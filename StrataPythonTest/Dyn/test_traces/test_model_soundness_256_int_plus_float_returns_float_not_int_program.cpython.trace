@@ -1,0 +1,10 @@
+--- stdout 4
+4.5
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCPython: 3 + 1.5 → 4.5 (float)\nModel:   PAdd(from_int(3), from_float(1.5)) → Hole (no int×float case)\n\nThe RETURN TYPE is wrong: CPython returns a float, model returns nothing.\n'
+__name__ = '__main__'
+int_plus_float = <function object>
+main = <function object>

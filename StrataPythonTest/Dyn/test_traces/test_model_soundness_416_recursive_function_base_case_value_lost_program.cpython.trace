@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nRECURSIVE FUNCTION BASE CASE VALUE LOST\n\nCPython: factorial(0) → 1 (base case returns 1)\n         factorial(3) → 6 (3 * 2 * 1 * 1)\n\nModel:   If return doesn\'t terminate (finding 052/165/344):\n         factorial(0): if n <= 1: return 1  ← "return" doesn\'t stop\n                       return n * factorial(n-1)  ← ALSO executes!\n         Result: n * factorial(n-1) = 0 * factorial(-1) = ... (infinite or wrong)\n\n         Even if return DOES terminate, the recursive call:\n         factorial(n-1) returns unconstrained value (finding 168)\n         unless the function is inlined.\n\nCPython result: factorial(3) == 6\nModel result: Hole (recursive call returns unconstrained) or wrong value (return doesn\'t terminate)\n\nRoot cause: Either return doesn\'t terminate (finding 052) OR\nrecursive call has no postcondition (finding 168).\n'
+__name__ = '__main__'
+factorial = <function object>
+fibonacci = <function object>
+main = <function object>
+power = <function object>
+sum_recursive = <function object>

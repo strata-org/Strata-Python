@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+n = 3
+s = 'n=3 end'
+u = 'N=3 END'

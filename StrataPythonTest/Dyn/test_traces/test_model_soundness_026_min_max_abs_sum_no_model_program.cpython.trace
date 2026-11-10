@@ -1,0 +1,12 @@
+--- stdout 13
+10 0 4 42 10
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nThe builtins min(), max(), abs(), sum() are explicitly IN the Frontend subset\nbut have no Laurel model. Calls to these functions produce unconstrained\nHole values, making any assertion about their results unprovable.\n'
+__name__ = '__main__'
+absolute_diff = <function object>
+clamp = <function object>
+main = <function object>
+total = <function object>

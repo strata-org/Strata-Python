@@ -1,0 +1,17 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+FailingIterator = <class 'FailingIterator'>
+InvalidIterator = <class 'InvalidIterator'>
+IteratorSetupFails = <class 'IteratorSetupFails'>
+RESULT = ([1], 'StopIteration', 'else', 'ValueError', 'LookupError', 'TypeError')
+ShortIterator = <class 'ShortIterator'>
+__doc__ = None
+__name__ = '__main__'
+exhaustion_runs_loop_else = <function object>
+invalid_iterator_result_is_type_error = <function object>
+iterator_setup_error_propagates = <function object>
+other_iterator_error_skips_loop_else = <function object>
+stop_iteration_from_body_propagates = <function object>

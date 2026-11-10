@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+RESULT = ('ZeroDivisionError', 'ZeroDivisionError', 'ZeroDivisionError', 'OverflowError', ('float', 1.5))
+__doc__ = 'Division rows retain zero-divisor and integer/float conversion failures.'
+__name__ = '__main__'
+observe = <function object>

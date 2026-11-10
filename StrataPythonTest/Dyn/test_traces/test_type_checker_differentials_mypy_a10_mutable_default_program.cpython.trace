@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Accumulator = <class 'Accumulator'>
+__doc__ = "\na10_mutable_default.py — Mutable default argument accumulates state across calls.\n\nThe mutable default list grows on each call. After enough calls, a threshold\nis crossed and the field type changes. mypy doesn't model that default arguments\nare shared mutable state.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str - int\n"
+__name__ = '__main__'
+main = <function object>

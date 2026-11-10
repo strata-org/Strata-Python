@@ -1,0 +1,10 @@
+--- stdout 62
+OK: name classification correct — local doesn't shadow global
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+x = 'global'

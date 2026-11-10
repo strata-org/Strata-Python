@@ -1,0 +1,9 @@
+--- stdout 46
+OK: import lowering — top-level package bound
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+os = <module object>

@@ -1,0 +1,12 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFOR-LOOP ELSE CLAUSE SKIPPED WHEN EXCEPTION PROPAGATES OUT OF BODY\n\nThe subset allows:\n  - for/else (IN, findings 065/316/330 cover break-based semantics)\n  - try/except (IN)\n  - raise (IN)\n\nThe NOVEL gap: when an EXCEPTION propagates out of the for-loop body\n(not caught inside the loop), the else clause must NOT execute.\n\nCPython\'s rule for for/else:\n  - else executes if loop completes normally (exhausts iterable)\n  - else does NOT execute if loop exits via break\n  - else does NOT execute if loop exits via exception propagation\n\nExisting findings 065/316/330 cover the break case. This finding covers\nthe EXCEPTION case, which is a distinct control-flow path.\n\n  def find_or_raise(xs: list[int], target: int) -> int:\n      for x in xs:\n          if x == target:\n              return x\n          if x < 0:\n              raise ValueError("negative element")\n      else:\n          # Should NOT execute if ValueError propagated\n          return -1\n      return -1  # unreachable\n\n  find_or_raise([1, 2, -3, 4], 5)\n  # CPython: raises ValueError (else never reached)\n  # Model: if exception-as-value doesn\'t terminate loop iteration,\n  #         loop "completes" and else executes, returning -1\n\nROOT CAUSE: The exception-as-value model (finding 274) doesn\'t terminate\nthe current loop iteration. The exception value flows through remaining\niterations, and the loop "completes normally" from the model\'s perspective.\nThe else clause then executes because no break was seen.\n\nThis is distinct from:\n  - Finding 065 (for/else break semantics) — that\'s about break\n  - Finding 316 (while/else) — that\'s about while loops\n  - Finding 330 (for/else conditional break) — that\'s about break in nested if\n  - Finding 274 (exception no propagation) — that\'s the root cause, but\n    this finding shows a SPECIFIC consequence: else clause incorrectly executes\n'
+__name__ = '__main__'
+count_valid_before_target = <function object>
+first_valid_match = <function object>
+main = <function object>
+search_validated = <function object>

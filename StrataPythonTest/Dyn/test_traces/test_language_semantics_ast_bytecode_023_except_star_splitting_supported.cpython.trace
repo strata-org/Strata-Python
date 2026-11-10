@@ -1,0 +1,10 @@
+--- stdout 44
+OK: except* — splits and handles both types
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+errors = [<ValueError object>, <TypeError object>]
+sys = <module object>

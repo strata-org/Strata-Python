@@ -1,0 +1,12 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nPython comparison operators (<, <=, >, >=, ==, !=) work across bool and int\nbecause bool is a subclass of int. True > 0 is True, False < 1 is True, etc.\nThe Laurel PLt/PGt/PLe/PGe operators dispatch on tags — if they only handle\nfrom_int × from_int and from_bool × from_bool but not the cross-type case,\ncomparisons between bool and int values produce Hole or wrong results.\n'
+__name__ = '__main__'
+compare_with_threshold = <function object>
+is_positive_flag = <function object>
+main = <function object>
+sort_key = <function object>

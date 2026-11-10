@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nINTEGER FLOOR DIVISION TRUNCATES TOWARD NEGATIVE INFINITY\n\nCPython: -7 // 2 → -4 (floor toward -∞)\n         7 // -2 → -4 (floor toward -∞)\n         -1 // 2 → -1 (floor toward -∞)\n\nModel:   PFloorDiv uses SMT-LIB `div` which truncates toward ZERO:\n         -7 div 2 → -3 (truncate toward 0) — WRONG!\n         7 div -2 → -3 (truncate toward 0) — WRONG!\n         -1 div 2 → 0 (truncate toward 0) — WRONG!\n\nCPython result: -4\nModel result: -3 (SPECIFIC WRONG VALUE — not Hole!)\n\nRoot cause: SMT-LIB integer division truncates toward zero.\nPython floor division truncates toward negative infinity.\nThese DIFFER for negative operands. Finding 012/258/266/273/291.\n'
+__name__ = '__main__'
+floor_div_negative_dividend = <function object>
+floor_div_negative_divisor = <function object>
+is_even = <function object>
+main = <function object>
+python_divmod = <function object>

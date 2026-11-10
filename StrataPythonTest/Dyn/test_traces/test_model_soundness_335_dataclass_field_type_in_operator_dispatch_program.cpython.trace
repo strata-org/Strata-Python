@@ -1,0 +1,17 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Measurement = <class 'Measurement'>
+Point = <class 'Point'>
+__doc__ = '\n@dataclass field type not used in operator dispatch after access.\n\nWhen reading a field from a @dataclass instance, the result is an\nunconstrained Any value from DictStrAny. The declared field type\n(e.g., `x: int`) is not emitted as a tag assertion after the read.\n\n    @dataclass\n    class Point:\n        x: int\n        y: int\n\n    p = Point(3, 4)\n    result = p.x + p.y  # PAdd needs to know both are from_int\n\nWithout `assert isfrom_int(p.x)` after the field read, the operator\ndispatch for `p.x + p.y` has unknown-tag operands and may:\n- Fall to catch-all (Hole)\n- Require the solver to trace back through construction\n\nThis is distinct from:\n- Finding 081 (field may not exist at all)\n- Finding 141 (field access after construction — needs McCarthy axioms)\n- Finding 221 (generic element types lost in containers)\n\nThis finding tests that field TYPE ANNOTATIONS must generate assertions.\n\nUses ONLY confirmed-accepted constructs: @dataclass, field access, arithmetic.\n'
+__name__ = '__main__'
+add_fields = <function object>
+dataclass = <function object>
+double = <function object>
+field_in_arithmetic_chain = <function object>
+field_in_comparison = <function object>
+field_passed_to_function = <function object>
+main = <function object>
+mixed_type_fields = <function object>

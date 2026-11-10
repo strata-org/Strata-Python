@@ -1,0 +1,15 @@
+--- stdout 18
+20
+2
+[99, 20, 30]
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Subscript: supported case.\nContainer type is known, so slot dispatch collapses to direct access.\n'
+__name__ = '__main__'
+data = {'a': 1, 'b': 2}
+dict_access = <function object>
+list_access = <function object>
+list_write = <function object>
+nums = [99, 20, 30]

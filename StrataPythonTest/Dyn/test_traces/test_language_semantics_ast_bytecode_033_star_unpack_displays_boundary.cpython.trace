@@ -1,0 +1,13 @@
+--- stdout 80
+PASS: splats not hoisted (naive grouping model would get [first, last, middle])
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Boundary: splats are NOT grouped before regular elements.'
+__name__ = '__main__'
+first = <function object>
+last = <function object>
+middle = <function object>
+order = ['first', 'middle', 'last']
+result = [10, 20, 30]

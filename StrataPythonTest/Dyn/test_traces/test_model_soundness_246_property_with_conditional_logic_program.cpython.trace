@@ -1,0 +1,15 @@
+--- stdout 7
+75 1 3
+
+--- outcome
+ok
+--- globals
+Battery = <class 'Battery'>
+__doc__ = '\n@property with conditional logic in the getter. The property body\ncontains if/else, field reads, and arithmetic — all IN the subset.\nThe frontend accepts this (no unsupported construct). But the model\nmust translate property access as a function call (finding 222).\n\nThe conditional logic inside the property means the return value\ndepends on field state — the model must inline or summarize correctly.\n\nAll constructs used: @dataclass, @property, if/else, int, comparison.\n'
+__name__ = '__main__'
+check_battery = <function object>
+critical_check = <function object>
+dataclass = <function object>
+main = <function object>
+property_calls_property = <function object>
+status_check = <function object>

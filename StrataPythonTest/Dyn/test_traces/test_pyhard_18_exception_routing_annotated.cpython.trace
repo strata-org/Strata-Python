@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+LocalLookupError = <class 'LocalLookupError'>
+__doc__ = None
+__name__ = '__main__'
+bare_reraise = <function object>
+ordered_handlers = <function object>
+unmatched_reaches_outer = <function object>

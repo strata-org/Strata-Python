@@ -1,0 +1,13 @@
+--- stdout 12
+True True 4
+
+--- outcome
+ok
+--- globals
+__doc__ = "\n`x in lst` for a list of ints uses `==` for comparison. In CPython,\n`1 in [True, 2, 3]` is True because `True == 1`. The model's\nList_contains uses structural equality on Any values, where\n`from_bool(true) != from_int(1)` structurally (finding 013).\n\nThis finding provides a concrete program demonstrating the divergence\nwith a practical pattern: checking membership in a list of constants.\n"
+__name__ = '__main__'
+contains_zero = <function object>
+has_value = <function object>
+is_valid_status = <function object>
+main = <function object>
+remove_duplicates_ordered = <function object>

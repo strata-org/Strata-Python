@@ -1,0 +1,12 @@
+--- stdout 25
+True True caught_runtime
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nIf an exception handler itself raises a new exception, the original\nexception is replaced. The new exception propagates; the original is\nlost (in CPython it becomes __context__ but that's not in the subset).\n\nThe model must handle: exception caught → handler raises new exception\n→ new exception propagates (original does NOT continue propagating).\n"
+__name__ = '__main__'
+handler_may_raise = <function object>
+main = <function object>
+nested_exception_replacement = <function object>
+wrap_error = <function object>

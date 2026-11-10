@@ -1,0 +1,12 @@
+--- stdout 43
+{'a': 2, 'b': 1}
+{'total': 60, 'count': 3}
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nAUGMENTED ASSIGNMENT ON DICT SUBSCRIPT: d[k] += 1\n\nCPython: d["x"] += 1 desugars to d["x"] = d["x"] + 1 (in-place on dict)\n         After: d["x"] == 2\n\nModel:   d[k] += v requires:\n         1. DictStrAny_get(d, k) → old_val\n         2. PAdd(old_val, v) → new_val\n         3. DictStrAny_set(d, k, new_val) → d\'\n         4. Rebind d to d\'\n\n         But the translator likely desugars AugAssign with Subscript target\n         as a simple PAdd without the get/set/rebind chain. The dict is\n         never updated — d["x"] remains 1.\n\nRoot cause: AugAssign translation handles Name targets (x += 1 → x = x + 1)\nbut Subscript targets (d[k] += 1) require a 4-step read-modify-write-rebind\nthat the translator doesn\'t implement.\n'
+__name__ = '__main__'
+accumulate = <function object>
+count_chars = <function object>
+main = <function object>

@@ -1,0 +1,13 @@
+--- stdout 26
+True [1, 3, 5] ['c', 'd']
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython has `not in` as a distinct operator: `x not in lst` is equivalent\nto `not (x in lst)` but is a single AST node (Compare with NotIn op).\nThe model may handle `in` (PIn/List_contains) but not `not in`. If the\ntranslator doesn't recognize NotIn, it either fails or produces Hole.\n"
+__name__ = '__main__'
+filter_exclude = <function object>
+is_missing = <function object>
+is_new_key = <function object>
+main = <function object>
+unique_keys = <function object>

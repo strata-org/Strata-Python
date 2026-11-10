@@ -1,0 +1,15 @@
+--- stdout 9
+True 3 3
+
+--- outcome
+ok
+--- globals
+Task = <class 'Task'>
+__doc__ = "\nWhen ClassInstances are stored in a list, modifying an element requires:\n1. Read the element from the list (List_get)\n2. Modify the ClassInstance (reconstruct with new attrs)\n3. Write the modified element back (List_set)\n4. Rebind the list variable\n\nIn CPython, `items[i].field = value` modifies in place (reference).\nUnder value semantics, the element in the list is a COPY. Modifying\nthe copy doesn't affect the list unless you write it back.\n\nFinding 087 identified this. This finding provides the COMPLETE\ntranslation pattern showing all 4 steps.\n\nUses ONLY confirmed-accepted constructs: @dataclass, list, int.\n"
+__name__ = '__main__'
+count_done = <function object>
+dataclass = <function object>
+increment_priority = <function object>
+main = <function object>
+mark_all_done = <function object>
+mark_done = <function object>

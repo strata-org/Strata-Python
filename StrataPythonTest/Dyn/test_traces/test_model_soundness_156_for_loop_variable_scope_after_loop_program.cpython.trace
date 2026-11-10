@@ -1,0 +1,13 @@
+--- stdout 7
+30 9 9
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nIn Python, the loop variable of a `for` loop remains in scope after the\nloop exits, retaining the value from the last iteration. If the loop body\nnever executes (empty iterable), the variable is UNBOUND.\n\nThe Laurel model must:\n1. Ensure the loop variable retains its last-iteration value after the loop\n2. Handle the empty-iterable case (variable unbound → potential NameError)\n\nUses ONLY confirmed-accepted constructs: for loop, list, int, function def.\n'
+__name__ = '__main__'
+index_of_last_positive = <function object>
+last_element = <function object>
+loop_variable_used_after = <function object>
+main = <function object>
+sum_with_last = <function object>

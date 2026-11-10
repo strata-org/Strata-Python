@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+B = <class 'B'>
+RESULT = ('AttributeError', True)
+__doc__ = 'A live missing-member table cell is a catchable Python exception.'
+__name__ = '__main__'

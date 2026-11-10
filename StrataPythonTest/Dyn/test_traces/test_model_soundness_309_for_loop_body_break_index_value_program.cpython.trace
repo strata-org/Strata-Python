@@ -1,0 +1,15 @@
+--- stdout 42
+All break/continue index value tests pass
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nWhen `break` exits a for loop, the loop variable retains the value\nfrom the iteration where `break` was executed. The model must ensure\nthat after a `break`:\n1. The loop variable holds the value from the breaking iteration\n2. The loop's `else` clause (if any) is NOT executed\n3. Code after the loop sees the correct variable value\n\nCombined with finding 054 (break/continue control flow), this tests\nthe INTERACTION between break and the loop variable's final value.\n\nThe critical pattern is:\n    for i in range(n):\n        if condition(i):\n            break\n    # i holds the value where condition was True\n\nIf the model doesn't correctly stop iteration at break, `i` will\nhold the LAST value (n-1) instead of the breaking value.\n\nUses ONLY confirmed-accepted constructs: for, range, break, if, int, list.\n"
+__name__ = '__main__'
+break_in_nested_only_inner = <function object>
+break_preserves_loop_var = <function object>
+break_with_accumulator = <function object>
+continue_skips_rest = <function object>
+find_first_above = <function object>
+find_index_of = <function object>
+main = <function object>

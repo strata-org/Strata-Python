@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised NameError: name 'List' is not defined
+--- globals
+Mul = <function object>
+Sum = <function object>
+Union = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'

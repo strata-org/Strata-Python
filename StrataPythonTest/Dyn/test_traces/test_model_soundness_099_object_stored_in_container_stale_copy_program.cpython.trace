@@ -1,0 +1,13 @@
+--- stdout 10
+100 50 75
+
+--- outcome
+ok
+--- globals
+User = <class 'User'>
+__doc__ = "\nStoring a class instance in a dict or list, then modifying the instance,\ncreates a divergence: CPython's dict/list holds a reference (sees the\nchange), but the value model's dict/list holds a copy (doesn't see it).\n\nThis combines findings 001/002 (container aliasing) with ClassInstance\nvalue semantics in a pattern that's common in registries and caches.\n"
+__name__ = '__main__'
+build_team = <function object>
+dataclass = <function object>
+main = <function object>
+register_and_update = <function object>

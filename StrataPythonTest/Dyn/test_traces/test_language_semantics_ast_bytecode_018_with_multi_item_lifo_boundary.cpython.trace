@@ -1,0 +1,10 @@
+--- stdout 51
+BOUNDARY: naive FIFO exit order; CPython uses LIFO
+
+--- outcome
+ok
+--- globals
+CM = <class 'CM'>
+__doc__ = None
+__name__ = '__main__'
+order = ['+1', '+2', '+3', '-3', '-2', '-1']

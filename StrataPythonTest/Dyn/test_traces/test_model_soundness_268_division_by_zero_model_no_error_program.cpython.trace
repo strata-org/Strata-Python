@@ -1,0 +1,12 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCPython: 1 // 0 → ZeroDivisionError (program crashes)\nModel:   PFloorDiv(from_int(1), from_int(0)) = from_int(???) ← NO ERROR\n\nSMT-LIB `div(1, 0)` is DEFINED (returns some arbitrary int).\nThe model says "this is fine, result is some int" when CPython CRASHES.\n\nThis is unsound: the model says "no error" when there IS an error.\n'
+__name__ = '__main__'
+divide_by_zero_floor = <function object>
+divide_by_zero_mod = <function object>
+divide_by_zero_true = <function object>
+main = <function object>

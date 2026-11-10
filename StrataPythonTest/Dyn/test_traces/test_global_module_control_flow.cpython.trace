@@ -1,0 +1,19 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'loop_guard': <class 'bool'>}
+__doc__ = None
+__name__ = '__main__'
+branch_value = 3
+first = 6
+left = 7
+loop_guard = False
+loop_index = 0
+loop_value = 4
+read_branch_value = <function object>
+read_loop_index = <function object>
+read_loop_value = <function object>
+right = 5
+second = 7

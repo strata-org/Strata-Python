@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nDICT VALUE ACCESS TYPE LOST — d[k] FROM dict[str, int] HAS NO TAG ASSERTION\n\nCPython: d: dict[str, int] = {"x": 1}\n         d["x"] → 1 (int, guaranteed by type annotation)\n\nModel:   d is from_DictStrAny(assoc_list)\n         d["x"] → DictStrAny_get(assoc_list, "x") → returns Any\n         NO assertion that result is from_int\n         Subsequent d["x"] + 1 → PAdd(unknown_tag, from_int(1)) → Hole\n\nThis is the DICT parallel of finding 350 (list element type lost).\nThe generic value type in dict[str, V] is lost at the access boundary.\n'
+__name__ = '__main__'
+get_port = <function object>
+increment_all = <function object>
+main = <function object>
+max_value = <function object>
+sum_values = <function object>

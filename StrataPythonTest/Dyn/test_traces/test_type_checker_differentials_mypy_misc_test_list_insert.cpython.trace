@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+__doc__ = 'Test: isinstance(lst[0], int) then lst.insert(0, "x").'
+__name__ = '__main__'
+main = <function object>

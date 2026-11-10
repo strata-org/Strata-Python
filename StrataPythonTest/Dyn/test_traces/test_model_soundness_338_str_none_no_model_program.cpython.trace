@@ -1,0 +1,15 @@
+--- stdout 5
+None
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nstr() CONVERSION ON None PRODUCES "None" — NO MODEL\n\nCPython: str(None) → "None" (the string literal)\nModel:   str_from_any(from_None()) → Hole (no case for None tag)\n\nThe subset declares str(x) as IN for "primitive-type conversions."\nNone is a primitive value in the subset. But the model\'s str conversion\nfunction likely only handles from_int, from_float, from_bool, from_str\nand has no case for from_None.\n'
+__name__ = '__main__'
+bool_to_str = <function object>
+build_debug_message = <function object>
+format_optional = <function object>
+format_value = <function object>
+int_to_str = <function object>
+main = <function object>
+none_to_str = <function object>

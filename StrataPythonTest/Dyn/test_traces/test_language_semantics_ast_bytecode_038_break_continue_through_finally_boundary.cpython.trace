@@ -1,0 +1,9 @@
+--- stdout 47
+PASS: return in finally replaces pending break
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Boundary: return in finally replaces pending break.'
+__name__ = '__main__'
+f = <function object>

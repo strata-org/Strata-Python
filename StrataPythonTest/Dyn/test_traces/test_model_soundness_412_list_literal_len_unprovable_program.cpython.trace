@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nLIST LITERAL LEN — UNPROVABLE WITHOUT AXIOMS\n\nCPython: len([1, 2, 3]) == 3 → True (always)\n         len([]) == 0 → True (always)\n\nModel:   [1, 2, 3] translates to cons(1, cons(2, cons(3, nil)))\n         List_len(cons(1, cons(2, cons(3, nil)))) == 3\n         → UNPROVABLE if List_len is uninterpreted\n\n         Even with List_len(nil) == 0 and List_len(cons(h,t)) == 1 + List_len(t):\n         The solver needs to UNFOLD the definition 3 times.\n         Without concrete definitions or axioms: len is unconstrained.\n\nCPython result: 3\nModel result: unconstrained\n\nRoot cause: List_len is uninterpreted with no axioms (finding 088/275).\n'
+__name__ = '__main__'
+len_after_build = <function object>
+len_bounds_check = <function object>
+len_in_condition = <function object>
+literal_len_three = <function object>
+literal_len_zero = <function object>
+main = <function object>

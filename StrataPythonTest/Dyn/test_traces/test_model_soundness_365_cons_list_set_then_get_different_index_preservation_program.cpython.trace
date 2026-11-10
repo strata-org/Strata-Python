@@ -1,0 +1,12 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCONS-LIST SET THEN GET AT DIFFERENT INDEX — PRESERVATION AXIOM MISSING\n\nCPython: xs = [10, 20, 30]; xs[1] = 99; xs[0] == 10 (unchanged!)\n         Writing at index 1 does NOT affect index 0.\n\nModel:   xs\' = List_set(xs, 1, 99)\n         List_get(xs\', 0) == ???\n\n         Finding 253 covers: List_get(List_set(xs, i, v), i) == v\n         (read-back at SAME index — the "read-over-write" axiom)\n\n         This finding covers: List_get(List_set(xs, i, v), j) == List_get(xs, j)\n         for j ≠ i (read at DIFFERENT index — the "frame" axiom)\n\n         Without the frame axiom, writing at index 1 could DESTROY\n         the value at index 0 from the solver\'s perspective.\n         The solver treats List_get(xs\', 0) as unconstrained.\n\nThese are the TWO McCarthy axioms for arrays:\n  get(set(a, i, v), i) == v           (finding 253)\n  get(set(a, i, v), j) == get(a, j)   when i ≠ j (THIS finding)\nBoth are needed for correct list reasoning.\n'
+__name__ = '__main__'
+main = <function object>
+modify_one_preserve_rest = <function object>
+swap_elements = <function object>
+write_preserves_other = <function object>

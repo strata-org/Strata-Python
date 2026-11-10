@@ -1,0 +1,13 @@
+--- stdout 28
+[5, 4, 3, 2, 1] 40 0 0 20 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`for x in range(start, stop, step)` with a negative step iterates in\nreverse. `range(5, 0, -1)` yields [5, 4, 3, 2, 1]. `range(5, 5)` yields\nnothing. If the model translates `for x in range(a, b)` as a simple\n`while x < b` loop without handling negative step or empty ranges, the\niteration count and values diverge from CPython.\n'
+__name__ = '__main__'
+countdown = <function object>
+empty_range_sum = <function object>
+main = <function object>
+step_two = <function object>
+sum_reverse_range = <function object>

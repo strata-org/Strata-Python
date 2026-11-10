@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nBOOL × FLOAT CROSS-TYPE — TWO-STEP PROMOTION NEEDED\n\nCPython: True + 1.5 → 2.5 (float)\n         bool → int → float (two promotions!)\n\n         Step 1: True → 1 (bool is subclass of int)\n         Step 2: 1 + 1.5 → 2.5 (int promoted to float for arithmetic)\n\nModel:   PAdd(from_bool(True), from_float(1.5))\n         Tag dispatch has cases for:\n         - (from_int, from_int) → from_int\n         - (from_float, from_float) → from_float\n         - (from_int, from_float) → from_float (if finding 282 fixed)\n         - (from_bool, from_int) → ??? (if finding 166 fixed)\n\n         But (from_bool, from_float) has NO case even if the above are fixed.\n         It requires TWO promotions: bool→int→float.\n         The model must either:\n         1. Add explicit (from_bool, from_float) cases for all operators\n         2. Normalize from_bool to from_int BEFORE dispatch (finding 166)\n\nFinding 166 proposes normalizing bool→int. But even with that fix,\nthe COMBINATION bool×float requires the int×float case to also exist.\nThis tests the FULL CHAIN: bool → int → float.\n'
+__name__ = '__main__'
+bool_in_mixed_expression = <function object>
+bool_minus_float = <function object>
+bool_plus_float = <function object>
+bool_times_float = <function object>
+float_minus_bool = <function object>
+main = <function object>

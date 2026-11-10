@@ -1,0 +1,9 @@
+--- stdout 71
+BOUNDARY: naive model leaves e bound; CPython deletes it after handler
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>

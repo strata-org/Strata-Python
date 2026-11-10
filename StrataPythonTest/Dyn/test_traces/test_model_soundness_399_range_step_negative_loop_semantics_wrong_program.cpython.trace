@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nrange() WITH NEGATIVE STEP — LOOP SEMANTICS WRONG\n\nThe subset says range(a, b, step) is IN with int arguments.\nCPython: range(10, 0, -2) → [10, 8, 6, 4, 2] (counts DOWN)\n         range(0, 10, -1) → [] (empty — wrong direction)\n\nModel:   The for-loop translation likely assumes FORWARD iteration:\n         while i < stop: body; i += step\n         With negative step, this is WRONG:\n         - Condition should be i > stop (not i < stop)\n         - Or: the range is empty (step goes wrong direction)\n\nFinding 161 mentions this issue. This finding provides the CONCRETE\nprogram showing the model computes wrong iteration counts and values.\n'
+__name__ = '__main__'
+countdown = <function object>
+empty_range_wrong_direction = <function object>
+main = <function object>
+range_length_formula = <function object>
+step_two_backward = <function object>
+sum_countdown = <function object>

@@ -1,0 +1,11 @@
+--- stdout 17
+'cleanup result'
+
+--- outcome
+ok
+--- globals
+RESULT = 'cleanup result'
+__doc__ = 'A conditional return in finally still discards the pending exception.'
+__name__ = '__main__'
+cleanup = <function object>
+run = <function object>

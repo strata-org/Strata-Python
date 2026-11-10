@@ -1,0 +1,14 @@
+--- stdout 7
+True 3
+
+--- outcome
+ok
+--- globals
+Task = <class 'Task'>
+__doc__ = "\nA list of class instances (`list[MyClass]`) stores ClassInstance values\nin a ListAny. Accessing an element and modifying its field creates a\ndivergence: in CPython the list element IS the object (reference), so\nmutations through the extracted reference are visible in the list. In\nthe value model, extracting an element gives a COPY — mutations to the\ncopy don't affect the list.\n\nThis combines findings 001 (list aliasing) and 011 (class field mutation)\ninto a single pattern that's extremely common: iterating over a list of\nobjects and modifying each one.\n"
+__name__ = '__main__'
+count_done = <function object>
+dataclass = <function object>
+main = <function object>
+mark_all_done = <function object>
+mark_done = <function object>

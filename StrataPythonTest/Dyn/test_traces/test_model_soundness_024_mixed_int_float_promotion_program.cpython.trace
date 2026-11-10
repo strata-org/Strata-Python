@@ -1,0 +1,12 @@
+--- stdout 16
+7.5 3.5 7.0 4.5
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nPython promotes int to float in mixed arithmetic: int + float -> float.\nThe Laurel PAdd/PSub/PMul likely only handle from_int × from_int and\nfrom_float × from_float, but not the cross-type from_int × from_float case.\n'
+__name__ = '__main__'
+average = <function object>
+main = <function object>
+offset = <function object>
+scale = <function object>

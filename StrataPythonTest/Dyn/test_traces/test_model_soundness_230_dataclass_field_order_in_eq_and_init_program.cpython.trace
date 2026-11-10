@@ -1,0 +1,18 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+Child = <class 'Child'>
+Person = <class 'Person'>
+Point = <class 'Point'>
+__doc__ = '\n@dataclass field ORDER matters for:\n1. __init__ parameter order: Point(x=1, y=2) — positional args follow field order\n2. __eq__ comparison: compares fields in declaration order\n3. Inheritance: parent fields come before child fields\n\nThe model must preserve field order in the DictStrAny encoding.\nBut DictStrAny is an UNORDERED association list — it has no concept\nof "first field" vs "second field."\n\nFor __eq__, order doesn\'t matter (all fields must match).\nFor __init__, order matters for POSITIONAL arguments:\n  Point(1, 2) means x=1, y=2 (not y=1, x=2).\n\nThe translator must map positional args to field names by ORDER.\n\nUses ONLY confirmed-accepted constructs: @dataclass, int, str.\n'
+__name__ = '__main__'
+dataclass = <function object>
+inheritance_field_order = <function object>
+keyword_construction = <function object>
+main = <function object>
+mixed_positional_keyword = <function object>
+positional_construction = <function object>
+three_fields_positional = <function object>

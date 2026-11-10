@@ -1,0 +1,15 @@
+--- stdout 10
+-1 3 True
+
+--- outcome
+ok
+--- globals
+__doc__ = "\n`//` and `%` must check for zero divisor and produce ZeroDivisionError.\nUnder tag-based dispatch, the operator function receives the operands\nand must:\n1. Check if divisor is zero\n2. If zero: return exception(ZeroDivisionError)\n3. If non-zero: compute the result\n\nFinding 080 identified that float division by zero doesn't raise\n(SMT Real division is total). This finding covers `//` and `%` on\nINTEGERS where division by zero must raise.\n\nIf the model computes `PFloorDiv(from_int(10), from_int(0))` without\nchecking, SMT integer division by zero is undefined (solver picks\narbitrary value). The model must explicitly produce an exception.\n\nUses ONLY confirmed-accepted constructs: int, //, %, try/except.\n"
+__name__ = '__main__'
+division_in_loop = <function object>
+floor_div_by_zero = <function object>
+guarded_division = <function object>
+main = <function object>
+mod_by_zero = <function object>
+mod_for_even_check = <function object>
+true_div_by_zero = <function object>

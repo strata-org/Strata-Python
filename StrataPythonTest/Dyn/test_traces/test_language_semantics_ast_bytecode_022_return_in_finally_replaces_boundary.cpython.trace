@@ -1,0 +1,9 @@
+--- stdout 71
+BOUNDARY: naive model returns try value; CPython returns finally value
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>

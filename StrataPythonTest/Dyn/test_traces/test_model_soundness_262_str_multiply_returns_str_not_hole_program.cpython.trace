@@ -1,0 +1,11 @@
+--- stdout 15
+ababab  hahaha
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCPython results (concrete):\n  "ab" * 3 = "ababab" (str)\n  "x" * 0  = ""       (str)\n  3 * "ha" = "hahaha" (str, reflected)\n\nLaurel model results:\n  PMul(from_str("ab"), from_int(3)) = Hole (string_repeat uninterpreted)\n  PMul(from_str("x"), from_int(0))  = Hole (no zero-case axiom)\n  PMul(from_int(3), from_str("ha")) = Hole (no int×str case)\n'
+__name__ = '__main__'
+int_times_str = <function object>
+main = <function object>
+str_times_int = <function object>

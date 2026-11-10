@@ -1,0 +1,12 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nMISSING EXCEPTION: "hello"[1.5] → TypeError in CPython, Hole in model.\n\nCPython: str indices must be integers. Float index → TypeError.\nModel: Any_get!(from_str("hello"), from_float(1.5)) → Hole (no error)\n\nAlso: list[float_index] → TypeError.\n'
+__name__ = '__main__'
+list_float_index = <function object>
+list_str_index = <function object>
+main = <function object>
+str_float_index = <function object>

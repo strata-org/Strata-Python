@@ -1,0 +1,12 @@
+--- stdout 30
+[10, 99, 30, 40] [4, 2, 3, 1]
+
+--- outcome
+ok
+--- globals
+__doc__ = "\n`lst[i] = value` assigns a new value to an existing list index. In\nCPython this mutates the list in place. In the value model (ListAny is\na cons-list), this requires creating a NEW list with the element at\nposition i replaced. The model needs a `List_set` operation that\nrebuilds the cons-list. If it doesn't exist, list element assignment\neither fails or produces Hole.\n"
+__name__ = '__main__'
+main = <function object>
+replace_at = <function object>
+swap = <function object>
+zero_negatives = <function object>

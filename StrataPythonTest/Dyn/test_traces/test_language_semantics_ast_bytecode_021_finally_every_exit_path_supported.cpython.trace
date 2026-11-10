@@ -1,0 +1,11 @@
+--- stdout 46
+OK: finally — cleanup runs on every exit path
+
+--- outcome
+ok
+--- globals
+Resource = <class 'Resource'>
+__doc__ = None
+__name__ = '__main__'
+r = <Resource object>
+use_resource = <function object>

@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+lookup = <function object>
+main = <function object>
+r = -1
+validate = <function object>

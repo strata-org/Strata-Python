@@ -1,0 +1,13 @@
+--- stdout 9
+5 5 True
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nAfter string concatenation, `len(a + b)` must equal `len(a) + len(b)`.\nFinding 060 identified this axiom is missing. This finding provides\nprograms that DEPEND on this property for correctness.\n\nWithout the axiom, the solver can't prove bounds checks on concatenated\nstrings, can't verify padding functions, and can't reason about string\nbuilding in loops.\n\nUses ONLY confirmed-accepted constructs: str, +, len, int.\n"
+__name__ = '__main__'
+build_csv = <function object>
+concat_length = <function object>
+length_preserved_after_ops = <function object>
+main = <function object>
+pad_right = <function object>

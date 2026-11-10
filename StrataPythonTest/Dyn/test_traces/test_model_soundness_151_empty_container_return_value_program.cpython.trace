@@ -1,0 +1,13 @@
+--- stdout 6
+0 0 1
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nReturning an empty list `[]` or empty dict `{}` from a function must\nproduce a valid ListAny/DictStrAny with length 0. If the model doesn't\nhave a representation for empty containers, or if the empty container\nhas no postconditions (len == 0, contains nothing), callers can't\nreason about the returned value.\n"
+__name__ = '__main__'
+build_or_empty = <function object>
+empty_dict = <function object>
+empty_list = <function object>
+main = <function object>
+merge_or_empty = <function object>

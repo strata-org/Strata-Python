@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Holder = <class 'Holder'>
+__doc__ = '\na16_tuple_element_narrowing.py — Narrowing on tuple element invalidated by mutation.\n\nisinstance(h.pair[0], int) narrows the element type. Then h.to_strs() replaces\nthe entire tuple with string values. The narrowing on the element persists.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str - int\n'
+__name__ = '__main__'
+main = <function object>

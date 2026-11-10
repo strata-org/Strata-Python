@@ -1,0 +1,10 @@
+--- stdout 47
+OK: comprehension inlining — variable isolated
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+squares = [0, 1, 4, 9, 16]
+x = 'safe'

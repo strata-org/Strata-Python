@@ -1,0 +1,14 @@
+--- stdout 9
+99 1 999
+
+--- outcome
+ok
+--- globals
+Pair = <class 'Pair'>
+__doc__ = '\n`b = a` in CPython makes b reference the SAME object as a. Modifying\nthrough a is visible through b. Under value semantics, `b = a` COPIES\nthe value — a and b are independent. This is the most fundamental\nconsequence of "no aliasing."\n\nThe subset says aliasing is OUT for lists. But for class instances,\nthe subset allows `b = a` (simple assignment). The model must either:\n1. Reject `b = a` for class instances (like lists)\n2. Accept that modifications through a are invisible through b\n'
+__name__ = '__main__'
+copy_and_modify = <function object>
+dataclass = <function object>
+main = <function object>
+pass_and_check = <function object>
+swap_references = <function object>

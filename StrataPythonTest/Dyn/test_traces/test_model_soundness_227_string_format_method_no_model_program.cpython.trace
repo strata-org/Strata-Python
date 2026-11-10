@@ -1,0 +1,15 @@
+--- stdout 31
+hello world value=42 3 + 4 = 7
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nF-strings (`f"x={x}"`) are IN the subset (finding 083 noted no model).\nBut the subset also says string methods like format are OUT.\n\nThe key issue: f-strings require implicit str() conversion of embedded\nexpressions. `f"{x}"` where x is int calls `str(x)` implicitly.\n\nFinding 053 identified str(int) has no axioms. Finding 083 identified\nf-strings have no model. This finding shows that f-strings are\nREDUCIBLE to str() + concatenation — both of which need models.\n\nUses ONLY confirmed-accepted constructs: f-string, int, str.\n'
+__name__ = '__main__'
+conditional_fstring = <function object>
+fstring_in_loop = <function object>
+fstring_with_method = <function object>
+int_in_fstring = <function object>
+main = <function object>
+multiple_expressions = <function object>
+simple_fstring = <function object>

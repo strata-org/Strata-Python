@@ -1,0 +1,19 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'counter': <class 'int'>, 'tuple_left': <class 'int'>, 'tuple_right': <class 'int'>, 'import_shadow': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+counter = 3
+create_global = <function object>
+created_in_function = 7
+import_shadow = 60
+increment_counter = <function object>
+local_binding_forms = <function object>
+local_shadow = <function object>
+parameter_shadow = <function object>
+read_counter = <function object>
+tuple_left = 40
+tuple_right = 50

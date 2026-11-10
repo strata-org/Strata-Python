@@ -1,0 +1,12 @@
+--- stdout 41
+-1 key_error_caught outer_caught_runtime
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nNested try/except: an inner try/except catches some exceptions, and\nuncaught ones propagate to the outer try/except. The exception-as-value\nmodel must correctly propagate through multiple levels of try/except.\n'
+__name__ = '__main__'
+deeply_nested = <function object>
+inner_catches = <function object>
+main = <function object>
+outer_catches = <function object>

@@ -1,0 +1,11 @@
+--- stdout 77
+BOUNDARY: naive model might call iter() per iteration; CPython calls it once
+
+--- outcome
+ok
+--- globals
+CountedIter = <class 'CountedIter'>
+_ = 3
+__doc__ = None
+__name__ = '__main__'
+ci = <CountedIter object>

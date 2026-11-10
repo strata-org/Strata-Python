@@ -1,0 +1,13 @@
+--- stdout 5
+5 45
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nA nested list (`list[list[int]]`) stores ListAny values inside a ListAny.\nAccessing an element returns `Any` which must be unwrapped as `from_ListAny`\nbefore the inner list can be indexed. This requires:\n1. List_get on outer list → returns Any\n2. Assert/check that result is from_ListAny\n3. Unwrap: as_ListAny(result)\n4. List_get on inner list → returns Any\n5. Assert/check that result is from_int\n\nIf the translator doesn't insert the intermediate unwrap, or if the\ntype tag assertion fails, nested list access breaks.\n"
+__name__ = '__main__'
+get_element = <function object>
+main = <function object>
+sum_all = <function object>
+sum_row = <function object>
+transpose_2x3 = <function object>

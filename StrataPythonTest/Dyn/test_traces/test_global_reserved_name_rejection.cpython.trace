@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'nullcall_ret': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+nullcall_ret = 1

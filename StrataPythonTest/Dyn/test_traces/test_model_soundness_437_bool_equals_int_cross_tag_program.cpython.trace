@@ -1,0 +1,11 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nBOOL EQUALS INT — CROSS-TAG EQUALITY\n\nDIVERGENCE:\n  CPython:  True == 1   → True\n  Model:    PEq(from_bool(True), from_int(1)) → Hole (no cross-tag case)\n\n  CPython:  False == 0  → True\n  Model:    PEq(from_bool(False), from_int(0)) → Hole\n\n  CPython:  True == 2   → False\n  Model:    PEq(from_bool(True), from_int(2)) → Hole\n\nThe model's PEq only handles same-tag pairs:\n  (from_int, from_int) → compare ints\n  (from_bool, from_bool) → compare bools\n  (from_bool, from_int) → NO CASE → Hole\n"
+__name__ = '__main__'
+bool_eq_int = <function object>
+count_true = <function object>
+main = <function object>

@@ -1,0 +1,14 @@
+--- stdout 40
+Toyota 2020 Toyota 2020 Toyota 2020 4dr
+
+--- outcome
+ok
+--- globals
+Car = <class 'Car'>
+Vehicle = <class 'Vehicle'>
+__doc__ = '\nWhen a subclass __init__ adds fields beyond those declared in the parent,\nand the object is accessed through a parent-typed variable, the model\nmust still have those fields available. But if the model uses the STATIC\ntype to determine which fields exist, accessing subclass-specific fields\nthrough a parent-typed reference fails.\n\nConversely, if a parent method accesses `self.field` where `field` is\ndeclared in the subclass, the model must find it in the DictStrAny attrs.\n'
+__name__ = '__main__'
+dataclass = <function object>
+get_make = <function object>
+get_year = <function object>
+main = <function object>

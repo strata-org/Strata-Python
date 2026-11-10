@@ -1,0 +1,12 @@
+--- stdout 23
+['a', 'b', 'c'] 6 3 24
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython's `for x in d` iterates over the KEYS of a dict. The Laurel\nencoding uses DictStrAny as an association list. If `for x in d` is\ntranslated as iterating over the association list entries, it may yield\n(key, value) pairs or just values, rather than keys alone. Additionally,\nif the association list has duplicate keys (from overwrites), iteration\nmay yield the same key multiple times.\n"
+__name__ = '__main__'
+count_keys = <function object>
+get_keys = <function object>
+main = <function object>
+sum_values_via_keys = <function object>

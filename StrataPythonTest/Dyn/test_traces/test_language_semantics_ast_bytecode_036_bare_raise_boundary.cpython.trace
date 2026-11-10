@@ -1,0 +1,8 @@
+--- stdout 53
+PASS: bare raise outside handler raises RuntimeError
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Boundary: bare raise outside handler is RuntimeError.'
+__name__ = '__main__'

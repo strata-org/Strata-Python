@@ -1,0 +1,15 @@
+--- stdout 16
+True False zero
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCPython: `not 0` → True (bool), `not ""` → True (bool), `not 5` → False (bool)\nModel:   PNot(from_int(0)) → Hole (only handles from_bool)\n\nPython\'s `not` operator:\n1. Evaluates truthiness of operand (Any → bool)\n2. Returns the NEGATION as a bool (always True or False)\n\n`not x` is equivalent to `not bool(x)` — always returns a bool.\n\nIf PNot only handles from_bool, then `not 0`, `not ""`, `not []` all\nreturn Hole instead of from_bool(True).\n'
+__name__ = '__main__'
+double_not = <function object>
+main = <function object>
+not_empty_string = <function object>
+not_in_condition = <function object>
+not_nonempty_string = <function object>
+not_nonzero = <function object>
+not_zero = <function object>

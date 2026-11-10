@@ -1,0 +1,17 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+Optional = <_SpecialForm object>
+__doc__ = '\nREPEATED FIELD ACCESS AFTER NARROWING — SECOND READ NOT NARROWED\n\nDIVERGENCE:\n  CPython:  `if obj.field is not None: x = obj.field + 1` works.\n            The field value doesn\'t change between the check and the use.\n  Model:    Each `obj.field` access translates to `DictStrAny_get(attrs, "field")`.\n            The narrowing from the condition applies to the FIRST read.\n            A SECOND read of the same field is a fresh uninterpreted call —\n            the solver doesn\'t know it returns the same value.\n\nThis is distinct from finding 149 (which covers Optional field construction)\nand finding 137 (which covers narrowing persistence through a branch for\nLOCAL VARIABLES). This finding is about FIELD ACCESS specifically.\n\nROOT CAUSE: In the value-semantics model, `obj.field` is translated as\n`DictStrAny_get(obj.instance_attributes, "field")`. Without a frame axiom\nstating "if attrs hasn\'t changed, get returns the same value", two reads\nof the same field are independent to the solver.\n\nThe narrowing `assume(!isfrom_None(DictStrAny_get(attrs, "field")))` only\nconstrains ONE specific term. A second `DictStrAny_get(attrs, "field")`\nis a syntactically different term that the solver treats as unconstrained.\n'
+__name__ = '__main__'
+dataclass = <function object>
+double = <function object>
+field_in_arithmetic_chain = <function object>
+field_in_comparison_after_narrow = <function object>
+field_passed_to_function = <function object>
+main = <function object>
+use_field_twice_after_check = <function object>

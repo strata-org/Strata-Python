@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+RESULT = (True, 5)
+__doc__ = 'The verifier should recover a correlation that a union analysis misses.'
+__name__ = '__main__'
+choose = <function object>

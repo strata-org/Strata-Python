@@ -1,0 +1,13 @@
+--- stdout 19
+6 [2, 4, 6] [2, 4]
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nLists are pure (cons-list). `for x in lst` iterates over the list.\nBut if the loop body rebinds `lst` (e.g., `lst = lst + [x]`), the\niteration must use the ORIGINAL list, not the rebound one.\n\nIn CPython, `for x in lst` creates an iterator over the list object\nat loop entry. Reassigning `lst` in the body doesn't affect iteration\nbecause the iterator holds a reference to the original object.\n\nUnder value semantics with pure lists, if the translator re-reads `lst`\neach iteration (because it's a variable, not a snapshot), reassignment\nin the body changes what's being iterated — WRONG.\n\nFinding 031 noted this. This finding provides concrete programs showing\nthe interaction between pure-list rebinding and iteration.\n\nUses ONLY confirmed-accepted constructs: for, list, int, function def.\n"
+__name__ = '__main__'
+collect_with_reassign = <function object>
+filter_positive = <function object>
+iterate_while_rebinding = <function object>
+main = <function object>
+sum_and_clear = <function object>

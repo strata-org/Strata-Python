@@ -1,0 +1,14 @@
+--- stdout 6
+1 0 2
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nINT() CONVERSION ON BOOL — TAG NORMALIZATION MISSING\n\nThe subset allows:\n  - int(x) for primitive-type conversions\n  - bool values True/False\n  - bool is a subclass of int in CPython\n\nCPython behavior:\n  int(True)  → 1  (type: int)\n  int(False) → 0  (type: int)\n  type(int(True)) → <class 'int'>  (NOT bool!)\n\nModel behavior:\n  int(True) → to_int_any(from_bool(True))\n  \n  If to_int_any has a from_bool case:\n    → from_int(1)  ✓ correct\n  If to_int_any has NO from_bool case (likely, per finding 017):\n    → Hole  ✗ wrong\n\n  Even if to_int_any handles from_bool, the CRITICAL question is:\n  does it return from_int(1) or from_bool(True)?\n  \n  CPython: int(True) returns a TRUE INT (not a bool). The type changes.\n  This matters for isinstance checks:\n    isinstance(True, int)     → True  (bool IS int)\n    isinstance(int(True), bool) → False  (int(True) is NOT bool!)\n    type(True) == type(int(True)) → False\n\nThe model must:\n1. Have a from_bool case in to_int_any\n2. Return from_int (not from_bool) to reflect the type change\n3. Map True→1, False→0\n\nThis is distinct from finding 017 (int() has no model at all) because\neven WITH a model, the bool→int normalization must produce from_int\nnot from_bool. And it's distinct from finding 166 (bool arithmetic)\nbecause here the user EXPLICITLY requests conversion via int().\n"
+__name__ = '__main__'
+bool_int_type_difference = <function object>
+bool_to_int_explicit = <function object>
+conditional_to_int = <function object>
+count_true_values = <function object>
+main = <function object>
+weighted_sum = <function object>

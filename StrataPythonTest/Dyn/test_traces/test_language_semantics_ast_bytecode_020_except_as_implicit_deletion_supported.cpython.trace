@@ -1,0 +1,9 @@
+--- stdout 47
+OK: except-as — variable usable inside handler
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+safe_divide = <function object>

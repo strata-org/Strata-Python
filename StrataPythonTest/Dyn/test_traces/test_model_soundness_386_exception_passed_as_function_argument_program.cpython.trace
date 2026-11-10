@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nEXCEPTION PASSED AS FUNCTION ARGUMENT — MUST PROPAGATE BEFORE CALL\n\nCPython: f(g()) where g() raises → f() is NEVER CALLED.\n         The exception from g() propagates immediately.\n\nModel:   g() returns exception(ValueError(...))\n         f(exception(ValueError(...))) → f is CALLED with exception as arg\n         Inside f: operations on the exception-valued parameter produce Hole\n         f returns some value → caller continues as if nothing happened\n\n         The exception is SILENTLY CONSUMED by being passed as an argument.\n         CPython would have propagated it BEFORE the call to f.\n'
+__name__ = '__main__'
+caller_multi_arg = <function object>
+caller_passes_exception = <function object>
+exception_in_method_arg = <function object>
+main = <function object>
+might_raise = <function object>
+multi_arg_first_raises = <function object>
+use_value = <function object>

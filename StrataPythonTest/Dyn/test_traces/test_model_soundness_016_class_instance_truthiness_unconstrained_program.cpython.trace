@@ -1,0 +1,14 @@
+--- stdout 10
+True
+prod
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+__doc__ = "\nPython objects without __bool__ or __len__ are ALWAYS truthy.\nThe Laurel encoding's Any_to_bool returns Hole (unconstrained) for\nfrom_ClassInstance, so the solver treats instance truthiness as unknown.\n"
+__name__ = '__main__'
+dataclass = <function object>
+is_configured = <function object>
+main = <function object>
+select = <function object>

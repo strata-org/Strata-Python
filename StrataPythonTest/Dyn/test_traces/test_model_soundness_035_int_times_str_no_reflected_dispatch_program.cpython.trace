@@ -1,0 +1,11 @@
+--- stdout 20
+ababab ababab    hi
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython's `int * str` uses reflected method dispatch: int.__mul__(str) returns\nNotImplemented, then str.__rmul__(int) is called. The Laurel model dispatches\nby tag pattern matching with no reflected methods. PMul likely has a case for\nstr*int but NOT int*str — the operand order matters.\n"
+__name__ = '__main__'
+main = <function object>
+pad_left = <function object>
+repeat_string = <function object>

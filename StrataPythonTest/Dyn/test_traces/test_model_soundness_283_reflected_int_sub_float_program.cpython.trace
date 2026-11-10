@@ -1,0 +1,11 @@
+--- stdout 8
+7.5 3.5
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nMISSING REFLECTED METHOD DISPATCH: int - float\n\nCPython protocol:\n  1. int.__sub__(float) → NotImplemented\n  2. float.__rsub__(int) → float result ✓\n\nModel: PSub(from_int(10), from_float(2.5))\n  → match: no (from_int, from_float) case\n  → Hole\n\nCPython result: 7.5\nModel result:  Hole\n'
+__name__ = '__main__'
+float_minus_int = <function object>
+int_minus_float = <function object>
+main = <function object>

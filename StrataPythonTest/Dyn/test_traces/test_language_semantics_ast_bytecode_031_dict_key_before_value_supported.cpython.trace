@@ -1,0 +1,12 @@
+--- stdout 5
+PASS
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Dict key-before-value: key side effects happen first.'
+__name__ = '__main__'
+d = {1: 10, 2: 20}
+make_key = <function object>
+make_val = <function object>
+order = ['k1', 'v1', 'k2', 'v2']

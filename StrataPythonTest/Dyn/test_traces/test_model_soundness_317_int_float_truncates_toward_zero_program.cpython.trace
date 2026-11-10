@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nint(float) truncates toward zero, NOT floor.\n\nIn CPython, `int(x)` on a float truncates toward zero:\n  int(2.7)  →  2   (toward zero, same as floor for positive)\n  int(-2.7) → -2   (toward zero, NOT -3 which is floor)\n  int(3.9)  →  3\n  int(-3.9) → -3   (NOT -4)\n\nThis is DIFFERENT from floor division `//`:\n  -7 // 2 = -4  (floor toward -∞)\n  int(-7 / 2) = int(-3.5) = -3  (truncate toward 0)\n\nThe Laurel model's `to_int_any` (finding 017 notes it's undefined/Hole).\nIf it IS defined, it must use truncation toward zero (C's `(int)` cast\nsemantics), NOT floor. If the model reuses the floor-division logic\n(which itself has issues per finding 273), it will compute wrong values\nfor negative floats.\n\nmath.trunc() is the explicit form: int(x) == math.trunc(x) for floats.\n\nUses ONLY confirmed-accepted constructs: int(), float, comparison, arithmetic.\n"
+__name__ = '__main__'
+int_negative_float = <function object>
+int_negative_large = <function object>
+int_positive_float = <function object>
+int_vs_floor_div = <function object>
+main = <function object>
+truncation_symmetry = <function object>

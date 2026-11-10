@@ -1,0 +1,14 @@
+--- stdout 18
+[110, 210, 300] 2
+
+--- outcome
+ok
+--- globals
+IndexTracker = <class 'IndexTracker'>
+__doc__ = '\nIn `a[i] += x`, CPython evaluates `a` and `i` exactly ONCE, then\nperforms: tmp = a[i]; tmp2 = tmp + x; a[i] = tmp2. A naive desugaring\nto `a[i] = a[i] + x` evaluates `a` and `i` TWICE. If either has side\neffects (e.g., `i` is a function call), the double evaluation diverges.\n\nThis also applies to `obj.field += x` where `obj` is a complex expression.\n'
+__name__ = '__main__'
+dataclass = <function object>
+dict_augmented = <function object>
+double_increment = <function object>
+increment_at = <function object>
+main = <function object>

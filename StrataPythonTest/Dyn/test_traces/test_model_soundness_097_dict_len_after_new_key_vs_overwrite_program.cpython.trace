@@ -1,0 +1,13 @@
+--- stdout 6
+3 1 4
+
+--- outcome
+ok
+--- globals
+__doc__ = "\n`len(d)` must distinguish between adding a NEW key (len increases by 1)\nand OVERWRITING an existing key (len stays the same). The association\nlist model (finding 082) doesn't distinguish these — both prepend.\nEven with McCarthy axioms, the len axiom must be:\n  len(set(d, k, v)) == (len(d) + 1) if k not in d else len(d)\n\nWithout this conditional, len is either always-incrementing (wrong for\noverwrites) or uninterpreted (unprovable).\n"
+__name__ = '__main__'
+add_new_keys = <function object>
+build_counter = <function object>
+main = <function object>
+mixed_new_and_overwrite = <function object>
+overwrite_same_key = <function object>

@@ -1,0 +1,12 @@
+--- stdout 10
+60 3 45 3
+
+--- outcome
+ok
+--- globals
+Accumulator = <class 'Accumulator'>
+__doc__ = "\nAugmented assignment on object fields (`self.x += 1`) desugars to\n`self.x = self.x + 1` in CPython. But in the value-semantics model,\n`self` is a from_ClassInstance value. Reading `self.x` extracts from\nthe DictStrAny, and writing `self.x = ...` must produce a NEW\nClassInstance with updated attrs. If the translator doesn't rebind\n`self` to the new instance, subsequent reads of `self.x` see the old\nvalue. Furthermore, the CALLER's reference to the object is never\nupdated (value semantics), so mutations through methods are invisible.\n"
+__name__ = '__main__'
+accumulate_values = <function object>
+dataclass = <function object>
+main = <function object>

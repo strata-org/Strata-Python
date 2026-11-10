@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nOPERATOR CATCH-ALL MUST BE TypeError NOT Hole — SOUNDNESS CRITICAL\n\nCPython: "hello" + 5 → TypeError (can\'t add str and int)\n         None + 1    → TypeError\n         [1,2] - [3] → TypeError\n\nModel:   PAdd(from_str("hello"), from_int(5))\n         → match: no (from_str, from_int) case\n         → catch-all: return Hole (unconstrained value)\n\n         Hole is UNSOUND because:\n         1. Hole can satisfy ANY assertion (it\'s unconstrained)\n         2. Code after the TypeError is modeled as reachable\n         3. The verifier says "verified ✓" for code that CRASHES\n\n         The catch-all MUST return exception(TypeError) because:\n         1. exception tag fails return-type assertions (finding 210)\n         2. Code after the error is unreachable (exception propagation)\n         3. The verifier correctly reports "possible TypeError"\n\nThis is THE MOST CRITICAL soundness issue in the operator dispatch.\nHole defeats the entire purpose of verification.\n\nFinding 204/270/286 identified this. This finding provides the\nCOMPREHENSIVE test showing Hole allows WRONG code to verify.\n'
+__name__ = '__main__'
+conditional_type_error = <function object>
+main = <function object>
+none_arithmetic = <function object>
+str_plus_int = <function object>
+use_after_type_error = <function object>

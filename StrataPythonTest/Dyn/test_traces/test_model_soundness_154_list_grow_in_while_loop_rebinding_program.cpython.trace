@@ -1,0 +1,12 @@
+--- stdout 7
+5 16 3
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nGrowing a list in a while loop using concatenation: `lst = lst + [x]`.\nEach iteration must rebind `lst` to the new ListAny. The loop condition\n`i < n` uses a simple int counter (not len(lst)), so termination is\nstraightforward. But the model must correctly thread the growing list.\n\nUses ONLY confirmed-accepted constructs: list create, list concat (+),\nwhile loop, int arithmetic, len(), subscript.\n'
+__name__ = '__main__'
+build_countdown = <function object>
+build_squares = <function object>
+filter_positive = <function object>
+main = <function object>

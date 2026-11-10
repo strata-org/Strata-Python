@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Dict = <_SpecialGenericAlias object>
+MyService = <class 'MyService'>
+__doc__ = None
+__name__ = '__main__'
+main = <function object>

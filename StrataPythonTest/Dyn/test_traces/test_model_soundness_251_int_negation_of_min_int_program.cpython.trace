@@ -1,0 +1,15 @@
+--- stdout 8
+-5 7 10
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCPython: -(-5) == 5 (negation of negative is positive)\nModel: PNeg(from_int(n)) should return from_int(-n).\n       But if PNeg only handles from_int and not from_bool/from_float,\n       negating a bool or float falls to Hole.\n\nMore critically: the model uses SMT-LIB Int which has no overflow.\n-x is always well-defined. But if PNeg is UNINTERPRETED (no definition),\nthen -5 returns Hole instead of from_int(-5).\n\nCPython result: -5 == from_int(-5)\nModel result: PNeg(from_int(5)) == Hole (if uninterpreted)\n\nFinding 073 identified missing float/bool dispatch. This finding tests\nthat BASIC int negation works and that double-negation is identity.\n'
+__name__ = '__main__'
+abs_via_negate = <function object>
+difference = <function object>
+double_negate = <function object>
+main = <function object>
+negate = <function object>
+negate_in_expression = <function object>
+negate_zero = <function object>

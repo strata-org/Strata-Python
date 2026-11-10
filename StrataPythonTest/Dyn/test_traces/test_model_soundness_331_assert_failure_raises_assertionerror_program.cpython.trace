@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nassert failure raises AssertionError — model treats assert as assume only.\n\nFinding 123 notes that `assert` must translate as check + assume. But\nthere\'s a deeper issue: when the assertion FAILS, CPython raises\nAssertionError. This is a catchable exception:\n\n    try:\n        assert x > 0, "must be positive"\n    except AssertionError as e:\n        print(str(e))  # "must be positive"\n\nIf the model translates `assert cond` as just `assume(cond)` (making\nsubsequent code unreachable when cond is false), then:\n1. The AssertionError is never produced as an exception value\n2. `try/except AssertionError` handlers are unreachable\n3. The message string is lost\n\nThe model must produce exception(AssertionError) on the failing path,\nnot just make it unreachable.\n\nUses ONLY confirmed-accepted constructs: assert, try/except, str, if.\n'
+__name__ = '__main__'
+assert_in_helper = <function object>
+assert_simple = <function object>
+assert_with_message = <function object>
+catch_assertion_error = <function object>
+main = <function object>
+validate = <function object>

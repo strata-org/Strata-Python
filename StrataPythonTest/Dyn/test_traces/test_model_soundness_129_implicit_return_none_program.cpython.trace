@@ -1,0 +1,18 @@
+--- stdout 54
+Hello, World
+Hello, Alice
+Hello, Bob
+Hello, test
+done
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nA function annotated `-> None` that reaches the end of its body without\nan explicit `return` implicitly returns None. The model must produce\n`from_None()` as the return value. If it produces Hole or doesn't\nreturn anything, callers that check the return value get garbage.\n"
+__name__ = '__main__'
+check_return_is_none = <function object>
+conditional_return = <function object>
+greet = <function object>
+main = <function object>
+modify_and_return_nothing = <function object>
+void_chain = <function object>

@@ -1,0 +1,13 @@
+--- stdout 5
+PASS
+
+--- outcome
+ok
+--- globals
+__doc__ = 'F-string evaluation order: expressions and format specs in source order.'
+__name__ = '__main__'
+order = ['x', 'w', 'y']
+result = '        42 hello'
+w = <function object>
+x = <function object>
+y = <function object>

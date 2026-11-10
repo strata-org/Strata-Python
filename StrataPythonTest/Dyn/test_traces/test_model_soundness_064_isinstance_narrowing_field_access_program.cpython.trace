@@ -1,0 +1,15 @@
+--- stdout 20
+box 3x4 disc r=5 44
+
+--- outcome
+ok
+--- globals
+Circle = <class 'Circle'>
+Rectangle = <class 'Rectangle'>
+Shape = <class 'Shape'>
+__doc__ = "\nAfter `isinstance(x, Dog)` succeeds, CPython knows `x` is a Dog and\nallows access to Dog-specific fields like `x.breed`. In the Laurel\nmodel, isinstance narrowing (finding 027) may update the classname\ncheck, but the DictStrAny field schema used for attribute access may\nstill be restricted to the parent class's declared fields. The model\nmust allow access to subclass-specific fields after isinstance narrowing.\n"
+__name__ = '__main__'
+dataclass = <function object>
+describe_shape = <function object>
+main = <function object>
+total_perimeter = <function object>

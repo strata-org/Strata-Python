@@ -1,0 +1,13 @@
+--- stdout 9
+3 100 60
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nOverwrite a dict key then read it back. The model\'s DictStrAny_set\nprepends a new entry; DictStrAny_get must find the MOST RECENT entry.\nWithout McCarthy axioms, `d["x"]` after `d["x"] = 5` is unprovable.\n\nUses ONLY frontend-confirmed constructs: dict create, dict assign,\ndict subscript, if, while, function def with annotations.\n'
+__name__ = '__main__'
+conditional_write = <function object>
+loop_write_read = <function object>
+main = <function object>
+overwrite_and_read = <function object>
+write_read_different_keys = <function object>

@@ -1,0 +1,13 @@
+--- stdout 14
+[1] 80 [0, 2]
+
+--- outcome
+ok
+--- globals
+__doc__ = "\n`enumerate(iterable)` yields (index, element) pairs. It's not explicitly\nIN or OUT of the subset, but `for i, x in enumerate(lst)` is a common\npattern that combines:\n- range-based indexing (IN)\n- element access (IN)\n- tuple unpacking (may grow)\n\nWithout enumerate, the equivalent is:\n    i = 0\n    for x in lst:\n        # use i and x\n        i += 1\n\nThe model must handle this equivalent correctly. If enumerate IS\naccepted, it needs a model that produces (int, element) pairs.\n\nUses ONLY confirmed-accepted constructs: for, list, int, while.\n"
+__name__ = '__main__'
+find_all_positions = <function object>
+index_based_equivalent = <function object>
+indexed_transform = <function object>
+main = <function object>
+manual_enumerate = <function object>

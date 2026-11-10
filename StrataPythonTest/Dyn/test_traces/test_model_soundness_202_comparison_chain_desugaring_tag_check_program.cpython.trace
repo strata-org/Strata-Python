@@ -1,0 +1,15 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nChained comparisons `a < b < c` desugar to `a < b and b < c` with b\nevaluated ONCE. Each comparison returns a bool. The `and` combines them.\n\nUnder tag-based dispatch:\n1. PLt(a, b) must return from_bool (not from_int or Hole)\n2. PLt(b, c) must return from_bool\n3. The `and` must operate on from_bool values\n\nIf PLt returns the wrong tag (e.g., from_int(1) for True), the `and`\noperation may fail (finding 056: and/or on non-bool).\n\nIf PLt returns Hole for a valid pair (finding 201), the chain breaks.\n\nFinding 066 identified evaluation-once semantics. This finding focuses\non the TAG CORRECTNESS of comparison results flowing into boolean ops.\n\nUses ONLY confirmed-accepted constructs: int, float, comparison, and.\n'
+__name__ = '__main__'
+chained_with_equality = <function object>
+comparison_in_arithmetic = <function object>
+comparison_result_is_bool = <function object>
+in_range = <function object>
+main = <function object>
+mixed_type_chain = <function object>
+three_way = <function object>

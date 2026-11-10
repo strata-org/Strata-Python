@@ -1,0 +1,11 @@
+--- stdout 12
+['a', 'bb']
+
+--- outcome
+ok
+--- globals
+RESULT = ['a', 'bb']
+Table = <class 'Table'>
+__doc__ = 'IndexError raised by a helper is consumed by legacy iteration.'
+__name__ = '__main__'
+width_at = <function object>

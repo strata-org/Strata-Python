@@ -1,0 +1,12 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Counter = <class 'Counter'>
+__doc__ = '\nDATACLASS FIELD DEFAULT LIST/DICT — SHARED MUTABLE STATE ACROSS INSTANCES\n\nCPython: @dataclass with `field(default_factory=list)` creates a FRESH list\n         per instance. But if someone writes `items: list[int] = []` without\n         field(), CPython\'s generated __init__ uses the SAME list object\n         for all instances (shared mutable default).\n\n         However, the subset bans mutable defaults ("No mutable default\n         arguments"). So this specific bug is OUT.\n\n         BUT: even with field(default_factory=list), the model must ensure\n         each construction produces a FRESH empty list — not a shared one.\n         Under value semantics this is AUTOMATICALLY CORRECT (no aliasing).\n\n         The ACTUAL gap: when a dataclass has a field with a default value\n         that is a PRIMITIVE (e.g., `count: int = 0`), and two instances\n         are created, the model must prove they are INDEPENDENT.\n         Under value semantics this works. But if the translator reuses\n         a single symbolic variable for the default, both instances\n         share the same SMT variable — modifications to one affect the other.\n\nThis tests that the model correctly produces INDEPENDENT instances\neven when constructed with the same default values.\n'
+__name__ = '__main__'
+dataclass = <function object>
+increment = <function object>
+main = <function object>

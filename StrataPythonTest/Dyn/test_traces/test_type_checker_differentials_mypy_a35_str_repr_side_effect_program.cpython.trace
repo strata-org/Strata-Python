@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Logged = <class 'Logged'>
+__doc__ = '\na35_str_repr_side_effect.py — __str__/__repr__ side effect invalidates narrowing.\n\nThe Frontend subset allows __str__ and __repr__ but requires them to be pure.\nThis purity requirement is a SEMANTIC predicate — not enforced syntactically.\nIf __str__ has a side effect that mutates a narrowed field, mypy doesn\'t catch it.\n\nstr(obj) and f"{obj}" both trigger __str__/__repr__ implicitly.\nmypy doesn\'t consider these as potential narrowing invalidators.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str - int\n'
+__name__ = '__main__'
+main = <function object>

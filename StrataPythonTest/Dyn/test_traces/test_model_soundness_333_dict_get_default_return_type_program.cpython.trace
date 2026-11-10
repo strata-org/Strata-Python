@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\ndict.get(key, default) return type — must be V or type(default).\n\nFinding 071 notes dict.get() has no model. This finding specifically\ntests the RETURN TYPE issue: dict.get(key, default) returns either:\n  - The value associated with key (type V), OR\n  - The default value (type of default argument)\n\nIn CPython:\n  d = {"a": 1, "b": 2}\n  d.get("a", 0)    → 1     (found: returns value)\n  d.get("z", 0)    → 0     (not found: returns default)\n  d.get("z", -1)   → -1    (default can be any value)\n  d.get("z")       → None  (no default: returns None)\n\nThe model must:\n1. Check if key exists in the dict\n2. If yes: return the associated value\n3. If no: return the default argument (or from_None if no default)\n\nWithout this, dict.get() returns Hole, and the common pattern\n`d.get(key, default_value)` is unverifiable.\n\nUses ONLY confirmed-accepted constructs: dict, str, int, if, comparison.\n'
+__name__ = '__main__'
+count_with_get = <function object>
+get_existing = <function object>
+get_missing = <function object>
+get_then_compare = <function object>
+get_vs_subscript = <function object>
+main = <function object>

@@ -1,0 +1,11 @@
+--- stdout 10
+True
+True
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPEq on two DictStrAny values uses structural equality on the association\nlist representation. But Python dict equality is ORDER-INDEPENDENT:\n{'a': 1, 'b': 2} == {'b': 2, 'a': 1} is True.\n\nThe model's structural comparison on cons-lists is order-dependent:\ncons('a', 1, cons('b', 2, empty)) != cons('b', 2, cons('a', 1, empty))\n"
+__name__ = '__main__'
+dicts_equal_different_order = <function object>
+main = <function object>

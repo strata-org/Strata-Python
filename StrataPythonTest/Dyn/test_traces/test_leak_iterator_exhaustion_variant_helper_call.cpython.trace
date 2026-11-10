@@ -1,0 +1,11 @@
+--- stdout 4
+[1]
+
+--- outcome
+ok
+--- globals
+RESULT = [1]
+Transformed = <class 'Transformed'>
+__doc__ = 'A helper-raised StopIteration is consumed inside __next__.'
+__name__ = '__main__'
+transform = <function object>

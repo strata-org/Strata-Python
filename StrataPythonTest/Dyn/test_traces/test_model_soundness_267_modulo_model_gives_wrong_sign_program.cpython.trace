@@ -1,0 +1,11 @@
+--- stdout 12
+2 2 -2 -2 2
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCPython: -7 % 3 = 2\nModel:   from_int(mod(-7, 3)) = from_int(-1)  ← WRONG SIGN\n\nThe model gives a number with the WRONG SIGN.\nPython % result has same sign as divisor. SMT mod has same sign as dividend.\n'
+__name__ = '__main__'
+is_even = <function object>
+main = <function object>
+modulo_examples = <function object>

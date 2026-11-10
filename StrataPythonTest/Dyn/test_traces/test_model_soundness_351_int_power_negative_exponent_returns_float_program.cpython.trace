@@ -1,0 +1,11 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nint ** negative_exponent RETURNS FLOAT — TYPE TAG CHANGES\n\nCPython: 2 ** -1 → 0.5 (float!)\n         2 ** 3  → 8 (int)\n         The return type of ** DEPENDS ON THE SIGN OF THE EXPONENT.\n\nModel:   PPow is uninterpreted (finding 021/295) → Hole.\n         But even if PPow were defined for (from_int, from_int),\n         it would need to return from_float when exponent < 0.\n         A single return-type rule (int**int→int) is WRONG.\n\nThe subset says: "** with negative integer exponent and integer base\nis OUT in v1." But this OUT rule must be ENFORCED by the AST checker.\nIf the checker doesn\'t reject it, the program reaches the model,\nwhich either returns Hole or returns from_int (wrong type).\n'
+__name__ = '__main__'
+main = <function object>
+power_negative_returns_float = <function object>
+power_positive = <function object>

@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`k in d` AFTER `d[k] = v` — NO AXIOM CONNECTING SET TO CONTAINS\n\nCPython: d = {}; d["x"] = 1; "x" in d → True (always)\n\nModel:   d\' = DictStrAny_set(empty, "x", 1)\n         DictStrAny_contains(d\', "x") == ???\n\n         There is no axiom:\n           DictStrAny_contains(DictStrAny_set(d, k, v), k) == True\n\n         Without it, the solver cannot prove that a key EXISTS after\n         being set. This breaks the common pattern:\n           d[k] = v\n           if k in d:  # should always be True after set!\n               use(d[k])\n'
+__name__ = '__main__'
+build_and_check_membership = <function object>
+contains_after_overwrite = <function object>
+guard_pattern = <function object>
+main = <function object>
+set_then_check = <function object>
+set_then_check_other = <function object>

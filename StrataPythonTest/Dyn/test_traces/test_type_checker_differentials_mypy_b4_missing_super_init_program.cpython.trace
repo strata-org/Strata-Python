@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for >>: 'str' and 'int'
+--- globals
+Child = <class 'Child'>
+Parent = <class 'Parent'>
+__doc__ = '\nb4_missing_super_init.py — Missing super().__init__ exposes class variable with wrong type.\n\nChild declares x: int (covariant override) but never calls super().__init__()\nand never sets self.x. Access to self.x falls through to the class variable\non Parent, which has been set to str.\n\nNo isinstance narrowing involved. Pure variance + missing initialization.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str >> int\n'
+__name__ = '__main__'
+main = <function object>

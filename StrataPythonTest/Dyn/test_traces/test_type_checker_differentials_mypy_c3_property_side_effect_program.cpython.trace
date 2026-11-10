@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Sneaky = <class 'Sneaky'>
+__doc__ = '\nc3_property_side_effect.py — isinstance narrowing on property invalidated by re-access.\n\nThe property has a side effect: it changes the underlying value on second access.\nmypy narrows based on the first access, but the second access returns a different type.\n\nNo explicit mutation call. The narrowing is invalidated by the SAME expression\nbeing evaluated twice (isinstance check + subsequent use).\n\nmypy --strict: Success (0 errors)\nRuntime: AssertionError — variable is str where mypy says int\n'
+__name__ = '__main__'
+main = <function object>

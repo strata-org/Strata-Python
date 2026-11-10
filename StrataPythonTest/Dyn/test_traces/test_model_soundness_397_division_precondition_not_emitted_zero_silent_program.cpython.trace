@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nDIVISION PRECONDITION NOT EMITTED — ZERO DIVISOR SILENT\n\nThe subset says: "Division preconditions: x / y, x // y, x % y require\ny != 0. The verifier EMITS the precondition."\n\nBut finding 268 shows: `1 // 0` in the model produces "some int"\n(SMT div is total), not an error. This means the precondition is\nNOT actually emitted — or if emitted, it\'s not connected to the\ndivision operation.\n\nIf the precondition IS emitted as `assert y != 0`:\n  - Programs with provable non-zero divisor: verified ✓\n  - Programs with possible zero divisor: "assertion may fail" ✓\n  - Programs with definite zero divisor: "assertion fails" ✓\n\nIf the precondition is NOT emitted:\n  - Division by zero silently produces a value (SMT div is total)\n  - No error reported — UNSOUND\n  - Programs that crash with ZeroDivisionError are "verified" ✓ (wrong!)\n'
+__name__ = '__main__'
+conditional_division = <function object>
+division_in_loop = <function object>
+main = <function object>
+modulo_zero = <function object>
+safe_division = <function object>
+true_div_zero = <function object>
+unsafe_division = <function object>

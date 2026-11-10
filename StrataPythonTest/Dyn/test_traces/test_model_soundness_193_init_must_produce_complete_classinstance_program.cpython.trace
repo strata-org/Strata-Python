@@ -1,0 +1,16 @@
+--- stdout 11
+6 test 250
+
+--- outcome
+ok
+--- globals
+Complete = <class 'Complete'>
+ConditionalInit = <class 'ConditionalInit'>
+ManualInit = <class 'ManualInit'>
+__doc__ = '\n`__init__` must produce a COMPLETE ClassInstance with ALL declared fields.\nIf __init__ has conditional paths where some fields are not assigned,\nthe resulting ClassInstance has missing keys in its attrs dict.\n\nReading a missing field returns Hole (finding 081). The model must\neither:\n1. Verify that __init__ assigns ALL fields on ALL paths\n2. Or emit postconditions that all declared fields are present\n\nFor @dataclass, this is automatic (all fields are constructor params).\nFor regular classes with __init__, the translator must verify completeness.\n\nUses ONLY confirmed-accepted constructs: class, __init__, int, str.\n'
+__name__ = '__main__'
+conditional_init_both_paths = <function object>
+dataclass = <function object>
+dataclass_always_complete = <function object>
+main = <function object>
+manual_init_complete = <function object>

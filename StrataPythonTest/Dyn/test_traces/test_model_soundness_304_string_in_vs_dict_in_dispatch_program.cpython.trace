@@ -1,0 +1,15 @@
+--- stdout 16
+True True False
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`in` OPERATOR DISPATCH: string-in-string vs key-in-dict vs element-in-list.\n\nThe `in` operator has THREE different semantics depending on the RIGHT operand:\n  - `x in lst` → element membership (finding 145 covers bool/int coercion)\n  - `k in d`   → key membership (finding 095 covers keys-not-values)\n  - `sub in s` → SUBSTRING containment (finding 046 covers this)\n\nThe model must dispatch `PIn(left, right)` based on the TAG of the RIGHT\noperand. But there\'s a subtle interaction: when the right operand is a\n`from_str` and the left is also `from_str`, the semantics is SUBSTRING\nsearch, not character membership.\n\nThe critical gap: if the translator uses a SINGLE `PIn` implementation\nthat dispatches only on the right operand\'s tag, it may use the WRONG\nalgorithm. Specifically:\n\n  "ab" in "abc"  → True (substring)\n  "ab" in ["abc", "ab", "x"]  → True (element equality)\n\nBoth have `from_str` on the left. The dispatch MUST check the RIGHT tag:\n  - right is from_str → substring (SMT str.contains)\n  - right is from_ListAny → element equality (List_contains)\n  - right is from_DictStrAny → key lookup (DictStrAny_contains)\n\nIf the model has a single `contains` function without right-tag dispatch,\nit will use the wrong semantics for at least one case.\n'
+__name__ = '__main__'
+combined_checks = <function object>
+critical_distinction = <function object>
+element_in_list = <function object>
+int_in_list_vs_range = <function object>
+key_in_dict = <function object>
+main = <function object>
+substring_check = <function object>

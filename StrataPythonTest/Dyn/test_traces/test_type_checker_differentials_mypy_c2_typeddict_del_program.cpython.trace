@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+raised KeyError: 'x'
+--- globals
+Point = <class 'Point'>
+TypedDict = <function object>
+__doc__ = "\nc2_typeddict_del.py — TypedDict 'in' narrowing invalidated by del through function call.\n\nNo union types on fields. No inheritance. Just TypedDict with optional keys.\n\nmypy --strict: Success (0 errors)\nRuntime: KeyError\n"
+__name__ = '__main__'
+main = <function object>
+remove_x = <function object>

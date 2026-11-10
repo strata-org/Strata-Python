@@ -1,0 +1,14 @@
+--- stdout 8
+0 0
+3 4
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = 'Class instantiation: supported case.\nKnown class, no metaclass, standard __new__, __init__ in source.\n'
+__name__ = '__main__'
+make_origin = <function object>
+make_point = <function object>
+o = <Point object>
+p = <Point object>

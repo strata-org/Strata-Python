@@ -1,0 +1,14 @@
+--- stdout 31
+All nested continue tests pass
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCONTINUE in nested loops must target ONLY the innermost enclosing loop.\n\nIn CPython, `continue` skips the rest of the current iteration of the\nINNERMOST loop only. The outer loop continues normally. If the model\'s\ncontrol flow encoding uses a single "skip" mechanism (e.g., a flag or\ngoto that doesn\'t distinguish loop levels), `continue` in an inner loop\nmay incorrectly skip the outer loop\'s iteration too.\n\n    for i in range(3):\n        for j in range(3):\n            if j == 1:\n                continue  # skips rest of INNER loop body only\n            # ... this code runs for j=0 and j=2, not j=1\n        # ... this code ALWAYS runs for each i (outer loop unaffected)\n\nSimilarly for while loops:\n    while outer_cond:\n        while inner_cond:\n            if skip:\n                continue  # only skips inner iteration\n            inner_work()\n        outer_work()  # always executes\n\nThis is distinct from:\n- Finding 054 (break/continue may not work at all)\n- Finding 307 (nested for loops variable rebinding)\n- Finding 309 (break preserves loop variable)\n\nThis finding specifically tests that continue in an INNER loop does not\naffect the OUTER loop\'s control flow.\n\nUses ONLY confirmed-accepted constructs: for, range, while, continue, if, int, list.\n'
+__name__ = '__main__'
+continue_only_skips_rest_of_inner_body = <function object>
+continue_with_accumulator_after = <function object>
+count_non_skipped_inner = <function object>
+main = <function object>
+nested_while_continue = <function object>
+outer_accumulates_despite_inner_continue = <function object>

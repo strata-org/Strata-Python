@@ -1,0 +1,14 @@
+--- stdout 7
+1 -1 1
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`raise ValueError("msg")` must produce an `exception(ValueError("msg"))`\nvalue in the model. Finding 014 identified that raise is silently dropped.\n\nIf raise is dropped:\n1. Code after raise executes (should be unreachable)\n2. No exception value is produced\n3. Enclosing except handler is never triggered\n\nThe correct translation: `raise E(msg)` produces an exception value\nAND makes subsequent code unreachable (like return — finding 165).\n\nUses ONLY confirmed-accepted constructs: raise, try/except, ValueError.\n'
+__name__ = '__main__'
+conditional_raise = <function object>
+explicit_raise = <function object>
+main = <function object>
+raise_in_function = <function object>
+raise_stops_execution = <function object>
+reraise_different = <function object>

@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nisinstance(x, type(None)) — type(None) is NoneType, no class to match.\n\nIn CPython, `type(None)` returns `<class \'NoneType\'>`. You can use it\nin isinstance checks:\n  isinstance(None, type(None))  → True\n  isinstance(42, type(None))    → False\n\nBut the Laurel model\'s isinstance translation checks the `classname`\nfield of `from_ClassInstance`. `None` is `from_None()`, not a ClassInstance.\nAnd `type(None)` has no representation — there\'s no "NoneType" string\nin the model\'s class hierarchy.\n\nMore commonly, this appears as:\n  isinstance(x, type(None))  — equivalent to `x is None`\n\nBut the model must handle it if it appears in code that passes mypy.\nThe subset allows isinstance for narrowing (IN), and type(None) is\na valid type argument in CPython.\n\nActually — checking the subset more carefully, isinstance is IN for\nT ∈ {int, float, str, bool, list, dict, tuple, <user class>}.\n`type(None)` is NOT in this list. So this may already be OUT.\n\nBut `isinstance(x, int)` where x is `from_bool(True)` has the SAME\nissue: CPython returns True (bool⊂int), model checks tag and returns\nFalse (from_bool ≠ from_int).\n\nThis finding focuses on isinstance with bool/int subtyping.\n\nUses ONLY confirmed-accepted constructs: isinstance, bool, int, if.\n'
+__name__ = '__main__'
+filter_ints_includes_bools = <function object>
+isinstance_bool_is_int = <function object>
+isinstance_narrows_bool_to_int = <function object>
+isinstance_none_check = <function object>
+main = <function object>

@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nfor/else with break inside nested if — break reachability determines else.\n\nFinding 065 covers for/else basic semantics. Finding 316 covers while/else.\nThis finding tests a subtler case: break is inside a CONDITIONAL in the\nloop body. The else block's execution depends on whether the break was\nACTUALLY TAKEN (runtime path), not just whether it EXISTS (static).\n\n    for x in xs:\n        if condition(x):\n            break\n    else:\n        # Runs if break was NEVER taken across ALL iterations\n        # i.e., condition(x) was False for every x\n\nThe model must track that:\n1. If the loop completes all iterations without break → else runs\n2. If break fires on ANY iteration → else is skipped\n3. The break is conditional — it may or may not fire depending on data\n\nThis is harder than unconditional break because the model can't\nstatically determine whether else runs — it depends on the loop's\nruntime behavior.\n\nUses ONLY confirmed-accepted constructs: for, if, break, else, list, int.\n"
+__name__ = '__main__'
+all_positive = <function object>
+conditional_break_accumulator = <function object>
+find_first_divisor = <function object>
+find_or_default = <function object>
+main = <function object>

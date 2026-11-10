@@ -1,0 +1,11 @@
+--- stdout 50
+OK: decorator order — inner first, outer wraps it
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+add_greeting = <function object>
+greet = <function object>
+uppercase = <function object>

@@ -1,0 +1,15 @@
+--- stdout 31
+Rex age 3 Rex (Labrador) guide
+
+--- outcome
+ok
+--- globals
+Animal = <class 'Animal'>
+Dog = <class 'Dog'>
+ServiceDog = <class 'ServiceDog'>
+__doc__ = '\nA @dataclass subclass inherits parent fields AND adds its own. The\nconstructor takes ALL fields (parent + child). The model must know\nthat a subclass instance has BOTH sets of fields in its DictStrAny.\n\n@dataclass inheritance auto-generates __init__ with all fields:\nparent fields first (in declaration order), then child fields.\n'
+__name__ = '__main__'
+dataclass = <function object>
+describe_animal = <function object>
+describe_dog = <function object>
+main = <function object>

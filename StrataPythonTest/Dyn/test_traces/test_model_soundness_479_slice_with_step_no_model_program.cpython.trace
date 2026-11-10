@@ -1,0 +1,15 @@
+--- stdout 11
+All passed
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nSLICE WITH STEP PARAMETER — NO MODEL FOR THREE-ARGUMENT SLICE\n\nThe subset allows:\n  - List subscript (IN)\n  - String subscript (IN)\n  - Slice syntax s[a:b] (findings 068/324 identify no model)\n\nThe NOVEL gap: slicing with a STEP parameter `s[a:b:c]` or `lst[::2]`\nis syntactically valid (same Slice AST node) but has ADDITIONAL semantics\nbeyond basic two-argument slicing:\n  - `lst[::2]` → every other element\n  - `lst[::-1]` → reversed list\n  - `s[::2]` → every other character\n\nEven if basic slicing `s[a:b]` gets a model (SMT-LIB str.substr), the\nstep parameter requires a fundamentally different operation — it's not\na contiguous substring/sublist but a STRIDED selection.\n\nCPython: lst = [0,1,2,3,4,5]; lst[::2] → [0, 2, 4]\nModel:   No slice operation at all → Hole\n         Even with basic slice model: no stride → Hole or wrong result\n\nDISTINCT FROM:\n  - Finding 068 (list slice no model) — covers [a:b] only, no step\n  - Finding 324 (string slice no model) — covers [a:b] only, no step\n  - Finding 431 (negative index wraps) — single index, not slice\n\nROOT CAUSE: The Slice AST node has three optional fields (lower, upper, step).\nFindings 068/324 address the case where step is None. When step is present,\na completely different algorithm is needed (strided selection), and no\nLaurel operation exists for it.\n"
+__name__ = '__main__'
+every_other_element = <function object>
+is_palindrome = <function object>
+main = <function object>
+reverse_list_via_slice = <function object>
+reverse_string = <function object>
+skip_elements = <function object>
+slice_with_all_three = <function object>

@@ -1,0 +1,14 @@
+--- stdout 24
+(3, 4)
+position: (3, 4)
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = '\nThe subset says __str__ and __repr__ are IN. str(obj) should call\nobj.__str__(). But the model dispatches operators by tag pattern matching\non the Any datatype — there is no slot lookup. PStr(from_ClassInstance(...))\nlikely returns a generic string or Hole, not the result of __str__.\n'
+__name__ = '__main__'
+dataclass = <function object>
+format_point = <function object>
+log_message = <function object>
+main = <function object>

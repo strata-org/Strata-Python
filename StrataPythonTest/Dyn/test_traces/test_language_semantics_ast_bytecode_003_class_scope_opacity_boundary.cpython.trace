@@ -1,0 +1,9 @@
+--- stdout 77
+BOUNDARY: naive LEGB gives 10; CPython raises NameError (class scope opaque)
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'

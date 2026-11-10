@@ -1,0 +1,12 @@
+--- stdout 7
+3 2 99
+
+--- outcome
+ok
+--- globals
+__doc__ = "\n`dict.get(key, default)` returns the value for key if present, otherwise\nreturns the default value (or None if no default). This is distinct from\n`d[key]` which raises KeyError on missing keys. The model's DictStrAny\nlikely has no `get` method — only `DictStrAny_get` which may have a\nprecondition that the key exists (or returns Hole for missing keys).\n"
+__name__ = '__main__'
+count_occurrences = <function object>
+lookup_or_default = <function object>
+main = <function object>
+merge_defaults = <function object>

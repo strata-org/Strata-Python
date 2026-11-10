@@ -1,0 +1,29 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+BindingExit = <class 'BindingExit'>
+BodyError = <class 'BodyError'>
+EnterError = <class 'EnterError'>
+EnterFails = <class 'EnterFails'>
+ExitError = <class 'ExitError'>
+FalseExit = <class 'FalseExit'>
+NormalExitRaises = <class 'NormalExitRaises'>
+RESULT = ('EnterError', 'normal', 'BodyError', 'suppressed', ('replacement', 'BodyError'), ('TypeError', 'TypeError'), 'exit replaced return', ('truth test', 'BodyError'), (1, 1))
+RaisingTruth = <class 'RaisingTruth'>
+ReplacementExit = <class 'ReplacementExit'>
+TrueExit = <class 'TrueExit'>
+TruthError = <class 'TruthError'>
+TruthinessExit = <class 'TruthinessExit'>
+__doc__ = None
+__name__ = '__main__'
+enter_failure_does_not_call_exit = <function object>
+exit_exception_replaces_body_exception = <function object>
+exit_exception_replaces_return = <function object>
+false_exit_propagates = <function object>
+normal_completion_calls_exit = <function object>
+target_binding_failure_is_sent_to_exit = <function object>
+true_exit_suppresses = <function object>
+truthiness_error_replaces_body_exception = <function object>
+with_target_survives_exit = <function object>

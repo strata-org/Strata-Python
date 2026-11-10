@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nEXCEPTION STORED IN CONTAINER — EXCEPTION VALUE IN LIST/DICT\n\nCPython: lst.append(might_raise(-1)) → raises, append never happens.\nModel:   lst.append(exception(...)) → exception stored AS ELEMENT in list!\n         Later: lst[0] → returns exception value\n         lst[0] + 1 → PAdd(exception, int) → Hole\n\nThe exception becomes a "zombie" element in the container.\nIt doesn\'t propagate — it sits in the list waiting to infect\nany code that reads it out.\n\nEven worse: len(lst) increases (the exception IS an element),\nso the list appears to have grown successfully.\n'
+__name__ = '__main__'
+exception_in_append = <function object>
+exception_in_dict_value = <function object>
+exception_in_list_literal = <function object>
+main = <function object>
+might_raise = <function object>
+sum_with_exception_element = <function object>

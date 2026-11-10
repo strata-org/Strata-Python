@@ -1,0 +1,10 @@
+--- stdout 81
+PASS: UnboundLocalError not NameError (naive model might fall through to global)
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Boundary: del raises UnboundLocalError, not NameError.'
+__name__ = '__main__'
+f = <function object>
+x = 'global'

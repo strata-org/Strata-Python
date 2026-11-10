@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+CallableSource = <class 'CallableSource'>
+EVENTS = ['lookup', 'argument', ('body', 7)]
+RESULT = (7, ['lookup', 'argument', ('body', 7)])
+__doc__ = 'Method lookup completes before call arguments are evaluated.'
+__name__ = '__main__'
+argument = <function object>

@@ -1,0 +1,12 @@
+--- stdout 6
+2 5 2
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCPython results (concrete):\n  True + True  = 2  (type: int)\n  True + False = 1  (type: int)\n  False + False = 0 (type: int)\n  True * 5     = 5  (type: int)\n\nLaurel model results:\n  PAdd(from_bool(True), from_bool(True))  = Hole (no bool×bool case)\n  PAdd(from_bool(True), from_bool(False)) = Hole\n  PMul(from_bool(True), from_int(5))      = Hole (no bool×int case)\n'
+__name__ = '__main__'
+bool_plus_bool = <function object>
+bool_times_int = <function object>
+count_trues = <function object>
+main = <function object>

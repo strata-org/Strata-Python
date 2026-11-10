@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nLIST METHOD EXPRESSION VALUE VS SIDE EFFECT — USING RETURN VALUE OF APPEND\n\nCPython: x = lst.append(5) → x is None (append returns None)\n         lst.sort() → returns None (sort is in-place)\n         lst.reverse() → returns None\n\n         If someone writes: new_list = old_list.append(5)\n         They get None, not the extended list!\n\nModel:   If translator models append as pure function returning new list:\n         new_list = List_append(old_list, 5) → new_list is the extended list\n         This is WRONG — the expression value should be from_None().\n\n         The model must distinguish:\n         1. The SIDE EFFECT: old_list gets a new element (rebind)\n         2. The EXPRESSION VALUE: from_None() (what .append() returns)\n\n         If the translator conflates these, code that uses the return value\n         of append/sort/reverse gets a list instead of None.\n'
+__name__ = '__main__'
+append_return_value = <function object>
+build_correctly = <function object>
+chain_mistake = <function object>
+main = <function object>
+sort_return_value = <function object>

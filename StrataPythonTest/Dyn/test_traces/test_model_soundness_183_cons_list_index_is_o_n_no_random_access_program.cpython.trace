@@ -1,0 +1,14 @@
+--- stdout 9
+90 5 139
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nCons-lists have O(n) index access: `List_get(lst, i)` must traverse\ni cons cells to reach element i. CPython lists have O(1) random access\n(array-backed).\n\nThis doesn't affect CORRECTNESS but affects AXIOM DESIGN. The key issue:\nif `List_get` is defined recursively on the cons structure, the solver\nmust unfold the recursion to prove properties about specific indices.\n\nFor VERIFICATION, the critical question is: can the solver prove\n`lst[i] == expected` after a sequence of operations? This requires\nthe axioms to be COMPLETE enough that the solver can determine the\nvalue at any index after construction/modification.\n\nThe specific gap: after `lst = [1, 2, 3]` (literal construction),\ncan the solver prove `lst[0] == 1`? This requires the literal\nconstruction to emit postconditions for EACH index.\n\nFinding 089 identified cons-order issues. This finding focuses on\nwhether the axioms are SUFFICIENT for index-based reasoning.\n\nUses ONLY confirmed-accepted constructs: list, int, indexing, function def.\n"
+__name__ = '__main__'
+access_after_append = <function object>
+access_after_assignment = <function object>
+access_literal_elements = <function object>
+index_in_loop = <function object>
+main = <function object>
+reverse_access = <function object>

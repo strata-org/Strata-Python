@@ -1,0 +1,14 @@
+--- stdout 11
+All passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFOR i IN RANGE(LEN(lst)) — WHILE-LOOP TRANSLATION RE-EVALUATES len(lst)\n\nThe subset allows:\n  - for i in range(len(lst)) (IN — common pattern)\n  - list.append() in loop body (IN)\n  - range with computed argument (IN)\n\nThe NOVEL gap: CPython evaluates `range(len(lst))` ONCE at loop entry,\ncreating a fixed range object. The loop iterates exactly `len(lst)` times\n(the length at entry). If the body modifies `lst` (e.g., appends), the\nrange does NOT grow — iteration count is fixed.\n\nBut if the translator converts this to a while-loop:\n    i = 0; while i < len(lst): BODY; i += 1\nthen `len(lst)` is re-evaluated EACH iteration. If the body appends to\nlst (with proper rebinding), `len(lst)` grows, and the loop runs MORE\niterations than CPython would.\n\nCPython: lst=[1,2,3]; for i in range(len(lst)): lst.append(0)\n         → iterates 3 times (range(3) is fixed), lst becomes [1,2,3,0,0,0]\n\nModel (while translation): i=0; while i < len(lst): lst=lst+[0]; i+=1\n         → len(lst) grows each iteration → INFINITE LOOP (or very long)\n\nThis is UNSOUND: the model may fail to terminate (report timeout) or\nexecute more iterations than CPython, proving properties about states\nthat CPython never reaches.\n\nDISTINCT FROM:\n  - Finding 031 (iterator snapshot) — covers reassigning the LIST variable;\n    this is about the RANGE BOUND being re-evaluated\n  - Finding 305 (range(len) no index axiom) — covers the axiom connecting\n    range output to list bounds; this is about ITERATION COUNT\n  - Finding 445 (range stop exclusive) — covers off-by-one; this is about\n    the bound being DYNAMIC vs FIXED\n  - Finding 474 (loop variable reassignment) — covers reassigning i;\n    this is about the BOUND changing\n'
+__name__ = '__main__'
+append_in_range_len_direct = <function object>
+append_in_range_len_loop = <function object>
+count_iterations_with_append = <function object>
+main = <function object>
+safe_pattern_capture_length = <function object>
+shrink_in_range_len_loop = <function object>

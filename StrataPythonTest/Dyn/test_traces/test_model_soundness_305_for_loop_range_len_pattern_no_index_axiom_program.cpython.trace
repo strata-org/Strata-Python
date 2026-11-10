@@ -1,0 +1,14 @@
+--- stdout 14
+6 1 [3, 2, 1]
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFOR-LOOP OVER range(len(lst)): index variable has no connection to list bounds.\n\nThe pattern `for i in range(len(lst)): lst[i]` is extremely common.\nIt requires THREE things to be sound:\n  1. range(n) produces values 0, 1, ..., n-1 (finding 161)\n  2. len(lst) returns the list length (finding 088)\n  3. The loop body can ASSUME 0 <= i < len(lst) — the INDEX VALIDITY axiom\n\nThe critical gap: even if range and len are individually modeled, the\nCOMPOSITION has no axiom connecting them. The solver sees:\n  - i comes from range(len(lst))\n  - lst[i] requires 0 <= i < len(lst)\n\nBut without an axiom stating "values produced by range(n) satisfy 0 <= v < n",\nthe precondition for lst[i] is UNPROVABLE. The verifier reports "cannot verify"\nfor a program that is obviously safe.\n\nThis is NOT about missing models for range or len individually — it\'s about\nthe LOOP INVARIANT that connects the iteration variable to the list bounds.\n\nCPython: always safe (range never produces out-of-bounds index)\nModel:   cannot prove lst[i] is safe — reports spurious "possible IndexError"\n'
+__name__ = '__main__'
+find_max_index = <function object>
+main = <function object>
+pairwise_sum = <function object>
+reverse_list = <function object>
+sum_by_index = <function object>
+transform_in_place = <function object>

@@ -1,0 +1,16 @@
+--- stdout 9
+5
+5 2 42
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+__doc__ = "\nFinding 131 says return-type assertions must be emitted. But they must\nbe emitted at EVERY return point, including:\n- Explicit `return expr` statements\n- Implicit `return None` at function end (for -> None functions)\n- Returns inside try/except/finally\n- Returns inside loops (early exit)\n\nIf the assertion is only at the LAST return, early returns bypass it.\nIf it's only at explicit returns, implicit None return bypasses it.\n\nUses ONLY confirmed-accepted constructs: function def, return, int, Optional.\n"
+__name__ = '__main__'
+early_return_in_loop = <function object>
+implicit_none_return = <function object>
+main = <function object>
+multiple_returns = <function object>
+optional_return = <function object>
+return_in_try = <function object>

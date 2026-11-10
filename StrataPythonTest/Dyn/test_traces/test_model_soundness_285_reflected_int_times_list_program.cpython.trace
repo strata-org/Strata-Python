@@ -1,0 +1,11 @@
+--- stdout 32
+[1, 2, 1, 2, 1, 2] [1, 2, 1, 2]
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nMISSING REFLECTED METHOD DISPATCH: int * list\n\nCPython protocol:\n  1. int.__mul__(list) → NotImplemented\n  2. list.__rmul__(int) → repeated list ✓\n\nModel: PMul(from_int(3), from_ListAny([1,2]))\n  → match: no (from_int, from_ListAny) case\n  → Hole\n\nCPython result: [1, 2, 1, 2, 1, 2]\nModel result:  Hole\n'
+__name__ = '__main__'
+int_times_list = <function object>
+list_times_int = <function object>
+main = <function object>

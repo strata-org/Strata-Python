@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = "\nFUNCTION RECEIVES AND RETURNS SAME OBJECT — NO LINK IN MODEL\n\nCPython: def identity(x): return x\n         obj = Point(1, 2)\n         result = identity(obj)\n         result is obj → True (same object!)\n         obj.x = 99 → result.x is also 99 (aliased!)\n\nModel:   identity(x) returns a COPY of x.\n         result is an independent value.\n         Modifying obj doesn't affect result.\n\nUnder functional style (reassignment):\n         obj = Point(99, 2)  → result is still Point(1, 2)\n         CPython: result is still Point(1, 2) (obj now points elsewhere)\n         BOTH AGREE — reassignment breaks the alias in CPython too.\n\nThe UNSOUND case: in-place mutation after identity return.\nThe SOUND case: reassignment after identity return.\n\nThe subset's functional discipline makes this safe, but the AST\nchecker must ensure no in-place mutation of the returned reference.\n"
+__name__ = '__main__'
+dataclass = <function object>
+identity = <function object>
+main = <function object>
+pass_through = <function object>
+store_and_retrieve = <function object>

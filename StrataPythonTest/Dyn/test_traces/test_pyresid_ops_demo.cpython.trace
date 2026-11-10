@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+raised IndexError: pop from empty list
+--- globals
+Pt = <class 'Pt'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+i = 2
+n = 1
+xs = []
+ys = [6, 5, 4, 3, 2, 1, 0]

@@ -1,0 +1,14 @@
+--- stdout 7
+99 5 4
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nROOT CAUSE: Operations like List_get, DictStrAny_get, str_concat,\nstring_repeat, str_len are UNINTERPRETED FUNCTIONS with no axioms.\n\nPROPERTY: The solver treats them as opaque — can't evaluate concrete\ncases or derive relationships between operations.\n\nThis causes findings:\n015, 019, 020, 021, 026, 046, 047, 053, 060, 068, 069, 071, 075,\n081, 083, 088, 089, 091, 093, 133, 134, 135, 138, 141, 144, 151,\n152, 153, 167, 183, 220, 232, 252, 253, 254.\n\nDEMONSTRATION: Write then read returns unknown; concat length unknown.\n"
+__name__ = '__main__'
+concat_length = <function object>
+empty_list_length = <function object>
+literal_access = <function object>
+main = <function object>
+write_read_dict = <function object>
+write_read_list = <function object>

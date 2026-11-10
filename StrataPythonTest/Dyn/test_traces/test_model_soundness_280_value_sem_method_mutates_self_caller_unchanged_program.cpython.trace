@@ -1,0 +1,13 @@
+--- stdout 4
+3 3
+
+--- outcome
+ok
+--- globals
+Counter = <class 'Counter'>
+__doc__ = "\nVALUE SEMANTICS WHERE CPYTHON HAS REFERENCE SEMANTICS:\nMethod mutates self (writes to self.field) — caller's variable unchanged.\n\nCPython: self IS the caller's object. self.x = v mutates it.\nModel: self is a COPY. self.x = v rebuilds the copy. Caller unchanged.\n\nCPython result: counter.value == 3\nModel result:  counter.value == 0\n"
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+right_usage = <function object>
+wrong_usage = <function object>

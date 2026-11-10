@@ -1,0 +1,11 @@
+--- stdout 4
+[1]
+
+--- outcome
+ok
+--- globals
+Done = <class 'Done'>
+Items = <class 'Items'>
+RESULT = [1]
+__doc__ = 'A StopIteration subclass is also consumed as iterator exhaustion.'
+__name__ = '__main__'

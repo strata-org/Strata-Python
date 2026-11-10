@@ -1,0 +1,14 @@
+--- stdout 16
+True True False
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython's `==` across different types has specific rules:\n- None == None → True\n- None == <anything else> → False (never raises)\n- int == float → numeric comparison (1 == 1.0 is True)\n- bool == int → numeric (True == 1 is True)\n- str == int → always False (no TypeError)\n\nThe model's PEq may only handle same-tag comparisons. Cross-tag PEq\n(e.g., from_None vs from_int) may return Hole instead of False, or\nmay not handle the int/float numeric equivalence.\n"
+__name__ = '__main__'
+find_none = <function object>
+int_equals_float = <function object>
+is_none = <function object>
+main = <function object>
+none_equals_none = <function object>
+not_equal_cross_type = <function object>

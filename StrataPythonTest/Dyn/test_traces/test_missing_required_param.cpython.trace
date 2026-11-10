@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised ModuleNotFoundError: No module named 'test_helper'
+--- globals
+Any = <class 'Any'>
+Dict = <_SpecialGenericAlias object>
+__annotations__ = {}
+__doc__ = None
+__name__ = '__main__'

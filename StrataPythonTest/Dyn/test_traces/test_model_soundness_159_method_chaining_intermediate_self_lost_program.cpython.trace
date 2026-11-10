@@ -1,0 +1,14 @@
+--- stdout 7
+2 1 52
+
+--- outcome
+ok
+--- globals
+QueryBuilder = <class 'QueryBuilder'>
+__doc__ = "\nMethod chaining pattern: `obj.method1().method2()` where each method\nreturns `self` (or a new instance). Under value semantics, the intermediate\nresult of method1() is a NEW ClassInstance. If method2() mutates fields,\nthose mutations apply to the intermediate copy, not the original.\n\nBut the deeper issue: if method1() returns self (the pattern for builders),\nthe Laurel model creates a COPY. The caller's reference to the original\nobject never sees the changes from method2().\n\nThis is related to finding 086 (builder pattern) but focuses on the\nCHAINING aspect: `obj.a().b().c()` where intermediate results are lost.\n\nUses ONLY confirmed-accepted constructs: @dataclass, method def, int, str.\n"
+__name__ = '__main__'
+chained_build = <function object>
+dataclass = <function object>
+intermediate_lost = <function object>
+main = <function object>
+reassign_chain = <function object>

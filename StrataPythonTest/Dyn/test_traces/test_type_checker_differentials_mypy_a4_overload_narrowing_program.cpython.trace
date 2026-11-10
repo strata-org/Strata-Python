@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Tricky = <class 'Tricky'>
+__doc__ = '\na4_overload_narrowing.py — overloaded function + narrowing invalidation.\n\nCombines narrowing invalidation with @overload: mypy selects the int→int\noverload based on the narrowed type, but the actual runtime value is str.\n\nmypy --strict: Success (0 errors)\nRuntime: AssertionError — got str where mypy inferred int (from overload resolution)\n'
+__name__ = '__main__'
+main = <function object>
+overload = <function object>
+process = <function object>

@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+first_or_unbound = <function object>
+keep_alias_on_failure = <function object>
+keep_old_on_failure = <function object>

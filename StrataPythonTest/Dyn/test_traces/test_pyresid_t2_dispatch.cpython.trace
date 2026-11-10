@@ -1,0 +1,21 @@
+--- stdout 0
+
+--- outcome
+raised AttributeError: 'Robot' object has no attribute 'speak'
+--- globals
+Animal = <class 'Animal'>
+Cat = <class 'Cat'>
+Dog = <class 'Dog'>
+Robot = <class 'Robot'>
+__doc__ = None
+__name__ = '__main__'
+a = <Cat object>
+flag = True
+klass = <class 'Dog'>
+noise = <function object>
+r = <Robot object>
+s = 'meow'
+t = 'woof'
+u = 'woof'
+x = <Dog object>
+zoo = [<Dog object>, <Cat object>]

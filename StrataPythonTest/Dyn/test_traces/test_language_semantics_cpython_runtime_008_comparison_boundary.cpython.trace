@@ -1,0 +1,14 @@
+--- stdout 14
+True
+1
+True
+2
+
+--- outcome
+ok
+--- globals
+Tracker = <class 'Tracker'>
+__doc__ = 'Comparison: boundary case.\nCustom __eq__ with side effects makes comparison non-pure.\nThe simplified model would miss the mutation.\n'
+__name__ = '__main__'
+a = <Tracker object>
+b = <Tracker object>

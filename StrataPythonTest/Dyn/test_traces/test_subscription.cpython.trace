@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+company = {'engineering': {'backend': {'lead': 'Alice', 'members': ['David', 'Eve', 'Frank']}, 'frontend': {'lead': 'Bob', 'members': ['Peter', 'Diana', 'Frank']}}, 'sales': {'north': {'lead': 'Charlie', 'members': 4}, 'south': {'lead': 'Diana', 'members': 6}}, 'management': {'CEO': 'Grant'}}

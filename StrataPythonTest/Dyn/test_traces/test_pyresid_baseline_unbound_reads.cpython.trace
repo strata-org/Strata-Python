@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+catch_global = <function object>
+catch_local = <function object>
+global_result = 'caught-global-error'
+local_result = 'caught-local-error'
+maybe_local = <function object>
+unknown_global = <function object>

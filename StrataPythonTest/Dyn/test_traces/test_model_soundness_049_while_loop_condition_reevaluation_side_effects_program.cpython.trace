@@ -1,0 +1,13 @@
+--- stdout 4
+6 0
+
+--- outcome
+ok
+--- globals
+Counter = <class 'Counter'>
+__doc__ = "\nA while loop condition that calls a method on an object is re-evaluated\neach iteration in CPython. If the method mutates the object (e.g., a\ncounter that decrements), the condition depends on the CURRENT state.\nIn the value model, the object passed to the method is a copy — mutations\ninside the method don't propagate back, so the condition never changes\nand the loop either never executes or never terminates.\n"
+__name__ = '__main__'
+countdown_sum = <function object>
+dataclass = <function object>
+drain = <function object>
+main = <function object>

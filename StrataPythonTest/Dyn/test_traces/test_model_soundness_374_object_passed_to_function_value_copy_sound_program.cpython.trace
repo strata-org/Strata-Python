@@ -1,0 +1,16 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+__doc__ = "\nOBJECT PASSED TO FUNCTION — VALUE COPY MEANS FUNCTION CAN'T SEE\nCALLER'S LATER MODIFICATIONS (AND VICE VERSA)\n\nCPython: def f(obj): obj.x = 99  → caller sees obj.x == 99 (reference!)\nModel:   def f(obj): obj.x = 99  → caller's obj unchanged (value copy!)\n\nThe subset BANS this pattern (finding 278/300). But the CONVERSE is\nalso important: if the caller modifies obj AFTER passing to function,\nthe function's copy is unaffected. Under value semantics, this is\nAUTOMATICALLY CORRECT — it's a positive property of the model.\n\nThis finding confirms that value semantics CORRECTLY models the\nindependence between a function's parameter and the caller's variable\nAFTER the call returns (assuming no aliasing).\n"
+__name__ = '__main__'
+caller_modifies_after_passing = <function object>
+dataclass = <function object>
+function_returns_new_caller_keeps_old = <function object>
+main = <function object>
+make_modified = <function object>
+multiple_calls_independent = <function object>
+read_port = <function object>

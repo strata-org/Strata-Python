@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Circle = <class 'Circle'>
+Square = <class 'Square'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+figures = [<Circle object>, <Square object>, <Circle object>]
+t = 7.9269875
+total_area = <function object>

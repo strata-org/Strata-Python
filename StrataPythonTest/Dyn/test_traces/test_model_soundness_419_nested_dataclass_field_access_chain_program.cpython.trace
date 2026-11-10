@@ -1,0 +1,16 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Address = <class 'Address'>
+Person = <class 'Person'>
+__doc__ = '\nNESTED DATACLASS FIELD ACCESS — p.address.city REQUIRES CHAIN\n\nCPython: person.address.city → "NYC"\n         Two-level field access: first get address, then get city.\n\nModel:   person.address:\n           DictStrAny_get(instance_attributes(person), "address")\n           → returns Any (needs isfrom_ClassInstance assertion)\n         Then .city:\n           DictStrAny_get(instance_attributes(???), "city")\n           → needs to extract instance_attributes from the intermediate result\n\n         The intermediate result from person.address is an Any value.\n         To access .city on it, the model must:\n         1. Assert it\'s from_ClassInstance (tag check)\n         2. Extract instance_attributes\n         3. DictStrAny_get on those attributes\n\n         Without step 1: accessing instance_attributes on non-ClassInstance → undefined\n         Without step 2: no way to get the inner dict\n         Without step 3: city value is Hole\n\nCPython result: "NYC"\nModel result: Hole (intermediate Any not unwrapped correctly)\n\nRoot cause: Nested field access requires intermediate tag assertion\nand ClassInstance unwrapping at each level (finding 107).\n'
+__name__ = '__main__'
+dataclass = <function object>
+full_address = <function object>
+get_city = <function object>
+get_zip = <function object>
+main = <function object>
+update_city = <function object>

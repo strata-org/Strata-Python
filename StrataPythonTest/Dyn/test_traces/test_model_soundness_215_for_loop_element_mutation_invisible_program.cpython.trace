@@ -1,0 +1,15 @@
+--- stdout 6
+0 2 8
+
+--- outcome
+ok
+--- globals
+Item = <class 'Item'>
+__doc__ = '\nIn `for x in lst`, the loop variable `x` is a COPY of each element\n(under value semantics). Modifying `x` inside the loop body does NOT\nmodify the list element.\n\n    for x in items:\n        x.value = 99  # modifies the COPY, not items[i]!\n\nIn CPython, `x` IS items[i] (same reference). Modification is visible.\nUnder value semantics, `x` is a copy. Modification is lost.\n\nThis is a specific instance of "no aliasing" applied to for-loop\niteration variables. The AST checker must reject this pattern.\n\nUses ONLY confirmed-accepted constructs: @dataclass, for, list, int.\n'
+__name__ = '__main__'
+correct_pattern_build_new = <function object>
+correct_pattern_index_based = <function object>
+dataclass = <function object>
+main = <function object>
+modify_loop_var_lost = <function object>
+read_only_loop_safe = <function object>

@@ -1,0 +1,14 @@
+--- stdout 8
+6 10 99
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n"Full annotations" means every parameter and return type is annotated.\nThe model uses these to emit tag assertions: `x: int` → `assert isfrom_int(x)`.\n\nBut for GENERIC containers like `list[int]`, the annotation says the\nLIST contains ints. The model knows `x` is `from_ListAny` but does it\nknow that ELEMENTS are `from_int`?\n\nIf not, after `val = xs[0]`, the model knows `val` is `Any` (could be\nanything) even though the annotation says `xs: list[int]` guarantees\nelements are int.\n\nThe annotation `list[int]` must generate:\n  1. `assert isfrom_ListAny(xs)` — xs is a list\n  2. For each element access `xs[i]`: `assert isfrom_int(xs[i])` — element is int\n\nWithout (2), element types are lost after extraction from the container.\n\nUses ONLY confirmed-accepted constructs: list[int], dict[str, int], int.\n'
+__name__ = '__main__'
+dict_value_type = <function object>
+first_element = <function object>
+list_of_strings = <function object>
+main = <function object>
+nested_list_type = <function object>
+sum_list = <function object>

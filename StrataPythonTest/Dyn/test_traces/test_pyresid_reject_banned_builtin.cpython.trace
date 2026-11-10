@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Base = <class 'Base'>
+Sub = <class 'Sub'>
+__doc__ = None
+__name__ = '__main__'
+e = 2
+o = <Base object>
+t = <class 'Base'>
+v = 1

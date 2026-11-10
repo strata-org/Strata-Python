@@ -1,0 +1,14 @@
+--- stdout 8
+-1 -1 6
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+__doc__ = '\nIn CPython, applying an operator to None raises TypeError:\n    None + 1  → TypeError\n    None < 5  → TypeError\n    None * 3  → TypeError\n\nUnder tag-based dispatch, `PAdd(from_None(), from_int(1))` has no\nmatching case. It falls to Hole — an unconstrained value.\n\nBut Hole is NOT TypeError. Hole means "could be anything" — the solver\ntreats it as an unknown value that might satisfy any assertion. This is\nUNSOUND: the model says "might succeed" when CPython always crashes.\n\nThe correct behavior: operators on None must produce `exception(TypeError)`\n(not Hole). This way the exception propagation mechanism (finding 173)\ncan catch it.\n\nUses ONLY confirmed-accepted constructs: Optional, int, try/except.\n'
+__name__ = '__main__'
+add_to_none = <function object>
+compare_none = <function object>
+guarded_operation = <function object>
+main = <function object>
+none_in_arithmetic_chain = <function object>

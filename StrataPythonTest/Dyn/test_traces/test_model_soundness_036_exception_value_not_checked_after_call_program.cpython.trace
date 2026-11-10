@@ -1,0 +1,12 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nExceptions are values (exception(...) constructor) in the model. When a\ncalled function raises, it returns exception(...). But the CALLER must\ncheck for this value after every call and skip subsequent statements.\nIf the translator doesn't insert these checks, the exception value flows\ninto subsequent operations (y + 1 where y is exception(...)), producing\nwrong results instead of propagating the exception.\n"
+__name__ = '__main__'
+chain = <function object>
+main = <function object>
+process = <function object>
+validate = <function object>

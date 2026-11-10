@@ -1,0 +1,14 @@
+--- stdout 9
+20 50 18
+
+--- outcome
+ok
+--- globals
+Accumulator = <class 'Accumulator'>
+__doc__ = "\nWhen the caller writes to an object's field and then calls a method,\nthe method must see the UPDATED field value. Under value semantics\nwith correct rebinding (finding 191), this works IF the updated object\nis passed to the method.\n\n    obj.x = 10       # rebinds obj to new ClassInstance\n    obj.method()     # method receives the REBOUND obj (with x=10)\n\nThe key: the method's `self` parameter must be the CURRENT value of\nobj (after the field write), not a stale copy from before the write.\n\nUses ONLY confirmed-accepted constructs: @dataclass, method, int.\n"
+__name__ = '__main__'
+chain_modifications = <function object>
+dataclass = <function object>
+main = <function object>
+modify_then_read_via_method = <function object>
+write_then_method = <function object>

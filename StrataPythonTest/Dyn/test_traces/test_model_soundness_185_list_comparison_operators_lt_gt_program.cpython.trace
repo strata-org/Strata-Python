@@ -1,0 +1,14 @@
+--- stdout 14
+True [1] True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nPython lists support ordering comparisons: `<`, `>`, `<=`, `>=`.\nComparison is LEXICOGRAPHIC: compare element by element, first\ndifference determines the result. If one list is a prefix of the\nother, the shorter list is "less than."\n\n[1, 2, 3] < [1, 2, 4]  → True (first difference at index 2: 3 < 4)\n[1, 2] < [1, 2, 3]     → True (prefix is less)\n[1, 2, 3] < [1, 2, 3]  → False (equal)\n[] < [1]                → True (empty is less than non-empty)\n\nThe model\'s `PEq` on lists uses structural equality (finding 040/091).\nBut `PLt` on lists likely has NO implementation at all — there\'s no\n`List_lt` in the prelude.\n\nUses ONLY confirmed-accepted constructs: list, int, comparison, function def.\n'
+__name__ = '__main__'
+find_min_list = <function object>
+is_sorted_lists = <function object>
+list_greater_than = <function object>
+list_less_equal = <function object>
+list_less_than = <function object>
+main = <function object>

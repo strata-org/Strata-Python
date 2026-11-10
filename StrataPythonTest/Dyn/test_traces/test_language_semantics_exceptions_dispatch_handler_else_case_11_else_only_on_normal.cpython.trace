@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+EVENTS = ['body', 'else', 'handler']
+Good = <class 'Good'>
+Missing = <class 'Missing'>
+RESULT = ['body', 'else', 'handler']
+__doc__ = 'A dispatch exception enters handlers and skips the try-else suite.'
+__name__ = '__main__'
+run = <function object>

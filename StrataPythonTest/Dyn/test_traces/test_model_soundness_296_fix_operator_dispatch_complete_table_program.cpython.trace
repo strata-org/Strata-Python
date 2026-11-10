@@ -1,0 +1,13 @@
+--- stdout 33
+All operator dispatch tests pass
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFIX PROPOSAL: Complete the operator dispatch table.\nResolves findings: 018, 022, 024, 035, 043, 050, 057, 073, 074, 076,\n077, 108, 109, 110, 111, 112, 145, 148, 166, 178, 201, 204, 256,\n260, 261, 262, 263, 264, 265, 270, 281-285, 286, 287, 290, 294.\n\nThe fix: enumerate ALL valid (left_tag, right_tag) pairs for each\noperator. Invalid pairs produce exception(TypeError). No Hole anywhere.\n\nThis program demonstrates that WITH the fix, all operations work.\n'
+__name__ = '__main__'
+arithmetic_cross_type = <function object>
+comparison_cross_type = <function object>
+invalid_ops_raise = <function object>
+main = <function object>
+not_on_all_types = <function object>

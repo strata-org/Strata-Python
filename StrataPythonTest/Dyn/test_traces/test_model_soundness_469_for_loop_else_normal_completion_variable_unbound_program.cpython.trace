@@ -1,0 +1,12 @@
+--- stdout 22
+all assertions passed
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nFOR-LOOP ELSE CLAUSE SETS VARIABLE — BREAK PATH LEAVES IT UNBOUND\n\nThe subset allows:\n  - for/else (IN)\n  - break (IN)\n  - Variable assignment in branches (IN)\n\nThe NOVEL gap: a variable assigned ONLY in the else clause is unbound\non the break path. CPython raises NameError (or the variable holds\nwhatever was assigned before). The model, if it merges both paths\nwithout tracking definite assignment per-path, may:\n  1. Assume the variable always has the else-clause value (UNSOUND: over-proves)\n  2. Leave it as Hole (correct but different from CPython's NameError)\n\nThe critical case: the variable is used AFTER the for/else block.\nOn the break path, CPython would raise NameError (if never assigned before)\nor retain a prior value. The model must either:\n  - Reject programs that use else-assigned variables after the block\n  - Track definite assignment per control-flow path\n\nThis is DISTINCT from:\n  - Finding 065 (for/else break semantics) — that's about WHEN else runs\n  - Finding 330 (conditional break accumulator) — that's about break-flag\n  - Finding 410 (break vs default merge) — that's about loop variable value\n  - Finding 456 (else skipped on exception) — that's about exception path\n\nTHIS finding is about a VARIABLE that only exists on one path.\n"
+__name__ = '__main__'
+accumulate_then_else_resets = <function object>
+find_or_default = <function object>
+main = <function object>
+search_with_flag = <function object>

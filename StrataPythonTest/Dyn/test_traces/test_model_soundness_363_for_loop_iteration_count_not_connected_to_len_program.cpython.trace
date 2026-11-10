@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFOR-LOOP ITERATION COUNT NOT CONNECTED TO len(xs)\n\nCPython: for x in xs: body\n         Executes body exactly len(xs) times.\n         After loop: loop variable x holds last element.\n\nModel:   The for-loop translation iterates over the cons-list.\n         But there\'s no axiom connecting:\n         - Number of iterations to List_len(xs)\n         - Loop variable\'s final value to the last element\n         - Accumulator\'s final value to a function of all elements\n\n         Without this connection, the verifier cannot prove:\n         - "this loop processes all elements"\n         - "the counter equals len(xs) after the loop"\n         - "the sum equals the sum of all elements"\n\nThis is distinct from finding 305 (range(len(xs)) index validity)\nbecause it\'s about the for-ELEMENT loop, not the for-INDEX loop.\n'
+__name__ = '__main__'
+all_positive = <function object>
+count_elements = <function object>
+last_element_after_loop = <function object>
+main = <function object>
+sum_equals_manual = <function object>

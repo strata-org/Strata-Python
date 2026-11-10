@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
+--- globals
+Point = <class 'Point'>
+__doc__ = None
+__name__ = '__main__'
+mix = <function object>
+poke = <function object>
+pt = <Point object>

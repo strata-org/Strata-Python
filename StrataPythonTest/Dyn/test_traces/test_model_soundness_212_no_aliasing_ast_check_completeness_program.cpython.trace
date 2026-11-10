@@ -1,0 +1,16 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+Mutable = <class 'Mutable'>
+__doc__ = '\n"No aliasing" is enforced by the AST checker. But what EXACTLY must it\nreject? This finding catalogs ALL aliasing patterns that would be unsound\nunder value semantics, testing that the AST check is COMPLETE.\n\nAliasing occurs when two variables refer to the same mutable object.\nUnder value semantics, they\'d be independent copies — diverging from\nCPython where mutations through one are visible through the other.\n\nPatterns that create aliases:\n1. `b = a` (direct assignment of class/list/dict variable)\n2. `f(a)` (function parameter aliases caller\'s variable)\n3. `lst.append(obj)` (container holds reference to obj)\n4. `return self` (caller\'s variable aliases the returned self)\n5. `obj.field = other_obj` (field holds reference)\n\nUses ONLY confirmed-accepted constructs: @dataclass, list, dict, int.\n(Programs demonstrate patterns that SHOULD be rejected.)\n'
+__name__ = '__main__'
+container_alias_diverges = <function object>
+dataclass = <function object>
+direct_alias_diverges = <function object>
+main = <function object>
+param_alias_diverges = <function object>
+safe_independent_construction = <function object>
+safe_return_new = <function object>

@@ -1,0 +1,16 @@
+--- stdout 12
+5.0 3.0 3 4
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nMATH MODULE FUNCTIONS HAVE NO LAUREL MODEL\n\nThe subset allows:\n  - `import math` (IN)\n  - `math.sqrt(x)`, `math.floor(x)`, `math.ceil(x)` (IN — stdlib allowlist)\n  - Float arithmetic (IN)\n  - Comparison operators on floats (IN)\n\nThe NOVEL gap: math module functions are IN the subset but have no\nLaurel model. Unlike string methods (finding 019/220) which return Hole,\nmath functions have well-defined mathematical semantics that MAP DIRECTLY\nto SMT-LIB theories (Real arithmetic, rounding).\n\nKey differences from string method findings:\n  - math.sqrt has a PRECISE mathematical definition: sqrt(x) * sqrt(x) == x\n  - math.floor/ceil have PRECISE definitions: floor(x) <= x < floor(x)+1\n  - These map to SMT-LIB `(^ x 0.5)`, `(to_int x)`, `(+ (to_int x) 1)`\n  - The model uses SMT Real (finding 042), so math functions are EXACT\n\nCPython behavior:\n  - math.sqrt(4.0) → 2.0\n  - math.floor(3.7) → 3 (returns int!)\n  - math.ceil(3.2) → 4 (returns int!)\n  - math.sqrt(-1.0) → raises ValueError\n\nModel behavior:\n  - All math.* calls return Hole (uninterpreted function, no axioms)\n  - Properties like sqrt(x) >= 0 for x >= 0 are unprovable\n  - Return TYPE is wrong: floor/ceil return int, model doesn't know this\n\nDISTINCT FROM:\n  - Finding 019/220 (string methods no model) — math functions have\n    exact SMT-LIB equivalents; string methods need theory solvers\n  - Finding 026 (min/max/abs no model) — those are builtins; math.*\n    are module functions with different dispatch\n  - Finding 080 (float division by zero) — math.sqrt(-1) is a different\n    error condition (domain error, not division)\n"
+__name__ = '__main__'
+floor_ceil_relationship = <function object>
+hypotenuse = <function object>
+main = <function object>
+math = <module object>
+round_down = <function object>
+round_up = <function object>
+safe_sqrt = <function object>
+sqrt_of_square = <function object>

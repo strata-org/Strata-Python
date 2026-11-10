@@ -1,0 +1,11 @@
+--- stdout 7
+3 -3 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nThe translator maps `int(x)` to a call to `to_int_any`, but this function\nis never defined in the prelude. The call becomes a Hole (unconstrained Any),\nso int() conversion produces an arbitrary value instead of truncation-toward-zero.\n'
+__name__ = '__main__'
+clamp_to_int = <function object>
+float_to_int = <function object>
+main = <function object>

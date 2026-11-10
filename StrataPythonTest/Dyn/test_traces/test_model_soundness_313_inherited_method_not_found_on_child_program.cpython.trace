@@ -1,0 +1,18 @@
+--- stdout 32
+All inherited method tests pass
+
+--- outcome
+ok
+--- globals
+Car = <class 'Car'>
+Truck = <class 'Truck'>
+Vehicle = <class 'Vehicle'>
+__doc__ = '\nInherited method call on child instance — child doesn\'t override method;\nmodel\'s classname-based method lookup fails to find parent\'s method.\n\nIn CPython, method resolution follows the MRO (Method Resolution Order).\nWhen a child class doesn\'t override a method, calling it on a child instance\ndispatches to the parent\'s implementation. The Laurel model translates\nmethod calls as direct function calls keyed by the DECLARED classname of\nthe receiver. If the receiver is typed as the child class, the translator\nlooks for `ChildClass_method` — which doesn\'t exist because the method\nis only defined on the parent.\n\n    class Animal:\n        def speak(self) -> str:\n            return "..."\n\n    class Dog(Animal):\n        def fetch(self) -> str:\n            return "fetching"\n\n    d = Dog()\n    d.speak()  # CPython: calls Animal.speak via MRO → "..."\n               # Model: looks for Dog_speak → not found → Hole or error\n\nThis is DISTINCT from finding 055 (override not dispatched — child HAS\nthe method but parent\'s version is called). Here the child DOESN\'T have\nthe method at all; the parent\'s version must be found via inheritance.\n\nUses ONLY confirmed-accepted constructs: class, single inheritance, method, str.\n'
+__name__ = '__main__'
+child_method_then_parent_method = <function object>
+dataclass = <function object>
+inherited_method_uses_self_fields = <function object>
+inherited_with_computation = <function object>
+inherited_with_parameter = <function object>
+main = <function object>
+use_inherited_method = <function object>

@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised AssertionError: EXPECTED_FAIL: fullmatch a on b
+--- globals
+__doc__ = None
+__name__ = '__main__'
+main = <function object>
+re = <module object>

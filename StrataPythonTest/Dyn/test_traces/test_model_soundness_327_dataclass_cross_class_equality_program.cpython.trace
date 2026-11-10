@@ -1,0 +1,16 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Pixel = <class 'Pixel'>
+Point2D = <class 'Point2D'>
+Vector2D = <class 'Vector2D'>
+__doc__ = "\n@dataclass cross-class equality — different classes are never equal.\n\nIn CPython, @dataclass-generated __eq__ checks type FIRST:\n  Point(1, 2) == Point(1, 2)       → True  (same class, same fields)\n  Point(1, 2) == ColorPoint(1, 2)  → False (different class!)\n\nEven if all fields match, objects of different @dataclass types are\nNOT equal. The generated __eq__ does:\n  def __eq__(self, other):\n      if other.__class__ is self.__class__:\n          return (self.x, self.y) == (other.x, other.y)\n      return NotImplemented\n\nThe Laurel model's PEq on from_ClassInstance uses structural equality\non the DictStrAny (instance_attributes). If two different classes happen\nto have the same field names and values, the model might say they're\nequal — but CPython says they're NOT.\n\nFinding 037 covers non-@dataclass equality (identity vs structural).\nFinding 213 confirms @dataclass structural eq is correct for SAME class.\nThis finding tests CROSS-CLASS comparison where classname differs.\n\nUses ONLY confirmed-accepted constructs: @dataclass, ==, !=.\n"
+__name__ = '__main__'
+dataclass = <function object>
+different_class_not_equal = <function object>
+different_class_same_fields = <function object>
+main = <function object>
+same_class_equal = <function object>
+three_classes_all_different = <function object>

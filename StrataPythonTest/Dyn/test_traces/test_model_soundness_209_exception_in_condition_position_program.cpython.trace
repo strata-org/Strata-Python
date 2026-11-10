@@ -1,0 +1,13 @@
+--- stdout 9
+-1 -1 -1
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nWhat happens when an exception value appears in a CONDITION position?\n\n    if exception_value:  # what does this mean?\n    while exception_value:  # infinite loop? no loop?\n\nIn CPython, this never happens — exceptions unwind the stack before\nreaching any condition. But under exception-as-value semantics, if\npropagation checks are missing, an exception value CAN flow into a\ncondition.\n\nThe model must handle this: `Any_to_bool(exception(...))` must either:\n1. Propagate the exception (correct)\n2. Return Hole (dangerous — branch is non-deterministic)\n3. Return True/False (wrong — exception is not a boolean)\n\nUses ONLY confirmed-accepted constructs: try/except, if, while, int.\n'
+__name__ = '__main__'
+exception_in_and_chain = <function object>
+exception_in_if_condition = <function object>
+exception_in_while_condition = <function object>
+main = <function object>
+safe_pattern = <function object>

@@ -1,0 +1,14 @@
+--- stdout 13
+50 True True
+
+--- outcome
+ok
+--- globals
+Stack = <class 'Stack'>
+__doc__ = '\nThe `Any` datatype has BOTH `from_ClassInstance` (value) and\n`from_Composite` (heap). The translator must decide which to use.\n\nDecision criteria:\n- If the class is NEVER aliased and methods return new instances → ClassInstance\n- If the class IS aliased or methods mutate in place → Composite\n\nFor the Frontend v1 subset (no aliasing), ALL classes use ClassInstance.\nBut what if a class is used in a way that LOOKS like it needs Composite\nbut is actually fine under value semantics?\n\nThis finding tests the BOUNDARY: patterns that work under value semantics\nbut might be mistakenly flagged as needing Composite.\n\nKey insight: if the programmer follows the functional pattern (return new\ninstances, rebind at caller), value semantics is ALWAYS correct. The\nComposite encoding is only needed for IMPERATIVE patterns (mutate in place,\naliasing visible to caller).\n\nUses ONLY confirmed-accepted constructs: @dataclass, method, int, list.\n'
+__name__ = '__main__'
+dataclass = <function object>
+functional_stack_usage = <function object>
+main = <function object>
+multiple_stacks_independent = <function object>
+stack_snapshot = <function object>

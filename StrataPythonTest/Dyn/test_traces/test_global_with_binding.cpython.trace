@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Resource = <class 'Resource'>
+__annotations__ = {'resource': <class 'Resource'>}
+__doc__ = None
+__name__ = '__main__'
+entered = 8
+read_entered = <function object>
+resource = <Resource object>

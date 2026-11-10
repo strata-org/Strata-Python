@@ -1,0 +1,15 @@
+--- stdout 12
+(3, 2) 32 3
+
+--- outcome
+ok
+--- globals
+Tuple = <_TupleType object>
+__doc__ = '\nThe subset explicitly says:\n  "tuple[T1, T2, ...] with explicit element types, fixed length" is IN.\n\nBut the Any datatype has no from_tuple constructor.\nFinding 171 identified this. This finding provides the SUBSET-SPECIFIC\nprograms that are promised to work but can\'t be represented.\n\nKey subset-promised tuple operations:\n  - Literal construction: (1, "two")\n  - Subscription: t[0], t[1]\n  - Length: len(t)\n  - Function return: def f() -> tuple[int, str]: return (1, "x")\n\nUses ONLY confirmed-accepted constructs: tuple, int, str, len.\n'
+__name__ = '__main__'
+divmod_manual = <function object>
+main = <function object>
+min_max = <function object>
+tuple_in_condition = <function object>
+tuple_length = <function object>
+unpack_and_use = <function object>

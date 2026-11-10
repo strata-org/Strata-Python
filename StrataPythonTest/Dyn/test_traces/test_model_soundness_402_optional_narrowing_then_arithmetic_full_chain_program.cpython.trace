@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nOPTIONAL NARROWING THEN ARITHMETIC — FULL END-TO-END CHAIN\n\nThe subset supports Optional[int] (as int | None) with `is not None`\nnarrowing. The FULL CHAIN that must work:\n\n1. Variable declared as Optional[int] → tag set {from_int, from_None}\n2. `if x is not None:` → narrow to {from_int} in true branch\n3. `x + 1` → PAdd(from_int(x), from_int(1)) → from_int(x+1)\n\nEach step requires a different model feature:\n- Step 1: disjunctive tag assertion (finding 223)\n- Step 2: tag-set narrowing via assume (finding 062)\n- Step 3: tag assertion enables operator dispatch (finding 350/352)\n\nIf ANY step fails, the chain breaks and arithmetic on Optional produces Hole.\n'
+__name__ = '__main__'
+add_or_default = <function object>
+clamp_positive = <function object>
+first_positive = <function object>
+main = <function object>
+safe_add = <function object>
+sum_non_none = <function object>

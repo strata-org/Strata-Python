@@ -1,0 +1,13 @@
+--- stdout 4
+3
+7
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = 'Attribute read: supported case.\nClass is closed, fields declared in __init__, no descriptors.\n'
+__name__ = '__main__'
+get_x = <function object>
+get_y = <function object>
+p = <Point object>

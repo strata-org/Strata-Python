@@ -1,0 +1,14 @@
+--- stdout 7
+0 0 -1
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nIf a function can raise an exception and there\'s NO try/except handler,\nthe exception propagates to the caller. If the caller also has no handler,\nit propagates further until it reaches the top level (program crash).\n\nThe verifier must DETECT this: a function that may produce an exception\nvalue without catching it should be flagged as "may raise uncaught\nexception" — this is a verification FAILURE (the program might crash).\n\nUnder exception-as-value semantics, an uncaught exception means the\nfunction RETURNS an exception value instead of its declared return type.\nThe return-type assertion (`assert isfrom_int(result)`) would fire\nbecause `exception(...)` is not `from_int(...)`.\n\nThis is how Frontend catches bugs: the type assertion fails, revealing\nthat the function might crash.\n\nUses ONLY confirmed-accepted constructs: function def, int, //.\n'
+__name__ = '__main__'
+always_safe = <function object>
+caught_internally = <function object>
+main = <function object>
+might_crash = <function object>
+propagates_to_caller = <function object>
+safe_caller = <function object>

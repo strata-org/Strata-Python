@@ -1,0 +1,13 @@
+--- stdout 7
+6 0 -1
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nThe `exception(get_error: Error)` tag in `Any` represents an exception\nvalue. When an operation produces an exception (e.g., division by zero),\nthe result is `exception(...)`.\n\nBut what happens when this exception value flows into the NEXT operation?\n\n    x = 1 / 0          # exception(ZeroDivisionError)\n    y = x + 1          # CPython: never reaches here (exception propagates)\n                       # Model: PAdd(exception(...), from_int(1)) → ???\n\nIn CPython, exceptions propagate via the call stack — once raised, no\nsubsequent expression evaluates. In the model, exception is just a TAG\nin the union. If operators don't check for it, the exception silently\ndisappears and garbage propagates.\n\nFinding 079 identified this for operators. This finding shows the FULL\npropagation chain: exceptions must poison ALL subsequent operations\nuntil caught by try/except.\n\nUses ONLY confirmed-accepted constructs: try/except, int, division.\n"
+__name__ = '__main__'
+chained_operations = <function object>
+division_propagates = <function object>
+exception_as_function_arg = <function object>
+exception_in_condition = <function object>
+main = <function object>

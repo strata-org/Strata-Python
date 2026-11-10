@@ -1,0 +1,14 @@
+--- stdout 7
+1 2 -1
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nDICT.POP() HAS DUAL EFFECT: returns value AND removes key.\n\ndict.pop(key) is IN the subset (dict methods are allowed). It has TWO\neffects that a pure-function model cannot capture in one operation:\n  1. Returns the value associated with key\n  2. Removes the key from the dict (mutates in place)\n\nUnder value semantics, even if we model pop as a pure function, we need\nBOTH the return value AND the modified dict. A single expression `d.pop(k)`\ncannot rebind `d` to the shorter dict AND return the popped value.\n\nCPython: d = {"a": 1, "b": 2}; v = d.pop("a"); → v==1, d=={"b": 2}\nModel:   d.pop("a") → either returns value (dict unchanged) or\n         returns new dict (value lost) — cannot do both.\n\nSame issue as finding 181 (list.pop) but for dicts. Finding 181 identified\nthe problem for lists; this is the dict-specific instance with its own\nsemantics (KeyError on missing key, optional default argument).\n'
+__name__ = '__main__'
+drain_dict = <function object>
+main = <function object>
+pop_and_check_len = <function object>
+pop_existing = <function object>
+pop_then_check_membership = <function object>
+pop_with_default = <function object>

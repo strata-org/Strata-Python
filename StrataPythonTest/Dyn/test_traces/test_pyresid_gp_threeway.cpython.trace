@@ -1,0 +1,19 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+deferred_binary = <function object>
+deferred_method = <function object>
+dict_absent = <function object>
+dict_modeled = <function object>
+dict_opaque = <function object>
+list_absent = <function object>
+list_modeled = <function object>
+set_modeled = <function object>
+set_opaque = <function object>
+str_absent = <function object>
+str_modeled = <function object>
+str_opaque = <function object>

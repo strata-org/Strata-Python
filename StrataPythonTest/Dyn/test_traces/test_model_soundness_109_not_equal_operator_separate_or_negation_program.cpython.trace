@@ -1,0 +1,14 @@
+--- stdout 12
+True True 3
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython's `!=` operator is NOT simply `not (a == b)`. It's a separate\noperator (`__ne__`) that can be independently defined. For built-in\ntypes, `a != b` is equivalent to `not (a == b)`, but the model must\neither:\n1. Have a separate PNe operator, or\n2. Translate `!=` as `PNot(PEq(a, b))`\n\nIf neither exists, `!=` comparisons return Hole.\n"
+__name__ = '__main__'
+all_different = <function object>
+filter_not_equal = <function object>
+main = <function object>
+not_equal_ints = <function object>
+not_equal_none = <function object>
+not_equal_strs = <function object>

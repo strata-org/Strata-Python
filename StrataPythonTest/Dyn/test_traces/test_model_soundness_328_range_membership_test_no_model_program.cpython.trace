@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = "\n`x in range(a, b)` membership test — no model for range containment.\n\nIn CPython, `x in range(a, b)` is O(1) — it checks:\n  a <= x < b and (x - a) % step == 0\n\nThis is NOT iteration. CPython's range object has __contains__ that\ndoes arithmetic, not linear search.\n\nThe model likely has no representation for range objects at all.\n`range(a, b)` is only used in `for i in range(...)` loops, where it's\ndesugared to a counter. But `x in range(a, b)` as a MEMBERSHIP TEST\n(outside a for loop) has no translation.\n\nThis is distinct from:\n- Finding 045/161 (range iteration semantics in for loops)\n- Finding 305 (range(len(lst)) index axiom)\n\nThis finding tests range as a CONTAINER for `in` operator.\n\nUses ONLY confirmed-accepted constructs: range, in, int, bool.\n"
+__name__ = '__main__'
+equivalent_to_comparison = <function object>
+in_range_start_stop = <function object>
+in_range_with_step = <function object>
+in_simple_range = <function object>
+main = <function object>
+range_membership_as_guard = <function object>

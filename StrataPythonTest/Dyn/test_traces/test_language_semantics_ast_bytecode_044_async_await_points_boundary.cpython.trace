@@ -1,0 +1,8 @@
+--- stdout 45
+PASS: await outside async def is SyntaxError
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Boundary: await outside async function is SyntaxError.'
+__name__ = '__main__'

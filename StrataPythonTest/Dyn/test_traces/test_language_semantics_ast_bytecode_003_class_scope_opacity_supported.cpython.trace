@@ -1,0 +1,10 @@
+--- stdout 54
+OK: class scope opacity — self.x required, not bare x
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+__doc__ = None
+__name__ = '__main__'
+c = <Config object>

@@ -1,0 +1,14 @@
+--- stdout 16
+Rex the dog Cat
+
+--- outcome
+ok
+--- globals
+Animal = <class 'Animal'>
+Dog = <class 'Dog'>
+__doc__ = '\nisinstance(obj, ParentClass) returns True for instances of subclasses.\nThe Laurel model\'s from_ClassInstance stores a single classname string.\nisinstance likely checks classname == "ParentClass" (exact match), which\nfails for Child instances where classname is "Child".\n'
+__name__ = '__main__'
+dataclass = <function object>
+describe = <function object>
+is_animal = <function object>
+main = <function object>

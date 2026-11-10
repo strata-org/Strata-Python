@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nWHILE LOOP EXIT CONDITION — n == 0 AFTER `while n > 0: n -= 1`\n\nCPython: n = 5; while n > 0: n -= 1; assert n == 0 (always true)\n\nModel:   Finding 169 says while-loop exit condition not assumed.\n         After the loop, the model should know: not (n > 0) → n <= 0.\n         Combined with n starting positive and decrementing by 1:\n         n == 0 after the loop.\n\n         But without `assume(not condition)` after the loop,\n         the solver treats n as unconstrained post-loop.\n         `assert n == 0` is UNPROVABLE.\n\nThis is the simplest possible while-loop verification:\na countdown to zero. If the model can't verify this, it can't\nverify ANY while loop.\n"
+__name__ = '__main__'
+countdown_to_zero = <function object>
+find_threshold = <function object>
+gcd = <function object>
+main = <function object>
+sum_to_n = <function object>

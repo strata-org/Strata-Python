@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Inner = <class 'Inner'>
+Outer = <class 'Outer'>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+d = {'k': <Outer object>}
+key = 'k'
+r = 7
+x = <P object>

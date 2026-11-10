@@ -1,0 +1,14 @@
+--- stdout 8
+120 8 4
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nRecursive functions with a base case that returns early. The model must\nhandle recursion correctly: the base case terminates, recursive calls\neventually reach the base case.\n\nUnder bounded unrolling (finding 124), the verifier unrolls N times.\nIf the base case is unreachable within N unrollings, the verifier\ncan't prove termination or correctness.\n\nBut more fundamentally: the RETURN in the base case must terminate\nthat call frame (finding 165). If return doesn't terminate, the\nrecursive call continues past the base case — infinite recursion.\n\nUses ONLY Frontend-subset features: function def, int, if, return, recursion.\n"
+__name__ = '__main__'
+factorial = <function object>
+fibonacci = <function object>
+gcd = <function object>
+main = <function object>
+power = <function object>
+sum_to_n = <function object>

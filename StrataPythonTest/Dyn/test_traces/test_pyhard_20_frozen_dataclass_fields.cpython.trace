@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Key = <class 'Key'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+make_key = <function object>
+read_key = <function object>

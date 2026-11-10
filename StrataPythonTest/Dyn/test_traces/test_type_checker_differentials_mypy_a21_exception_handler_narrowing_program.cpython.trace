@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+  context ValueError
+--- globals
+Fragile = <class 'Fragile'>
+__doc__ = '\na21_exception_handler_narrowing.py — Narrowing persists into except handler after mutation.\n\nisinstance narrows obj.x to int. A method call raises AND mutates obj.x.\nIn the except handler, mypy still has the narrowing active, but obj.x is now str.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str - int\n'
+__name__ = '__main__'
+main = <function object>

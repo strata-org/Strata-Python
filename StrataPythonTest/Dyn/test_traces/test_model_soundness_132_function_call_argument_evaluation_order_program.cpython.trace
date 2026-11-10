@@ -1,0 +1,13 @@
+--- stdout 13
+[0, 1, 2] -1
+
+--- outcome
+ok
+--- globals
+Sequence = <class 'Sequence'>
+__doc__ = '\nPython evaluates function arguments LEFT TO RIGHT before the call.\nIf arguments have side effects, the order matters. The model must\nevaluate arguments in the same order as CPython.\n\n`f(a(), b(), c())` evaluates a(), then b(), then c(), then calls f.\nIf the model evaluates in a different order (or all at once), side\neffects occur in the wrong sequence.\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+three_args = <function object>
+two_args = <function object>

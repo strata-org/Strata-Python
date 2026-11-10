@@ -1,0 +1,13 @@
+--- stdout 32
+(False, True, False)
+True
+False
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Comparison: supported case.\nTypes are known, so richcompare dispatch collapses to native predicates.\n'
+__name__ = '__main__'
+compare_ints = <function object>
+compare_strs = <function object>
+cross_type = <function object>

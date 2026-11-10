@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised AttributeError: 'Partial' object has no attribute 'x'
+--- globals
+Partial = <class 'Partial'>
+__doc__ = "\na33_conditional_init.py — Field declared but not initialized on all __init__ paths.\n\nmypy trusts the class-level annotation `x: int` and assumes the field exists.\nBut __init__ only sets self.x on one branch. Accessing self.x on the other\npath raises AttributeError.\n\nmypy --strict: Success (0 errors)\nRuntime: AttributeError — 'Partial' object has no attribute 'x'\n"
+__name__ = '__main__'
+main = <function object>

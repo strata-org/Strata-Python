@@ -1,0 +1,13 @@
+--- stdout 14
+False False 2
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`bool(x)` converts any value to True/False using truthiness rules:\n- bool(0) == False, bool(nonzero) == True\n- bool("") == False, bool(nonempty) == True\n- bool([]) == False, bool(nonempty_list) == True\n- bool(None) == False\n\nThis is IN (builtin conversion) but the model\'s `Any_to_bool` may not\nhandle all tags correctly (finding 016 covers ClassInstance; this covers\nthe full dispatch).\n'
+__name__ = '__main__'
+count_truthy = <function object>
+main = <function object>
+to_bool_int = <function object>
+to_bool_list = <function object>
+to_bool_str = <function object>

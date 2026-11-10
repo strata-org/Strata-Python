@@ -1,0 +1,13 @@
+--- stdout 5
+11 8
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nWhen a function returns an exception value (exception(Error)), what\nhappens if that value flows into a binary operator? E.g.:\n  y = might_raise(x)   # returns exception(ValueError)\n  z = y + 1            # PAdd(exception(...), from_int(1)) = ???\n\nIf PAdd has no case for the `exception` tag, the result is Hole or\nan assertion failure. The exception should propagate (z should also\nbe an exception), but without explicit propagation logic, the exception\nis silently consumed and computation continues with garbage.\n'
+__name__ = '__main__'
+chain_operations = <function object>
+main = <function object>
+process = <function object>
+use_in_condition = <function object>
+validate = <function object>

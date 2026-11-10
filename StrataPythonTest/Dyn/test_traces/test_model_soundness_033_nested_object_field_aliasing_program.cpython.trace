@@ -1,0 +1,13 @@
+--- stdout 6
+90 90
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+Service = <class 'Service'>
+__doc__ = '\nWhen a class instance is stored as a field of another instance, both the\nouter.inner reference and the original variable point to the SAME object\nin CPython. Mutating through one path is visible through the other.\nIn the value model, from_ClassInstance contains a COPY of the inner value —\nmutations through one path are invisible through the other.\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+update_timeout = <function object>

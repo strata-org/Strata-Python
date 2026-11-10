@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nEARLY RETURN GUARD PATTERN — MOST COMMON FUNCTION STRUCTURE\n\nCPython: def f(x):\n             if x < 0: return -1  # guard\n             return x * 2          # main logic\n\n         f(-5) → -1 (guard returns early)\n         f(3) → 6 (main logic)\n\nModel:   If return doesn\'t terminate (finding 052/165):\n         f(-5): if -5 < 0: result = -1  # "return" just assigns\n                result = -5 * 2 = -10    # ALSO executes!\n         Returns -10 instead of -1.\n\n         The guard pattern is THE most common function structure.\n         If early return doesn\'t work, almost no function verifies correctly.\n\nCPython result: f(-5) == -1\nModel result: -10 (if return doesn\'t terminate) or Hole\n'
+__name__ = '__main__'
+abs_value = <function object>
+clamp = <function object>
+find_in_list = <function object>
+main = <function object>
+safe_divide = <function object>
+validate_and_process = <function object>

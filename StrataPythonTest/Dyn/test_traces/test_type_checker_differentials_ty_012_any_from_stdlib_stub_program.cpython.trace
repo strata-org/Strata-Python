@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: can only concatenate str (not "int") to str
+--- globals
+__annotations__ = {'x': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+json = <module object>
+x = 'nope'

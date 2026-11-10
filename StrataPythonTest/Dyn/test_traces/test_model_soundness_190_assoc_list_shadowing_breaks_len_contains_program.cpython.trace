@@ -1,0 +1,15 @@
+--- stdout 12
+True True 3
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nThe ROOT CAUSE of multiple dict findings (032, 041, 051, 082, 096, 188):\nDictStrAny_set PREPENDS without removing the old entry, creating shadows.\n\nThis finding provides a COMPREHENSIVE test suite showing all the ways\nshadowing breaks dict semantics:\n\n1. len() counts shadows (finding 032)\n2. equality is order-dependent (finding 041)\n3. iteration yields duplicates (finding 051)\n4. contains works (accidentally) but for wrong reason\n5. get returns correct value (first match) but shadows waste space\n\nThe fix for ALL of these is: DictStrAny_set must REPLACE, not shadow.\n\nUses ONLY confirmed-accepted constructs: dict, str, int, len, in.\n'
+__name__ = '__main__'
+contains_after_overwrite = <function object>
+equality_order_independent = <function object>
+get_returns_latest = <function object>
+main = <function object>
+multiple_overwrites_same_len = <function object>
+overwrite_preserves_len = <function object>
+overwrite_then_count_keys = <function object>

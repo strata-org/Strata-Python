@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'
+--- globals
+Optional = <_SpecialForm object>
+__annotations__ = {'x': <_UnionGenericAlias object>}
+__doc__ = None
+__name__ = '__main__'
+clear = <function object>
+x = None

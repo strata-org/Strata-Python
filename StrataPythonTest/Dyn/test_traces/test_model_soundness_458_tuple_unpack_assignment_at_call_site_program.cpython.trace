@@ -1,0 +1,18 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = '\nMULTIPLE RETURN VALUES VIA TUPLE UNPACKING AT CALL SITE\n\nThe subset allows:\n  - Tuples (IN, though finding 028/171/218 note representation issues)\n  - Function return types (IN)\n  - Variable assignment (IN)\n\nThe NOVEL gap: a function returns a tuple, and the caller unpacks it\ninto multiple variables via `a, b = f()`. The subset document says\ntuple unpacking `a, b = 1, 2` is "may grow", but the CALL-SITE\nunpacking pattern `a, b = divmod(x, y)` or `a, b = f()` is distinct.\n\nThe critical issue: even if tuples have a ClassInstance encoding\n(finding 218 proposes _0, _1 fields), the UNPACKING ASSIGNMENT\n`a, b = expr` requires the translator to:\n1. Evaluate expr to a tuple value\n2. Extract element 0 → assign to a\n3. Extract element 1 → assign to b\n\nIf the translator doesn\'t handle tuple unpacking, the assignment\neither fails silently or assigns the entire tuple to `a` and leaves\n`b` unbound.\n\n  def divmod_manual(n: int, d: int) -> tuple[int, int]:\n      return (n // d, n % d)\n\n  q, r = divmod_manual(17, 5)\n  # CPython: q=3, r=2\n  # Model: q=ClassInstance("tuple", {"_0":3, "_1":2}), r=unbound (WRONG)\n  # Or: q=Hole, r=Hole (if tuple has no representation)\n\nThis is the MOST COMMON multi-return pattern in Python. Functions like\ndivmod, enumerate, dict.items(), and user functions all use it.\n\nROOT CAUSE: Tuple unpacking assignment is a compound operation that\nthe translator must decompose into element extraction + individual\nassignments. Without this decomposition, multi-return functions are\nunusable even if tuples themselves have a representation.\n'
+__name__ = '__main__'
+dataclass = <function object>
+divmod_manual = <function object>
+main = <function object>
+min_max = <function object>
+swap = <function object>
+unpack_and_use_both = <function object>
+unpack_in_loop = <function object>
+unpack_min_max = <function object>
+unpack_nested_call = <function object>

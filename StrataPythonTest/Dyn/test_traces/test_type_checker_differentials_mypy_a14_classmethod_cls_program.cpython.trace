@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Registry = <class 'Registry'>
+__doc__ = '\na14_classmethod_cls.py — classmethod narrows cls.data then mutates it.\n\nisinstance narrowing works on class variables accessed via cls in a classmethod.\nA subsequent classmethod call mutates the class variable.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str - int\n'
+__name__ = '__main__'
+main = <function object>

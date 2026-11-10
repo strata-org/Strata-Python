@@ -1,0 +1,14 @@
+--- stdout 9
+True 1 2
+
+--- outcome
+ok
+--- globals
+Box = <class 'Box'>
+__doc__ = "\nEach `MyClass()` constructor call must allocate a FRESH heap cell with\na unique identity. Two separate constructor calls produce distinct\nobjects even with identical field values. Under Composite semantics,\nthe allocator must return a reference that doesn't alias any existing\nobject.\n\nThis matters for: object identity (`is`), mutation independence, and\ncontainer storage (two objects in a list are distinct cells).\n"
+__name__ = '__main__'
+create_in_loop = <function object>
+create_two_boxes = <function object>
+dataclass = <function object>
+main = <function object>
+modify_one = <function object>

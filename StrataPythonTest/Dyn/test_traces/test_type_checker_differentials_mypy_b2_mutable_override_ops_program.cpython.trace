@@ -1,0 +1,15 @@
+--- stdout 278
+  TypeError via unary -: bad operand type for unary -: 'str'
+  TypeError via hex(): 'str' object cannot be interpreted as an integer
+  TypeError via list[]: list indices must be integers or slices, not str
+  TypeError via >>: unsupported operand type(s) for >>: 'str' and 'int'
+
+--- outcome
+ok
+--- globals
+Base = <class 'Base'>
+IntSub = <class 'IntSub'>
+__doc__ = '\nb2_mutable_override_ops.py — Covariant mutable override + various int-only operations.\n\nSame mechanism as b1 (covariant override of mutable field, write through base class)\nbut demonstrating that ANY int-only operation becomes a TypeError vector.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError on all operations\n'
+__name__ = '__main__'
+corrupt = <function object>
+main = <function object>

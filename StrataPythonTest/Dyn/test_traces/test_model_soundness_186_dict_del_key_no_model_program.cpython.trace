@@ -1,0 +1,14 @@
+--- stdout 8
+2 2 200
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`del d[key]` removes a key from a dict. Under pure association-list\nsemantics, this requires producing a new dict without that key.\n\nBut `DictStrAny` is an association list that PREPENDS on set:\n  DictStrAny_set(d, k, v) = DictStrAny_cons(k, v, d)\n\nThere is likely no `DictStrAny_del` operation. And even if there were,\nthe association list may have MULTIPLE entries for the same key (from\noverwrites — finding 082). Deletion must remove ALL entries for that key.\n\nAdditionally, `del d[key]` raises KeyError if key is absent.\nThe model must either check presence first or produce an exception.\n\nUses ONLY confirmed-accepted constructs: dict, del, str, int, function def.\n'
+__name__ = '__main__'
+delete_and_check_len = <function object>
+delete_and_check_membership = <function object>
+delete_existing_key = <function object>
+delete_raises_keyerror = <function object>
+delete_then_readd = <function object>
+main = <function object>

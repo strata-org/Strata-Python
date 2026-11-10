@@ -1,0 +1,14 @@
+--- stdout 8
+99 3 60
+
+--- outcome
+ok
+--- globals
+__doc__ = "\n`dict.update(other)` merges another dict into the current one.\nKeys from `other` overwrite existing keys. Returns None.\n\nUnder pure association-list semantics, update must:\n1. Prepend all key-value pairs from `other` onto `self`\n2. Rebind the dict variable\n3. Return None as expression value\n\nBut there's no `DictStrAny_update` operation. And the association-list\nshadowing problem (finding 082) means naive prepending creates duplicates\nthat break `len()` and iteration.\n\nUses ONLY confirmed-accepted constructs: dict, update, str, int.\n"
+__name__ = '__main__'
+build_config = <function object>
+main = <function object>
+merge_dicts = <function object>
+update_adds_new = <function object>
+update_overwrites = <function object>
+update_returns_none = <function object>

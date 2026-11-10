@@ -1,0 +1,12 @@
+--- stdout 8
+4 6 6 8
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+Stats = <class 'Stats'>
+__doc__ = '\nWhen a method writes to multiple fields of self sequentially, each write\nmust see the effect of the previous write. Under value semantics, each\n`self.field = v` creates a NEW ClassInstance. The next write must operate\non the UPDATED self, not the original.\n\nThis is the multi-statement version of finding 098. The key issue is\nthat the translator must THREAD the rebound self through sequential\nfield assignments.\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>

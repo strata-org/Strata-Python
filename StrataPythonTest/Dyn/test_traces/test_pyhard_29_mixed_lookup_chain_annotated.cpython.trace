@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Branch = <class 'Branch'>
+Record = <class 'Record'>
+Records = <class 'Records'>
+Root = <class 'Root'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+combine = <function object>

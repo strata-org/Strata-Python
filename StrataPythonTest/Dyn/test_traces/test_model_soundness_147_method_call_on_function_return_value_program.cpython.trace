@@ -1,0 +1,15 @@
+--- stdout 27
+localhost:8080 11 hi there
+
+--- outcome
+ok
+--- globals
+Builder = <class 'Builder'>
+Config = <class 'Config'>
+__doc__ = "\nCalling a method on a function's return value: `get_obj().method()`.\nThe returned ClassInstance is a temporary — the method is called on it,\nand under value semantics, any mutations inside the method are lost\n(no variable holds the modified value).\n\nThis is fine for PURE methods (that return a value without modifying\nself). But for methods that modify self and return None, the mutation\nis completely lost — there's no variable to rebind.\n"
+__name__ = '__main__'
+create_builder = <function object>
+dataclass = <function object>
+get_length_of_built = <function object>
+main = <function object>
+make_config = <function object>

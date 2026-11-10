@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nisinstance narrowing killed by assignment in else branch.\n\nFinding 162 covers narrowing invalidated by reassignment. This finding\ntests a subtler case: narrowing in the if-branch must NOT persist into\nthe else-branch, and vice versa.\n\n    x: Optional[int] = get_value()\n    if isinstance(x, int):\n        # Here: x is int (narrowed)\n        use_int(x)\n    else:\n        # Here: x is None (narrowed to complement)\n        x = 42  # reassignment\n    # Here: x could be int from either branch\n    # The narrowing from the if-branch must NOT leak here\n\nThe model must:\n1. Narrow x to int in the if-branch\n2. Narrow x to None in the else-branch\n3. At the merge point: x has the UNION of both branch outcomes\n\nIf the model keeps the if-branch narrowing active after the merge,\nit incorrectly assumes x is always int — missing the case where\nthe else-branch assigned a different value.\n\nUses ONLY confirmed-accepted constructs: isinstance, if/else, Optional, int.\n'
+__name__ = '__main__'
+main = <function object>
+narrow_and_merge = <function object>
+narrow_both_branches = <function object>
+narrow_else_assigns = <function object>
+narrow_then_reassign_in_branch = <function object>

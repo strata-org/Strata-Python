@@ -1,0 +1,15 @@
+--- stdout 10
+8080 30 0
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+Counter = <class 'Counter'>
+__doc__ = "\n@dataclass fields can have default values: `field: int = 0`. When\nconstructing an instance without providing that argument, the default\nis used. The model must know that:\n1. The default value is substituted when the argument is omitted\n2. The resulting ClassInstance has the field set to the default\n\nIf the translator doesn't handle dataclass defaults, construction with\nomitted arguments either fails or produces Hole for the missing field.\n"
+__name__ = '__main__'
+create_counter = <function object>
+create_custom_config = <function object>
+create_default_config = <function object>
+dataclass = <function object>
+main = <function object>

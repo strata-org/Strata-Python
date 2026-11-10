@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFunction returning bool where return type is declared int — bool⊂int.\n\nIn CPython, bool is a subclass of int. A function declared `-> int` can\nlegally return True or False, and the caller receives a valid int value:\n  def f() -> int: return True   # valid, returns 1 (as bool, which IS int)\n  x: int = f()                  # x == 1, type(x) is bool but isinstance(x, int) is True\n\nMypy accepts this (bool is assignable to int). CPython runs fine.\n\nThe Laurel model\'s return-type enforcement (finding 131) emits:\n  assert isfrom_int(result)\nBut `True` is encoded as `from_bool(True)`, and `isfrom_int(from_bool(True))`\nis FALSE. The verifier fires a spurious assertion — reporting a "possible\nTypeError" for code that is perfectly valid.\n\nThis is the return-type manifestation of the bool⊂int subtyping gap\n(findings 043/148/166). The model treats from_bool and from_int as\nDISJOINT tags, but Python treats bool as a subtype of int.\n\nUses ONLY confirmed-accepted constructs: def, bool, int, return, if.\n'
+__name__ = '__main__'
+bool_as_int_return = <function object>
+conditional_bool_return = <function object>
+count_flags = <function object>
+has_positive = <function object>
+main = <function object>
+use_bool_return = <function object>

@@ -1,0 +1,10 @@
+--- stdout 62
+BOUNDARY: naive model runs else after break; CPython skips it
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+found = 2
+x = 2

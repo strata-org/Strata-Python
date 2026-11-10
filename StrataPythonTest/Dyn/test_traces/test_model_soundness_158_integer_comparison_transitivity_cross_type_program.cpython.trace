@@ -1,0 +1,15 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nPython allows comparing int and float freely: `3 == 3.0` is True,\n`2 < 2.5` is True. The model must handle cross-type comparisons\ncorrectly, including TRANSITIVITY:\n\n  If a == b and b == c, then a == c.\n  If a < b and b < c, then a < c.\n\nWhen the model uses separate tags (from_int vs from_float), cross-type\ncomparison requires coercion. If PEq/PLt only handle same-tag pairs\n(finding 076), then transitivity through mixed types breaks:\n\n  x: int = 3\n  y: float = 3.0\n  z: int = 3\n\n  x == y → True (cross-type)\n  y == z → True (cross-type)\n  x == z → True (same-type)\n\nBut if cross-type comparison falls to Hole, the solver cannot prove\nthat x == z follows from x == y and y == z.\n\nMore critically: ordering chains like `a < b < c` where types differ.\n\nUses ONLY confirmed-accepted constructs: int, float, comparison, function def.\n'
+__name__ = '__main__'
+clamp_float_to_int_bounds = <function object>
+float_less_than_int = <function object>
+int_equals_float = <function object>
+main = <function object>
+mixed_chain_comparison = <function object>
+transitivity_eq = <function object>
+transitivity_lt = <function object>

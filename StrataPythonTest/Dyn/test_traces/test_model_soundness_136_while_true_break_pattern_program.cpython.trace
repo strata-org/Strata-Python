@@ -1,0 +1,12 @@
+--- stdout 4
+6 1
+
+--- outcome
+ok
+--- globals
+__doc__ = "\n`while True: ... break` is a common pattern for loops with exit\nconditions in the middle. The model must handle:\n1. `True` as a loop condition (always truthy — loop never exits via condition)\n2. `break` as the only exit mechanism\n3. Termination depends on reaching the break\n\nIf the model can't prove the break is reachable, it may report\nnon-termination. If break is dropped (finding 054), the loop is infinite.\n"
+__name__ = '__main__'
+find_first_match = <function object>
+main = <function object>
+read_until_zero = <function object>
+retry_until_success = <function object>

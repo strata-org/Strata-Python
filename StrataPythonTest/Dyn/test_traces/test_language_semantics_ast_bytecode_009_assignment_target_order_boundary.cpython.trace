@@ -1,0 +1,13 @@
+--- stdout 74
+BOUNDARY: naive model evaluates target first; CPython evaluates RHS first
+
+--- outcome
+ok
+--- globals
+Obj = <class 'Obj'>
+__doc__ = None
+__name__ = '__main__'
+get_key = <function object>
+get_obj = <function object>
+get_val = <function object>
+trace = ['val', 'obj', 'key', 'store[0]=99']

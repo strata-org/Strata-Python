@@ -1,0 +1,10 @@
+--- stdout 21
+[-4, -1, -4, -4, -1]
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nINCORRECT OPERATOR BEHAVIOR: // on negative operands.\n\nCPython: -7 // 2 = -4 (floor toward -∞)\nModel:   -7 // 2 = -3 (SMT div truncates toward 0)\n\nThe model computes a SPECIFIC WRONG NUMBER. Not Hole — a concrete\nincorrect value that the solver uses as fact.\n'
+__name__ = '__main__'
+main = <function object>
+test_floor_div = <function object>

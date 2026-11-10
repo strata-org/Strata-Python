@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: can only concatenate str (not "int") to str
+--- globals
+Base = <class 'Base'>
+Derived = <class 'Derived'>
+__doc__ = '\nb1_mutable_override.py — Covariant override of mutable attribute.\n\nNo type-changing assignment within a single class. The unsoundness is purely\nfrom subtyping: Derived narrows Base.value from int|str to int, then a function\naccepting Base writes str into it.\n\nmypy --strict: Success (0 errors)\nmypy --strict --enable-error-code mutable-override: CATCHES IT (but disabled by default)\nRuntime: TypeError — str + int fails\n'
+__name__ = '__main__'
+main = <function object>
+set_to_str = <function object>

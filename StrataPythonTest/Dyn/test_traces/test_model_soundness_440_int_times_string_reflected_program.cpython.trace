@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nINT * STRING — REFLECTED DISPATCH NEEDED\n\nDIVERGENCE:\n  CPython:  3 * "ab"  → "ababab" (string repeated 3 times)\n  Model:    PMul(from_int(3), from_str("ab")) → Hole (no int×str case)\n\n  CPython:  "ab" * 3  → "ababab" (same result)\n  Model:    PMul(from_str("ab"), from_int(3)) → Hole (may have str×int but not int×str)\n\nIn CPython: int.__mul__(str) returns NotImplemented,\nthen str.__rmul__(int) is called and returns the repeated string.\nThe model has no reflected dispatch — only left-primary.\n'
+__name__ = '__main__'
+indent = <function object>
+int_times_str = <function object>
+main = <function object>
+separator = <function object>
+str_times_int = <function object>

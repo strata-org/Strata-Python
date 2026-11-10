@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised NameError: name 'while_value' is not defined
+--- globals
+__annotations__ = {'keep_going': <class 'bool'>}
+__doc__ = None
+__name__ = '__main__'
+keep_going = False

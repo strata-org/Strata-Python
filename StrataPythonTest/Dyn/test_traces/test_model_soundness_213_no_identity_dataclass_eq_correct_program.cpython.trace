@@ -1,0 +1,18 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+Person = <class 'Person'>
+Point = <class 'Point'>
+__doc__ = '\n"No object identity" means `==` on @dataclass is STRUCTURAL equality\n(compare fields), which matches CPython\'s @dataclass-generated __eq__.\n\nThis is a case where the model is CORRECT: @dataclass equality IS\nstructural in CPython. Two separately constructed @dataclass instances\nwith the same field values ARE equal.\n\nThis finding verifies that the model\'s structural equality matches\nCPython for @dataclass, and documents where it DIVERGES for non-dataclass.\n\nUses ONLY confirmed-accepted constructs: @dataclass, ==, !=, int, str.\n'
+__name__ = '__main__'
+dataclass = <function object>
+different_class_not_equal = <function object>
+different_fields_not_equal = <function object>
+equality_after_modification = <function object>
+equality_in_list_search = <function object>
+equality_is_reflexive = <function object>
+main = <function object>
+same_fields_are_equal = <function object>

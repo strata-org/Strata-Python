@@ -1,0 +1,17 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Accumulator = <class 'Accumulator'>
+Counter = <class 'Counter'>
+__doc__ = "\nWHILE LOOP CONDITION READS OBJECT FIELD — BODY MODIFIES FIELD — STALE CONDITION\n\nThe subset allows:\n  - while loops with conditions (IN)\n  - @dataclass field access in conditions (IN)\n  - Field write + rebinding in loop body (IN, finding 211)\n  - Comparison operators (IN)\n\nThe NOVEL gap: when a while loop's condition reads an object field,\nand the loop body modifies that field (with proper rebinding), the\nNEXT iteration's condition evaluation must read the UPDATED field.\nUnder value semantics with rebinding, this requires the condition\nto re-read from the REBOUND variable, not the original.\n\n  @dataclass\n  class Counter:\n      value: int\n      limit: int\n\n  c = Counter(value=0, limit=5)\n  while c.value < c.limit:\n      c = Counter(value=c.value + 1, limit=c.limit)\n  # CPython: loop runs 5 times, c.value == 5\n  # Model risk: condition reads ORIGINAL c (value=0 < limit=5 = True FOREVER)\n\nIf the translator evaluates the condition using the variable binding\nfrom BEFORE the loop body executes (stale binding), the condition\nnever changes and the loop either:\n  - Runs forever (if model tracks termination)\n  - Is unrolled with always-true condition (unsound: proves post-loop\n    properties that assume the loop ran, but condition was never false)\n\nROOT CAUSE: The while loop translation must ensure that:\n  1. The condition is evaluated using the CURRENT binding of all variables\n  2. After the body executes and rebinds variables, the back-edge\n     re-evaluates the condition with the NEW bindings\n  3. The exit assume uses the FINAL binding's field values\n\nThis is related to but distinct from:\n  - Finding 049 (while condition re-evaluation with object mutation) —\n    that's about MUTATION (which is lost under value semantics);\n    THIS is about REBINDING (which should work but may not)\n  - Finding 169 (while exit condition not assumed) — that's about\n    the post-loop assume; this is about the condition evaluation itself\n  - Finding 414 (while counter final value) — that's about simple int\n    counters; this is about OBJECT FIELDS in the condition\n\nThe key insight: with value semantics + rebinding, the loop SHOULD work\ncorrectly IF the translator properly threads the rebound variable back\nto the condition. But if the condition is translated as a fixed expression\nreferencing the INITIAL variable (before any rebinding), it's stale.\n"
+__name__ = '__main__'
+accumulate_until_threshold = <function object>
+count_to_limit = <function object>
+dataclass = <function object>
+decreasing_loop = <function object>
+main = <function object>
+method_in_condition = <function object>
+nested_field_in_condition = <function object>

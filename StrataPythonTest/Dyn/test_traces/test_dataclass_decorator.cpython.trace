@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Box = <class 'Box'>
+Point = <class 'Point'>
+Position = <class 'Position'>
+Size = <class 'Size'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+dataclasses = <module object>
+dc = <function object>
+dc_module = <module object>

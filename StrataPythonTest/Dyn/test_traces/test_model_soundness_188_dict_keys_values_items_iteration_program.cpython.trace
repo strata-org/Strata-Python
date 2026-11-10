@@ -1,0 +1,15 @@
+--- stdout 8
+3 6 120
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`dict.keys()`, `dict.values()`, `dict.items()` return view objects.\nIn `for k in d.keys()` or `for k, v in d.items()`, iteration yields\nkeys/values/pairs.\n\nUnder association-list semantics:\n- `d.keys()` must yield UNIQUE keys (no duplicates from shadowing)\n- `d.values()` must yield values for the LATEST entry per key\n- `d.items()` must yield (key, value) pairs with no duplicate keys\n- Order must be insertion order (Python 3.7+)\n\nFinding 051 identified that `for k in d` iterates keys. This finding\nextends to `.keys()`, `.values()`, `.items()` — all of which must\nhandle the shadowing problem.\n\nUses ONLY confirmed-accepted constructs: dict, for, str, int.\n'
+__name__ = '__main__'
+get_items = <function object>
+get_keys = <function object>
+get_values = <function object>
+keys_after_overwrite = <function object>
+main = <function object>
+sum_values = <function object>
+values_reflect_latest = <function object>

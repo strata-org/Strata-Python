@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nSTRING COMPARISON ORDERING — UNPROVABLE WITHOUT SMT-LIB STRING THEORY\n\nCPython: "apple" < "banana" → True (lexicographic)\n         "abc" < "abd" → True\n         "a" < "ab" → True (prefix is less)\n\nModel:   PLt(from_str("apple"), from_str("banana"))\n         → str_lt("apple", "banana")\n         → UNPROVABLE if str_lt is uninterpreted\n\n         SMT-LIB String theory has native `str.<` with correct\n         lexicographic semantics. If mapped, these are trivially provable.\n\nThe subset declares string comparison as IN:\n  "Comparison: ==, !=, <, <=, >, >= for ... str × str → bool"\n\nBut finding 047 notes str_lt may be uninterpreted.\nThis provides the concrete programs that fail.\n'
+__name__ = '__main__'
+find_min_str = <function object>
+is_before = <function object>
+is_prefix_less = <function object>
+main = <function object>
+sort_pair = <function object>

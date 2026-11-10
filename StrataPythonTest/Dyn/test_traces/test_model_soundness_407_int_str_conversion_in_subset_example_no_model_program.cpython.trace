@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nint()/str() CONVERSION IN SUBSET EXAMPLE — NO MODEL\n\nThe subset\'s parse_positive example uses int(s):\n    n: int = int(s)\n\nCPython: int("42") → 42, int("abc") → ValueError\nModel:   int(s) → Hole (uninterpreted, finding 017)\n\nSimilarly str(n) is used in f-strings and logging:\n    msg = "value: " + str(n)\n\nCPython: str(42) → "42"\nModel:   str(n) → Hole (no int-to-str model, finding 053)\n\nThese are the TWO MOST BASIC type conversions in Python.\nWithout them, the subset\'s own examples don\'t work.\n'
+__name__ = '__main__'
+format_result = <function object>
+int_from_str = <function object>
+main = <function object>
+parse_and_compute = <function object>
+roundtrip = <function object>
+str_from_int = <function object>

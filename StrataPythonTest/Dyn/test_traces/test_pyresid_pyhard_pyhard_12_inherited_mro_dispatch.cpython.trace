@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Base = <class 'Base'>
+Leaf = <class 'Leaf'>
+Middle = <class 'Middle'>
+__doc__ = None
+__name__ = '__main__'
+use_leaf = <function object>

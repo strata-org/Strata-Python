@@ -1,0 +1,9 @@
+--- stdout 71
+BOUNDARY: naive model binds leaf; CPython binds top-level package only
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+os = <module object>

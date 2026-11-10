@@ -1,0 +1,12 @@
+--- stdout 6
+0 2 3
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nBuilding a dict in a loop (`for item in lst: d[key] = value`) is the\nstandard pattern for constructing dicts from data. Under pure-function\nvalue semantics, each `d[key] = value` creates a NEW DictStrAny. The\nvariable `d` must be rebound after each assignment.\n\nIf the translator doesn't rebind `d` after `d[key] = value`, the dict\nnever grows — each assignment operates on the original empty dict.\n"
+__name__ = '__main__'
+build_index = <function object>
+count_chars = <function object>
+invert_dict = <function object>
+main = <function object>

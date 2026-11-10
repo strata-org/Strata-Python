@@ -1,0 +1,13 @@
+--- stdout 43
+all Python clash-semantics assertions hold
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+d = {<K object>: 'v3', <K object>: 'v2'}
+pairs = [(<K object>, 'v1'), (<K object>, 'v2'), (<K object>, 'v3')]
+s = {<K object>, <K object>}
+xs = [1, 1, 1, 2, 2, 3]

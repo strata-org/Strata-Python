@@ -1,0 +1,14 @@
+--- stdout 14
+274 274 carol
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nDICT.ITEMS() ITERATION YIELDS TUPLES — NO TUPLE TAG IN Any\n\nThe subset declares:\n  - dict[str, int] is IN\n  - dict.keys()/.values()/.items() iteration is IN (finding 188 confirms)\n  - tuple[T1, T2, ...] is IN\n\nBut the Any datatype has NO from_tuple constructor:\n  datatype Any { from_None, from_bool, from_int, from_float, from_str,\n                 from_DictStrAny, from_ListAny, from_ClassInstance, \n                 from_Composite, exception }\n\nWhen iterating `for k, v in d.items()`:\n  CPython: each iteration yields a tuple (key, value)\n  Model:   the iteration variable has type Any, but tuple has no tag\n           → the yielded value is unrepresentable → Hole\n\nThis is distinct from finding 028 (tuple no representation) because\nhere the tuple is IMPLICITLY created by dict.items(), not by user code.\nThe user writes perfectly natural dict iteration code that the subset\nexplicitly allows, but the model cannot represent the intermediate value.\n\nEven if we avoid tuple unpacking and use `for item in d.items()`:\n  item has type tuple[str, int] — still no tag.\n  item[0] and item[1] — subscript on unrepresentable value → Hole.\n'
+__name__ = '__main__'
+collect_keys = <function object>
+find_key_for_value = <function object>
+invert_dict = <function object>
+main = <function object>
+sum_by_items = <function object>
+sum_values = <function object>

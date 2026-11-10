@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+raised SystemExit: 
+--- globals
+AppError = <class 'AppError'>
+ConfigError = <class 'ConfigError'>
+__doc__ = None
+__name__ = '__main__'
+bail = <function object>
+load = <function object>
+r1 = 2

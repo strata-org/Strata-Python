@@ -1,0 +1,14 @@
+--- stdout 13
+6 True False
+
+--- outcome
+ok
+--- globals
+Node = <class 'Node'>
+Optional = <_SpecialForm object>
+__doc__ = '\nOptional[MyClass] means the variable can be None or a MyClass instance.\nThe Any datatype has from_None but class instances use from_ClassInstance\n(or Composite). If the translator uses Composite for classes, then\nOptional[MyClass] spans two representation worlds (Any for None, Composite\nfor the class) with no coercion path between them.\n'
+__name__ = '__main__'
+dataclass = <function object>
+find = <function object>
+list_sum = <function object>
+main = <function object>

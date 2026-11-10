@@ -1,0 +1,14 @@
+--- stdout 6
+1 9 2
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nWhen a function has multiple return statements, code after an earlier\nreturn is DEAD (unreachable). The model must ensure that once a return\nis hit, no subsequent statements execute.\n\nThis interacts with finding 052 (return doesn't terminate control flow)\nbut focuses on a specific pattern: multiple returns with DIFFERENT values\nwhere the model might execute all of them and return the LAST one.\n\nIf `return` is translated as `result := value` without termination,\nthen:\n    def f(x: int) -> int:\n        if x > 0:\n            return 1    # result := 1\n        return -1       # result := -1  ← ALWAYS executes, overwriting!\n\nThe function would always return -1 regardless of x.\n\nUses ONLY confirmed-accepted constructs: if/else, return, int, function def.\n"
+__name__ = '__main__'
+cascading_returns = <function object>
+early_return_guard = <function object>
+main = <function object>
+return_after_return_dead = <function object>
+return_in_loop = <function object>
+sign = <function object>

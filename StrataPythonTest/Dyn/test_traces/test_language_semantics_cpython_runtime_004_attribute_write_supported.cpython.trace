@@ -1,0 +1,11 @@
+--- stdout 6
+20
+21
+
+--- outcome
+ok
+--- globals
+Counter = <class 'Counter'>
+__doc__ = 'Attribute write: supported case.\nKnown class, declared field, no descriptors.\n'
+__name__ = '__main__'
+c = <Counter object>

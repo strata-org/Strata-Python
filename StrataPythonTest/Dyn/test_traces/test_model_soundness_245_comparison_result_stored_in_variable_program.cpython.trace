@@ -1,0 +1,15 @@
+--- stdout 13
+True 7 False
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nStoring a comparison result in a bool variable, then using it later.\nThe model must ensure comparisons return `from_bool` (finding 110)\nAND that the stored value retains its type for later use.\n\n    flag: bool = x > 0\n    if flag:\n        ...\n\nThe variable `flag` must be `from_bool(True/False)`. If PLt/PGt returns\na wrong tag (from_int(1)) or Hole, then `if flag` fails because\n`Any_to_bool` doesn't handle the wrong tag.\n\nUses ONLY Frontend-subset features: bool, int, comparison, if, and.\n"
+__name__ = '__main__'
+bool_from_equality = <function object>
+comparison_in_variable_then_branch = <function object>
+main = <function object>
+multiple_comparisons_stored = <function object>
+negate_stored_bool = <function object>
+store_comparison = <function object>
+use_stored_comparison = <function object>

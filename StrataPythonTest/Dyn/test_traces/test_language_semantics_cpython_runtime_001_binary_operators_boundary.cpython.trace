@@ -1,0 +1,12 @@
+--- stdout 18
+MyInt(3)
+MyInt(2)
+
+--- outcome
+ok
+--- globals
+MyInt = <class 'MyInt'>
+__doc__ = "Binary operators: boundary case.\nMonkey-patching __add__ makes the simplified model unsound.\nThe static axiom 'int + int -> int' would be wrong after patching.\n"
+__name__ = '__main__'
+a = <MyInt object>
+b = <MyInt object>

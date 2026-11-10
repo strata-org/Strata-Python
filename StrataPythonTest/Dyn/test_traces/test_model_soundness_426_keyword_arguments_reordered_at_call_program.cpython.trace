@@ -1,0 +1,12 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nKEYWORD ARGUMENTS REORDERED AT CALL SITE\n\nCPython: def divide(a: int, b: int) -> int: return a // b\n         divide(b=3, a=10) → 3 (a=10, b=3, computes 10//3)\n\nModel:   If translator uses CALL-SITE ORDER instead of PARAMETER ORDER:\n         divide(b=3, a=10) → divide(3, 10) → 3 // 10 = 0 (WRONG!)\n\n         The translator must map keyword arguments BY NAME to their\n         POSITIONAL slot in the function signature, regardless of\n         the order they appear at the call site.\n\nCPython result: divide(b=3, a=10) == 3\nModel result (if order-based): 0 (computes 3 // 10)\n'
+__name__ = '__main__'
+divide = <function object>
+main = <function object>
+make_range = <function object>
+power = <function object>

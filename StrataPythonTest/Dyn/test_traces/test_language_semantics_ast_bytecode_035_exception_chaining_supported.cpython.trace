@@ -1,0 +1,9 @@
+--- stdout 5
+PASS
+
+--- outcome
+ok
+--- globals
+__doc__ = "Exception chaining: __cause__ via 'raise from'."
+__name__ = '__main__'
+orig = <ValueError object>

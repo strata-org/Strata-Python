@@ -1,0 +1,20 @@
+--- stdout 346
+  TypeError via __eq__ side effect: unsupported operand type(s) for -: 'str' and 'int'
+  TypeError via __bool__ side effect: unsupported operand type(s) for -: 'str' and 'int'
+  TypeError via __len__ side effect: can only concatenate str (not "int") to str
+  TypeError via __iter__ side effect: unsupported operand type(s) for -: 'str' and 'int'
+
+--- outcome
+ok
+--- globals
+BoolMutates = <class 'BoolMutates'>
+EqMutates = <class 'EqMutates'>
+IterMutates = <class 'IterMutates'>
+LenMutates = <class 'LenMutates'>
+__doc__ = '\na5_dunder_side_effects.py — Dunder methods with side effects invalidate narrowing.\n\nmypy does not consider that __eq__, __bool__, __len__, __iter__ can mutate fields.\nThese are called IMPLICITLY by Python syntax (==, if, len(), for) so the mutation\nis invisible at the source level.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError on all four sub-examples\n'
+__name__ = '__main__'
+main = <function object>
+test_bool = <function object>
+test_eq = <function object>
+test_iter = <function object>
+test_len = <function object>

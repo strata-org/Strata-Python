@@ -1,0 +1,11 @@
+--- stdout 163
+CORRECT: cannot access local variable 'x' where it is not associated with a value
+BOUNDARY: naive model would resolve x globally; CPython raises UnboundLocalError
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+x = 'global'

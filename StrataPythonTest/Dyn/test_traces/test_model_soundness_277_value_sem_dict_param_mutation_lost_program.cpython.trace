@@ -1,0 +1,10 @@
+--- stdout 38
+{'host': 'localhost', 'port': '8080'}
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nVALUE SEMANTICS WHERE CPYTHON HAS REFERENCE SEMANTICS:\nDict passed to function — function adds key, caller sees change in CPython.\n\nCPython: dict param is a reference. d[k]=v mutates the SAME dict.\nModel: dict param is a COPY. d[k]=v mutates the copy. Caller unchanged.\n\nCPython result: config == {"host": "x", "port": 8080}\nModel result:  config == {"host": "x"}\n'
+__name__ = '__main__'
+add_default_port = <function object>
+main = <function object>

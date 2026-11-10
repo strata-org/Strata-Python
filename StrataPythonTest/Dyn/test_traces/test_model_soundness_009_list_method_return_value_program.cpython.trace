@@ -1,0 +1,10 @@
+--- stdout 2
+4
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nlist.append() returns None in CPython but the Laurel encoding\nhavocs the receiver variable to an arbitrary ListAny value.\nA program that branches on the return value of append diverges.\n'
+__name__ = '__main__'
+main = <function object>
+process = <function object>

@@ -1,0 +1,14 @@
+--- stdout 28
+All safe patterns work: 2 4
+
+--- outcome
+ok
+--- globals
+Counter = <class 'Counter'>
+__doc__ = '\nFIX PROPOSAL: AST rejection rules for aliasing patterns.\nResolves findings: 001-005, 010, 011, 033, 048, 049, 086, 087, 094,\n098, 099, 118, 119, 122, 184, 192, 194, 198, 212, 215, 216, 271,\n276-280.\n\nThe fix: syntactic AST checks that REJECT programs with aliasing\npatterns BEFORE translation. No model change needed — just enforcement.\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+safe_function = <function object>
+safe_list_usage = <function object>
+safe_usage = <function object>

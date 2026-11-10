@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Setter = <class 'Setter'>
+__annotations__ = {'method_value': <class 'int'>, 'setter': <class 'Setter'>}
+__doc__ = None
+__name__ = '__main__'
+method_value = 9
+setter = <Setter object>

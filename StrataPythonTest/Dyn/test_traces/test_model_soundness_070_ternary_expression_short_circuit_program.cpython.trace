@@ -1,0 +1,14 @@
+--- stdout 6
+1 0 1
+
+--- outcome
+ok
+--- globals
+Counter = <class 'Counter'>
+__doc__ = "\nPython's ternary expression `a if cond else b` evaluates ONLY ONE of\n`a` or `b` depending on the truthiness of `cond`. If the model evaluates\nboth arms eagerly (like a function call `select(cond, a, b)`), side\neffects in the unselected arm execute incorrectly.\n\nThis is the expression-level analog of finding 044 (short-circuit and/or).\n"
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+nested_ternary = <function object>
+pick_with_effect = <function object>
+safe_divide = <function object>

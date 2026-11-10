@@ -1,0 +1,13 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+Vector = <class 'Vector'>
+__doc__ = '\nApplying arithmetic operators to ClassInstance values should produce a\nTypeError (no __add__/__mul__ defined — user-defined operators are OUT).\nBut the model\'s tag-based dispatch may not have a case for\nfrom_ClassInstance, causing it to fall to Hole instead of reporting an\nerror. The verifier should catch this as "possible TypeError."\n'
+__name__ = '__main__'
+add_vectors_wrong = <function object>
+compare_vectors = <function object>
+dataclass = <function object>
+main = <function object>

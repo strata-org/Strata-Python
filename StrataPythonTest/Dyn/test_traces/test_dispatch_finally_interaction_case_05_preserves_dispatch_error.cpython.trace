@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+EVENTS = ['finally']
+RESULT = ('AttributeError', ['finally'])
+__doc__ = 'A normal finally completion resumes the pending dispatch exception.'
+__name__ = '__main__'

@@ -1,0 +1,13 @@
+--- stdout 12
+5 True True
+
+--- outcome
+ok
+--- globals
+MathUtils = <class 'MathUtils'>
+Validator = <class 'Validator'>
+__doc__ = "\n@staticmethod is a method with no `self` or `cls` parameter. It's just\na function namespaced inside a class. The translator must not pass any\nimplicit first argument. If it treats all methods uniformly (passing\nself/cls), staticmethod calls will have wrong arity.\n"
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+math = <module object>

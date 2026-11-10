@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nNEGATIVE INDEX WRAPS AROUND — lst[-1] IS LAST ELEMENT\n\nCPython: [10, 20, 30][-1] → 30 (last element)\n         [10, 20, 30][-2] → 20 (second to last)\n         Negative index i means: access at len(lst) + i\n\nModel:   List_get(lst, -1) → either:\n         - Hole (no negative index handling)\n         - IndexError (treats -1 as out of bounds)\n         - Accesses index -1 literally (undefined for cons-list)\n\nCPython result: 30\nModel result: Hole or IndexError (WRONG — should be 30)\n\nRoot cause: Finding 020 identified this. List_get has no index-wrapping\nlogic. Negative indices must be translated to: lst[len(lst) + i].\n'
+__name__ = '__main__'
+last_element = <function object>
+main = <function object>
+reverse_access = <function object>
+second_to_last = <function object>
+swap_first_last = <function object>

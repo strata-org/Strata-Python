@@ -1,0 +1,13 @@
+--- stdout 20
+True True True True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nWhen an operator is applied to incompatible types (e.g., str + int),\nCPython raises TypeError. The model\'s tag-based dispatch falls to a\ndefault case that returns Hole (unconstrained value) instead of\nexception(TypeError). This means type errors are SILENT in the model —\nthe program continues with garbage instead of crashing.\n\nThe verifier should report "possible TypeError" but if the default\ncase is Hole, it can\'t distinguish "type error" from "unknown result."\n'
+__name__ = '__main__'
+add_str_int = <function object>
+divide_str = <function object>
+main = <function object>
+multiply_str_str = <function object>
+subtract_str = <function object>

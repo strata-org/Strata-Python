@@ -1,0 +1,10 @@
+--- stdout 2
+4
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nAugmented assignment `xs += [4]` on a list uses __iadd__ in CPython,\nwhich mutates in place and returns self. The Laurel encoding desugars\nthis to `xs = PAdd(xs, [4])` which creates a NEW ListAny value via\nList_extend — correct for the local variable, but wrong for any\nfunction that received the list as a parameter.\n'
+__name__ = '__main__'
+extend_list = <function object>
+main = <function object>

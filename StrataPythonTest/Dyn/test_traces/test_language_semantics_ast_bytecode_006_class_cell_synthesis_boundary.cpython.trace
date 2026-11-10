@@ -1,0 +1,10 @@
+--- stdout 85
+BOUNDARY: naive model can't resolve zero-arg super(); CPython injects __class__ cell
+
+--- outcome
+ok
+--- globals
+Base = <class 'Base'>
+Child = <class 'Child'>
+__doc__ = None
+__name__ = '__main__'

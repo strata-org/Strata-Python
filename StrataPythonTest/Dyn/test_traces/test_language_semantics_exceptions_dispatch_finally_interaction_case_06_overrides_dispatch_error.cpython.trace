@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+RESULT = ('replacement', ('TypeError', 'AttributeError'))
+__doc__ = 'An abrupt finally completion replaces the pending dispatch exception.'
+__name__ = '__main__'
+raise_override = <function object>
+replacement = ('TypeError', 'AttributeError')
+return_override = <function object>

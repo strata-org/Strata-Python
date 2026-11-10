@@ -1,0 +1,12 @@
+--- stdout 23
+All div/mod tests pass
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFIX PROPOSAL: Replace SMT div/mod with Python floor-div/mod + zero check.\nResolves findings: 012, 039, 050, 080, 205, 258, 259, 266, 267, 268, 291, 292.\n\nThe fix: define python_floor_div and python_mod in terms of SMT operations,\nwith explicit zero-divisor check producing ZeroDivisionError.\n'
+__name__ = '__main__'
+floor_div_correct = <function object>
+invariant_holds = <function object>
+main = <function object>
+mod_correct = <function object>

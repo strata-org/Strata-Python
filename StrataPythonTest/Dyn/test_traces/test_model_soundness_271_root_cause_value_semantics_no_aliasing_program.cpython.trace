@@ -1,0 +1,14 @@
+--- stdout 8
+1 42 10
+
+--- outcome
+ok
+--- globals
+Box = <class 'Box'>
+__doc__ = '\nROOT CAUSE: from_ClassInstance is a VALUE, not a heap reference.\nPROPERTY: No aliasing. No mutation in place. No object identity.\n\nThis single property causes findings:\n001, 002, 003, 004, 005, 010, 011, 033, 048, 049, 086, 087, 094,\n098, 099, 101, 118, 119, 122, 184, 192, 194, 198, 212, 215, 216.\n\nDEMONSTRATION: Two variables pointing to "same" object are independent.\nCPython: mutation through one is visible through the other.\nModel: mutation through one is invisible to the other.\n'
+__name__ = '__main__'
+aliasing_divergence = <function object>
+dataclass = <function object>
+list_element_aliasing = <function object>
+main = <function object>
+param_aliasing = <function object>

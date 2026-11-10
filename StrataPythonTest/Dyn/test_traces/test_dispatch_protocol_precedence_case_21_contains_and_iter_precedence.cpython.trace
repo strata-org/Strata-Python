@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+EVENTS = ['contains', 'iter']
+Protocols = <class 'Protocols'>
+RESULT = (True, [1, 2], ['contains', 'iter'])
+__doc__ = 'Membership prefers __contains__; iteration prefers __iter__.'
+__name__ = '__main__'
+iteration = [1, 2]
+membership = True
+value = <Protocols object>

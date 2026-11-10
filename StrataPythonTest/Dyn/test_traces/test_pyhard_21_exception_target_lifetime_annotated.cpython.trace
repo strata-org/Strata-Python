@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+CapturedError = <class 'CapturedError'>
+ReplacementError = <class 'ReplacementError'>
+__doc__ = None
+__name__ = '__main__'
+return_target = <function object>
+save_then_fallthrough = <function object>
+save_then_replacement = <function object>

@@ -1,0 +1,16 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+Wallet = <class 'Wallet'>
+__doc__ = "\nTwo objects of the same class must have INDEPENDENT state. Modifying\none must not affect the other. Under value semantics this is AUTOMATIC\n(they're separate values). Under reference semantics it's also true\n(separate allocations).\n\nThis finding verifies that the model correctly handles independent\nobjects — a case where value semantics is actually CORRECT and matches\nCPython. The key test: after `a = MyClass(); b = MyClass()`, modifying\n`a` must not affect `b`.\n\nThis is the POSITIVE case — value semantics gets this right.\n(Contrast with aliasing `b = a` which is OUT of subset.)\n\nUses ONLY confirmed-accepted constructs: @dataclass, int, function def.\n"
+__name__ = '__main__'
+caller_independence = <function object>
+dataclass = <function object>
+independent_objects = <function object>
+list_of_independent_objects = <function object>
+main = <function object>
+objects_in_function = <function object>
+same_initial_state = <function object>

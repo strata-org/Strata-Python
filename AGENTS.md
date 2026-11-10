@@ -99,6 +99,9 @@ and write its goldens by running `StrataPythonTestExtra/PySpecDynTest.lean` with
 
 `StrataPythonTestExtra/DynReadTest.lean` reads every golden back with `Module.read`, so a
 printer change that breaks reading fails there; `lake exe pydyn read FILE` reads one.
+A new program in `StrataPythonTest/Dyn/dyn_tests/` or in `StrataPythonTest/tests/` also needs
+its CPython trace and its verdict for the Python semantics' differential test: run
+`StrataPythonTestExtra/SemDiffTest.lean` with `SEM_UPDATE=1`.
 
 ## Convention: `open Strata` pattern
 

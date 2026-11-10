@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'counter': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+counter = 2
+inc = <function object>
+local_shadow = <function object>
+nested_value = 7
+set_nested_global = <function object>
+test_globals = <function object>

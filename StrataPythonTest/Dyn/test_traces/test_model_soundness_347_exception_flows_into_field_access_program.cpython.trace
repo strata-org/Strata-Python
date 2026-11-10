@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+__doc__ = '\nEXCEPTION FLOWS INTO FIELD ACCESS — UNDEFINED BEHAVIOR ON WRONG TAG\n\nCPython: If f() raises, then f().x never executes — exception propagates.\nModel:   If f() returns exception(...), then accessing .x on exception tag\n         means: classname(exception(...)) → UNDEFINED (wrong constructor)\n         or: DictStrAny_get(???, "x") → accessing non-existent attrs\n\nThe exception-as-value model (finding 274) means exceptions don\'t propagate\nautomatically. They flow as VALUES into subsequent operations. Finding 079\ncovers exception in OPERATORS (PAdd etc). This finding covers exception\nflowing into FIELD ACCESS and METHOD CALLS — a different code path.\n'
+__name__ = '__main__'
+chain_access = <function object>
+dataclass = <function object>
+get_config = <function object>
+get_host = <function object>
+get_port_plus_one = <function object>
+main = <function object>

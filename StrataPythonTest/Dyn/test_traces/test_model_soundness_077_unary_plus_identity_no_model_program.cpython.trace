@@ -1,0 +1,13 @@
+--- stdout 9
+5 3.14 1
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nUnary `+x` is the identity operator for numeric types: it returns the\nvalue unchanged but as a new object. For int and float, `+x == x`.\nFor bool, `+True == 1` (promotes to int, like all arithmetic on bool).\n\nThe model likely has no PPos (unary plus) operator at all, since it\nseems like a no-op. But it's a real operator that:\n1. Validates the operand is numeric (raises TypeError on str/list/None)\n2. Promotes bool to int\n"
+__name__ = '__main__'
+double_positive = <function object>
+identity_float = <function object>
+identity_int = <function object>
+main = <function object>
+promote_bool = <function object>

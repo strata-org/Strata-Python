@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: f() missing 1 required positional argument: 'a'
+--- globals
+__doc__ = None
+__name__ = '__main__'
+d = {}
+f = <function object>

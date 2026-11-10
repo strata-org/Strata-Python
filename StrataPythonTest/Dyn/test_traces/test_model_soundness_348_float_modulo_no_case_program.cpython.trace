@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFLOAT MODULO — PMod HAS NO (from_float, from_float) CASE\n\nCPython: 7.5 % 2.0 → 1.5 (float modulo is well-defined)\n         -7.5 % 2.0 → 0.5 (sign follows divisor, same as int)\n         3.5 % 1.0 → 0.5\n\nModel:   PMod likely only handles (from_int, from_int) → SMT mod.\n         (from_float, from_float) has no case → Hole.\n         Even if it existed, SMT Real mod semantics differ from Python\'s.\n\nThe subset declares % as IN for float×float (frontend-subset.md: "Binary\narithmetic: +, -, *, //, %, **. Supported for int×int→int, float×float→float").\nBut the model has no implementation for float modulo.\n'
+__name__ = '__main__'
+float_mod_basic = <function object>
+float_mod_negative = <function object>
+is_half_integer = <function object>
+main = <function object>
+normalize_angle = <function object>

@@ -1,0 +1,10 @@
+--- stdout 73
+BOUNDARY: naive value-capture model gives [0,1,2]; CPython gives [2,2,2]
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+make_funcs = <function object>
+results = [2, 2, 2]

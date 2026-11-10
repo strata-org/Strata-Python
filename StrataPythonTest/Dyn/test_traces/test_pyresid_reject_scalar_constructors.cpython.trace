@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+as_bool = True
+as_complex = <complex object>
+as_float = 1.0
+as_int = 1
+bare_object = <object object>
+converter = <class 'int'>
+through_alias = 1

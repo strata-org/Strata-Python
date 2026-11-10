@@ -1,0 +1,14 @@
+--- stdout 9
+10 10 11
+
+--- outcome
+ok
+--- globals
+Calculator = <class 'Calculator'>
+__doc__ = '\nA method calling another method on self. Under value semantics, `self`\nis a ClassInstance value. Calling `self.other_method()` must pass the\nCURRENT self (with any field updates from earlier in the method).\n\nAll constructs used: @dataclass, method def, self.method(), int.\nFrontend accepts this — no unsupported construct.\n'
+__name__ = '__main__'
+chained_internal = <function object>
+dataclass = <function object>
+main = <function object>
+method_calls_method = <function object>
+multiple_self_calls = <function object>

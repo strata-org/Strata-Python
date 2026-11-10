@@ -1,0 +1,20 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Box = <class 'Box'>
+ExhaustingGetItem = <class 'ExhaustingGetItem'>
+GetItemMutator = <class 'GetItemMutator'>
+IterMutator = <class 'IterMutator'>
+RaisingGetItem = <class 'RaisingGetItem'>
+__doc__ = None
+__name__ = '__main__'
+exhaustion_result = 'exhausted'
+failure_result = 'failed'
+getitem_result = 'indexed'
+iter_result = 'iterated'
+state_after_getitem_error = <function object>
+state_after_getitem_exhaustion = <function object>
+state_after_getitem_failure = <function object>
+state_after_iter_error = <function object>

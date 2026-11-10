@@ -1,0 +1,21 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nEdge-case tests for Python truthiness semantics (passing cases).\n\nTests that the Strata runtime (PNot, PAnd, POr) correctly models\nPython's truthiness for the types identified in issue #934.\n\nNon-passing cases are in tests/pending/test_truthiness_bool_eq.py,\ntest_truthiness_not_eq.py, and test_truthiness_float_and_or.py.\n"
+__name__ = '__main__'
+test_and_bool = <function object>
+test_and_dict = <function object>
+test_and_int = <function object>
+test_and_list = <function object>
+test_and_none = <function object>
+test_and_str = <function object>
+test_not_bool = <function object>
+test_not_none = <function object>
+test_or_bool = <function object>
+test_or_dict = <function object>
+test_or_int = <function object>
+test_or_list = <function object>
+test_or_none = <function object>
+test_or_str = <function object>

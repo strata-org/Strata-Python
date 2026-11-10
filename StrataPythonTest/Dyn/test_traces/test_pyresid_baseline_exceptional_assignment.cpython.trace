@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
+--- globals
+__doc__ = None
+__name__ = '__main__'
+value = 'preexisting'

@@ -1,0 +1,17 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Animal = <class 'Animal'>
+Dog = <class 'Dog'>
+Optional = <_SpecialForm object>
+__doc__ = "\nISINSTANCE NARROWING NOT KILLED AT LOOP BACK-EDGE — OVER-PROVES\n\nThe subset allows:\n  - isinstance narrowing (IN)\n  - while loops (IN)\n  - Optional[T] variables reassigned in loop body (IN)\n  - Single inheritance (IN)\n\nThe NOVEL gap: when isinstance narrows a variable inside a loop body,\nthat narrowing must be KILLED at the loop back-edge because the variable\nmay be reassigned to a different type on the next iteration.\n\n  from typing import Optional\n\n  def process(items: list[Optional[int]]) -> int:\n      total: int = 0\n      i: int = 0\n      while i < len(items):\n          x: Optional[int] = items[i]\n          if x is not None:\n              total = total + x  # narrowed: x is int here\n          # At back-edge: x is reassigned next iteration\n          # Narrowing from this iteration must NOT carry to next\n          i = i + 1\n      return total\n\nThis specific case is SOUND because x is reassigned at loop top.\nBut the UNSOUND case is:\n\n  def find_first_int(items: list[Optional[int]]) -> int:\n      result: Optional[int] = None\n      i: int = 0\n      while i < len(items):\n          if result is not None:\n              return result  # narrowed: result is int\n          result = items[i]  # may be None or int\n          i = i + 1\n      # Here: result may be None (last element was None)\n      # Model may INCORRECTLY assume result is int (narrowing leaked)\n      if result is not None:\n          return result\n      return -1\n\nThe critical issue: if the model's narrowing from `if result is not None`\non iteration K persists to iteration K+1's entry, the model incorrectly\nassumes result is always int after the first successful narrowing.\n\nROOT CAUSE: The translator emits `assume(!isfrom_None(result))` inside\nthe if-branch. At the loop back-edge, this assumption must be KILLED\nbecause `result = items[i]` may reassign result to None. If the model\nuses a simple SSA form without phi-nodes at loop headers, the narrowing\nfrom one iteration leaks into the next.\n\nThis is distinct from:\n  - Finding 162 (narrowing invalidated by reassignment) — that's about\n    SEQUENTIAL code, not loop back-edges\n  - Finding 334 (narrowing killed at branch merge) — that's about\n    if/else merge, not loop iteration\n  - Finding 459 (narrowing killed by method call) — that's about\n    conservative invalidation, not loop structure\n\nThe loop back-edge is special because it creates a CYCLE in the CFG.\nNarrowing that's valid on one path through the cycle may be invalid\non the next traversal.\n"
+__name__ = '__main__'
+accumulate_with_narrowing = <function object>
+count_dogs_wrong = <function object>
+dataclass = <function object>
+find_first_with_tricks = <function object>
+main = <function object>
+narrowing_across_reassignment = <function object>

@@ -1,0 +1,17 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+PendingError = <class 'PendingError'>
+RESULT = ('finally return', 'finally return', 'ReplacementError', ('replacement', 'PendingError'), 'after break', 2)
+ReplacementError = <class 'ReplacementError'>
+__doc__ = None
+__name__ = '__main__'
+break_over_exception = <function object>
+continue_over_exception = <function object>
+observe_raise_over_return = <function object>
+raise_over_exception = <function object>
+raise_over_return = <function object>
+return_over_exception = <function object>
+return_over_return = <function object>

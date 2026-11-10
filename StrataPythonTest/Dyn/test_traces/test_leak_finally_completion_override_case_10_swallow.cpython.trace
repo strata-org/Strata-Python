@@ -1,0 +1,12 @@
+--- stdout 33
+('returned', 'loop exited', [0])
+
+--- outcome
+ok
+--- globals
+RESULT = ('returned', 'loop exited', [0])
+__doc__ = 'Case 10 (finally override): Abrupt control discards a sentinel.'
+__name__ = '__main__'
+swallowed_by_break = <function object>
+swallowed_by_continue = <function object>
+swallowed_by_return = <function object>

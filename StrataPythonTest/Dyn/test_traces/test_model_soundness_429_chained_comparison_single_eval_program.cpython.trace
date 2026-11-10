@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nCHAINED COMPARISON — MIDDLE OPERAND EVALUATED ONCE\n\nCPython: 1 < x < 10 desugars to: (1 < x) and (x < 10)\n         with x evaluated ONCE (not twice).\n\n         For pure expressions this doesn't matter.\n         But the RESULT must be from_bool (not from_int).\n         And the short-circuit must work: if 1 < x is False,\n         x < 10 is NOT evaluated.\n\nModel:   Finding 066 identified that middle operands may be evaluated twice.\n         Finding 202 identified that PLt must return from_bool for chaining.\n\n         The concrete issue: `1 < x < 10` must:\n         1. Compute PLt(1, x) → from_bool(True/False)\n         2. If False: short-circuit, return from_bool(False)\n         3. If True: compute PLt(x, 10) → from_bool(True/False)\n         4. Return the AND of both\n\n         If the model evaluates as PLt(PLt(1, x), 10):\n         → PLt(from_bool(True), 10) → comparing bool to int → Hole!\n\nCPython result: True (for x=5)\nModel result: Hole (if desugared wrong)\n"
+__name__ = '__main__'
+in_range = <function object>
+in_range_inclusive = <function object>
+main = <function object>
+mixed_comparison = <function object>
+three_way = <function object>

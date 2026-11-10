@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+test_while_countdown = <function object>
+test_while_true_break = <function object>
+test_while_with_continue = <function object>

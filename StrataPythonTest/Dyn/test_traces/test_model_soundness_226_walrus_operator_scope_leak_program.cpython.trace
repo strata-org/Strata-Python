@@ -1,0 +1,12 @@
+--- stdout 7
+-2 3 2
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nThe walrus operator `:=` is OUT of the subset. But this finding tests\na related IN-subset pattern: assignment in a WHILE condition via a\nhelper variable.\n\nThe subset allows `while cond:` where cond is a boolean expression.\nBut what about patterns where the condition depends on a value computed\neach iteration?\n\n    while (line := f.readline()) != "":  ← OUT (walrus)\n\n    line = get_next()\n    while line != "":                    ← IN (pre-compute)\n        process(line)\n        line = get_next()\n\nThe model must handle the "loop-and-a-half" pattern where the condition\nvariable is updated at the END of the loop body.\n\nUses ONLY confirmed-accepted constructs: while, list, int, function def.\n'
+__name__ = '__main__'
+consume_until_zero = <function object>
+find_first_negative = <function object>
+main = <function object>
+process_with_sentinel = <function object>

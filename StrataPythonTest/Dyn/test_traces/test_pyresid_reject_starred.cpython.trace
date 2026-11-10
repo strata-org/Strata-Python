@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = 1
+merged = {'a': 1}
+rest = [2, 3]
+variadic = <function object>
+xs = [1, 2, 3]

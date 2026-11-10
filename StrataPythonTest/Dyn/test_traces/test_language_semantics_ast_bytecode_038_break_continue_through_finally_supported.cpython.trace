@@ -1,0 +1,10 @@
+--- stdout 5
+PASS
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Continue through finally: finally runs each time.'
+__name__ = '__main__'
+i = 2
+order = ['body0', 'finally0', 'finally1', 'body2', 'finally2']

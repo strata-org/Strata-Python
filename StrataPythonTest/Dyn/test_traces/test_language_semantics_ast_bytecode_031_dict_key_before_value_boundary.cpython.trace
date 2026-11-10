@@ -1,0 +1,13 @@
+--- stdout 76
+PASS: key-before-value confirmed (naive value-first model would get {0: 0})
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Boundary: a naive model evaluating value-before-key (pre-3.8 behavior) gets wrong order.'
+__name__ = '__main__'
+d = {1: 10}
+k = <function object>
+order = ['k1', 'v1']
+state = {'count': 1}
+v = <function object>

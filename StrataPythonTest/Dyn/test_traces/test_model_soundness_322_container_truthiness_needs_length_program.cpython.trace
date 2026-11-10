@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nContainer truthiness in conditions — `if xs:` needs length-based dispatch.\n\nIn CPython, empty containers are falsy, non-empty are truthy:\n  bool([])      → False\n  bool([1,2])   → True\n  bool({})      → False\n  bool({"a":1}) → True\n\nWhen used in conditions: `if xs:` is equivalent to `if len(xs) > 0:`.\n\nFinding 016 covers ClassInstance truthiness (always True, returns Hole).\nFinding 059 covers non-bool conditions generally.\nFinding 139 covers bool() conversion dispatch.\n\nThis finding specifically tests that `Any_to_bool(from_ListAny(lst))`\nand `Any_to_bool(from_DictStrAny(d))` must check container LENGTH,\nwhich requires List_len/DictStrAny_len to be defined AND connected\nto the truthiness function. Since List_len has no axioms (finding 088),\neven if the dispatch exists, the result may be unprovable.\n\nUses ONLY confirmed-accepted constructs: list, dict, if, bool, len.\n'
+__name__ = '__main__'
+dict_truthy_empty = <function object>
+dict_truthy_nonempty = <function object>
+guard_before_access = <function object>
+list_truthy_empty = <function object>
+list_truthy_nonempty = <function object>
+main = <function object>
+while_container_drain = <function object>

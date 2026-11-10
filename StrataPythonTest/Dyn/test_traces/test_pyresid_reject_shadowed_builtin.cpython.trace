@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+ValueError = <class 'ValueError'>
+__doc__ = None
+__name__ = '__main__'
+len = 5
+list = 2
+print = <function object>

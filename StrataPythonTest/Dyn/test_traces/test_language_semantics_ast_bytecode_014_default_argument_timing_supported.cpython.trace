@@ -1,0 +1,11 @@
+--- stdout 53
+OK: default argument timing — shared mutable default
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = [1, 2]
+append_to = <function object>
+b = [1, 2]

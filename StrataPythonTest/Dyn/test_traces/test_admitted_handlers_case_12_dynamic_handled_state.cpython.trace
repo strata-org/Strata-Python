@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+InnerError = <class 'InnerError'>
+OuterError = <class 'OuterError'>
+RESULT = ('outer', 'outer', 'outer', 'RuntimeError')
+__doc__ = None
+__name__ = '__main__'
+no_active_exception = <function object>
+reraised_from_callee = <function object>
+reraised_from_unwinding_finally = <function object>
+reraiser = <function object>
+restored_after_nested_handler = <function object>

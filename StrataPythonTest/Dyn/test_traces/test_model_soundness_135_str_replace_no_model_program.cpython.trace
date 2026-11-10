@@ -1,0 +1,12 @@
+--- stdout 12
+jello bhi/b
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`str.replace(old, new)` returns a NEW string with all occurrences of\n`old` replaced by `new`. The original string is unchanged (strings are\nimmutable). This is IN the allowlist but has no model.\nMaps to SMT-LIB `str.replace_all`.\n'
+__name__ = '__main__'
+main = <function object>
+normalize_spaces = <function object>
+replace_extension = <function object>
+sanitize = <function object>

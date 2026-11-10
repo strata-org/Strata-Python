@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+RESULT = ('ValueError', 'ValueError', 'OverflowError', ('int', 0), ('int', 6))
+__doc__ = 'Shift rows distinguish negative counts from oversized left shifts.'
+__name__ = '__main__'
+observe = <function object>

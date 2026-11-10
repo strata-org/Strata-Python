@@ -1,0 +1,13 @@
+--- stdout 56
+PASS: true-branch not evaluated when condition is false
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Boundary: naive L-to-R would evaluate x before condition.'
+__name__ = '__main__'
+cond = <function object>
+explode = <function object>
+order = ['cond', 'safe']
+result = 'ok'
+safe = <function object>

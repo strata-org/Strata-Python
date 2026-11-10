@@ -1,0 +1,12 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCPython results (concrete):\n  True < 2   = True  (1 < 2)\n  False < 1  = True  (0 < 1)\n  True > 0   = True  (1 > 0)\n  True >= 1  = True  (1 >= 1)\n  False >= 1 = False (0 >= 1)\n\nLaurel model results:\n  PLt(from_bool(True), from_int(2)) = Hole (no bool×int case)\n'
+__name__ = '__main__'
+bool_ge_int = <function object>
+bool_lt_int = <function object>
+int_lt_bool = <function object>
+main = <function object>

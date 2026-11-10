@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised UnboundLocalError: cannot access local variable 'helper' where it is not associated with a value
+--- globals
+__doc__ = None
+__name__ = '__main__'
+helper = <function object>
+outer = <function object>

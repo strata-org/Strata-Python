@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'state': <class 'int'>, 'value': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+mark = <function object>
+state = 1
+value = 0

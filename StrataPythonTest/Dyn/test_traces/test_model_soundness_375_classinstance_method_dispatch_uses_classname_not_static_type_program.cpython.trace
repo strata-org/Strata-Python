@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Animal = <class 'Animal'>
+Cat = <class 'Cat'>
+Dog = <class 'Dog'>
+__doc__ = '\nClassInstance METHOD DISPATCH USES classname NOT STATIC TYPE\n\nCPython: obj.method() dispatches based on obj\'s RUNTIME type.\n         If obj is a Dog (subclass of Animal), obj.speak() calls Dog.speak.\n\nModel:   Method call translates to ClassName_method(obj).\n         The question: which ClassName does the translator use?\n\n         Option 1: STATIC type from annotation → Animal_speak(obj)\n           WRONG if obj is actually a Dog (finding 055)\n\n         Option 2: RUNTIME classname from the value → classname(obj)_speak(obj)\n           Requires dynamic dispatch on classname string.\n           Not directly expressible in Laurel (no computed function names).\n\n         Option 3: if/elif chain on classname:\n           if classname(obj) == "Dog": Dog_speak(obj)\n           elif classname(obj) == "Cat": Cat_speak(obj)\n           else: Animal_speak(obj)\n           CORRECT but requires enumerating all subclasses.\n\nFinding 055 identified the issue. This finding shows the CONCRETE\nfailure: calling a method on a parent-typed variable holding a child\ninstance dispatches to the WRONG method.\n'
+__name__ = '__main__'
+all_sounds = <function object>
+dataclass = <function object>
+main = <function object>
+make_sound = <function object>

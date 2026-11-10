@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nString negative indexing s[-1] — no index-wrapping for strings.\n\nFinding 020 covers negative list indexing (List_get has no wrap logic).\nThis finding covers the SAME gap for strings: s[-1] should return the\nlast character, but the model\'s string subscript (finding 069) has no\nnegative-index wrapping either.\n\nIn CPython:\n  s = "hello"\n  s[-1]  → "o"  (wraps to s[len(s)-1] = s[4])\n  s[-2]  → "l"  (wraps to s[3])\n  s[-5]  → "h"  (wraps to s[0])\n  s[-6]  → IndexError (out of bounds)\n\nThe model\'s str_char_at (if it exists per finding 069) likely takes\nthe index as-is. Negative indices either:\n  - Return Hole (index not found in string)\n  - Map to some undefined position\n  - Produce exception(IndexError) unconditionally\n\nUses ONLY confirmed-accepted constructs: str, int, subscript, len.\n'
+__name__ = '__main__'
+first_via_negative = <function object>
+last_char = <function object>
+main = <function object>
+negative_index_equivalence = <function object>
+second_to_last = <function object>

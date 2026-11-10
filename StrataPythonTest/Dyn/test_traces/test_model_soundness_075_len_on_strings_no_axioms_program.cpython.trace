@@ -1,0 +1,13 @@
+--- stdout 9
+5 6 True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`len()` on strings returns the number of characters. The model needs\n`str_len` mapped to SMT-LIB `str.len` for this to be provable. If\n`len()` on `from_str` is uninterpreted or falls to Hole, basic string\nlength properties (len("") == 0, len(s) >= 0) are unprovable.\n'
+__name__ = '__main__'
+is_empty = <function object>
+is_short = <function object>
+main = <function object>
+pad_right = <function object>
+truncate = <function object>

@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = "\nCOMPOSITE/CLASSINSTANCE SPLIT — EQUALITY BROKEN ACROSS BOUNDARY\n\nThe Any datatype has BOTH:\n  from_ClassInstance(classname, attrs)  — value, structural equality\n  from_Composite(ref)                  — reference, identity equality\n\nIf two objects of the SAME Python class are encoded differently\n(one as ClassInstance, one as Composite), PEq cannot compare them.\nPEq dispatches on tag: (from_ClassInstance, from_ClassInstance) works,\n(from_Composite, from_Composite) works, but\n(from_ClassInstance, from_Composite) has NO case → Hole.\n\nIn v1 (all ClassInstance), this doesn't arise. But it's a DESIGN\nCONSTRAINT: the translator must ensure ALL instances of a given class\nuse the SAME encoding. Mixing is unsound.\n"
+__name__ = '__main__'
+dataclass = <function object>
+different_instances_not_equal = <function object>
+equality_after_construction = <function object>
+equality_in_list_search = <function object>
+main = <function object>
+same_encoding_equality = <function object>

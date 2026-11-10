@@ -1,0 +1,17 @@
+--- stdout 19
+4 heavy truck 2006
+
+--- outcome
+ok
+--- globals
+Car = <class 'Car'>
+Truck = <class 'Truck'>
+Vehicle = <class 'Vehicle'>
+__doc__ = '\nAfter `isinstance(x, Dog)` narrows x to Dog, the model must allow\naccess to Dog-specific fields (like `breed`). But `from_ClassInstance`\nstores ALL fields in one DictStrAny — the narrowing must tell the\nsolver that `breed` EXISTS in the attrs dict.\n\nFinding 064 identified this. This finding shows the COMPLETE pattern:\nisinstance narrows → field access must succeed → requires postcondition\nthat subclass fields are present.\n\nUses ONLY confirmed-accepted constructs: @dataclass, isinstance, str, int.\n'
+__name__ = '__main__'
+dataclass = <function object>
+describe = <function object>
+get_doors = <function object>
+get_payload = <function object>
+main = <function object>
+process_fleet = <function object>

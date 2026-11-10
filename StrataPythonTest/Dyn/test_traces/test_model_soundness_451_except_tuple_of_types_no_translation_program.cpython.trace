@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nEXCEPT WITH TUPLE OF EXCEPTION TYPES — NO TRANSLATION\n\nThe subset allows:\n  - try / except SomeError as e: for built-in exceptions\n  - ValueError, TypeError, IndexError, KeyError, RuntimeError\n\nCPython also supports (and it\'s standard Python):\n  except (ValueError, KeyError) as e:\nThis catches EITHER exception type in a single handler.\n\nCPython behavior:\n  try:\n      d = {}\n      d["missing"]  # raises KeyError\n  except (ValueError, KeyError) as e:\n      result = "caught"\n  # result == "caught"\n\nModel behavior:\n  The translator likely handles `except ValueError:` by checking\n  if the exception tag matches ValueError. But the tuple form\n  `except (ValueError, KeyError):` requires checking if the tag\n  matches ANY of the types in the tuple.\n\n  If the translator only handles single-type except clauses:\n    except (ValueError, KeyError): → translation error or Hole\n  \n  If it treats the tuple as a single type name "(ValueError, KeyError)":\n    → never matches → exception propagates → UNSOUND (reports unhandled\n      exception for a program that handles it correctly)\n\nThis is distinct from:\n  - Finding 115 (multiple except CLAUSES — separate handlers)\n  - Finding 302 (isinstance with tuple of types)\n  - Finding 208 (except must match error type)\n\nThe tuple-in-except form is syntactically different from multiple\nexcept clauses. It\'s ONE handler that catches MULTIPLE types.\nThis is extremely common in real code:\n  except (OSError, IOError) as e:\n  except (ValueError, TypeError) as e:\n\nROOT CAUSE: The except-clause translation assumes a single type name.\nThe tuple form requires OR-semantics in the exception type check.\n'
+__name__ = '__main__'
+catch_either_error = <function object>
+catch_with_message = <function object>
+first_matching_type = <function object>
+main = <function object>
+nested_tuple_except = <function object>

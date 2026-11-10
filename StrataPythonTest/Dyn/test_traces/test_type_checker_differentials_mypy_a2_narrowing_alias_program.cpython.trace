@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Holder = <class 'Holder'>
+__doc__ = '\na2_narrowing_alias.py — isinstance narrowing invalidated by mutation through alias.\n\nmypy --strict: Success (0 errors)\nRuntime: AssertionError — variable is str where mypy says int\n'
+__name__ = '__main__'
+main = <function object>
+mutate_holder = <function object>

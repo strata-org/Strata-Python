@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Dict = <_SpecialGenericAlias object>
+__doc__ = None
+__name__ = '__main__'
+test_type_dict_annotation = <function object>

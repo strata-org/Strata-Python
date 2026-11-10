@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+RESULT = ('property', 'instance')
+Record = <class 'Record'>
+__doc__ = 'A data-descriptor property wins over a same-named instance field.'
+__name__ = '__main__'
+record = <Record object>

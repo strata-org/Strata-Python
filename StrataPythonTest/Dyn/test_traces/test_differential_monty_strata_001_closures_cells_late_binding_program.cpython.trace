@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+late_binding = <function object>
+main = <function object>
+make_adder = <function object>
+make_counter = <function object>

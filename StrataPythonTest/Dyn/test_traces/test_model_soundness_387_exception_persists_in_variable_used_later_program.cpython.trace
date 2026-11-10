@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nEXCEPTION PERSISTS IN VARIABLE — USED LATER WITHOUT CHECK\n\nCPython: x = might_raise(-1)  → raises, x never assigned, code stops.\nModel:   x = exception(ValueError(...))  → x holds exception value.\n         Later: y = x + 1  → PAdd(exception(...), from_int(1)) → Hole\n         Even later: return y  → returns Hole (passes type assertion!)\n\nThe exception is "trapped" in variable x. It doesn\'t propagate.\nAll subsequent uses of x produce Hole (or wrong values).\nThe program continues executing as if nothing happened.\n\nThis is the TEMPORAL aspect of the propagation problem:\nthe exception persists across multiple statements, infecting\nevery expression that touches the variable.\n'
+__name__ = '__main__'
+exception_in_condition = <function object>
+exception_persists = <function object>
+exception_used_much_later = <function object>
+main = <function object>
+might_raise = <function object>

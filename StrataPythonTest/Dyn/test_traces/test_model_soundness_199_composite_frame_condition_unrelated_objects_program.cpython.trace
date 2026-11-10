@@ -1,0 +1,14 @@
+--- stdout 13
+True 600 175
+
+--- outcome
+ok
+--- globals
+Sensor = <class 'Sensor'>
+__doc__ = "\nFrame conditions: after a method call on object A, all UNRELATED objects\nmust retain their field values. Under Composite/heap semantics, this\nrequires explicit frame conditions (what DIDN'T change).\n\nFinding 106 identified this. This finding provides a systematic test:\nafter calling a method on one object, verify that N other objects are\nall unchanged. The solver must be able to prove this.\n\nUnder value semantics (ClassInstance), frame conditions are FREE —\nobjects are independent values. Under Composite, the solver needs\nexplicit `ensures old(b.field) == b.field` for every unrelated object.\n\nUses ONLY confirmed-accepted constructs: @dataclass, method, int, list.\n"
+__name__ = '__main__'
+dataclass = <function object>
+function_call_preserves_unrelated = <function object>
+main = <function object>
+one_update_others_preserved = <function object>
+update_in_loop_preserves_others = <function object>

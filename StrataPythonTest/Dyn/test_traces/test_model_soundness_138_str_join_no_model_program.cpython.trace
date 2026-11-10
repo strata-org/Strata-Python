@@ -1,0 +1,13 @@
+--- stdout 16
+hello world a,b
+
+--- outcome
+ok
+--- globals
+__doc__ = "\n`sep.join(lst)` concatenates list elements with separator between them.\nIt's IN the allowlist but has no model. The result depends on:\n1. The separator string\n2. The list elements (must all be strings)\n3. len(result) = sum(len(elem)) + len(sep) * (len(lst) - 1)\n"
+__name__ = '__main__'
+build_path = <function object>
+join_csv = <function object>
+join_empty_sep = <function object>
+join_words = <function object>
+main = <function object>

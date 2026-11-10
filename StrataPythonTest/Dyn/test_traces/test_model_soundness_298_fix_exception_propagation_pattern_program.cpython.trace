@@ -1,0 +1,13 @@
+--- stdout 37
+All exception propagation tests pass
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFIX PROPOSAL: Exception propagation pattern for exception-as-value.\nResolves findings: 014, 025, 036, 052, 063, 079, 113-117, 160, 165,\n173, 206-210, 249, 268-270.\n\nThe fix: after every potentially-raising operation, insert a check.\nIf exception, jump to handler. If no handler, propagate to caller.\n'
+__name__ = '__main__'
+demonstrates_correct_propagation = <function object>
+demonstrates_per_iteration = <function object>
+demonstrates_raise_terminates = <function object>
+demonstrates_type_matching = <function object>
+main = <function object>

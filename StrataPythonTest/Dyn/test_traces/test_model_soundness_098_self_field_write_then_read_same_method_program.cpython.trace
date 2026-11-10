@@ -1,0 +1,11 @@
+--- stdout 13
+150 True 200
+
+--- outcome
+ok
+--- globals
+Account = <class 'Account'>
+__doc__ = "\nWhen a method writes to self.x and then reads self.x in the same method,\nthe read must see the written value. Under value semantics, `self` is a\nfrom_ClassInstance value. Writing `self.x = v` creates a NEW ClassInstance\nwith updated attrs. If the translator doesn't rebind `self` to the new\nvalue, subsequent reads of `self.x` see the OLD value.\n"
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>

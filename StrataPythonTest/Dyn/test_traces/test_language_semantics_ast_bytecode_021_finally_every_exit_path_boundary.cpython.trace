@@ -1,0 +1,10 @@
+--- stdout 69
+BOUNDARY: naive model skips finally on break; CPython always runs it
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+i = 2
+trace = ['body0', 'fin0', 'body1', 'fin1', 'fin2']

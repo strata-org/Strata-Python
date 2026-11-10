@@ -1,0 +1,13 @@
+--- stdout 6
+1 5 3
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nDict comprehensions are OUT of the subset ("may grow"). But the\nEQUIVALENT loop pattern IS in the subset:\n\n    # Comprehension (OUT):\n    d = {k: v for k, v in items}\n\n    # Equivalent loop (IN):\n    d = {}\n    for item in items:\n        d[key] = value\n\nThis finding verifies that the loop-based dict construction works\ncorrectly under pure dict semantics with rebinding.\n\nThe model must handle:\n1. Empty dict literal: d = {} → DictStrAny_empty\n2. Repeated d[k] = v → rebind d each time (finding 146)\n3. Final dict has all keys with correct values\n\nUses ONLY confirmed-accepted constructs: dict, for, while, str, int.\n'
+__name__ = '__main__'
+build_dict_from_lists = <function object>
+conditional_build = <function object>
+count_chars = <function object>
+invert_dict = <function object>
+main = <function object>

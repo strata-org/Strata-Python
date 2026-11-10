@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+App = <class 'App'>
+List = <_SpecialGenericAlias object>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+list_apps = <function object>
+main = <function object>

@@ -1,0 +1,17 @@
+--- stdout 7
+3 30 3
+
+--- outcome
+ok
+--- globals
+DEFAULT_TIMEOUT = 30
+MAX_RETRIES = 3
+PI_APPROX = 3.14159
+__annotations__ = {'MAX_RETRIES': <class 'int'>, 'DEFAULT_TIMEOUT': <class 'int'>, 'PI_APPROX': <class 'float'>}
+__doc__ = '\nModule-level variables (constants, configuration) can be read by\nfunctions. The model must make these values available inside function\nbodies. If the translator only handles local variables and parameters,\nmodule-level reads return Hole.\n'
+__name__ = '__main__'
+circle_area = <function object>
+get_max_retries = <function object>
+main = <function object>
+retry_loop = <function object>
+with_timeout = <function object>

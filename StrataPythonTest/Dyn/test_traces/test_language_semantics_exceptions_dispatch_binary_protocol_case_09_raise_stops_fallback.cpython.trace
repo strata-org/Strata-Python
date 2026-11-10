@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+EVENTS = ['left-add']
+Left = <class 'Left'>
+RESULT = ('KeyError', ['left-add'])
+Right = <class 'Right'>
+__doc__ = 'An exception from a selected candidate stops binary fallback.'
+__name__ = '__main__'

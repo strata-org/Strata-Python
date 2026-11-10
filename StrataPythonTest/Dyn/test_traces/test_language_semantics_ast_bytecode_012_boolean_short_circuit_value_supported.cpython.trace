@@ -1,0 +1,11 @@
+--- stdout 50
+OK: boolean short-circuit — returns operand value
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+active = {'debug': False}
+config = None
+default_config = {'debug': False}

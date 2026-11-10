@@ -1,0 +1,16 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+Point = <class 'Point'>
+__doc__ = '\nDATACLASS CONSTRUCTOR — FIELD VALUE UNPROVABLE AFTER CONSTRUCTION\n\nCPython: p = Point(3, 4); p.x == 3 → True (always)\n\nModel:   Point(3, 4) translates to:\n           from_ClassInstance("Point", DictStrAny_set(DictStrAny_set(empty, "x", 3), "y", 4))\n         p.x translates to:\n           DictStrAny_get(instance_attributes(p), "x")\n\n         Without McCarthy axiom get(set(d, k, v), k) == v:\n           DictStrAny_get(DictStrAny_set(..., "x", 3), "x") == ???\n           → UNPROVABLE\n\nCPython result: 3\nModel result: unconstrained (Hole)\n\nRoot cause: DictStrAny_get and DictStrAny_set are uninterpreted functions\nwith no read-over-write axiom (findings 093/141/254).\n'
+__name__ = '__main__'
+construct_and_pass = <function object>
+construct_and_read = <function object>
+construct_and_use_in_arithmetic = <function object>
+construct_three_fields = <function object>
+dataclass = <function object>
+main = <function object>

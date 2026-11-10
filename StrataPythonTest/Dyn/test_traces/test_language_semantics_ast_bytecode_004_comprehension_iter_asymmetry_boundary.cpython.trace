@@ -1,0 +1,9 @@
+--- stdout 92
+BOUNDARY: naive model sees multiplier in class scope; CPython raises NameError in comp body
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'

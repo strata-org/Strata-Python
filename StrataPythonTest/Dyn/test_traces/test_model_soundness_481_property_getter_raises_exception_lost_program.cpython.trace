@@ -1,0 +1,16 @@
+--- stdout 11
+All passed
+
+--- outcome
+ok
+--- globals
+BoundedValue = <class 'BoundedValue'>
+LazyConfig = <class 'LazyConfig'>
+__doc__ = '\n@PROPERTY GETTER THAT RAISES EXCEPTION — EXCEPTION LOST, HOLE RETURNED\n\nThe subset allows:\n  - @property (IN)\n  - raise in function bodies (IN)\n  - try/except (IN)\n\nThe NOVEL gap: a @property getter can raise an exception (e.g., ValueError\nfor invalid state). When the property is accessed, CPython calls the getter\nand propagates the exception. But the model translates property access as\nDictStrAny_get (finding 424), which returns Hole — the exception is LOST.\n\nThis is WORSE than just returning Hole:\n  1. The exception path is invisible — try/except around property access\n     is unreachable in the model\n  2. The model may PROVE that code after the property access is safe,\n     when in reality the exception prevents reaching that code\n  3. The verifier cannot detect the error condition\n\nCPython: obj.prop → raises ValueError("invalid state")\nModel:   obj.prop → DictStrAny_get(attrs, "prop") → Hole (no exception)\n\nDISTINCT FROM:\n  - Finding 038 (property not in instance dict) — covers the Hole result\n  - Finding 424 (property computed value) — covers the missing computation\n  - Finding 222 (property is dynamic) — covers the dispatch mechanism\n  - Finding 246 (property with conditional logic) — covers complex getters\n\n  NONE of these address the case where the getter RAISES. They all focus\n  on the getter RETURNING a value that the model can\'t compute. This\n  finding is about the getter FAILING — an error path that\'s completely\n  invisible to the model.\n'
+__name__ = '__main__'
+access_uninitialized = <function object>
+dataclass = <function object>
+exception_prevents_subsequent_code = <function object>
+guarded_access = <function object>
+main = <function object>
+validate_via_property = <function object>

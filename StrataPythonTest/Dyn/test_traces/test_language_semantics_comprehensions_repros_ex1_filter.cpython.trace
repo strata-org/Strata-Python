@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+List = <_SpecialGenericAlias object>
+Metric = <class 'Metric'>
+MetricsResponse = <class 'MetricsResponse'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+get_metrics = <function object>
+main = <function object>

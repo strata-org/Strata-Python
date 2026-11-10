@@ -1,0 +1,12 @@
+--- stdout 32
+[1, 2, 3, 4] [0, 1, 2] [10, 20]
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCPython results (concrete):\n  [1, 2] + [3, 4] = [1, 2, 3, 4]\n  [] + [1]         = [1]\n  [1] + []         = [1]\n\nLaurel model results:\n  PAdd(from_ListAny([1,2]), from_ListAny([3,4])) = Hole (no list+list case)\n'
+__name__ = '__main__'
+append_element = <function object>
+concat_lists = <function object>
+main = <function object>
+prepend_element = <function object>

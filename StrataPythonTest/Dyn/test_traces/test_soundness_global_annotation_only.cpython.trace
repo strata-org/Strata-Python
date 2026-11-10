@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised NameError: name 'annotation_only' is not defined
+--- globals
+__annotations__ = {'annotation_only': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'

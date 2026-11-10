@@ -1,0 +1,11 @@
+--- stdout 8
+2 7 2 1
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython's bool is a subclass of int. Arithmetic on booleans returns int,\nnot bool. PAdd(from_bool(true), from_bool(true)) in the Laurel encoding\nlikely returns from_bool (or Hole) rather than from_int(2).\n"
+__name__ = '__main__'
+count_flags = <function object>
+main = <function object>
+weighted_sum = <function object>

@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Account = <class 'Account'>
+Logger = <class 'Logger'>
+__doc__ = "\nMODIFIES CLAUSE MISSING — HEAP HAVOC'D AFTER METHOD CALL\n\nCPython: a.method() modifies only a's fields.\n         b (unrelated object) is unchanged after a.method().\n\nModel (Composite/heap):\n  Without a modifies clause, the verifier HAVOCS the entire heap\n  after any method call. This means:\n  - b.field becomes unconstrained after a.method()\n  - Local variables holding field values become stale\n  - Any property proved before the call is lost\n\n  With a correct modifies clause:\n    modifies { a.field1, a.field2 }\n  The verifier knows only a's fields change; b is preserved.\n\nFinding 103 identified this issue. Finding 196 noted the clause is\ntoo broad. This finding shows the CONCRETE impact: after calling\none object's method, an unrelated object's fields become unprovable.\n"
+__name__ = '__main__'
+dataclass = <function object>
+interleaved_operations = <function object>
+main = <function object>
+multiple_objects_one_modified = <function object>
+unrelated_objects_preserved = <function object>

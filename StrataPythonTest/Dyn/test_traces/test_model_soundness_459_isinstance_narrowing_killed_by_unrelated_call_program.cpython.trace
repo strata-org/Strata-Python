@@ -1,0 +1,18 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Circle = <class 'Circle'>
+Logger = <class 'Logger'>
+Rectangle = <class 'Rectangle'>
+Shape = <class 'Shape'>
+__doc__ = '\nISINSTANCE NARROWING LOST AFTER FUNCTION CALL ON UNRELATED OBJECT\n\nThe subset allows:\n  - isinstance narrowing (IN)\n  - Method calls (IN)\n  - Multiple objects in scope (IN)\n\nThe NOVEL gap: after isinstance narrowing establishes a type for variable\n`x`, a method call on a DIFFERENT object `y.method()` may invalidate\nthe narrowing of `x` in the model, even though CPython\'s `x` is unchanged.\n\n  class Animal: ...\n  class Dog(Animal):\n      breed: str\n\n  def process(animals: list[Animal], logger: Logger) -> str:\n      a: Animal = animals[0]\n      if isinstance(a, Dog):\n          # Here: a is narrowed to Dog, a.breed is accessible\n          logger.log("found dog")  # unrelated method call\n          # Model may HAVOC all assumptions after method call\n          # including the isinstance narrowing on `a`\n          return a.breed  # Model: narrowing lost → Hole or TypeError\n      return "not a dog"\n\nIn CPython, calling `logger.log()` cannot change the type of `a`.\nBut in the model, if method calls havoc the heap (finding 103/196)\nor invalidate all assumptions (conservative approach), the narrowing\n`assume(classname(a) == "Dog")` may be killed.\n\nThis is distinct from:\n  - Finding 162 (narrowing invalidated by REASSIGNMENT) — that\'s about\n    reassigning the narrowed variable itself\n  - Finding 334 (narrowing killed at branch merge) — that\'s about\n    control flow merging\n  - Finding 441 (repeated field access narrowing lost) — that\'s about\n    re-reading the same field\n  - Finding 103/196 (no modifies clause) — those are the ROOT CAUSE,\n    but this finding shows the SPECIFIC consequence for isinstance\n\nThe key insight: isinstance narrowing is an ASSUMPTION about a variable\'s\ntag. If the model conservatively invalidates all assumptions after any\nmethod call (because it can\'t prove the call doesn\'t affect the variable),\nthen narrowing becomes useless in any function that does work between\nthe isinstance check and the field access.\n'
+__name__ = '__main__'
+area_with_logging = <function object>
+classify_with_work = <function object>
+dataclass = <function object>
+main = <function object>
+narrowing_across_conditional = <function object>
+narrowing_survives_local_computation = <function object>

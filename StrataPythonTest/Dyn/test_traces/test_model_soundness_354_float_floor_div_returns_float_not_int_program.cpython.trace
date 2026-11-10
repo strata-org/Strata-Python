@@ -1,0 +1,12 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFLOAT FLOOR DIVISION RETURNS FLOAT NOT INT\n\nCPython: 7.0 // 2.0 → 3.0 (float!)\n         7.0 // 2   → 3.0 (float!)\n         7 // 2     → 3   (int)\n\n         The return TYPE of // depends on operand types:\n         int // int → int\n         float // float → float\n         float // int → float\n         int // float → float\n\nModel:   PFloorDiv likely only handles (from_int, from_int) → from_int.\n         (from_float, from_float) either:\n         - Has no case → Hole\n         - Returns from_int (WRONG TYPE — should be from_float)\n         - Returns from_float but with wrong value (SMT div semantics)\n\nFinding 050 mentions this issue exists. This finding provides the\nconcrete program and demonstrates the TYPE TAG divergence specifically.\n'
+__name__ = '__main__'
+divide_evenly = <function object>
+float_floor_div = <function object>
+main = <function object>
+mixed_floor_div = <function object>

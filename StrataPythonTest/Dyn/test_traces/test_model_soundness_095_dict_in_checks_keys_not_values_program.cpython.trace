@@ -1,0 +1,13 @@
+--- stdout 31
+True False ['apple', 'cherry']
+
+--- outcome
+ok
+--- globals
+__doc__ = "\n`key in d` checks whether `key` is a KEY in the dict, not a value.\n`value in d` does NOT check if value appears as a dict value — it\nchecks if `value` is a key. This is a common Python gotcha.\n\nThe model's `DictStrAny_contains` must check keys only. If it's\nuninterpreted or checks values, the semantics diverge.\n"
+__name__ = '__main__'
+collect_present = <function object>
+has_key = <function object>
+main = <function object>
+safe_increment = <function object>
+value_not_found_as_key = <function object>

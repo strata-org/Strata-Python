@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+__doc__ = None
+__name__ = '__main__'
+finite_loop = <function object>
+killed_difference = <function object>
+reassigned_guard = <function object>
+unchanged_guard = <function object>

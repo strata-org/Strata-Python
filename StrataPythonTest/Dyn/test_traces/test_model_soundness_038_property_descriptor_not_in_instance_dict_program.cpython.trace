@@ -1,0 +1,12 @@
+--- stdout 9
+12 14 42
+
+--- outcome
+ok
+--- globals
+Rectangle = <class 'Rectangle'>
+__doc__ = '\n@property creates a descriptor on the class, not a field in the instance dict.\nAccessing obj.prop calls the getter function. The model reads from\ninstance_attributes (DictStrAny) where the property does NOT exist —\nreturning Hole or raising a missing-key error instead of calling the getter.\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+total_area = <function object>

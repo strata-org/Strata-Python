@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'len': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+len = 1
+read_len = <function object>

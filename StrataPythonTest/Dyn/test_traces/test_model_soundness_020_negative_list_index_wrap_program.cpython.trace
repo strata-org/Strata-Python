@@ -1,0 +1,12 @@
+--- stdout 12
+50 40 50 -1
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython supports negative list indexing: lst[-1] is the last element,\nlst[-2] is second-to-last, etc. The Laurel encoding's List_get function\nlikely uses the index directly without wrapping negative values, causing\neither an out-of-bounds access or returning the wrong element.\n"
+__name__ = '__main__'
+last_element = <function object>
+main = <function object>
+safe_last = <function object>
+second_to_last = <function object>

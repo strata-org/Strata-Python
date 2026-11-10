@@ -1,0 +1,10 @@
+--- stdout 61
+OK: comprehension iter asymmetry — items visible, x isolated
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+items = [1, 2, 3]
+result = [2, 4, 6]

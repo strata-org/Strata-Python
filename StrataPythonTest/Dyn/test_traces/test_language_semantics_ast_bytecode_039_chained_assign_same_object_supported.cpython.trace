@@ -1,0 +1,11 @@
+--- stdout 5
+PASS
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Chained assign: mutations visible through both names.'
+__name__ = '__main__'
+x = {'key': 'val', 'new': 1}
+y = {'key': 'val', 'new': 1}
+z = {'key': 'val', 'new': 1}

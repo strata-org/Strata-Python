@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+G = 100
+H = 123
+LATER = 7
+__annotations__ = {'G': <class 'int'>, 'H': <class 'int'>, 'LATER': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+read_later_global = <function object>
+test_global_var = <function object>

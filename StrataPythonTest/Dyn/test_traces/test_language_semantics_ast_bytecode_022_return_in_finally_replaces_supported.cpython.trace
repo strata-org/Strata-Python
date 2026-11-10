@@ -1,0 +1,10 @@
+--- stdout 48
+OK: return in finally — provides fallback value
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+compute_value = <function object>
+get_default = <function object>

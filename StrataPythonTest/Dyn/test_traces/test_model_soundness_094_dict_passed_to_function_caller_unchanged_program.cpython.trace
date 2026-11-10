@@ -1,0 +1,12 @@
+--- stdout 30
+{'a': 1, 'b': 2, 'c': 3} 11 3
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nWhen a dict is passed to a function that modifies it (`d[k] = v`),\nthe caller's dict is unchanged under pure-function value semantics.\nIn CPython, dicts are passed by reference — the caller sees the change.\n\nThis is the dict-specific instance of finding 005 (mutable container\npassed to function). The divergence is that the function's modifications\nare invisible to the caller.\n"
+__name__ = '__main__'
+add_entry = <function object>
+build_config = <function object>
+main = <function object>
+remove_and_add = <function object>

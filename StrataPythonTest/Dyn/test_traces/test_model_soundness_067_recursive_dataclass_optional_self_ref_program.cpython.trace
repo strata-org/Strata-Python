@@ -1,0 +1,15 @@
+--- stdout 9
+6 3 True
+
+--- outcome
+ok
+--- globals
+Node = <class 'Node'>
+Optional = <_SpecialForm object>
+__doc__ = '\nA dataclass with an Optional self-referential field creates a recursive\ntype: `Optional[Node]` means the field is either None or another Node.\nThe Laurel `from_ClassInstance` encoding stores attributes in a flat\nDictStrAny. A recursive structure (linked list, tree) requires that\nthe DictStrAny can contain `from_ClassInstance` values — which it can,\nsince values are `Any`. But the model may not handle:\n1. Traversal termination (checking `node.next is None` to stop)\n2. Depth-dependent properties (the type is infinitely recursive)\n3. Construction of nested instances\n'
+__name__ = '__main__'
+dataclass = <function object>
+find_value = <function object>
+list_length = <function object>
+list_sum = <function object>
+main = <function object>

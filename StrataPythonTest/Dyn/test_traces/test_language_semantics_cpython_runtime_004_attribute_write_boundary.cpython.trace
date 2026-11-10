@@ -1,0 +1,12 @@
+--- stdout 51
+1
+99
+Error: 'Flexible' object has no attribute 'x'
+
+--- outcome
+ok
+--- globals
+Flexible = <class 'Flexible'>
+__doc__ = 'Attribute write: boundary case.\nDynamic attribute creation outside __init__ breaks the field-array model.\n'
+__name__ = '__main__'
+obj = <Flexible object>

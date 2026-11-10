@@ -1,0 +1,13 @@
+--- stdout 13
+True True 30
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nAfter constructing a list literal and appending elements, the model must\ntrack the list's length precisely. The solver needs to prove:\n  len([1,2,3]) == 3\n  After append: len == 4\n  After another append: len == 5\n\nThis requires CONNECTED axioms between:\n- List literal construction (finding 183: postconditions)\n- List_append (finding 170: rebind + len+1)\n- List_len (finding 088: no relationship to operations)\n\nWithout all three working together, loop bounds and index checks fail.\n\nUses ONLY confirmed-accepted constructs: list, append, len, int, while.\n"
+__name__ = '__main__'
+build_and_check_length = <function object>
+build_in_loop_check_length = <function object>
+index_after_append = <function object>
+main = <function object>
+safe_access_after_build = <function object>

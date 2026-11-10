@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Resource = <class 'Resource'>
+__annotations__ = {'entered': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+bind_entered = <function object>
+entered = 8

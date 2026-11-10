@@ -1,0 +1,11 @@
+--- stdout 13
+[1, 2, 3] 60
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nCPython's `for x in lst` captures an iterator at loop entry. Reassigning\nthe list variable inside the loop does NOT affect iteration — the iterator\nholds a reference to the ORIGINAL list object. In the pure-functional\nmodel, if the loop reads from the current value of the variable at each\nstep, reassignment inside the body changes what the loop iterates over.\n"
+__name__ = '__main__'
+collect_with_reassign = <function object>
+main = <function object>
+sum_with_clear = <function object>

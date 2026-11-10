@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: NoInit() takes no arguments
+--- globals
+NoInit = <class 'NoInit'>
+__doc__ = None
+__name__ = '__main__'
+test = <function object>

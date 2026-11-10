@@ -1,0 +1,12 @@
+--- stdout 17
+[1, 1, 1, 1] 8 7
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nINCORRECT OPERATOR BEHAVIOR: ** (power) with zero exponent.\n\nCPython: x ** 0 = 1 for ALL x (including 0**0 = 1)\nModel:   PPow is uninterpreted → x ** 0 = Hole (unknown)\n\nThe model can't prove the most basic power identity: anything**0 == 1.\n"
+__name__ = '__main__'
+main = <function object>
+power_basic = <function object>
+power_one_exponent = <function object>
+power_zero_exponent = <function object>

@@ -1,0 +1,9 @@
+--- stdout 8
+cleanup
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+read_flag = <function object>

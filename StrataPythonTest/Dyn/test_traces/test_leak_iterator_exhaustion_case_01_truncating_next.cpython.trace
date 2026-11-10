@@ -1,0 +1,10 @@
+--- stdout 9
+[(1, 2)]
+
+--- outcome
+ok
+--- globals
+Pairs = <class 'Pairs'>
+RESULT = [(1, 2)]
+__doc__ = 'Case 1 (iterator exhaustion): StopIteration escaping __next__ truncates.'
+__name__ = '__main__'

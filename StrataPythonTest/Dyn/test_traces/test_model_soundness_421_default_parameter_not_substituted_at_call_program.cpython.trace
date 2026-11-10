@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nDEFAULT PARAMETER NOT SUBSTITUTED AT CALL SITE\n\nCPython: def greet(name: str, prefix: str = "Hello") -> str:\n             return prefix + " " + name\n         greet("World") → "Hello World" (default substituted)\n\nModel:   If translator doesn\'t substitute default at call site:\n         greet("World") → greet("World", ???)\n         prefix parameter is unbound or Hole → result is Hole\n\n         The translator must recognize that greet("World") has\n         fewer arguments than parameters and substitute the default\n         value "Hello" for the missing `prefix` argument.\n\nCPython result: "Hello World"\nModel result: Hole (prefix not substituted)\n'
+__name__ = '__main__'
+clamp = <function object>
+greet = <function object>
+increment = <function object>
+main = <function object>
+repeat = <function object>

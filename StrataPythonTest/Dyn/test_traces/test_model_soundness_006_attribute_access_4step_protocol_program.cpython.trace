@@ -1,0 +1,11 @@
+--- stdout 12
+42
+fallback
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Fallback = <class 'Fallback'>
+__doc__ = '\nDemonstrates the 4-step attribute access protocol fallthrough.\nAfter del self.x, access falls to __getattr__ which returns wrong type.\n'
+__name__ = '__main__'
+main = <function object>

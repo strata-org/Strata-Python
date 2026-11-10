@@ -1,0 +1,13 @@
+--- stdout 23
+False
+False
+False
+True
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython floats are IEEE 754 double-precision. The Laurel encoding models\nthem as mathematical reals (SMT-LIB 'Real' sort). This causes divergence\non any computation where IEEE 754 rounding produces a different result\nthan exact real arithmetic.\n\nClassic example: 0.1 + 0.2 != 0.3 in IEEE 754, but == 0.3 in reals.\n"
+__name__ = '__main__'
+check_sum = <function object>
+main = <function object>

@@ -1,0 +1,17 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+Temperature = <class 'Temperature'>
+__doc__ = "\nOrdering comparison (<, >, <=, >=) on @dataclass instances raises TypeError.\n\nIn CPython, @dataclass (without order=True) does NOT generate __lt__,\n__gt__, __le__, __ge__. Attempting `Point(1,2) < Point(3,4)` raises:\n  TypeError: '<' not supported between instances of 'Point' and 'Point'\n\nThe Laurel model's PLt/PGt/PLe/PGe dispatch on from_ClassInstance likely\nfalls to the catch-all case. Per finding 270/286/290, the catch-all\nshould produce exception(TypeError), but if it produces Hole instead,\nthe model silently accepts code that WILL crash at runtime.\n\nThis is distinct from:\n- Finding 111 (operators on ClassInstance produce no error — covers +,-,*,/)\n- Finding 290 (missing exception for str < int)\n\nThis finding specifically tests ORDERING comparisons on @dataclass objects,\nwhich is a common mistake (forgetting order=True or using @dataclass\nwithout @total_ordering).\n\nUses ONLY confirmed-accepted constructs: @dataclass, comparison operators, if.\n"
+__name__ = '__main__'
+compare_points_gt = <function object>
+compare_points_le = <function object>
+compare_points_lt = <function object>
+compare_temperatures = <function object>
+dataclass = <function object>
+equality_works_but_ordering_doesnt = <function object>
+main = <function object>
+sort_by_comparison = <function object>

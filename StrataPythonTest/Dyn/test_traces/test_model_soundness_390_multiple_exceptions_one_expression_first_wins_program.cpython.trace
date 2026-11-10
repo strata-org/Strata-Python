@@ -1,0 +1,16 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nMULTIPLE EXCEPTIONS IN ONE EXPRESSION — FIRST (LEFT-TO-RIGHT) WINS\n\nCPython: f() + g() where both raise:\n         f() is evaluated FIRST (left-to-right).\n         f() raises → g() is NEVER evaluated.\n         Only f()\'s exception propagates.\n\nModel:   If both subexpressions are evaluated eagerly:\n         val_f = f()  → exception(ValueError("from f"))\n         val_g = g()  → exception(KeyError("from g"))\n         PAdd(exception(...), exception(...)) → Hole or picks one arbitrarily\n\n         The model may:\n         1. Evaluate both (wrong — g should never run)\n         2. Pick the wrong exception (KeyError instead of ValueError)\n         3. Return Hole (losing both exceptions)\n\nCPython guarantees LEFT-TO-RIGHT evaluation with SHORT-CIRCUIT on exception.\nThe FIRST exception (leftmost) is the one that propagates.\n'
+__name__ = '__main__'
+both_raise_addition = <function object>
+both_raise_in_args = <function object>
+first_ok_second_raises = <function object>
+main = <function object>
+raise_key_error = <function object>
+raise_value_error = <function object>
+side_effect_tracking = <function object>
+three_operands = <function object>

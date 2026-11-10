@@ -1,0 +1,14 @@
+--- stdout 10
+True 10 2
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nComparison operators (`<`, `>`, `<=`, `>=`, `==`, `!=`) must return\n`from_bool(True)` or `from_bool(False)`. If PLt/PGt/etc. return\n`from_int` (e.g., 0 or 1) instead of `from_bool`, subsequent boolean\noperations on the result fail: `if` conditions expect `from_bool`,\n`and`/`or` expect `from_bool`, etc.\n'
+__name__ = '__main__'
+both_positive = <function object>
+clamp = <function object>
+count_above = <function object>
+is_positive = <function object>
+main = <function object>
+min_of_two = <function object>

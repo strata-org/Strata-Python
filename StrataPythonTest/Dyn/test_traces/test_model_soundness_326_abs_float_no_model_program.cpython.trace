@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nabs() on float has no model — abs(-3.14) returns Hole.\n\nFinding 026/228 note that abs() has no Laurel model. This finding\nspecifically demonstrates abs() on FLOAT values, where the model\nmust return from_float (not from_int), and the semantics are trivial:\n  abs(x) = x if x >= 0 else -x\n\nThe fix is a simple conditional, but without it:\n- abs(-3.14) → Hole (unconstrained value)\n- Downstream comparisons like `abs(x) >= 0` are unprovable\n- Guard patterns like `if abs(x - y) < epsilon:` can't be verified\n\nUses ONLY confirmed-accepted constructs: abs, float, int, comparison.\n"
+__name__ = '__main__'
+abs_always_nonneg = <function object>
+abs_negative_float = <function object>
+abs_negative_int = <function object>
+abs_positive_float = <function object>
+distance = <function object>
+main = <function object>
+within_epsilon = <function object>

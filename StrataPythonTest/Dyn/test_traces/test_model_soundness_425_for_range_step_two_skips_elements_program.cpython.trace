@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFOR RANGE WITH STEP 2 — SKIPS ELEMENTS, ITERATION COUNT IS HALVED\n\nCPython: for i in range(0, 10, 2): → iterates i = 0, 2, 4, 6, 8\n         5 iterations, not 10.\n\nModel:   If step is ignored or always 1:\n         for i in range(0, 10, 2): → iterates i = 0, 1, 2, ..., 9\n         10 iterations (WRONG)\n\n         If step is used but iteration count formula wrong:\n         count = (stop - start) // step = (10 - 0) // 2 = 5 (correct)\n         But: must also handle non-divisible cases:\n         range(0, 7, 2) → [0, 2, 4, 6] → 4 iterations (ceil((7-0)/2) = 4)\n\nCPython result: [0, 2, 4, 6, 8] (5 elements)\nModel result: [0, 1, 2, ..., 9] (10 elements, if step ignored)\n'
+__name__ = '__main__'
+collect_range = <function object>
+count_range_elements = <function object>
+even_indices = <function object>
+main = <function object>
+sum_every_third = <function object>

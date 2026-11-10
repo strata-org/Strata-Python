@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+FrozenInstanceError = <class 'FrozenInstanceError'>
+Key = <class 'Key'>
+RESULT = (('FrozenInstanceError', True), 1, 2, True, False)
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+frozen_write_and_replace = <function object>
+replace = <function object>

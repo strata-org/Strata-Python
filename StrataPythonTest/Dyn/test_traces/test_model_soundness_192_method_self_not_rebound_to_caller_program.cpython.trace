@@ -1,0 +1,14 @@
+--- stdout 6
+3 0 1
+
+--- outcome
+ok
+--- globals
+Counter = <class 'Counter'>
+__doc__ = "\nWhen a method modifies `self` (writes to self.field), the caller's\nvariable is NOT updated under value semantics. The method operates on\na COPY of the object.\n\n    obj.method()  # method modifies self internally\n    # obj is UNCHANGED from caller's perspective\n\nIn CPython, obj IS modified (reference semantics). Under value semantics,\nthe caller must capture the return value:\n\n    obj = obj.method()  # method returns modified self\n\nFinding 011 identified this. Finding 098 identified self-rebinding within\nthe method. This finding focuses on the CALLER SIDE: even if the method\ncorrectly rebinds self internally, the caller's variable is still the\nold copy unless the method returns the new self AND the caller rebinds.\n\nUses ONLY confirmed-accepted constructs: @dataclass, method, int.\n"
+__name__ = '__main__'
+caller_forgets = <function object>
+caller_rebinds = <function object>
+dataclass = <function object>
+main = <function object>
+mutating_method_diverges = <function object>

@@ -1,0 +1,12 @@
+--- stdout 20
+positive -1 unnamed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nPython\'s `if` statement evaluates truthiness of the condition expression.\n`if n:` is equivalent to `if bool(n):`. For int, 0 is falsy; for str,\n"" is falsy; for list, [] is falsy. If the model only accepts `from_bool`\nin condition position, non-bool conditions produce wrong control flow\nor Hole.\n'
+__name__ = '__main__'
+first_or_default = <function object>
+label_or_unnamed = <function object>
+main = <function object>
+sign = <function object>

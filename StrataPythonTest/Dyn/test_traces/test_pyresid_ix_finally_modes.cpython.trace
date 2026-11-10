@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised Oops: 
+--- globals
+Oops = <class 'Oops'>
+__doc__ = None
+__name__ = '__main__'
+modes = <function object>

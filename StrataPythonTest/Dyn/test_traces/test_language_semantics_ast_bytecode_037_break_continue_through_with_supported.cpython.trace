@@ -1,0 +1,11 @@
+--- stdout 5
+PASS
+
+--- outcome
+ok
+--- globals
+CM = <class 'CM'>
+__doc__ = 'Continue through with: __exit__ called each iteration.'
+__name__ = '__main__'
+exit_count = 3
+i = 2

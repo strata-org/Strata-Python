@@ -1,0 +1,12 @@
+--- stdout 9
+99 3 3 5
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nDict key assignment (`d[k] = v`) in the model prepends a new entry to\nthe DictStrAny association list. The old entry for the same key remains\n(shadowed). This means:\n1. Memory grows unboundedly with repeated overwrites (finding 032 covers len)\n2. `DictStrAny_keys` or iteration may yield duplicate keys\n3. Equality comparison sees different internal structure for semantically\n   equal dicts (finding 041 covers this)\n\nThis finding focuses on a NEW consequence: after N overwrites of the\nsame key, the DictStrAny has N+1 entries. Operations that traverse the\nfull list (keys(), values(), items(), iteration) have O(N) cost per\noverwrite instead of O(1), and may expose shadowed entries.\n'
+__name__ = '__main__'
+build_frequency_table = <function object>
+count_updates = <function object>
+main = <function object>
+overwrite_and_check = <function object>

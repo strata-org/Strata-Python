@@ -1,0 +1,14 @@
+--- stdout 7
+1 42 3
+
+--- outcome
+ok
+--- globals
+__doc__ = "\n`dict.setdefault(key, default)` returns d[key] if key exists,\notherwise sets d[key] = default and returns default.\n\nIt's equivalent to:\n    if key not in d:\n        d[key] = default\n    return d[key]\n\nBut as a single atomic operation. Under pure dict semantics, it must:\n1. Check if key exists\n2. If not, rebind dict with new key-value pair\n3. Return the value (existing or default)\n\nThis is another dual-return operation (like list.pop — finding 181):\nit returns a value AND potentially modifies the dict.\n\nUses ONLY confirmed-accepted constructs: dict, str, int, function def.\n"
+__name__ = '__main__'
+counting_pattern = <function object>
+main = <function object>
+setdefault_doesnt_overwrite = <function object>
+setdefault_existing = <function object>
+setdefault_missing = <function object>
+setdefault_modifies_dict = <function object>

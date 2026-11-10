@@ -1,0 +1,16 @@
+--- stdout 11
+42 10 True
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nWhen function `f` has return type `-> int` and the caller does:\n    x: int = f(args)\n    assert x > 0  # should be provable if f's postcondition guarantees it\n\nThe model must ASSUME the function's postcondition at the call site.\nWithout this, the caller knows nothing about the return value — it's\nan unconstrained value of the correct type.\n\nKey issue: inter-procedural reasoning. If `f` is verified to always\nreturn a positive int, the caller of `f` must be able to USE that fact.\n\nTwo approaches:\n1. Inline f's body (only works for non-recursive, small functions)\n2. Use f's contract (postcondition) as an assumption at the call site\n\nIf neither is done, the return value is Hole (unconstrained), and the\ncaller cannot prove anything about it.\n\nUses ONLY confirmed-accepted constructs: function def, int, assert.\n"
+__name__ = '__main__'
+absolute_value = <function object>
+always_positive = <function object>
+caller_needs_abs_nonneg = <function object>
+caller_uses_arithmetic_postcondition = <function object>
+caller_uses_postcondition = <function object>
+chained_calls = <function object>
+double = <function object>
+main = <function object>

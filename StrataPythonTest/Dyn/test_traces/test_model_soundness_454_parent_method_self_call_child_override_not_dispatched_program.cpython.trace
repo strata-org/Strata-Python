@@ -1,0 +1,17 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+DoubleFormatter = <class 'DoubleFormatter'>
+EvenValidator = <class 'EvenValidator'>
+Formatter = <class 'Formatter'>
+HexFormatter = <class 'HexFormatter'>
+Validator = <class 'Validator'>
+__doc__ = '\nPARENT METHOD CALLS self.method() — CHILD OVERRIDE NOT DISPATCHED\n\nThe subset allows:\n  - Single inheritance (IN)\n  - Method override in child class (IN, finding 055/375)\n  - Method calling another method on self (IN, finding 247)\n\nThe NOVEL gap: a PARENT method calls self.other_method(), and the\nCHILD overrides other_method(). In CPython, the parent\'s call dispatches\nto the child\'s override (virtual dispatch). In the model, the parent\'s\ncall dispatches to the PARENT\'s version (static dispatch).\n\nThis is the "template method pattern" — extremely common in OOP:\n\n  class Base:\n      def template(self) -> str:\n          return self.step()  # should dispatch to child\'s step()\n      def step(self) -> str:\n          return "base"\n\n  class Child(Base):\n      def step(self) -> str:\n          return "child"\n\n  Child().template()\n  # CPython: "child" (self.step() dispatches to Child.step)\n  # Model:  "base"  (self.step() dispatches to Base.step — WRONG)\n\nROOT CAUSE: When translating Base.template(), the translator sees\nself.step() and translates it as Base_step(self) (static dispatch\nbased on the class where the method is defined). It doesn\'t know\nthat self might be a Child instance at runtime.\n\nThis is distinct from:\n  - Finding 055 (method override no virtual dispatch) — that\'s about\n    EXTERNAL calls: caller.method() on a parent-typed variable\n  - Finding 375 (classname-based dispatch) — that\'s about the dispatch\n    mechanism, not the internal-call scenario\n  - Finding 247 (method calling another method on self) — that\'s about\n    the SAME class, not cross-class dispatch\n  - Finding 313 (inherited method not found on child) — that\'s about\n    finding the method at all, not about override dispatch\n\nThe template method pattern is one of the most common OOP patterns.\nIf the model can\'t handle it, a large class of programs is unsound.\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+test_formatter_dispatch = <function object>
+test_validator_dispatch = <function object>

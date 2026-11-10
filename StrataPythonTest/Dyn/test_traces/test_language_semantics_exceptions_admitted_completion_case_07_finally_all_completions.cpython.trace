@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+Marker = <class 'Marker'>
+RESULT = (1, 1, 1, 1, 1)
+__doc__ = None
+__name__ = '__main__'
+break_completion = <function object>
+continue_completion = <function object>
+normal_completion = <function object>
+raise_completion = <function object>
+return_completion = <function object>

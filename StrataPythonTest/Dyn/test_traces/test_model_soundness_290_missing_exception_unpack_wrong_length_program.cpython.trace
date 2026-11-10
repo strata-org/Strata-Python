@@ -1,0 +1,12 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nMISSING EXCEPTION: Comparison on incompatible types → TypeError.\n\nCPython: "hello" < 5 → TypeError (unorderable types)\nModel: PLt(from_str("hello"), from_int(5)) → Hole (no error)\n\nNote: == and != work cross-type (return False). But <, >, <=, >= on\nincompatible types raise TypeError in Python 3.\n'
+__name__ = '__main__'
+list_lt_int = <function object>
+main = <function object>
+none_lt_int = <function object>
+str_lt_int = <function object>

@@ -1,0 +1,12 @@
+--- stdout 7
+2 9 10
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython's `break` statement exits the innermost enclosing loop immediately.\nCode after the break within the loop body is unreachable. If the model\ndoesn't terminate the loop iteration on `break`, subsequent statements\nexecute and the loop may continue iterating.\n\nSimilarly, `continue` skips the rest of the current iteration and jumps\nto the loop's next iteration check. If not modeled as a control-flow\njump, code after `continue` executes incorrectly.\n"
+__name__ = '__main__'
+find_index = <function object>
+first_above_threshold = <function object>
+main = <function object>
+sum_skip_negatives = <function object>

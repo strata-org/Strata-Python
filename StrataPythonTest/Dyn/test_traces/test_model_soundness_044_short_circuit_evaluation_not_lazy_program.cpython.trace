@@ -1,0 +1,14 @@
+--- stdout 21
+False 0 True 0 False
+
+--- outcome
+ok
+--- globals
+Counter = <class 'Counter'>
+__doc__ = "\nPython's `and` and `or` are short-circuit operators: `a and b` does NOT\nevaluate `b` if `a` is falsy; `a or b` does NOT evaluate `b` if `a` is\ntruthy. If the Laurel translator emits both operands eagerly (e.g., as\nPAnd(eval(a), eval(b))), side-effecting function calls on the RHS execute\nunconditionally, diverging from CPython.\n"
+__name__ = '__main__'
+check_and_skip = <function object>
+check_or_skip = <function object>
+dataclass = <function object>
+guarded_division = <function object>
+main = <function object>

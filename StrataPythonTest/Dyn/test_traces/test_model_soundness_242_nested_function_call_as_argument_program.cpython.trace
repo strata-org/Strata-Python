@@ -1,0 +1,17 @@
+--- stdout 9
+12 11 10
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nNested function calls as arguments: `f(g(x), h(y))`.\nThe model must:\n1. Evaluate g(x) first → result1\n2. Evaluate h(y) second → result2\n3. Call f(result1, result2)\n\nEvaluation order is left-to-right (finding 132). Each intermediate\nresult must be available as input to the outer call.\n\nThis is the ANF requirement (finding 159/240) applied to function\narguments: each argument expression must be evaluated to a temporary\nbefore the outer call.\n\nUses ONLY Frontend-subset features: function def, int, nested calls.\n'
+__name__ = '__main__'
+add = <function object>
+add_one = <function object>
+deeply_nested = <function object>
+double = <function object>
+main = <function object>
+nested_same_function = <function object>
+nested_simple = <function object>
+nested_two_args = <function object>
+nested_with_literal = <function object>

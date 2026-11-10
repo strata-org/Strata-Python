@@ -1,0 +1,17 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nNESTED FUNCTION CALL — RETURN TYPE OF INNER MUST SATISFY PARAM TYPE OF OUTER\n\nCPython: f(g(x)) — g returns int, f expects int. Type flows through.\n\nModel:   g(x) returns from_int(result).\n         f(from_int(result)) — f\'s parameter has tag assertion isfrom_int.\n         The caller must ASSUME g\'s return type to PROVE f\'s precondition.\n\n         Without inter-procedural contracts (finding 225):\n         - g\'s return value is unconstrained (Hole)\n         - f\'s parameter assertion fails (can\'t prove isfrom_int(Hole))\n         - Verifier reports false positive: "possible TypeError"\n\nThis tests the INTER-PROCEDURAL TYPE FLOW that the subset requires:\nfull annotations on all functions means the verifier should use\nreturn-type annotations as assumptions at call sites.\n'
+__name__ = '__main__'
+add_one = <function object>
+chain_through_variable = <function object>
+deeply_nested = <function object>
+double = <function object>
+main = <function object>
+negate = <function object>
+nested_in_condition = <function object>
+nested_simple = <function object>
+nested_with_arithmetic = <function object>

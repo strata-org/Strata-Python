@@ -1,0 +1,13 @@
+--- stdout 4
+3 3
+
+--- outcome
+ok
+--- globals
+Stack = <class 'Stack'>
+__doc__ = '\nUnder value semantics, a method that modifies self produces a new value\ninternally, but the CALLER\'s variable still holds the old value. The\ncaller must reassign: `obj = obj.method()` (if method returns self) or\nthe method must return the modified value explicitly.\n\nThis is the "caller must reassign" pattern that value semantics forces.\nPrograms that call mutating methods without reassignment silently lose\nthe mutations.\n'
+__name__ = '__main__'
+correct_usage = <function object>
+dataclass = <function object>
+incorrect_usage = <function object>
+main = <function object>

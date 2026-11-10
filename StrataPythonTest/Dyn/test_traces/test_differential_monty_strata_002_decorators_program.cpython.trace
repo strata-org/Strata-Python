@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised AssertionError: precondition
+--- globals
+__doc__ = None
+__name__ = '__main__'
+identity = <function object>
+require_nonneg = <function object>

@@ -1,0 +1,12 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nWHILE TRUE + BREAK — POSTCONDITION FROM BREAK GUARD\n\nCPython: while True:\n             if found: break\n         # After loop: `found` is True (break only exits when found is True)\n\nModel:   Finding 311 notes that `assume(!condition)` after while is UNSOUND\n         when break exits (condition is still True).\n\n         But the BREAK GUARD gives us information:\n         `if cond: break` means: at the break point, cond is True.\n         After the loop (exited via break): cond holds.\n\n         The model must emit: assume(break_guard_condition) after the loop\n         (when the loop can ONLY exit via break, not normal termination).\n\nFor `while True: ... if cond: break`:\n  - Normal exit: impossible (True is always True)\n  - Break exit: cond is True at break point\n  - Post-loop: assume(cond)\n'
+__name__ = '__main__'
+binary_search_step = <function object>
+find_first_positive = <function object>
+main = <function object>
+read_until_sentinel = <function object>

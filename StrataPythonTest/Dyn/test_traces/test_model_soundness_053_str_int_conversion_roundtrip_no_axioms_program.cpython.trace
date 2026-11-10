@@ -1,0 +1,13 @@
+--- stdout 15
+42 42 count: 5
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nPython\'s `str()` on an int produces the decimal string representation.\n`int()` on a string parses it. These conversions have precise semantics:\nstr(42) == "42", int("42") == 42, str(-3) == "-3", len(str(n)) depends\non the number of digits. The Laurel model\'s `to_str_any`/`to_int_any`\nare likely uninterpreted (Hole), meaning properties like\n`int(str(n)) == n` or `len(str(n)) > 0` are unprovable.\n'
+__name__ = '__main__'
+digit_count_positive = <function object>
+int_to_str = <function object>
+main = <function object>
+roundtrip = <function object>
+str_concat_int = <function object>

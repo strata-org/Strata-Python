@@ -1,0 +1,14 @@
+--- stdout 5
+7 ab
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nType annotations in the Frontend subset are the SOURCE OF TRUTH for tag\nassertions. `x: int` means the verifier should know `isfrom_int(x)` at\nthat point. The oracle uses annotations to determine the initial tag set\nfor each variable.\n\nIf annotations are ignored or not translated to tag assertions, the\nverifier has no type information and can't prove anything.\n"
+__name__ = '__main__'
+local_annotations = <function object>
+main = <function object>
+typed_arithmetic = <function object>
+typed_comparison = <function object>
+typed_mixed = <function object>
+typed_string_ops = <function object>

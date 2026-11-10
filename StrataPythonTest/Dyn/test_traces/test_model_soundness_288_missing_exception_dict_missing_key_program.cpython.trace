@@ -1,0 +1,12 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nMISSING EXCEPTION: d["missing_key"] → KeyError in CPython, Hole in model.\n\nCPython: accessing a key not in the dict raises KeyError.\nModel: DictStrAny_get(d, "missing") → Hole (unconstrained, no error)\n\nThe model thinks accessing a missing key MIGHT SUCCEED and return some value.\n'
+__name__ = '__main__'
+access_after_del = <function object>
+access_empty_dict = <function object>
+access_missing_key = <function object>
+main = <function object>

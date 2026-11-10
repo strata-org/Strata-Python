@@ -1,0 +1,11 @@
+--- stdout 8
+2.5 2.5
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nMISSING REFLECTED METHOD DISPATCH: int / float\n\nCPython protocol:\n  1. int.__truediv__(float) → NotImplemented\n  2. float.__rtruediv__(int) → float result ✓\n\nModel: PTrueDiv(from_int(10), from_float(4.0))\n  → match: no (from_int, from_float) case\n  → Hole\n\nCPython result: 2.5\nModel result:  Hole\n'
+__name__ = '__main__'
+float_div_int = <function object>
+int_div_float = <function object>
+main = <function object>

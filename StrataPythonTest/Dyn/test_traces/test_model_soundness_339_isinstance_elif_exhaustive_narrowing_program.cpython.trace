@@ -1,0 +1,16 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Animal = <class 'Animal'>
+Cat = <class 'Cat'>
+Dog = <class 'Dog'>
+__doc__ = '\nisinstance EXHAUSTIVE elif NARROWING — else branch has no negation\n\nCPython: After `if isinstance(x, int): ... elif isinstance(x, str): ... else:`\n         the else branch knows x is NEITHER int NOR str.\n\nModel:   Each isinstance guard emits `assume(isfrom_int(x))` in its branch,\n         but the final else branch has NO assumption about what x is NOT.\n         The solver treats x as unconstrained in the else branch, which means\n         it could be int or str — contradicting the control flow.\n\nThis causes FALSE NEGATIVES: the verifier fails to detect bugs in the else\nbranch because it considers impossible type combinations.\n'
+__name__ = '__main__'
+classify_number = <function object>
+dataclass = <function object>
+describe = <function object>
+main = <function object>
+process_value = <function object>

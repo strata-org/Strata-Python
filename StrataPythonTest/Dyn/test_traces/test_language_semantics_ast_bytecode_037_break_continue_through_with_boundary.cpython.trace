@@ -1,0 +1,11 @@
+--- stdout 64
+PASS: __exit__ not skipped by break (naive model would miss it)
+
+--- outcome
+ok
+--- globals
+CM = <class 'CM'>
+__doc__ = 'Boundary: break exits loop but __exit__ still runs.'
+__name__ = '__main__'
+i = 0
+order = ['enter', 'body0', 'exit']

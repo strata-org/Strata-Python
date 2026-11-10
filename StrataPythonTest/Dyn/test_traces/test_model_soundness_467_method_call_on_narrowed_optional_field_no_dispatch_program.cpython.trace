@@ -1,0 +1,19 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Car = <class 'Car'>
+Engine = <class 'Engine'>
+Optional = <_SpecialForm object>
+Warranty = <class 'Warranty'>
+__doc__ = '\nMETHOD CALL ON NARROWED OPTIONAL FIELD — DISPATCH FAILS AFTER NARROWING\n\nThe subset allows:\n  - @dataclass with Optional[UserClass] fields (IN)\n  - `is not None` narrowing (IN)\n  - Method calls on narrowed variables (IN)\n  - Field access on narrowed variables (IN)\n\nThe NOVEL gap: after narrowing an Optional[UserClass] field via\n`if obj.field is not None`, the narrowed value should support method\ncalls. But the model has TWO compounding problems:\n\n  1. Field access returns untyped Any (finding 441: repeated field access)\n  2. Method dispatch requires classname (finding 375: dispatch uses classname)\n\nCombined, the narrowed field value has:\n  - Tag: known to be from_ClassInstance (narrowing killed from_None)\n  - Classname: UNKNOWN (DictStrAny_get returns opaque Any)\n  - Method dispatch: FAILS (no classname to select method)\n\n  @dataclass\n  class Engine:\n      horsepower: int\n      \n      def is_powerful(self) -> bool:\n          return self.horsepower > 200\n\n  @dataclass\n  class Car:\n      name: str\n      engine: Optional[Engine]\n\n  def check_power(car: Car) -> bool:\n      if car.engine is not None:\n          # Narrowed: car.engine is Engine (not None)\n          # CPython: calls Engine.is_powerful() → True/False\n          # Model: car.engine is from_ClassInstance(???, ???)\n          #   classname unknown → method dispatch fails → Hole\n          return car.engine.is_powerful()\n      return False\n\nROOT CAUSE CHAIN:\n  1. `car.engine` → DictStrAny_get(car.attrs, "engine") → opaque Any\n  2. Narrowing: assume(!isfrom_None(car.engine)) → know it\'s ClassInstance\n  3. But classname is STILL unknown: isfrom_ClassInstance(x) doesn\'t tell\n     us WHICH class it is\n  4. Method dispatch: Engine_is_powerful(x) requires\n     assert(ClassInstance_classname(x) == "Engine") → UNPROVABLE\n  5. Result: Hole or verification failure\n\nThis is distinct from:\n  - Finding 441 (repeated field access narrowing lost) — that\'s about\n    the SAME field read twice; this is about METHOD CALL after narrowing\n  - Finding 235 (isinstance narrows but field access fails) — that\'s\n    about isinstance, not Optional narrowing via `is not None`\n  - Finding 062 (is None narrowing Optional) — that\'s about the\n    narrowing mechanism itself, not the downstream method dispatch\n  - Finding 375 (classname-based dispatch) — that\'s the general\n    dispatch problem; this is the specific interaction with Optional\n\nThe interaction of Optional narrowing + field access + method dispatch\ncreates a THREE-WAY failure that none of the individual findings cover.\n'
+__name__ = '__main__'
+check_power = <function object>
+check_warranty_status = <function object>
+combined_check = <function object>
+dataclass = <function object>
+field_access_then_method = <function object>
+get_efficiency = <function object>
+main = <function object>

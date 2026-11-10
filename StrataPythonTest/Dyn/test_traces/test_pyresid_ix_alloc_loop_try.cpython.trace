@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Box = <class 'Box'>
+Stop = <class 'Stop'>
+__doc__ = None
+__name__ = '__main__'
+build = <function object>
+r = 6

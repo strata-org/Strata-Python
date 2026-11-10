@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised AttributeError: 'A' object has no attribute 'b_only'
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+__doc__ = None
+__name__ = '__main__'
+foo = <function object>

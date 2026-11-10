@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+__doc__ = '\na36_dict_subscript_narrowing.py — isinstance narrowing on d["key"] not invalidated by d["key"] = str.\n\nmypy narrows d["key"] to int via isinstance. Then d["key"] = "changed" assigns str.\nmypy does NOT invalidate the narrowing — it still thinks d["key"] is int.\nSubsequent use of d["key"] as int produces TypeError.\n\nThis is NOT a method-call invalidation bug. It\'s a DIRECT ASSIGNMENT to the\nsame subscript expression that was narrowed. mypy\'s binder doesn\'t track that\nd["key"] = x invalidates isinstance(d["key"], int).\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str - int\n'
+__name__ = '__main__'
+main = <function object>

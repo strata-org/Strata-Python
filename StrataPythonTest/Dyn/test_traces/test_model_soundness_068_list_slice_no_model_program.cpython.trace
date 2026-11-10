@@ -1,0 +1,13 @@
+--- stdout 26
+[10, 20, 30] [20, 30, 40]
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nList slicing (`lst[a:b]`) creates a new list containing elements from\nindex a to b-1. The ListAny cons-list model has no slice operation —\nList_get retrieves a single element by index. There is no List_slice\nthat extracts a sublist. The result is either Hole (uninterpreted) or\na type error (slice object not handled by Any_get!).\n'
+__name__ = '__main__'
+first_n = <function object>
+last_n = <function object>
+main = <function object>
+middle = <function object>
+split_at = <function object>

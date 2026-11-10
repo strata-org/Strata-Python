@@ -1,0 +1,15 @@
+--- stdout 9
+True 3 4
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nThe subset says:\n  - "List append: lst.append(x)" is IN\n  - "for x in lst" is IN\n  - "No aliasing: assigning a list variable to another name (b = a) is OUT"\n\nBut the subset does NOT explicitly forbid:\n  - Passing a list to a function (which creates a parameter alias)\n  - Appending to a list parameter (mutation through alias)\n\nThe subset\'s "no aliasing" rule says `b = a` is OUT, but function\nparameters ARE a form of aliasing: `def f(xs): xs.append(1)` creates\nan alias between the caller\'s list and the parameter.\n\nThis is a SUBSET DEFINITION GAP: the rule is too narrow. It forbids\ndirect variable copy but not parameter aliasing.\n\nUses ONLY confirmed-accepted constructs: list, append, function def.\n'
+__name__ = '__main__'
+append_to_param = <function object>
+caller_correct = <function object>
+caller_multiple = <function object>
+caller_sees_mutation = <function object>
+correct_pattern_return = <function object>
+main = <function object>
+multiple_appends_through_param = <function object>

@@ -1,0 +1,14 @@
+--- stdout 29
+10.0 0.9999999999999999 True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`from_float(as_float: real)` uses SMT-LIB `Real` (exact rational/real\narithmetic), not IEEE 754 double-precision floating point.\n\nFinding 042 identified `0.1 + 0.2 == 0.3` (True in model, False in CPython).\nThis finding focuses on DIVISION specifically, where the divergence is\nmost dangerous for verification:\n\n- `1.0 / 3.0` in CPython: 0.3333333333333333 (rounded)\n- `1.0 / 3.0` in model: exactly 1/3 (no rounding)\n- `(1.0 / 3.0) * 3.0` in CPython: 1.0 (lucky rounding)\n- `(1.0 / 3.0) * 3.0` in model: exactly 1.0 (exact arithmetic)\n\nBut:\n- `1.0 / 10.0 * 10.0` in CPython: 1.0 (happens to round correctly)\n- `0.1 * 3.0` in CPython: 0.30000000000000004 (NOT 0.3)\n- `0.1 * 3.0` in model: exactly 0.3\n\nThe model OVER-PROVES: it says equalities hold that CPython violates.\nThis is UNSOUND in the "false verification" direction — the model says\n"this assertion passes" but CPython would fail it.\n\nUses ONLY confirmed-accepted constructs: float, arithmetic, comparison.\n'
+__name__ = '__main__'
+divide_and_multiply = <function object>
+division_remainder = <function object>
+float_equality_trap = <function object>
+main = <function object>
+safe_comparison = <function object>
+sum_tenths = <function object>

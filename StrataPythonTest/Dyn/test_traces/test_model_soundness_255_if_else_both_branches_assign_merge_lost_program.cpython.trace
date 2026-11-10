@@ -1,0 +1,14 @@
+--- stdout 13
+positive 7 5
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nAfter if/else where BOTH branches assign to the same variable, the\nmerged state must reflect EITHER value depending on which branch was\ntaken. The solver must handle this as a conditional value.\n\nCPython: deterministic — one branch executes, variable has that value.\nModel: if the translator doesn\'t merge correctly, the variable might\n       have the value from the WRONG branch, or be undefined.\n\nCPython result: classify(5) == "positive" (True)\nModel result: depends on merge handling — may be wrong or unprovable.\n'
+__name__ = '__main__'
+abs_manual = <function object>
+classify = <function object>
+conditional_with_computation = <function object>
+main = <function object>
+max_of_two = <function object>
+nested_conditional = <function object>

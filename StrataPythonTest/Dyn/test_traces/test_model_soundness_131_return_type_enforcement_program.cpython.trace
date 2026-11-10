@@ -1,0 +1,13 @@
+--- stdout 6
+6 0 2
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nA function annotated `-> int` must return a value tagged `from_int`.\nIf the function returns a value with a different tag (e.g., from_str\nor from_None), the verifier should catch this as a type error.\n\nThe model must enforce return type annotations by asserting the tag\nof the return value matches the declared return type.\n'
+__name__ = '__main__'
+always_returns_int = <function object>
+conditionally_typed = <function object>
+main = <function object>
+multiple_return_paths = <function object>
+returns_wrong_type_if_unchecked = <function object>

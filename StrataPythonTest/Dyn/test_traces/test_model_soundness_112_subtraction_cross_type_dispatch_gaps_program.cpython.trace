@@ -1,0 +1,14 @@
+--- stdout 10
+2.5 3.5 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nSubtraction (`-`) has the same cross-type dispatch gaps as addition:\n- int - float → float (promotion)\n- float - int → float (promotion)\n- bool - int → int (bool promotes to int)\n- int - bool → int (bool promotes to int)\n\nIf PSub only handles same-type pairs (int-int, float-float), cross-type\nsubtraction falls to Hole. This is the subtraction analog of finding 024.\n'
+__name__ = '__main__'
+bool_minus_int = <function object>
+countdown = <function object>
+distance = <function object>
+float_minus_int = <function object>
+int_minus_float = <function object>
+main = <function object>

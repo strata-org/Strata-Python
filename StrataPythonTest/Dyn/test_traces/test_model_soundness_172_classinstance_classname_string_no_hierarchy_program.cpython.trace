@@ -1,0 +1,16 @@
+--- stdout 9
+15 48 63
+
+--- outcome
+ok
+--- globals
+Circle = <class 'Circle'>
+Rectangle = <class 'Rectangle'>
+Shape = <class 'Shape'>
+__doc__ = '\n`from_ClassInstance(classname: string, instance_attributes: DictStrAny)`\nuses a STRING for the class name. This means:\n\n1. isinstance(obj, Parent) checks `classname == "Parent"` — exact match\n   A Dog instance has classname="Dog", so isinstance(dog, Animal) fails\n   even though Dog inherits from Animal.\n\n2. Method dispatch uses the static type\'s classname, not the runtime\n   classname. If `animal: Animal = Dog(...)`, calling `animal.speak()`\n   dispatches to Animal.speak, not Dog.speak.\n\n3. Subclass field access: a Dog stored as `Animal` type still has\n   classname="Dog" and all Dog fields, but the verifier may not know\n   which fields are available without checking the classname.\n\nFinding 027 identified isinstance. Finding 055 identified virtual dispatch.\nThis finding shows the ROOT CAUSE: a flat string classname cannot encode\nan inheritance hierarchy.\n\nUses ONLY confirmed-accepted constructs: class, single inheritance, method.\n'
+__name__ = '__main__'
+dataclass = <function object>
+get_area = <function object>
+is_shape = <function object>
+main = <function object>
+total_area = <function object>

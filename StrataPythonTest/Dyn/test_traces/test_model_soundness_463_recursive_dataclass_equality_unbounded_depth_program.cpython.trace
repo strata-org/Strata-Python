@@ -1,0 +1,18 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Node = <class 'Node'>
+Optional = <_SpecialForm object>
+__doc__ = '\nRECURSIVE DATACLASS EQUALITY REQUIRES UNBOUNDED-DEPTH PEQ RECURSION\n\nThe subset allows:\n  - @dataclass with Optional[Self] field (IN, finding 067)\n  - @dataclass structural equality (IN, finding 213)\n  - Equality comparison == (IN)\n\nThe NOVEL gap: @dataclass generates __eq__ that compares field-by-field.\nWhen a field is itself a @dataclass (or Optional[@dataclass]), equality\nmust RECURSE into that field. For recursive structures like linked lists,\nthis recursion is unbounded.\n\n  @dataclass\n  class Node:\n      value: int\n      next: Optional["Node"]\n\n  a = Node(1, Node(2, Node(3, None)))\n  b = Node(1, Node(2, Node(3, None)))\n  a == b  # True — requires comparing 3 levels deep\n\nThe model\'s PEq on ClassInstance compares:\n  1. classname strings (equal: "Node" == "Node")\n  2. instance_attributes DictStrAny (structural comparison)\n\nBut DictStrAny structural comparison on the "next" field encounters\nANOTHER from_ClassInstance value, requiring PEq to call itself recursively.\n\nROOT CAUSE: PEq is likely defined as a FLAT function that compares\nDictStrAny entries with a single level of PEq. It has no recursive\ncase for from_ClassInstance values nested inside DictStrAny.\n\nEven if PEq IS recursive, the SMT solver cannot unroll it to arbitrary\ndepth. For a linked list of length N, the solver needs N recursive\nunrollings of PEq — which is unbounded.\n\nCPython: True (recursive __eq__ terminates because structure is finite)\nModel: Either Hole (no recursive case) or Unknown (solver timeout)\n\nThis affects ALL recursive data structures: linked lists, trees,\nexpression ASTs — any @dataclass with Optional[Self] fields.\n'
+__name__ = '__main__'
+build_list = <function object>
+dataclass = <function object>
+lists_equal = <function object>
+main = <function object>
+test_depth_three_inequality = <function object>
+test_depth_two_equality = <function object>
+test_length_mismatch = <function object>
+test_shallow_equality = <function object>

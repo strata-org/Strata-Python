@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nSTRING MULTIPLY BY ZERO GIVES EMPTY STRING\n\nCPython: "abc" * 0 → "" (empty string)\n         "abc" * -5 → "" (negative = empty)\n         "abc" * 1 → "abc"\n         "abc" * 3 → "abcabcabc"\n\nModel:   PMul(from_str("abc"), from_int(0)) → Hole (finding 015/262)\n         string_repeat is uninterpreted with no axioms.\n         Even if it existed: no axiom says repeat(s, 0) == ""\n\nCPython result: ""\nModel result: Hole (unconstrained — could be anything)\n\nRoot cause: string_repeat uninterpreted (finding 015).\nThe model doesn\'t know that s * 0 == "" and s * 1 == s.\n'
+__name__ = '__main__'
+main = <function object>
+pad_right = <function object>
+repeat_n = <function object>
+repeat_negative = <function object>
+repeat_one = <function object>
+repeat_zero = <function object>

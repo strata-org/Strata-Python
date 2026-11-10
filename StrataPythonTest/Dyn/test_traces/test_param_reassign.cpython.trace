@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+multi_param_reassign = <function object>
+no_param_reassign = <function object>
+param_reassign_twice = <function object>
+partial_param_reassign = <function object>
+single_param_reassign = <function object>
+test_param_reassign = <function object>

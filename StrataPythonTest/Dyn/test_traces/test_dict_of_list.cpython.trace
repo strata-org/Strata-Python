@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Dict = <_SpecialGenericAlias object>
+List = <_SpecialGenericAlias object>
+__doc__ = None
+__name__ = '__main__'
+test = <function object>

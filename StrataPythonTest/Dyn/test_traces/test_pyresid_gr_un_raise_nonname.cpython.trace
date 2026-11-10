@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised AttributeError: 'NS' object has no attribute 'attr'
+--- globals
+NS = <class 'NS'>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>

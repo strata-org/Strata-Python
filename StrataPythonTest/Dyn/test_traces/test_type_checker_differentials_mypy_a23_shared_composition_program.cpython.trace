@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Shared = <class 'Shared'>
+ViewA = <class 'ViewA'>
+ViewB = <class 'ViewB'>
+__doc__ = "\na23_shared_composition.py — Mutation through shared composition invalidates narrowing.\n\nTwo objects (ViewA, ViewB) hold references to the same Shared instance.\nisinstance narrows a.shared.x to int. Calling b.shared.clear() mutates\nthe shared object's x field. a.shared.x is now str.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str - int\n"
+__name__ = '__main__'
+main = <function object>

@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Enum = <class 'Enum'>
+Job = <class 'Job'>
+Status = <class 'Status'>
+__doc__ = '\na13_enum_narrowing.py — Enum value used after status mutation.\n\nAfter checking j.status == Status.ACTIVE, a method changes the status.\nCode in the narrowed branch uses .value expecting "active" but gets "inactive".\nSubtracting 1 from a str → TypeError.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — unsupported operand type(s) for -: \'str\' and \'int\'\n'
+__name__ = '__main__'
+main = <function object>
+process = <function object>

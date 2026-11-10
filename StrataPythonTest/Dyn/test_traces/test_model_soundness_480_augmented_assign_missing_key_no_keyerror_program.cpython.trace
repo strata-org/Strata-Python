@@ -1,0 +1,14 @@
+--- stdout 11
+All passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nAUGMENTED ASSIGN ON DICT SUBSCRIPT WITH MISSING KEY — KeyError NOT RAISED\n\nThe subset allows:\n  - dict subscript access d[k] (IN)\n  - Augmented assignment d[k] += v (IN — finding 336 covers translation)\n  - Exceptions from missing keys (IN — finding 288 covers d[k] on missing key)\n\nThe NOVEL gap: `d[k] += 1` when `k` is NOT in `d` raises KeyError in\nCPython (because the READ of d[k] fails before the write). But the model\neither:\n  (a) Returns Hole for the read (no KeyError) — computation continues\n      with Hole, producing garbage\n  (b) Treats the augmented assign as a pure write (skips the read) —\n      no error, d[k] becomes 1 instead of raising\n\nThis is DISTINCT from finding 336 which covers the TRANSLATION MECHANICS\n(4-step read-modify-write-rebind). This finding covers the ERROR PATH:\nwhen the initial read FAILS, the model must produce an exception, not\nsilently continue.\n\nCPython: d = {}; d["x"] += 1 → KeyError: \'x\'\nModel:   d = {}; d["x"] += 1 → either Hole (no error) or d["x"]=1 (wrong)\n\nDISTINCT FROM:\n  - Finding 336 (augmented assign translation) — covers mechanics, not error\n  - Finding 288 (missing key access) — covers plain d[k], not d[k] += v\n  - Finding 084 (dict missing key no KeyError) — covers plain read, not\n    augmented assign which has BOTH read AND write semantics\n'
+__name__ = '__main__'
+accumulate_missing = <function object>
+increment_after_guard = <function object>
+increment_missing_key = <function object>
+main = <function object>
+multiply_missing = <function object>
+safe_accumulate = <function object>

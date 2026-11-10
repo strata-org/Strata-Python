@@ -1,0 +1,10 @@
+--- stdout 13
+3.5 2.0 -3.5
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCPython: 7 / 2 → 3.5 (float, true division)\nModel:   PTrueDiv(from_int(7), from_int(2)) → from_int(3) or Hole\n\nTrue division ALWAYS returns float in Python 3, even for int operands.\nIf the model uses integer division or has no PTrueDiv, the result is wrong.\n'
+__name__ = '__main__'
+main = <function object>
+true_div = <function object>

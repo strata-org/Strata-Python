@@ -1,0 +1,12 @@
+--- stdout 9
+1 True 4
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nPython\'s `for/else` construct: the `else` block runs ONLY if the loop\ncompletes without hitting a `break`. If `break` is executed, the `else`\nblock is skipped. This is a control-flow subtlety that the model must\nhandle: the `else` clause is NOT simply "code after the loop" — it is\nconditionally executed based on whether `break` was reached.\n'
+__name__ = '__main__'
+find_index = <function object>
+first_divisor = <function object>
+has_negative = <function object>
+main = <function object>

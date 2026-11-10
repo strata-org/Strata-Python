@@ -1,0 +1,17 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Box = <class 'Box'>
+__doc__ = None
+__name__ = '__main__'
+big = [<Box object>, <Box object>]
+boxes = [<Box object>, <Box object>]
+first = <Box object>
+names = {1, 2}
+same = [<Box object>, <Box object>]
+table = {1: <Box object>, 2: <Box object>}
+vals = [1, 2]
+w = 2
+wrapped = [<Box object>, <Box object>]

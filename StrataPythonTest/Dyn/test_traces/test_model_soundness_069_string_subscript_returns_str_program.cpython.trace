@@ -1,0 +1,14 @@
+--- stdout 6
+h cba
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nIn Python, `s[i]` on a string returns a NEW string of length 1 (there\nis no separate char type). The model's `Any_get!` likely only handles\n`from_ListAny` for subscription. Strings are `from_str` — subscription\non a string requires a separate code path that returns `from_str`.\n"
+__name__ = '__main__'
+char_at = <function object>
+first_char = <function object>
+is_digit_string = <function object>
+last_char = <function object>
+main = <function object>
+reverse_string = <function object>

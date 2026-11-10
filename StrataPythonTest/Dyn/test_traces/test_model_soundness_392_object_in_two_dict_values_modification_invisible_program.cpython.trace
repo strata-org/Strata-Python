@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+__doc__ = '\nOBJECT IN TWO DICT VALUES — MODIFICATION THROUGH ONE KEY INVISIBLE\n\nCPython: d = {"a": obj, "b": obj}  → both values are SAME object\n         d["a"].x = 99 → d["b"].x is also 99 (aliased!)\n\nModel:   d = {"a": copy_of_obj, "b": copy_of_obj}\n         Modifying d["a"].x doesn\'t affect d["b"].x (independent copies)\n\nThe subset bans `b = a` for mutable types. But storing the same\nobject under two dict keys creates an alias that\'s harder to detect.\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+multiple_list_positions = <function object>
+store_in_list_and_dict = <function object>
+store_same_object_two_keys = <function object>

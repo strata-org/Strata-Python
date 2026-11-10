@@ -1,0 +1,11 @@
+--- stdout 11
+False True
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nComparing two lists with `==` when they have different lengths should\nalways return False. In CPython, list equality first checks length,\nthen compares elements. If the model's PEq on ListAny doesn't check\nlength first (or has no model at all — finding 040), it may return\nTrue for lists of different lengths if the shorter list's elements\nhappen to match a prefix of the longer list.\n"
+__name__ = '__main__'
+check_prefix = <function object>
+lists_equal = <function object>
+main = <function object>

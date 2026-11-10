@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+raised NameError: name 'items' is not defined
+--- globals
+Meta = <class 'Meta'>
+Sneaky = <class 'Sneaky'>
+__doc__ = 'Deliberately outside the subset: exercises the accumulate-all checker.\nEvery construct below must appear in one rejection report.'
+__name__ = '__main__'
+os = <module object>
+outer = <function object>
+squares = [0, 0, 0, 0, 1, 2, 0, 2, 4]
+variadic = <function object>

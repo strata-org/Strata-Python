@@ -1,0 +1,12 @@
+--- stdout 17
+3 Dr. John Smith
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nKeyword arguments (`f(y=2, x=1)`) pass arguments by name, not position.\nThe translator must map keyword args to the correct parameter positions.\nIf it only handles positional args, keyword calls produce wrong bindings.\n'
+__name__ = '__main__'
+create_range = <function object>
+divide = <function object>
+format_name = <function object>
+main = <function object>

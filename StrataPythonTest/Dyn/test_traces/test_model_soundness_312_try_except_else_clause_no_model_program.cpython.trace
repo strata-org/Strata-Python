@@ -1,0 +1,13 @@
+--- stdout 31
+All try/except/else tests pass
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nTRY/EXCEPT/ELSE clause — the `else` block runs ONLY when no exception\nwas raised in the `try` block. The model has no representation for this\nconditional execution path.\n\n    try:\n        result = int(s)\n    except ValueError:\n        result = -1\n    else:\n        result = result * 2  # only runs if int(s) succeeded\n\nCPython semantics:\n- `else` executes if and only if the `try` block completed without raising\n- `else` does NOT execute if an exception was raised (even if caught)\n- `else` runs BEFORE `finally`\n\nThe Laurel encoding models exceptions as values (finding 274). Even if\nexception propagation is fixed (finding 298), the `else` clause requires\nknowing WHETHER an exception occurred — a boolean condition on the\nexception path that the current encoding doesn't track.\n\nUses ONLY confirmed-accepted constructs: try, except, else, int, str, function.\n"
+__name__ = '__main__'
+else_not_on_caught = <function object>
+else_with_finally = <function object>
+main = <function object>
+parse_or_double = <function object>
+safe_divide_with_logging = <function object>

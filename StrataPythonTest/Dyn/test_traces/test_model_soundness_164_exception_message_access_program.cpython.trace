@@ -1,0 +1,13 @@
+--- stdout 9
+0 1 True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nWhen catching an exception with `except ValueError as e`, the variable\n`e` holds the exception instance. Accessing `str(e)` or using `e` in\nan f-string retrieves the error message.\n\nThe Laurel model uses `exception(get_error: Error)` as a value tag.\nBut what is `Error`? Can the handler extract the message string from it?\nIf `Error` is opaque (no fields), then `str(e)` in the handler is Hole.\n\nAdditionally, the exception variable `e` is DELETED after the except\nblock exits (Python 3 semantics — prevents reference cycles with\ntraceback). The model must not allow access to `e` after the block.\n\nUses ONLY confirmed-accepted constructs: try/except, ValueError, str, int.\n'
+__name__ = '__main__'
+classify_error = <function object>
+error_message_contains_input = <function object>
+get_error_message = <function object>
+main = <function object>
+reraise_with_context = <function object>

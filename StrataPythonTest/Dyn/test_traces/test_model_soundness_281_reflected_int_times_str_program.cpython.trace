@@ -1,0 +1,10 @@
+--- stdout 7
+ababab
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nMISSING REFLECTED METHOD DISPATCH: int * str\n\nCPython protocol:\n  1. int.__mul__(str) → NotImplemented\n  2. str.__rmul__(int) → repeated string ✓\n\nModel: PMul(from_int(3), from_str("ab"))\n  → match: no (from_int, from_str) case\n  → Hole\n\nCPython result: "ababab"\nModel result:  Hole\n'
+__name__ = '__main__'
+int_times_str = <function object>
+main = <function object>

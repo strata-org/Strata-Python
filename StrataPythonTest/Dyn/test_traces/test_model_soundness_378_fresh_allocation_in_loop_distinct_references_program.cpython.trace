@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Task = <class 'Task'>
+__doc__ = "\nFRESH ALLOCATION IN LOOP — EACH ITERATION MUST PRODUCE DISTINCT REFERENCE\n\nCPython: for i in range(3): objs.append(MyClass(i))\n         Creates 3 DISTINCT objects. objs[0] is not objs[1].\n\nModel (Composite/heap):\n  Each MyClass() call must produce a FRESH Composite reference.\n  fresh(ref) means: ref ≠ all previously-allocated references.\n\n  Without freshness: solver can't prove objs[0] ≠ objs[1].\n  Modifying objs[0].field might affect objs[1].field (same ref!).\n\n  The heap model uses nextReference counter:\n    alloc(heap) → (MkComposite(heap.nextReference), heap{nextReference += 1})\n\n  In a loop, each iteration must increment the counter.\n  The solver needs: ref_i ≠ ref_j for all i ≠ j.\n\nFinding 104 covers two allocations. This finding covers N allocations\nin a LOOP — requiring inductive freshness reasoning.\n"
+__name__ = '__main__'
+all_independent = <function object>
+create_tasks = <function object>
+dataclass = <function object>
+factory_in_loop = <function object>
+main = <function object>
+modify_one_task = <function object>

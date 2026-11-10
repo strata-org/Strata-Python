@@ -1,0 +1,16 @@
+--- stdout 12
+200 150 100
+
+--- outcome
+ok
+--- globals
+Account = <class 'Account'>
+Bank = <class 'Bank'>
+__doc__ = "\nWhen one object's method takes another object as argument and modifies\nit, value semantics means the caller's reference to the second object\nis unchanged.\n\nExample: `manager.add_employee(emp)` — in CPython, if add_employee\nstores emp in manager's list, both manager and the caller's `emp`\nreference the same object. Under value semantics, manager gets a COPY.\n\nBut more subtly: if a method on object A reads fields from object B\n(passed as argument), and B was modified between construction and the\ncall, the model must have the CURRENT state of B, not a stale copy.\n\nUses ONLY confirmed-accepted constructs: @dataclass, method, int.\n"
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+multi_object_interaction = <function object>
+stale_reference_problem = <function object>
+transfer = <function object>
+transfer_between_accounts = <function object>

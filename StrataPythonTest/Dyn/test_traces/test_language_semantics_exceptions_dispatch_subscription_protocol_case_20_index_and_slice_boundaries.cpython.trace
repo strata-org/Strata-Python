@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Index = <class 'Index'>
+RESULT = (30, 'IndexError', 'ValueError')
+__doc__ = 'Sequence indexing normalizes negatives and preserves boundary errors.'
+__name__ = '__main__'
+negative = 30
+out_of_range = 'IndexError'
+values = [10, 20, 30]
+zero_step = 'ValueError'

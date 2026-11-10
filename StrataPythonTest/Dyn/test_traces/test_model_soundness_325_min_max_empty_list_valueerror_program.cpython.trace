@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nmin()/max() on empty list raises ValueError — model returns Hole.\n\nIn CPython:\n  min([1, 2, 3])  → 1\n  max([1, 2, 3])  → 3\n  min([])         → ValueError: min() arg is an empty sequence\n  max([])         → ValueError: max() arg is an empty sequence\n\nFinding 026 notes that min/max/abs/sum have no Laurel model (results\nare Hole). This finding specifically demonstrates the EXCEPTION case:\ncalling min()/max() on an empty list MUST produce exception(ValueError),\nnot Hole. Without this, code that crashes at runtime is silently accepted.\n\nThe pattern `min(xs)` where xs might be empty is a common bug that\nFrontend should catch. If the model returns Hole instead of an exception,\nthe verifier cannot detect this error.\n\nUses ONLY confirmed-accepted constructs: min, max, list, try/except, len.\n'
+__name__ = '__main__'
+main = <function object>
+max_empty_crashes = <function object>
+max_nonempty = <function object>
+min_empty_crashes = <function object>
+min_in_try_except = <function object>
+min_nonempty = <function object>
+safe_min = <function object>

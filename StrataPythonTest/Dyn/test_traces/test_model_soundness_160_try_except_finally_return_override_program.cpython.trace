@@ -1,0 +1,14 @@
+--- stdout 10
+2 99 42 3
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nIn Python, a `return` inside a `finally` block OVERRIDES any return value\nfrom the `try` or `except` block. This is a well-known Python gotcha:\n\n    def f():\n        try:\n            return 1\n        finally:\n            return 2    # This wins! f() returns 2\n\nSimilarly, if `try` raises and `except` returns a value, but `finally`\nalso returns, the `finally` return wins.\n\nThe Laurel model must handle this: `finally` return overrides all other\nreturn paths.\n\nUses ONLY confirmed-accepted constructs: try/except/finally, return, int.\n'
+__name__ = '__main__'
+finally_no_return_preserves_except = <function object>
+finally_no_return_preserves_try = <function object>
+finally_overrides_except = <function object>
+finally_overrides_try = <function object>
+main = <function object>
+nested_finally = <function object>

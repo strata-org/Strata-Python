@@ -1,0 +1,12 @@
+--- stdout 70
+error: invalid literal for int() with base 10: 'abc' parse_error True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`except ValueError as e:` binds the exception object to variable `e`.\nThe handler can access `e` to get the error message or other info.\nIn the exception-as-value model, `e` must be bound to the Error value\nextracted from the exception constructor.\n'
+__name__ = '__main__'
+classify_error = <function object>
+get_error_message = <function object>
+main = <function object>
+reraise_with_context = <function object>

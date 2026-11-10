@@ -84,18 +84,29 @@ def joinRuns (t0 t1 : String) : String :=
   if t0 == t1 then t0
   else s!"{twoRunsHeader}{maskTrace t0}--- PYTHONHASHSEED=1\n{maskTrace t1}"
 
+/-- The seconds that CPython's run of a program may take. -/
+def cpythonSeconds : Nat := 60
+
+/-- The fuel of the semantics' run of a program whose CPython run doesn't end in time. -/
+def endlessFuel : Nat := 1000000
+
+/-- CPython's text for a program whose run doesn't end within `cpythonSeconds`. -/
+def endlessTrace : String := s!"--- does not end within {cpythonSeconds} s\n"
+
 /-- CPython's text for `pyFile`: its trace, or both traces if its runs with `PYTHONHASHSEED` 0
-and 1 differ. -/
+and 1 differ, or `endlessTrace` if a run doesn't end within `cpythonSeconds`. -/
 def cpythonTrace (pythonCmd pyFile : System.FilePath) : IO String := do
-  let traceWith (seed : String) : IO String := do
+  let traceWith (seed : String) : IO (Option String) := do
     let r ← IO.Process.output {
-      cmd := pythonCmd.toString, args := #[traceScript.toString, pyFile.toString]
+      cmd := "timeout"
+      args := #[toString cpythonSeconds, pythonCmd.toString, traceScript.toString, pyFile.toString]
       env := #[("PYTHONHASHSEED", some seed)] }
+    if r.exitCode == 124 then return none
     unless r.exitCode == 0 do
       throw <| .userError s!"{pyFile}: trace.py failed:\n{r.stderr}"
-    return r.stdout
-  let t0 ← traceWith "0"
-  let t1 ← traceWith "1"
+    return some r.stdout
+  let some t0 ← traceWith "0" | return endlessTrace
+  let some t1 ← traceWith "1" | return endlessTrace
   return joinRuns t0 t1
 
 /-- The sections of a trace after its output, before its first gap line, and the gap's message.
@@ -156,8 +167,10 @@ def readRejection (stdout : String) : Except String Ours := do
   return .unsupported constructs.eraseDups
 
 /-- Run `pydyn run` on `pyFile`. -/
-def runOurs (pyFile : System.FilePath) (pydyn : System.FilePath := pydynPath) : IO Ours := do
-  let r ← IO.Process.output { cmd := pydyn.toString, args := #["run", pyFile.toString] }
+def runOurs (pyFile : System.FilePath) (pydyn : System.FilePath := pydynPath)
+    (fuel : Option Nat := none) : IO Ours := do
+  let fuelArgs := match fuel with | some n => #["--fuel", toString n] | none => #[]
+  let r ← IO.Process.output { cmd := pydyn.toString, args := #["run", pyFile.toString] ++ fuelArgs }
   if r.exitCode == 0 then return .trace r.stdout
   unless r.exitCode == 1 do
     throw <| .userError s!"{pyFile}: pydyn run failed ({r.exitCode}):\n{r.stdout}{r.stderr}"
@@ -181,12 +194,11 @@ def judge (name : String) (ours : Ours) (theirs : String) (known : Option Diff.K
     else .ok (.gap s!"the translator does not support {", ".intercalate cs}")
   | .trace ours =>
     let twoRuns := theirs.startsWith twoRunsHeader
+    let outOfFuel := ((splitOutput ours).map (·.2.splitOn "\n")).any (·.contains "--- out of fuel")
     if theirs == syntaxTrace then
       .error s!"{name}: CPython reports a syntax error, but the program runs"
     else if (splitOutput ours).isNone then
       .error s!"{name}: the run's trace has no output section"
-    else if ((splitOutput ours).map (·.2.splitOn "\n")).any (·.contains "--- out of fuel") then
-      .error s!"{name}: the run is out of fuel"
     else if let some msg := (gapOf ours).filter StrataPython.Dyn.Sem.isModelInvariant then
       -- A precondition of the model itself doesn't hold: a bug in the model, never an allowed gap.
       .error s!"{name}: the run breaks a model invariant: {msg}"
@@ -194,6 +206,13 @@ def judge (name : String) (ours : Ours) (theirs : String) (known : Option Diff.K
       -- A fault other than a gap is a wrong ending, after which ref-to-reg keeps nothing: it is a
       -- bug, whatever the verdict file says.
       .error s!"{name}: the run ends with a fault: {line}"
+    else if theirs == endlessTrace then
+      -- CPython's run doesn't end: ours must not end with a result either.
+      if outOfFuel || (gapOf ours).isSome then
+        .ok (.gap "CPython's run does not end in time, so the outputs are not compared")
+      else .error s!"{name}: the run ends, but CPython's doesn't"
+    else if outOfFuel then
+      .error s!"{name}: the run is out of fuel"
     else if let some (out, before, msg) := splitGap ours then
       -- Up to the gap, our trace is CPython's.  With two different runs, it is either run's.
       let runs := if twoRuns then

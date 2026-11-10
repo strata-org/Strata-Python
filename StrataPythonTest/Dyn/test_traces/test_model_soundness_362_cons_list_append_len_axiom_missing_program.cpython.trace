@@ -1,0 +1,12 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCONS-LIST APPEND LEN AXIOM MISSING — len(append(xs, v)) ≠ len(xs) + 1\n\nCPython: xs = [1, 2]; xs.append(3); len(xs) == 3 (always true)\n\nModel:   List_append is an uninterpreted function (finding 275).\n         List_len is an uninterpreted function.\n         There is NO AXIOM connecting them:\n           List_len(List_append(xs, v)) == List_len(xs) + 1\n         Without this axiom, the solver CANNOT prove len grows after append.\n\n         This makes bounds checks after list building UNPROVABLE:\n           result = []\n           result.append(x)\n           result.append(y)\n           assert len(result) == 2  # UNPROVABLE without axiom chain\n\nFinding 233 identifies the axiom chain is needed.\nThis finding provides the MINIMAL program that fails verification\ndue to the missing axiom, and shows the specific axiom required.\n'
+__name__ = '__main__'
+build_and_check_len = <function object>
+loop_build_then_access = <function object>
+main = <function object>
+safe_access_after_build = <function object>

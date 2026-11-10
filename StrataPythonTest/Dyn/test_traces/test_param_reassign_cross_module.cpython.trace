@@ -1,0 +1,7 @@
+--- stdout 0
+
+--- outcome
+raised ModuleNotFoundError: No module named 'param_reassign_helper'
+--- globals
+__doc__ = None
+__name__ = '__main__'

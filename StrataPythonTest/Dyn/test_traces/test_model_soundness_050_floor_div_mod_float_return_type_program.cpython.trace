@@ -1,0 +1,12 @@
+--- stdout 17
+3.0 3.0 1.0 -4.0
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython's `//` (floor division) returns an int when both operands are int,\nbut returns a float when either operand is float. Similarly, `%` returns\nfloat for float operands. The Laurel encoding's PFloorDiv and PMod likely\nalways return from_int (since they model integer division), but\n`7.0 // 2.0` must return `3.0` (a float), not `3` (an int).\n"
+__name__ = '__main__'
+float_floor_div = <function object>
+float_mod = <function object>
+main = <function object>
+mixed_floor_div = <function object>

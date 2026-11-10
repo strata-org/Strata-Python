@@ -1,0 +1,15 @@
+--- stdout 30
+All McCarthy axiom tests pass
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFIX PROPOSAL: McCarthy read-over-write axioms for containers.\nResolves findings: 078, 081, 088, 089, 093, 141, 151, 153, 183,\n232, 233, 252, 253, 254.\n\nThe fix: add axioms connecting get/set/len for both lists and dicts.\nOr better: use SMT-LIB Array theory which provides these natively.\n'
+__name__ = '__main__'
+dict_write_preserves_other = <function object>
+dict_write_read = <function object>
+list_write_preserves_other = <function object>
+list_write_read = <function object>
+literal_postconditions = <function object>
+main = <function object>
+string_concat_length = <function object>

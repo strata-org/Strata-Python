@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = 1
+b = 6
+c = 11
+parse = <function object>
+risky = <function object>
+scan = <function object>

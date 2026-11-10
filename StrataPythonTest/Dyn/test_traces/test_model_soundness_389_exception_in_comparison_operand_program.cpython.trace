@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nEXCEPTION IN COMPARISON OPERAND — NON-DETERMINISTIC BRANCHING\n\nCPython: if might_raise(-1) > 0: → raises, neither branch taken.\nModel:   if PGt(exception(...), from_int(0)): → Hole (unconstrained bool)\n         Solver picks EITHER branch non-deterministically.\n         Both branches are "reachable" — verification explores both.\n\nThis is UNSOUND in two ways:\n1. Code in the TRUE branch executes with impossible preconditions\n2. Code in the FALSE branch executes with impossible preconditions\n3. The verifier may "prove" properties that depend on the branch choice\n\nFinding 209 identified this issue. This finding provides the CONCRETE\nprogram showing how non-deterministic branching leads to wrong proofs.\n'
+__name__ = '__main__'
+exception_guards_division = <function object>
+exception_in_assert = <function object>
+exception_in_if_condition = <function object>
+exception_in_while_condition = <function object>
+main = <function object>
+might_raise = <function object>

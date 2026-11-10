@@ -1,0 +1,11 @@
+--- stdout 12
+3.5 2.0 0.0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nINCORRECT OPERATOR BEHAVIOR: / on int operands returns wrong TYPE.\n\nCPython: 7 / 2 = 3.5 (ALWAYS float, even for int/int)\nModel:   7 / 2 = 3 (if mapped to floor div) or Hole (if no PTrueDiv)\n\nThe RETURN TYPE is wrong: should be from_float, model gives from_int.\n'
+__name__ = '__main__'
+main = <function object>
+true_div_examples = <function object>
+type_is_always_float = <function object>

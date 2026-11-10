@@ -1,0 +1,16 @@
+--- stdout 23
+Chicago Springfield 31
+
+--- outcome
+ok
+--- globals
+Address = <class 'Address'>
+Person = <class 'Person'>
+__doc__ = '\n"No mutation in place" means nested field writes require CHAIN REBUILDING.\n\n    obj.inner.field = value\n\nIn CPython: modifies inner object in place (one step).\nIn model: requires rebuilding inner, then rebuilding outer:\n    1. new_inner = reconstruct(obj.inner, field, value)\n    2. new_obj = reconstruct(obj, "inner", new_inner)\n    3. obj = new_obj\n\nFor deeply nested access: obj.a.b.c = v requires rebuilding c, b, a, obj.\nEach level must be reconstructed with the updated child.\n\nFinding 033 identified nested composition. Finding 107 identified\nComposite nested access. This finding shows the COMPLETE chain-rebuild\npattern for value semantics.\n\nUses ONLY confirmed-accepted constructs: @dataclass, int, str.\n'
+__name__ = '__main__'
+chain_updates = <function object>
+dataclass = <function object>
+main = <function object>
+update_city = <function object>
+update_preserves_other_fields = <function object>
+update_zip = <function object>

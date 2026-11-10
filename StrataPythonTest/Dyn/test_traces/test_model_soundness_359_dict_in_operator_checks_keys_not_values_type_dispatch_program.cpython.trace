@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`in` OPERATOR TYPE DISPATCH — str-in-str vs str-in-list vs str-in-dict\n\nCPython: "ab" in "abc"     → True (SUBSTRING check)\n         "ab" in ["ab","c"] → True (ELEMENT equality check)\n         "ab" in {"ab": 1}  → True (KEY membership check)\n\n         Three completely different algorithms based on the RIGHT operand\'s type.\n\nModel:   The `in` operator must dispatch on the TAG of the right operand:\n         - from_str: substring containment (SMT-LIB str.contains)\n         - from_ListAny: element equality scan (List_contains)\n         - from_DictStrAny: key membership (DictStrAny_contains)\n\n         If the translator uses a single `PIn` function that doesn\'t\n         dispatch on the right operand\'s tag, it will use the wrong\n         algorithm. E.g., using List_contains on a string, or\n         substring search on a list.\n\nFinding 095 notes dict `in` checks keys not values.\nFinding 046 notes string `in` is substring.\nFinding 304 catalogs the dispatch.\nThis finding provides the CONCRETE program showing all three in one\nfunction, demonstrating the tag-dispatch requirement.\n'
+__name__ = '__main__'
+combined_search = <function object>
+element_check = <function object>
+key_check = <function object>
+main = <function object>
+substring_check = <function object>

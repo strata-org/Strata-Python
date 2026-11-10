@@ -1,0 +1,10 @@
+--- stdout 8
+2 -2 -1
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nCPython: -7 % 3 → 2 (sign follows DIVISOR, result is non-negative when divisor > 0)\nModel:   PMod uses SMT `mod` → -7 mod 3 = -1 (sign follows DIVIDEND)\n\nPython's % follows the sign of the DIVISOR.\nSMT-LIB's mod follows the sign of the DIVIDEND (or is always non-negative).\n\n  -7 % 3:  Python = 2,   SMT mod = -1 (or 2 depending on SMT-LIB version)\n  7 % -3:  Python = -2,  SMT mod = 1\n  -7 % -3: Python = -1,  SMT mod = -1\n"
+__name__ = '__main__'
+main = <function object>
+python_mod = <function object>

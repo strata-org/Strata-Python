@@ -1,0 +1,10 @@
+--- stdout 4
+5.5
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nMISSING REFLECTED METHOD DISPATCH: int + float\n\nCPython protocol:\n  1. int.__add__(float) → NotImplemented\n  2. float.__radd__(int) → float result ✓\n\nModel: PAdd(from_int(2), from_float(3.5))\n  → match: no (from_int, from_float) case\n  → Hole\n\nCPython result: 5.5\nModel result:  Hole\n'
+__name__ = '__main__'
+int_plus_float = <function object>
+main = <function object>

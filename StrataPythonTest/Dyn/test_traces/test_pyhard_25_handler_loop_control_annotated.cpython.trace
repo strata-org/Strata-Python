@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+LoopError = <class 'LoopError'>
+__doc__ = None
+__name__ = '__main__'
+break_from_handler = <function object>
+continue_from_handler = <function object>

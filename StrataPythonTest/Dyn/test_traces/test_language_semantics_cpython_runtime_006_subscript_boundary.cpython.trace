@@ -1,0 +1,12 @@
+--- stdout 13
+42
+default
+2
+
+--- outcome
+ok
+--- globals
+LoggingDict = <class 'LoggingDict'>
+__doc__ = 'Subscript: boundary case.\nUser-defined __getitem__ with side effects cannot be modeled as a pure read.\n'
+__name__ = '__main__'
+d = <LoggingDict object>

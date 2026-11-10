@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
+--- globals
+Expr = <class 'Expr'>
+__doc__ = "\na17_expression_eval_order.py — Evaluation order within a single expression invalidates narrowing.\n\nobj.x narrowed to int. In the expression `obj.method() + obj.x`, Python evaluates\nleft-to-right: obj.method() runs first (mutates obj.x to str), then obj.x is read.\nResult: int + str → TypeError.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — unsupported operand type(s) for +: 'int' and 'str'\n"
+__name__ = '__main__'
+main = <function object>

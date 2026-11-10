@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nNO ALIASING MAKES PRIMITIVES TRIVIALLY CORRECT — POSITIVE CONFIRMATION\n\nCPython: Primitives (int, float, str, bool, None) are IMMUTABLE.\n         No operation can mutate them in place.\n         Therefore: aliasing is UNOBSERVABLE for primitives.\n         a = 5; b = a; a += 1 → b is still 5 (in BOTH models!)\n\nModel:   Value semantics copies the value.\n         a = from_int(5); b = from_int(5); a = from_int(6)\n         b is still from_int(5).\n\nFor primitives, value semantics and reference semantics are\nOBSERVATIONALLY EQUIVALENT because no operation can distinguish\n"same object" from "copy with same value" when the object is immutable.\n\nThis is the FOUNDATION of the model\'s soundness for primitive types.\n'
+__name__ = '__main__'
+bool_copy_independent = <function object>
+float_copy_independent = <function object>
+int_copy_independent = <function object>
+main = <function object>
+primitives_in_function = <function object>
+str_copy_independent = <function object>

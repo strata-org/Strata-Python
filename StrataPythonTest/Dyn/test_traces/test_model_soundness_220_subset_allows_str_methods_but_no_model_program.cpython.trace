@@ -1,0 +1,18 @@
+--- stdout 10
+hi 1 test
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nThe subset explicitly says these string methods are IN:\n  str.split(), str.join(), str.strip(), str.lower(), str.upper(),\n  str.startswith(), str.endswith(), str.find(), str.replace()\n\nBut findings 019, 133, 134, 135, 138, 144 identified that NONE of\nthese have Laurel models. Results are Hole (unconstrained).\n\nThis finding provides a SINGLE program using ALL allowlisted string\nmethods, demonstrating the scope of the gap.\n\nUses ONLY confirmed-accepted constructs: str methods from allowlist.\n'
+__name__ = '__main__'
+check_prefix = <function object>
+check_suffix = <function object>
+clean_input = <function object>
+find_char = <function object>
+join_words = <function object>
+main = <function object>
+parse_csv_line = <function object>
+process_input = <function object>
+sanitize = <function object>
+shout = <function object>

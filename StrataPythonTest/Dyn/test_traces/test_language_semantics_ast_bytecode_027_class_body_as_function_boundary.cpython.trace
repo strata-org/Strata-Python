@@ -1,0 +1,10 @@
+--- stdout 66
+BOUNDARY: class body uses STORE_NAME (dict-based), not STORE_FAST
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+result = 42

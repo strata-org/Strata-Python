@@ -1,0 +1,16 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Person = <class 'Person'>
+Point = <class 'Point'>
+__doc__ = '\nClassInstance FIELD WRITE FRAME AXIOM — WRITING obj.x MUST PRESERVE obj.y\n\nCPython: obj.x = 99; obj.y still has its old value.\n\nModel:   obj.x = 99 translates to:\n           attrs\' = DictStrAny_set(instance_attributes(obj), "x", 99)\n           obj\' = from_ClassInstance(classname(obj), attrs\')\n\n         Then obj\'.y = DictStrAny_get(attrs\', "y")\n         This requires the DICT FRAME AXIOM (finding 366):\n           get(set(attrs, "x", 99), "y") == get(attrs, "y")\n\n         Without the frame axiom, writing obj.x destroys knowledge of obj.y.\n\nThis is finding 366 (dict frame) applied specifically to ClassInstance\nfield access. It\'s the most common manifestation because every field\nwrite on an object goes through the instance_attributes DictStrAny.\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+method_preserves_other_field = <function object>
+sequential_field_writes = <function object>
+three_field_object = <function object>
+write_x_preserves_y = <function object>

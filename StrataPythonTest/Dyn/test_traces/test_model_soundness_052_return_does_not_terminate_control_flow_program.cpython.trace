@@ -1,0 +1,12 @@
+--- stdout 14
+positive 3 42
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nWhen a function has multiple return statements on different branches,\neach returns a value. In CPython, exactly one return executes. In the\nLaurel model, if `return` is translated as assigning to a result variable\nwithout immediately terminating the function, subsequent statements\n(including other returns) may execute, overwriting the correct result.\n\nThis is the dual of finding 014 (raise silently dropped): if `return`\ndoesn't terminate control flow in the model, code after it is reachable.\n"
+__name__ = '__main__'
+classify = <function object>
+early_exit = <function object>
+first_positive = <function object>
+main = <function object>

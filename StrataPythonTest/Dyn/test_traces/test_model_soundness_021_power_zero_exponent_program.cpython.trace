@@ -1,0 +1,11 @@
+--- stdout 14
+1 1 1 -8 16 1
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython defines 0**0 == 1 and handles negative bases with odd/even exponents.\nThe Laurel PPow likely uses an uninterpreted function or SMT power that\nmay not match Python's specific edge-case definitions.\n"
+__name__ = '__main__'
+main = <function object>
+negative_base_power = <function object>
+power_zero = <function object>

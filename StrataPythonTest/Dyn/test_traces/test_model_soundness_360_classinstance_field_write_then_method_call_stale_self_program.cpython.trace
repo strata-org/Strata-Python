@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Accumulator = <class 'Accumulator'>
+Counter = <class 'Counter'>
+__doc__ = '\nFIELD WRITE THEN METHOD CALL — METHOD RECEIVES STALE SELF\n\nCPython: obj.x = 10; result = obj.compute()\n         compute() sees self.x == 10 (the updated value)\n\nModel:   obj.x = 10 translates to:\n           obj = from_ClassInstance("C", DictStrAny_set(attrs, "x", 10))\n         obj.compute() translates to:\n           C_compute(obj)\n         IF the translator correctly rebinds obj before the method call,\n         compute() receives the updated ClassInstance. CORRECT.\n\n         BUT: if the translator doesn\'t rebind (finding 191), or if\n         the method call uses a STALE copy of obj from before the write,\n         compute() sees the OLD value of x.\n\nThis tests the INTERACTION between field write (finding 191) and\nsubsequent method call (finding 234) in sequence. The method must\nreceive the POST-WRITE version of the object.\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+sequential_modifications = <function object>
+write_then_conditional_method = <function object>
+write_then_read_method = <function object>

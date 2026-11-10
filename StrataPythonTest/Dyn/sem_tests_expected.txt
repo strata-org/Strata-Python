@@ -1,0 +1,1484 @@
+param_reassign_helper | agree
+test_admitted_completion_case_07_finally_all_completions | agree
+test_admitted_completion_case_08_finally_override | gap | built-in method str.__new__ is not modelled yet
+test_admitted_completion_case_09_else_and_handler_regions | agree
+test_admitted_completion_case_10_loop_else_from_handlers | agree
+test_admitted_comprehensions_case_16_failure_and_walrus | gap | not modelled yet: py.listComp
+test_admitted_comprehensions_case_23_exception_order | gap | not modelled yet: py.listComp
+test_admitted_context_managers_case_14_with_edges | gap | built-in method str.__new__ is not modelled yet
+test_admitted_dataclasses_case_19_frozen_write_error | gap | import of module dataclasses is not modelled yet
+test_admitted_exception_groups_case_20_except_star_partition | gap | the translator does not support try/except*
+test_admitted_exception_groups_case_21_except_star_merge | gap | the translator does not support try/except*
+test_admitted_functions_case_17_definition_and_call_errors | agree
+test_admitted_handlers_case_11_matching_and_boundaries | agree
+test_admitted_handlers_case_12_dynamic_handled_state | gap | built-in method str.__new__ is not modelled yet
+test_admitted_handlers_case_13_chaining_state | agree
+test_admitted_handlers_case_24_exception_string_failure | gap | built-in method str.__new__ is not modelled yet
+test_admitted_iteration_case_15_stop_iteration_boundary | gap | built-in method list.__new__ is not modelled yet
+test_admitted_operations_case_18_builtin_error_arms | agree
+test_admitted_operations_case_22_truthiness_protocol | gap | built-in method bool.__new__ is not modelled yet
+test_admitted_scope_case_01_function_target_cleanup | agree
+test_admitted_scope_case_02_target_value_vs_closure | gap | built-in method str.__new__ is not modelled yet
+test_admitted_scope_case_03_static_local_classification | agree
+test_admitted_scope_case_04_module_target_cleanup | gap | import of module json is not modelled yet
+test_admitted_scope_case_05_nested_handler_targets | gap | built-in method str.__new__ is not modelled yet
+test_admitted_scope_case_06_path_dependent_boundness | agree
+test_any_arithmetic | gap | import of module typing is not modelled yet
+test_any_bool | gap | import of module typing is not modelled yet
+test_any_comparison | gap | import of module typing is not modelled yet
+test_any_dict | gap | import of module typing is not modelled yet
+test_any_in_if | gap | import of module typing is not modelled yet
+test_any_int | gap | import of module typing is not modelled yet
+test_any_list | gap | import of module typing is not modelled yet
+test_any_none | gap | import of module typing is not modelled yet
+test_any_reassign_type | gap | import of module typing is not modelled yet
+test_any_str | gap | import of module typing is not modelled yet
+test_any_to_int | gap | import of module typing is not modelled yet
+test_any_to_str | gap | import of module typing is not modelled yet
+test_arithmetic | agree
+test_assert_false | agree
+test_assert_no_msg | agree
+test_augadd | agree
+test_augadd_list | agree
+test_augadd_str | agree
+test_augfloordiv | agree
+test_augfloordiv_neg | agree
+test_augmented_assign | agree
+test_augmod | agree
+test_augmod_neg | agree
+test_augmul | agree
+test_augsub | agree
+test_bitand | agree
+test_bitand_negative | agree
+test_bitnot | agree
+test_bitor | agree
+test_bitxor | agree
+test_bool_and | agree
+test_bool_as_int | agree
+test_bool_complex | agree
+test_bool_floordiv_neg | agree
+test_bool_not | agree
+test_bool_or | agree
+test_boolean_logic | agree
+test_break_continue | agree
+test_bubble_sort_step | agree
+test_bug_finding_unreachable | agree
+test_chained_compare | agree
+test_chained_compare_eval_once | agree
+test_chained_compare_mixed | agree
+test_chained_compare_triple | agree
+test_chained_compare_verify | agree
+test_class_decl | gap | import of module test_helper is not modelled yet
+test_class_decorator_rejection | agree
+test_class_empty | agree
+test_class_field_any | agree
+test_class_field_init | gap | import of module test_helper is not modelled yet
+test_class_field_use | gap | import of module test_helper is not modelled yet
+test_class_inheritance_no_dispatch | agree
+test_class_method_call_from_main | agree
+test_class_method_redefinition | agree
+test_class_methods | gap | import of module test_helper is not modelled yet
+test_class_mixed_init | agree
+test_class_no_init | agree
+test_class_no_init_extra_args | agree
+test_class_no_init_multi_field | agree
+test_class_no_init_with_method | agree
+test_class_with_methods | gap | import of module test_helper is not modelled yet
+test_cmp_eq | agree
+test_cmp_ge | agree
+test_cmp_gt | agree
+test_cmp_le | agree
+test_cmp_lt | agree
+test_cmp_neq | agree
+test_coerce_any_in_comparison | gap | import of module typing is not modelled yet
+test_coerce_any_str_concat | gap | import of module typing is not modelled yet
+test_coerce_any_to_bool_falsy | gap | import of module typing is not modelled yet
+test_coerce_any_to_bool_truthy | gap | import of module typing is not modelled yet
+test_coerce_int_in_any_list | gap | import of module typing is not modelled yet
+test_coerce_none_to_any | gap | import of module typing is not modelled yet
+test_comparisons | agree
+test_composite_return | gap | import of module typing is not modelled yet
+test_conditional_assign | agree
+test_control_flow | agree
+test_dataclass_decorator | gap | import of module dataclasses is not modelled yet
+test_dataclass_shadow_rejection | agree
+test_datetime | gap | import of module datetime is not modelled yet
+test_datetime_now_tz | gap | import of module datetime is not modelled yet
+test_deep_inline | agree
+test_deeply_nested_if | agree
+test_deeply_nested_list | agree
+test_default_params | agree
+test_dict_add_key | agree
+test_dict_assign | agree
+test_dict_create | agree
+test_dict_in | agree
+test_dict_of_list | gap | import of module typing is not modelled yet
+test_dict_operations | agree
+test_dict_overwrite | agree
+test_differential_monty_strata_001_closures_cells_late_binding_program | gap | subscripting a built-in class is not modelled yet
+test_differential_monty_strata_002_decorators_program | agree
+test_differential_monty_strata_003_dynamic_attr_builtins_program | gap | built-in hasattr is not modelled yet
+test_differential_monty_strata_004_object_identity_id_is_program | gap | built-in id is not modelled yet
+test_differential_monty_strata_005_containers_aliasing_heterogeneity_program | agree
+test_differential_monty_strata_006_exceptions_try_except_else_finally_raise_from_program | gap | built-in method list.append is not modelled yet
+test_differential_monty_strata_007_global_nonlocal_scope_program | agree
+test_differential_monty_strata_008_fstrings_and_format_program | agree
+test_differential_monty_strata_009_comprehensions_and_scope_program | gap | the translator does not support generator expression
+test_differential_monty_strata_010_stdlib_effects_program | gap | import of module math is not modelled yet
+test_differential_monty_strata_011_async_await_asyncio_program | gap | the translator does not support async def
+test_differential_monty_strata_012_free_exclusions_catalog_program | agree
+test_differential_monty_strata_013_with_context_managers_program | gap | built-in open is not modelled yet
+test_differential_monty_strata_014_augmented_assignment_program | agree
+test_differential_monty_strata_015_chained_comparisons_program | agree
+test_differential_monty_strata_016_tuple_unpacking_program | agree
+test_differential_monty_strata_017_lambdas_program | gap | built-in sorted is not modelled yet
+test_differential_monty_strata_018_conditional_expressions_program | agree
+test_differential_monty_strata_019_string_operations_program | gap | built-in method str.split is not modelled yet
+test_differential_monty_strata_020_integer_model_and_arithmetic_program | agree
+test_dispatch_attribute_helpers_case_17_attributeerror_boundary | gap | built-in method list.append is not modelled yet
+test_dispatch_attribute_write_case_22_property_intercepts_write | gap | a write to a property without a setter or deleter is not modelled yet
+test_dispatch_binary_protocol_case_07_notimplemented_reflected | gap | built-in method list.append is not modelled yet
+test_dispatch_binary_protocol_case_08_subclass_reflected_priority | gap | built-in method list.append is not modelled yet
+test_dispatch_binary_protocol_case_09_raise_stops_fallback | gap | built-in method list.append is not modelled yet
+test_dispatch_binary_protocol_case_10_exhaustion_typeerror | gap | built-in method list.append is not modelled yet
+test_dispatch_call_order_case_23_lookup_precedes_arguments | gap | built-in method list.append is not modelled yet
+test_dispatch_container_lookup_case_18_dict_get_vs_subscription | gap | built-in method dict.__new__ is not modelled yet
+test_dispatch_container_lookup_case_19_dict_get_propagates_hash_error | gap | built-in method dict.get is not modelled yet
+test_dispatch_descriptor_precedence_case_12_property_beats_instance_field | agree
+test_dispatch_descriptor_precedence_case_13_subclass_masks_base_property | agree
+test_dispatch_exception_evidence_case_30_attributes_and_binary | gap | the translator does not support generator expression
+test_dispatch_exception_evidence_case_31_subscript_read | gap | the translator does not support generator expression
+test_dispatch_exception_evidence_case_32_subscript_write | gap | the translator does not support generator expression
+test_dispatch_exception_evidence_case_33_truth_and_length | gap | the translator does not support generator expression
+test_dispatch_exception_evidence_case_34_iteration_and_membership | gap | the translator does not support generator expression
+test_dispatch_exception_evidence_case_35_conversion_hash_context | gap | the translator does not support generator expression
+test_dispatch_exception_evidence_case_36_numeric_and_repeat | gap | the translator does not support generator expression
+test_dispatch_exception_evidence_case_37_typed_dict_runtime_shape | gap | the translator does not support generator expression
+test_dispatch_finally_interaction_case_05_preserves_dispatch_error | gap | built-in method list.append is not modelled yet
+test_dispatch_finally_interaction_case_06_overrides_dispatch_error | agree
+test_dispatch_handler_else_case_11_else_only_on_normal | gap | built-in method list.append is not modelled yet
+test_dispatch_lookup_error_case_02_missing_member_caught | gap | built-in method str.__new__ is not modelled yet
+test_dispatch_method_body_exception_case_03_selected_body_raises | gap | built-in method list.append is not modelled yet
+test_dispatch_method_shadowing_case_14_instance_field_shadows_method | agree
+test_dispatch_nested_dispatch_case_04_result_then_dispatch | agree
+test_dispatch_numeric_tower_case_24_runtime_numeric_links | gap | the translator does not support generator expression
+test_dispatch_numeric_tower_case_25_division_errors | agree
+test_dispatch_numeric_tower_case_26_shift_errors | agree
+test_dispatch_numeric_tower_case_27_power_boundaries | gap | not modelled: the OverflowError of a float power, which has an errno
+test_dispatch_numeric_tower_case_28_mixed_numeric_type_errors | agree
+test_dispatch_numeric_tower_case_29_mixed_float_overflow | agree
+test_dispatch_path_correlation_case_01_correlated_member | agree
+test_dispatch_protocol_precedence_case_21_contains_and_iter_precedence | gap | built-in method list.append is not modelled yet
+test_dispatch_special_method_lookup_case_16_len_ignores_instance_shadow | agree
+test_dispatch_subscription_protocol_case_20_index_and_slice_boundaries | agree
+test_dispatch_uninitialized_fields_case_15_absence_falls_back_or_raises | agree
+test_effectful_return_annotation_rejection | agree
+test_empty_dict_access | agree
+test_empty_function | agree
+test_exc_reject_as_binding | agree
+test_exc_reject_bare_raise | agree
+test_exc_reject_except_star | gap | the translator does not support try/except*
+test_exc_reject_multiple_handlers | agree
+test_exc_reject_raise_from | agree
+test_exc_reject_typed_handler | agree
+test_field_write | agree
+test_flag_pattern | agree
+test_float_literal | agree
+test_floordiv_both_neg | agree
+test_floordiv_neg_divisor | agree
+test_for_continue_advance | agree
+test_for_else_break | agree
+test_for_loop | agree
+test_for_range | agree
+test_fstrings | agree
+test_func_input_type_constraints | gap | import of module typing is not modelled yet
+test_function_decorator_rejection | agree
+test_function_def_calls | gap | import of module test_helper is not modelled yet
+test_global_async_method_rejection | gap | the translator does not support async def
+test_global_bound_name_parameter | agree
+test_global_builtin_call_shadowing | agree
+test_global_builtin_shadowing | agree
+test_global_class_body_rejection | agree
+test_global_class_control_flow_rejection | agree
+test_global_collision | agree
+test_global_composite_attribute_augassign_rejection | agree
+test_global_composite_attribute_read_rejection | agree
+test_global_composite_attribute_write_rejection | agree
+test_global_composite_read_rejection | agree
+test_global_composite_rejection | agree
+test_global_definition_default_rejection | agree
+test_global_destructured_with_rejection | agree
+test_global_dotted_import_collision | gap | import of module xml.sax is not modelled yet
+test_global_effectful_annotation_rejection | agree
+test_global_effectful_default_rejection | agree
+test_global_function_binding_forms | agree
+test_global_function_import | gap | import of module os is not modelled yet
+test_global_function_with_binding | agree
+test_global_import_rebinding_in_control_flow_rejection | gap | import of module sys is not modelled yet
+test_global_import_rebinding_in_function_rejection | agree
+test_global_import_rebinding_rejection | gap | import of module sys is not modelled yet
+test_global_inherited_method_rejection | agree
+test_global_inherited_nested_rejection | agree
+test_global_keyword | agree
+test_global_method_binding | agree
+test_global_module_control_flow | agree
+test_global_nested_class_rejection | agree
+test_global_nested_function_control_flow_rejection | agree
+test_global_prelude_collision | agree
+test_global_readonly_declaration | gap | import of module sys is not modelled yet
+test_global_reserved_name_rejection | agree
+test_global_scope_semantics | gap | import of module sys is not modelled yet
+test_global_try_finally_rejection | agree
+test_global_type_collision | agree
+test_global_var | agree
+test_global_while_unmodeled_condition | gap | import of module os is not modelled yet
+test_global_wildcard_import_rejection | gap | the translator does not support import *
+test_global_with_binding | agree
+test_havoc_callee_after_hole_call | gap | subscripting a built-in class is not modelled yet
+test_if_elif | agree
+test_if_elif_chain | agree
+test_if_else | agree
+test_if_simple | agree
+test_ifexpr | agree
+test_int_add | agree
+test_int_as_bool | agree
+test_int_bool_conversion | agree
+test_int_chain_arith | agree
+test_int_floordiv | agree
+test_int_large | agree
+test_int_mod | agree
+test_int_mul | agree
+test_int_mul_zero | agree
+test_int_neg | agree
+test_int_negative_floordiv | agree
+test_int_negative_mod | agree
+test_int_parens | agree
+test_int_pow | agree
+test_int_sub | agree
+test_int_sub_negative | agree
+test_int_to_any | gap | import of module typing is not modelled yet
+test_int_truthy | agree
+test_int_zero_add | agree
+test_interpret_factory_concrete_eval | agree
+test_interpret_pow_no_panic | gap | not modelled: an int with more than 2 ^ 32 bits
+test_interpret_rshift_no_panic | agree
+test_invalid_client_type | gap | import of module typing is not modelled yet
+test_is_bool_not_int | agree
+test_is_non_none | agree
+test_is_none | agree
+test_is_not_non_none | agree
+test_is_not_true_false | agree
+test_is_singleton_lhs | agree
+test_is_true_false | agree
+test_language_semantics_ast_bytecode_001_name_classification_boundary | agree
+test_language_semantics_ast_bytecode_001_name_classification_supported | agree
+test_language_semantics_ast_bytecode_002_cell_promotion_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_002_cell_promotion_supported | agree
+test_language_semantics_ast_bytecode_003_class_scope_opacity_boundary | agree
+test_language_semantics_ast_bytecode_003_class_scope_opacity_supported | agree
+test_language_semantics_ast_bytecode_004_comprehension_iter_asymmetry_boundary | gap | not modelled yet: py.listComp
+test_language_semantics_ast_bytecode_004_comprehension_iter_asymmetry_supported | gap | not modelled yet: py.listComp
+test_language_semantics_ast_bytecode_005_walrus_escape_boundary | gap | not modelled yet: py.listComp
+test_language_semantics_ast_bytecode_005_walrus_escape_supported | gap | not modelled yet: py.listComp
+test_language_semantics_ast_bytecode_006_class_cell_synthesis_boundary | agree
+test_language_semantics_ast_bytecode_006_class_cell_synthesis_supported | agree
+test_language_semantics_ast_bytecode_007_annotation_scopes_boundary | gap | import of module sys is not modelled yet
+test_language_semantics_ast_bytecode_007_annotation_scopes_supported | gap | import of module sys is not modelled yet
+test_language_semantics_ast_bytecode_008_call_argument_order_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_008_call_argument_order_supported | agree
+test_language_semantics_ast_bytecode_009_assignment_target_order_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_009_assignment_target_order_supported | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_010_augassign_single_eval_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_010_augassign_single_eval_supported | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_011_chained_cmp_single_eval_boundary | agree
+test_language_semantics_ast_bytecode_011_chained_cmp_single_eval_supported | agree
+test_language_semantics_ast_bytecode_012_boolean_short_circuit_value_boundary | agree
+test_language_semantics_ast_bytecode_012_boolean_short_circuit_value_supported | agree
+test_language_semantics_ast_bytecode_013_decorator_anti_parallel_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_013_decorator_anti_parallel_supported | gap | built-in method str.upper is not modelled yet
+test_language_semantics_ast_bytecode_014_default_argument_timing_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_014_default_argument_timing_supported | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_015_for_loop_iter_once_boundary | agree
+test_language_semantics_ast_bytecode_015_for_loop_iter_once_supported | gap | not modelled yet: py.listComp
+test_language_semantics_ast_bytecode_016_for_else_while_else_boundary | agree
+test_language_semantics_ast_bytecode_016_for_else_while_else_supported | agree
+test_language_semantics_ast_bytecode_017_with_exit_before_enter_boundary | agree
+test_language_semantics_ast_bytecode_017_with_exit_before_enter_supported | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_018_with_multi_item_lifo_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_018_with_multi_item_lifo_supported | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_019_exception_type_lazy_eval_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_019_exception_type_lazy_eval_supported | agree
+test_language_semantics_ast_bytecode_020_except_as_implicit_deletion_boundary | gap | built-in method str.__new__ is not modelled yet
+test_language_semantics_ast_bytecode_020_except_as_implicit_deletion_supported | gap | built-in method str.__new__ is not modelled yet
+test_language_semantics_ast_bytecode_021_finally_every_exit_path_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_021_finally_every_exit_path_supported | agree
+test_language_semantics_ast_bytecode_022_return_in_finally_replaces_boundary | agree
+test_language_semantics_ast_bytecode_022_return_in_finally_replaces_supported | agree
+test_language_semantics_ast_bytecode_023_except_star_splitting_boundary | gap | import of module sys is not modelled yet
+test_language_semantics_ast_bytecode_023_except_star_splitting_supported | gap | import of module sys is not modelled yet
+test_language_semantics_ast_bytecode_024_generator_stopiteration_wrap_boundary | gap | the translator does not support generator function
+test_language_semantics_ast_bytecode_024_generator_stopiteration_wrap_supported | gap | the translator does not support generator function
+test_language_semantics_ast_bytecode_025_yield_from_delegation_boundary | gap | the translator does not support generator function
+test_language_semantics_ast_bytecode_025_yield_from_delegation_supported | gap | the translator does not support generator function
+test_language_semantics_ast_bytecode_026_comprehension_inlining_boundary | gap | not modelled yet: py.listComp
+test_language_semantics_ast_bytecode_026_comprehension_inlining_supported | gap | not modelled yet: py.listComp
+test_language_semantics_ast_bytecode_027_class_body_as_function_boundary | agree
+test_language_semantics_ast_bytecode_027_class_body_as_function_supported | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_028_closure_creation_boundary | agree
+test_language_semantics_ast_bytecode_028_closure_creation_supported | agree
+test_language_semantics_ast_bytecode_029_pattern_matching_boundary | gap | import of module sys is not modelled yet
+test_language_semantics_ast_bytecode_029_pattern_matching_supported | gap | import of module sys is not modelled yet
+test_language_semantics_ast_bytecode_030_import_lowering_boundary | gap | import of module os.path is not modelled yet
+test_language_semantics_ast_bytecode_030_import_lowering_supported | gap | import of module os.path is not modelled yet
+test_language_semantics_ast_bytecode_031_dict_key_before_value_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_031_dict_key_before_value_supported | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_032_fstring_segment_order_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_032_fstring_segment_order_supported | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_033_star_unpack_displays_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_033_star_unpack_displays_supported | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_034_ternary_condition_first_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_034_ternary_condition_first_supported | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_035_exception_chaining_boundary | agree
+test_language_semantics_ast_bytecode_035_exception_chaining_supported | agree
+test_language_semantics_ast_bytecode_036_bare_raise_boundary | gap | built-in method str.__new__ is not modelled yet
+test_language_semantics_ast_bytecode_036_bare_raise_supported | gap | built-in method str.__new__ is not modelled yet
+test_language_semantics_ast_bytecode_037_break_continue_through_with_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_037_break_continue_through_with_supported | agree
+test_language_semantics_ast_bytecode_038_break_continue_through_finally_boundary | agree
+test_language_semantics_ast_bytecode_038_break_continue_through_finally_supported | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_039_chained_assign_same_object_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_ast_bytecode_039_chained_assign_same_object_supported | agree
+test_language_semantics_ast_bytecode_040_unpack_ex_starred_list_boundary | agree
+test_language_semantics_ast_bytecode_040_unpack_ex_starred_list_supported | agree
+test_language_semantics_ast_bytecode_041_global_nonlocal_retroactive_boundary | gap | built-in compile is not modelled yet
+test_language_semantics_ast_bytecode_041_global_nonlocal_retroactive_supported | agree
+test_language_semantics_ast_bytecode_042_del_null_slot_boundary | agree
+test_language_semantics_ast_bytecode_042_del_null_slot_supported | agree
+test_language_semantics_ast_bytecode_043_star_import_prohibition_boundary | gap | built-in compile is not modelled yet
+test_language_semantics_ast_bytecode_043_star_import_prohibition_supported | gap | built-in compile is not modelled yet
+test_language_semantics_ast_bytecode_044_async_await_points_boundary | gap | built-in compile is not modelled yet
+test_language_semantics_ast_bytecode_044_async_await_points_supported | gap | import of module dis is not modelled yet
+test_language_semantics_ast_bytecode_045_generator_frame_preservation_boundary | gap | the translator does not support generator function
+test_language_semantics_ast_bytecode_045_generator_frame_preservation_supported | gap | the translator does not support generator function
+test_language_semantics_comprehensions_repros_d1_bindname | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_d1_bindname_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_d2_intlist | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_d2_intlist_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_d3_arith | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_d3_arith_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_d4_two_stage | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_d4_two_stage_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_d5_attr | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_d5_attr_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_ex1_filter | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_ex1_filter_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_ex2_nested | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_ex2_nested_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_ex3_order | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_ex3_order_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_ex4_late | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_ex4_late_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_ex5_empty | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_ex5_empty_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_ex6_setcomp | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_ex6_setcomp_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_ex7_dictcomp | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_ex7_dictcomp_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_k1_dictclash | gap | not modelled yet: py.dictComp
+test_language_semantics_comprehensions_repros_k2_setdup | gap | not modelled yet: py.setComp
+test_language_semantics_comprehensions_repros_k3_tuple_nodup | gap | not modelled yet: py.dictComp
+test_language_semantics_comprehensions_repros_k4_dictcomp_crash | gap | not modelled yet: py.dictComp
+test_language_semantics_comprehensions_repros_k5_clash_semantics | gap | not modelled yet: py.dictComp
+test_language_semantics_comprehensions_repros_repro | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_repro_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_t1_typeddict_total | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_t1_typeddict_total_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_t2_typeddict_scan | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_t2_typeddict_scan_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_t3_neglen | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_t3_neglen_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_t4_neglen_direct | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_t4_neglen_direct_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_t5_presence | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_t5_presence_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_t6_presence_guarded | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_t6_presence_guarded_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_u1_puremap | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_u1_puremap_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_u2_srclen | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_u2_srclen_fail | gap | import of module typing is not modelled yet
+test_language_semantics_cpython_runtime_001_binary_operators_boundary | agree
+test_language_semantics_cpython_runtime_001_binary_operators_supported | agree
+test_language_semantics_cpython_runtime_002_inplace_operators_boundary | gap | import of module typing is not modelled yet
+test_language_semantics_cpython_runtime_002_inplace_operators_supported | gap | subscripting a built-in class is not modelled yet
+test_language_semantics_cpython_runtime_003_attribute_read_boundary | agree
+test_language_semantics_cpython_runtime_003_attribute_read_supported | agree
+test_language_semantics_cpython_runtime_004_attribute_write_boundary | agree
+test_language_semantics_cpython_runtime_004_attribute_write_supported | agree
+test_language_semantics_cpython_runtime_005_method_call_boundary | agree
+test_language_semantics_cpython_runtime_005_method_call_supported | agree
+test_language_semantics_cpython_runtime_006_subscript_boundary | gap | built-in method dict.get is not modelled yet
+test_language_semantics_cpython_runtime_006_subscript_supported | gap | subscripting a built-in class is not modelled yet
+test_language_semantics_cpython_runtime_007_iteration_boundary | gap | the translator does not support generator function
+test_language_semantics_cpython_runtime_007_iteration_supported | gap | subscripting a built-in class is not modelled yet
+test_language_semantics_cpython_runtime_008_comparison_boundary | agree
+test_language_semantics_cpython_runtime_008_comparison_supported | gap | subscripting a built-in class is not modelled yet
+test_language_semantics_cpython_runtime_009_truth_testing_boundary | gap | built-in method bool.__new__ is not modelled yet
+test_language_semantics_cpython_runtime_009_truth_testing_supported | gap | subscripting a built-in class is not modelled yet
+test_language_semantics_cpython_runtime_010_class_instantiation_boundary | gap | built-in hasattr is not modelled yet
+test_language_semantics_cpython_runtime_010_class_instantiation_supported | agree
+test_language_semantics_exceptions_admitted_completion_case_07_finally_all_completions | agree
+test_language_semantics_exceptions_admitted_completion_case_08_finally_override | gap | built-in method str.__new__ is not modelled yet
+test_language_semantics_exceptions_admitted_completion_case_09_else_and_handler_regions | agree
+test_language_semantics_exceptions_admitted_completion_case_10_loop_else_from_handlers | agree
+test_language_semantics_exceptions_admitted_comprehensions_case_16_failure_and_walrus | gap | not modelled yet: py.listComp
+test_language_semantics_exceptions_admitted_comprehensions_case_23_exception_order | gap | not modelled yet: py.listComp
+test_language_semantics_exceptions_admitted_context_managers_case_14_with_edges | gap | built-in method str.__new__ is not modelled yet
+test_language_semantics_exceptions_admitted_dataclasses_case_19_frozen_write_error | gap | import of module dataclasses is not modelled yet
+test_language_semantics_exceptions_admitted_exception_groups_case_20_except_star_partition | gap | the translator does not support try/except*
+test_language_semantics_exceptions_admitted_exception_groups_case_21_except_star_merge | gap | the translator does not support try/except*
+test_language_semantics_exceptions_admitted_functions_case_17_definition_and_call_errors | agree
+test_language_semantics_exceptions_admitted_handlers_case_11_matching_and_boundaries | agree
+test_language_semantics_exceptions_admitted_handlers_case_12_dynamic_handled_state | gap | built-in method str.__new__ is not modelled yet
+test_language_semantics_exceptions_admitted_handlers_case_13_chaining_state | agree
+test_language_semantics_exceptions_admitted_handlers_case_24_exception_string_failure | gap | built-in method str.__new__ is not modelled yet
+test_language_semantics_exceptions_admitted_iteration_case_15_stop_iteration_boundary | gap | built-in method list.__new__ is not modelled yet
+test_language_semantics_exceptions_admitted_operations_case_18_builtin_error_arms | agree
+test_language_semantics_exceptions_admitted_operations_case_22_truthiness_protocol | gap | built-in method bool.__new__ is not modelled yet
+test_language_semantics_exceptions_admitted_scope_case_01_function_target_cleanup | agree
+test_language_semantics_exceptions_admitted_scope_case_02_target_value_vs_closure | gap | built-in method str.__new__ is not modelled yet
+test_language_semantics_exceptions_admitted_scope_case_03_static_local_classification | agree
+test_language_semantics_exceptions_admitted_scope_case_04_module_target_cleanup | gap | import of module json is not modelled yet
+test_language_semantics_exceptions_admitted_scope_case_05_nested_handler_targets | gap | built-in method str.__new__ is not modelled yet
+test_language_semantics_exceptions_admitted_scope_case_06_path_dependent_boundness | agree
+test_language_semantics_exceptions_dispatch_attribute_helpers_case_17_attributeerror_boundary | gap | built-in method list.append is not modelled yet
+test_language_semantics_exceptions_dispatch_attribute_write_case_22_property_intercepts_write | gap | a write to a property without a setter or deleter is not modelled yet
+test_language_semantics_exceptions_dispatch_binary_protocol_case_07_notimplemented_reflected | gap | built-in method list.append is not modelled yet
+test_language_semantics_exceptions_dispatch_binary_protocol_case_08_subclass_reflected_priority | gap | built-in method list.append is not modelled yet
+test_language_semantics_exceptions_dispatch_binary_protocol_case_09_raise_stops_fallback | gap | built-in method list.append is not modelled yet
+test_language_semantics_exceptions_dispatch_binary_protocol_case_10_exhaustion_typeerror | gap | built-in method list.append is not modelled yet
+test_language_semantics_exceptions_dispatch_call_order_case_23_lookup_precedes_arguments | gap | built-in method list.append is not modelled yet
+test_language_semantics_exceptions_dispatch_container_lookup_case_18_dict_get_vs_subscription | gap | built-in method dict.__new__ is not modelled yet
+test_language_semantics_exceptions_dispatch_container_lookup_case_19_dict_get_propagates_hash_error | gap | built-in method dict.get is not modelled yet
+test_language_semantics_exceptions_dispatch_descriptor_precedence_case_12_property_beats_instance_field | agree
+test_language_semantics_exceptions_dispatch_descriptor_precedence_case_13_subclass_masks_base_property | agree
+test_language_semantics_exceptions_dispatch_finally_interaction_case_05_preserves_dispatch_error | gap | built-in method list.append is not modelled yet
+test_language_semantics_exceptions_dispatch_finally_interaction_case_06_overrides_dispatch_error | agree
+test_language_semantics_exceptions_dispatch_handler_else_case_11_else_only_on_normal | gap | built-in method list.append is not modelled yet
+test_language_semantics_exceptions_dispatch_lookup_error_case_02_missing_member_caught | gap | built-in method str.__new__ is not modelled yet
+test_language_semantics_exceptions_dispatch_method_body_exception_case_03_selected_body_raises | gap | built-in method list.append is not modelled yet
+test_language_semantics_exceptions_dispatch_method_shadowing_case_14_instance_field_shadows_method | agree
+test_language_semantics_exceptions_dispatch_nested_dispatch_case_04_result_then_dispatch | agree
+test_language_semantics_exceptions_dispatch_numeric_tower_case_24_runtime_numeric_links | gap | the translator does not support generator expression
+test_language_semantics_exceptions_dispatch_numeric_tower_case_25_division_errors | agree
+test_language_semantics_exceptions_dispatch_numeric_tower_case_26_shift_errors | agree
+test_language_semantics_exceptions_dispatch_numeric_tower_case_27_power_boundaries | gap | not modelled: the OverflowError of a float power, which has an errno
+test_language_semantics_exceptions_dispatch_numeric_tower_case_28_mixed_numeric_type_errors | agree
+test_language_semantics_exceptions_dispatch_numeric_tower_case_29_mixed_float_overflow | agree
+test_language_semantics_exceptions_dispatch_path_correlation_case_01_correlated_member | agree
+test_language_semantics_exceptions_dispatch_protocol_precedence_case_21_contains_and_iter_precedence | gap | built-in method list.append is not modelled yet
+test_language_semantics_exceptions_dispatch_special_method_lookup_case_16_len_ignores_instance_shadow | agree
+test_language_semantics_exceptions_dispatch_subscription_protocol_case_20_index_and_slice_boundaries | agree
+test_language_semantics_exceptions_dispatch_uninitialized_fields_case_15_absence_falls_back_or_raises | agree
+test_leak_contextmanager_protocol_case_08_stopiteration_suppression | gap | the translator does not support generator function
+test_leak_contextmanager_protocol_variant_decorator_alias_bare_except | gap | the translator does not support generator function
+test_leak_contextmanager_protocol_variant_helper_body_raise | gap | the translator does not support generator function
+test_leak_finally_completion_override_case_10_swallow | gap | built-in method list.append is not modelled yet
+test_leak_finally_completion_override_variant_conditional_return | agree
+test_leak_generator_finalization_case_07_generator_exit | gap | the translator does not support generator function
+test_leak_generator_finalization_variant_bare_except | gap | the translator does not support generator function
+test_leak_generator_finalization_variant_bound_close_alias | gap | the translator does not support generator function
+test_leak_iterator_exhaustion_case_01_truncating_next | gap | built-in method list.__new__ is not modelled yet
+test_leak_iterator_exhaustion_case_02_builtin_consumers | gap | built-in method list.__new__ is not modelled yet
+test_leak_iterator_exhaustion_variant_async_anext_helper | gap | the translator does not support async def
+test_leak_iterator_exhaustion_variant_helper_call | gap | built-in method list.__new__ is not modelled yet
+test_leak_iterator_exhaustion_variant_stopiteration_subclass | gap | built-in method list.__new__ is not modelled yet
+test_leak_legacy_sequence_iteration_case_06_indexerror_exhaustion | gap | built-in method list.__new__ is not modelled yet
+test_leak_legacy_sequence_iteration_variant_helper_indexerror | gap | built-in method list.__new__ is not modelled yet
+test_leak_legacy_sequence_iteration_variant_indexerror_subclass | gap | built-in method list.__new__ is not modelled yet
+test_leak_pep_479_case_04_frame_boundary | gap | the translator does not support generator function, async def
+test_leak_pep_479_case_05_comprehension_asymmetry | gap | the translator does not support generator expression
+test_leak_pep_479_variant_async_generator | gap | the translator does not support async def
+test_leak_pep_479_variant_nested_helper | gap | the translator does not support generator function
+test_leak_pep_479_variant_stopiteration_subclass | gap | the translator does not support generator function
+test_leak_runtime_observability_case_09_detection_limit | gap | the translator does not support generator expression
+test_leak_yield_from_case_03_value_injection | gap | the translator does not support generator function
+test_leak_yield_from_variant_alias_subclass_value | gap | the translator does not support generator function
+test_leak_yield_from_variant_helper_raised_value | gap | the translator does not support generator function
+test_list | agree
+test_list_assign | agree
+test_list_concat | agree
+test_list_create | agree
+test_list_empty | agree
+test_list_falsy | agree
+test_list_in | agree
+test_list_negative_index | agree
+test_list_of_list | gap | import of module typing is not modelled yet
+test_list_slice | agree
+test_list_truthy | agree
+test_loops | agree
+test_lshift | agree
+test_lshift_negative | agree
+test_method_call_with_kwargs | agree
+test_method_kwargs_no_hierarchy | agree
+test_method_param_reassign | agree
+test_missing_models | gap | import of module typing is not modelled yet
+test_missing_required_param | gap | import of module typing is not modelled yet
+test_mixed_types_list | agree
+test_mod_both_neg | agree
+test_mod_neg_divisor | agree
+test_mod_sign_property | agree
+test_model_soundness_006_attribute_access_4step_protocol_program | agree
+test_model_soundness_009_list_method_return_value_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_010_augmented_assign_list_semantics_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_011_class_field_mutation_through_method_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_012_int_division_truncation_direction_program | agree
+test_model_soundness_013_boolean_subtype_arithmetic_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_014_raise_silently_dropped_program | agree
+test_model_soundness_015_string_list_repeat_negative_multiplier_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_016_class_instance_truthiness_unconstrained_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_017_int_conversion_missing_model_program | gap | built-in method int.__new__ is not modelled yet
+test_model_soundness_018_bool_arithmetic_int_promotion_program | agree
+test_model_soundness_019_str_split_no_model_program | gap | built-in method str.split is not modelled yet
+test_model_soundness_020_negative_list_index_wrap_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_021_power_zero_exponent_program | agree
+test_model_soundness_022_comparison_bool_int_cross_type_program | agree
+test_model_soundness_023_true_division_returns_float_program | agree
+test_model_soundness_024_mixed_int_float_promotion_program | agree
+test_model_soundness_025_try_except_builtin_exception_not_raised_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_026_min_max_abs_sum_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_027_isinstance_inheritance_not_modeled_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_028_tuple_no_representation_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_029_dict_int_keys_not_supported_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_030_str_conversion_class_instance_no_dispatch_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_031_for_loop_iterator_snapshot_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_032_dict_len_counts_duplicates_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_033_nested_object_field_aliasing_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_034_optional_class_any_composite_split_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_035_int_times_str_no_reflected_dispatch_program | agree
+test_model_soundness_036_exception_value_not_checked_after_call_program | agree
+test_model_soundness_037_equality_identity_vs_structural_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_038_property_descriptor_not_in_instance_dict_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_039_modulo_negative_dividend_wrong_sign_program | agree
+test_model_soundness_040_list_equality_structural_vs_elementwise_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_041_dict_equality_order_dependent_program | agree
+test_model_soundness_042_float_modeled_as_real_not_ieee754_program | agree
+test_model_soundness_043_bool_index_into_list_rejected_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_044_short_circuit_evaluation_not_lazy_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_045_range_negative_step_empty_range_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_046_string_in_operator_substring_not_element_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_047_string_ordering_comparison_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_048_augmented_assign_field_value_semantics_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_049_while_loop_condition_reevaluation_side_effects_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_050_floor_div_mod_float_return_type_program | agree
+test_model_soundness_051_dict_iteration_yields_keys_not_entries_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_052_return_does_not_terminate_control_flow_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_053_str_int_conversion_roundtrip_no_axioms_program | gap | built-in method str.__new__ is not modelled yet
+test_model_soundness_054_break_continue_control_flow_not_modeled_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_055_method_override_no_virtual_dispatch_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_056_and_or_return_operand_not_bool_program | agree
+test_model_soundness_057_not_operator_non_bool_operand_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_058_default_parameter_substitution_program | agree
+test_model_soundness_059_if_condition_non_bool_truthiness_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_060_string_concat_length_axioms_missing_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_061_subclass_fields_through_parent_type_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_062_is_none_narrowing_optional_program | gap | import of module typing is not modelled yet
+test_model_soundness_063_finally_block_always_executes_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_064_isinstance_narrowing_field_access_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_065_for_else_clause_break_semantics_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_066_chained_comparison_single_eval_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_067_recursive_dataclass_optional_self_ref_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_068_list_slice_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_069_string_subscript_returns_str_program | agree
+test_model_soundness_070_ternary_expression_short_circuit_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_071_dict_get_default_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_072_augmented_assign_target_evaluated_once_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_073_unary_minus_bool_float_dispatch_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_074_list_concatenation_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_075_len_on_strings_no_axioms_program | agree
+test_model_soundness_076_cross_tag_equality_none_and_types_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_077_unary_plus_identity_no_model_program | agree
+test_model_soundness_078_list_element_assignment_cons_rebuild_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_079_exception_tag_poisons_operators_program | agree
+test_model_soundness_080_float_division_by_zero_no_exception_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_081_classinstance_missing_field_read_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_082_dict_key_overwrite_assoc_list_growth_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_083_fstring_interpolation_no_model_program | agree
+test_model_soundness_084_dict_missing_key_no_keyerror_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_085_not_in_operator_no_negation_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_086_class_method_returns_new_instance_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_087_list_of_class_instances_element_mutation_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_088_list_len_no_relationship_to_operations_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_089_list_literal_construction_cons_order_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_090_nested_list_access_double_unwrap_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_091_list_equality_length_mismatch_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_092_for_loop_list_length_invariant_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_093_dict_literal_postconditions_missing_program | agree
+test_model_soundness_094_dict_passed_to_function_caller_unchanged_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_095_dict_in_checks_keys_not_values_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_096_dict_iteration_order_insertion_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_097_dict_len_after_new_key_vs_overwrite_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_098_self_field_write_then_read_same_method_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_099_object_stored_in_container_stale_copy_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_100_dataclass_default_values_not_modeled_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_101_multiple_field_writes_in_method_threading_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_102_classmethod_no_instance_access_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_103_no_modifies_clause_method_havocs_heap_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_104_composite_allocation_fresh_identity_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_105_value_composite_coercion_list_of_objects_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_106_heap_frame_preservation_after_call_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_107_composite_field_type_not_any_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_108_operator_type_error_returns_hole_not_exception_program | agree
+test_model_soundness_109_not_equal_operator_separate_or_negation_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_110_comparison_return_type_must_be_bool_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_111_operator_on_incompatible_tags_no_error_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_112_subtraction_cross_type_dispatch_gaps_program | agree
+test_model_soundness_113_try_except_type_matching_no_dispatch_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_114_exception_as_variable_in_handler_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_115_multiple_except_clauses_dispatch_order_program | agree
+test_model_soundness_116_raise_in_except_replaces_original_program | gap | built-in method int.__new__ is not modelled yet
+test_model_soundness_117_nested_try_except_propagation_program | gap | built-in method str.__new__ is not modelled yet
+test_model_soundness_118_variable_assignment_copies_value_not_reference_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_119_method_mutation_requires_caller_reassignment_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_120_is_none_vs_eq_none_semantics_program | gap | import of module typing is not modelled yet
+test_model_soundness_121_object_identity_after_construction_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_122_function_local_mutation_invisible_to_caller_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_123_assert_statement_not_modeled_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_124_recursive_function_termination_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_125_staticmethod_translation_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_126_module_level_variable_access_program | agree
+test_model_soundness_127_print_implicit_str_conversion_program | agree
+test_model_soundness_128_keyword_arguments_position_mapping_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_129_implicit_return_none_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_130_type_annotations_drive_tag_assertions_program | agree
+test_model_soundness_131_return_type_enforcement_program | agree
+test_model_soundness_132_function_call_argument_evaluation_order_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_133_str_startswith_endswith_no_model_program | gap | built-in method str.startswith is not modelled yet
+test_model_soundness_134_str_find_returns_negative_one_program | gap | built-in method str.find is not modelled yet
+test_model_soundness_135_str_replace_no_model_program | gap | built-in method str.replace is not modelled yet
+test_model_soundness_136_while_true_break_pattern_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_137_variable_narrowing_persists_through_branch_program | gap | import of module typing is not modelled yet
+test_model_soundness_138_str_join_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_139_bool_conversion_truthiness_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_140_float_conversion_from_int_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_141_dataclass_field_access_after_construction_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_142_multiple_return_values_via_class_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_143_dataclass_inheritance_field_union_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_144_str_strip_lower_upper_no_model_program | gap | built-in method str.strip is not modelled yet
+test_model_soundness_145_list_membership_type_coercion_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_146_dict_construction_from_loop_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_147_method_call_on_function_return_value_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_148_isinstance_bool_is_int_subclass_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_149_dataclass_optional_field_construction_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_150_bounds_check_pattern_and_conjunction_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_151_empty_container_return_value_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_152_string_equality_case_sensitive_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_153_dict_overwrite_then_read_same_key_program | agree
+test_model_soundness_154_list_grow_in_while_loop_rebinding_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_155_nested_if_narrowing_lost_at_merge_program | agree
+test_model_soundness_156_for_loop_variable_scope_after_loop_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_157_dataclass_default_factory_shared_state_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_158_integer_comparison_transitivity_cross_type_program | gap | built-in method float.__new__ is not modelled yet
+test_model_soundness_159_method_chaining_intermediate_self_lost_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_160_try_except_finally_return_override_program | gap | built-in method int.__new__ is not modelled yet
+test_model_soundness_161_range_object_not_list_program | agree
+test_model_soundness_162_isinstance_narrowing_invalidated_by_reassignment_program | gap | import of module typing is not modelled yet
+test_model_soundness_163_dataclass_eq_with_none_fields_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_164_exception_message_access_program | gap | built-in method int.__new__ is not modelled yet
+test_model_soundness_165_multiple_return_statements_dead_code_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_166_bool_is_int_subclass_tag_mismatch_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_167_string_multiply_zero_or_negative_program | agree
+test_model_soundness_168_function_postcondition_not_assumed_at_callsite_program | agree
+test_model_soundness_169_while_loop_exit_condition_not_assumed_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_170_list_append_return_none_not_new_list_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_171_tuple_unrepresentable_in_any_program | gap | import of module typing is not modelled yet
+test_model_soundness_172_classinstance_classname_string_no_hierarchy_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_173_exception_propagation_through_expressions_program | gap | built-in abs is not modelled yet
+test_model_soundness_174_float_exact_real_division_diverges_program | gap | built-in abs is not modelled yet
+test_model_soundness_175_dict_int_keys_no_representation_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_176_list_pure_ops_iteration_rebinding_conflict_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_177_cross_object_method_value_semantics_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_178_tag_dispatch_no_reflected_radd_program | agree
+test_model_soundness_179_no_object_identity_is_operator_program | gap | import of module typing is not modelled yet
+test_model_soundness_180_composite_value_split_boundary_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_181_list_pop_remove_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_182_list_insert_at_index_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_183_cons_list_index_is_o_n_no_random_access_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_184_list_passed_to_function_pure_copy_semantics_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_185_list_comparison_operators_lt_gt_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_186_dict_del_key_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_187_dict_update_merge_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_188_dict_keys_values_items_iteration_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_189_dict_setdefault_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_190_assoc_list_shadowing_breaks_len_contains_program | agree
+test_model_soundness_191_field_write_requires_full_reconstruction_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_192_method_self_not_rebound_to_caller_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_193_init_must_produce_complete_classinstance_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_194_classinstance_in_list_element_mutation_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_195_two_objects_same_class_independent_state_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_196_composite_modifies_clause_too_broad_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_197_composite_fresh_allocation_identity_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_198_composite_aliasing_write_through_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_199_composite_frame_condition_unrelated_objects_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_200_when_does_class_become_composite_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_201_operator_missing_tag_pair_falls_to_hole_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_202_comparison_chain_desugaring_tag_check_program | agree
+test_model_soundness_203_augmented_assign_dispatch_same_as_binary_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_204_operator_on_none_must_raise_not_hole_program | gap | import of module typing is not modelled yet
+test_model_soundness_205_floor_div_mod_must_check_zero_divisor_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_206_exception_value_no_stack_unwinding_program | agree
+test_model_soundness_207_raise_must_produce_exception_tag_program | agree
+test_model_soundness_208_except_clause_must_match_error_type_program | agree
+test_model_soundness_209_exception_in_condition_position_program | agree
+test_model_soundness_210_uncaught_exception_must_fail_verification_program | agree
+test_model_soundness_211_no_mutation_requires_rebinding_discipline_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_212_no_aliasing_ast_check_completeness_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_213_no_identity_dataclass_eq_correct_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_214_nested_field_write_requires_chain_rebuild_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_215_for_loop_element_mutation_invisible_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_216_subset_allows_list_aliasing_via_for_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_217_subset_allows_dict_int_but_model_cant_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_218_subset_allows_tuple_but_no_any_tag_program | gap | import of module typing is not modelled yet
+test_model_soundness_219_subset_allows_isinstance_but_no_hierarchy_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_220_subset_allows_str_methods_but_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_221_full_annotations_drive_tag_but_generics_lost_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_222_no_dynamic_features_but_property_is_dynamic_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_223_optional_annotation_requires_union_tag_set_program | gap | import of module typing is not modelled yet
+test_model_soundness_224_return_type_annotation_not_checked_at_all_exits_program | gap | import of module typing is not modelled yet
+test_model_soundness_225_annotation_mismatch_between_caller_and_callee_program | agree
+test_model_soundness_226_walrus_operator_scope_leak_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_227_string_format_method_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_228_list_count_index_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_229_int_overflow_compact_range_unchecked_program | agree
+test_model_soundness_230_dataclass_field_order_in_eq_and_init_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_231_global_constant_access_from_function_program | agree
+test_model_soundness_232_str_len_after_concat_no_axiom_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_233_list_literal_plus_append_length_tracking_program | gap | built-in method list.append is not modelled yet
+test_model_soundness_234_dataclass_method_reads_field_after_caller_write_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_235_isinstance_narrows_but_field_access_still_fails_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_236_enumerate_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_237_str_concatenation_in_loop_quadratic_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_238_dict_comprehension_equivalent_loop_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_239_multiple_assignment_same_line_program | agree
+test_model_soundness_240_method_called_on_literal_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_241_recursive_function_base_case_unreachable_program | agree
+test_model_soundness_242_nested_function_call_as_argument_program | agree
+test_model_soundness_243_boolean_short_circuit_guards_division_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_244_dataclass_field_default_none_vs_missing_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_245_comparison_result_stored_in_variable_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_246_property_with_conditional_logic_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_247_method_calling_another_method_on_self_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_248_for_loop_over_dict_keys_type_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_249_try_except_in_loop_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_250_dataclass_eq_used_in_list_contains_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_251_int_negation_of_min_int_program | agree
+test_model_soundness_252_string_equality_after_concat_not_provable_program | agree
+test_model_soundness_253_list_element_overwrite_old_value_persists_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_254_dict_get_on_just_set_key_returns_hole_program | agree
+test_model_soundness_255_if_else_both_branches_assign_merge_lost_program | agree
+test_model_soundness_256_int_plus_float_returns_float_not_int_program | gap | built-in abs is not modelled yet
+test_model_soundness_257_true_division_int_int_returns_float_program | agree
+test_model_soundness_258_floor_div_negative_rounds_toward_neg_inf_program | agree
+test_model_soundness_259_modulo_sign_follows_divisor_program | agree
+test_model_soundness_260_not_operator_returns_bool_not_operand_program | agree
+test_model_soundness_261_bool_plus_bool_returns_int_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_262_str_multiply_returns_str_not_hole_program | agree
+test_model_soundness_263_list_plus_list_returns_concatenated_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_264_none_equality_cross_type_program | agree
+test_model_soundness_265_int_to_bool_comparison_program | agree
+test_model_soundness_266_floor_div_model_gives_wrong_number_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_267_modulo_model_gives_wrong_sign_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_268_division_by_zero_model_no_error_program | agree
+test_model_soundness_269_index_out_of_bounds_model_no_error_program | agree
+test_model_soundness_270_type_error_on_none_add_model_no_error_program | gap | import of module typing is not modelled yet
+test_model_soundness_271_root_cause_value_semantics_no_aliasing_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_272_root_cause_tag_dispatch_incomplete_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_273_root_cause_smt_div_not_python_floor_program | agree
+test_model_soundness_274_root_cause_exception_as_value_no_propagation_program | agree
+test_model_soundness_275_root_cause_uninterpreted_functions_no_axioms_program | agree
+test_model_soundness_276_value_sem_list_param_mutation_lost_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_277_value_sem_dict_param_mutation_lost_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_278_value_sem_object_param_field_write_lost_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_279_value_sem_list_in_object_field_stale_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_280_value_sem_method_mutates_self_caller_unchanged_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_281_reflected_int_times_str_program | agree
+test_model_soundness_282_reflected_int_plus_float_program | agree
+test_model_soundness_283_reflected_int_sub_float_program | agree
+test_model_soundness_284_reflected_int_div_float_program | agree
+test_model_soundness_285_reflected_int_times_list_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_286_missing_exception_str_plus_int_program | agree
+test_model_soundness_287_missing_exception_int_subscript_str_program | agree
+test_model_soundness_288_missing_exception_dict_missing_key_program | agree
+test_model_soundness_289_missing_exception_int_call_on_non_number_program | gap | built-in method int.__new__ is not modelled yet
+test_model_soundness_290_missing_exception_unpack_wrong_length_program | agree
+test_model_soundness_291_incorrect_floor_div_negative_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_292_incorrect_mod_negative_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_293_incorrect_true_div_returns_int_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_294_incorrect_eq_bool_int_cross_program | agree
+test_model_soundness_295_incorrect_power_zero_exponent_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_296_fix_operator_dispatch_complete_table_program | agree
+test_model_soundness_297_fix_div_mod_python_semantics_program | agree
+test_model_soundness_298_fix_exception_propagation_pattern_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_299_fix_mccarthy_axioms_containers_program | agree
+test_model_soundness_300_fix_ast_rejection_rules_aliasing_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_301_list_multiply_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_302_isinstance_tuple_of_types_program | agree
+test_model_soundness_303_dict_pop_dual_effect_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_304_string_in_vs_dict_in_dispatch_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_305_for_loop_range_len_pattern_no_index_axiom_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_306_except_as_variable_deleted_after_handler_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_307_nested_for_loop_variable_rebinding_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_308_class_level_attribute_no_representation_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_309_for_loop_body_break_index_value_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_310_string_method_returns_new_no_rebind_needed_program | gap | built-in method str.upper is not modelled yet
+test_model_soundness_311_while_break_unsound_postcondition_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_312_try_except_else_clause_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_313_inherited_method_not_found_on_child_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_314_str_bool_produces_true_false_not_int_program | gap | built-in method str.__new__ is not modelled yet
+test_model_soundness_315_continue_nested_loop_target_conflation_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_316_while_else_clause_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_317_int_float_truncates_toward_zero_program | agree
+test_model_soundness_318_ordering_comparison_dataclass_no_lt_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_319_bool_return_where_int_declared_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_320_str_float_no_conversion_model_program | agree
+test_model_soundness_321_string_negative_index_no_wrap_program | agree
+test_model_soundness_322_container_truthiness_needs_length_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_323_isinstance_none_type_no_match_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_324_string_slice_no_model_program | agree
+test_model_soundness_325_min_max_empty_list_valueerror_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_326_abs_float_no_model_program | agree
+test_model_soundness_327_dataclass_cross_class_equality_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_328_range_membership_test_no_model_program | agree
+test_model_soundness_329_sum_list_return_type_depends_on_elements_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_330_for_loop_else_break_in_nested_if_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_331_assert_failure_raises_assertionerror_program | agree
+test_model_soundness_332_chained_string_methods_hole_propagation_program | agree
+test_model_soundness_333_dict_get_default_return_type_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_334_isinstance_narrowing_killed_by_else_assign_program | agree
+test_model_soundness_335_dataclass_field_type_in_operator_dispatch_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_336_augmented_assign_dict_subscript_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_337_inherited_property_not_resolved_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_338_str_none_no_model_program | gap | built-in method str.__new__ is not modelled yet
+test_model_soundness_339_isinstance_elif_exhaustive_narrowing_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_340_dataclass_post_init_silently_dropped_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_341_list_subscript_augmented_assign_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_342_super_method_call_not_translated_program | gap | built-in method str.__new__ is not modelled yet
+test_model_soundness_343_isinstance_none_returns_false_for_all_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_344_early_return_in_for_loop_iteration_continues_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_345_dataclass_field_reuse_across_instances_no_fresh_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_346_bool_as_dict_key_hash_equivalence_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_347_exception_flows_into_field_access_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_348_float_modulo_no_case_program | gap | built-in abs is not modelled yet
+test_model_soundness_349_method_call_on_exception_value_no_propagation_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_350_list_of_optional_element_narrowing_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_351_int_power_negative_exponent_returns_float_program | agree
+test_model_soundness_352_dict_value_access_type_lost_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_353_classinstance_subtype_at_function_boundary_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_354_float_floor_div_returns_float_not_int_program | agree
+test_model_soundness_355_and_or_return_operand_value_not_bool_program | agree
+test_model_soundness_356_for_loop_append_requires_rebind_each_iteration_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_357_non_dataclass_eq_is_identity_not_structural_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_358_list_method_expression_value_vs_side_effect_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_359_dict_in_operator_checks_keys_not_values_type_dispatch_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_360_classinstance_field_write_then_method_call_stale_self_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_361_list_multiply_objects_shared_vs_independent_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_362_cons_list_append_len_axiom_missing_program | gap | built-in method list.append is not modelled yet
+test_model_soundness_363_for_loop_iteration_count_not_connected_to_len_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_364_list_returned_from_function_independence_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_365_cons_list_set_then_get_different_index_preservation_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_366_dict_frame_axiom_set_preserves_other_keys_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_367_dict_contains_after_set_no_axiom_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_368_dict_len_conditional_on_key_existence_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_369_dict_equality_order_independent_assoc_list_not_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_370_dict_construction_loop_final_contents_unprovable_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_371_classinstance_field_write_frame_axiom_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_372_classinstance_classname_preserved_after_field_write_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_373_functional_update_pattern_caller_must_rebind_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_374_object_passed_to_function_value_copy_sound_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_375_classinstance_method_dispatch_uses_classname_not_static_type_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_376_composite_in_any_no_classname_or_fields_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_377_modifies_clause_missing_heap_havoc_after_call_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_378_fresh_allocation_in_loop_distinct_references_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_379_composite_classinstance_split_equality_broken_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_380_heap_threading_missing_for_pure_methods_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_381_non_commutative_operators_operand_order_matters_program | gap | built-in abs is not modelled yet
+test_model_soundness_382_comparison_operators_gt_le_ge_derived_from_lt_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_383_bool_float_cross_type_two_step_promotion_program | agree
+test_model_soundness_384_eq_on_classinstance_must_check_classname_first_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_385_operator_catch_all_must_be_typeerror_not_hole_program | agree
+test_model_soundness_386_exception_passed_as_function_argument_program | agree
+test_model_soundness_387_exception_persists_in_variable_used_later_program | agree
+test_model_soundness_388_exception_stored_in_container_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_389_exception_in_comparison_operand_program | agree
+test_model_soundness_390_multiple_exceptions_one_expression_first_wins_program | agree
+test_model_soundness_391_same_object_two_parameters_aliasing_undetected_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_392_object_in_two_dict_values_modification_invisible_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_393_list_element_is_same_object_as_variable_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_394_no_aliasing_makes_primitives_trivially_correct_program | gap | built-in abs is not modelled yet
+test_model_soundness_395_function_receives_and_returns_same_object_no_link_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_396_subset_promises_str_split_but_model_returns_hole_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_397_division_precondition_not_emitted_zero_silent_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_398_subset_promises_isinstance_user_class_model_cant_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_399_range_step_negative_loop_semantics_wrong_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_400_subset_example_count_words_uses_split_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_401_while_loop_exit_condition_n_equals_zero_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_402_optional_narrowing_then_arithmetic_full_chain_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_403_nested_function_call_return_type_flows_to_param_program | agree
+test_model_soundness_404_function_called_twice_independent_results_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_405_while_true_break_postcondition_from_break_guard_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_406_try_except_handler_return_value_not_modeled_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_407_int_str_conversion_in_subset_example_no_model_program | gap | built-in method int.__new__ is not modelled yet
+test_model_soundness_408_string_concatenation_result_not_equal_to_literal_program | agree
+test_model_soundness_409_dataclass_field_access_after_method_return_no_postcondition_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_410_for_loop_break_value_vs_default_value_merge_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_411_dataclass_constructor_field_value_unprovable_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_412_list_literal_len_unprovable_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_413_if_else_variable_value_at_merge_point_program | agree
+test_model_soundness_414_while_loop_counter_final_value_program | agree
+test_model_soundness_415_string_comparison_ordering_unprovable_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_416_recursive_function_base_case_value_lost_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_417_list_concat_length_not_sum_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_418_comparison_result_used_in_arithmetic_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_419_nested_dataclass_field_access_chain_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_420_try_except_normal_path_return_value_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_421_default_parameter_not_substituted_at_call_program | agree
+test_model_soundness_422_early_return_guard_pattern_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_423_staticmethod_called_on_class_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_424_property_computed_value_not_modeled_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_425_for_range_step_two_skips_elements_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_426_keyword_arguments_reordered_at_call_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_427_assert_as_assume_loses_error_path_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_428_string_in_string_substring_check_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_429_chained_comparison_single_eval_program | agree
+test_model_soundness_430_dataclass_equality_field_by_field_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_431_negative_index_wraps_around_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_432_string_multiply_zero_gives_empty_program | agree
+test_model_soundness_433_integer_division_always_truncates_toward_negative_infinity_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_434_modulo_result_sign_follows_divisor_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_435_boolean_not_on_integer_returns_bool_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_436_true_division_int_int_returns_float_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_437_bool_equals_int_cross_tag_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_438_empty_list_truthiness_is_false_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_439_string_len_after_concat_program | agree
+test_model_soundness_440_int_times_string_reflected_program | agree
+test_model_soundness_441_repeated_field_access_narrowing_lost_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_442_bare_raise_reraises_current_exception_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_443_dataclass_order_true_comparison_no_dispatch_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_444_try_body_partial_execution_side_effects_visible_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_445_for_loop_range_stop_exclusive_off_by_one_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_446_dict_items_iteration_yields_tuple_no_tag_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_447_optional_narrowing_incomplete_ordering_typeerror_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_448_int_conversion_bool_tag_normalization_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_449_list_extend_no_model_length_unprovable_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_450_dataclass_method_modifies_field_caller_stale_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_451_except_tuple_of_types_no_translation_program | gap | built-in method int.__new__ is not modelled yet
+test_model_soundness_452_frozen_dataclass_field_write_no_error_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_453_dict_add_key_during_iteration_no_runtime_error_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_454_parent_method_self_call_child_override_not_dispatched_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_455_continue_break_inside_try_finally_interaction_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_456_for_loop_else_exception_propagation_skips_else_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_457_dataclass_inheritance_positional_arg_ordering_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_458_tuple_unpack_assignment_at_call_site_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_459_isinstance_narrowing_killed_by_unrelated_call_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_460_sequential_loops_same_variable_independent_iteration_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_461_method_return_self_identity_vs_copy_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_462_exception_in_for_loop_iterable_expression_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_463_recursive_dataclass_equality_unbounded_depth_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_464_isinstance_narrowing_not_killed_at_loop_back_edge_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_465_string_repeat_length_no_axiom_connection_program | agree
+test_model_soundness_466_exception_in_dataclass_constructor_argument_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_467_method_call_on_narrowed_optional_field_no_dispatch_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_468_while_loop_modifies_object_field_condition_reads_stale_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_469_for_loop_else_normal_completion_variable_unbound_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_470_dataclass_field_default_factory_list_shared_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_471_isinstance_narrowing_in_or_condition_no_assume_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_472_multiple_return_values_tuple_field_access_no_model_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_473_exception_in_augmented_assign_partial_eval_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_474_for_loop_variable_reassignment_ignored_by_range_iterator_program | agree
+test_model_soundness_475_math_module_functions_no_model_program | gap | import of module math is not modelled yet
+test_model_soundness_476_isinstance_result_stored_no_narrowing_propagation_program | gap | import of module typing is not modelled yet
+test_model_soundness_477_divmod_builtin_no_model_program | agree
+test_model_soundness_478_for_loop_range_variable_final_value_off_by_one_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_479_slice_with_step_no_model_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_480_augmented_assign_missing_key_no_keyerror_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_481_property_getter_raises_exception_lost_program | gap | import of module dataclasses is not modelled yet
+test_model_soundness_482_range_len_while_translation_reeval_bound_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_483_list_negative_index_write_no_wrap_program | gap | subscripting a built-in class is not modelled yet
+test_model_soundness_484_object_reference_semantics_program | agree
+test_model_soundness_485_integer_floordiv_mod_sign_program | agree
+test_model_soundness_486_exception_propagation_raise_program | agree
+test_model_soundness_487_exception_propagation_conditional_program | agree
+test_module_level | gap | import of module typing is not modelled yet
+test_multi_assign | agree
+test_multi_assign_triple | agree
+test_multi_function | gap | import of module test_helper is not modelled yet
+test_multiple_except | agree
+test_nested_calls | agree
+test_nested_dict | agree
+test_nested_function_ancestor_capture_rejection | agree
+test_nested_function_capture_rejection | agree
+test_nested_function_control_flow_rejection | agree
+test_nested_function_default_capture_rejection | agree
+test_nested_function_forward_reference_rejection | agree
+test_nested_function_lifting | agree
+test_nested_function_shadow_capture_rejection | agree
+test_nested_function_sibling_capture_rejection | agree
+test_nested_function_value_capture | agree
+test_nested_function_value_rejection | agree
+test_nested_function_vararg_capture_rejection | agree
+test_nested_if | agree
+test_nested_list | agree
+test_nested_optional | gap | import of module typing is not modelled yet
+test_none_assign | agree
+test_none_check | agree
+test_none_conditional | agree
+test_none_falsy | agree
+test_none_in_list | agree
+test_optional_int | gap | import of module typing is not modelled yet
+test_optional_str | gap | import of module typing is not modelled yet
+test_param_reassign | agree
+test_param_reassign_cross_module | gap | import of module param_reassign_helper is not modelled yet
+test_param_reassign_kwargs | agree
+test_pass_stmt | agree
+test_pin_any | agree
+test_power | agree
+test_precondition_verification | gap | import of module test_helper is not modelled yet
+test_procedure_in_assert | gap | import of module datetime is not modelled yet
+test_pyhard_01_correlated_dispatch | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyhard_01_correlated_dispatch_annotated | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyhard_01_correlated_dispatch_checked | gap | the translator does not support generator expression
+test_pyhard_02_nested_property_dispatch | agree
+test_pyhard_02_nested_property_dispatch_annotated | agree
+test_pyhard_02_nested_property_dispatch_checked | gap | the translator does not support generator expression
+test_pyhard_03_double_dispatch | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyhard_03_double_dispatch_annotated | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyhard_03_double_dispatch_checked | gap | the translator does not support generator expression
+test_pyhard_04_exception_hierarchy | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyhard_04_exception_hierarchy_annotated | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyhard_04_exception_hierarchy_checked | gap | the translator does not support generator expression
+test_pyhard_05_boundness_and_loops | agree
+test_pyhard_05_boundness_and_loops_annotated | agree
+test_pyhard_05_boundness_and_loops_checked | gap | the translator does not support generator expression
+test_pyhard_06_typed_dict_shapes | gap | import of module typing is not modelled yet
+test_pyhard_06_typed_dict_shapes_annotated | gap | import of module typing is not modelled yet
+test_pyhard_06_typed_dict_shapes_checked | gap | the translator does not support generator expression
+test_pyhard_07_recursive_container_types | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyhard_07_recursive_container_types_annotated | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyhard_07_recursive_container_types_checked | gap | the translator does not support generator expression
+test_pyhard_08_pure_comprehension | gap | subscripting a built-in class is not modelled yet
+test_pyhard_08_pure_comprehension_annotated | gap | subscripting a built-in class is not modelled yet
+test_pyhard_08_pure_comprehension_checked | gap | the translator does not support generator expression
+test_pyhard_09_typed_dict_alias_presence | gap | import of module typing is not modelled yet
+test_pyhard_09_typed_dict_alias_presence_annotated | gap | import of module typing is not modelled yet
+test_pyhard_09_typed_dict_alias_presence_checked | gap | the translator does not support generator expression
+test_pyhard_10_builtin_binary_matrix | gap | subscripting a built-in class is not modelled yet
+test_pyhard_10_builtin_binary_matrix_annotated | gap | subscripting a built-in class is not modelled yet
+test_pyhard_10_builtin_binary_matrix_checked | gap | the translator does not support generator expression
+test_pyhard_11_membership_protocols | gap | subscripting a built-in class is not modelled yet
+test_pyhard_11_membership_protocols_annotated | gap | subscripting a built-in class is not modelled yet
+test_pyhard_11_membership_protocols_checked | gap | the translator does not support generator expression
+test_pyhard_12_inherited_mro_dispatch | gap | subscripting a built-in class is not modelled yet
+test_pyhard_12_inherited_mro_dispatch_annotated | gap | subscripting a built-in class is not modelled yet
+test_pyhard_12_inherited_mro_dispatch_checked | gap | the translator does not support generator expression
+test_pyhard_13_subscript_read_write | gap | subscripting a built-in class is not modelled yet
+test_pyhard_13_subscript_read_write_annotated | gap | subscripting a built-in class is not modelled yet
+test_pyhard_13_subscript_read_write_checked | gap | the translator does not support generator expression
+test_pyhard_14_chained_comparisons | agree
+test_pyhard_14_chained_comparisons_annotated | agree
+test_pyhard_14_chained_comparisons_checked | gap | the translator does not support generator expression
+test_pyhard_15_short_circuit_values | gap | subscripting a built-in class is not modelled yet
+test_pyhard_15_short_circuit_values_annotated | gap | subscripting a built-in class is not modelled yet
+test_pyhard_15_short_circuit_values_checked | gap | the translator does not support generator expression
+test_pyhard_16_conditional_expression | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyhard_16_conditional_expression_annotated | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyhard_16_conditional_expression_checked | gap | the translator does not support generator expression
+test_pyhard_17_for_else_boundness | gap | subscripting a built-in class is not modelled yet
+test_pyhard_17_for_else_boundness_annotated | gap | subscripting a built-in class is not modelled yet
+test_pyhard_17_for_else_boundness_checked | gap | the translator does not support generator expression
+test_pyhard_18_exception_routing | agree
+test_pyhard_18_exception_routing_annotated | agree
+test_pyhard_18_exception_routing_checked | gap | the translator does not support generator expression
+test_pyhard_19_delete_and_rebind | agree
+test_pyhard_19_delete_and_rebind_annotated | agree
+test_pyhard_19_delete_and_rebind_checked | gap | the translator does not support generator expression
+test_pyhard_20_frozen_dataclass_fields | gap | import of module dataclasses is not modelled yet
+test_pyhard_20_frozen_dataclass_fields_annotated | gap | import of module dataclasses is not modelled yet
+test_pyhard_20_frozen_dataclass_fields_checked | gap | the translator does not support generator expression
+test_pyhard_21_exception_target_lifetime | agree
+test_pyhard_21_exception_target_lifetime_annotated | agree
+test_pyhard_21_exception_target_lifetime_checked | gap | the translator does not support generator expression
+test_pyhard_22_exceptional_assignment | gap | subscripting a built-in class is not modelled yet
+test_pyhard_22_exceptional_assignment_annotated | gap | subscripting a built-in class is not modelled yet
+test_pyhard_22_exceptional_assignment_checked | gap | the translator does not support generator expression
+test_pyhard_23_exception_path_value_sets | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyhard_23_exception_path_value_sets_annotated | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyhard_23_exception_path_value_sets_checked | gap | the translator does not support generator expression
+test_pyhard_24_alias_transitions | gap | subscripting a built-in class is not modelled yet
+test_pyhard_24_alias_transitions_annotated | gap | subscripting a built-in class is not modelled yet
+test_pyhard_24_alias_transitions_checked | gap | the translator does not support generator expression
+test_pyhard_25_handler_loop_control | gap | subscripting a built-in class is not modelled yet
+test_pyhard_25_handler_loop_control_annotated | gap | subscripting a built-in class is not modelled yet
+test_pyhard_25_handler_loop_control_checked | gap | the translator does not support generator expression
+test_pyhard_26_comprehension_failure_boundness | gap | subscripting a built-in class is not modelled yet
+test_pyhard_26_comprehension_failure_boundness_annotated | gap | subscripting a built-in class is not modelled yet
+test_pyhard_26_comprehension_failure_boundness_checked | gap | the translator does not support generator expression
+test_pyhard_27_numeric_tower | gap | subscripting a built-in class is not modelled yet
+test_pyhard_27_numeric_tower_annotated | gap | subscripting a built-in class is not modelled yet
+test_pyhard_27_numeric_tower_checked | gap | the translator does not support generator expression
+test_pyhard_28_versioned_predicates | agree
+test_pyhard_28_versioned_predicates_annotated | agree
+test_pyhard_28_versioned_predicates_checked | gap | the translator does not support generator expression
+test_pyhard_29_mixed_lookup_chain | gap | import of module typing is not modelled yet
+test_pyhard_29_mixed_lookup_chain_annotated | gap | import of module typing is not modelled yet
+test_pyhard_29_mixed_lookup_chain_checked | gap | the translator does not support generator expression
+test_pyhard_test_audit | gap | the translator does not support from __future__ import annotations
+test_pyresid_bad_subset | gap | import of module os is not modelled yet
+test_pyresid_baseline_assignment_target_order | gap | subscripting a built-in class is not modelled yet
+test_pyresid_baseline_builtin_protocol | agree
+test_pyresid_baseline_callee_order | agree
+test_pyresid_baseline_comparison_protocol | agree
+test_pyresid_baseline_comprehension_fixpoint | gap | not modelled yet: py.listComp
+test_pyresid_baseline_dict_literal_order | agree
+test_pyresid_baseline_exception_init | agree
+test_pyresid_baseline_exceptional_assignment | agree
+test_pyresid_baseline_genexpr_kind | gap | the translator does not support generator expression
+test_pyresid_baseline_init_failure | agree
+test_pyresid_baseline_loop_fixpoint | agree
+test_pyresid_baseline_membership_protocol | agree
+test_pyresid_baseline_nested_annotations | gap | subscripting a built-in class is not modelled yet
+test_pyresid_baseline_no_backward_flow | agree
+test_pyresid_baseline_not_protocol | agree
+test_pyresid_baseline_string_protocol | gap | built-in method str.__new__ is not modelled yet
+test_pyresid_baseline_try_else_escape | agree
+test_pyresid_baseline_unbound_reads | agree
+test_pyresid_binary_dispatch_soundness | gap | built-in method dict.keys is not modelled yet
+test_pyresid_binary_protocol_effect_state | gap | built-in method dict.keys is not modelled yet
+test_pyresid_chain_demo | agree
+test_pyresid_comp | gap | the translator does not support generator expression
+test_pyresid_corr_flip_bug | agree
+test_pyresid_corr_flip_ok | agree
+test_pyresid_corr_isinstance | agree
+test_pyresid_defects | gap | the translator does not support generator function
+test_pyresid_dict_store_key_presence | gap | subscripting a built-in class is not modelled yet
+test_pyresid_fuzz | agree
+test_pyresid_gen_pairs | gap | the translator does not support module attribute __file__, generator expression
+test_pyresid_gen_reject | gap | the translator does not support module attribute __file__, generator expression
+test_pyresid_generator_close_cleanup | gap | the translator does not support generator function
+test_pyresid_gm_after_first | gap | import of module os is not modelled yet
+test_pyresid_gm_both_branches | gap | import of module os is not modelled yet
+test_pyresid_gm_class_soup | gap | the translator does not support async def
+test_pyresid_gm_lambda_holding_eval | agree
+test_pyresid_gm_nested_in_rejected | gap | built-in eval is not modelled yet
+test_pyresid_gp_binop_matrix | gap | the translator does not support a % format that CPython may fold into a str constant
+test_pyresid_gp_builtin_calls | gap | built-in method list.__new__ is not modelled yet
+test_pyresid_gp_methods | agree
+test_pyresid_gp_threeway | agree
+test_pyresid_gr_as_def | gap | the translator does not support async def
+test_pyresid_gr_as_inner | gap | the translator does not support async def
+test_pyresid_gr_as_method | gap | the translator does not support async def
+test_pyresid_gr_bb_getattr | agree
+test_pyresid_gr_bb_getattr_func | agree
+test_pyresid_gr_bb_globals | gap | built-in globals is not modelled yet
+test_pyresid_gr_bb_super | agree
+test_pyresid_gr_bb_type | agree
+test_pyresid_gr_bb_vars | gap | built-in vars is not modelled yet
+test_pyresid_gr_cb_ann_nonname | agree
+test_pyresid_gr_cb_expr | agree
+test_pyresid_gr_cb_field_default | agree
+test_pyresid_gr_cb_stmt | agree
+test_pyresid_gr_cb_td_method | gap | import of module typing is not modelled yet
+test_pyresid_gr_cd_dataclass_kw | gap | import of module dataclasses is not modelled yet
+test_pyresid_gr_cd_expr | agree
+test_pyresid_gr_cd_nondataclass | agree
+test_pyresid_gr_he_eq_only | agree
+test_pyresid_gr_he_hash_only | agree
+test_pyresid_gr_ho_init_subclass | agree
+test_pyresid_gr_ho_setattr_hook | agree
+test_pyresid_gr_im_dataclasses_field | gap | import of module dataclasses is not modelled yet
+test_pyresid_gr_im_from | gap | import of module os is not modelled yet
+test_pyresid_gr_im_plain | gap | import of module os is not modelled yet
+test_pyresid_gr_im_typing_any | gap | import of module typing is not modelled yet
+test_pyresid_gr_rd_iadd | agree
+test_pyresid_gr_rd_radd | agree
+test_pyresid_gr_sh_assign | agree
+test_pyresid_gr_sh_assign_func | agree
+test_pyresid_gr_sh_assign_method | agree
+test_pyresid_gr_sh_class | agree
+test_pyresid_gr_sh_comp_target | gap | not modelled yet: py.listComp
+test_pyresid_gr_sh_def | agree
+test_pyresid_gr_sh_handler | agree
+test_pyresid_gr_sh_param | agree
+test_pyresid_gr_st_call_kwstar | agree
+test_pyresid_gr_st_call_star | agree
+test_pyresid_gr_st_def_kwstar | agree
+test_pyresid_gr_st_def_star | agree
+test_pyresid_gr_st_dict_splat | agree
+test_pyresid_gr_st_expr_star | agree
+test_pyresid_gr_st_target_star | agree
+test_pyresid_gr_uf_bare | gap | import of module dataclasses is not modelled yet
+test_pyresid_gr_uf_false | gap | import of module dataclasses is not modelled yet
+test_pyresid_gr_un_augop_shift | agree
+test_pyresid_gr_un_binop_bitand | agree
+test_pyresid_gr_un_binop_matmul | agree
+test_pyresid_gr_un_binop_matmul_func | agree
+test_pyresid_gr_un_binop_shift | agree
+test_pyresid_gr_un_cmp_is | agree
+test_pyresid_gr_un_cmp_is_func | agree
+test_pyresid_gr_un_cmp_isnot | agree
+test_pyresid_gr_un_comp_target_tuple | gap | not modelled yet: py.listComp
+test_pyresid_gr_un_const_bytes | agree
+test_pyresid_gr_un_const_bytes_func | agree
+test_pyresid_gr_un_const_complex | gap | the translator does not support complex literal
+test_pyresid_gr_un_exceptstar | gap | the translator does not support try/except*
+test_pyresid_gr_un_expr_yield_expr | gap | the translator does not support generator function
+test_pyresid_gr_un_kwonly | agree
+test_pyresid_gr_un_raise_from | agree
+test_pyresid_gr_un_raise_nonname | agree
+test_pyresid_gr_un_slice | agree
+test_pyresid_gr_un_slice_func | agree
+test_pyresid_gr_un_target_list | agree
+test_pyresid_gr_un_typealias | gap | the translator does not support type alias
+test_pyresid_gt_attr_named_list | agree
+test_pyresid_gt_aug_ok | agree
+test_pyresid_gt_bare_except | agree
+test_pyresid_gt_chained_cmp | agree
+test_pyresid_gt_dictcomp | gap | not modelled yet: py.dictComp
+test_pyresid_gt_docstrings | agree
+test_pyresid_gt_dunder_ok | agree
+test_pyresid_gt_eq_and_hash | agree
+test_pyresid_gt_except_baseexception | agree
+test_pyresid_gt_frozen_dataclass | gap | import of module dataclasses is not modelled yet
+test_pyresid_gt_fstring | gap | built-in method str.upper is not modelled yet
+test_pyresid_gt_genexp | gap | the translator does not support generator expression
+test_pyresid_gt_kwargs_at_call | agree
+test_pyresid_gt_method_named_builtin | agree
+test_pyresid_gt_raise_name_call | agree
+test_pyresid_gt_setcomp | gap | not modelled yet: py.setComp
+test_pyresid_gt_single_gen_comp | gap | not modelled yet: py.listComp
+test_pyresid_gt_ternary | agree
+test_pyresid_gt_typing_allowlist | gap | import of module typing is not modelled yet
+test_pyresid_gt_uadd_ok | agree
+test_pyresid_gt_unary_invert_ok | gap | not modelled: ~ on a bool, which warns
+test_pyresid_ix_alias_strong | gap | built-in method list.append is not modelled yet
+test_pyresid_ix_alloc_loop_try | agree
+test_pyresid_ix_corr_eafp | agree
+test_pyresid_ix_diamond_mro | agree
+test_pyresid_ix_except_hierarchy | agree
+test_pyresid_ix_finally_modes | gap | built-in method list.append is not modelled yet
+test_pyresid_ix_gen_send | gap | the translator does not support generator function
+test_pyresid_ix_havoc_narrow | gap | built-in method set.intersection_update is not modelled yet
+test_pyresid_ix_td_raise_eafp | gap | import of module typing is not modelled yet
+test_pyresid_key_presence_precision | gap | import of module typing is not modelled yet
+test_pyresid_matrix | gap | the translator does not support generator function
+test_pyresid_mb_unbound_frozen | gap | import of module dataclasses is not modelled yet
+test_pyresid_mb_wrong_types | agree
+test_pyresid_ops_demo | gap | import of module dataclasses is not modelled yet
+test_pyresid_policy_eafp | agree
+test_pyresid_policy_strict | agree
+test_pyresid_pyhard_pyhard_01_correlated_dispatch | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyresid_pyhard_pyhard_02_nested_property_dispatch | agree
+test_pyresid_pyhard_pyhard_03_double_dispatch | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyresid_pyhard_pyhard_04_exception_hierarchy | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyresid_pyhard_pyhard_05_boundness_and_loops | agree
+test_pyresid_pyhard_pyhard_06_typed_dict_shapes | gap | import of module typing is not modelled yet
+test_pyresid_pyhard_pyhard_07_recursive_container_types | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyresid_pyhard_pyhard_08_pure_comprehension | gap | subscripting a built-in class is not modelled yet
+test_pyresid_pyhard_pyhard_09_typed_dict_alias_presence | gap | import of module typing is not modelled yet
+test_pyresid_pyhard_pyhard_10_builtin_binary_matrix | gap | subscripting a built-in class is not modelled yet
+test_pyresid_pyhard_pyhard_11_membership_protocols | gap | subscripting a built-in class is not modelled yet
+test_pyresid_pyhard_pyhard_12_inherited_mro_dispatch | gap | subscripting a built-in class is not modelled yet
+test_pyresid_pyhard_pyhard_13_subscript_read_write | gap | subscripting a built-in class is not modelled yet
+test_pyresid_pyhard_pyhard_14_chained_comparisons | agree
+test_pyresid_pyhard_pyhard_15_short_circuit_values | gap | subscripting a built-in class is not modelled yet
+test_pyresid_pyhard_pyhard_16_conditional_expression | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyresid_pyhard_pyhard_17_for_else_boundness | gap | subscripting a built-in class is not modelled yet
+test_pyresid_pyhard_pyhard_18_exception_routing | agree
+test_pyresid_pyhard_pyhard_19_delete_and_rebind | agree
+test_pyresid_pyhard_pyhard_20_frozen_dataclass_fields | gap | import of module dataclasses is not modelled yet
+test_pyresid_pyhard_pyhard_21_exception_target_lifetime | agree
+test_pyresid_pyhard_pyhard_22_exceptional_assignment | gap | subscripting a built-in class is not modelled yet
+test_pyresid_pyhard_pyhard_23_exception_path_value_sets | gap | `|` of a class, which makes a union type, is not modelled yet
+test_pyresid_pyhard_pyhard_24_alias_transitions | gap | subscripting a built-in class is not modelled yet
+test_pyresid_pyhard_pyhard_25_handler_loop_control | gap | subscripting a built-in class is not modelled yet
+test_pyresid_pyhard_pyhard_26_comprehension_failure_boundness | gap | subscripting a built-in class is not modelled yet
+test_pyresid_pyhard_pyhard_27_numeric_tower | gap | subscripting a built-in class is not modelled yet
+test_pyresid_pyhard_pyhard_28_versioned_predicates | agree
+test_pyresid_pyhard_pyhard_29_mixed_lookup_chain | gap | import of module typing is not modelled yet
+test_pyresid_reject_async | gap | the translator does not support async def
+test_pyresid_reject_banned_builtin | gap | built-in getattr is not modelled yet
+test_pyresid_reject_class_body_stmt | agree
+test_pyresid_reject_class_decorator | agree
+test_pyresid_reject_delete | agree
+test_pyresid_reject_except_tuple | agree
+test_pyresid_reject_field_default | agree
+test_pyresid_reject_function_decorator | agree
+test_pyresid_reject_global | agree
+test_pyresid_reject_handler_name_collision | agree
+test_pyresid_reject_hash_eq | agree
+test_pyresid_reject_hook_override | agree
+test_pyresid_reject_import | gap | import of module os is not modelled yet
+test_pyresid_reject_import_star | gap | the translator does not support import *
+test_pyresid_reject_invalid_c3 | gap | an exception whose text has a line break
+test_pyresid_reject_lambda | agree
+test_pyresid_reject_match | gap | the translator does not support match
+test_pyresid_reject_metaclass | agree
+test_pyresid_reject_multigen_comp | gap | not modelled yet: py.listComp
+test_pyresid_reject_nested_class | agree
+test_pyresid_reject_nested_function | agree
+test_pyresid_reject_non_exception_classes | agree
+test_pyresid_reject_nonlocal | agree
+test_pyresid_reject_nonlocal_delete | agree
+test_pyresid_reject_nonstatic_base | agree
+test_pyresid_reject_raise_from | agree
+test_pyresid_reject_realworld | gap | import of module os is not modelled yet
+test_pyresid_reject_reflected_dunder | agree
+test_pyresid_reject_scalar_constructors | gap | built-in method bool.__new__ is not modelled yet
+test_pyresid_reject_shadowed_builtin | agree
+test_pyresid_reject_starred | agree
+test_pyresid_reject_type_params | gap | the translator does not support type parameters
+test_pyresid_reject_unfrozen_dataclass | gap | import of module dataclasses is not modelled yet
+test_pyresid_reject_unsupported_ops | gap | the translator does not support complex literal
+test_pyresid_reject_walrus | agree
+test_pyresid_reject_with | gap | built-in open is not modelled yet
+test_pyresid_run_all | gap | the translator does not support module attribute __file__, generator expression
+test_pyresid_soundness_heap_dispatch | gap | import of module typing is not modelled yet
+test_pyresid_stress | gap | the translator does not support generator function
+test_pyresid_t1_recency | gap | built-in method list.append is not modelled yet
+test_pyresid_t2_dispatch | agree
+test_pyresid_t3_flow | agree
+test_pyresid_t4_comp | gap | not modelled yet: py.listComp
+test_pyresid_t5_typed | gap | import of module dataclasses is not modelled yet
+test_pyresid_t6_handler | agree
+test_pyresid_t7_init | agree
+test_pyresid_t8_annotations | agree
+test_pyresid_t9_dunder | agree
+test_pyresid_td_demo | gap | import of module typing is not modelled yet
+test_pyresid_unary_operators | agree
+test_pyresid_v2_rule_inventory | gap | import of module typing is not modelled yet
+test_pyresid_wb_inventory | gap | built-in method dict.get is not modelled yet
+test_pyresid_wb_shapes | gap | import of module dataclasses is not modelled yet
+test_reassign_different_type | agree
+test_regex_negative | gap | import of module re is not modelled yet
+test_regex_positive | gap | import of module re is not modelled yet
+test_return_types | agree
+test_rshift | agree
+test_rshift_negative | agree
+test_scope_if_var | agree
+test_soundness_global_annotation_only | agree
+test_soundness_global_dead_branch | agree
+test_soundness_global_declaration_only | agree
+test_soundness_global_for_target_unbound | agree
+test_soundness_global_read_before_assignment | agree
+test_soundness_global_unmodeled_nested_arg | agree
+test_soundness_global_while_body_unbound | agree
+test_str_concat | agree
+test_str_empty | agree
+test_str_eq | agree
+test_str_falsy | agree
+test_str_neq | agree
+test_str_slice | agree
+test_str_truthy | agree
+test_strings | agree
+test_subscription | agree
+test_ternary_false | agree
+test_ternary_nested | agree
+test_ternary_true | agree
+test_timedelta_expr | gap | import of module datetime is not modelled yet
+test_truthiness_bool_eq | gap | built-in method bool.__new__ is not modelled yet
+test_truthiness_edge_cases | agree
+test_truthiness_float | agree
+test_truthiness_not_eq | agree
+test_try_else_rejection | agree
+test_try_except | agree
+test_try_except_basic | agree
+test_try_except_modeled | agree
+test_try_except_nested | agree
+test_try_except_scoping | agree
+test_try_finally_return_rejection | agree
+test_tuple_create | agree
+test_tuple_swap | agree
+test_tuple_type | gap | import of module typing is not modelled yet
+test_tuple_unpack | agree
+test_type_alias | agree
+test_type_bool | agree
+test_type_checker_differentials_mypy_a10_mutable_default_program | gap | subscripting a built-in class is not modelled yet
+test_type_checker_differentials_mypy_a11_linked_structure_program | gap | the translator does not support from __future__ import annotations
+test_type_checker_differentials_mypy_a12_multiple_fields_program | agree
+test_type_checker_differentials_mypy_a13_enum_narrowing_program | gap | import of module enum is not modelled yet
+test_type_checker_differentials_mypy_a14_classmethod_cls_program | gap | `|` of a class, which makes a union type, is not modelled yet
+test_type_checker_differentials_mypy_a15_super_mutation_program | agree
+test_type_checker_differentials_mypy_a16_tuple_element_narrowing_program | agree
+test_type_checker_differentials_mypy_a17_expression_eval_order_program | agree
+test_type_checker_differentials_mypy_a18_finally_mutation_program | agree
+test_type_checker_differentials_mypy_a1_narrowing_method_program | gap | `|` of a class, which makes a union type, is not modelled yet
+test_type_checker_differentials_mypy_a20_list_narrowing_mutation_program | agree
+test_type_checker_differentials_mypy_a21_exception_handler_narrowing_program | agree
+test_type_checker_differentials_mypy_a23_shared_composition_program | agree
+test_type_checker_differentials_mypy_a2_narrowing_alias_program | agree
+test_type_checker_differentials_mypy_a31_try_else_narrowing_program | agree
+test_type_checker_differentials_mypy_a32_property_setter_side_effect_program | agree
+test_type_checker_differentials_mypy_a33_conditional_init_program | agree
+test_type_checker_differentials_mypy_a34_staticmethod_class_var_program | gap | `|` of a class, which makes a union type, is not modelled yet
+test_type_checker_differentials_mypy_a35_str_repr_side_effect_program | gap | built-in method str.__new__ is not modelled yet
+test_type_checker_differentials_mypy_a36_dict_subscript_narrowing_program | agree
+test_type_checker_differentials_mypy_a3_narrowing_indirect_program | agree
+test_type_checker_differentials_mypy_a4_overload_narrowing_program | gap | import of module typing is not modelled yet
+test_type_checker_differentials_mypy_a5_dunder_side_effects_program | gap | `|` of a class, which makes a union type, is not modelled yet
+test_type_checker_differentials_mypy_a6_match_narrowing_program | gap | the translator does not support match
+test_type_checker_differentials_mypy_a7_implicit_calls_program | gap | not modelled yet: py.listComp
+test_type_checker_differentials_mypy_a8_context_manager_program | agree
+test_type_checker_differentials_mypy_a9_condition_side_effects_program | gap | the translator does not support generator expression
+test_type_checker_differentials_mypy_b1_mutable_override_program | gap | `|` of a class, which makes a union type, is not modelled yet
+test_type_checker_differentials_mypy_b2_mutable_override_ops_program | gap | `|` of a class, which makes a union type, is not modelled yet
+test_type_checker_differentials_mypy_b3_diamond_inheritance_program | gap | `|` of a class, which makes a union type, is not modelled yet
+test_type_checker_differentials_mypy_b4_missing_super_init_program | gap | `|` of a class, which makes a union type, is not modelled yet
+test_type_checker_differentials_mypy_b5_multilevel_override_program | gap | `|` of a class, which makes a union type, is not modelled yet
+test_type_checker_differentials_mypy_b6_property_covariant_override_program | gap | `|` of a class, which makes a union type, is not modelled yet
+test_type_checker_differentials_mypy_c1_dict_in_narrowing_program | agree
+test_type_checker_differentials_mypy_c2_typeddict_del_program | gap | import of module typing is not modelled yet
+test_type_checker_differentials_mypy_c3_property_side_effect_program | gap | `|` of a class, which makes a union type, is not modelled yet
+test_type_checker_differentials_mypy_c4_getattr_fallback_program | agree
+test_type_checker_differentials_mypy_c5_setattr_override_program | agree
+test_type_checker_differentials_mypy_c6_getattribute_override_program | agree
+test_type_checker_differentials_mypy_d1_numeric_tower_float_method_program | agree
+test_type_checker_differentials_mypy_misc_test_list_insert | gap | built-in method list.insert is not modelled yet
+test_type_checker_differentials_mypy_misc_test_list_slice | agree
+test_type_checker_differentials_mypy_misc_test_while | gap | CPython's run does not end in time, so the outputs are not compared
+test_type_checker_differentials_ty_001_unannotated_param_implicit_any_program | agree
+test_type_checker_differentials_ty_002_unannotated_return_unknown_program | agree
+test_type_checker_differentials_ty_003_unknown_launders_through_return_annotation_program | agree
+test_type_checker_differentials_ty_004_unknown_launders_through_param_annotation_program | agree
+test_type_checker_differentials_ty_005_empty_dict_unknown_value_program | gap | built-in method dict.get is not modelled yet
+test_type_checker_differentials_ty_006_cast_unchecked_program | gap | import of module typing is not modelled yet
+test_type_checker_differentials_ty_007_unknown_launders_into_list_element_program | gap | subscripting a built-in class is not modelled yet
+test_type_checker_differentials_ty_008_unknown_launders_into_dict_value_program | gap | subscripting a built-in class is not modelled yet
+test_type_checker_differentials_ty_009_unknown_launders_through_for_iterable_program | agree
+test_type_checker_differentials_ty_010_slice_variable_length_tuple_program | gap | subscripting a built-in class is not modelled yet
+test_type_checker_differentials_ty_011_narrowing_survives_mutating_call_program | gap | import of module typing is not modelled yet
+test_type_checker_differentials_ty_012_any_from_stdlib_stub_program | gap | import of module json is not modelled yet
+test_type_checker_differentials_ty_013_subscript_narrowing_survives_mutating_call_program | gap | `|` of a class, which makes a union type, is not modelled yet
+test_type_checker_differentials_ty_014_typeguard_predicate_trusted_unchecked_program | gap | import of module typing is not modelled yet
+test_type_checker_differentials_ty_015_unpack_variable_length_tuple_arity_program | gap | subscripting a built-in class is not modelled yet
+test_type_checker_differentials_ty_015_unpack_variable_length_tuple_arity_repro_minimal | gap | subscripting a built-in class is not modelled yet
+test_type_dict_annotation | gap | import of module typing is not modelled yet
+test_type_int | agree
+test_type_list_annotation | gap | import of module typing is not modelled yet
+test_type_optional_none | gap | import of module typing is not modelled yet
+test_type_optional_value | gap | import of module typing is not modelled yet
+test_type_str | agree
+test_unary_plus | agree
+test_unary_plus_float | agree
+test_union_type | gap | import of module typing is not modelled yet
+test_union_type_310 | agree
+test_unsupported_config | gap | import of module test_helper is not modelled yet
+test_untyped_var | agree
+test_user_error_metadata | gap | import of module typing is not modelled yet
+test_var_reassign | agree
+test_var_shadow_func | agree
+test_var_swap | agree
+test_variable_in_nested_block | agree
+test_variable_reassign | agree
+test_while_else_rejection | agree
+test_while_loop | agree
+test_with_statement | agree
+test_with_void_enter | agree

@@ -1,0 +1,10 @@
+--- stdout 59
+OK: annotation scope — lazy evaluation allows forward refs
+
+--- outcome
+ok
+--- globals
+Tree = <TypeAliasType object>
+__doc__ = None
+__name__ = '__main__'
+sys = <module object>

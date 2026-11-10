@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Container = <class 'Container'>
+__doc__ = "\nLIST RETURNED FROM FUNCTION — CALLER AND CALLEE INDEPENDENT (POSITIVE)\n\nCPython: def make_list(): return [1,2,3]\n         a = make_list(); b = make_list()\n         a.append(4)\n         b == [1,2,3]  # True — each call returns a fresh list\n\nModel:   Value semantics: each function call returns an independent value.\n         Modifying a doesn't affect b. This is CORRECT.\n\n         BUT: def get_shared(): return self.items\n         a = obj.get_items(); a.append(4)\n         In CPython: obj.items is NOW [1,2,3,4] (aliased!)\n         In Model: obj.items is still [1,2,3] (value copy)\n\n         The model is CORRECT for factory functions (returning new lists)\n         but WRONG for accessor functions (returning references to existing lists).\n\nThis finding confirms value semantics is SOUND for the factory pattern\nbut UNSOUND for the accessor pattern. The AST checker must distinguish them.\n"
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+make_list = <function object>
+make_range = <function object>
+test_accessor_aliasing = <function object>
+test_factory_independence = <function object>

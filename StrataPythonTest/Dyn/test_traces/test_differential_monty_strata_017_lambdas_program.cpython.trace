@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+add_k = <function object>
+inc = <function object>
+k = 10
+xs = [3, 1, 2]
+ys = [3, 2, 1]

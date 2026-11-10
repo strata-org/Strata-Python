@@ -1,0 +1,17 @@
+--- stdout 8
+8 hi! 6
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nAugmented assignment `x += y` desugars to `x = x + y` for immutable types.\nThe operator dispatch for `+=` must use the SAME tag-matching as `+`.\n\nBut there\'s a subtlety: for mutable types (lists), `+=` calls __iadd__\n(in-place add) which is different from __add__. Finding 003/010 covered\nthis for lists. This finding focuses on IMMUTABLE types where `+=` is\npurely `x = x.__add__(y)`:\n\n- `x: int; x += 1` → `x = PAdd(x, 1)` — same dispatch as `+`\n- `x: float; x += 0.5` → `x = PAdd(x, 0.5)`\n- `x: str; x += "suffix"` → `x = PAdd(x, "suffix")` — string concat\n\nThe model must ensure augmented assignment uses the same operator\nfunction as the binary operator, with the result rebound to the variable.\n\nUses ONLY confirmed-accepted constructs: int, float, str, +=, -=, *=.\n'
+__name__ = '__main__'
+accumulate_in_loop = <function object>
+build_string = <function object>
+float_augmented_add = <function object>
+int_augmented_add = <function object>
+int_augmented_mul = <function object>
+int_augmented_sub = <function object>
+main = <function object>
+mixed_augmented = <function object>
+str_augmented_add = <function object>

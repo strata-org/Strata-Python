@@ -1,0 +1,10 @@
+--- stdout 56
+OK: exception type lazy eval — not called if not needed
+
+--- outcome
+ok
+--- globals
+LazyExc = <function object>
+__doc__ = None
+__name__ = '__main__'
+evaluated = []

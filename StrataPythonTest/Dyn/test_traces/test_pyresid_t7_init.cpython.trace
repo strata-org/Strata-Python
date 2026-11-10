@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+raised AttributeError: 'Lazy' object has no attribute 'cache'
+--- globals
+Cond = <class 'Cond'>
+Good = <class 'Good'>
+Lazy = <class 'Lazy'>
+__doc__ = None
+__name__ = '__main__'
+g = <Good object>
+l = <Lazy object>
+u = 5

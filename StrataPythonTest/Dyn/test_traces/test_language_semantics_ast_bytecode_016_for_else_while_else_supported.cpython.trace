@@ -1,0 +1,9 @@
+--- stdout 46
+OK: for-else — search pattern works correctly
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+find = <function object>

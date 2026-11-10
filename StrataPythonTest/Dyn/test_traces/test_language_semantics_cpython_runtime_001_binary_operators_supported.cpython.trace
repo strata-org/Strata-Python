@@ -1,0 +1,15 @@
+--- stdout 22
+7
+7.5
+hello world
+3.5
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Binary operators: supported case.\nTypes are statically known, so slot dispatch collapses to inlined semantics.\n'
+__name__ = '__main__'
+add_ints = <function object>
+concat_strs = <function object>
+mixed_add = <function object>
+mul_floats = <function object>

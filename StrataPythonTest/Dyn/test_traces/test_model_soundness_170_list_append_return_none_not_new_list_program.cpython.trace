@@ -1,0 +1,14 @@
+--- stdout 9
+True 3 3
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nIn CPython, `list.append(x)` returns None (not the modified list).\nThe mutation happens IN PLACE on the list object.\n\nUnder value semantics, the translator must model append as:\n    lst = List_append(lst, x)  # rebind to new list\n\nBut the RETURN VALUE of append must be from_None(), not the new list.\nIf the model returns the new list from append, code like:\n\n    result = lst.append(x)\n    # result should be None, not the list\n\nwould get the wrong value. And if the model doesn't rebind lst:\n\n    lst.append(x)\n    # lst should now contain x\n\nthe list doesn't grow (finding 009).\n\nThe dual requirement: rebind the list AND return None.\n\nUses ONLY confirmed-accepted constructs: list, append, None, int.\n"
+__name__ = '__main__'
+append_in_loop = <function object>
+append_modifies_list = <function object>
+append_returns_none = <function object>
+build_list_with_append = <function object>
+dont_chain_append = <function object>
+main = <function object>

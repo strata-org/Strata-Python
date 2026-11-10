@@ -1,0 +1,14 @@
+--- stdout 27
+[2, 4, 6]
+[2, 4]
+[0, 2, 4]
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFOR LOOP APPEND REQUIRES REBIND EACH ITERATION\n\nCPython: result = []; for x in xs: result.append(x*2)\n         After loop: result == [2, 4, 6]\n         append() mutates result in place each iteration.\n\nModel:   Lists are pure. append returns a NEW list.\n         result.append(x*2) must translate to:\n           result = List_append(result, x*2)  // REBIND each iteration\n         Without rebinding, result stays empty forever.\n\n         The key issue: the translator must recognize that .append()\n         in a for-loop body requires the variable to be REBOUND on\n         every iteration. The loop variable `result` must be threaded\n         through the loop as mutable state.\n\nThis is the MOST COMMON list-building pattern in Python.\nFinding 170 covers append returning None.\nFinding 154 covers while-loop list growth.\nThis finding covers the FOR-LOOP + APPEND combination specifically.\n'
+__name__ = '__main__'
+collect_indices = <function object>
+double_all = <function object>
+filter_positive = <function object>
+main = <function object>

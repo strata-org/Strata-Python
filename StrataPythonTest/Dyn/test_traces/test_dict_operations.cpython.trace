@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'config': <class 'dict'>, 'nested': <class 'dict'>}
+__doc__ = None
+__name__ = '__main__'
+config = {'host': 'localhost', 'port': 8080, 'debug': True, 'timeout': 30}
+nested = {'database': {'primary': {'host': 'db3', 'port': 5432}, 'replica': {'host': 'db2', 'port': 5433}}}

@@ -1,0 +1,13 @@
+--- stdout 8
+-1 0 -1
+
+--- outcome
+ok
+--- globals
+__doc__ = "\n`try/except ValueError` must only catch ValueError, not KeyError or\nother exceptions. The exception-as-value model stores the exception\ntype in the Error value. The `except` clause must CHECK the type and\nonly execute if it matches. If the model doesn't dispatch on exception\ntype, ALL exceptions are caught by ANY except clause.\n"
+__name__ = '__main__'
+correct_dispatch = <function object>
+main = <function object>
+parse_int = <function object>
+safe_lookup = <function object>
+wrong_handler = <function object>

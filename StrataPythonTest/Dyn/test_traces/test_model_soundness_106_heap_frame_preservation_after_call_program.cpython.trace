@@ -1,0 +1,13 @@
+--- stdout 11
+True 20 12
+
+--- outcome
+ok
+--- globals
+Counter = <class 'Counter'>
+__doc__ = '\nAfter calling a method on one object, other objects on the heap must\nbe UNCHANGED (heap frame preservation). If the verifier doesn\'t know\nthat `a.method()` only modifies `a`, it may assume `b` was also\nmodified — losing all knowledge about `b`\'s fields.\n\nThis is the multi-object version of finding 103. The frame rule says:\n"objects not mentioned in the modifies clause retain their values."\n'
+__name__ = '__main__'
+dataclass = <function object>
+independent_counters = <function object>
+main = <function object>
+modify_first_preserve_second = <function object>

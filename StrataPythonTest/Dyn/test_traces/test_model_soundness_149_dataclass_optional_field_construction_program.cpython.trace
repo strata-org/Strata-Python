@@ -1,0 +1,16 @@
+--- stdout 13
+Alice 0 True
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+UserProfile = <class 'UserProfile'>
+__doc__ = '\nA @dataclass with an Optional field: `field: Optional[int] = None`.\nThe field can hold either an int or None. Construction with and without\nthe field, plus access with is-None guards.\n'
+__name__ = '__main__'
+create_full = <function object>
+create_minimal = <function object>
+dataclass = <function object>
+get_age_or_default = <function object>
+has_email = <function object>
+main = <function object>

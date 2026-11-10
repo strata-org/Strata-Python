@@ -1,0 +1,18 @@
+--- stdout 13
+8080 9090 30
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+Optional = <_SpecialForm object>
+Request = <class 'Request'>
+__doc__ = "\nWhen a @dataclass has a field with a default value that is a mutable\ncontainer (list/dict), Python's dataclass machinery uses default_factory\nto create a fresh copy per instance. But if the default is a LITERAL\nin the class body (not field(default_factory=...)), Python raises\nValueError at class definition time.\n\nHowever, the REAL issue for Laurel is simpler: even with immutable\ndefaults (int, str, None), the model must correctly substitute defaults\nwhen fewer arguments are passed to the constructor.\n\nThis finding focuses on: @dataclass constructor with PARTIAL arguments\nwhere some fields use defaults. The model must substitute the default\nvalues for omitted fields.\n\nUses ONLY confirmed-accepted constructs: @dataclass, int, str, Optional,\nfunction def.\n"
+__name__ = '__main__'
+check_defaults = <function object>
+create_default_config = <function object>
+create_partial_config = <function object>
+dataclass = <function object>
+main = <function object>
+request_with_body = <function object>
+request_without_body = <function object>

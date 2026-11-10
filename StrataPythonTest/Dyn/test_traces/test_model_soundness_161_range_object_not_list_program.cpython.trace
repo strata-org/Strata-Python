@@ -1,0 +1,14 @@
+--- stdout 8
+10 30 4
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`range(start, stop, step)` produces a range OBJECT, not a list.\nIn `for x in range(...)`, the translator must generate correct iteration\nbounds. Key issues:\n\n1. range(5) → 0,1,2,3,4 (stop exclusive)\n2. range(2, 7) → 2,3,4,5,6\n3. range(10, 0, -2) → 10,8,6,4,2 (negative step, stop exclusive)\n4. range(5, 5) → empty (start == stop)\n5. range(5, 3) → empty (start > stop with positive step)\n\nThe model must correctly compute iteration count and element values.\nIf it models range as a list literal, `len(range(n))` and indexing\nsemantics differ (range supports negative indexing, len, `in`).\n\nUses ONLY confirmed-accepted constructs: for, range, int, function def.\n'
+__name__ = '__main__'
+count_iterations = <function object>
+countdown_sum = <function object>
+main = <function object>
+range_stop_exclusive = <function object>
+sum_range = <function object>
+sum_range_start_stop = <function object>

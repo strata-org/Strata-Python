@@ -1,0 +1,17 @@
+--- stdout 267
+  TypeError via 'in' (__contains__): unsupported operand type(s) for -: 'str' and 'int'
+  TypeError via f-string (__format__): unsupported operand type(s) for -: 'str' and 'int'
+  TypeError via comprehension filter: unsupported operand type(s) for -: 'str' and 'int'
+
+--- outcome
+ok
+--- globals
+ContainsMutates = <class 'ContainsMutates'>
+FilterMutates = <class 'FilterMutates'>
+FormatMutates = <class 'FormatMutates'>
+__doc__ = '\na7_implicit_calls.py — More implicit dunder calls that invalidate narrowing.\n\nExtends a5 with additional Python syntax that triggers hidden method calls:\n- `x in obj` → __contains__\n- `f"{obj}"` → __format__\n- `[... if obj.method() ...]` → filter in comprehension\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError on all three\n'
+__name__ = '__main__'
+main = <function object>
+test_contains = <function object>
+test_filter = <function object>
+test_format = <function object>

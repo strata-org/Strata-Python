@@ -1,0 +1,13 @@
+--- stdout 9
+4 5 True
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython's `assert expr` raises AssertionError if expr is falsy. In the\nmodel, `assert` could be translated as:\n1. A Laurel `assert` (verification condition — correct)\n2. Dropped entirely (code after assert is reachable even when expr is False)\n3. An if-then-raise (exception-as-value, with all its issues)\n\nThe key question: does `assert x > 0` in the SOURCE translate to an\nassertion the VERIFIER checks, or is it modeled as runtime behavior?\n"
+__name__ = '__main__'
+assert_as_precondition = <function object>
+bounded = <function object>
+main = <function object>
+non_empty_list = <function object>
+positive_only = <function object>

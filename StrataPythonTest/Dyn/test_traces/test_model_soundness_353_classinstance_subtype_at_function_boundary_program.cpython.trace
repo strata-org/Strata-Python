@@ -1,0 +1,16 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Circle = <class 'Circle'>
+Rectangle = <class 'Rectangle'>
+Shape = <class 'Shape'>
+__doc__ = '\nClassInstance SUBTYPE AT FUNCTION BOUNDARY — classname MISMATCH\n\nCPython: def process(a: Animal) → str: return a.name\n         process(Dog("Rex", "Lab")) → "Rex" (Dog IS-A Animal)\n\nModel:   process expects classname == "Animal" (from parameter type)\n         But receives from_ClassInstance("Dog", {...})\n         classname "Dog" ≠ "Animal" → type assertion fails!\n\n         The model\'s tag assertion for class-typed parameters is:\n         assert isfrom_ClassInstance(a) && classname(a) == "Animal"\n         This REJECTS valid subclass instances.\n\nFinding 055 covers method dispatch (calling wrong method).\nFinding 172 covers isinstance (classname has no hierarchy).\nThis finding covers the FUNCTION PARAMETER BOUNDARY: passing a child\ninstance to a function expecting the parent type.\n'
+__name__ = '__main__'
+dataclass = <function object>
+describe = <function object>
+get_name = <function object>
+main = <function object>
+total_area = <function object>

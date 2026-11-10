@@ -1,0 +1,12 @@
+--- stdout 5
+99 0
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = '\nVALUE SEMANTICS WHERE CPYTHON HAS REFERENCE SEMANTICS:\nObject passed to function — function writes field, caller sees in CPython.\n\nCPython: object param is a reference. obj.x = v mutates the SAME object.\nModel: object param is a COPY. obj.x = v rebuilds the copy. Caller unchanged.\n\nCPython result: p.x == 99\nModel result:  p.x == 0\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+set_x = <function object>

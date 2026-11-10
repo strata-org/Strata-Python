@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Forward = <class 'Forward'>
+Reflected = <class 'Reflected'>
+__doc__ = None
+__name__ = '__main__'
+correlated_builtin = <function object>
+custom = <function object>

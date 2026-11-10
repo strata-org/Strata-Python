@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: can only concatenate str (not "int") to str
+--- globals
+__annotations__ = {'xs': <GenericAlias object>}
+__doc__ = None
+__name__ = '__main__'
+src = <function object>
+xs = ['s']

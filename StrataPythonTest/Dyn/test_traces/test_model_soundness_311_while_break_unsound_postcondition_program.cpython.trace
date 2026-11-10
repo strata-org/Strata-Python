@@ -1,0 +1,13 @@
+--- stdout 41
+All while-break postcondition tests pass
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nWHILE loop with BREAK — post-loop assume(!cond) is UNSOUND.\n\nWhen a `while` loop exits via `break`, the loop condition may still be True.\nThe standard translation emits `assume(!cond)` after the loop to let the\nsolver reason about post-loop state. But if the loop exited via `break`,\nthis assumption is FALSE — it introduces unsoundness by assuming something\nthat doesn't hold.\n\n    while i < n:\n        if found(i):\n            break\n        i = i + 1\n    # Model assumes: i >= n (WRONG if break was taken)\n    # CPython: i < n is still True (break exited early)\n\nThis is distinct from:\n- Finding 054 (break/continue not modeled at all)\n- Finding 136 (while True: break pattern)\n- Finding 169 (exit condition not assumed — MISSING assume)\n- Finding 309 (for-loop break preserves variable)\n\nThis finding is about the assume being PRESENT but WRONG: it over-constrains\nthe post-loop state, potentially making the verifier MISS bugs or PROVE\nfalse properties.\n\nUses ONLY confirmed-accepted constructs: while, break, if, int, comparison.\n"
+__name__ = '__main__'
+bounded_search = <function object>
+break_vs_normal_exit = <function object>
+find_first_negative = <function object>
+main = <function object>
+search_with_postcondition = <function object>

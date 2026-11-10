@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Account = <class 'Account'>
+__doc__ = '\nMETHOD CALL ON EXCEPTION VALUE — NO PROPAGATION BEFORE DISPATCH\n\nCPython: If obj holds an exception (from a raising function), calling\n         obj.method() never happens — the exception propagates.\n\nModel:   obj.method() translates to ClassName_method(obj).\n         If obj = exception(...), the function receives an exception value\n         as its `self` parameter. It then tries to access self.field →\n         undefined (finding 347). But BEFORE that, the method DISPATCH\n         itself is wrong: looking up "method" on an exception value.\n\nThis is the METHOD CALL variant of finding 347 (field access on exception).\nThe propagation check must happen BEFORE method resolution, not just\nbefore field access inside the method body.\n'
+__name__ = '__main__'
+chained_methods = <function object>
+check_balance = <function object>
+create_account = <function object>
+dataclass = <function object>
+deposit_to_new = <function object>
+main = <function object>

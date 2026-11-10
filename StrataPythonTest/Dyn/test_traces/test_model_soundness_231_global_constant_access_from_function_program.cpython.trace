@@ -1,0 +1,18 @@
+--- stdout 23
+100 True hello unknown
+
+--- outcome
+ok
+--- globals
+DEFAULT_NAME = 'unknown'
+MAX_SIZE = 100
+PI_APPROX = 3.14159
+__annotations__ = {'MAX_SIZE': <class 'int'>, 'DEFAULT_NAME': <class 'str'>, 'PI_APPROX': <class 'float'>}
+__doc__ = "\nModule-level constants accessed from functions. Finding 126 noted this.\nThe model must make global constants available inside function bodies.\n\n    MAX_RETRIES = 3\n    def retry() -> int:\n        return MAX_RETRIES  # must resolve to 3\n\nIf the translator doesn't inline or scope-resolve module-level names,\nthe function body can't access them — result is Hole or NameError.\n\nUses ONLY confirmed-accepted constructs: module-level variable, function.\n"
+__name__ = '__main__'
+circle_area = <function object>
+get_max_size = <function object>
+greet = <function object>
+is_within_bounds = <function object>
+main = <function object>
+use_multiple_globals = <function object>

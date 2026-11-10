@@ -1,0 +1,19 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+Point = <class 'Point'>
+__doc__ = '\nEXCEPTION IN DATACLASS CONSTRUCTOR ARGUMENT — PARTIAL EVALUATION LOST\n\nThe subset allows:\n  - @dataclass construction (IN)\n  - Function calls as constructor arguments (IN)\n  - Functions that may raise exceptions (IN)\n  - try/except around construction (IN)\n\nThe NOVEL gap: when a @dataclass constructor has multiple arguments\nand one of them raises an exception, CPython evaluates arguments\nLEFT-TO-RIGHT and raises at the failing argument. The constructor\nis NEVER called. But the model may:\n\n  1. Evaluate all arguments (including ones after the exception)\n  2. Call the constructor with an exception-tagged value as a field\n  3. Produce a ClassInstance with an exception embedded in its attrs\n\n  @dataclass\n  class Config:\n      host: str\n      port: int\n      timeout: int\n\n  def get_port() -> int:\n      raise ValueError("no port configured")\n\n  def get_timeout() -> int:\n      return 30  # This should NEVER execute\n\n  try:\n      c = Config(host="localhost", port=get_port(), timeout=get_timeout())\n  except ValueError:\n      c = Config(host="localhost", port=8080, timeout=30)\n\nCPython behavior:\n  1. Evaluates "localhost" → "localhost"\n  2. Evaluates get_port() → raises ValueError\n  3. get_timeout() is NEVER called (left-to-right, short-circuit on raise)\n  4. Config() is NEVER called\n  5. Handler catches ValueError, creates fallback Config\n\nModel behavior (if exception-as-value without propagation):\n  1. Evaluates "localhost" → from_str("localhost")\n  2. Evaluates get_port() → exception(ValueError)\n  3. Evaluates get_timeout() → from_int(30)  ← WRONG: should not execute\n  4. Calls Config constructor with exception in port field\n  5. Produces from_ClassInstance("Config", {"host": "localhost",\n     "port": exception(ValueError), "timeout": from_int(30)})\n  6. Exception is EMBEDDED in the object, not propagated\n\nThis is a specific instance of finding 386 (exception passed as function\nargument) but with the additional problem that:\n  - The constructor SUCCEEDS (producing a zombie object)\n  - Subsequent field access on the zombie reads exception values\n  - The try/except handler may be unreachable (exception never propagates)\n\nThis is distinct from:\n  - Finding 386 (exception as function arg) — general case\n  - Finding 390 (multiple exceptions, first wins) — about which exception\n  - Finding 340 (__post_init__ dropped) — about post-construction validation\n  - Finding 411 (constructor field value unprovable) — about postconditions\n'
+__name__ = '__main__'
+dataclass = <function object>
+expensive_computation = <function object>
+main = <function object>
+parse_int = <function object>
+test_exception_in_nested_construction = <function object>
+test_first_arg_raises = <function object>
+test_handler_uses_exception_info = <function object>
+test_no_exception_normal_path = <function object>
+test_second_arg_raises = <function object>

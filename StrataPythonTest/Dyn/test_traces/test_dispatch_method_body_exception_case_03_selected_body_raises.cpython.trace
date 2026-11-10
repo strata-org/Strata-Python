@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+EVENTS = ['body']
+RESULT = ('ValueError', ['body'])
+__doc__ = 'Failure after successful lookup is not an AttributeError table cell.'
+__name__ = '__main__'

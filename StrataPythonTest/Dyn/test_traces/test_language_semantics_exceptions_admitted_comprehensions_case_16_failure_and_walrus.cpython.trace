@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+RESULT = ((0, 'UnboundLocalError', 'module x'), (0, 'UnboundLocalError'), ([1, 2], 'caught', 'UnboundLocalError'))
+__doc__ = None
+__name__ = '__main__'
+body_failure = <function object>
+exception_target_erases_walrus_binding = <function object>
+filter_failure = <function object>
+x = 'module x'

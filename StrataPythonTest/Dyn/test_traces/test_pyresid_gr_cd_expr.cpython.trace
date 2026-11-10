@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised AttributeError: type object 'NS' has no attribute 'deco'
+--- globals
+NS = <class 'NS'>
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nsum() return type depends on element type — sum([1.0, 2.0]) returns float.\n\nIn CPython:\n  sum([1, 2, 3])       → 6     (int)\n  sum([1.0, 2.0, 3.0]) → 6.0   (float)\n  sum([1, 2.0, 3])     → 6.0   (float — int promoted)\n  sum([])              → 0     (int — default start value)\n  sum([], 0.0)         → 0.0   (float — explicit start)\n\nFinding 026/228 note sum() has no model (Hole). This finding\nspecifically demonstrates the RETURN TYPE issue: sum() on a list\nof floats must return from_float, not from_int. The model must\ndispatch on element types to determine the result tag.\n\nAdditionally, sum([]) returns 0 (the default start value), not\nan error. This differs from min([])/max([]) which raise ValueError.\n\nUses ONLY confirmed-accepted constructs: sum, list, float, int, type checking.\n'
+__name__ = '__main__'
+main = <function object>
+sum_empty_int = <function object>
+sum_floats = <function object>
+sum_in_average = <function object>
+sum_ints = <function object>
+sum_postcondition = <function object>
+sum_single = <function object>

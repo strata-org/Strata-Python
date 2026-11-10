@@ -1,0 +1,17 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Measurement = <class 'Measurement'>
+__doc__ = '\nOPTIONAL NARROWING INCOMPLETE — ORDERING COMPARISON ON None PRODUCES\nHOLE INSTEAD OF TypeError\n\nThe subset allows:\n  - Optional[int] (= int | None)\n  - isinstance narrowing and `is not None` checks\n  - Ordering comparisons (<, >, <=, >=) on int\n\nThe gap: if narrowing is INCOMPLETE (e.g., narrowing lost at merge point,\nor narrowing not applied after function return), a variable annotated\nOptional[int] may still hold None when an ordering comparison is attempted.\n\nCPython: `None < 5` → TypeError: \'<\' not supported between \'NoneType\' and \'int\'\nModel: PLt(from_None(), from_int(5)) → Hole (no case for from_None in PLt)\n\nThis is UNSOUND because:\n1. The model doesn\'t report the TypeError (purpose of Frontend is to catch these)\n2. The Hole propagates silently, potentially allowing "verified" status\n   for a program that crashes at runtime\n\nThis differs from finding 204 (operator on None) because here the None\narrives through a LEGITIMATE Optional[int] variable that SHOULD have been\nnarrowed but wasn\'t — the narrowing system has a gap, and the operator\ndispatch doesn\'t catch it as a backup.\n\nThe combination of:\n  - Finding 137 (narrowing lost at merge)\n  - Finding 441 (repeated field access narrowing lost)\n  - Finding 270 (None + int → Hole not TypeError)\ncreates a scenario where a well-typed program with proper guards still\nhas a path where None reaches an operator, and the model doesn\'t catch it.\n'
+__name__ = '__main__'
+chained_comparison_with_narrowing = <function object>
+compare_after_function_call = <function object>
+dataclass = <function object>
+find_min = <function object>
+main = <function object>
+process_optional = <function object>
+safe_compare = <function object>
+threshold_check = <function object>

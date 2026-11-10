@@ -1,0 +1,13 @@
+--- stdout 11
+10 50 True
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nA list literal `[1, 2, 3]` must be translated to a ListAny cons-list\nwith elements in the correct order. If built as cons(1, cons(2, cons(3, nil))),\nthen List_get(lst, 0) must return 1 (not 3). The cons-list's head is\nthe FIRST element, not the last.\n\nIf the translator builds the cons-list in reverse order (cons(3, cons(2, cons(1, nil)))),\nthen lst[0] returns 3 instead of 1.\n"
+__name__ = '__main__'
+check_order = <function object>
+first_element = <function object>
+last_element = <function object>
+main = <function object>
+sum_first_two = <function object>

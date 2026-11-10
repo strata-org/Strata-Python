@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nSTRING IN STRING — SUBSTRING CONTAINMENT CHECK\n\nCPython: "bc" in "abcd" → True (substring check)\n         "xy" in "abcd" → False\n         "" in "anything" → True (empty string is substring of everything)\n\nModel:   PIn(from_str("bc"), from_str("abcd"))\n         → needs str_contains("abcd", "bc") → True\n         If uninterpreted: UNPROVABLE\n         If mapped to SMT-LIB str.contains: trivially provable\n\n         Finding 046 identified this. This provides the concrete test\n         showing the model can\'t prove basic substring checks.\n\nCPython result: True\nModel result: Unknown (str_contains uninterpreted)\n'
+__name__ = '__main__'
+contains_word = <function object>
+filter_containing = <function object>
+has_substring = <function object>
+main = <function object>
+starts_with_manual = <function object>

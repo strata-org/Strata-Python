@@ -1,0 +1,16 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nEXCEPTION IN FOR-LOOP ITERABLE EXPRESSION — LOOP BODY EXECUTES ON HOLE\n\nThe subset allows:\n  - for loops (IN)\n  - Function calls in expressions (IN)\n  - Exceptions (IN)\n\nThe NOVEL gap: when the ITERABLE expression in a for-loop raises an\nexception, the loop body must NOT execute. But if the exception-as-value\nmodel doesn\'t check the iterable\'s tag before entering the loop, the\nloop may iterate over an exception value.\n\n  def get_items() -> list[int]:\n      raise ValueError("no items")\n\n  total: int = 0\n  for x in get_items():  # get_items() raises!\n      total += x\n  # CPython: ValueError propagates, loop body never executes, total stays 0\n  # Model: get_items() returns exception(...), for-loop iterates over it\n  #         → x = ??? (undefined behavior on exception tag)\n  #         → total += x → Hole or garbage\n\nThis is distinct from:\n  - Finding 274 (exception no propagation) — that\'s about exceptions\n    INSIDE the loop body\n  - Finding 386 (exception in function argument) — that\'s about args\n  - Finding 389 (exception in condition) — that\'s about if/while conditions\n  - Finding 456 (exception + for/else) — that\'s about the else clause\n\nThis finding is about the ITERABLE EXPRESSION itself raising. The\nexception must propagate BEFORE the loop begins. No iteration occurs.\n\nThe model likely translates `for x in expr:` as:\n  _iter = expr\n  _i = 0\n  while _i < List_len(_iter):\n      x = List_get(_iter, _i)\n      <body>\n      _i += 1\n\nIf `expr` evaluates to `exception(...)`, then:\n  - `List_len(exception(...))` → Hole (no case for exception tag)\n  - `_i < Hole` → Hole (comparison with Hole)\n  - Loop condition is Hole → solver may explore both branches\n  - Loop body may execute with x = Hole\n\nSimilarly for range-based loops:\n  for i in range(f()):  # f() raises\n      ...\n  # CPython: exception propagates, no iteration\n  # Model: range(exception(...)) → Hole → loop behavior undefined\n'
+__name__ = '__main__'
+count_range = <function object>
+dataclass = <function object>
+exception_in_range_stop = <function object>
+get_count = <function object>
+get_positive_items = <function object>
+main = <function object>
+nested_exception_in_iterable = <function object>
+sum_validated_items = <function object>

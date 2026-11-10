@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+RESULT = ('AttributeError', 'managed', 'hidden-instance-value', 'shadow')
+Record = <class 'Record'>
+__doc__ = 'A property without a setter intercepts writes and raises.'
+__name__ = '__main__'
+property_write = 'AttributeError'
+record = <Record object>

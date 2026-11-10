@@ -1,0 +1,14 @@
+--- stdout 16
+True True False
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nINCORRECT OPERATOR BEHAVIOR: == between bool and int.\n\nCPython: 0 == False → True (because False IS 0)\n         1 == True  → True (because True IS 1)\n         2 == True  → False (2 != 1)\nModel:   PEq(from_int(0), from_bool(False)) → Hole (cross-tag, no case)\n\nThe model can't determine that 0 equals False or 1 equals True.\n"
+__name__ = '__main__'
+bool_in_int_list = <function object>
+false_eq_zero_in_condition = <function object>
+main = <function object>
+one_eq_true = <function object>
+two_eq_true = <function object>
+zero_eq_false = <function object>

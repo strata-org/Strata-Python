@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'str'
+--- globals
+Pair = <class 'Pair'>
+__doc__ = "\na12_multiple_fields.py — Multiple fields narrowed, single call corrupts both.\n\nZ3-predicted: mypy narrows x.a and x.b independently. A single method call\nthat changes BOTH is not detected because mypy only invalidates on direct\nassignment to the specific expression, not on arbitrary method calls.\n\nThe exploit uses both corrupted fields in a single expression (a - b)\nwhich produces TypeError (str - str is not supported).\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — unsupported operand type(s) for -: 'str' and 'str'\n"
+__name__ = '__main__'
+main = <function object>

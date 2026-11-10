@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nLIST OF OPTIONAL — ELEMENT ACCESS RETURNS UNION TAG BUT NO NARROWING\n\nCPython: xs: list[Optional[int]] = [1, None, 3]\n         xs[0] → 1 (int)\n         xs[1] → None\n         Must narrow with isinstance/is None before using as int.\n\nModel:   ListAny stores Any values. xs[i] returns Any.\n         Finding 221 notes element type is lost (no isfrom_int assertion).\n         But for list[Optional[int]], the element type is ITSELF a union:\n         {from_int, from_None}. The model must:\n         1. Assert element is from_int OR from_None (not from_str, etc.)\n         2. Allow narrowing via isinstance/is None checks\n         3. After narrowing, assert the specific tag\n\n         Without (1): element could be ANY tag — too permissive\n         Without (2): can't safely use element as int\n         Without (3): operations on narrowed element still have unknown tag\n\nThis is the INTERACTION between findings 221 (element type lost) and\n223 (Optional requires disjunctive tag) applied to container elements.\n"
+__name__ = '__main__'
+count_positive = <function object>
+dataclass = <function object>
+first_non_none = <function object>
+main = <function object>
+safe_sum_with_check = <function object>
+sum_non_none = <function object>

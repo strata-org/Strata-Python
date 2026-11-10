@@ -1,0 +1,12 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nEMPTY LIST TRUTHINESS IS FALSE\n\nDIVERGENCE:\n  CPython:  bool([])     → False\n  Model:    Any_to_bool(from_ListAny(nil)) → Hole (finding 322)\n\n  CPython:  bool([1,2])  → True\n  Model:    Any_to_bool(from_ListAny(cons(...))) → Hole\n\n  CPython:  if []: print("yes") → never prints\n  Model:    if Hole: → non-deterministic (solver picks either branch)\n\nEmpty containers are falsy in Python. The model\'s Any_to_bool has\nno case for from_ListAny — it returns Hole, making conditions\non lists non-deterministic.\n'
+__name__ = '__main__'
+first_or_default = <function object>
+is_empty = <function object>
+main = <function object>
+process_if_nonempty = <function object>

@@ -1,0 +1,15 @@
+--- stdout 9
+LA LA SF
+
+--- outcome
+ok
+--- globals
+Address = <class 'Address'>
+Person = <class 'Person'>
+__doc__ = "\nIf user classes use Composite (heap semantics), their fields are stored\nin the heap as typed values (Box: BoxInt, BoxBool, BoxFloat64, BoxComposite).\nBut Python fields can hold ANY type — a field declared `x: int` holds an\nint, but the heap model's Box type must match.\n\nThe issue: Composite fields use Box (fixed type per field), but Python's\ndynamic nature means a field could theoretically hold any type. The\ntranslator must ensure field types are enforced at write time, and that\nreads produce the correct type tag.\n\nAdditionally, if a field holds another object (BoxComposite), nested\nfield access requires dereferencing through the heap twice.\n"
+__name__ = '__main__'
+dataclass = <function object>
+get_city = <function object>
+main = <function object>
+same_address = <function object>
+update_city = <function object>

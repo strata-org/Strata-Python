@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nLIST CONCATENATION LENGTH NOT SUM OF PARTS\n\nCPython: len([1,2] + [3,4,5]) == 5 (always: 2 + 3 = 5)\n\nModel:   PAdd(from_ListAny(a), from_ListAny(b)) → Hole (finding 074/263)\n         Even if list concat IS modeled:\n         List_len(List_concat(a, b)) == List_len(a) + List_len(b)\n         → UNPROVABLE without axiom\n\nCPython result: 5\nModel result: Hole (no list+list case) or unconstrained len\n\nRoot cause: PAdd has no (from_ListAny, from_ListAny) case (finding 263),\nAND even if it did, no len axiom connects concat to length (finding 088).\n'
+__name__ = '__main__'
+build_by_concat = <function object>
+concat_and_check_len = <function object>
+concat_preserves_elements = <function object>
+main = <function object>
+prepend_element = <function object>

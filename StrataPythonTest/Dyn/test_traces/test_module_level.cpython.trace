@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Any = <class 'Any'>
+Dict = <_SpecialGenericAlias object>
+__annotations__ = {'data': <_GenericAlias object>}
+__doc__ = None
+__name__ = '__main__'
+data = {'name': 'test', 'version': 1, 'active': True, 'status': 'running'}

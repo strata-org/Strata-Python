@@ -1,0 +1,14 @@
+--- stdout 8
+one 3 3
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nThe `Any` datatype has `from_DictStrAny(as_Dict: DictStrAny)` — the dict\nrepresentation uses STRING keys only. But the Frontend subset says:\n\n    dict[K, V] for K ∈ {str, int}\n\nSo `dict[int, str]` is IN the subset but has NO representation in the\nmodel. `DictStrAny` cannot store integer keys.\n\nThis means:\n- `{1: "one", 2: "two"}` cannot be constructed\n- `d[42]` where d is dict[int, str] cannot be modeled\n- `42 in d` cannot be checked\n- Frequency counters (`counts[n] = counts.get(n, 0) + 1`) fail\n\nUses ONLY confirmed-accepted constructs: dict[int, str], int, function def.\n'
+__name__ = '__main__'
+build_int_dict = <function object>
+count_occurrences = <function object>
+index_mapping = <function object>
+int_key_lookup = <function object>
+int_key_membership = <function object>
+main = <function object>

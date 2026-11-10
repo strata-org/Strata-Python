@@ -1,0 +1,14 @@
+--- stdout 12
+-2
+-1
+-3
+-2
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPMod uses SMT-LIB '%' which is Euclidean modulo (result always >= 0 for\npositive divisor, but wrong for negative divisor). Python's '%' follows\nfloor-division semantics: result has the sign of the divisor.\n\nThis is the PMod counterpart of finding 012 (PFloorDiv). Both use SMT-LIB\ninteger operations that diverge from Python on negative operands.\n"
+__name__ = '__main__'
+main = <function object>
+modulo_negative_dividend = <function object>
+modulo_negative_divisor = <function object>

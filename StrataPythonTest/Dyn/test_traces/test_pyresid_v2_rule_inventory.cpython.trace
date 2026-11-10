@@ -1,0 +1,21 @@
+--- stdout 12
+3:[1, 2, 3]
+
+--- outcome
+ok
+--- globals
+InventoryRow = <class 'InventoryRow'>
+NotRequired = <_SpecialForm object>
+Required = <_SpecialForm object>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+builtin_functions = <function object>
+dict_methods = <function object>
+exercise_typed_dict = <function object>
+list_methods = <function object>
+set_methods = <function object>
+string_methods = <function object>
+tuple_and_range_methods = <function object>
+typed_dict_operations = <function object>
+typed_result = 'WIDGET'

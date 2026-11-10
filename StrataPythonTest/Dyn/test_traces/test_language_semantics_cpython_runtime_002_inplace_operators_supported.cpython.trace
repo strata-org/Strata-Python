@@ -1,0 +1,14 @@
+--- stdout 23
+6
+[1, 2, 3, 4, 5]
+True
+
+--- outcome
+ok
+--- globals
+__doc__ = 'In-place operators: supported case.\nTypes are known, so we can determine mutation vs rebinding statically.\n'
+__name__ = '__main__'
+extend_list = <function object>
+increment_int = <function object>
+original = [1, 2, 3, 4, 5]
+result = [1, 2, 3, 4, 5]

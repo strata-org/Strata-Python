@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised ModuleNotFoundError: No module named 'test_helper'
+--- globals
+List = <_SpecialGenericAlias object>
+__doc__ = None
+__name__ = '__main__'

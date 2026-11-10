@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+branch_alias = <function object>
+delete_one_name = <function object>
+rebind_one_name = <function object>

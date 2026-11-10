@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+BoolError = <class 'BoolError'>
+BoolPrecedesLength = <class 'BoolPrecedesLength'>
+BoolRaises = <class 'BoolRaises'>
+LengthRaises = <class 'LengthRaises'>
+NegativeLength = <class 'NegativeLength'>
+NonIntegerLength = <class 'NonIntegerLength'>
+RESULT = ('BoolError', 'LookupError', 'ValueError', 'TypeError', False)
+__doc__ = None
+__name__ = '__main__'
+observe_truth_testing = <function object>

@@ -1,0 +1,17 @@
+--- stdout 17
+True Rex (Lab) 2
+
+--- outcome
+ok
+--- globals
+Animal = <class 'Animal'>
+Cat = <class 'Cat'>
+Dog = <class 'Dog'>
+Optional = <_SpecialForm object>
+__doc__ = '\nThe subset explicitly says:\n  "isinstance(x, T) for T ∈ {int, float, str, bool, list, dict, tuple,\n   <user class>} — used for narrowing" is IN.\n  "Single-inheritance class definitions" is IN.\n\nBut the model uses `from_ClassInstance(classname: string, ...)` with\nexact string matching. `isinstance(dog, Animal)` checks\n`classname == "Animal"` which fails for a Dog instance.\n\nFinding 172 identified this. This finding shows SUBSET-PROMISED patterns\nthat fail: isinstance with inheritance for narrowing.\n\nUses ONLY confirmed-accepted constructs: class, isinstance, single inheritance.\n'
+__name__ = '__main__'
+dataclass = <function object>
+describe = <function object>
+find_dogs = <function object>
+is_animal = <function object>
+main = <function object>

@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCOMPARISON RESULT USED IN ARITHMETIC — bool + int INTERACTION\n\nCPython: (x > 0) + (y > 0) → counts how many are positive (0, 1, or 2)\n         True + True == 2, True + False == 1, False + False == 0\n\nModel:   PGt(x, 0) returns from_bool(True/False)\n         PAdd(from_bool(True), from_bool(True)) → Hole (finding 261)\n         OR: PAdd returns from_bool (wrong type — should be from_int(2))\n\nCPython result: 2 (int)\nModel result: Hole or from_bool(True) (wrong type)\n\nRoot cause: Comparison returns from_bool, but arithmetic on bools\nrequires promotion to int (finding 166/261). The CHAIN is:\ncomparison → from_bool → promote to from_int → arithmetic.\n'
+__name__ = '__main__'
+conditional_increment = <function object>
+count_flags = <function object>
+count_positive = <function object>
+main = <function object>
+weighted_score = <function object>

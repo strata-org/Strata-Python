@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+BadStringError = <class 'BadStringError'>
+FormattingError = <class 'FormattingError'>
+RESULT = ('format failed', 'BadStringError', 'UnboundLocalError')
+__doc__ = None
+__name__ = '__main__'
+string_failure_inside_handler = <function object>

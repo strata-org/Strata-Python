@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for >>: 'float' and 'int'
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+C = <class 'C'>
+__doc__ = "\nb5_multilevel_override.py — 3-level inheritance with float written through grandparent.\n\nZ3-predicted: if A.field: int|str|float, B.field: int|str, C.field: int,\nthen writing float through an A reference breaks C's int assumption.\n\nThis extends b1 (2-level) to show the exploit works across multiple levels.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — float >> int (unsupported operand)\n"
+__name__ = '__main__'
+corrupt = <function object>
+main = <function object>

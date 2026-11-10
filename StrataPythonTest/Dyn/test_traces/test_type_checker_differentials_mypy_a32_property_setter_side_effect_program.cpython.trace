@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Tricky = <class 'Tricky'>
+__doc__ = "\na32_property_setter_side_effect.py — @property setter mutates a DIFFERENT narrowed field.\n\nisinstance narrows obj.x to int. Assigning to obj.y triggers @y.setter which\nmutates obj.x to str. mypy sees `obj.y = 5` as a plain attribute assignment\nand doesn't invalidate narrowing on obj.x.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str - int\n"
+__name__ = '__main__'
+main = <function object>

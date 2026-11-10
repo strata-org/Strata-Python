@@ -1,0 +1,10 @@
+--- stdout 12
+['a', 'bb']
+
+--- outcome
+ok
+--- globals
+RESULT = ['a', 'bb']
+Table = <class 'Table'>
+__doc__ = 'Case 6 (legacy iteration): __getitem__ consumes accidental IndexError.'
+__name__ = '__main__'

@@ -1,0 +1,15 @@
+--- stdout 6
+7 3 3
+
+--- outcome
+ok
+--- globals
+Tuple = <_TupleType object>
+__doc__ = '\nThe `Any` datatype has no `from_tuple` constructor. Tuples are IN the\nFrontend subset (`tuple[T1, T2, ...]` with explicit element types), but\nthere is no way to represent them in the tagged union.\n\nThis means:\n- `(1, "hello")` cannot be constructed\n- `t[0]` on a tuple cannot be modeled\n- `len(t)` on a tuple cannot be modeled\n- Functions returning tuples have no representation for the return value\n- `divmod(a, b)` returns a tuple — unrepresentable\n\nUses ONLY confirmed-accepted constructs: tuple, int, str, function def.\n'
+__name__ = '__main__'
+main = <function object>
+min_max = <function object>
+split_at = <function object>
+swap = <function object>
+tuple_len = <function object>
+use_tuple_elements = <function object>

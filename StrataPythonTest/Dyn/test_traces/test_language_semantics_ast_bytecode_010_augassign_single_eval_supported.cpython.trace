@@ -1,0 +1,11 @@
+--- stdout 50
+OK: augassign single eval — subscript called once
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = [15]
+calls = [1]
+idx = <function object>

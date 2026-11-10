@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Counter = <class 'Counter'>
+Stack = <class 'Stack'>
+__doc__ = '\nFUNCTIONAL UPDATE PATTERN — CALLER MUST REBIND TO SEE CHANGES\n\nCPython: obj.method() mutates obj in place. Caller sees changes.\nModel:   method returns new ClassInstance. Caller must rebind.\n\nThe CORRECT pattern under value semantics:\n    obj = obj.method()  # rebind to capture the new value\n\nThe INCORRECT pattern (works in CPython, fails in model):\n    obj.method()  # mutation in place — caller sees it\n    # Model: method returns new value, DISCARDED\n\nThis finding tests that the CORRECT functional pattern works:\nmethods that return a new instance, caller rebinds.\nThis is the SOUND usage pattern for from_ClassInstance.\n'
+__name__ = '__main__'
+counter_chain = <function object>
+counter_usage = <function object>
+dataclass = <function object>
+main = <function object>
+stack_usage = <function object>

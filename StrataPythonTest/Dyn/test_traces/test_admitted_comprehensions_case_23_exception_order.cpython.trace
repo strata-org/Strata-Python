@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+RESULT = ('IndexError', 'ZeroDivisionError', 'ZeroDivisionError')
+__doc__ = None
+__name__ = '__main__'
+dict_key_precedes_value = <function object>
+filter_precedes_body = <function object>
+source_precedes_body = <function object>

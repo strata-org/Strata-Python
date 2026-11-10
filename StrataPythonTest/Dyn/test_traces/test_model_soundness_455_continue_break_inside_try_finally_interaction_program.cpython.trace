@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nCONTINUE/BREAK INSIDE TRY/FINALLY — FINALLY EXECUTES BEFORE CONTROL TRANSFER\n\nThe subset allows:\n  - for/while loops with break/continue (IN)\n  - try/except/finally (IN)\n\nCPython behavior:\n  for x in items:\n      try:\n          if x < 0:\n              continue  # finally STILL executes before continuing!\n          process(x)\n      finally:\n          cleanup()  # ALWAYS runs, even on continue/break\n\n  This means: `continue` inside a `try` block does NOT skip the `finally`.\n  The `finally` executes, THEN the continue takes effect.\n\n  Similarly for `break`:\n  for x in items:\n      try:\n          if x == sentinel:\n              break  # finally executes before breaking!\n      finally:\n          cleanup()  # runs before the break takes effect\n\nModel behavior:\n  The exception-as-value model translates `continue` and `break` as\n  control flow jumps. `finally` is translated as code that runs after\n  the try body. The interaction between these two is complex:\n\n  If `continue` is translated as a jump to loop-head:\n    → finally block is SKIPPED (wrong)\n  If `continue` is translated as setting a flag + falling through:\n    → finally block executes, then flag checked → correct but complex\n\n  The model likely handles `finally` for the exception path (finding 063)\n  and the return path (finding 160), but the CONTINUE/BREAK path through\n  finally is a third case that may not be modeled.\n\nROOT CAUSE: The model has three control-flow mechanisms that interact:\n  1. Exception propagation (exception-as-value)\n  2. Return (function exit)\n  3. Break/continue (loop control)\n\n  Finding 063 covers: finally + exception\n  Finding 160 covers: finally + return\n  This finding covers: finally + continue/break (NOVEL)\n\n  Each requires finally to execute before the control transfer.\n  If the model only handles (1) and (2), break/continue skip finally.\n\nThis is distinct from:\n  - Finding 063 (finally always executes) — covers exception path only\n  - Finding 160 (finally return override) — covers return path only\n  - Finding 249 (try/except in loop) — no finally, no continue/break\n  - Finding 054 (break/continue not modeled) — doesn't mention finally\n"
+__name__ = '__main__'
+break_executes_finally = <function object>
+continue_executes_finally = <function object>
+continue_with_accumulator = <function object>
+main = <function object>
+nested_try_continue = <function object>

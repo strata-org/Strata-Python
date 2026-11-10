@@ -1,0 +1,11 @@
+--- stdout 66
+BOUNDARY: naive desugaring calls f() twice; CPython calls it once
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = [15]
+calls = [1]
+f = <function object>

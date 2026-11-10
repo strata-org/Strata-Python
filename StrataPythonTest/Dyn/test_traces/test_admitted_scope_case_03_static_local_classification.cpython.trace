@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+RESULT = (('UnboundLocalError', 'UnboundLocalError'), ('UnboundLocalError', 'UnboundLocalError'))
+__doc__ = None
+__name__ = '__main__'
+builtin_is_also_shadowed = <function object>
+handler_never_matches = <function object>
+module_name = 'module value'

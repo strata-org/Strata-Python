@@ -1,0 +1,12 @@
+--- stdout 34
+All except-as-variable tests pass
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nIn Python 3, the variable bound in `except SomeError as e:` is DELETED\nwhen the except block exits. This is explicit in the language spec:\nthe `as` target is implicitly `del`'d at the end of the handler.\n\n    try:\n        ...\n    except ValueError as e:\n        msg = str(e)\n    # e is UNBOUND here — accessing it raises NameError\n\nThe Laurel model likely keeps `e` in scope after the handler (since it\nhas no implicit-del semantics). This creates two divergences:\n\n1. If code after the handler reads `e`, CPython raises NameError but\n   the model provides a value (UNSOUND: model misses a crash).\n2. If `e` shadows an outer variable, the outer variable is also deleted\n   in CPython (the del applies to the name in the local scope).\n\nUses ONLY confirmed-accepted constructs: try/except, ValueError, str, int.\n"
+__name__ = '__main__'
+exception_variable_shadows_outer = <function object>
+get_error_message = <function object>
+handler_variable_not_accessible_after = <function object>
+main = <function object>

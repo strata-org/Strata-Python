@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised ValueError: division by zero
+--- globals
+__doc__ = '\nThe `raise` statement is silently dropped by the translator.\nCode after a raise is modeled as reachable when it is not.\n'
+__name__ = '__main__'
+main = <function object>
+safe_divide = <function object>

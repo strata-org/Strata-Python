@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nString slicing s[a:b] has no model — no str_slice operation.\n\nFinding 068 covers list slicing (no List_slice). This finding covers\nthe same gap for strings. String slicing is extremely common:\n  s[1:3]   → "el"     (substring from index 1 to 3, exclusive)\n  s[:3]    → "hel"    (first 3 characters)\n  s[2:]    → "llo"    (from index 2 to end)\n  s[-2:]   → "lo"     (last 2 characters)\n\nThe model has no str_slice/str_substr operation. The Subscript AST node\nwith a Slice value (not just an integer index) has no translation for\nstring-typed containers.\n\nThis maps directly to SMT-LIB str.substr(s, offset, length), so the\nfix is straightforward — but the translation doesn\'t exist yet.\n\nUses ONLY confirmed-accepted constructs: str, int, subscript/slice, len.\n'
+__name__ = '__main__'
+extract_extension = <function object>
+first_n = <function object>
+last_n = <function object>
+main = <function object>
+middle = <function object>
+slice_length = <function object>
+split_and_rejoin = <function object>

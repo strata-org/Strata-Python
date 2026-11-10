@@ -1,0 +1,12 @@
+--- stdout 10
+-4 2 True
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nROOT CAUSE: PFloorDiv/PMod use SMT-LIB `div`/`mod` which have DIFFERENT\nsemantics from Python's `//` and `%`.\n\nPROPERTY: SMT-LIB div truncates toward zero. Python // floors toward -∞.\n          SMT-LIB mod sign follows dividend. Python % sign follows divisor.\n          SMT-LIB div(x,0) is defined (total). Python raises ZeroDivisionError.\n\nThis causes findings: 012, 039, 050, 080, 205, 258, 259, 266, 267, 268.\n\nDEMONSTRATION: Concrete wrong values for negative operands.\n"
+__name__ = '__main__'
+invariant_holds = <function object>
+main = <function object>
+python_floor_div_vs_smt = <function object>
+python_mod_vs_smt = <function object>

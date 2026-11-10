@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nSTRING REPEAT LENGTH HAS NO AXIOM: len(s * n) != len(s) * n IN MODEL\n\nThe subset allows:\n  - String repetition: str * int (IN)\n  - len() on strings (IN)\n  - Integer arithmetic (IN)\n  - Comparison operators (IN)\n\nThe NOVEL gap: even if string_repeat and str_len are both given SOME\naxioms (findings 167, 432 cover the n<=0 case; finding 075 covers\nlen basics), there is NO AXIOM connecting them:\n\n  len("ab" * 3) should equal len("ab") * 3 = 6\n\nBut string_repeat and str_len are independent uninterpreted functions.\nThe solver has no way to derive:\n  str_len(string_repeat(s, n)) == str_len(s) * n  (for n >= 1)\n\nThis blocks verification of common patterns:\n  - Buffer/padding size checks: `assert len(padding) == width`\n  - Protocol framing: `header = "=" * 40; assert len(header) == 40`\n  - Bounds validation after string construction\n\nThis is distinct from:\n  - Finding 075 (len on strings no axioms) — that\'s about len being\n    uninterpreted in general\n  - Finding 167 (string multiply boundary cases) — that\'s about n<=0\n    producing empty string\n  - Finding 232 (len after concat) — that\'s about len(a+b)==len(a)+len(b)\n    for concatenation, not repetition\n  - Finding 432 (str*0 gives empty) — that\'s about the zero case only\n  - Finding 439 (len of concat) — same as 232, concat not repeat\n\nThe REPEAT-LENGTH connection is a separate axiom that must be stated\nindependently of the concat-length axiom.\n'
+__name__ = '__main__'
+build_and_verify = <function object>
+indent_check = <function object>
+main = <function object>
+padding_check = <function object>
+repeat_then_concat_length = <function object>
+safe_truncate = <function object>

@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+add = <function object>
+get_flag = <function object>
+get_greeting = <function object>
+get_nothing = <function object>
+get_number = <function object>
+main = <function object>

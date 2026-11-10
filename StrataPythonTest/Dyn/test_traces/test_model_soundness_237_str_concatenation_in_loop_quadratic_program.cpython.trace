@@ -1,0 +1,13 @@
+--- stdout 16
+a-b-c xyxy True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nBuilding a string in a loop via concatenation: `result = result + s`.\nUnder pure string semantics, each concatenation creates a NEW string.\nThe model must track that `result` grows each iteration.\n\nThe key verification challenge: proving properties about the FINAL\nstring after the loop. E.g., len(result) == sum of len(parts).\n\nThis interacts with:\n- Finding 232: len(a+b) == len(a) + len(b)\n- Finding 169: while exit condition\n- Finding 154: list growth in loop (analogous for strings)\n\nUses ONLY confirmed-accepted constructs: str, +, len, while, for.\n'
+__name__ = '__main__'
+build_number_string = <function object>
+concat_grows_length = <function object>
+join_with_sep = <function object>
+main = <function object>
+repeat_string = <function object>

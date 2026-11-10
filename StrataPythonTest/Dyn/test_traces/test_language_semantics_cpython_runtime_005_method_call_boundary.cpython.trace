@@ -1,0 +1,11 @@
+--- stdout 14
+hello
+goodbye
+
+--- outcome
+ok
+--- globals
+Greeter = <class 'Greeter'>
+__doc__ = 'Method call: boundary case.\nMonkey-patching a method after class definition makes static resolution unsound.\n'
+__name__ = '__main__'
+g = <Greeter object>

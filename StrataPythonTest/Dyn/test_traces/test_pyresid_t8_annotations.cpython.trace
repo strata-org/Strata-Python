@@ -1,0 +1,26 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Animal = <class 'Animal'>
+Counter = <class 'Counter'>
+Dog = <class 'Dog'>
+__annotations__ = {'w': <class 'int'>, 'z': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+b1 = 's'
+b2 = None
+bad = <function object>
+c = <Counter object>
+count = <function object>
+d = <Dog object>
+greet = <function object>
+maybe = <function object>
+n = 9
+s = 'woof'
+t = 'woof'
+v = 'woof'
+w = 4
+x = <Dog object>
+z = 'nope'

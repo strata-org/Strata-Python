@@ -1,0 +1,15 @@
+--- stdout 5
+PASS
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Starred target from various iterable types.'
+__name__ = '__main__'
+a = 1
+b = []
+c = 2
+first = 0
+rest = [1, 2, 3, 4]
+x = 'h'
+y = ['e', 'l', 'l', 'o']

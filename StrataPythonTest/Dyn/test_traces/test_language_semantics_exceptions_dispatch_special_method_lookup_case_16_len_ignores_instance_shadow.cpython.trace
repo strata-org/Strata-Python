@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+RESULT = (99, 3)
+Sized = <class 'Sized'>
+__doc__ = 'Implicit len lookup ignores an instance field named __len__.'
+__name__ = '__main__'
+value = <Sized object>

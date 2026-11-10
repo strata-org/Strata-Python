@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = '\nisinstance ON None VALUE — MUST RETURN False FOR ALL NON-NoneType CHECKS\n\nCPython: isinstance(None, int) → False\n         isinstance(None, str) → False\n         isinstance(None, SomeClass) → False\n\nModel:   isinstance translates to tag check: isfrom_int(x), isfrom_str(x), etc.\n         For from_None(), ALL these checks correctly return False.\n         BUT: isinstance(x, SomeClass) translates to classname check:\n              classname(x) == "SomeClass"\n         For from_None(), there IS no classname field — the value is not\n         a ClassInstance at all. The model may:\n         - Crash (access classname on non-ClassInstance tag)\n         - Return Hole (undefined behavior)\n         - Return True (if classname check is vacuously satisfied)\n\nThis matters for Optional[MyClass] patterns where isinstance is used\nto narrow before field access.\n'
+__name__ = '__main__'
+classify_value = <function object>
+dataclass = <function object>
+is_point = <function object>
+main = <function object>
+safe_distance = <function object>

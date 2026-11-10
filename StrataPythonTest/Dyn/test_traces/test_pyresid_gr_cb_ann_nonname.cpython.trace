@@ -1,0 +1,7 @@
+--- stdout 0
+
+--- outcome
+raised NameError: name 'y' is not defined
+--- globals
+__doc__ = None
+__name__ = '__main__'

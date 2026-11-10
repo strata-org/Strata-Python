@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+ContainsBomb = <class 'ContainsBomb'>
+__doc__ = None
+__name__ = '__main__'
+contains = <function object>
+result = 'caught-contains-error'

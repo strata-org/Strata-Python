@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'int' and 'datetime.timedelta'
+--- globals
+__doc__ = None
+__name__ = '__main__'
+main = <function object>
+timedelta = <class 'timedelta'>

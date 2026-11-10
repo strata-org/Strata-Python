@@ -1,0 +1,12 @@
+--- stdout 9
+42.0 4.0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`float(x)` converts int to float. This is IN (builtin conversion).\nThe model must handle `float(from_int(n))` → `from_float(to_real(n))`.\nIf `float()` has no model (like `int()` in finding 017), the result\nis Hole.\n'
+__name__ = '__main__'
+average = <function object>
+int_to_float = <function object>
+main = <function object>
+normalize = <function object>

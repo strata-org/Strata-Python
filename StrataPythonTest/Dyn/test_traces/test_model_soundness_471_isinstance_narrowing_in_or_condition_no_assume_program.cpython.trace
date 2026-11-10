@@ -1,0 +1,16 @@
+--- stdout 22
+all assertions passed
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+Result = <class 'Result'>
+__doc__ = "\nISINSTANCE NARROWING IN OR-CONDITION — NO ASSUME EMITTED\n\nThe subset allows:\n  - isinstance (IN)\n  - or/and boolean operators (IN)\n  - Optional narrowing (IN)\n  - if/elif/else (IN)\n\nThe NOVEL gap: isinstance used in a COMPOUND condition with `or`:\n\n    if isinstance(x, int) or isinstance(x, str):\n        # CPython: x is int OR str — both branches valid\n        # Model: what assume is emitted?\n\nThe model's narrowing mechanism works by emitting:\n    assume(isfrom_int(x))  — after `isinstance(x, int)` guard\n\nBut with `or`:\n    isinstance(x, int) or isinstance(x, str)\n\nThe DISJUNCTION means the assume must be:\n    assume(isfrom_int(x) || isfrom_str(x))\n\nIf the translator:\n1. Only handles single isinstance in condition → no narrowing at all (Hole)\n2. Takes the FIRST isinstance → assume(isfrom_int(x)) only (UNSOUND: rejects valid str values)\n3. Takes the LAST isinstance → assume(isfrom_str(x)) only (UNSOUND: rejects valid int values)\n\nSimilarly for `and` with negation:\n    if not isinstance(x, int) and not isinstance(x, str):\n        # x is neither int nor str\n    else:\n        # x IS int or str — same disjunctive narrowing needed\n\nThis is DISTINCT from:\n  - Finding 302 (isinstance tuple-of-types) — that's `isinstance(x, (int, str))`\n    which is a SINGLE call with tuple arg; THIS is two separate isinstance calls\n    joined by `or`\n  - Finding 339 (isinstance elif exhaustive) — that's sequential elif chains;\n    THIS is a single compound condition\n  - Finding 223 (Optional disjunctive tag) — that's about Optional[T] annotation;\n    THIS is about runtime isinstance checks in boolean expressions\n\nThe key insight: the translator must COMPOSE narrowing assumptions from\nboolean operators, not just extract them from single isinstance calls.\n"
+__name__ = '__main__'
+classify_or_condition = <function object>
+dataclass = <function object>
+main = <function object>
+narrowing_with_and_not = <function object>
+process_numeric = <function object>
+safe_length_or_value = <function object>

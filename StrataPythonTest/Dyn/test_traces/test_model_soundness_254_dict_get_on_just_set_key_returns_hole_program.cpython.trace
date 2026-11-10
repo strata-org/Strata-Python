@@ -1,0 +1,14 @@
+--- stdout 7
+5 99 3
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCPython: d["x"] = 5; d["x"] → 5 (just-set key readable)\nModel: DictStrAny_set prepends to assoc-list; DictStrAny_get searches\n       from front. IF get finds the prepended entry, this works.\n       But without the McCarthy axiom, the solver can\'t PROVE it.\n\nFinding 153 identified this. This finding provides the MINIMAL program\nthat demonstrates the model computes INCORRECTLY (or unprovably):\n\nCPython result: d["x"] == 5 (True, assertion passes)\nModel result: DictStrAny_get(DictStrAny_set(d, "x", 5), "x") == UNKNOWN\n'
+__name__ = '__main__'
+conditional_set_then_get = <function object>
+main = <function object>
+overwrite_then_get = <function object>
+set_get_set_get = <function object>
+set_then_get = <function object>
+set_two_get_first = <function object>

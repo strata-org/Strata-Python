@@ -1,0 +1,10 @@
+--- stdout 18
+[2, 2, -2, -2, 2]
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nINCORRECT OPERATOR BEHAVIOR: % on negative operands.\n\nCPython: -7 % 3 = 2 (sign follows divisor)\nModel:   -7 % 3 = -1 (SMT mod, sign follows dividend)\n\nThe model computes a value with the WRONG SIGN.\n'
+__name__ = '__main__'
+main = <function object>
+test_mod = <function object>

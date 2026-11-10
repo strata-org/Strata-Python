@@ -1,0 +1,15 @@
+--- stdout 9
+True 1 3
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = "\n`x in lst` where lst contains @dataclass instances uses __eq__ for\ncomparison. @dataclass generates structural __eq__. So:\n\n    Point(1, 2) in [Point(1, 2), Point(3, 4)]  → True\n\nThe model's PEq on ClassInstance must do STRUCTURAL comparison\n(field-by-field), which matches @dataclass __eq__. Finding 121\nconfirmed this is correct.\n\nBut the `in` operator on lists uses List_contains, which must call\nPEq on each element. If List_contains uses a DIFFERENT equality\n(e.g., identity), it fails.\n\nAll constructs used: @dataclass, list, in, ==, int — all IN.\nFrontend accepts this.\n"
+__name__ = '__main__'
+count_occurrences = <function object>
+dataclass = <function object>
+find_point = <function object>
+main = <function object>
+point_in_list = <function object>
+remove_duplicates = <function object>

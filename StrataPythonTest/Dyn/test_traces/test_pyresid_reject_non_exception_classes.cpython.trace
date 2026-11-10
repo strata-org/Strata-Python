@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Plain = <class 'Plain'>
+__doc__ = None
+__name__ = '__main__'
+invalid_handler = <function object>
+invalid_raise = <function object>
+unknown_handler = <function object>
+unknown_raise = <function object>

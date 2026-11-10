@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Resource = <class 'Resource'>
+__doc__ = None
+__name__ = '__main__'
+test_with_as = <function object>
+test_with_multiple = <function object>
+test_with_no_as = <function object>

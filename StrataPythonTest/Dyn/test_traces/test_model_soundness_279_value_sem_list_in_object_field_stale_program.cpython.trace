@@ -1,0 +1,13 @@
+--- stdout 4
+3 3
+
+--- outcome
+ok
+--- globals
+Bag = <class 'Bag'>
+__doc__ = "\nVALUE SEMANTICS WHERE CPYTHON HAS REFERENCE SEMANTICS:\nList stored in object field — modifying the list through the field\nis visible in CPython but lost in the model.\n\nCPython: obj.items is a reference to the list. obj.items.append(x)\n         mutates the list. Reading obj.items later sees the change.\nModel: obj.items is a COPY of the list stored in the attrs dict.\n       Appending to it creates a new list but doesn't update the object.\n\nCPython result: len(bag.items) == 3\nModel result:  len(bag.items) == 0 (or stale copy)\n"
+__name__ = '__main__'
+correct_pattern = <function object>
+dataclass = <function object>
+main = <function object>
+wrong_pattern = <function object>

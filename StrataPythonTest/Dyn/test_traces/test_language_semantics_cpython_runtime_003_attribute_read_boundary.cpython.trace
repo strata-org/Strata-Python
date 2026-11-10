@@ -1,0 +1,12 @@
+--- stdout 38
+42
+dynamic:fake_attr
+dynamic:anything
+
+--- outcome
+ok
+--- globals
+DynamicAttrs = <class 'DynamicAttrs'>
+__doc__ = 'Attribute read: boundary case.\n__getattr__ makes attribute access dynamic — the simplified model\nwould miss the fallback and get the wrong result.\n'
+__name__ = '__main__'
+obj = <DynamicAttrs object>

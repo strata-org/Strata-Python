@@ -1,0 +1,11 @@
+--- stdout 6
+12
+48
+
+--- outcome
+ok
+--- globals
+Rectangle = <class 'Rectangle'>
+__doc__ = 'Method call: supported case.\nKnown class, method defined in source, no monkey-patching.\n'
+__name__ = '__main__'
+r = <Rectangle object>

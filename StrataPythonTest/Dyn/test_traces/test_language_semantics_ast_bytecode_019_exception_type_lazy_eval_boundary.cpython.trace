@@ -1,0 +1,11 @@
+--- stdout 80
+BOUNDARY: naive model evaluates all handler types; CPython stops at first match
+
+--- outcome
+ok
+--- globals
+Exc1 = <function object>
+Exc2 = <function object>
+__doc__ = None
+__name__ = '__main__'
+trace = ['E1']

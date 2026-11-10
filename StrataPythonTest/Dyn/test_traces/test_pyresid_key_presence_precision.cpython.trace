@@ -1,0 +1,20 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+NotRequired = <_SpecialForm object>
+Shape = <class 'Shape'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+plain_after_clear = <function object>
+plain_dynamic = <function object>
+plain_dynamic_partial = <function object>
+plain_get = <function object>
+plain_literal = <function object>
+plain_membership = <function object>
+plain_pop = <function object>
+td_dynamic = <function object>
+td_literal = <function object>
+td_notrequired = <function object>

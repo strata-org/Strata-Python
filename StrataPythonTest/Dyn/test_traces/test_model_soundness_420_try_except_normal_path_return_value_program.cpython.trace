@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nTRY/EXCEPT NORMAL PATH RETURN VALUE — MUST FLOW THROUGH\n\nCPython: try: n = int("42") except ValueError: n = -1\n         → n == 42 (no exception, normal path)\n\nModel:   Even on the NORMAL path (no exception), the model may fail:\n         - int("42") returns Hole (finding 017) → n is Hole\n         - try block translation may not connect normal-path value to post-try variable\n         - The variable `n` after try/except must hold the try-block value\n           when no exception occurred\n\n         This is different from finding 406 (handler unreachable).\n         This tests the NORMAL PATH: no exception raised, value flows through.\n\nCPython result: n == 42\nModel result: Hole (int() has no model) or unconstrained (try block doesn\'t connect)\n\nRoot cause: int() returns Hole (finding 017), AND try-block normal-path\nvariable flow may not be connected to post-try scope.\n'
+__name__ = '__main__'
+access_safe = <function object>
+divide_safe = <function object>
+main = <function object>
+parse_safe = <function object>
+try_with_computation = <function object>

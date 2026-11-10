@@ -1,0 +1,11 @@
+--- stdout 77
+BOUNDARY: naive model calls default factory each time; CPython calls it once
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+call_count = [1]
+f = <function object>
+make_default = <function object>

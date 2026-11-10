@@ -1,0 +1,11 @@
+--- stdout 10
+True
+True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nPEq on two ListAny values uses structural equality after normalize_any.\nBut normalize_any only normalizes the TOP-LEVEL Any value (bool->int,\nint-valued float->int). It does NOT recursively normalize list elements.\n\nSo from_ListAny(cons(from_bool(true), nil)) != from_ListAny(cons(from_int(1), nil))\nstructurally, but CPython says [True] == [1] is True (element-wise __eq__).\n'
+__name__ = '__main__'
+compare_bool_int_lists = <function object>
+main = <function object>

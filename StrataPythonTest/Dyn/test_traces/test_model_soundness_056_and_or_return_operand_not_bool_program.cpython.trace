@@ -1,0 +1,13 @@
+--- stdout 14
+5 default 7 9
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nPython\'s `not` operator returns True or False (always a bool). But\n`and` and `or` return one of their OPERANDS, not necessarily a bool:\n  - `x and y` returns x if x is falsy, else y\n  - `x or y` returns x if x is truthy, else y\n\nSo `0 or 5` returns 5 (an int), not True.\n`"" or "default"` returns "default" (a str), not True.\n`[1,2] and [3]` returns [3] (a list), not True.\n\nIf the model treats `and`/`or` as always returning from_bool, the\nreturn type is wrong for non-bool operands.\n'
+__name__ = '__main__'
+both_positive = <function object>
+chain_or = <function object>
+default_string = <function object>
+first_truthy_int = <function object>
+main = <function object>

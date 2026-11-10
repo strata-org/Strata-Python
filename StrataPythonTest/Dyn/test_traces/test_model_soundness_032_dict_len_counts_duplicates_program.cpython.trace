@@ -1,0 +1,11 @@
+--- stdout 4
+3 2
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nDictStrAny is an association list using cons. When a key is overwritten\n(d[k] = new_val), the new entry is prepended but the OLD entry remains.\nDictStrAny_get finds the first match (correct), but DictStrAny_len counts\nALL entries including shadowed duplicates (wrong).\nPython's len(d) returns the number of UNIQUE keys.\n"
+__name__ = '__main__'
+build_and_count = <function object>
+main = <function object>
+overwrite_test = <function object>

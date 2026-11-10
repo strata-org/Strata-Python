@@ -1,0 +1,13 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCPython: "hello" + " " + "world" == "hello world" → True\nModel: str_concat is uninterpreted → PEq(str_concat(str_concat("hello"," "),"world"), "hello world") → UNKNOWN\n\nThe model CANNOT PROVE this equality because str_concat has no axioms\nconnecting it to string literals. The solver sees two opaque terms and\ncan\'t determine they\'re equal.\n\nCPython result: True (assertion passes)\nModel result: UNKNOWN/unprovable (verifier says "cannot verify")\n\nThis is a FALSE NEGATIVE: the model rejects a correct program.\n'
+__name__ = '__main__'
+build_and_compare = <function object>
+concat_associativity = <function object>
+concat_equals_literal = <function object>
+empty_concat_identity = <function object>
+main = <function object>

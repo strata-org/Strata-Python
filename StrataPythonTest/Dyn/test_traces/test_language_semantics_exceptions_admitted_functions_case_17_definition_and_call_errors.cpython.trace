@@ -1,0 +1,18 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+ArgumentError = <class 'ArgumentError'>
+BodyError = <class 'BodyError'>
+Empty = <class 'Empty'>
+RESULT = ('UnboundLocalError', 'ArgumentError', 'AttributeError', 'TypeError')
+__doc__ = None
+__name__ = '__main__'
+argument = <function object>
+argument_error_precedes_body = <function object>
+binding_error_precedes_body = <function object>
+body = <function object>
+body_requires_one = <function object>
+failed_default_leaves_function_name_unbound = <function object>
+lookup_error_precedes_argument = <function object>

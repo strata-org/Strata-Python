@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Box = <class 'Box'>
+__doc__ = '\nClassInstance CLASSNAME PRESERVED AFTER FIELD WRITE\n\nCPython: type(obj) doesn\'t change when you write a field.\n         obj.x = 99 → obj is still a Point, not something else.\n\nModel:   Field write reconstructs:\n           obj\' = from_ClassInstance(classname(obj), new_attrs)\n\n         The classname must be PRESERVED from the original object.\n         If the translator uses a literal string, it\'s correct.\n         But if it extracts classname(obj) and the extraction is\n         uninterpreted, the solver can\'t prove classname(obj\') == "Point".\n\n         This matters for isinstance checks AFTER field writes:\n           obj.x = 99\n           isinstance(obj, Point)  # must still be True!\n\n         And for method dispatch after field writes:\n           obj.x = 99\n           obj.method()  # must dispatch to Point.method, not Hole\n'
+__name__ = '__main__'
+chain_modifications = <function object>
+dataclass = <function object>
+main = <function object>
+modify_then_call_method = <function object>
+modify_then_check_type = <function object>

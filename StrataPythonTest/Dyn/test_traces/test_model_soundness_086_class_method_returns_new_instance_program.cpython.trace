@@ -1,0 +1,13 @@
+--- stdout 4
+3 1
+
+--- outcome
+ok
+--- globals
+Builder = <class 'Builder'>
+__doc__ = "\nA method that modifies `self` and returns `self` (builder/fluent pattern)\ncreates an aliasing situation: the caller's original reference and the\nreturn value point to the SAME object in CPython. Under value semantics,\nthe return value is a modified COPY — the original is unchanged.\n\nThis diverges when the caller checks the original variable after calling\nthe method through a chain or via a separate variable.\n"
+__name__ = '__main__'
+chained_build = <function object>
+dataclass = <function object>
+divergence_demo = <function object>
+main = <function object>

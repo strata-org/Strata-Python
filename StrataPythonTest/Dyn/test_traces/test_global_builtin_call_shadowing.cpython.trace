@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: 'int' object is not callable
+--- globals
+__annotations__ = {'len': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+len = 0

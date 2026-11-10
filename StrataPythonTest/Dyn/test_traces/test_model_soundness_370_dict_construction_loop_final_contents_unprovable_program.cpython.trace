@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nDICT CONSTRUCTION IN LOOP — FINAL CONTENTS UNPROVABLE\n\nCPython: d = {}; for k in keys: d[k] = f(k)\n         After loop: d contains ALL keys with correct values.\n\nModel:   Each d[k] = v requires rebinding d (finding 146/238).\n         Even with correct rebinding, the solver cannot prove:\n         - Which keys are in the final dict\n         - What values they map to\n         Because there\'s no inductive connection between loop\n         iterations and the dict\'s final state.\n\n         The solver would need:\n         - Loop invariant: "d contains all keys processed so far"\n         - Post-condition: "d contains all keys in the input"\n         - Axioms connecting set/contains/get across iterations\n\nThis is the DICT parallel of finding 363 (for-loop iteration count).\n'
+__name__ = '__main__'
+build_from_keys = <function object>
+build_indexed = <function object>
+count_chars = <function object>
+main = <function object>
+merge_dicts = <function object>

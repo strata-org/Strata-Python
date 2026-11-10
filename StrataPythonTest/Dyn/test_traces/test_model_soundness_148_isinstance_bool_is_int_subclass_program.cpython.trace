@@ -1,0 +1,12 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+__doc__ = "\n`isinstance(True, int)` returns True in CPython because bool is a\nsubclass of int. The model's isinstance likely checks the tag:\n- isfrom_int(from_bool(true)) → False (different tag!)\n- But CPython says True IS an int.\n\nThis means isinstance(x, int) must return True for BOTH from_int AND\nfrom_bool values. The model must handle the bool⊂int relationship.\n"
+__name__ = '__main__'
+check_bool_is_int = <function object>
+count_ints = <function object>
+is_integer = <function object>
+main = <function object>

@@ -1,0 +1,16 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Meter = <class 'Meter'>
+__doc__ = None
+__name__ = '__main__'
+inv_float = <function object>
+inv_int = <function object>
+inv_obj = <function object>
+neg_int = <function object>
+neg_obj = <function object>
+pos_int = <function object>
+pos_obj = <function object>
+pos_str = <function object>

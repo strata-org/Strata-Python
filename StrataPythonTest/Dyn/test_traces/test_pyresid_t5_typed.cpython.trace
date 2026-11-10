@@ -1,0 +1,18 @@
+--- stdout 0
+
+--- outcome
+raised KeyError: 'director'
+--- globals
+Half = <class 'Half'>
+Movie = <class 'Movie'>
+Pair = <class 'Pair'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+m = {'title': 'Alien', 'year': 1979}
+n = 3
+p = <Pair object>
+t = 'Alien'
+u = 'z'
+y = 1980

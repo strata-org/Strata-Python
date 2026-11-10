@@ -1,0 +1,10 @@
+--- stdout 73
+BOUNDARY: naive model leaks x=3; CPython isolates comprehension variable
+
+--- outcome
+ok
+--- globals
+_ = [1, 2, 3]
+__doc__ = None
+__name__ = '__main__'
+x = 'outer'

@@ -1,0 +1,14 @@
+--- stdout 9
+True 1 3
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = "\nWithout object identity, two independently constructed objects with the\nsame field values are INDISTINGUISHABLE in the model. The model treats\nthem as equal (structural equality). But in CPython, they're different\nobjects (`a is not b`).\n\nFor @dataclass (which defines __eq__), this is CORRECT — two dataclass\ninstances with same fields ARE equal. But for non-@dataclass classes,\nthis is WRONG (finding 037). This finding explores the POSITIVE case:\nwhere lack of identity is actually sound (@dataclass equality).\n"
+__name__ = '__main__'
+dataclass = <function object>
+deduplicate = <function object>
+find_point = <function object>
+main = <function object>
+points_equal = <function object>

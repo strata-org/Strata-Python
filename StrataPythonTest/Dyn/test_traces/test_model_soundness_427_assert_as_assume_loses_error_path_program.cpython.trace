@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nASSERT AS ASSUME — LOSES THE ERROR PATH\n\nCPython: assert x > 0 → if x <= 0: raises AssertionError\n         Code AFTER assert can rely on x > 0.\n         Code that CATCHES AssertionError can handle the failure.\n\nModel:   If assert translates to ONLY `assume(x > 0)`:\n         - Post-assert code correctly knows x > 0 ✓\n         - BUT: the failure path (x <= 0) is INVISIBLE\n         - Programs where assert FAILS are "verified" (solver ignores the path)\n         - try/except AssertionError is unreachable\n\n         Correct translation needs BOTH:\n         - assert(x > 0)  → check that x > 0 holds (report if not)\n         - assume(x > 0)  → for subsequent code, x > 0 is known\n\nCPython result: AssertionError raised when condition is False\nModel result: path silently pruned (no error reported)\n'
+__name__ = '__main__'
+assert_after_computation = <function object>
+assert_catches_bug = <function object>
+bounded = <function object>
+main = <function object>
+positive_only = <function object>

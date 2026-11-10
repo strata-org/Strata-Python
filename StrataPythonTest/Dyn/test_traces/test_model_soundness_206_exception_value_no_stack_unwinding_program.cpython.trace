@@ -1,0 +1,13 @@
+--- stdout 8
+-1 99 2
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCPython uses stack unwinding for exceptions: when raised, execution\njumps to the nearest enclosing except handler. No intermediate code runs.\n\nThe Laurel model uses exception VALUES: `exception(...)` is a tag in the\nAny union. There is NO jump. Code continues executing sequentially.\n\nThis means the translator must INSERT explicit checks after every\noperation that might produce an exception. Without these checks,\nexception values flow silently into subsequent operations.\n\nFinding 173 identified this. This finding shows the MINIMAL translation\npattern required to make exception-as-value behave like stack unwinding.\n\nUses ONLY confirmed-accepted constructs: try/except, int, function def.\n'
+__name__ = '__main__'
+main = <function object>
+multiple_statements_after_raise = <function object>
+nested_function_raise = <function object>
+raise_in_middle = <function object>
+simple_try_except = <function object>

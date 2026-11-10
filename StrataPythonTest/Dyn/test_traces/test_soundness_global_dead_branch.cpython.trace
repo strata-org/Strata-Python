@@ -1,0 +1,7 @@
+--- stdout 0
+
+--- outcome
+raised NameError: name 'dead_branch_value' is not defined
+--- globals
+__doc__ = None
+__name__ = '__main__'

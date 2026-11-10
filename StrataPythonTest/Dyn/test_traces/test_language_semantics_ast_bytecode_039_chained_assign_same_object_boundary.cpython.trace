@@ -1,0 +1,10 @@
+--- stdout 64
+PASS: not independent copies (naive copy model would get b==[])
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Boundary: naive model assuming independent copies would diverge.'
+__name__ = '__main__'
+a = [42]
+b = [42]

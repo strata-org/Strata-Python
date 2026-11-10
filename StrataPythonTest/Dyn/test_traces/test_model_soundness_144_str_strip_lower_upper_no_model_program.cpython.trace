@@ -1,0 +1,14 @@
+--- stdout 10
+hi abc LO
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`str.strip()` removes leading/trailing whitespace.\n`str.lower()` returns lowercase copy.\n`str.upper()` returns uppercase copy.\nAll are IN the allowlist but have no Laurel model — results are Hole.\n'
+__name__ = '__main__'
+clean_and_lower = <function object>
+clean_input = <function object>
+is_yes = <function object>
+main = <function object>
+normalize = <function object>
+shout = <function object>

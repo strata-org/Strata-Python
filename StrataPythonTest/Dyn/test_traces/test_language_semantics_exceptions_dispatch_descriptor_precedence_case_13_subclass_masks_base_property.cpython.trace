@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Base = <class 'Base'>
+Child = <class 'Child'>
+RESULT = ('child-class-value', 'instance-value')
+__doc__ = 'The first MRO entry masks a deeper property before descriptor precedence.'
+__name__ = '__main__'
+with_field = <Child object>
+without_field = <Child object>

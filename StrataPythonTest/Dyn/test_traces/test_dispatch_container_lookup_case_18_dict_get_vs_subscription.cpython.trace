@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+DefaultingDict = <class 'DefaultingDict'>
+EVENTS = [('missing', 'x')]
+RESULT = (17, 23, [('missing', 'x')])
+__doc__ = 'dict.get treats absence as a result and never calls __missing__.'
+__name__ = '__main__'
+get_result = 23
+subscription = 17
+values = <DefaultingDict object>

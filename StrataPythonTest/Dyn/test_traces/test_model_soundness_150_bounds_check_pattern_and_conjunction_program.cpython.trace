@@ -1,0 +1,12 @@
+--- stdout 9
+30 -1 60
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nThe bounds-check pattern `if 0 <= i and i < len(lst): lst[i]` is the\nstandard way to safely access list elements. The model must:\n1. Evaluate `0 <= i` → from_bool\n2. Short-circuit `and` (finding 044)\n3. Evaluate `i < len(lst)` → from_bool\n4. Use both facts to prove `lst[i]` is safe (index in bounds)\n\nIf the verifier can\'t connect the guard to the subsequent access,\nit reports a false positive "possible IndexError."\n'
+__name__ = '__main__'
+main = <function object>
+safe_get = <function object>
+safe_set = <function object>
+sum_range = <function object>

@@ -1,0 +1,13 @@
+--- stdout 8
+5 -1 10
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+__doc__ = "\nPython's `None` comparison uses `is` (identity), not `==` (equality).\n`x is None` checks reference identity. In the model, `from_None()` is\na value constructor — `PEq(from_None(), from_None())` should return True,\nand `PIs(x, from_None())` should check the tag.\n\nThe issue: if `is None` is translated as `PEq(x, from_None())`, it uses\nstructural equality which works. But if it's translated as a reference\nidentity check (which doesn't exist in the value model), it fails.\n\nMore subtly: `x is not None` as a narrowing guard must EXCLUDE the\nfrom_None tag from x's tag set for subsequent code. If the model doesn't\nnarrow after `is None` checks, Optional[T] handling is broken.\n"
+__name__ = '__main__'
+chain_optional = <function object>
+main = <function object>
+safe_divide = <function object>
+unwrap_or = <function object>

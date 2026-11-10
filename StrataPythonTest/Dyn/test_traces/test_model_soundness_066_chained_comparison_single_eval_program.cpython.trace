@@ -1,0 +1,16 @@
+--- stdout 12
+True 2 True
+
+--- outcome
+ok
+--- globals
+Counter = <class 'Counter'>
+__doc__ = "\nPython's chained comparisons (`a < b < c`) evaluate `b` exactly ONCE\nand expand to `a < b and b < c` with short-circuit semantics. If `b`\nis a function call with side effects, it must execute only once. The\nmodel may either:\n1. Evaluate `b` twice (once for each comparison) — wrong side effects\n2. Not implement chaining at all — wrong semantics for the expression\n"
+__name__ = '__main__'
+clamp_check = <function object>
+dataclass = <function object>
+in_range = <function object>
+main = <function object>
+mixed_ops = <function object>
+side_effect_chain = <function object>
+triple_chain = <function object>

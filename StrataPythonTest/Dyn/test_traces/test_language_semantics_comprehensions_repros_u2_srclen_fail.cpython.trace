@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+raised AssertionError: 
+--- globals
+Item = <class 'Item'>
+List = <_SpecialGenericAlias object>
+Resp = <class 'Resp'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+get_items = <function object>
+main = <function object>

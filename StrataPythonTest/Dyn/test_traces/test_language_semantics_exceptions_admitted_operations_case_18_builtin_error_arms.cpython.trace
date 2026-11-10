@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Empty = <class 'Empty'>
+RESULT = ('KeyError', 'IndexError', 'ValueError', 'ZeroDivisionError', 'TypeError', 'ValueError', 'AttributeError', 'AssertionError')
+__doc__ = None
+__name__ = '__main__'
+observe_errors = <function object>

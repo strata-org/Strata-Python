@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'caught': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+caught = 1
+parse = <function object>

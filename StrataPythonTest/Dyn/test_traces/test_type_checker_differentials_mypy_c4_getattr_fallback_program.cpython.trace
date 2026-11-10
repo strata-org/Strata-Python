@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Fallback = <class 'Fallback'>
+__doc__ = "\nc4_getattr_fallback.py — __getattr__ returns wrong type after instance attribute deleted.\n\nNo union-typed field changes. The field is declared as int and IS int.\nBut after `del self.x`, attribute access falls through to __getattr__\nwhich returns str. mypy doesn't model this fallback.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str - int\n"
+__name__ = '__main__'
+main = <function object>

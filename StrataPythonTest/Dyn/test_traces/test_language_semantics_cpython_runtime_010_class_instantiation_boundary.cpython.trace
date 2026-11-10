@@ -1,0 +1,16 @@
+--- stdout 57
+True
+<class '__main__.Singleton'>
+<class 'object'>
+False
+
+--- outcome
+ok
+--- globals
+Singleton = <class 'Singleton'>
+Weird = <class 'Weird'>
+__doc__ = 'Class instantiation: boundary case.\nCustom __new__ returning a different type makes the simplified model unsound.\n'
+__name__ = '__main__'
+a = <Singleton object>
+b = <Singleton object>
+w = <object object>

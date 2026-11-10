@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+RESULT = ('ZeroDivisionError', 'OverflowError', 'OverflowError', ('float', 0.5), 'complex', 'complex')
+__doc__ = 'Power can raise two numeric errors or leave the launch tag alphabet.'
+__name__ = '__main__'
+observe = <function object>

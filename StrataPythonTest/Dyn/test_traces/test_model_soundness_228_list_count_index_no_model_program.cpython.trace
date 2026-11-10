@@ -1,0 +1,17 @@
+--- stdout 7
+6 2 10
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nThe subset says `list.count(x)` and `list.index(x)` are "may grow."\nBut `len()`, `min()`, `max()`, `sum()` ARE in the subset.\n\n`sum()` on a list of ints has no model (finding 026). But it\'s IN.\nThis finding tests `sum()` specifically — it must return the sum of\nelements, with `sum([]) == 0`.\n\nSimilarly, `min()` and `max()` on lists must return the smallest/largest\nelement. These are IN but have no Laurel model.\n\nUses ONLY confirmed-accepted constructs: sum, min, max, abs, list, int.\n'
+__name__ = '__main__'
+abs_value = <function object>
+clamp = <function object>
+main = <function object>
+max_of_list = <function object>
+min_of_list = <function object>
+range_width = <function object>
+sum_empty = <function object>
+sum_of_absolutes = <function object>
+sum_of_list = <function object>

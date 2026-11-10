@@ -1,0 +1,11 @@
+--- stdout 72
+{'list': [10, 20], 'zip': [(10, 'a'), (20, 'b')], 'sum': 30, 'max': 20}
+
+--- outcome
+ok
+--- globals
+Every = <class 'Every'>
+RESULT = {'list': [10, 20], 'zip': [(10, 'a'), (20, 'b')], 'sum': 30, 'max': 20}
+__doc__ = 'Case 2 (iterator exhaustion): Built-ins accept a truncated iterator.'
+__name__ = '__main__'
+make_iterator = <function object>

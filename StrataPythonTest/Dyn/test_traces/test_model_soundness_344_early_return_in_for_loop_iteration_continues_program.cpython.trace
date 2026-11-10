@@ -1,0 +1,14 @@
+--- stdout 5
+-2
+1
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nEARLY RETURN INSIDE FOR LOOP — REMAINING ITERATIONS MUST NOT EXECUTE\n\nCPython: `return` inside a for loop immediately exits the function.\n         No further iterations execute. No code after the loop executes.\n\nModel:   If `return` is translated as assignment to result variable\n         WITHOUT making subsequent code unreachable (finding 052/165),\n         the loop CONTINUES ITERATING after the "return."\n         The final iteration\'s value overwrites the early return\'s value.\n\nThis is the INTERACTION between findings 052 (return doesn\'t terminate)\nand for-loop translation. The loop body executes for ALL elements,\nand the LAST iteration\'s return value wins — not the first match.\n'
+__name__ = '__main__'
+count_until_zero = <function object>
+find_first_negative = <function object>
+find_index = <function object>
+first_above_threshold = <function object>
+main = <function object>

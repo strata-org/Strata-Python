@@ -1,0 +1,16 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+IterBomb = <class 'IterBomb'>
+LengthBomb = <class 'LengthBomb'>
+NextBomb = <class 'NextBomb'>
+__doc__ = None
+__name__ = '__main__'
+iter_result = 'caught-iter-error'
+iteration = <function object>
+length = <function object>
+length_result = 'caught-len-error'
+next_item = <function object>
+next_result = 'caught-next-error'

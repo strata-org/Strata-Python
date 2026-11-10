@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+accept_set = <function object>
+bad_dict_case = <function object>
+bad_list_case = <function object>
+bad_set_case = <function object>
+bad_tuple_case = <function object>
+dict_value = <function object>
+list_head = <function object>
+tuple_second = <function object>

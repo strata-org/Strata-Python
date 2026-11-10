@@ -1,0 +1,8 @@
+--- stdout 81
+PASS: from None suppresses context (naive model might lose __context__ entirely)
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Boundary: raise from None suppresses context display.'
+__name__ = '__main__'

@@ -1,0 +1,13 @@
+--- stdout 7
+3 10 2
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`except ValueError` must only catch ValueError, not TypeError or others.\nThe exception-as-value model must MATCH the exception type in the handler.\n\nFinding 113 identified this. This finding provides concrete cases where\nwrong-type exceptions must PROPAGATE past a non-matching handler.\n\nIf the model catches ALL exceptions regardless of type:\n    try:\n        x = 1 // 0  # ZeroDivisionError\n    except ValueError:  # should NOT catch ZDE!\n        return -1\n    # ZDE should propagate UP\n\nUses ONLY confirmed-accepted constructs: try/except, raise, int.\n'
+__name__ = '__main__'
+correct_handler_catches = <function object>
+first_matching_handler = <function object>
+main = <function object>
+unmatched_propagates = <function object>
+wrong_handler_doesnt_catch = <function object>

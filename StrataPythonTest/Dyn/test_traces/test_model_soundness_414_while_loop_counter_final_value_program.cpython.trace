@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nWHILE LOOP COUNTER FINAL VALUE — i == n AFTER `while i < n: i += 1`\n\nCPython: i = 0; while i < n: i += 1; assert i == n (always true for n >= 0)\n\nModel:   Without loop exit assume (finding 169/401):\n         i is unconstrained after loop → i == n unprovable.\n\n         WITH loop exit assume: assume(!(i < n)) → assume(i >= n)\n         But we also need: i was incremented by 1 each iteration,\n         started at 0, so i == n (not just i >= n).\n\n         The PRECISE post-loop value requires EITHER:\n         - Loop invariant: i >= 0 && i <= n\n         - OR: bounded unrolling (for small n)\n         - OR: the exit condition alone (i >= n) + knowledge that\n           i was < n at the START of the last iteration → i == n\n\nThis is the FUNDAMENTAL while-loop verification challenge.\n'
+__name__ = '__main__'
+count_to_n = <function object>
+main = <function object>
+multiply_by_addition = <function object>
+power_by_multiplication = <function object>
+sum_1_to_n = <function object>

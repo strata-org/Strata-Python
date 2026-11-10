@@ -1,0 +1,19 @@
+--- stdout 15
+4.5 3.5 ababab
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nOperators pattern-match on (left_tag, right_tag). If a valid type pair\nhas no matching case, the result is Hole — an unconstrained value that\nsilently propagates. CPython would either compute a correct result or\nraise TypeError.\n\nThis finding provides a CATALOG of valid type pairs that likely have\nno case in the model, producing Hole where CPython produces a value.\n\nThe subset allows: int, float, bool, str, None, list, dict, ClassInstance.\nValid operator pairs (non-exhaustive):\n  + : (int,int), (float,float), (int,float), (float,int), (str,str), (list,list)\n  * : (int,int), (float,float), (int,float), (str,int), (int,str)\n  - : (int,int), (float,float), (int,float), (float,int)\n  / : (int,int), (int,float), (float,int), (float,float)\n  //: (int,int), (float,float), (int,float), (float,int)\n  % : (int,int), (float,float), (int,float), (float,int)\n  ==: ALL pairs (cross-type returns False except int/float/bool)\n  < : (int,int), (float,float), (int,float), (float,int), (str,str)\n\nUses ONLY confirmed-accepted constructs: int, float, str, arithmetic.\n'
+__name__ = '__main__'
+all_cross_type_ops = <function object>
+float_int_div = <function object>
+float_int_sub = <function object>
+int_float_add = <function object>
+int_float_floor_div = <function object>
+int_float_mod = <function object>
+int_float_mul = <function object>
+int_str_mul = <function object>
+list_list_add = <function object>
+main = <function object>
+str_str_add = <function object>

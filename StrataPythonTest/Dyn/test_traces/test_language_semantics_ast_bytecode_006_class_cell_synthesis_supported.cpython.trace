@@ -1,0 +1,10 @@
+--- stdout 45
+OK: __class__ cell synthesis — super() works
+
+--- outcome
+ok
+--- globals
+Animal = <class 'Animal'>
+Dog = <class 'Dog'>
+__doc__ = None
+__name__ = '__main__'

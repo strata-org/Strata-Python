@@ -1,0 +1,17 @@
+--- stdout 8
+10 4 11
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = '\n"No mutation in place" means EVERY modification requires rebinding.\nThis creates a DISCIPLINE the programmer must follow:\n\n  WRONG:  obj.x = 5          (mutation lost if obj not rebound)\n  RIGHT:  obj = new_obj(...)  (explicit rebind)\n\n  WRONG:  lst.append(x)      (list unchanged without rebind)\n  RIGHT:  lst = lst + [x]    (or: lst.append(x) with translator rebinding)\n\nThe model is SOUND only if the translator correctly rebinds after every\n"mutation." This finding catalogs ALL patterns that require rebinding\nand tests that the rebinding discipline produces correct results.\n\nUses ONLY confirmed-accepted constructs: @dataclass, list, dict, int.\n'
+__name__ = '__main__'
+conditional_rebind = <function object>
+dataclass = <function object>
+dict_set_rebind = <function object>
+field_write_rebind = <function object>
+list_append_rebind = <function object>
+main = <function object>
+multiple_rebinds_in_sequence = <function object>
+rebind_in_loop = <function object>

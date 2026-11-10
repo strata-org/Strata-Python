@@ -1,0 +1,14 @@
+--- stdout 11
+banana 315
+
+--- outcome
+ok
+--- globals
+Item = <class 'Item'>
+__doc__ = '\nA `list[MyClass]` stores objects in a list. If MyClass uses Composite\n(heap semantics), the list stores Composite REFERENCES (not values).\nBut ListAny stores `Any` values. To put a Composite reference in a\nListAny, it must be wrapped as `from_Composite(ref)`.\n\nThis means list operations must handle the wrapping/unwrapping:\n- Storing: wrap Composite ref as from_Composite before List_append\n- Loading: unwrap from_Composite after List_get to access heap fields\n- The list itself remains value-semantics (ListAny), but its ELEMENTS\n  are heap references\n\nThis is the coercion path between the two worlds.\n'
+__name__ = '__main__'
+apply_discount = <function object>
+dataclass = <function object>
+find_cheapest = <function object>
+main = <function object>
+total_price = <function object>

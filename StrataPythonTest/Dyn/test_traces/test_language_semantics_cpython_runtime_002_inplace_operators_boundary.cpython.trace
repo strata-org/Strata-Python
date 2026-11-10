@@ -1,0 +1,11 @@
+--- stdout 37
+Same object: False
+Same object: True
+
+--- outcome
+ok
+--- globals
+Union = <_SpecialForm object>
+__doc__ = 'In-place operators: boundary case.\nA Union type makes it impossible to know statically whether += mutates or rebinds.\n'
+__name__ = '__main__'
+ambiguous_iadd = <function object>

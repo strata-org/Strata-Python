@@ -1,0 +1,9 @@
+--- stdout 84
+BOUNDARY: naive model says y is comp-local; CPython hoists it to enclosing function
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>

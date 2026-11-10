@@ -1,0 +1,10 @@
+--- stdout 47
+OK: closure creation — captures cell correctly
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+add5 = <function object>
+make_adder = <function object>

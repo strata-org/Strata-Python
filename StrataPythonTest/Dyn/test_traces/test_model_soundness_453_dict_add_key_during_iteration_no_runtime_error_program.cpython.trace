@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nDICT MODIFICATION DURING ITERATION — RuntimeError IN CPYTHON, SILENT IN MODEL\n\nThe subset allows:\n  - for k in d: (dict iteration yields keys — finding 051)\n  - d[k] = v (dict assignment)\n  - del is OUT, but d[new_key] = v ADDS a key (changes size)\n\nCPython behavior:\n  d = {"a": 1, "b": 2}\n  for k in d:\n      d["new_" + k] = d[k] * 2\n  # RAISES RuntimeError: dictionary changed size during iteration\n\n  This is a RUNTIME CHECK in CPython\'s dict iterator. If the dict\'s\n  internal version counter changes (due to insertion or deletion),\n  the iterator raises RuntimeError on the next __next__ call.\n\nModel behavior:\n  Under value semantics, the for loop iterates over a SNAPSHOT of keys.\n  Adding keys to d inside the loop modifies a COPY (or the rebound d),\n  but the iteration continues over the original key set.\n  \n  Result: the model says the loop completes successfully with the\n  modified dict. CPython raises RuntimeError.\n\nThis is UNSOUND: the model verifies a program that crashes at runtime.\n\nIMPORTANT DISTINCTION:\n  - Modifying VALUES of existing keys during iteration is ALLOWED in CPython:\n    for k in d: d[k] = d[k] * 2  ← OK (size unchanged)\n  - Adding NEW keys or deleting keys during iteration RAISES RuntimeError:\n    for k in d: d["new"] = 1  ← RuntimeError\n\nThe model cannot distinguish these cases because:\n1. It has no concept of "iteration is in progress"\n2. It has no concept of "dict size changed since iteration started"\n3. Value semantics means the iterated-over dict is frozen anyway\n\nROOT CAUSE: The model\'s for-loop-over-dict translation takes a snapshot\nof keys and iterates over that snapshot. This is CORRECT for the key\nsequence but MISSES the RuntimeError that CPython raises when the dict\nis mutated during iteration.\n'
+__name__ = '__main__'
+add_key_during_iteration = <function object>
+conditional_add_during_iteration = <function object>
+dataclass = <function object>
+main = <function object>
+modify_value_during_iteration = <function object>
+safe_pattern_collect_then_modify = <function object>

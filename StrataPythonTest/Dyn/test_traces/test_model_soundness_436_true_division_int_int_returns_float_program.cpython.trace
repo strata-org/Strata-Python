@@ -1,0 +1,11 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nTRUE DIVISION int / int ALWAYS RETURNS float\n\nDIVERGENCE:\n  CPython:  7 / 2  → 3.5  (type: float)\n  Model:    PTrueDiv(from_int(7), from_int(2)) → Hole or from_int(3)\n\n  CPython:  6 / 2  → 3.0  (type: float, even when "evenly divisible")\n  Model:    PTrueDiv(from_int(6), from_int(2)) → Hole or from_int(3)\n\nThe return TYPE is always float in CPython. The model either:\n- Has no PTrueDiv at all → Hole\n- Uses PFloorDiv (wrong value: 3 instead of 3.5)\n- Returns from_int (wrong tag: should be from_float)\n'
+__name__ = '__main__'
+average = <function object>
+main = <function object>
+true_div = <function object>

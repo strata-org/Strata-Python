@@ -1,0 +1,18 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+RESULT = ('UnboundLocalError', 'UnboundLocalError', 'UnboundLocalError', 'UnboundLocalError', 'NameError', 'UnboundLocalError')
+ReplacementError = <class 'ReplacementError'>
+__doc__ = None
+__name__ = '__main__'
+after_break = <function object>
+after_continue = <function object>
+after_explicit_delete = <function object>
+after_fallthrough = <function object>
+after_new_exception = <function object>
+reader_returned_from_handler = <function object>
+returned_reader = <function object>
+returned_reader_result = 'NameError'

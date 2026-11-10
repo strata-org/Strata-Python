@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nChained string methods — intermediate Hole poisons the chain.\n\nIn CPython:\n  "  Hello  ".strip().lower()  → "hello"\n  "Hello World".lower().replace("world", "python")  → "hello python"\n\nEach method returns a new string, and the next method is called on it.\nThis works because each method is pure (finding 310).\n\nBut in the Laurel model, string methods have no model (findings 144, 220).\nEach returns Hole. When methods are CHAINED:\n  s.strip()  → Hole\n  Hole.lower()  → calling method on Hole → Hole or error\n\nThe intermediate Hole propagates through the chain. Even if ONE method\nhad a model, the chain breaks if ANY method in it returns Hole.\n\nThis is distinct from:\n- Finding 144 (individual string methods return Hole)\n- Finding 310 (string methods are pure — correct property)\n- Finding 159 (method chaining on class instances)\n\nThis finding tests that chained string methods compound the Hole problem.\n\nUses ONLY confirmed-accepted constructs: str methods (strip, lower, upper).\n'
+__name__ = '__main__'
+chain_with_comparison = <function object>
+lower_then_replace = <function object>
+main = <function object>
+multi_chain = <function object>
+strip_then_lower = <function object>
+upper_then_startswith = <function object>

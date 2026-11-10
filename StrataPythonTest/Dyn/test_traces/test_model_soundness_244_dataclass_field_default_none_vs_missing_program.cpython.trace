@@ -1,0 +1,18 @@
+--- stdout 20
+no email True alice
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+User = <class 'User'>
+__doc__ = '\nA @dataclass field with `Optional[int] = None` default means:\n- The field CAN be None (tag set: {from_int, from_None})\n- If not provided at construction, it IS None\n- If provided, it\'s the given value\n\nThe model must distinguish between:\n1. Field explicitly set to None: `User(name="x", age=None)`\n2. Field defaulting to None: `User(name="x")` (age omitted)\n\nBoth produce the same result (age is None), but the translator must\nhandle case 2 by substituting the default (finding 157).\n\nUses ONLY Frontend-subset features: @dataclass, Optional, int, str, None.\n'
+__name__ = '__main__'
+check_optional_field = <function object>
+create_explicit_none = <function object>
+create_full = <function object>
+create_minimal = <function object>
+create_with_email = <function object>
+dataclass = <function object>
+has_age = <function object>
+main = <function object>

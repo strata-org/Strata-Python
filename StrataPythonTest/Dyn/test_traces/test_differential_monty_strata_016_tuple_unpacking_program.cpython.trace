@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = 2
+b = 1
+p = 1
+q = 2
+r = 3
+x = 10
+y = 20
+z = 30

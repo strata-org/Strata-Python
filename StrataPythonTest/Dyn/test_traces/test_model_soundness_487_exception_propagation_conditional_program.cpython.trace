@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised ZeroDivisionError: integer division or modulo by zero
+--- globals
+__annotations__ = {'x': <class 'int'>, 'y': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+x = 1
+y = 0

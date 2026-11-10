@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+HasOperation = <class 'HasOperation'>
+LocalFileError = <class 'LocalFileError'>
+MissingOperation = <class 'MissingOperation'>
+__doc__ = None
+__name__ = '__main__'
+caught_dispatch = <function object>
+routed_exception = <function object>

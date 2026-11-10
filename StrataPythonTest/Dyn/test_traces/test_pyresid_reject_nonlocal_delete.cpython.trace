@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Box = <class 'Box'>
+__doc__ = None
+__name__ = '__main__'
+box = <Box object>
+mapping = {}

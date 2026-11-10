@@ -1,0 +1,16 @@
+--- stdout 36
+All str(bool) conversion tests pass
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nstr(True) produces "True", not "1" — bool-specific string conversion.\n\nIn CPython, `str(True)` → `"True"` and `str(False)` → `"False"`.\nThis is DIFFERENT from `str(int(True))` → `"1"`. The bool type has\nits own `__str__`/`__repr__` that produces the word, not the number.\n\nThe Laurel model\'s `to_str` (or `Any_to_str`) dispatch must handle\n`from_bool` as a SEPARATE case from `from_int`. If the model normalizes\nbool to int before string conversion (as finding 166 suggests for\narithmetic), it will produce "1"/"0" instead of "True"/"False".\n\nThis creates a tension:\n- For ARITHMETIC: bool should normalize to int (True→1, False→0)\n- For STRING CONVERSION: bool must NOT normalize (True→"True", False→"False")\n\nThe dispatch must be: check from_bool FIRST, produce "True"/"False";\nonly if from_int, produce the decimal string.\n\nSimilarly:\n- str(None) → "None" (not some error or empty string)\n- str(3.14) → "3.14" (specific float formatting)\n\nUses ONLY confirmed-accepted constructs: str(), bool, int, None, comparison.\n'
+__name__ = '__main__'
+bool_str_in_condition = <function object>
+bool_to_str_false = <function object>
+bool_to_str_true = <function object>
+bool_vs_int_str_divergence = <function object>
+comparison_result_to_str = <function object>
+main = <function object>
+none_to_str = <function object>
+str_in_fstring_context = <function object>

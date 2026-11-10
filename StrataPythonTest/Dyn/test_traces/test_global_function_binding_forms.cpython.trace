@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'first': <class 'int'>, 'second': <class 'int'>, 'chain_left': <class 'int'>, 'chain_right': <class 'int'>, 'loop_index': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+chain_left = 3
+chain_right = 3
+first = 1
+loop_index = 0
+second = 2
+update_globals = <function object>

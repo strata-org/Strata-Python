@@ -1,0 +1,13 @@
+--- stdout 13
+True True 42
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nMISSING EXCEPTION: int("hello") → ValueError in CPython, Hole in model.\n\nCPython: int() on a non-numeric string raises ValueError.\nModel: to_int_any(from_str("hello")) → Hole (no error produced)\n\nThe model thinks int("hello") MIGHT SUCCEED and return some int.\n'
+__name__ = '__main__'
+main = <function object>
+parse_int_empty = <function object>
+parse_int_float_str = <function object>
+parse_int_invalid = <function object>
+safe_parse = <function object>

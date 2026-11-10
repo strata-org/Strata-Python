@@ -1,0 +1,15 @@
+--- stdout 13
+4.5 6 ababab
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nROOT CAUSE: Operators dispatch by pattern matching on (left_tag, right_tag).\nPROPERTY: No slot lookup. No reflected methods. Incomplete case coverage.\n\nThis single property causes findings:\n018, 022, 024, 035, 043, 050, 057, 073, 074, 076, 077, 108, 109,\n110, 111, 112, 145, 148, 166, 178, 201, 204, 256, 260, 261, 262,\n263, 264, 265, 270.\n\nDEMONSTRATION: Operations on valid type combinations return Hole.\n'
+__name__ = '__main__'
+bool_int_ops = <function object>
+cross_type_eq = <function object>
+int_float_ops = <function object>
+int_str_ops = <function object>
+list_concat = <function object>
+main = <function object>
+none_arithmetic = <function object>

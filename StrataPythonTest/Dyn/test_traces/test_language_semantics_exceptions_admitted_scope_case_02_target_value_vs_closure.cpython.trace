@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+RESULT = ('E', 'direct', 'NameError', 'saved')
+__doc__ = None
+__name__ = '__main__'
+return_exception_value = <function object>
+return_readers = <function object>
+returned_exception = <E object>
+saved_reader = <function object>
+target_reader = <function object>
+target_reader_result = 'NameError'

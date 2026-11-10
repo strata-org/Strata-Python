@@ -1,0 +1,12 @@
+--- stdout 51
+['a', 'b', 'c'] ['first', 'second', 'third'] first
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nPython 3.7+ guarantees dict iteration order matches insertion order.\n`for k in d` yields keys in the order they were first inserted.\nThe association list model (prepend on set) naturally yields keys in\nREVERSE insertion order (most recent first). This diverges from CPython.\n'
+__name__ = '__main__'
+build_ordered = <function object>
+first_key = <function object>
+get_keys_in_order = <function object>
+main = <function object>

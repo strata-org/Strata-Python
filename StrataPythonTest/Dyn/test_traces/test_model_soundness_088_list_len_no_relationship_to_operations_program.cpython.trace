@@ -1,0 +1,14 @@
+--- stdout 12
+5 True True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nAfter `lst = lst + [x]`, the new list has length `len(lst) + 1`. After\n`lst = lst + other`, the new list has length `len(lst) + len(other)`.\nIf List_len and List_concat (PAdd on lists) are both uninterpreted with\nno connecting axioms, these relationships are unprovable. Loop bounds\nthat depend on list growth become unverifiable.\n'
+__name__ = '__main__'
+append_and_check = <function object>
+build_list = <function object>
+concat_lengths = <function object>
+empty_list_len = <function object>
+main = <function object>
+singleton_len = <function object>

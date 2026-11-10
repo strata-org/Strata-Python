@@ -1,0 +1,11 @@
+--- stdout 41
+OK: assignment target order — L→R stores
+
+--- outcome
+ok
+--- globals
+Logged = <class 'Logged'>
+__doc__ = None
+__name__ = '__main__'
+d = <Logged object>
+log = [(0, 42), (1, 42)]

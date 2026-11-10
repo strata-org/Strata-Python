@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'
+test_type_optional_value = <function object>

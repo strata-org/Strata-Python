@@ -1,0 +1,13 @@
+--- stdout 21
+accepted True number
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nISINSTANCE WITH TUPLE OF TYPES: isinstance(x, (int, str))\n\nThe subset allows isinstance(x, T) for narrowing. CPython also supports\nisinstance(x, (T1, T2, ...)) — checking membership in a TUPLE of types.\nThis is IN the subset (isinstance is IN, tuples of types are standard).\n\nCPython: isinstance(42, (int, str)) → True\nModel:   isinstance translates to classname == "int" check;\n         tuple-of-types form has no translation — likely Hole or always-False.\n\nThis pattern is common for handling multiple acceptable types:\n    if isinstance(value, (int, float)):\n        return value * 2\n\nRoot cause: isinstance translation only handles single-type second argument.\nThe tuple form requires OR-ing multiple tag checks.\n'
+__name__ = '__main__'
+accepts_int_or_str = <function object>
+classify = <function object>
+main = <function object>
+numeric_check = <function object>
+process_value = <function object>

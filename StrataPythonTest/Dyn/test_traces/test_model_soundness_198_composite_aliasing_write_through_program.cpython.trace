@@ -1,0 +1,14 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+Shared = <class 'Shared'>
+__doc__ = '\nUnder Composite/heap semantics, aliasing is possible:\n    a = MyClass(x=1)\n    b = a  # b aliases a (same heap reference)\n    a.x = 99\n    # b.x is also 99 (same object)\n\nThis is the REASON Composite exists — to model aliasing that\nClassInstance (value semantics) cannot handle.\n\nThe Frontend subset says "no aliasing" for v1, so this pattern is OUT.\nBut if the subset is expanded, Composite must handle write-through:\nmodifying through one alias must be visible through all other aliases.\n\nThis finding documents what Composite MUST support if aliasing is added,\nand verifies that the current subset correctly REJECTS these patterns.\n\nUses ONLY confirmed-accepted constructs: @dataclass, int.\n(NOTE: This program demonstrates patterns that SHOULD be rejected by\nthe subset checker. It runs in CPython but would be OUT of Frontend.)\n'
+__name__ = '__main__'
+alias_write_through = <function object>
+dataclass = <function object>
+function_param_alias = <function object>
+main = <function object>
+no_alias_correct = <function object>

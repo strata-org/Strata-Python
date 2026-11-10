@@ -1,0 +1,13 @@
+--- stdout 10
+True True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`str.startswith(prefix)` returns True if the string starts with prefix.\n`str.endswith(suffix)` returns True if the string ends with suffix.\nBoth are IN the subset allowlist but have no Laurel model — results\nare Hole. They map directly to SMT-LIB `str.prefixof`/`str.suffixof`.\n'
+__name__ = '__main__'
+classify_path = <function object>
+has_prefix = <function object>
+has_suffix = <function object>
+main = <function object>
+strip_prefix = <function object>

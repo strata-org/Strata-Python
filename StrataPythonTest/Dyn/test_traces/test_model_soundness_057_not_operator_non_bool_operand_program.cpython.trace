@@ -1,0 +1,13 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nPython\'s `not` operator returns the boolean inverse of the truthiness\nof its operand. `not 0` is True, `not ""` is True, `not [1,2]` is False.\nThe result is ALWAYS a bool regardless of the operand type.\n\nIf the model\'s `PNot` only handles `from_bool` operands, then `not 0`,\n`not ""`, `not []` fall to Hole. The subset says `not` is IN "when\noperands are bool", but truthiness coercion means non-bool operands\nappear in boolean contexts (e.g., `if not lst:` to check emptiness).\n'
+__name__ = '__main__'
+is_blank = <function object>
+is_empty_list = <function object>
+is_zero = <function object>
+main = <function object>
+negate_bool = <function object>

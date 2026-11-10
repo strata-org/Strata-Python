@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Worker = <class 'Worker'>
+__doc__ = '\na31_try_else_narrowing.py — try/else: method mutates in try body without raising,\nelse clause uses stale narrowing.\n\nisinstance narrows obj.x to int. In the try body, a method mutates obj.x to str\nbut does NOT raise. The else clause (runs when no exception) still has the\nnarrowing active per mypy.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str - int\n'
+__name__ = '__main__'
+main = <function object>

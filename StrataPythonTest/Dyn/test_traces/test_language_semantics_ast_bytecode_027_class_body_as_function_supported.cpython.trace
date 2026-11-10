@@ -1,0 +1,10 @@
+--- stdout 59
+OK: class body — executes immediately, populates namespace
+
+--- outcome
+ok
+--- globals
+Plugin = <class 'Plugin'>
+__doc__ = None
+__name__ = '__main__'
+registry = ['Plugin']

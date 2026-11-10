@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+State = <class 'State'>
+__doc__ = '\nTRY BODY PARTIAL EXECUTION — SIDE EFFECTS BEFORE EXCEPTION ARE VISIBLE\n\nDIVERGENCE:\n  CPython:  In a try body with multiple statements, if statement N raises,\n            statements 1..N-1 have ALREADY EXECUTED (their side effects\n            are visible in the except handler and after).\n  Model:    The exception-as-value model may either:\n            (a) Execute ALL statements (exception doesn\'t stop execution)\n            (b) Execute NO statements (treats try body as atomic)\n            Neither correctly models partial execution.\n\nThis is a refinement of finding 274 (exception doesn\'t terminate).\nFinding 274 shows that statements AFTER the raise still execute.\nThis finding shows the CONVERSE: statements BEFORE the raise MUST\nhave their effects preserved in the handler.\n\nROOT CAUSE: The exception-as-value model has no concept of "execution\nstopped at statement N." It either runs everything or nothing.\n'
+__name__ = '__main__'
+accumulator_before_exception = <function object>
+dataclass = <function object>
+handler_sees_partial_state = <function object>
+main = <function object>
+partial_execution_visible = <function object>
+sequential_effects_before_raise = <function object>

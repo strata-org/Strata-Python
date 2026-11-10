@@ -1,0 +1,15 @@
+--- stdout 22
+all assertions passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nTUPLE RETURN FROM FUNCTION — CALLER ACCESSES ELEMENTS — NO TUPLE MODEL\n\nThe subset allows:\n  - tuple[T1, T2, ...] with explicit types (IN)\n  - Functions returning tuples (IN, via finding 218 ClassInstance encoding)\n  - Tuple unpacking `a, b = f()` (IN, finding 458)\n\nThe NOVEL gap: accessing tuple elements BY INDEX after function return,\nWITHOUT unpacking. The subset allows `t[0]`, `t[1]` on tuples.\n\n    def min_max(xs: list[int]) -> tuple[int, int]:\n        return (min(xs), max(xs))\n\n    result: tuple[int, int] = min_max([3, 1, 4])\n    lo: int = result[0]   # CPython: 1\n    hi: int = result[1]   # CPython: 4\n\nFinding 218 proposes encoding tuples as ClassInstance with _0, _1 fields.\nFinding 458 covers tuple UNPACKING (`a, b = f()`).\n\nTHIS finding covers the case where the tuple is stored in a variable\nand then accessed by INDEX. The model must:\n  1. Know that `result` has tag from_ClassInstance (or whatever tuple encoding)\n  2. Translate `result[0]` to field access on the tuple encoding\n  3. Assert the correct element type (int) on the accessed value\n\nIf tuples are encoded as ClassInstance("tuple_2", {"_0": v0, "_1": v1}):\n  - `result[0]` → DictStrAny_get(result.attrs, "_0") → needs McCarthy axiom\n  - `result[1]` → DictStrAny_get(result.attrs, "_1") → needs McCarthy axiom\n  - Type assertion: isfrom_int(result[0]) needed but not emitted\n\nIf tuples have NO encoding (finding 028):\n  - `result` is Hole\n  - `result[0]` is Hole\n  - All downstream computation is Hole\n\nThe INTERACTION: even if finding 218\'s encoding is implemented,\nthe SUBSCRIPT operator `t[i]` must be translated differently for\ntuples than for lists:\n  - List: List_get(xs, i) with bounds check\n  - Tuple: DictStrAny_get(attrs, str(i)) with field-presence axiom\n  - String: str_char_at(s, i)\n\nThe translator must dispatch `Any_get!` based on the STATIC TYPE\nof the container, not just the runtime tag. Without static type info,\n`result[0]` goes through the generic subscript path which may not\nhandle the tuple encoding.\n'
+__name__ = '__main__'
+dataclass = <function object>
+divmod_manual = <function object>
+main = <function object>
+min_max = <function object>
+nested_tuple_access = <function object>
+tuple_in_condition = <function object>
+use_tuple_by_index = <function object>

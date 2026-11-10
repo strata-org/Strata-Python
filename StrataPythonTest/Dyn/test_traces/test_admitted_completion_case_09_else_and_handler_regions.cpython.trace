@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+RESULT = ('else', 'handler', 'try return', 'after break', 'after continue', ('outer handler', 1))
+__doc__ = None
+__name__ = '__main__'
+break_skips_else = <function object>
+continue_skips_else = <function object>
+exception_in_else_escapes_same_handlers = <function object>
+exception_uses_handler = <function object>
+normal_uses_else = <function object>
+return_skips_else = <function object>

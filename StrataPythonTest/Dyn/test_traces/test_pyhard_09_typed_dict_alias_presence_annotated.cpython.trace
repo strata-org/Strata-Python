@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+NotRequired = <_SpecialForm object>
+Settings = <class 'Settings'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+alias_update = <function object>
+direct_update = <function object>

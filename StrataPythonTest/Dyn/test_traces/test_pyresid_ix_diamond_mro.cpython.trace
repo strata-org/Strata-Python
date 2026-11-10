@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Base = <class 'Base'>
+Bottom = <class 'Bottom'>
+Left = <class 'Left'>
+Right = <class 'Right'>
+__doc__ = None
+__name__ = '__main__'
+r1 = 'left'
+r2 = 'base'
+which = <function object>

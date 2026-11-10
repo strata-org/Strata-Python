@@ -1,0 +1,12 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nMISSING EXCEPTION: "hello" + 5 → TypeError in CPython, Hole in model.\n\nCPython: str.__add__(int) → TypeError (can\'t concatenate str and int)\nModel: PAdd(from_str("hello"), from_int(5)) → Hole (catch-all, no error)\n\nThe model should produce exception(TypeError) but produces Hole instead.\nThis means the model thinks "hello" + 5 MIGHT SUCCEED.\n'
+__name__ = '__main__'
+main = <function object>
+none_times_int = <function object>
+str_minus_str = <function object>
+str_plus_int = <function object>

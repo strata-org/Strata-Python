@@ -1,0 +1,10 @@
+--- stdout 48
+OK: pattern matching — structural decomposition
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+classify = <function object>
+sys = <module object>

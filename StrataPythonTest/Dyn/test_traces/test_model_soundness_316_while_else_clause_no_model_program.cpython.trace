@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nWHILE/ELSE clause — else runs only when loop exits WITHOUT break.\n\nIn CPython, `while cond: ... else: ...` executes the else block ONLY\nwhen the loop exits because the condition became False (normal exit).\nIf the loop exits via `break`, the else block is SKIPPED.\n\nThis is the while-loop analog of finding 065 (for/else). The model\nmust distinguish two exit paths:\n  1. Normal exit (condition False) → execute else\n  2. Break exit → skip else\n\nIf the model has no conditional path for the else block, it either:\n  - Always executes else (wrong when break taken)\n  - Never executes else (wrong when loop completes normally)\n  - Treats else as dead code (wrong in both cases)\n\nUses ONLY confirmed-accepted constructs: while, break, else, if, int, bool.\n'
+__name__ = '__main__'
+find_factor = <function object>
+main = <function object>
+search_while_else = <function object>
+while_else_with_accumulator = <function object>

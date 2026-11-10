@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+RESULT = ((10, 20, 'UnboundLocalError', 40, 'UnboundLocalError'), (10, 'UnboundLocalError', 30, 'UnboundLocalError', 'UnboundLocalError'))
+__doc__ = None
+__name__ = '__main__'
+exceptional_path = <function object>
+success_path = <function object>

@@ -1,0 +1,14 @@
+--- stdout 17
+False False True
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nBoolean short-circuit `and` used as a GUARD for division:\n    if b != 0 and a // b > 5:\n        ...\n\nThe first conjunct (`b != 0`) guards the second (`a // b`).\nIf `and` is evaluated eagerly (finding 044), `a // b` executes even\nwhen `b == 0` — causing ZeroDivisionError.\n\nThis is the MOST CRITICAL short-circuit pattern: it's the standard\nway to prevent division by zero, index out of bounds, and None access.\n\nUses ONLY Frontend-subset features: int, and, //, if, comparison.\n"
+__name__ = '__main__'
+chained_guards = <function object>
+main = <function object>
+or_short_circuit = <function object>
+safe_divide_check = <function object>
+safe_index_check = <function object>
+safe_none_check = <function object>

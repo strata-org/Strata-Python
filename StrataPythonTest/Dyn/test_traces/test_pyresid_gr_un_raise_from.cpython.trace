@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised ValueError: 
+  cause ValueError
+--- globals
+__doc__ = None
+__name__ = '__main__'
+err = <ValueError object>

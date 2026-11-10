@@ -1,0 +1,15 @@
+--- stdout 17
+circle
+rectangle
+
+--- outcome
+ok
+--- globals
+Circle = <class 'Circle'>
+Rectangle = <class 'Rectangle'>
+Shape = <class 'Shape'>
+__doc__ = "\nINHERITED @property NOT RESOLVED ON CHILD CLASS\n\nCPython: Child inherits parent's @property; child.prop calls parent's getter.\nModel:   Method/property lookup uses classname string; child's classname doesn't\n         match parent's method table → property call fails or returns Hole.\n\nThis is related to finding 313 (inherited method not found on child) but\nspecifically for @property, which has ADDITIONAL complexity: the property\nmust be translated as a function call, not a field read (finding 222).\nWhen inheritance is involved, the translator must resolve the property\ngetter through the class hierarchy.\n"
+__name__ = '__main__'
+dataclass = <function object>
+describe_shape = <function object>
+main = <function object>

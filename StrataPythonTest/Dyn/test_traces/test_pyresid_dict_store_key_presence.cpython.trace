@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+conditional_store = <function object>
+strong_store = <function object>
+summary_store = <function object>

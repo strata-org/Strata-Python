@@ -1,0 +1,10 @@
+--- stdout 54
+OK: cell promotion — shared mutable state via closure
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+c = <function object>
+counter = <function object>

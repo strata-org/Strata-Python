@@ -1,0 +1,16 @@
+--- stdout 17
+True -1 positive
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+__doc__ = '\nThe model has "No object identity." The `is` operator checks identity\n(same object in memory), not equality. The subset says `is None` and\n`is not None` are IN, but `x is y` for non-None is OUT.\n\nHowever, the model must still correctly handle the SEMANTICS of `is None`:\n- `x is None` must be True only when x is actually None\n- `x is not None` must be True when x is any non-None value\n- These must work for Optional[T] variables\n\nThe deeper issue: under value semantics, two objects with identical fields\nare INDISTINGUISHABLE. There\'s no way to tell if they\'re "the same object"\nor "two objects with the same values." This is fine for `is None` (None is\na singleton) but would break `is` on other types if it were IN.\n\nThis finding verifies that `is None` / `is not None` work correctly and\ndocuments why general `is` must remain OUT.\n\nUses ONLY confirmed-accepted constructs: is None, is not None, Optional.\n'
+__name__ = '__main__'
+chain_none_checks = <function object>
+check_is_none = <function object>
+check_is_not_none = <function object>
+identity_not_equality = <function object>
+main = <function object>
+none_propagation = <function object>
+safe_unwrap = <function object>

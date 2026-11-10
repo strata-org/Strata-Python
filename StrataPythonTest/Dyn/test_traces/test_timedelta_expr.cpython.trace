@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'now': <class 'datetime'>, 'delta': <class 'timedelta'>, 'start': <class 'datetime'>}
+__doc__ = None
+__name__ = '__main__'
+datetime = <class 'datetime'>
+delta = <timedelta object>
+now = <datetime object>
+start = <datetime object>
+timedelta = <class 'timedelta'>

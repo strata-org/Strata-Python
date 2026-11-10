@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Cell = <class 'Cell'>
+__doc__ = "\nLIST MULTIPLY WITH OBJECTS — CPython SHARES REFERENCES, MODEL COPIES\n\nCPython: [[0]] * 3 → [[0], [0], [0]] — all THREE inner lists are the\n         SAME OBJECT. Modifying one modifies all:\n         xs = [[0]] * 3; xs[0][0] = 99 → [[99], [99], [99]]\n\nModel:   List_repeat creates independent copies (value semantics).\n         xs[0][0] = 99 → [[99], [0], [0]] — only first modified.\n\n         For PRIMITIVE elements ([0] * 3 → [0, 0, 0]), value semantics\n         is CORRECT (ints are immutable, no aliasing observable).\n\n         For OBJECT elements, value semantics OVER-PROVES independence:\n         the model says elements are independent when CPython says they're\n         aliased. This is a FALSE NEGATIVE — the model misses a bug class\n         where mutation through one reference affects others.\n\nThe subset bans aliasing, so this pattern SHOULD be rejected.\nBut the AST checker must detect `[mutable] * n` as creating aliases.\n"
+__name__ = '__main__'
+correct_pattern = <function object>
+dataclass = <function object>
+main = <function object>
+object_repeat_bug = <function object>
+primitive_repeat = <function object>

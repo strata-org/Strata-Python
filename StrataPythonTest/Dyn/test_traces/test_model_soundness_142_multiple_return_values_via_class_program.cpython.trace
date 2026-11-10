@@ -1,0 +1,14 @@
+--- stdout 12
+3 False 1 9
+
+--- outcome
+ok
+--- globals
+MinMax = <class 'MinMax'>
+Result = <class 'Result'>
+__doc__ = '\nPython functions can only return one value. To return multiple values,\nthe common pattern is to return a dataclass (or tuple — finding 028).\nThe model must handle: construct a dataclass inside a function, return\nit, and have the caller access its fields.\n\nThis tests the full pipeline: construction → return → field access\nacross a function boundary.\n'
+__name__ = '__main__'
+dataclass = <function object>
+find_min_max = <function object>
+main = <function object>
+safe_divide = <function object>

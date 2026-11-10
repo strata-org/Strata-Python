@@ -1,0 +1,16 @@
+--- stdout 15
+5 hello 42 999
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+__doc__ = '\nA function that modifies a local variable (including parameters) cannot\naffect the caller\'s copy. This is the FUNDAMENTAL consequence of "no\nmutation in place" for function calls. Every function operates on\nindependent copies of its arguments.\n\nThis finding consolidates the pattern across all types: int, str, list,\ndict, and class instances all behave the same way — modifications inside\na function are invisible to the caller.\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+try_modify_dict = <function object>
+try_modify_int = <function object>
+try_modify_list = <function object>
+try_modify_object = <function object>
+try_modify_str = <function object>

@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for >>: 'str' and 'int'
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+C = <class 'C'>
+D = <class 'D'>
+__doc__ = '\nb3_diamond_inheritance.py — Diamond inheritance combines narrow field with mutating method.\n\nClass B narrows x: int|str to x: int. Class C has set_str() that writes str.\nClass D inherits both. D.use_x() assumes int, D.set_str() writes str.\nNo explicit override needed — the conflict comes from the diamond.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str >> int\n'
+__name__ = '__main__'
+main = <function object>

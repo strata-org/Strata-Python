@@ -1,0 +1,12 @@
+--- stdout 88
+PASS: starred target is list even from tuple source (naive type-preserving model fails)
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Boundary: starred target from tuple source is list, not tuple.'
+__name__ = '__main__'
+first = 10
+last = 40
+middle = [20, 30]
+source = (10, 20, 30, 40)

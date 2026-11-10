@@ -1,0 +1,17 @@
+--- stdout 38
+42
+Alice 30 95.5
+True
+score: 100
+done
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`print()` accepts any number of arguments of any type. It calls str()\non each argument before outputting. The subset models print as a "pure\nlogging effect" — but the implicit str() conversion on non-string args\nrequires the same str() model as f-strings (finding 083/053).\n\nIf print\'s arguments aren\'t converted to strings, the model may try to\n"print" a from_int value directly, which has no meaning in the model.\n'
+__name__ = '__main__'
+main = <function object>
+print_bool = <function object>
+print_int = <function object>
+print_multiple = <function object>
+print_result = <function object>

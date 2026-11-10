@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+List = <_SpecialGenericAlias object>
+Reading = <class 'Reading'>
+ReadingsResponse = <class 'ReadingsResponse'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+get_readings = <function object>
+main = <function object>

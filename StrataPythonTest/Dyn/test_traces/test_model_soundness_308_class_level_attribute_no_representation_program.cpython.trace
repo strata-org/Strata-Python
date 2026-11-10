@@ -1,0 +1,19 @@
+--- stdout 37
+All class-level attribute tests pass
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+MAX_CONNECTIONS = 100
+Registry = <class 'Registry'>
+Tracker = <class 'Tracker'>
+Versioned = <class 'Versioned'>
+__annotations__ = {'MAX_CONNECTIONS': <class 'int'>}
+__doc__ = '\nClass-level attributes (class variables) are shared across all instances\nand accessible via both the class name and instances. The `from_ClassInstance`\nencoding stores only instance attributes in a per-instance DictStrAny.\nThere is no representation for class-level shared state.\n\n    class Counter:\n        count: int = 0  # class-level attribute\n\n        def __init__(self: "Counter", name: str) -> None:\n            self.name = name\n            Counter.count += 1  # modifies shared class state\n\nThe subset says class body annotations are IN. But class-level attributes\nthat are READ via `ClassName.attr` or WRITTEN via `ClassName.attr = v`\nhave no representation in `from_ClassInstance(classname, instance_attrs)`.\n\nUses ONLY confirmed-accepted constructs: class, int, str, method, @dataclass.\n'
+__name__ = '__main__'
+check_version_shared = <function object>
+create_registries = <function object>
+dataclass = <function object>
+get_max = <function object>
+main = <function object>

@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Color = <class 'Color'>
+Point = <class 'Point'>
+__doc__ = '\n@dataclass EQUALITY — FIELD-BY-FIELD COMPARISON\n\nCPython: @dataclass generates __eq__ that compares ALL fields:\n         Point(1, 2) == Point(1, 2) → True\n         Point(1, 2) == Point(1, 3) → False (y differs)\n\nModel:   PEq(from_ClassInstance("Point", attrs1), from_ClassInstance("Point", attrs2))\n         Must compare: attrs1["x"] == attrs2["x"] AND attrs1["y"] == attrs2["y"]\n\n         If PEq uses STRUCTURAL equality on the entire DictStrAny:\n         - Order-dependent (finding 369/041)\n         - May not recursively compare nested values\n\n         If PEq just checks classname equality (without field comparison):\n         - All Points are "equal" regardless of field values (WRONG)\n\nCPython result: Point(1,2) == Point(1,3) → False\nModel result: depends on PEq implementation — may be True (over-proves) or Unknown\n'
+__name__ = '__main__'
+dataclass = <function object>
+find_point = <function object>
+main = <function object>
+points_equal = <function object>
+remove_duplicates = <function object>

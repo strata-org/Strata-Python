@@ -1,0 +1,12 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nBARE `raise` IN EXCEPT HANDLER RE-RAISES CURRENT EXCEPTION\n\nDIVERGENCE:\n  CPython:  `raise` (no argument) in except block re-raises the caught\n            exception, propagating it to the next outer handler.\n  Model:    `raise` with no argument has no exception value to construct.\n            The `exception(...)` tag requires an Error value. Bare `raise`\n            either: (a) translates to nothing (silent drop), or\n            (b) produces an unbound-variable error in the encoding.\n\nThis is IN the subset: `raise` is IN, `try/except` is IN.\nThe subset says "raise SomeError(\'message\')" but bare `raise` in an\nexcept handler is standard Python and passes mypy --strict.\n\nROOT CAUSE: The exception-as-value model requires an explicit Error\nconstructor at every `raise` site. Bare `raise` implicitly references\nthe "current exception" — a runtime concept with no Laurel equivalent.\n'
+__name__ = '__main__'
+main = <function object>
+reraise_after_logging = <function object>
+reraise_conditionally = <function object>
+reraise_with_cleanup = <function object>

@@ -1,0 +1,12 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nSUBSET EXAMPLE count_words USES SPLIT — ENTIRE FUNCTION UNVERIFIABLE\n\nThe subset document's WORKED EXAMPLE is:\n\n    def count_words(text: str) -> dict[str, int]:\n        counts: dict[str, int] = {}\n        for word in text.split():\n            if word in counts:\n                counts[word] = counts[word] + 1\n            else:\n                counts[word] = 1\n        return counts\n\nThis function uses FIVE features that have model gaps:\n1. str.split() → Hole (finding 019/396)\n2. for word in <Hole> → undefined iteration (finding 363)\n3. word in counts → DictStrAny_contains (finding 367 — no axiom after set)\n4. counts[word] + 1 → dict value type lost (finding 352)\n5. counts[word] = ... → dict rebinding in loop (finding 146/370)\n\nThe subset's OWN EXAMPLE cannot be verified by the current model.\nThis is the ultimate integration test for the encoding.\n"
+__name__ = '__main__'
+count_words = <function object>
+main = <function object>
+most_common_word = <function object>
+unique_word_count = <function object>

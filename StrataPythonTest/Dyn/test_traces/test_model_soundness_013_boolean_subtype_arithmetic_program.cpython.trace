@@ -1,0 +1,12 @@
+--- stdout 15
+True
+True
+True
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython's `in` operator uses == for comparison, and bool is a subtype of int\n(True == 1, False == 0). List_contains in Laurel uses structural equality\non the Any datatype, so from_bool(true) != from_int(1) structurally.\n"
+__name__ = '__main__'
+has_one = <function object>
+main = <function object>

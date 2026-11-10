@@ -1,0 +1,16 @@
+--- stdout 0
+
+--- outcome
+raised AssertionError: 
+--- globals
+__annotations__ = {'now': <class 'datetime'>, 'end': <class 'datetime'>, 'delta': <class 'timedelta'>, 'start': <class 'datetime'>, 'start_dt': <class 'datetime'>}
+__doc__ = None
+__name__ = '__main__'
+date = <class 'date'>
+datetime = <class 'datetime'>
+delta = <timedelta object>
+end = <date object>
+now = <datetime object>
+start = <date object>
+start_dt = <datetime object>
+timedelta = <class 'timedelta'>

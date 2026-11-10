@@ -1,0 +1,15 @@
+--- stdout 29
+[1, 2, 3, 4] [2, 4] [10, 20]
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nWhen a list is passed to a function, the function receives a COPY under\npure/value semantics. This is CORRECT for the Frontend subset (no aliasing\nrule). But the function's RETURN value must be the mechanism for\ncommunicating list changes back to the caller.\n\nThe pattern:\n    def process(xs: list[int]) -> list[int]:\n        xs.append(99)\n        return xs\n\n    data = [1, 2, 3]\n    data = process(data)  # caller must rebind!\n\nUnder value semantics, `process` gets a copy. Its append modifies the\ncopy. The caller only sees changes if it captures the return value.\n\nThis finding verifies that the CORRECT pattern (return modified list)\nworks, and documents that the INCORRECT pattern (modify param, don't\nreturn) is correctly rejected by value semantics.\n\nUses ONLY confirmed-accepted constructs: list, function, int.\n"
+__name__ = '__main__'
+append_and_return = <function object>
+caller_forgets = <function object>
+caller_rebinds = <function object>
+filter_positive = <function object>
+main = <function object>
+take_first_n = <function object>
+transform_elements = <function object>

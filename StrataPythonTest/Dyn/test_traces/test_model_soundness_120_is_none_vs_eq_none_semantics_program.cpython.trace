@@ -1,0 +1,15 @@
+--- stdout 14
+True False -1
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+__doc__ = "\n`x is None` and `x == None` have different semantics in CPython:\n- `is` checks object IDENTITY (same memory address)\n- `==` checks VALUE equality (calls __eq__)\n\nFor None specifically, they're equivalent (None is a singleton). But\nthe model has no object identity — `is` must be translated differently\nfrom `==`. The subset says `is` is only for None, so `is None` should\ntranslate to a tag check (`isfrom_None`), not to PEq.\n"
+__name__ = '__main__'
+chain_none_checks = <function object>
+check_eq_none = <function object>
+check_is_none = <function object>
+check_is_not_none = <function object>
+main = <function object>
+safe_unwrap = <function object>

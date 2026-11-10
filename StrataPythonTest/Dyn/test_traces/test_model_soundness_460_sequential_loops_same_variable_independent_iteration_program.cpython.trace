@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFOR-LOOP ITERATION VARIABLE REUSE ACROSS SEQUENTIAL LOOPS\n\nThe subset allows:\n  - for loops (IN)\n  - Variable reuse (IN, type stability required)\n  - Sequential code (IN)\n\nThe NOVEL gap: when two sequential for-loops use the SAME iteration\nvariable name, the second loop must start fresh — the variable\'s value\nfrom the first loop\'s last iteration must not "leak" into the second\nloop\'s iteration mechanism.\n\n  xs: list[int] = [10, 20, 30]\n  ys: list[int] = [1, 2, 3]\n  \n  total: int = 0\n  for x in xs:\n      total += x\n  # After first loop: x == 30 (last element), total == 60\n  \n  for x in ys:\n      total += x\n  # After second loop: x == 3, total == 66\n  # CPython: second loop iterates over ys independently\n  # Model risk: if loop variable is not re-initialized, second loop\n  #             may start with x==30 or skip iteration\n\nFinding 156 covers loop variable PERSISTING after loop (scope leak).\nFinding 307 covers NESTED loops with same variable (inner rebinds outer).\nThis finding covers SEQUENTIAL loops with same variable — the second\nloop must iterate its own iterable independently of the first loop\'s\nfinal state.\n\nThe model risk: if the translator encodes `for x in xs` as:\n  x = List_get(xs, 0); body; x = List_get(xs, 1); body; ...\nthen the second `for x in ys` must reset the index counter. If the\ntranslator uses a shared counter or doesn\'t reinitialize, the second\nloop starts at the wrong position or doesn\'t iterate at all.\n\nAdditionally, if the model uses a "loop variable unchanged" invariant\n(e.g., for proving properties about x after the loop), this invariant\nfrom the first loop must not carry into the second loop.\n'
+__name__ = '__main__'
+collect_from_two_sources = <function object>
+dataclass = <function object>
+different_length_sequential = <function object>
+loop_variable_value_between_loops = <function object>
+main = <function object>
+sum_two_lists = <function object>
+three_sequential_loops = <function object>

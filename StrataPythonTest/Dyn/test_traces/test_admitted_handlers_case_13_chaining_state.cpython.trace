@@ -1,0 +1,16 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+InnerError = <class 'InnerError'>
+OuterError = <class 'OuterError'>
+RESULT = (('OuterError', True, False), 'OuterError', ('OuterError', True, True), (True, 'OuterError', True), True)
+__doc__ = None
+__name__ = '__main__'
+bare_reraise_adds_no_context = <function object>
+context_crosses_call_boundary = <function object>
+explicit_cause = <function object>
+implicit_context = <function object>
+raise_inner = <function object>
+suppressed_context_is_retained = <function object>

@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'
+--- globals
+__annotations__ = {'m': <GenericAlias object>}
+__doc__ = None
+__name__ = '__main__'
+clear = <function object>
+f = <function object>
+m = {'k': None}
+r = None

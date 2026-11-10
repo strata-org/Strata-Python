@@ -1,0 +1,12 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Circle = <class 'Circle'>
+Rectangle = <class 'Rectangle'>
+__doc__ = '\n@property COMPUTED VALUE — NOT IN INSTANCE DICT\n\nCPython: class Rectangle:\n             @property\n             def area(self) -> int: return self.width * self.height\n         r = Rectangle(3, 4); r.area → 12\n\nModel:   r.area translates to:\n         DictStrAny_get(instance_attributes(r), "area")\n         → Hole (no "area" key in the dict — it\'s a property, not a field!)\n\n         @property creates a DESCRIPTOR on the CLASS, not an attribute\n         on the INSTANCE. The instance dict only has width and height.\n         Accessing .area must CALL the getter function, not read the dict.\n\nCPython result: 12\nModel result: Hole (key "area" not in instance_attributes)\n\nRoot cause: Finding 222 identified this. Property access must translate\nto a function call, not a DictStrAny_get.\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>

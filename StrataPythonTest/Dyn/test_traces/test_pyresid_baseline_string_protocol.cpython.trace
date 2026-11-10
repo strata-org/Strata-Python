@@ -1,0 +1,19 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+BadStrResult = <class 'BadStrResult'>
+ReprBomb = <class 'ReprBomb'>
+ReprOnlyBomb = <class 'ReprOnlyBomb'>
+StrBomb = <class 'StrBomb'>
+__doc__ = None
+__name__ = '__main__'
+bad_result = 'caught-bad-str-result'
+bad_string_result = <function object>
+default_result = 'caught-default-repr-error'
+default_string_uses_repr = <function object>
+repr_result = 'caught-repr-error'
+represent = <function object>
+str_result = 'caught-str-error'
+stringify = <function object>

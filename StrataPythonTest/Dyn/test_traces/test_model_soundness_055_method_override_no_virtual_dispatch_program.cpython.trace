@@ -1,0 +1,14 @@
+--- stdout 14
+43 sq area=16
+
+--- outcome
+ok
+--- globals
+Circle = <class 'Circle'>
+Shape = <class 'Shape'>
+Square = <class 'Square'>
+__doc__ = "\nWhen a subclass overrides a method, calling that method on a subclass\ninstance should dispatch to the SUBCLASS implementation. In the Laurel\nmodel, method calls are translated as direct function calls based on the\ndeclared type. If the variable is typed as the parent class but holds a\nsubclass instance, the model calls the parent's method instead of the\nchild's override.\n"
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+total_area = <function object>

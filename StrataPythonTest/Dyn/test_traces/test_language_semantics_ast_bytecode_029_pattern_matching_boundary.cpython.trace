@@ -1,0 +1,12 @@
+--- stdout 75
+BOUNDARY: naive == matching hits Tricky.__eq__; CPython uses 'is' for None
+
+--- outcome
+ok
+--- globals
+Tricky = <class 'Tricky'>
+__doc__ = None
+__name__ = '__main__'
+result = 'other'
+sys = <module object>
+t = <Tricky object>

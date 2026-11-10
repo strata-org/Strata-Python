@@ -1,0 +1,17 @@
+--- stdout 9
+42 35 15
+
+--- outcome
+ok
+--- globals
+Accumulator = <class 'Accumulator'>
+Counter = <class 'Counter'>
+__doc__ = '\nDATACLASS METHOD THAT READS FIELD WRITTEN BY CALLER — STALE SELF\n\nThis is a specific interaction between:\n  - Finding 191 (field write requires full reconstruction + rebind)\n  - Finding 360 (field write then method call — stale self)\n  - Finding 234 (method reads field after caller write)\n\nThe NOVEL aspect here: a method that RETURNS a value computed from\na field that was JUST WRITTEN by the caller. The caller writes a field,\nthen immediately calls a method that reads that field. Under value\nsemantics, the method receives the PRE-WRITE version of self unless\nthe caller properly rebinds.\n\nCPython (reference semantics):\n  obj.x = 10\n  result = obj.get_x()  # returns 10 — same object, field was mutated\n\nModel (value semantics):\n  obj = ClassInstance_set(obj, "x", from_int(10))  # rebind obj\n  result = get_x(obj)  # IF obj was rebound, returns 10 ✓\n  \n  BUT if the translator doesn\'t rebind obj after field write:\n  obj_old.x = 10  → side effect lost\n  result = get_x(obj_old)  # returns OLD value of x\n\nThe CRITICAL test: does the translator emit the rebind?\nIf yes → correct (value semantics works)\nIf no → stale self, wrong result, UNSOUND\n\nThis finding provides a MINIMAL test case that distinguishes correct\ntranslation (with rebind) from incorrect translation (without rebind).\n'
+__name__ = '__main__'
+chain_write_method_write_method = <function object>
+dataclass = <function object>
+main = <function object>
+method_returns_new_then_read = <function object>
+sequential_modifications = <function object>
+write_then_conditional_method = <function object>
+write_then_read_method = <function object>

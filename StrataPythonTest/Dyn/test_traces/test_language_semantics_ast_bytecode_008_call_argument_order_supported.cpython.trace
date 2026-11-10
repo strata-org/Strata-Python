@@ -1,0 +1,12 @@
+--- stdout 44
+OK: call argument order — deterministic L→R
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+next_id = <function object>
+record = <function object>
+result = (1, 2, 3)
+state = {'n': 3}

@@ -1,0 +1,13 @@
+--- stdout 8
+104 hi?
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+__doc__ = '\nAfter `if isinstance(x, int):`, the variable `x` is narrowed to `int`\nfor the ENTIRE true branch — including nested ifs, function calls, and\nassignments. The narrowing must persist until the branch ends or `x` is\nreassigned.\n\nIf the model only narrows at the immediate next statement (not the\nwhole branch), subsequent uses of `x` lose the narrowing.\n'
+__name__ = '__main__'
+main = <function object>
+multi_statement_after_narrow = <function object>
+nested_narrowing = <function object>
+process_optional = <function object>

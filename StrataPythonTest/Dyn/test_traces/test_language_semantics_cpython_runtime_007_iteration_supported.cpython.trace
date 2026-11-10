@@ -1,0 +1,11 @@
+--- stdout 6
+10
+10
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Iteration: supported case.\nContainer type is known, so iterator protocol collapses to index loop.\n'
+__name__ = '__main__'
+count_range = <function object>
+sum_list = <function object>

@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+MutatingCtx = <class 'MutatingCtx'>
+Victim = <class 'Victim'>
+__doc__ = "\na8_context_manager.py — with-statement __enter__ mutates narrowed field.\n\nThe 'with' statement calls __enter__ which is an implicit method call that\nmypy doesn't consider as a narrowing invalidator.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str - int\n"
+__name__ = '__main__'
+main = <function object>

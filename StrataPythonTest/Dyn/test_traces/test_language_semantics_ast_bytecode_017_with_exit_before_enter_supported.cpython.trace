@@ -1,0 +1,11 @@
+--- stdout 50
+OK: with protocol — __exit__ guaranteed available
+
+--- outcome
+ok
+--- globals
+SafeFile = <class 'SafeFile'>
+__doc__ = None
+__name__ = '__main__'
+f = <SafeFile object>
+sf = <SafeFile object>

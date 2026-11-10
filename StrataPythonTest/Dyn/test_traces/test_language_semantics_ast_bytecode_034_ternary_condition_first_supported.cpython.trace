@@ -1,0 +1,13 @@
+--- stdout 5
+PASS
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Ternary: only one branch evaluated.'
+__name__ = '__main__'
+cond = <function object>
+false_branch = <function object>
+order = ['cond', 'false']
+result = 'F'
+true_branch = <function object>

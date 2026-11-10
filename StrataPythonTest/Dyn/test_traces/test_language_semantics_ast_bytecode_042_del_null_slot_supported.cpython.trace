@@ -1,0 +1,9 @@
+--- stdout 5
+PASS
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Del makes slot NULL; re-assignment works.'
+__name__ = '__main__'
+f = <function object>

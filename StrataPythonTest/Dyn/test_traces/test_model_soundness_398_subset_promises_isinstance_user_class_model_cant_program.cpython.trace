@@ -1,0 +1,16 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Circle = <class 'Circle'>
+Rectangle = <class 'Rectangle'>
+Shape = <class 'Shape'>
+__doc__ = '\nSUBSET PROMISES isinstance ON USER CLASSES — MODEL CAN\'T DO IT\n\nThe subset says isinstance is IN for user classes:\n  "isinstance(x, T) for T ∈ {int, float, str, bool, list, dict, tuple, <user class>}"\n\nBut findings 027/172/219 show the model CANNOT do isinstance on user\nclasses correctly because:\n1. classname string has no hierarchy (finding 172)\n2. isinstance(child, Parent) fails — exact match only (finding 027)\n3. The subset allows inheritance + isinstance but model has no MRO (finding 219)\n\nThis is a PROMISE vs DELIVERY gap: the subset says "we support isinstance\non user classes" but the model can only check exact classname equality.\n'
+__name__ = '__main__'
+area = <function object>
+dataclass = <function object>
+filter_circles = <function object>
+is_shape = <function object>
+main = <function object>

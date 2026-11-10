@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Vector = <class 'Vector'>
+__doc__ = "\nHEAP THREADING MISSING FOR PURE METHODS — UNNECESSARY HEAP PARAMETER\n\nLaurel's heap parameterization pass automatically threads `heap: THeap`\nthrough procedures that read/write fields. But for PURE methods\n(functional style, return new instance, don't modify heap):\n\nProblem 1: If the pass ADDS heap threading to pure methods,\n  the method signature changes. Callers must pass/receive heap.\n  But the heap is UNCHANGED — unnecessary complexity.\n\nProblem 2: If the pass DOESN'T add heap threading,\n  the method can't read fields from self (field read requires heap).\n  But self is from_ClassInstance with inline attrs — no heap needed!\n\nThe v1 encoding (ClassInstance, no heap) avoids this entirely.\nBut it means: if ANY method in the program needs heap semantics,\nALL methods get heap threading — even pure ones.\n\nThis finding tests that pure @dataclass methods work WITHOUT\nheap threading — confirming the v1 approach is correct.\n"
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+multiple_objects_pure = <function object>
+vector_operations = <function object>

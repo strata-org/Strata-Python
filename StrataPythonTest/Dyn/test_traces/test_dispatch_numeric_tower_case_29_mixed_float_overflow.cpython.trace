@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+RESULT = ('OverflowError', 'OverflowError', 'OverflowError', ('float', 4.0))
+__doc__ = 'Mixed int/float arithmetic may fail while float/float remains normal.'
+__name__ = '__main__'
+observe = <function object>

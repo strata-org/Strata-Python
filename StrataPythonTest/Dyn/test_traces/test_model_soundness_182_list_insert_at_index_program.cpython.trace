@@ -1,0 +1,15 @@
+--- stdout 33
+[1, 2, 3] [1, 3, 4, 5] [3, 2, 1]
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`list.insert(i, x)` inserts element x at position i, shifting subsequent\nelements right. Returns None. List grows by 1.\n\nUnder cons-list semantics:\n- Insertion at index 0 is natural (cons)\n- Insertion at arbitrary index requires splitting and rejoining\n- The list variable must be rebound\n- Return value is None\n\nKey properties that must hold after insert:\n- len(lst) increases by 1\n- lst[i] == x (the inserted element)\n- lst[j] == old_lst[j] for j < i (elements before unchanged)\n- lst[j] == old_lst[j-1] for j > i (elements after shifted)\n\nUses ONLY confirmed-accepted constructs: list, insert, int, function def.\n'
+__name__ = '__main__'
+build_reversed = <function object>
+insert_at_beginning = <function object>
+insert_at_end = <function object>
+insert_in_middle = <function object>
+insert_returns_none = <function object>
+main = <function object>
+sorted_insert = <function object>

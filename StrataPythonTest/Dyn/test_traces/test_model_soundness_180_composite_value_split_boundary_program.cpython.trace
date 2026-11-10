@@ -1,0 +1,16 @@
+--- stdout 7
+66 3 7
+
+--- outcome
+ok
+--- globals
+Counter = <class 'Counter'>
+Pair = <class 'Pair'>
+Point = <class 'Point'>
+__doc__ = "\nThe `Any` datatype has both `from_ClassInstance` (value semantics) and\n`from_Composite` (heap semantics with modifies clauses). The question:\nWHEN does a class get the Composite treatment vs ClassInstance?\n\nIf a class is encoded as ClassInstance:\n- Pure value semantics, no aliasing, no mutation in place\n- Methods must return new instances\n- Caller must rebind after every modification\n\nIf a class is encoded as Composite:\n- Heap reference semantics, aliasing possible\n- Methods can modify in place (modifies clauses)\n- Caller sees changes without rebinding\n\nThe PROBLEM: the translator must decide at translation time which\nencoding to use. If it picks wrong:\n- ClassInstance for a class that needs aliasing → unsound (findings 001-011)\n- Composite for a class that's used as a value → unnecessary complexity\n\nThis finding explores the boundary: what determines which encoding a\nclass gets, and what happens when a class needs BOTH behaviors in\ndifferent contexts?\n\nUses ONLY confirmed-accepted constructs: @dataclass, class, method.\n"
+__name__ = '__main__'
+composed_objects = <function object>
+counter_requires_rebinding = <function object>
+dataclass = <function object>
+main = <function object>
+value_type_usage = <function object>

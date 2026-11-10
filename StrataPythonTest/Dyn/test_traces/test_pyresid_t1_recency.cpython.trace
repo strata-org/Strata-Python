@@ -1,0 +1,16 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = None
+__name__ = '__main__'
+d = 5
+i = 3
+p = <Point object>
+prev = <Point object>
+pts = [<Point object>, <Point object>, <Point object>]
+q = <Point object>
+r = None
+s = 1

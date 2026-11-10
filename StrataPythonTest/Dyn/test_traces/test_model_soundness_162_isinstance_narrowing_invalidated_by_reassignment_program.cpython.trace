@@ -1,0 +1,14 @@
+--- stdout 8
+31 4 -1
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+__doc__ = '\nAfter `isinstance` or `is not None` narrowing, the narrowed type\ninformation must be INVALIDATED if the variable is reassigned.\n\nExample:\n    x: Optional[int] = get_value()\n    if x is not None:\n        # narrowed: x is int\n        x = get_other_value()  # reassignment!\n        # x is now Optional[int] again, NOT int\n        print(x + 1)  # could crash if x is None\n\nThe Laurel model must track that reassignment invalidates narrowing.\nIf the `assume(isfrom_int(x))` persists after reassignment, the model\nis unsound — it believes x is int when it might be None.\n\nUses ONLY confirmed-accepted constructs: Optional, if, is None, int.\n'
+__name__ = '__main__'
+conditional_reassign = <function object>
+main = <function object>
+narrow_in_loop = <function object>
+reassign_breaks_narrow = <function object>
+safe_after_narrow = <function object>

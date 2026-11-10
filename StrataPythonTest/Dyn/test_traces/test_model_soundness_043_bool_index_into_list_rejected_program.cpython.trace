@@ -1,0 +1,13 @@
+--- stdout 8
+20
+10
+2
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nAny_get! checks `isfrom_int(index)` for list subscription. But Python's\nbool is a subclass of int, so lst[True] == lst[1] and lst[False] == lst[0]\nare valid in CPython. The model rejects from_bool as a list index with\nTypeError because from_bool is not from_int.\n"
+__name__ = '__main__'
+count_if = <function object>
+get_by_flag = <function object>
+main = <function object>

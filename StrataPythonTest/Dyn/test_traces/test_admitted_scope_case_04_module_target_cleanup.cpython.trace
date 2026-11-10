@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+RESULT = ('NameError', 3, 'NameError', '{"ok": true}')
+__doc__ = None
+__name__ = '__main__'
+builtin_fallback_result = 3
+deleted_import_result = 'NameError'
+preserved_import_result = '{"ok": true}'
+preserved_module = <module object>
+target_result = 'NameError'

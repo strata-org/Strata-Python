@@ -1,0 +1,12 @@
+--- stdout 6
+-4
+-1
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython's // is floor division (rounds toward -infinity).\nThe Laurel encoding uses SMT-LIB `div` which is Euclidean division\n(remainder always non-negative). These differ when the divisor is negative.\n"
+__name__ = '__main__'
+divide_negative = <function object>
+main = <function object>
+modulo_negative = <function object>

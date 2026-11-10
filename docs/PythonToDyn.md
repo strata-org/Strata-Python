@@ -2476,10 +2476,11 @@ section's header. A run out of fuel prints `--- out of fuel`.
 
 ### 13.2 The differential test
 
-`StrataPythonTestExtra/SemDiffTest.lean` runs every program of `StrataPythonTest/Dyn/dyn_tests/`
-with `pydyn run`, and compares its trace with CPython's, which `StrataPythonTest/Dyn/trace.py`
-prints in the same form. Each program gets a verdict, pinned in
-`StrataPythonTest/Dyn/sem_expected.txt`:
+`StrataPythonTestExtra/SemDiffTest.lean` runs every program of two suites with `pydyn run`, and
+compares its trace with CPython's, which `StrataPythonTest/Dyn/trace.py` prints in the same form.
+The suites are the corpus, `StrataPythonTest/Dyn/dyn_tests/`, with its verdicts in
+`StrataPythonTest/Dyn/sem_expected.txt`, and the test programs, `StrataPythonTest/tests/`, with
+their verdicts in `StrataPythonTest/Dyn/sem_tests_expected.txt`. Each program gets a verdict:
 
 ```
 <name> | agree                  (the two traces are equal)
@@ -2494,7 +2495,11 @@ needs only a beginning of CPython's output. A later gap needs the whole output, 
 before the gap, to be CPython's. The test fails on any other difference, on a run out of fuel, on
 a fault, on a model-invariant gap, on an internal error of the translator, and on any change of
 verdict or of a known difference's trace. CPython's traces are goldens, `NAME.cpython.trace` beside
-`NAME.py`.
+the corpus's `NAME.py`, and in `StrataPythonTest/Dyn/test_traces/` for the test programs; the
+golden of a test program that the translator rejects is a fixed line, since it is never compared.
+A CPython run that doesn't end within 60 seconds has a fixed golden too. Then the semantics runs
+the program with a fuel of 1,000,000 steps, and its run must run out of fuel or stop with a gap:
+the verdict is a gap, and the outputs are not compared.
 CPython runs each program twice, with `PYTHONHASHSEED` 0 and 1. If the two traces differ, the
 golden holds both, with each address replaced by `0x?`, and the semantics must stop with a gap on
 the program. `SEM_UPDATE=1` rewrites the goldens and the verdicts. `StrataPythonTest/Util/SemDiff.lean`

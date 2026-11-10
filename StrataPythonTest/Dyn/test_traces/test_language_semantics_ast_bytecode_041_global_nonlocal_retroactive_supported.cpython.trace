@@ -1,0 +1,10 @@
+--- stdout 5
+PASS
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Global declaration makes name global for entire body.'
+__name__ = '__main__'
+f = <function object>
+x = 'modified'

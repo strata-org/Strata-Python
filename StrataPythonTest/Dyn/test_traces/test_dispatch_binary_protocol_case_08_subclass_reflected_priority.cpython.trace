@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+EVENTS = ['sub-radd']
+Number = <class 'Number'>
+RESULT = (99, ['sub-radd'])
+SubNumber = <class 'SubNumber'>
+__doc__ = "A strict right subclass's reflected override runs before the left method."
+__name__ = '__main__'

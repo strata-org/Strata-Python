@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Registry = <class 'Registry'>
+__doc__ = "\na34_staticmethod_class_var.py — @staticmethod mutates class variable after isinstance narrowing.\n\nisinstance narrows cls.data (accessed via class name) to int.\nA @staticmethod mutates the class variable through the class name.\nmypy doesn't track that C.data and the narrowed reference are the same.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str - int\n"
+__name__ = '__main__'
+main = <function object>

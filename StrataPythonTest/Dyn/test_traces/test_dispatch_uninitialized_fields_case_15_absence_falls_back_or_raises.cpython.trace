@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+RESULT = ('instance', 'class-fallback', 'AttributeError')
+Record = <class 'Record'>
+__doc__ = 'An annotation does not initialize a field; deletion restores fallback.'
+__name__ = '__main__'
+after_delete = 'class-fallback'
+before_delete = 'instance'
+missing = 'AttributeError'
+record = <Record object>

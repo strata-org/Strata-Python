@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+RESULT = ('class-method', 'instance-callable', 'class-method')
+Worker = <class 'Worker'>
+__doc__ = 'A plain function is a non-data descriptor and can be shadowed.'
+__name__ = '__main__'
+unshadowed = 'class-method'
+worker = <Worker object>

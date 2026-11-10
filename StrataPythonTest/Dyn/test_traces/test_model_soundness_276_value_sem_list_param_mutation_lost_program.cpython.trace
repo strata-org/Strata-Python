@@ -1,0 +1,10 @@
+--- stdout 14
+[1, 2, 3, 99]
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nVALUE SEMANTICS WHERE CPYTHON HAS REFERENCE SEMANTICS:\nList passed to function — function appends, caller sees change in CPython.\n\nCPython: list param is a reference. append mutates the SAME object.\nModel: list param is a COPY. append mutates the copy. Caller unchanged.\n\nCPython result: data == [1, 2, 3, 99]\nModel result:  data == [1, 2, 3]\n'
+__name__ = '__main__'
+add_element = <function object>
+main = <function object>

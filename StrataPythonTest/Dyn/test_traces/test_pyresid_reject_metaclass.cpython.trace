@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: Meta() takes no arguments
+--- globals
+Meta = <class 'Meta'>
+__doc__ = None
+__name__ = '__main__'

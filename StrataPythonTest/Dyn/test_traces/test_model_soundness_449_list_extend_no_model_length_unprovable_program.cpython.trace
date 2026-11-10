@@ -1,0 +1,14 @@
+--- stdout 9
+6 True 6
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nLIST.EXTEND() — NO MODEL, LENGTH RELATIONSHIP UNPROVABLE\n\nThe subset allows list.append() (finding 009 covers its model gap).\nlist.extend() is also a common list method that adds ALL elements\nfrom another iterable.\n\nCPython:\n  a = [1, 2]\n  a.extend([3, 4, 5])\n  # a is now [1, 2, 3, 4, 5]\n  # len(a) == 5 == 2 + 3\n\nModel:\n  Under value semantics with rebinding:\n    a = List_extend(a, [3, 4, 5])\n  \n  But List_extend is uninterpreted (no axioms), so:\n  - len(a) after extend is unconstrained (Hole)\n  - a[0] after extend is unconstrained (Hole)\n  - The relationship len(result) == len(original) + len(extension) is unprovable\n\nThis is distinct from:\n  - Finding 004 (extend mutates in place) — that's about aliasing\n  - Finding 074 (list + list no model) — that's about the + operator\n  - Finding 417 (concat length) — that's about + operator length\n\nlist.extend() is the METHOD form of concatenation. Under value semantics\nwith rebinding (a = a.extend(other)), the model needs axioms for:\n  1. len(extend(a, b)) == len(a) + len(b)\n  2. extend(a, b)[i] == a[i] for i < len(a)\n  3. extend(a, b)[i] == b[i - len(a)] for len(a) <= i < len(a)+len(b)\n\nWithout these, any code that builds a list via extend and then checks\nbounds or accesses elements produces Hole.\n\nADDITIONAL ISSUE: list.extend() returns None in CPython (mutates in place).\nUnder value semantics, it must return the new list. The translator must\nhandle this return-value mismatch (same issue as append, finding 009).\n"
+__name__ = '__main__'
+build_with_extend = <function object>
+extend_preserves_prefix = <function object>
+extend_then_check_length = <function object>
+flatten_and_sum = <function object>
+main = <function object>
+merge_sorted_halves = <function object>

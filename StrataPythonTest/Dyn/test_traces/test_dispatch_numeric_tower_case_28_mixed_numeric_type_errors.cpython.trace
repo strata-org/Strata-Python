@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+RESULT = ('TypeError', 'TypeError', 'TypeError', 'bool')
+__doc__ = 'Unsupported exact builtin pairs exhaust the protocol with TypeError.'
+__name__ = '__main__'
+observe = <function object>

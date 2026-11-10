@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Engine = <class 'Engine'>
+Machine = <class 'Machine'>
+__doc__ = '\na3_narrowing_indirect.py — isinstance narrowing invalidated through indirect reference chain.\n\nmypy --strict: Success (0 errors)\nRuntime: AssertionError — variable is str where mypy says int\n'
+__name__ = '__main__'
+main = <function object>

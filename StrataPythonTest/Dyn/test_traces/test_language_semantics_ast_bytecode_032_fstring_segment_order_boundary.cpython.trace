@@ -1,0 +1,13 @@
+--- stdout 55
+PASS: format spec sees side effects of main expression
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Boundary: format spec evaluated AFTER main expr, not before.'
+__name__ = '__main__'
+expr = <function object>
+order = ['expr', 'spec']
+result = '   42'
+spec = <function object>
+val = [42]

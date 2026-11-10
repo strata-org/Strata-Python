@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+Connection = <class 'Connection'>
+__doc__ = '\nNON-@dataclass CLASS == IS IDENTITY, NOT STRUCTURAL — MODEL IS WRONG\n\nCPython: For classes WITHOUT @dataclass, == is IDENTITY comparison.\n         Two objects with identical fields are NOT equal unless same object.\n         a = Config("x", 1); b = Config("x", 1); a == b → False!\n\nModel:   from_ClassInstance uses structural equality on DictStrAny.\n         Two ClassInstances with same classname and same attrs are EQUAL.\n         PEq(from_ClassInstance("Config", {h:"x",p:1}),\n             from_ClassInstance("Config", {h:"x",p:1})) → True (WRONG!)\n\nFinding 037 identified this issue. This finding provides the CONCRETE\nprogram showing the model OVER-PROVES: it says objects are equal when\nCPython says they\'re not. This is a FALSE POSITIVE — the verifier\naccepts code that would fail at runtime.\n'
+__name__ = '__main__'
+configs_equal = <function object>
+deduplicate_wrong = <function object>
+find_config = <function object>
+main = <function object>

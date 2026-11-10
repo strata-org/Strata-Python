@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+InnerError = <class 'InnerError'>
+OuterError = <class 'OuterError'>
+RESULT = (('outer', 'inner', 'UnboundLocalError', 'outer'), ('outer', 'inner', 'outer'))
+__doc__ = None
+__name__ = '__main__'
+distinct_targets = <function object>
+reused_target = <function object>

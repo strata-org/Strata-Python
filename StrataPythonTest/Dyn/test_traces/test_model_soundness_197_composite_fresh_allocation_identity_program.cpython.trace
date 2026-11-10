@@ -1,0 +1,15 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+Box = <class 'Box'>
+__doc__ = '\nUnder Composite/heap semantics, each `MyClass()` constructor call must\nallocate a FRESH heap location. Two separate constructor calls must\nproduce non-aliasing references.\n\n    a = MyClass(x=1)\n    b = MyClass(x=1)\n    # a and b are DIFFERENT objects (different heap locations)\n    # a is b → False\n    # Modifying a must not affect b\n\nFinding 104 identified this requirement. This finding provides test\ncases showing that fresh allocation is critical for correctness when\nComposite encoding is used.\n\nUnder value semantics (ClassInstance), this is trivially satisfied\n(finding 195). Under Composite, the allocator must guarantee freshness.\n\nUses ONLY confirmed-accepted constructs: @dataclass, int, function def.\n'
+__name__ = '__main__'
+boxes_in_loop = <function object>
+dataclass = <function object>
+factory_produces_fresh = <function object>
+main = <function object>
+modify_one_in_list = <function object>
+two_boxes_independent = <function object>

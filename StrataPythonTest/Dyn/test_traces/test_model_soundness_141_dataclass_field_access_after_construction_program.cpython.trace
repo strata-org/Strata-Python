@@ -1,0 +1,14 @@
+--- stdout 8
+3 15 25
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+Rectangle = <class 'Rectangle'>
+__doc__ = "\nAfter constructing a @dataclass instance, field access must return the\nvalues passed to the constructor. This requires the translator to emit\npostconditions connecting constructor arguments to field values.\n\nWithout this, `Point(x=3, y=4).x` is unprovable — the solver doesn't\nknow that constructing with x=3 means the x field contains 3.\n"
+__name__ = '__main__'
+create_and_use = <function object>
+dataclass = <function object>
+distance_sq = <function object>
+main = <function object>

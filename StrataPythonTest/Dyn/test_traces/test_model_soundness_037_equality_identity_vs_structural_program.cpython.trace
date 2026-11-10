@@ -1,0 +1,14 @@
+--- stdout 11
+True False
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+Connection = <class 'Connection'>
+__doc__ = "\nPython's default `==` for class instances (without __eq__) is identity\ncomparison (`is`). Two objects with identical fields are NOT equal.\nThe model has no object identity — PEq on two from_ClassInstance values\nwith the same fields returns True (structural equality), diverging from\nCPython which returns False.\n"
+__name__ = '__main__'
+configs_equal = <function object>
+connections_equal = <function object>
+dataclass = <function object>
+main = <function object>

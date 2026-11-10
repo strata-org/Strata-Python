@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+raised AssertionError: 
+--- globals
+Cluster = <class 'Cluster'>
+ClustersResponse = <class 'ClustersResponse'>
+List = <_SpecialGenericAlias object>
+Node = <class 'Node'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+list_clusters = <function object>
+main = <function object>

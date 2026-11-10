@@ -1,0 +1,16 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Box = <class 'Box'>
+Worker = <class 'Worker'>
+__doc__ = None
+__name__ = '__main__'
+choose_callable = <function object>
+generic_order = <function object>
+generic_result = 'callee-evaluated'
+identity = <function object>
+make_worker = <function object>
+method_order = <function object>
+method_result = 'receiver-evaluated'

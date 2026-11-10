@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nSUBSET PROMISES str.split() IS IN — MODEL RETURNS HOLE\n\nThe subset document explicitly lists str.split() as IN and uses it\nin the WORKED EXAMPLE (count_words). But finding 019 notes that\nstr.split() has no Laurel model — the result is unconstrained Hole.\n\nThis means: the subset\'s own example program CANNOT BE VERIFIED.\nThe verifier would say "cannot prove" for the count_words function\nbecause split() returns Hole, and iterating over Hole is undefined.\n\nThis is a PROMISE vs DELIVERY gap: the subset says "we support this"\nbut the model doesn\'t implement it.\n'
+__name__ = '__main__'
+count_words = <function object>
+first_word = <function object>
+main = <function object>
+split_by_delimiter = <function object>
+word_count = <function object>

@@ -1,0 +1,14 @@
+--- stdout 10
+60 True 3
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nA dict literal `{"a": 1, "b": 2}` must produce a DictStrAny where:\n- DictStrAny_contains(d, "a") == True\n- DictStrAny_get(d, "a") == from_int(1)\n- DictStrAny_contains(d, "b") == True\n- DictStrAny_get(d, "b") == from_int(2)\n- DictStrAny_len(d) == 2\n- DictStrAny_contains(d, "c") == False\n\nWithout postconditions establishing these facts, the solver cannot\nprove anything about dict contents after construction.\n'
+__name__ = '__main__'
+contains_check = <function object>
+empty_dict_properties = <function object>
+literal_len = <function object>
+lookup_literal = <function object>
+main = <function object>
+overwrite_in_literal = <function object>

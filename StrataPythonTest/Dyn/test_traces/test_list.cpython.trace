@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+n = 30
+numbers = [10, 20, 30, 40, 99]
+sumlist = [10, 5, 30, 40, 99, 'apple', 'pencil', 'wood']
+words = ['apple', 'pencil', 'wood']

@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+EqOnly = <class 'EqOnly'>
+HashOnly = <class 'HashOnly'>
+__doc__ = None
+__name__ = '__main__'

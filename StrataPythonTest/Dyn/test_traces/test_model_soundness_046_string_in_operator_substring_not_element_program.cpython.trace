@@ -1,0 +1,12 @@
+--- stdout 49
+found_error clean ['error: bad', 'error: worse']
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nPython\'s `in` operator on strings checks for SUBSTRING containment:\n`"ab" in "abc"` is True. This is fundamentally different from `in` on\nlists (which checks element membership). The model\'s PContains likely\ndispatches to List_contains for lists and DictStrAny_contains for dicts,\nbut may have no substring-search implementation for strings — falling\nto Hole or using character-level membership instead of substring search.\n'
+__name__ = '__main__'
+filter_lines = <function object>
+find_keyword = <function object>
+has_prefix_manual = <function object>
+main = <function object>

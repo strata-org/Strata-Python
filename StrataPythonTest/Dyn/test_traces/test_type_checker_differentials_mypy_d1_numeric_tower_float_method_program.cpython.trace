@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised AttributeError: 'int' object has no attribute 'hex'
+--- globals
+__doc__ = '\nd1_numeric_tower_float_method.py — Numeric tower: int passed where float expected, float-only method called.\n\nPEP 484 numeric tower: int <: float. So mypy allows passing int where float is expected.\nBut float has methods that int doesn\'t (e.g., .hex()). Calling such a method\non the actual int value produces AttributeError.\n\nmypy --strict: Success (0 errors)\nRuntime: AttributeError — \'int\' object has no attribute \'hex\'\n\nNOTE: This produces AttributeError, not TypeError. Still a type-safety violation.\nThe Frontend subset says "Integer/float conversions at call boundaries" is OUT,\nwhich would block this. Documented for completeness.\n'
+__name__ = '__main__'
+float_to_hex = <function object>
+main = <function object>

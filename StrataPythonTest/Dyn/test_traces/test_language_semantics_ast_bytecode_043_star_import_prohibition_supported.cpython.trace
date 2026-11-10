@@ -1,0 +1,9 @@
+--- stdout 5
+PASS
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Star import at module level is fine.'
+__name__ = '__main__'
+code = <code object>

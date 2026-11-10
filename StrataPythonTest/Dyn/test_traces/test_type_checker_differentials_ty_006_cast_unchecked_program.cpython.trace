@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: can only concatenate str (not "int") to str
+--- globals
+__doc__ = None
+__name__ = '__main__'
+cast = <function object>
+x = 's'

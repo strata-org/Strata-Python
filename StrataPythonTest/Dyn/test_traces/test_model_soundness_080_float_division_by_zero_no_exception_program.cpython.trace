@@ -1,0 +1,12 @@
+--- stdout 14
+5.0 True True
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nIn CPython, `1.0 / 0.0` raises ZeroDivisionError. But the model uses\nSMT-LIB `Real` for from_float, and real-valued division by zero is\neither undefined or produces an unconstrained value in SMT (not an\nexception). The model may allow `x / 0.0` to succeed silently,\nreturning an arbitrary real number instead of raising.\n\nSimilarly, `1 / 0` (true division) and `1 // 0` (floor division)\nshould raise ZeroDivisionError, but the model's precondition may\nonly be checked for int division, not float division.\n"
+__name__ = '__main__'
+inverse = <function object>
+main = <function object>
+normalize = <function object>
+safe_ratio = <function object>

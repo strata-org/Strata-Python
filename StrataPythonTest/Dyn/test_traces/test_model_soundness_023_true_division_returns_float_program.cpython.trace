@@ -1,0 +1,11 @@
+--- stdout 31
+5.0 3.5 0.3333333333333333 2.0
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython's `/` operator (true division) ALWAYS returns a float, even when\nboth operands are int and the result is exact: 10 / 2 == 5.0 (float).\nThe Laurel encoding has no dedicated PTrueDiv — it likely maps `/` to\nPFloorDiv (returning int) or to a Hole.\n"
+__name__ = '__main__'
+half = <function object>
+main = <function object>
+ratio = <function object>

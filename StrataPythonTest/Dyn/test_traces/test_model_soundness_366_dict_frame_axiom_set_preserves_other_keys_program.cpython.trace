@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nDICT FRAME AXIOM — SET AT ONE KEY PRESERVES OTHER KEYS\n\nCPython: d = {"x": 1, "y": 2}; d["x"] = 99; d["y"] == 2 (unchanged!)\n\nModel:   d\' = DictStrAny_set(d, "x", 99)\n         DictStrAny_get(d\', "y") == ???\n\n         Finding 254 covers: get(set(d, k, v), k) == v (same key)\n         This finding covers: get(set(d, k, v), k2) == get(d, k2) for k≠k2\n\n         Without the frame axiom, setting "x" makes "y" unconstrained.\n         The solver cannot prove d["y"] is preserved after d["x"] = 99.\n\nThis is the DICT parallel of finding 365 (list frame axiom).\n'
+__name__ = '__main__'
+build_then_read_all = <function object>
+config_update = <function object>
+main = <function object>
+multiple_sets_preserve = <function object>
+set_preserves_other = <function object>

@@ -1,0 +1,18 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+ConstructionError = <class 'ConstructionError'>
+LeafError = <class 'LeafError'>
+OtherError = <class 'OtherError'>
+RESULT = ('root', 'leaf', 'tuple', 'SystemExit', 'outer', 'OtherError')
+RootError = <class 'RootError'>
+__doc__ = None
+__name__ = '__main__'
+broad_handler_first = <function object>
+exception_does_not_catch_base_exception = <function object>
+exception_during_raise_normalization = <function object>
+handler_exception_skips_siblings = <function object>
+specific_handler_first = <function object>
+tuple_handler = <function object>

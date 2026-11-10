@@ -1,0 +1,13 @@
+--- stdout 14
+False False 2
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nString equality (`==`) is case-sensitive: "Hello" != "hello". The model\nmust use exact string comparison (SMT-LIB `str.=` is case-sensitive).\nIf the model uses case-insensitive comparison or an uninterpreted\nequality, it may report wrong results.\n'
+__name__ = '__main__'
+case_matters = <function object>
+count_matches = <function object>
+exact_match = <function object>
+find_exact = <function object>
+main = <function object>

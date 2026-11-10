@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Resource = <class 'Resource'>
+__doc__ = '\na18_finally_mutation.py — finally block mutates narrowed field; code after try uses stale narrowing.\n\nisinstance narrows obj.x to int inside try. The finally block always runs and\nmutates obj.x to str. Code AFTER the try/finally still has the narrowing active\nper mypy, but the field is now str.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str - int\n'
+__name__ = '__main__'
+main = <function object>

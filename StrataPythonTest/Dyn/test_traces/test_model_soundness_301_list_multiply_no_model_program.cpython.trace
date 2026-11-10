@@ -1,0 +1,14 @@
+--- stdout 19
+[0, 0, 0] [7, 7] 4
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nLIST MULTIPLICATION: `[0] * n` creates a list of n copies.\n\nThe subset allows `list * int` (analogous to `str * int`), but the model\nhas no `PMul(from_ListAny, from_int)` case. Finding 285 covers `int * list`\n(reflected dispatch), but this is the LEFT-primary case: list.__mul__(int).\n\nCPython: [0] * 3 → [0, 0, 0], len([0]*3) == 3\nModel:   PMul(from_ListAny(...), from_int(3)) → Hole (no case)\n\nThis is extremely common for initializing fixed-size arrays:\n    visited: list[bool] = [False] * n\n    matrix: list[int] = [0] * size\n\nRoot cause: PMul operator dispatch has no (ListAny, int) case.\nRelated: finding 015 (str*int negative), 262 (str*int), 285 (int*list).\nThis is the MISSING SYMMETRIC CASE for lists.\n'
+__name__ = '__main__'
+init_flags = <function object>
+length_after_multiply = <function object>
+main = <function object>
+repeat_element = <function object>
+repeat_then_modify = <function object>
+zeros = <function object>

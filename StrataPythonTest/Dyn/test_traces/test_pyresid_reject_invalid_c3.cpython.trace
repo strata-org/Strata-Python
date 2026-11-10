@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: Cannot create a consistent method resolution
+order (MRO) for bases X, Y
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+X = <class 'X'>
+Y = <class 'Y'>
+__doc__ = None
+__name__ = '__main__'

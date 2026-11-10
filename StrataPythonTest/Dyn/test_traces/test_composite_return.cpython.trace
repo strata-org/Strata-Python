@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Any = <class 'Any'>
+MyService = <class 'MyService'>
+__doc__ = None
+__name__ = '__main__'
+create_service = <function object>

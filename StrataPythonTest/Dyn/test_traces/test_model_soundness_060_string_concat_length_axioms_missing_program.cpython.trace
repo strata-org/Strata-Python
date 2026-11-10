@@ -1,0 +1,12 @@
+--- stdout 25
+hello world ababab hi   
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nPython\'s string concatenation with `+` requires both operands to be str.\n`str + int` raises TypeError. But `str(x) + str(y)` is the standard\npattern for building strings from mixed types.\n\nThe issue: if `PAdd(from_str(s), from_str(t))` uses `str_concat` but\nthe SMT string theory\'s concat has no length axioms, then\n`len(s + t) == len(s) + len(t)` is unprovable. Similarly,\n`s + "" == s` (identity) and `(s + t) + u == s + (t + u)` (associativity)\nmay be unprovable if str_concat is uninterpreted.\n'
+__name__ = '__main__'
+build_csv = <function object>
+main = <function object>
+pad_right = <function object>
+repeat_join = <function object>

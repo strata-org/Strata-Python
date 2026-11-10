@@ -1,0 +1,16 @@
+--- stdout 22
+all assertions passed
+
+--- outcome
+ok
+--- globals
+Accumulator = <class 'Accumulator'>
+__doc__ = "\nEXCEPTION IN AUGMENTED ASSIGN RHS — PARTIAL EVALUATION LEAVES TARGET STALE\n\nThe subset allows:\n  - Augmented assignment (IN): x += expr, d[k] += expr, obj.f += expr\n  - Exceptions from function calls (IN)\n  - try/except (IN)\n\nThe NOVEL gap: augmented assignment `target += expr` where `expr` raises.\n\nCPython evaluation order for `x += f()`:\n  1. Evaluate x (read current value)\n  2. Evaluate f() — THIS RAISES\n  3. Never reaches the addition or assignment\n  4. x retains its OLD value\n\nCPython evaluation order for `d[k] += f()`:\n  1. Evaluate d[k] (read current value)\n  2. Evaluate f() — THIS RAISES\n  3. Never reaches addition or assignment\n  4. d[k] retains its old value\n\nThe model's translation of `x += f()`:\n  - Naive: `x = PAdd(x, f())` — if f() returns exception tag, PAdd gets\n    exception as operand → Hole (finding 079) or exception propagates\n  - But the ASSIGNMENT still happens: `x = Hole` or `x = exception(...)`\n  - CPython: x is UNCHANGED (assignment never executed)\n\nThis creates a divergence:\n  - CPython: x retains pre-augmented-assign value\n  - Model: x gets Hole or exception value (WRONG)\n\nThe fix requires: if RHS evaluation produces exception, the assignment\nmust NOT execute. This is the augmented-assign-specific version of\nfinding 386 (exception in function argument), but with the additional\ncomplication that the TARGET has already been read.\n\nFor compound targets (`d[k] += f()`, `obj.field += f()`):\n  - The target evaluation (step 1) may have SIDE EFFECTS in CPython\n    (e.g., __getitem__ with side effects) — but in Frontend subset,\n    all reads are pure, so this is not an issue\n  - The key issue is: the WRITE-BACK must not happen if RHS raises\n\nDISTINCT FROM:\n  - Finding 079 (exception poisons operators) — that's about exception\n    flowing INTO PAdd; this is about the ASSIGNMENT not happening\n  - Finding 386 (exception in function argument) — that's about call\n    arguments; this is about augmented assignment specifically\n  - Finding 048 (augmented assign on fields) — that's about rebinding;\n    this is about exception interrupting the augmented assign\n  - Finding 336 (augmented assign dict subscript) — that's about the\n    4-step read-modify-write; this is about exception in the RHS\n"
+__name__ = '__main__'
+augmented_assign_rhs_raises = <function object>
+chained_augmented_partial = <function object>
+dataclass = <function object>
+dict_augmented_rhs_raises = <function object>
+field_augmented_rhs_raises = <function object>
+main = <function object>
+might_raise = <function object>

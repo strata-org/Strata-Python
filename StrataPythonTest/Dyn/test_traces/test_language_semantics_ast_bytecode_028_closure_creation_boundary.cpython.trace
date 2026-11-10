@@ -1,0 +1,11 @@
+--- stdout 69
+BOUNDARY: naive snapshot model gives 1; CPython shared cell gives 99
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+get = <function object>
+make = <function object>
+set = <function object>

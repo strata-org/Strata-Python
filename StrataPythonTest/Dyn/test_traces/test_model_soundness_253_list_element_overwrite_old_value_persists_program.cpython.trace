@@ -1,0 +1,14 @@
+--- stdout 9
+99 10 60
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nCPython: xs[1] = 99; xs[1] → 99 (overwrite visible)\nModel: List_set creates new list, but without McCarthy axiom\n       (get(set(lst, i, v), i) == v), the read returns UNKNOWN.\n\nAfter `xs[1] = 99`, reading `xs[1]` must return 99. This requires\nthe read-over-write axiom. Without it, the model can't prove that\nwriting then reading the SAME index returns the written value.\n\nCPython result: xs[1] == 99 (True)\nModel result: xs[1] == UNKNOWN (unprovable)\n"
+__name__ = '__main__'
+main = <function object>
+multiple_writes = <function object>
+write_different_indices = <function object>
+write_in_loop = <function object>
+write_preserves_other = <function object>
+write_then_read_same = <function object>

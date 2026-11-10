@@ -1,0 +1,17 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Priority = <class 'Priority'>
+Version = <class 'Version'>
+__doc__ = "\n@dataclass(order=True) GENERATES COMPARISON METHODS — MODEL DOESN'T KNOW\n\nDIVERGENCE:\n  CPython:  @dataclass(order=True) generates __lt__, __le__, __gt__, __ge__\n            that compare instances field-by-field in declaration order.\n            `Point(1, 2) < Point(1, 3)` → True (compares x first, then y).\n  Model:    PLt on from_ClassInstance has no case for ordered dataclasses.\n            Falls to catch-all → Hole or TypeError exception.\n            The comparison SHOULD succeed but the model rejects it.\n\nThis is the OPPOSITE of finding 318 (which shows that comparison on\nnon-ordered dataclass should FAIL but model gives Hole). Here, comparison\non ordered dataclass should SUCCEED but model gives Hole/exception.\n\n@dataclass is IN the subset. order=True is a standard parameter.\nmypy --strict accepts ordered dataclass comparisons.\n\nROOT CAUSE: The model has no mechanism to dispatch comparison operators\nto generated methods. PLt pattern-matches on tags (int, float, str) but\nhas no case for ClassInstance with order=True.\n"
+__name__ = '__main__'
+compare_priorities = <function object>
+dataclass = <function object>
+find_max_version = <function object>
+main = <function object>
+priority_ordering = <function object>
+sort_versions = <function object>
+version_in_range = <function object>

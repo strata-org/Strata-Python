@@ -1,0 +1,12 @@
+--- stdout 21
+[1, 2, 3, 4, 5, 6] 6
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nList concatenation (`[1,2] + [3,4]`) produces a new list containing all\nelements of both lists. The model's PAdd dispatches on tags — it handles\nint+int, float+float, str+str. But from_ListAny + from_ListAny requires\na List_concat operation that may not exist in the prelude.\n"
+__name__ = '__main__'
+build_range_list = <function object>
+concat_lists = <function object>
+flatten_pairs = <function object>
+main = <function object>

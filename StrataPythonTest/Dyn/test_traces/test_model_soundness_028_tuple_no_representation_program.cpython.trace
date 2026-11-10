@@ -1,0 +1,12 @@
+--- stdout 23
+(7, 3) ('hello', 3) 30
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nThe Any datatype has no from_Tuple constructor. Tuples are IN the Frontend\nsubset (tuple[T1, T2, ...] with explicit element types, fixed length),\nbut there is no way to represent them in the value model. They likely\nget encoded as ListAny (losing fixed-length and heterogeneous-type info)\nor as Hole.\n'
+__name__ = '__main__'
+first_and_len = <function object>
+main = <function object>
+swap = <function object>
+unpack_pair = <function object>

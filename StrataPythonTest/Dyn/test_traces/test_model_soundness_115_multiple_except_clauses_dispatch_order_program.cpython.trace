@@ -1,0 +1,12 @@
+--- stdout 27
+value_error key_error True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nMultiple `except` clauses are tried in ORDER. The first matching clause\nhandles the exception; subsequent clauses are skipped. If no clause\nmatches, the exception propagates.\n\nThe model must try clauses sequentially and stop at the first match.\nIf it tries all clauses or picks the wrong one, behavior diverges.\n'
+__name__ = '__main__'
+first_match_wins = <function object>
+handle_multiple = <function object>
+main = <function object>
+no_match_propagates = <function object>

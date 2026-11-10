@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Item = <class 'Item'>
+__doc__ = "\nLIST ELEMENT IS SAME OBJECT AS LOCAL VARIABLE — ALIAS THROUGH CONTAINER\n\nCPython: obj = Point(1, 2); lst = [obj]\n         obj.x = 99 → lst[0].x is also 99 (same object!)\n\nModel:   lst = [copy_of_obj]\n         Modifying obj doesn't affect lst[0] (independent copy)\n\nUnder functional style (reassignment):\n         obj = Point(99, 2)  → lst[0] is still Point(1, 2)\n         This is CORRECT in both CPython and model!\n\n         CPython: obj now points to NEW object; lst[0] still points to OLD\n         Model: obj is new value; lst[0] is independent copy of old value\n\nThe key insight: REASSIGNMENT (obj = new_value) breaks the alias in\nCPython too! Only IN-PLACE MUTATION (obj.x = 99) shows the difference.\nSince the subset uses functional style, this is SOUND.\n"
+__name__ = '__main__'
+build_list_then_reassign_source = <function object>
+dataclass = <function object>
+function_modifies_local_not_list = <function object>
+main = <function object>
+variable_and_list_element = <function object>

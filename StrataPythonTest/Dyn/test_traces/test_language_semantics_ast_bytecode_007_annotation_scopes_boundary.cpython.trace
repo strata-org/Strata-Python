@@ -1,0 +1,12 @@
+--- stdout 80
+BOUNDARY: naive model evaluates RHS eagerly; CPython defers to __value__ access
+
+--- outcome
+ok
+--- globals
+Lazy = <TypeAliasType object>
+_ = <class 'int'>
+__doc__ = None
+__name__ = '__main__'
+calls = [1]
+sys = <module object>

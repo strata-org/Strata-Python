@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nCOMPARISON OPERATORS >, <=, >= MAY BE DERIVED FROM < INCORRECTLY\n\nCPython: a > b  ≡ b < a (swap operands, use __lt__)\n         a <= b ≡ not (b < a) (negate swapped __lt__)\n         a >= b ≡ not (a < b) (negate __lt__)\n\nModel:   The translator may implement >, <=, >= as:\n         - Separate PGt, PLe, PGe functions (each needing full dispatch)\n         - OR derived from PLt: PGt(a,b) = PLt(b,a), PLe(a,b) = PNot(PLt(b,a))\n\n         If derived, the derivation must be CORRECT:\n         - PGt(a, b) = PLt(b, a)  ← operands SWAPPED\n         - PLe(a, b) = not PLt(b, a)  ← swap + negate\n         - PGe(a, b) = not PLt(a, b)  ← negate only\n\n         If the derivation swaps wrong or negates wrong:\n         - PGt(a, b) = PLt(a, b) → WRONG (that's <, not >)\n         - PLe(a, b) = not PLt(a, b) → WRONG (that's >=, not <=)\n\n         Each wrong derivation produces WRONG BOOLEAN VALUES.\n"
+__name__ = '__main__'
+all_comparisons = <function object>
+float_comparisons = <function object>
+main = <function object>
+test_ge = <function object>
+test_gt = <function object>
+test_le = <function object>

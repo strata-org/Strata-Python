@@ -1,0 +1,12 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCPython: [1,2,3][5] → IndexError (program crashes)\nModel:   List_get(lst, 5) = from_int(???) or Hole ← NO ERROR\n\nIf List_get has no bounds check, accessing an out-of-bounds index\neither returns Hole (unconstrained) or an arbitrary value — but\ndoes NOT produce an exception. CPython CRASHES.\n\nThe model says "this might work" when CPython says "this crashes."\n'
+__name__ = '__main__'
+empty_list_access = <function object>
+index_out_of_bounds = <function object>
+main = <function object>
+negative_too_far = <function object>

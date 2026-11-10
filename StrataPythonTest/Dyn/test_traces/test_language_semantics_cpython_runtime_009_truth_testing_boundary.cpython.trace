@@ -1,0 +1,12 @@
+--- stdout 13
+False
+True
+2
+
+--- outcome
+ok
+--- globals
+WeirdBool = <class 'WeirdBool'>
+__doc__ = 'Truth testing: boundary case.\nCustom __bool__ with side effects makes truth testing non-pure.\n'
+__name__ = '__main__'
+w = <WeirdBool object>

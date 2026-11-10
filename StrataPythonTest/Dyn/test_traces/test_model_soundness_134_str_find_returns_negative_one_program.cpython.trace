@@ -1,0 +1,12 @@
+--- stdout 7
+6 True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\n`str.find(sub)` returns the lowest index where `sub` is found, or -1\nif not found. This is IN the allowlist but has no model. The return\nvalue is used in conditions (`if s.find(x) >= 0`) and as an index.\nMaps to SMT-LIB `str.indexof`.\n'
+__name__ = '__main__'
+contains_word = <function object>
+find_position = <function object>
+main = <function object>
+split_at_char = <function object>

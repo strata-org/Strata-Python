@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Greeter = <class 'Greeter'>
+__annotations__ = {'g': <class 'Greeter'>, 'msg': <class 'str'>}
+__doc__ = None
+__name__ = '__main__'
+g = <Greeter object>
+msg = 'hello'

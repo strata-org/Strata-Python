@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: '<' not supported between instances of 'Vec' and 'Vec'
+--- globals
+Flag = <class 'Flag'>
+Vec = <class 'Vec'>
+__doc__ = None
+__name__ = '__main__'
+a = <Vec object>
+b = <Vec object>
+c = <Vec object>
+d = 10
+e = False

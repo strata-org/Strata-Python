@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Cell = <class 'Cell'>
+__doc__ = None
+__name__ = '__main__'
+a = <Cell object>
+after = 2
+b = <Cell object>
+c = <Cell object>
+holder = [<Cell object>, <Cell object>]

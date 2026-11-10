@@ -1,0 +1,16 @@
+--- stdout 53
+Hello, Alice! You are 30 years old.
+(3, 4)
+2 + 3 = 5
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nF-strings (`f"x={x}"`) desugar to a series of str() conversions and\nstring concatenations. The model needs:\n1. str(int) → from_str (finding 053 notes no axioms)\n2. str(float) → from_str\n3. str(bool) → from_str("True"/"False")\n4. Concatenation of the literal parts with the converted expressions\n\nIf the translator doesn\'t desugar f-strings, or if str() conversions\nhave no model, the result is Hole.\n'
+__name__ = '__main__'
+bool_label = <function object>
+format_point = <function object>
+greet = <function object>
+main = <function object>
+multi_expr = <function object>
+status_message = <function object>

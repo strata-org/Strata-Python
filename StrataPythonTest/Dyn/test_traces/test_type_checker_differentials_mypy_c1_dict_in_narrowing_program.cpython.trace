@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised KeyError: 'x'
+--- globals
+Config = <class 'Config'>
+__doc__ = "\nc1_dict_in_narrowing.py — 'in' narrowing invalidated by deletion through method call.\n\nNo union types. No type-changing assignments. No inheritance.\nJust a dict, an 'in' check, and a method that deletes the key.\n\nmypy --strict: Success (0 errors)\nRuntime: KeyError\n"
+__name__ = '__main__'
+main = <function object>

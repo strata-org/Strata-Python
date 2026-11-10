@@ -1,0 +1,13 @@
+--- stdout 36
+All nested loop variable tests pass
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nNested for loops where the inner loop reuses the same variable name\nas the outer loop. Python has no block scoping — the inner loop\nREBINDS the outer loop variable, and after the inner loop exits,\nthe variable holds the last value from the INNER loop.\n\n    for i in [1, 2, 3]:\n        for i in [10, 20]:\n            pass\n        # i is now 20, NOT the outer iteration value\n\nThis is legal Python (no shadowing error). The Laurel model must\ncorrectly handle that:\n1. The inner loop overwrites the outer loop variable\n2. After the inner loop, the outer loop\'s "current element" is lost\n3. The outer loop\'s NEXT iteration still proceeds correctly\n   (because `for` in CPython uses an iterator object, not re-reading i)\n\nUses ONLY confirmed-accepted constructs: for loop, list, int.\n'
+__name__ = '__main__'
+accumulate_with_nested = <function object>
+inner_overwrites_outer = <function object>
+main = <function object>
+outer_loop_still_iterates = <function object>
+variable_value_after_nested = <function object>

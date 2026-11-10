@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+EVENTS = ['default', 'absent-getter', 'absent-getter', 'broken-getter']
+RESULT = ('fallback', False, 'RuntimeError', ['default', 'absent-getter', 'absent-getter', 'broken-getter'])
+Source = <class 'Source'>
+__doc__ = 'getattr defaults and hasattr suppress only AttributeError.'
+__name__ = '__main__'
+fallback = 'fallback'
+make_default = <function object>
+present = False
+propagated = 'RuntimeError'
+source = <Source object>

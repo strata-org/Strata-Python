@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for -: 'str' and 'int'
+--- globals
+Base = <class 'Base'>
+Child = <class 'Child'>
+__doc__ = "\na15_super_mutation.py — super().method() mutates the narrowed field.\n\nisinstance narrows self.x to int. Then super().process() is called, which\nmutates self.x to str. mypy doesn't consider super() calls as potential\nnarrowing invalidators.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str - int\n"
+__name__ = '__main__'
+main = <function object>

@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Cell = <class 'Cell'>
+__doc__ = None
+__name__ = '__main__'
+test_oop_field_write = <function object>

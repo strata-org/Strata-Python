@@ -1,0 +1,14 @@
+--- stdout 11
+All passed
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nFOR-LOOP RANGE VARIABLE FINAL VALUE — OFF-BY-ONE AT LOOP EXIT\n\nThe subset allows:\n  - for i in range(n) (IN)\n  - Using loop variable after loop (IN — finding 156 confirms Python scoping)\n  - Arithmetic on loop variable (IN)\n\nThe NOVEL gap: after `for i in range(n)` completes normally (no break),\nthe loop variable `i` holds the value `n-1` (the last value produced by\nthe iterator). But the model's while-loop translation may leave `i` at\na different value depending on where the increment happens.\n\nTranslation A (increment at end):\n    i = 0; while i < n: BODY; i += 1\n    → After loop: i == n (one past the last iteration)\n\nTranslation B (increment at start of next iteration):\n    i = -1; while True: i += 1; if i >= n: break; BODY\n    → After loop: i == n\n\nCPython behavior:\n    for i in range(5): pass\n    → After loop: i == 4 (last value from iterator)\n\nThe model's while-loop translation leaves i == n (or n+1 depending on\ntranslation), but CPython leaves i == n-1. This is an off-by-one error\nthat affects any code using the loop variable after the loop.\n\nCRITICAL: This interacts with finding 156 (loop variable persists after\nloop) — that finding establishes that the variable IS accessible, but\ndoesn't address what VALUE it has.\n\nDISTINCT FROM:\n  - Finding 156 (loop variable scope) — that's about accessibility;\n    this is about the VALUE\n  - Finding 414 (while loop counter final value) — that's about while\n    loops; this is about for-range specifically\n  - Finding 445 (range stop exclusive) — that's about iteration COUNT;\n    this is about the FINAL VALUE of the variable after loop exit\n  - Finding 309 (break preserves loop var) — that's about break;\n    this is about NORMAL completion\n"
+__name__ = '__main__'
+empty_range_variable_unchanged = <function object>
+index_after_search = <function object>
+last_value_after_range = <function object>
+last_value_used_in_computation = <function object>
+main = <function object>
+range_with_step_final_value = <function object>

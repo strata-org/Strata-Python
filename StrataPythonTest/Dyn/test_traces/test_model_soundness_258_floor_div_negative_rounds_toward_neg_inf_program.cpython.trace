@@ -1,0 +1,10 @@
+--- stdout 9
+-4 -4 -1
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nCPython: -7 // 2 → -4 (floor toward negative infinity)\nModel:   PFloorDiv uses SMT `div` → -7 div 2 = -3 (truncation toward zero)\n\nPython's // rounds toward NEGATIVE INFINITY.\nSMT-LIB's div rounds toward ZERO (Euclidean/truncation).\n\nThese differ for negative operands:\n  -7 // 2:  Python = -4 (floor),  SMT = -3 (truncate)\n  7 // -2:  Python = -4 (floor),  SMT = -3 (truncate)\n  -7 // -2: Python = 3 (floor),   SMT = 3 (truncate) — same!\n"
+__name__ = '__main__'
+floor_div_neg_num = <function object>
+main = <function object>

@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised error: missing ), unterminated subpattern at position 0
+--- globals
+__doc__ = None
+__name__ = '__main__'
+main = <function object>
+re = <module object>

@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+raised ZeroDivisionError: integer division or modulo by zero
+--- globals
+Item = <class 'Item'>
+ItemsResponse = <class 'ItemsResponse'>
+List = <_SpecialGenericAlias object>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+get_items = <function object>
+main = <function object>

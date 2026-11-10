@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised AssertionError: reversed bounds should fail
+--- globals
+__doc__ = None
+__name__ = '__main__'
+test_chained_compare = <function object>

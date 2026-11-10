@@ -1,0 +1,13 @@
+--- stdout 5
+PASS
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Star-unpacking in displays: interleaved evaluation.'
+__name__ = '__main__'
+d = {'a': 1, 'k': 2, 'b': 3}
+order = ['x', 'y', 'z']
+x = <function object>
+y = <function object>
+z = <function object>

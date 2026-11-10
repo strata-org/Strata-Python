@@ -1,0 +1,16 @@
+--- stdout 21
+HELLO 25 hello world
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = '\nCalling a method on a LITERAL or constructor expression:\n    [1, 2, 3].append(4)   — method on list literal\n    "hello".upper()       — method on string literal\n    Point(1, 2).norm()    — method on constructor result\n\nThe model must handle method calls where the receiver is NOT a variable\nbut an expression. Finding 159 covered chaining. This finding covers\nthe base case: method on a literal/constructor.\n\nThe result of the method call is a value. If the method mutates (append),\nthe mutation is lost (no variable to rebind). If the method is pure\n(upper, norm), the result is usable.\n\nUses ONLY confirmed-accepted constructs: str methods, list, @dataclass.\n'
+__name__ = '__main__'
+chained_on_constructor = <function object>
+dataclass = <function object>
+main = <function object>
+method_on_constructor = <function object>
+method_on_list_result = <function object>
+method_on_string_literal = <function object>
+string_method_chain = <function object>

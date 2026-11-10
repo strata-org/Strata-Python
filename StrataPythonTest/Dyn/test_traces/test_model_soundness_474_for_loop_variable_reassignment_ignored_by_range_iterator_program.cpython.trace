@@ -1,0 +1,12 @@
+--- stdout 6
+5 6 5
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFOR-LOOP VARIABLE REASSIGNMENT IGNORED BY RANGE ITERATOR\n\nThe subset allows:\n  - for loops over range() (IN)\n  - Assignment to loop variable in body (IN — no rule forbids it)\n  - Arithmetic on loop variable (IN)\n\nThe NOVEL gap: reassigning the loop variable inside the body does NOT\naffect iteration in CPython (the range iterator maintains its own state),\nbut if the model translates `for i in range(n)` as a while loop:\n    i = 0; while i < n: BODY; i += 1\nthen reassigning `i` in BODY changes the iteration sequence.\n\nCPython behavior:\n  - `for i in range(5)` creates a range_iterator object\n  - Each iteration, the iterator produces the NEXT value regardless of i\n  - Reassigning i in the body is overwritten at the next iteration start\n\nModel behavior (while-loop translation):\n  - `i = 0; while i < n: BODY; i += 1`\n  - If BODY contains `i = 99`, then `i += 1` makes i=100, loop exits\n  - CPython would continue with i=1, i=2, i=3, i=4\n\nDISTINCT FROM:\n  - Finding 031 (reassigning the ITERABLE variable, not the loop variable)\n  - Finding 307 (nested loops with same variable name)\n  - Finding 460 (sequential loops with same variable)\n'
+__name__ = '__main__'
+conditional_reassign = <function object>
+count_iterations_with_reassign = <function object>
+main = <function object>
+sum_with_reassign = <function object>

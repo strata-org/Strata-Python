@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nDICT EQUALITY IS ORDER-INDEPENDENT — ASSOC-LIST COMPARISON IS NOT\n\nCPython: {"a": 1, "b": 2} == {"b": 2, "a": 1} → True\n         Dict equality checks same keys with same values, regardless of\n         insertion order.\n\nModel:   PEq on from_DictStrAny uses STRUCTURAL equality on the assoc-list.\n         [("a",1), ("b",2)] ≠ [("b",2), ("a",1)] structurally.\n         Model returns False when CPython returns True.\n\nFinding 041 identified this issue. This finding provides the CONCRETE\nprogram showing the practical impact: dicts built in different orders\nbut with same content are not recognized as equal.\n'
+__name__ = '__main__'
+dict_in_condition = <function object>
+function_returns_equivalent = <function object>
+literal_vs_built = <function object>
+main = <function object>
+same_content_different_order = <function object>

@@ -1,0 +1,15 @@
+--- stdout 11
+All passed
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+__doc__ = "\nISINSTANCE RESULT STORED IN VARIABLE — NARROWING DOESN'T PROPAGATE\n\nThe subset allows:\n  - isinstance(x, T) for narrowing (IN)\n  - Boolean variables (IN)\n  - if/else with boolean condition (IN)\n  - Optional[T] types (IN)\n\nThe NOVEL gap: isinstance narrowing only works when the isinstance call\nappears DIRECTLY in the if-condition. Storing the result in a boolean\nvariable and using that variable later does NOT trigger narrowing.\n\nCPython behavior:\n  - `flag = isinstance(x, int); if flag: x + 1` — works fine (x IS int)\n  - The isinstance check is TRUE, so x is definitely int in the branch\n\nModel behavior:\n  - `flag = isinstance(x, int)` → flag gets from_bool(True/False)\n  - `if flag:` → enters branch, but NO assume(isfrom_int(x)) emitted\n  - `x + 1` → PAdd(x, from_int(1)) where x has tag {from_int, from_None}\n  - Result: Hole or verification failure (can't prove x is int)\n\nThe narrowing mechanism in the translator recognizes the PATTERN:\n    if isinstance(x, T):\n        # x is narrowed to T here\n\nBut does NOT recognize:\n    flag = isinstance(x, T)\n    if flag:\n        # x is NOT narrowed (flag is just a bool variable)\n\nThis is a semantic gap: the translator performs pattern-matching on the\nAST of the if-condition, not dataflow analysis.\n\nDISTINCT FROM:\n  - Finding 245 (comparison result stored) — that's about PLt/PGt\n    return type; this is about NARROWING not propagating\n  - Finding 334 (narrowing killed by else assign) — that's about\n    narrowing being invalidated; this is about narrowing never starting\n  - Finding 464 (narrowing at loop back-edge) — that's about loop\n    iteration; this is about variable indirection\n"
+__name__ = '__main__'
+direct_isinstance_works = <function object>
+isinstance_combined_with_other_condition = <function object>
+isinstance_in_variable_then_assert = <function object>
+main = <function object>
+negated_stored_isinstance = <function object>
+stored_isinstance_fails = <function object>

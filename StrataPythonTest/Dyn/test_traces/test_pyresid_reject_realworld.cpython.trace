@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Meta = <class 'Meta'>
+__doc__ = None
+__name__ = '__main__'
+fetch = <_lru_cache_wrapper object>
+list = [1, 2, 3]
+lru_cache = <function object>
+os = <module object>

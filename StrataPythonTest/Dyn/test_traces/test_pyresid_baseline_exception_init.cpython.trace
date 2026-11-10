@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Box = <class 'Box'>
+BuiltError = <class 'BuiltError'>
+__doc__ = None
+__name__ = '__main__'
+construct_before_raise = <function object>
+result = 'exception-initialized'

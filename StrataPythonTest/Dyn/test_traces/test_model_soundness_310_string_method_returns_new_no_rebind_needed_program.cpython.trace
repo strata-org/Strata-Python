@@ -1,0 +1,15 @@
+--- stdout 35
+All string immutability tests pass
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nString methods in Python return NEW strings (strings are immutable).\nUnlike list.append() which mutates in place, str.upper()/lower()/strip()\netc. always return a new value. The original string is UNCHANGED.\n\nThe model's value semantics is actually CORRECT for strings (since\nstrings are immutable in CPython too). But the model might still get\nthis wrong if:\n1. String methods are uninterpreted (return Hole) — finding 144/220\n2. The model doesn't enforce that the ORIGINAL string is unchanged\n3. The model conflates string method behavior with list method behavior\n\nThe critical test: after `result = s.upper()`, the original `s` must\nstill equal its original value. This is trivially true in CPython\n(immutability) and should be trivially true in the model (value semantics).\nBut if the model has no axiom for string methods, it can't PROVE that\n`s` is unchanged — it might think `s.upper()` could modify `s`.\n\nThis finding tests that the model correctly handles the interaction\nbetween:\n- String method calls (return new value)\n- The original variable (must be provably unchanged)\n- Chained operations (each produces a new string)\n\nUses ONLY confirmed-accepted constructs: str, method calls, comparison.\n"
+__name__ = '__main__'
+caller_string_unchanged = <function object>
+chained_methods_each_new = <function object>
+main = <function object>
+method_on_parameter_no_mutation = <function object>
+multiple_operations_independent = <function object>
+string_replace_returns_new = <function object>
+upper_preserves_original = <function object>

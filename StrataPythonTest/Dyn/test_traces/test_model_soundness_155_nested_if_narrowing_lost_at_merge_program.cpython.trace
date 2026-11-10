@@ -1,0 +1,13 @@
+--- stdout 6
+7 0 6
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nAfter nested if-else branches merge, the verifier must correctly handle\nthe UNION of possible states. If one branch sets x to a value and the\nother doesn't, the merged state must reflect both possibilities.\n\nUses ONLY confirmed-accepted constructs: if/elif/else, int arithmetic,\ncomparison, function def.\n"
+__name__ = '__main__'
+abs_value = <function object>
+bounded_increment = <function object>
+classify = <function object>
+main = <function object>
+nested_conditions = <function object>

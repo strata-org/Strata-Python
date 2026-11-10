@@ -1,0 +1,16 @@
+--- stdout 21
+True False True True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nCPython results (concrete):\n  None == None  = True\n  None == 0     = False\n  None == False = False\n  None == ""    = False\n  0 == False    = True  (bool is int subclass!)\n  1 == True     = True\n\nLaurel model results:\n  PEq(from_None(), from_None())    = ??? (may be Hole if no None×None case)\n  PEq(from_None(), from_int(0))    = ??? (cross-tag: Hole or wrong)\n  PEq(from_int(0), from_bool(False)) = ??? (cross-tag: Hole)\n  PEq(from_int(1), from_bool(True))  = ??? (cross-tag: Hole)\n'
+__name__ = '__main__'
+main = <function object>
+none_eq_empty_str = <function object>
+none_eq_false = <function object>
+none_eq_none = <function object>
+none_eq_zero = <function object>
+one_eq_true = <function object>
+two_eq_true = <function object>
+zero_eq_false = <function object>

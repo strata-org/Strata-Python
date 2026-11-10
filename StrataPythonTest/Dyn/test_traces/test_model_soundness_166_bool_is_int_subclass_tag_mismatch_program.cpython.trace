@@ -1,0 +1,16 @@
+--- stdout 8
+2 6 yes
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython's bool is a subclass of int: True == 1, False == 0.\nThe `Any` datatype has SEPARATE tags: from_bool(b) vs from_int(n).\n\nThis causes pervasive mismatches when bool values flow into int contexts:\n- `True + 1` → 2 in CPython (bool promotes to int)\n- In model: PAdd(from_bool(True), from_int(1)) → Hole (tag mismatch)\n\nFinding 018 identified bool arithmetic. Finding 043 identified bool indexing.\nFinding 148 identified isinstance. This finding consolidates the ROOT CAUSE:\nthe two-tag design means EVERY operation that accepts int must ALSO accept\nbool, because Python guarantees bool IS int.\n\nThe fix must be systematic: either normalize from_bool to from_int at\nevery operation boundary, or merge the tags entirely.\n"
+__name__ = '__main__'
+bool_as_counter = <function object>
+bool_as_index = <function object>
+bool_comparison_with_int = <function object>
+bool_in_arithmetic = <function object>
+bool_multiplication = <function object>
+bool_subtraction = <function object>
+conditional_increment = <function object>
+main = <function object>

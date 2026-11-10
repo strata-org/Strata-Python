@@ -1,0 +1,15 @@
+--- stdout 9
+15 44 37
+
+--- outcome
+ok
+--- globals
+Rectangle = <class 'Rectangle'>
+__doc__ = '\nThe subset says "no dynamic features" but `@property` IS in the subset:\n  "@property for read-only computed attributes" is IN.\n\nA @property is a DESCRIPTOR — it\'s looked up on the CLASS, not the\ninstance dict. When you access `obj.area`, Python doesn\'t look in\nobj.__dict__["area"]. It finds the property descriptor on the class\nand calls its __get__ method.\n\nFinding 038 identified this. Under `from_ClassInstance(name, attrs)`,\nfield access is `DictStrAny_get(attrs, "area")`. But "area" is NOT\nin the instance attrs — it\'s a computed property on the class.\n\nThe model must handle @property differently from regular fields.\n\nUses ONLY confirmed-accepted constructs: @dataclass, @property, int.\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+property_in_condition = <function object>
+property_in_expression = <function object>
+property_on_different_instances = <function object>
+use_property = <function object>

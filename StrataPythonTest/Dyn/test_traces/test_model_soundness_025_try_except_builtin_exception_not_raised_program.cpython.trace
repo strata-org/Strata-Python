@@ -1,0 +1,11 @@
+--- stdout 11
+20 -1 42 0
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nBuilt-in operations (list indexing, dict key access, int()) can raise\nexceptions (IndexError, KeyError, ValueError). The Laurel model likely\ndoes not emit exception values for these operations — List_get with an\nout-of-bounds index either has a precondition (blocking the path) or\nreturns Hole, but does NOT set maybe_except to IndexError. This means\ntry/except blocks that catch built-in exceptions from these operations\nare modeled incorrectly: the except branch is unreachable in the model.\n'
+__name__ = '__main__'
+main = <function object>
+safe_get = <function object>
+safe_parse = <function object>

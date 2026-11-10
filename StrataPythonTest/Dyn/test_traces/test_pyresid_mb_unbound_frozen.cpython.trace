@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+raised FrozenInstanceError: cannot assign to field 'name'
+--- globals
+Tag = <class 'Tag'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+label = <function object>
+t = <Tag object>

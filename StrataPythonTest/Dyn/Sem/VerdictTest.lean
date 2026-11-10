@@ -233,4 +233,18 @@ ok
   "--- PYTHONHASHSEED=0\n" ++ tr "<x 0x?>\n" "--- outcome\nok\n" ++ "--- PYTHONHASHSEED=1\n" ++
     tr "<x 0x?>\n" "--- outcome\nok\n"
 
+-- A program whose CPython run doesn't end in time: a run out of fuel, or one that stops with a
+-- gap, is a gap; a model-invariant gap and a run that ends with a result fail.
+/-- info: p | gap | CPython's run does not end in time, so the outputs are not compared -/
+#guard_msgs in #eval IO.println (verdictText (judge "p" (.trace (tr "a\n" "--- out of fuel\n")) endlessTrace none))
+
+/-- info: fails: p: the run breaks a model invariant: model invariant: x -/
+#guard_msgs in
+#eval IO.println (verdictText
+  (judge "p" (.trace (tr "a\n" ("--- gap " ++ StrataPython.Dyn.Sem.modelInvariantPrefix ++ "x\n")))
+    endlessTrace none))
+
+/-- info: fails: p: the run ends, but CPython's doesn't -/
+#guard_msgs in #eval IO.println (verdictText (judge "p" (.trace cpy) endlessTrace none))
+
 end StrataPython.SemDiff.VerdictTest

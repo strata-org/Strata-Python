@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+RESULT = ((2, 'else', 'UnboundLocalError'), (1, 'skipped', 'UnboundLocalError'))
+__doc__ = None
+__name__ = '__main__'
+break_from_handler = <function object>
+continue_from_handler = <function object>

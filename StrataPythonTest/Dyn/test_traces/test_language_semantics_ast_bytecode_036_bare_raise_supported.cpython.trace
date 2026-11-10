@@ -1,0 +1,8 @@
+--- stdout 5
+PASS
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Bare raise in nested handlers re-raises innermost.'
+__name__ = '__main__'

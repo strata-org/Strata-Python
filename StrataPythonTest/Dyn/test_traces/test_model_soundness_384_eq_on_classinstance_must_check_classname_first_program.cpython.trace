@@ -1,0 +1,17 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Point2D = <class 'Point2D'>
+Size = <class 'Size'>
+Vector2D = <class 'Vector2D'>
+__doc__ = '\nPEq ON from_ClassInstance MUST CHECK CLASSNAME FIRST\n\nCPython: @dataclass __eq__ checks type(other) is type(self) FIRST.\n         Point(1,2) == Vector(1,2) → False (different class!)\n         Point(1,2) == Point(1,2) → True (same class, same fields)\n\nModel:   PEq(from_ClassInstance(n1, a1), from_ClassInstance(n2, a2))\n         If implemented as: structural_eq(a1, a2)\n         → WRONG: ignores classname, says Point == Vector if fields match\n\n         Must be: n1 == n2 AND structural_eq(a1, a2)\n         → classname check FIRST, then field comparison\n\nFinding 327 identified this for unrelated classes.\nThis finding tests the SPECIFIC failure mode: two @dataclass classes\nwith IDENTICAL field names and values but different classnames.\n'
+__name__ = '__main__'
+dataclass = <function object>
+different_class_not_equal = <function object>
+equality_in_list = <function object>
+main = <function object>
+same_class_equal = <function object>
+three_classes_same_fields = <function object>

@@ -1,0 +1,17 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = "\nFUNCTION CALLED TWICE — RESULTS MUST BE INDEPENDENT\n\nCPython: a = f(x); b = f(x) — two calls, two independent results.\n         For PURE functions: a == b (same input → same output).\n         For functions with state: a may != b.\n\nModel:   Under value semantics, function calls are pure.\n         f(x) called twice should return the SAME value both times\n         (if f is deterministic and has no side effects).\n\n         The model must ensure:\n         1. Two calls to same function with same args produce same result\n            (or at least: each result independently satisfies the return type)\n         2. The results are independent values (modifying one doesn't affect other)\n\nThis tests that the inter-procedural contract (finding 225) works\ncorrectly when the same function is called multiple times.\n"
+__name__ = '__main__'
+accumulate_calls = <function object>
+calls_in_expression = <function object>
+dataclass = <function object>
+double = <function object>
+main = <function object>
+make_point = <function object>
+two_calls_independent = <function object>
+two_calls_same_result = <function object>

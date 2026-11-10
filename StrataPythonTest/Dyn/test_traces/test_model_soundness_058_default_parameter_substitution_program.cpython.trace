@@ -1,0 +1,12 @@
+--- stdout 17
+Hello Alice 6 50
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nWhen a function has a parameter with a default value, and the function\nis called without that argument, the default is used. In CPython, default\nvalues are evaluated ONCE at function definition time and stored on the\nfunction object. For immutable defaults (int, str, None), this is fine.\n\nThe Laurel model must correctly substitute the default value when the\nargument is omitted. If the translator doesn't handle default arguments\n(treating all parameters as required), calls with fewer arguments than\nparameters will fail or produce wrong results.\n"
+__name__ = '__main__'
+clamp = <function object>
+greet = <function object>
+increment = <function object>
+main = <function object>

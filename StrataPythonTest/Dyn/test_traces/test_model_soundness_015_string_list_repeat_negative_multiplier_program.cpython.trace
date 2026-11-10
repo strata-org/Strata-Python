@@ -1,0 +1,13 @@
+--- stdout 7
+
+[]
+[]
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython's `str * n` and `list * n` return empty string/list when n <= 0.\nThe Laurel encoding uses uninterpreted functions `string_repeat` and\n`List_repeat` with no postconditions, so the solver cannot prove anything\nabout the result when n <= 0.\n"
+__name__ = '__main__'
+main = <function object>
+repeat_list = <function object>
+repeat_string = <function object>

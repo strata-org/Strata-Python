@@ -1,0 +1,12 @@
+--- stdout 18
+10 99 -1 1030 999
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nThe `finally` block in Python ALWAYS executes — whether the try block\ncompletes normally, raises an exception, or returns early. In the\nexception-as-value model, if `finally` is not explicitly wired into\nall exit paths, it may be skipped when a return or exception occurs\nin the try block.\n'
+__name__ = '__main__'
+cleanup_on_exception = <function object>
+cleanup_on_return = <function object>
+finally_modifies_state = <function object>
+main = <function object>

@@ -1,0 +1,10 @@
+--- stdout 48
+OK: chained cmp — middle operand evaluated once
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+count = [1]
+val = <function object>

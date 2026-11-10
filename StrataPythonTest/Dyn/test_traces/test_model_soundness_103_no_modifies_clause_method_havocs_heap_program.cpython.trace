@@ -1,0 +1,11 @@
+--- stdout 12
+Alice 100 0
+
+--- outcome
+ok
+--- globals
+Player = <class 'Player'>
+__doc__ = '\nIf user classes are modeled as Composite (heap semantics), every method\nthat modifies self needs a `modifies` clause declaring which fields it\nchanges. Without it, the verifier must assume the method could modify\nANYTHING on the heap (havoc), making all subsequent reads unprovable.\n\nThis program shows methods that modify specific fields — the verifier\nneeds to know which fields are modified to preserve knowledge about\nunmodified fields.\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>

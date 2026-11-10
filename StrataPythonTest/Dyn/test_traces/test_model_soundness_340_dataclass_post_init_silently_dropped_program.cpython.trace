@@ -1,0 +1,17 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+NormalizedName = <class 'NormalizedName'>
+Segment = <class 'Segment'>
+Temperature = <class 'Temperature'>
+__doc__ = "\nDATACLASS __post_init__ SILENTLY DROPPED\n\nCPython: @dataclass classes can define __post_init__ which runs after\n         the generated __init__. It can validate fields, compute derived\n         fields, or raise exceptions.\n\nModel:   The translator generates a constructor that sets fields from args.\n         If __post_init__ is defined, it is NEVER CALLED — the method exists\n         in the class but the generated __init__ translation doesn't invoke it.\n\nThis is a soundness issue because __post_init__ can:\n1. Raise exceptions (validation) — model misses the error path\n2. Modify fields — model has stale initial values\n3. Compute derived fields — model has uninitialized/wrong values\n"
+__name__ = '__main__'
+create_invalid_segment = <function object>
+create_invalid_temp = <function object>
+create_valid_segment = <function object>
+create_valid_temp = <function object>
+dataclass = <function object>
+main = <function object>

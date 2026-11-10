@@ -1,0 +1,14 @@
+--- stdout 7
+6 30 2
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nThe subset says "No x = y = z = 1 chains" and "No tuple unpacking\na, b = 1, 2" — both are OUT.\n\nBut what about SEQUENTIAL assignments on separate lines that interact?\n\n    a = compute()\n    b = a + 1\n    a = b + 1  # a is now rebound; old a is gone\n\nThe model must handle that `b = a + 1` uses the CURRENT value of a\n(from the first assignment), and `a = b + 1` rebinds a (the second\nassignment doesn\'t affect b\'s value).\n\nThis is basic SSA / sequential assignment semantics. The model should\nhandle it correctly, but it\'s worth verifying.\n\nUses ONLY confirmed-accepted constructs: int, assignment, arithmetic.\n'
+__name__ = '__main__'
+accumulate_with_reassignment = <function object>
+fibonacci_step = <function object>
+main = <function object>
+reassignment_doesnt_affect_prior = <function object>
+sequential_assignments = <function object>
+swap_via_temp = <function object>

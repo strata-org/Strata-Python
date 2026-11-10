@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+i = 4
+j = 1
+numbers = [2, 4, 5, 9, 1]
+x = 15

@@ -1,0 +1,10 @@
+--- stdout 75
+BOUNDARY: naive model calls __enter__ first; CPython checks __exit__ first
+
+--- outcome
+ok
+--- globals
+Broken = <class 'Broken'>
+__doc__ = None
+__name__ = '__main__'
+trace = []

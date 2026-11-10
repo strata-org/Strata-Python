@@ -1,0 +1,13 @@
+--- stdout 7
+1 True
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nAccessing a dict key that doesn\'t exist (`d["missing"]`) raises KeyError\nin CPython. The model\'s DictStrAny_get either:\n1. Has a precondition (key must exist) — correct but may not be enforced\n2. Returns Hole for missing keys — unsound (no error reported)\n3. Returns exception(KeyError) — correct if exception propagation works\n\nThe subset says: "dict indexing preconditions (k in d for dict) are\nenforced at check time via assert/assume." But does the model actually\nemit these assertions?\n'
+__name__ = '__main__'
+get_or_raise = <function object>
+main = <function object>
+safe_lookup = <function object>
+sum_keys = <function object>
+unsafe_lookup = <function object>

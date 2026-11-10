@@ -1,0 +1,13 @@
+--- stdout 15
+True True True
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+__doc__ = '\nCPython: None + 1 → TypeError: unsupported operand type(s) for +: \'NoneType\' and \'int\'\nModel:   PAdd(from_None(), from_int(1)) = Hole ← NO ERROR\n\nThe model returns Hole (unconstrained value) instead of an exception.\nThis means the model thinks "None + 1 might succeed" when it ALWAYS crashes.\n\nA program that accidentally adds None to an int is "verified" by the model.\n'
+__name__ = '__main__'
+add_none_to_int = <function object>
+compare_none_to_int = <function object>
+main = <function object>
+multiply_none = <function object>

@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Counter = <class 'Counter'>
+__annotations__ = {'counter': <class 'Counter'>}
+__doc__ = None
+__name__ = '__main__'
+counter = <Counter object>
+read_n = <function object>

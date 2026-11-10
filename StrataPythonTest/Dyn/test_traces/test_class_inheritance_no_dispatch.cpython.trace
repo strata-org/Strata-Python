@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Base = <class 'Base'>
+Child = <class 'Child'>
+__annotations__ = {'obj': <class 'Base'>, 'result': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+obj = <Base object>
+result = 0

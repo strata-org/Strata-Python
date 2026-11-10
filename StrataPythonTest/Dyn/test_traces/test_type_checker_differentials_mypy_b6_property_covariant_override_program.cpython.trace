@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: can only concatenate str (not "int") to str
+--- globals
+Base = <class 'Base'>
+Child = <class 'Child'>
+__doc__ = "\nb6_property_covariant_override.py — Property return type narrowed in subclass; write through base.\n\nChild overrides Base's @property with a narrower return type (int vs int|str).\nA function accepting Base writes str via the property setter.\nPython dispatches to Child's setter (MRO), which receives str despite\nbeing annotated for int. The backing field becomes str.\nChild's getter returns str, but mypy thinks it returns int.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str + int\n"
+__name__ = '__main__'
+corrupt = <function object>
+main = <function object>

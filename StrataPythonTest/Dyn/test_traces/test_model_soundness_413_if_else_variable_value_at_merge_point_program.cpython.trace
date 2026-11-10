@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nIF/ELSE VARIABLE VALUE AT MERGE POINT — BOTH BRANCHES MUST CONTRIBUTE\n\nCPython: if cond: x = 1 else: x = 2\n         After if/else: x is EITHER 1 OR 2 (depending on cond)\n         x >= 1 and x <= 2 → True (always)\n\nModel:   The translator must produce:\n         x = ite(cond, 1, 2)  — or equivalent SSA merge\n\n         If the translator only keeps the LAST assignment:\n         x = 2 (else branch always wins) → WRONG for cond=True\n\n         If the translator only keeps the FIRST assignment:\n         x = 1 (if branch always wins) → WRONG for cond=False\n\nCPython result: x depends on cond\nModel result (if broken): x is always one branch's value\n\nRoot cause: Missing phi-node / ite at the merge point after if/else.\nFinding 255 identified this conceptually. This provides the concrete test.\n"
+__name__ = '__main__'
+abs_value = <function object>
+classify = <function object>
+conditional_computation = <function object>
+main = <function object>
+max_of_two = <function object>

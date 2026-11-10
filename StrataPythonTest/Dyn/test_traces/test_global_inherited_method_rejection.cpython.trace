@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Base = <class 'Base'>
+Child = <class 'Child'>
+__doc__ = None
+__name__ = '__main__'

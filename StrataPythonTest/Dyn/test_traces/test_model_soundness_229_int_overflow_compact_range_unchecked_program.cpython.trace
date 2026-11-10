@@ -1,0 +1,13 @@
+--- stdout 22
+20000 3628800 1048576
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nThe subset says: "Integer literals must fit in the compact range (|n| < 2^30)."\nBut the model uses SMT-LIB `Int` which is UNBOUNDED mathematical integers.\n\nThis means:\n1. Arithmetic can produce values OUTSIDE compact range without error\n2. The model says `2**30 + 1` is fine; CPython also says fine (Python ints\n   are unbounded) — but the SUBSET says this is OUT.\n3. The model can\'t detect when a computation exceeds compact range.\n\nActually, Python integers ARE unbounded (no overflow). The subset\'s\ncompact-range restriction is about what the VERIFIER can handle, not\nabout runtime behavior. So the model (unbounded Int) matches CPython.\n\nThe REAL issue: if the subset restricts to compact range for extraction\nreasons, the model should WARN when values might exceed it — but this\nis a completeness issue, not soundness.\n\nThis finding documents that SMT Int = Python int (both unbounded) is\nCORRECT, and the compact-range restriction is a VERIFIER limitation.\n\nUses ONLY confirmed-accepted constructs: int, arithmetic.\n'
+__name__ = '__main__'
+factorial = <function object>
+large_multiplication = <function object>
+main = <function object>
+power_of_two = <function object>
+stays_in_range = <function object>

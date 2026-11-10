@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = "\nSAME OBJECT PASSED AS TWO PARAMETERS — ALIASING UNDETECTED\n\nCPython: def f(a: Point, b: Point): a.x = 99; return b.x\n         f(obj, obj) → 99 (a and b are the SAME object!)\n\nModel:   f receives two INDEPENDENT copies of obj.\n         Modifying a.x doesn't affect b.x.\n         f(obj, obj) → obj.x (original value, not 99)\n\nThe subset bans `b = a` (direct alias). But passing the SAME\nobject as two different parameters creates an alias that the\nAST checker may NOT detect — it looks like two different variables\nat the call site.\n"
+__name__ = '__main__'
+aliased_accumulate = <function object>
+dataclass = <function object>
+main = <function object>
+modify_first_read_second = <function object>
+same_object_two_params = <function object>
+swap_fields = <function object>

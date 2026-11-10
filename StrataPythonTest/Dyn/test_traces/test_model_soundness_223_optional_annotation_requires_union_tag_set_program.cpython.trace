@@ -1,0 +1,15 @@
+--- stdout 6
+5 7 4
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+__doc__ = '\n`Optional[int]` means the value can be `int` or `None`. The model must\ntrack a TAG SET for such variables: {from_int, from_None}.\n\nAfter `if x is not None`, the tag set narrows to {from_int}.\nBefore the check, operations on x must account for BOTH possibilities.\n\nThe key issue: how does the model represent "x is Optional[int]"?\n- Option 1: `assert(isfrom_int(x) || isfrom_None(x))` — disjunction\n- Option 2: no assertion (x is unconstrained Any) — too weak\n- Option 3: separate tracking per branch — SSA-style\n\nIf the model uses Option 2 (no assertion), then x could be from_str\nor from_float — the Optional constraint is lost entirely.\n\nUses ONLY confirmed-accepted constructs: Optional, is None, int, str.\n'
+__name__ = '__main__'
+main = <function object>
+multiple_optionals = <function object>
+optional_chain = <function object>
+optional_field_access = <function object>
+optional_in_loop = <function object>
+unwrap_or_default = <function object>

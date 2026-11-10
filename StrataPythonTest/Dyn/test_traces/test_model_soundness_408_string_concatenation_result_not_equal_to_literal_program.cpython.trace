@@ -1,0 +1,15 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nSTRING CONCATENATION RESULT NOT EQUAL TO LITERAL — UNPROVABLE\n\nCPython: "hello" + " " + "world" == "hello world" → True (always)\n\nModel:   str_concat(str_concat("hello", " "), "world")\n         == "hello world"\n         → UNPROVABLE if str_concat is uninterpreted\n\n         The solver doesn\'t know that concatenating "hello", " ", "world"\n         produces "hello world". Without mapping to SMT-LIB str.++,\n         string concatenation results are opaque.\n\nFinding 252 identified this. This finding provides the MINIMAL program\nthat fails: a simple string equality check after concatenation.\n'
+__name__ = '__main__'
+build_path = <function object>
+check_greeting = <function object>
+check_path = <function object>
+concat_length = <function object>
+empty_concat_identity = <function object>
+greet = <function object>
+main = <function object>

@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+RESULT = (5, 'AttributeError')
+__doc__ = 'The result tag from one selected label drives the next dispatch site.'
+__name__ = '__main__'
+missing = 'AttributeError'
+normal = 5
+value = <B object>

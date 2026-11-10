@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Box = <class 'Box'>
+Failing = <class 'Failing'>
+__doc__ = None
+__name__ = '__main__'
+construct = <function object>
+late_step = <function object>
+result = 'init-evaluated'

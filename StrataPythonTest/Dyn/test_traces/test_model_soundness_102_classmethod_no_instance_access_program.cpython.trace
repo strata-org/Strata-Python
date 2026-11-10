@@ -1,0 +1,12 @@
+--- stdout 14
+100.0 0.0 0.0
+
+--- outcome
+ok
+--- globals
+Temperature = <class 'Temperature'>
+Vector = <class 'Vector'>
+__doc__ = '\n@classmethod receives `cls` (the class itself) instead of `self` (an\ninstance). It can create new instances but has no instance state.\nThe model must handle classmethod calls differently from instance methods:\n- No `self` parameter (no ClassInstance passed)\n- `cls` is the class type, not an instance\n- Can call cls(...) to construct new instances\n\nIf the translator treats classmethod like instance method, it may\npass a ClassInstance as the first argument (wrong).\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>

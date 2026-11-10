@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+EVENTS = ['left-add', 'right-radd']
+Left = <class 'Left'>
+RESULT = (41, ['left-add', 'right-radd'])
+Right = <class 'Right'>
+__doc__ = 'NotImplemented advances from the forward to the reflected candidate.'
+__name__ = '__main__'

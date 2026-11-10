@@ -1,0 +1,14 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nFOR LOOP OVER range() — STOP IS EXCLUSIVE BUT MODEL MAY INCLUDE IT\n\nDIVERGENCE:\n  CPython:  `for i in range(n)` iterates i = 0, 1, ..., n-1 (n excluded)\n            `for i in range(a, b)` iterates i = a, a+1, ..., b-1 (b excluded)\n  Model:    If range is modeled as `0 <= i <= n` (inclusive) instead of\n            `0 <= i < n` (exclusive), the loop body executes one extra time.\n\nThis is subtle because:\n1. The off-by-one only manifests when the loop body uses `i` at the boundary\n2. List access `lst[i]` with `for i in range(len(lst))` is safe in CPython\n   (i goes 0..len-1) but UNSAFE if model uses inclusive bound (i reaches len)\n3. Accumulation loops produce wrong sums if extra iteration included\n\nThe model likely translates `for i in range(n)` as:\n  i = 0; while i < n: body; i = i + 1\nBut if the translation uses `<=` instead of `<`, or if the range axioms\ndon't enforce exclusivity of the stop bound, the model diverges.\n\nROOT CAUSE: range() stop-exclusivity must be an axiom in the model.\nWithout it, the solver may consider i == n as a valid loop iteration.\n"
+__name__ = '__main__'
+last_index_safe = <function object>
+main = <function object>
+range_boundary_value = <function object>
+range_empty_when_start_equals_stop = <function object>
+range_start_stop_exclusive = <function object>
+sum_range_exclusive = <function object>

@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Any = <class 'Any'>
+__doc__ = None
+__name__ = '__main__'
+test_any_list = <function object>

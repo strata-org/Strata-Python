@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nDICT LEN CONDITIONAL ON KEY EXISTENCE — NEW KEY vs OVERWRITE\n\nCPython: d = {"x": 1}; d["x"] = 2; len(d) == 1 (overwrite, no growth)\n         d = {"x": 1}; d["y"] = 2; len(d) == 2 (new key, grows)\n\nModel:   DictStrAny_set PREPENDS to association list (finding 082).\n         DictStrAny_len counts ALL entries including shadows.\n         After overwrite: len counts BOTH old and new entry → WRONG.\n\n         Even with a correct len model, the axiom is CONDITIONAL:\n         - If k ∈ d: len(set(d, k, v)) == len(d)     (overwrite)\n         - If k ∉ d: len(set(d, k, v)) == len(d) + 1 (new key)\n\n         This conditional axiom is HARDER than the list version\n         (which is always +1 for append). It requires the solver\n         to reason about key presence BEFORE computing length.\n\nFinding 032 identified the wrong-count issue.\nFinding 097 identified the conditional axiom need.\nThis finding provides the CONCRETE program showing both cases.\n'
+__name__ = '__main__'
+count_unique_keys = <function object>
+main = <function object>
+mixed_operations = <function object>
+new_key_grows_len = <function object>
+overwrite_same_len = <function object>

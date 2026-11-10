@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+OrderedDict = <class 'OrderedDict'>
+TypeGuard = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'
+os = <module object>
+path = <module object>

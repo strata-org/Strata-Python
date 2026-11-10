@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+FromCall = <class 'FromCall'>
+__doc__ = None
+__name__ = '__main__'
+make_base = <function object>

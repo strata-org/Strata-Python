@@ -1,0 +1,11 @@
+--- stdout 42
+OK: for loop — iter() called exactly once
+
+--- outcome
+ok
+--- globals
+OneShotRange = <class 'OneShotRange'>
+__doc__ = None
+__name__ = '__main__'
+r = <OneShotRange object>
+result = [0, 1, 2]

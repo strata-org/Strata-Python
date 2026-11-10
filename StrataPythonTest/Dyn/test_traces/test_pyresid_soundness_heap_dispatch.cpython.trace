@@ -1,0 +1,21 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+LeftCell = <class 'LeftCell'>
+NotRequired = <_SpecialForm object>
+OptionalCell = <class 'OptionalCell'>
+RightCell = <class 'RightCell'>
+TypedDict = <function object>
+__doc__ = 'Regression cases for SOUNDNESS_AUDIT.md findings S1-S7.'
+__name__ = '__main__'
+attribute_union = <function object>
+primitive_attribute_store = <function object>
+typed_dict_clear = <function object>
+typed_dict_copy_union = <function object>
+typed_dict_mapping_update = <function object>
+typed_dict_setdefault = <function object>
+typed_dict_update = <function object>

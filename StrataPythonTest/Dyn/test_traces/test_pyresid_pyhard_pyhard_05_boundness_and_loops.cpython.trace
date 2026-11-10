@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+both_branches = <function object>
+conditional = <function object>
+loop_assignment = <function object>

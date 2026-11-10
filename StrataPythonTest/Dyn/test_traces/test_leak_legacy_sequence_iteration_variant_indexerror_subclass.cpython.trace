@@ -1,0 +1,11 @@
+--- stdout 7
+[0, 1]
+
+--- outcome
+ok
+--- globals
+EndOfTable = <class 'EndOfTable'>
+RESULT = [0, 1]
+Table = <class 'Table'>
+__doc__ = 'A subclass of IndexError also terminates legacy sequence iteration.'
+__name__ = '__main__'

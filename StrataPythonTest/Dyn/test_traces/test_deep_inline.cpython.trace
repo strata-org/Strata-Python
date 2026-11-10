@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+raised AssertionError: triple_apply(3) should not be 10
+--- globals
+__doc__ = None
+__name__ = '__main__'
+double_inc = <function object>
+inc = <function object>
+main = <function object>
+triple_apply = <function object>

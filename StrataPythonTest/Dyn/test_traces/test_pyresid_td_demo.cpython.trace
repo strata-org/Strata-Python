@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+raised KeyError: 'director'
+--- globals
+Movie = <class 'Movie'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+m = {'title': 'Alien', 'year': 1979}
+t = 'Alien'
+y = 1980

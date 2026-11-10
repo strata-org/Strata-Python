@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nMODULO RESULT SIGN FOLLOWS DIVISOR (NOT DIVIDEND)\n\nCPython: -7 % 3 → 2 (sign follows divisor: positive)\n         7 % -3 → -2 (sign follows divisor: negative)\n         -7 % -3 → -1 (sign follows divisor: negative)\n\nModel:   PMod uses SMT-LIB `mod` where sign follows DIVIDEND:\n         -7 mod 3 → -1 (sign follows dividend: negative) — WRONG!\n         7 mod -3 → 1 (sign follows dividend: positive) — WRONG!\n\nCPython result: 2\nModel result: -1 (SPECIFIC WRONG VALUE)\n\nRoot cause: SMT-LIB mod semantics differ from Python %.\nPython guarantees: 0 <= result < abs(divisor) when divisor > 0.\nSMT guarantees: abs(result) < abs(divisor), sign matches dividend.\nFinding 039/259/267/273/292.\n'
+__name__ = '__main__'
+is_divisible = <function object>
+main = <function object>
+mod_negative_dividend = <function object>
+mod_negative_divisor = <function object>
+wrap_around = <function object>

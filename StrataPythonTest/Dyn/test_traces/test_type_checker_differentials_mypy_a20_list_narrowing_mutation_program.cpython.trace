@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: can only concatenate str (not "int") to str
+--- globals
+Container = <class 'Container'>
+__doc__ = '\na20_list_narrowing_mutation.py — isinstance narrows union field containing list, method mutates to str.\n\nobj.items: list[int] | str is narrowed to list[int] via isinstance.\nA method call changes obj.items to str. Subsequent list operations\n(subscript) fail with TypeError.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — can only concatenate str (not "int") to str\n'
+__name__ = '__main__'
+main = <function object>

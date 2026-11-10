@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised AttributeError: 'list' object has no attribute 'some_unmodeled_call_1'
+--- globals
+MyClass = <class 'MyClass'>
+__annotations__ = {'xs': <GenericAlias object>}
+__doc__ = None
+__name__ = '__main__'
+xs = [1, 2]

@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+BadKey = <class 'BadKey'>
+RESULT = 'KeyError'
+__doc__ = 'dict.get propagates exceptions from key hashing.'
+__name__ = '__main__'

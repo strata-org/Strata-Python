@@ -1,0 +1,12 @@
+--- stdout 14
+3 a Not Found
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nThe subset explicitly says:\n  "dict[K, V] for K ∈ {str, int}"\n\nBut the model only has `from_DictStrAny` — string keys only.\nThis is a PROMISE vs DELIVERY mismatch: the subset promises int keys\nbut the encoding can\'t represent them.\n\nFinding 175 identified the representation gap. This finding focuses on\nthe SUBSET DEFINITION aspect: either the subset must narrow (move\ndict[int, V] to OUT) or the model must extend (add DictIntAny).\n\nUses ONLY confirmed-accepted constructs: dict[int, str], int.\n'
+__name__ = '__main__'
+enum_like_mapping = <function object>
+frequency_counter = <function object>
+index_to_value = <function object>
+main = <function object>

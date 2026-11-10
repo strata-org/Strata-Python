@@ -1,0 +1,15 @@
+--- stdout 10
+BOB 26 50
+
+--- outcome
+ok
+--- globals
+Person = <class 'Person'>
+__doc__ = '\n`from_ClassInstance(name, attrs)` is a VALUE. Writing `obj.x = v` doesn\'t\nmutate — it must construct an ENTIRELY NEW ClassInstance with the updated\nattrs dict. The old ClassInstance is unchanged.\n\nThis means every field write is a FULL RECONSTRUCTION:\n  obj.x = 5\n  →  obj = from_ClassInstance(classname(obj), DictStrAny_set(attrs(obj), "x", 5))\n\nIf the class has 10 fields and you write 1, you still rebuild all 10.\nMore critically: the translator must emit this reconstruction. If it\njust calls DictStrAny_set on the attrs without rebinding obj, the\nwrite is lost.\n\nThis finding tests multi-field classes where writing one field must\npreserve all others.\n\nUses ONLY confirmed-accepted constructs: @dataclass, field write, int, str.\n'
+__name__ = '__main__'
+dataclass = <function object>
+main = <function object>
+write_in_conditional = <function object>
+write_multiple_fields_sequentially = <function object>
+write_one_field_preserves_others = <function object>
+write_then_read_different_field = <function object>

@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Item = 1
+__annotations__ = {'Item': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'

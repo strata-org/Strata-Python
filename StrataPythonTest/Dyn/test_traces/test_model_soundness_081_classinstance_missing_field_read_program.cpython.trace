@@ -1,0 +1,16 @@
+--- stdout 19
+localhost web INFO
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+Server = <class 'Server'>
+__doc__ = "\nReading a field from a ClassInstance that doesn't have that field in its\nDictStrAny should raise AttributeError. In the model, DictStrAny_get on\na missing key either returns Hole (unconstrained) or has a precondition\nthat the key exists. If neither, the model silently returns garbage for\nnon-existent attributes.\n\nThis matters when:\n1. A field is conditionally initialized (only on some __init__ paths)\n2. A subclass is accessed through a parent type that declares fewer fields\n3. A typo in field name goes undetected\n"
+__name__ = '__main__'
+dataclass = <function object>
+get_host = <function object>
+get_log_level = <function object>
+get_name = <function object>
+get_timeout = <function object>
+main = <function object>

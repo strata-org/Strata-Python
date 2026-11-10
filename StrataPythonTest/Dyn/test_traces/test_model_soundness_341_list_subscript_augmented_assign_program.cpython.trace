@@ -1,0 +1,13 @@
+--- stdout 27
+[11, 21, 31]
+[1, 3, 6, 10]
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nAUGMENTED ASSIGNMENT ON LIST SUBSCRIPT: lst[i] += v\n\nCPython: lst[i] += v desugars to lst[i] = lst[i] + v (mutates list in place)\nModel:   Requires: List_get → PAdd → List_set → rebind lst\n         But cons-list List_set requires FULL REBUILD of the list.\n         If translator doesn't handle Subscript target in AugAssign for lists,\n         the operation is a no-op.\n\nDistinct from finding 336 (dict subscript) because:\n- List uses cons-list (O(n) rebuild) vs dict assoc-list\n- List needs integer index bounds checking\n- List_set semantics differ from DictStrAny_set\n"
+__name__ = '__main__'
+accumulate_running = <function object>
+increment_all = <function object>
+main = <function object>
+scale_element = <function object>

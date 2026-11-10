@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nFOR LOOP BREAK VALUE VS DEFAULT VALUE — PHI/MERGE AT LOOP EXIT\n\nCPython: result = -1\n         for x in xs:\n             if x > 0:\n                 result = x\n                 break\n         # result is EITHER -1 (no break) OR first positive (break)\n\nModel:   After the loop, `result` has TWO possible values:\n         - The default (-1) if loop completed without break\n         - The break-point value (first positive x) if break executed\n\n         The model must MERGE these two paths correctly.\n         Without proper merge: result is either always -1 (break lost)\n         or always the break value (default lost).\n\nThis is the PHI-NODE problem at loop exit: the variable has different\nvalues depending on which path exited the loop.\n'
+__name__ = '__main__'
+find_first_positive = <function object>
+find_index = <function object>
+has_negative = <function object>
+main = <function object>
+sum_until_zero = <function object>

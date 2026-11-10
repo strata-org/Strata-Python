@@ -1,0 +1,13 @@
+--- stdout 68
+Rex has 4 legs (Labrador)
+Buddy has 4 legs (Golden), handler: Alice
+
+--- outcome
+ok
+--- globals
+Animal = <class 'Animal'>
+Dog = <class 'Dog'>
+GuideDog = <class 'GuideDog'>
+__doc__ = "\nsuper().method() CALL IN OVERRIDING METHOD — NOT TRANSLATED\n\nCPython: super().method() resolves to the parent class's method via MRO.\n         The child can extend behavior by calling super() then adding logic.\n\nModel:   super() has no representation. It's not a ClassInstance, not a\n         builtin, not a function. The translator likely:\n         - Drops the call entirely (silent no-op)\n         - Or fails to resolve which function to call\n\nFinding 008 covers super().__init__() specifically for field initialization.\nThis finding covers super().arbitrary_method() in overriding methods —\nthe parent's logic is LOST, only the child's additions execute.\n"
+__name__ = '__main__'
+main = <function object>

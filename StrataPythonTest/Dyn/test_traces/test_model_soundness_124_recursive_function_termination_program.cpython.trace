@@ -1,0 +1,14 @@
+--- stdout 8
+120 8 4
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nRecursive functions call themselves. The model must handle:\n1. The function's translation must allow self-reference\n2. Termination: the verifier needs a decreasing measure\n3. Stack depth: CPython has a recursion limit (~1000); model is unbounded\n\nIf the translator doesn't support recursion (e.g., requires all callees\nto be defined before callers), recursive functions can't be translated.\n"
+__name__ = '__main__'
+factorial = <function object>
+fibonacci = <function object>
+gcd = <function object>
+main = <function object>
+power = <function object>
+sum_list_recursive = <function object>

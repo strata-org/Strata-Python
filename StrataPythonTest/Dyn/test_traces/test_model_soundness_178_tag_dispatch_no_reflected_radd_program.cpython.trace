@@ -1,0 +1,16 @@
+--- stdout 15
+ababab 5.5 7.5
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nPython's operator dispatch uses a two-step protocol:\n1. Try left operand's __add__ (or __lt__, etc.)\n2. If it returns NotImplemented, try right operand's __radd__\n\nThe Laurel model dispatches by pattern matching on the LEFT tag only.\nThere is no reflected method fallback.\n\nIn the Frontend subset, user-defined __add__/__radd__ are OUT. But the\nBUILT-IN reflected dispatch still matters:\n\n- `int * str`: int.__mul__(str) returns NotImplemented,\n  then str.__rmul__(int) is called → works\n- `int + float`: int.__add__(float) returns NotImplemented,\n  then float.__radd__(int) is called → works (with promotion)\n\nFinding 035 identified `int * str`. Finding 024 identified `int + float`.\nThis finding shows the SYSTEMATIC issue: the model's tag dispatch has\nthe LEFT operand as primary, but Python tries BOTH sides.\n\nFor built-in types, this means the model needs BOTH orderings:\n  PMul(from_int, from_str) AND PMul(from_str, from_int)\n\nUses ONLY confirmed-accepted constructs: int, str, float, *, +.\n"
+__name__ = '__main__'
+float_plus_int = <function object>
+int_div_float = <function object>
+int_minus_float = <function object>
+int_plus_float = <function object>
+int_times_str = <function object>
+main = <function object>
+str_times_int = <function object>
+symmetry_check = <function object>

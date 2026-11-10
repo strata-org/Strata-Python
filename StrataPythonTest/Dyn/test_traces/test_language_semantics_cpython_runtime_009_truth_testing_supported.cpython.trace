@@ -1,0 +1,17 @@
+--- stdout 35
+False
+True
+False
+True
+False
+[1, 2]
+
+--- outcome
+ok
+--- globals
+__doc__ = 'Truth testing: supported case.\nType is known, so truthiness is a pure predicate on the value.\n'
+__name__ = '__main__'
+check_int = <function object>
+check_list = <function object>
+check_none = <function object>
+filter_truthy = <function object>

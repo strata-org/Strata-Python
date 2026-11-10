@@ -1,0 +1,14 @@
+--- stdout 77
+BOUNDARY: naive model might reorder splats; CPython guarantees textual order
+
+--- outcome
+ok
+--- globals
+A = <function object>
+B = <function object>
+C = <function object>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+result = (1, 2, 3, 4)
+trace = ['A', 'B', 'C']

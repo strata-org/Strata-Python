@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Console = <class 'Console'>
+Gauge = <class 'Gauge'>
+Panel = <class 'Panel'>
+__doc__ = None
+__name__ = '__main__'
+adjust = <function object>

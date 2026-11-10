@@ -1,0 +1,13 @@
+--- stdout 11
+all passed
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nTRY/EXCEPT HANDLER RETURN VALUE — MODEL DOESN\'T REACH HANDLER\n\nCPython: def safe_parse(s: str) -> int:\n             try:\n                 return int(s)\n             except ValueError:\n                 return -1\n         safe_parse("abc") → -1 (handler returns -1)\n\nModel:   int(s) either:\n         - Returns Hole (no model for int(), finding 017)\n         - Returns from_int(some_value) (no exception produced)\n         The except handler is UNREACHABLE in the model because\n         int() never produces an exception value.\n\n         Even if int() DID produce exception(ValueError):\n         - Finding 274: no propagation to handler\n         - Finding 113: handler may not match exception type\n         - Finding 206: no stack unwinding\n\n         Result: safe_parse("abc") returns Hole (from int()),\n         not -1 (from handler). The handler code is dead.\n'
+__name__ = '__main__'
+main = <function object>
+parse_or_default = <function object>
+safe_divide = <function object>
+safe_index = <function object>
+safe_parse = <function object>

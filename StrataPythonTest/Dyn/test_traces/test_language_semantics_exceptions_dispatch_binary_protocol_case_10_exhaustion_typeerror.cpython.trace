@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+EVENTS = ['left-add', 'right-radd']
+Left = <class 'Left'>
+RESULT = ('TypeError', ['left-add', 'right-radd'])
+Right = <class 'Right'>
+__doc__ = 'Exhausting all NotImplemented candidates produces TypeError.'
+__name__ = '__main__'

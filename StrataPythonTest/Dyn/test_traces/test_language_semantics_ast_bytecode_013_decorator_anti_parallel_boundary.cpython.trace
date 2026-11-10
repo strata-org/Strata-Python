@@ -1,0 +1,12 @@
+--- stdout 75
+BOUNDARY: naive model applies top-to-bottom; CPython applies bottom-to-top
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+d1 = <function object>
+d2 = <function object>
+f = <function object>
+trace = ['d2', 'd1']

@@ -1,0 +1,13 @@
+--- stdout 6
+5 0 4
+
+--- outcome
+ok
+--- globals
+__doc__ = "\nAfter a `while` loop exits, the loop condition is FALSE. The model must\nassume the negation of the condition after the loop for the solver to\nreason about post-loop state.\n\nExample:\n    while i < n:\n        i = i + 1\n    # Here: i >= n (loop condition negated)\n\nWithout this assumption, the solver doesn't know WHY the loop exited.\nIt can't prove that `i >= n` after the loop, making post-loop assertions\nunprovable.\n\nUses ONLY confirmed-accepted constructs: while, int, comparison, function def.\n"
+__name__ = '__main__'
+binary_search_steps = <function object>
+count_to_zero = <function object>
+drain_list = <function object>
+find_threshold = <function object>
+main = <function object>

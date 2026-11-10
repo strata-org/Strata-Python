@@ -1,0 +1,13 @@
+--- stdout 9
+150 50 5
+
+--- outcome
+ok
+--- globals
+__doc__ = '\nWhen iterating `for x in lst` with a while-loop equivalent\n`while i < len(lst)`, the loop bound `len(lst)` must remain stable\nacross iterations. Under value semantics (pure functions), if `lst`\nis reassigned inside the loop (e.g., `lst = lst + [x]`), the length\nchanges. The model must correctly re-evaluate `len(lst)` each iteration.\n\nBut if `lst` is NOT reassigned, `len(lst)` is invariant. The model\nmust know this to prove termination (i increases, len(lst) is fixed).\n'
+__name__ = '__main__'
+count_above = <function object>
+find_max = <function object>
+growing_loop = <function object>
+main = <function object>
+sum_with_index = <function object>
