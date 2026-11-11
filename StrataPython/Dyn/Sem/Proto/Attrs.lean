@@ -244,6 +244,10 @@ def excSetAttr [PyWrites m V] (v : V) (t : Builtin) (n : String) (k : DescrKind)
 /-- An attribute write (`val = some x`) or deletion (`none`) on the instance `v`, as
 `PyObject_GenericSetAttr` does it: a data descriptor on the type, else `v`'s `__dict__`. -/
 def genericSetAttr [PyWrites m V] (v t : V) (name : String) (val : Option V) : m Unit := do
+  -- A native function that a piece makes (`NativeKind.function`) is a Python function in CPython,
+  -- whose writes go to its getsets and its `__dict__`, which the native doesn't follow.
+  if let some (.native { kind := .function, qualname, .. }) ← PyReads.objView v then
+    PyPure.gap s!"an attribute write to the function {qualname} is not modelled yet"
   if let some cd ← classData? t then
     if cd.instanceWritesGap then
       PyPure.gap s!"an attribute write to an instance of {cd.name} is not modelled yet"

@@ -67,6 +67,7 @@ public environment PyT extends Py where
   insn groupLenHint (^err (exc : Value)) : Value
   insn objPrims (^err (exc : Value)) : Value
   insn dictWalkSub (k : base.Int) (^err (exc : Value)) : Value
+  insn nativeWrite (k : base.Int) (^err (exc : Value)) : Value
   insn dictOrSub (k : base.Int) (^err (exc : Value)) : Value
   insn bindCase (i : base.Int) (^err (exc : Value)) : Value
   insn subclassOps (^err (exc : Value)) : Value
@@ -291,6 +292,23 @@ dict's reads (`6`). The cases that read the entries directly give the result's l
       | 2 | 5 => Builtins.dictOrBody "__or__" false d (.tuple #[e]) (← PyPure.allocDict)
       | _ => Builtins.dictOrBody "__or__" false e (.tuple #[d]) (← PyPure.allocDict)
     pure (Value.int (← PyReads.dictLen r))
+    : PyM σ .writes true Value)
+
+/-- A write of `__name__` (`0`) and of a plain name (`1`), a deletion of a plain name (`2`), and
+`object.__setattr__` (`3`) and `object.__delattr__` (`4`) of a plain name, on a native function:
+each stops with a gap. -/
+@[dyn_sem PyT.nativeWrite, expose] public def nativeWrite (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let f ← PyPure.allocObj (.builtin .function) (.native
+      { key := "k", kind := .function, name := "cast", qualname := "cast", «module» := "typing" })
+    match k with
+    | 0 => Proto.setAttr f "__name__" (some (Value.ofString "z"))
+    | 1 => Proto.setAttr f "foo" (some (.int 1))
+    | 2 => Proto.setAttr f "foo" none
+    | 3 => discard <| Builtins.objectSetattr f (.tuple #[Value.ofString "foo", .int 1]) (← PyPure.allocDict)
+    | _ => discard <| Builtins.objectDelattr f (.tuple #[Value.ofString "foo"]) (← PyPure.allocDict)
+    pure Value.none
     : PyM σ .writes true Value)
 
 /-- `guardDictWalk` of an empty dict into an instance of a subclass of `dict`, which it reads as a
@@ -981,7 +999,7 @@ def ptEffect : String → Effects.Level
   | "pt.callNew" => .calls
   | "pt.raiseIn" => .writes
   | "pt.classOfNew" | "pt.dictWalkSub" => .reads
-  | "pt.dictOrSub" => .writes
+  | "pt.nativeWrite" | "pt.dictOrSub" => .writes
   | "pt.probeCase" => .reads
   | "pt.requireIn" => .writes
   | "pt.importGaps" => .writes
@@ -1236,6 +1254,26 @@ info: StrataPython.Dyn.Sem.Value.tuple
 /-- info: fault: Strata.Dyn.Exec.Fault.gap "a walk of a dict whose comparisons may run user code is not modelled yet" -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.dictWalkSub(1) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "an attribute write to the function cast is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.nativeWrite(0) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "an attribute write to the function cast is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.nativeWrite(1) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "an attribute write to the function cast is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.nativeWrite(2) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "an attribute write to the function cast is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.nativeWrite(3) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "an attribute write to the function cast is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.nativeWrite(4) ^err.0()"
 
 /-- info: fault: Strata.Dyn.Exec.Fault.gap "a | of a dict whose class overrides how its entries are read is not modelled yet" -/
 #guard_msgs in
