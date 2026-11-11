@@ -18,9 +18,9 @@ set_option autoImplicit false
 # The contract operations on instances of subclasses of built-in classes
 
 A test environment, `PyR`, adds one instruction, `pr.hcase(i)`, whose rule builds instances of
-subclasses of `str`, `tuple`, `dict` and `int` by hand and applies the case `i` of a contract
-operation to them, so that the cases don't depend on which of these classes' `__new__` the
-semantics models for a subclass.  Each operation
+subclasses of `str`, `tuple`, `dict`, `int` and `bytes` by hand and applies the case `i` of a
+contract operation to them, so that the cases don't depend on which of these classes' `__new__`
+the semantics models for a subclass.  Each operation
 that asks for exactly a `str`, a tuple or a dict ignores them, as its docstring says.
 -/
 
@@ -87,6 +87,25 @@ public def hcaseM (i : Int) : PyM σ .writes false Value := do
   | 17 => Contracts.len sx                                      -- 1
   | 18 => Contracts.len t12                                     -- 2
   | 19 => Contracts.len dx                                      -- 1
+  | 20 => bv <$> Contracts.reSearch "^x$" sx                   -- the stored str is searched: True
+  | 21 => do                                                   -- a subclass of bytes: TypeError
+    let Bs ← subclassOf "Bs" .bytes
+    bv <$> Contracts.reSearch "a" (← PyReads.allocInstance Bs (.bytes #[97]) #[] #[])
+  | 22 => do                                                   -- a str subclass with __buffer__: True
+    let Sb ← subclassOf "Sb" .str
+    let some cd ← Proto.classData? Sb | pure .none
+    PyWrites.dictSet cd.ns (.ofString "__buffer__") .none none fun _ => pure false
+    bv <$> Contracts.reSearch "x" (← PyReads.allocInstance Sb (.str (.ofString "x")) #[] #[])
+  | 23 => do                                                   -- a bytes subclass with __buffer__: gap
+    let Bb ← subclassOf "Bb" .bytes
+    let some cd ← Proto.classData? Bb | pure .none
+    PyWrites.dictSet cd.ns (.ofString "__buffer__") .none none fun _ => pure false
+    bv <$> Contracts.reSearch "a" (← PyReads.allocInstance Bb (.bytes #[97]) #[] #[])
+  | 24 => do                                                   -- a bytes subclass with
+    let Br ← subclassOf "Br" .bytes                            -- __release_buffer__: gap
+    let some cd ← Proto.classData? Br | pure .none
+    PyWrites.dictSet cd.ns (.ofString "__release_buffer__") .none none fun _ => pure false
+    bv <$> Contracts.reSearch "a" (← PyReads.allocInstance Br (.bytes #[97]) #[] #[])
   | _ => pure .none
 
 @[dyn_sem PyR.hcase, expose] public def hcase (i : Int) (err : Target E [Value]) : Sem ε E Value :=
@@ -110,7 +129,10 @@ def runText (text : String) : IO Unit := do
     | .ok _, some (.obj id) =>
       match o.snapshot.world.store.get? id with
       | some { cls, payload := .exc e, .. } =>
-        IO.println s!"exception {reprStr cls} {reprStr e.args}"
+        let args := match e.args with
+          | .tuple xs => xs.toList.map fun (x : Value) => match x with | .str t => t.s | v => reprStr v
+          | v => [reprStr v]
+        IO.println s!"exception {reprStr cls} {args}"
       | _ => IO.println s!"object {id}"
     | .ok _, some v => IO.println (reprStr v)
     | .ok _, none => IO.println "a result that is not a value"
@@ -187,4 +209,19 @@ def hcaseRun (i : Nat) : IO Unit := runText s!"module m \{
 /-- info: StrataPython.Dyn.Sem.Value.int 1 -/
 #guard_msgs in
 #eval hcaseRun 19
+/-- info: StrataPython.Dyn.Sem.Value.bool true -/
+#guard_msgs in
+#eval hcaseRun 20
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) [cannot use a string pattern on a bytes-like object] -/
+#guard_msgs in
+#eval hcaseRun 21
+/-- info: StrataPython.Dyn.Sem.Value.bool true -/
+#guard_msgs in
+#eval hcaseRun 22
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "py.reSearch: a subject whose class defines __buffer__ is not modelled" -/
+#guard_msgs in
+#eval hcaseRun 23
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "py.reSearch: a subject whose class defines __release_buffer__ is not modelled" -/
+#guard_msgs in
+#eval hcaseRun 24
 end StrataPython.Dyn.Sem.ContractSubclassTest

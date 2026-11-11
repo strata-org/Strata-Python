@@ -22,8 +22,7 @@ set_option autoImplicit false
   that runs a region whose parameter is a ref (`pt.regionCell`; `pt.regionValue`, its twin on a
   `Value`, gets its theorem).
 * A computation at `reads` can't use a `writes` primitive: Lean finds no instance.
-* `#dyn_coverage Py (complete)` names what has no rule yet: the contract operations `reSearch` and
-  the quantifiers.
+* `#dyn_coverage Py (complete)` names what has no rule yet: the quantifiers of the contracts.
 -/
 
 namespace StrataPython.Dyn.Sem.RuleTheoremsTest
@@ -3945,8 +3944,7 @@ Hint: Type class instance resolution failures can be inspected with the `set_opt
 #guard_msgs in
 example {σ : Type} [Store σ] [Decode σ] : PyM σ .reads true Unit := PyWrites.write "x"
 
--- Every instruction of `Py` has a rule, but the contract operations `reSearch` and the
--- quantifiers.
+-- Every instruction of `Py` has a rule, but the quantifiers of the contracts.
 -- `BaseExceptionGroup.__new__` stops with a gap where CPython would run a user length hint.
 /-- info: fault: Strata.Dyn.Exec.Fault.gap "a length hint of user code inside BaseExceptionGroup.__new__ is not modelled yet" -/
 #guard_msgs in
@@ -3975,7 +3973,7 @@ example {σ : Type} [Store σ] [Decode σ] : PyM σ .reads true Unit := PyWrites
 #eval run "      %v.0 : py.Value = pt.importGaps(4) ^err.0()"
 
 /--
-error: Py is not fully covered: no rule for py.reSearch, py.allIn, py.anyIn, py.allItems, py.anyItems
+error: Py is not fully covered: no rule for py.allIn, py.anyIn, py.allItems, py.anyItems
 -/
 #guard_msgs in
 #dyn_coverage Py (complete)

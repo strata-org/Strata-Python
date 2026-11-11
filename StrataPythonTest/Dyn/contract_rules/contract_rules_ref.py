@@ -88,3 +88,9 @@ def builtin(name):
     """The value of `name` in the module `builtins`, whatever the program binds `name` to."""
     import builtins
     return getattr(builtins, name)
+
+
+def reSearch_ref(pattern, s):
+    """Whether `re.search(pattern, s)` finds a match, with the standard library's `re`."""
+    import re
+    return re.search(pattern, s) is not None

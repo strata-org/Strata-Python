@@ -81,7 +81,8 @@ instance of a subclass, unless the item says otherwise.
 * the bound `__exit__` of a `with`: the `exit` of `exitWithExc`;
 * what `pushExcInfo` or `pushPending` returned: the `prev` of `popExcept`;
 * for `reSearch`: a `pattern` that compiles without a warning and without `RecursionError`,
-  and an `s` that is a `str` or whose class and its bases define no `__buffer__` in Python;
+  and an `s` that is a `str` or whose class and its bases define no `__buffer__` in Python and,
+  if `s` supports the buffer protocol, no `__release_buffer__` in Python;
 * a name that CPython 3.12's standard library defines as a class: `stdClass`, which also
   assumes that the program has not run a second time the body of the module that creates that
   class.
@@ -670,7 +671,9 @@ public environment Py extends Base where
   such as the `FutureWarning` of `"[[a]"`: the warning filters decide whether the warning is raised,
   and the program's `warnings.showwarning` may run.  Compiling `pattern` raises `RecursionError`,
   which depends on the depth of the call stack.  Or `s` is not a `str`, and its class or a base of
-  it defines `__buffer__` in Python (PEP 688): CPython runs that method. -/
+  it defines `__buffer__` in Python (PEP 688), or `s` supports the buffer protocol and its class
+  or a base of it defines `__release_buffer__` in Python, as a subclass of `bytes` can: CPython
+  runs that method. -/
   reads insn reSearch (pattern : String) (s : Value) (^err (exc : Value)) : Bool
   /-- Whether `v` is exactly a `str`, not an instance of a subclass, with the characters of one
   of `lits`.  It runs no user code.  It implies `v == lits[0] or v == lits[1] or …`, since `==`

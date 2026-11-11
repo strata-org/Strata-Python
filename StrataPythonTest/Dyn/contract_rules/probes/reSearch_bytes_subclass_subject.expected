@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+B = <class 'B'>
+__doc__ = None
+__name__ = '__main__'
+s = <B object>
+--- result __main__.__probe__
+raised TypeError: cannot use a string pattern on a bytes-like object

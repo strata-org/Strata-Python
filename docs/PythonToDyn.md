@@ -2720,16 +2720,17 @@ is recorded as caught.
   `__warningregistry__`, which a program can read, so where CPython 3.12 warns, the semantics
   stops with a gap: `~` on a `bool`, an `__index__` that returns a `bool` or an instance of a
   subclass of `int`, and the truth of `NotImplemented` (each a `DeprecationWarning`).
-- Contracts: the operations on a call's arguments (`py.argOf`, `py.extraKwargs`, `py.bindsTo`)
-  and the tests (`py.stdClass`, `py.isInstance`, `py.typeIsSubclass`, `py.len`, `py.strIsOneOf`,
-  `py.intIsOneOf`, `py.isImmutableScalar`, `py.dictKeysWithin`), each as its docstring in
-  `StrataPython/Dyn/Env.lean` says. `py.stdClass` stops with a gap outside `builtins`;
-  `py.typeIsSubclass` stops with a gap on a class whose metaclass is `abc.ABCMeta` or a subclass of it, and
-  `py.intIsOneOf` on an `int` whose value depends on the hash seed. The operations that make the
-  locations of a frame (`py.attrLoc`, `py.itemLoc`,
-  `py.objLoc`, `py.reachLoc`, `py.instanceState` and `base.cellLoc`) stop with a gap, since
-  frames have no meaning at run time, and so does `base.old`, since a run doesn't keep the state
-  at the call.
+- Contracts: the operations on a call's arguments (`py.argOf`, `py.extraKwargs`, `py.bindsTo`) and
+  the tests (`py.stdClass`, `py.isInstance`, `py.typeIsSubclass`, `py.len`, `py.strIsOneOf`,
+  `py.intIsOneOf`, `py.isImmutableScalar`, `py.dictKeysWithin`, `py.reSearch`), each as its
+  docstring in `StrataPython/Dyn/Env.lean` says. `py.stdClass` stops with a gap outside `builtins`;
+  `py.typeIsSubclass` stops with a gap on a class whose metaclass is `abc.ABCMeta` or a subclass of
+  it, and `py.intIsOneOf` on an `int` whose value depends on the hash seed. `py.reSearch` searches
+  with a matcher of a subset of `re`'s syntax, and stops with a gap on a pattern outside it, an
+  invalid one included. The operations that make the locations of a frame (`py.attrLoc`,
+  `py.itemLoc`, `py.objLoc`, `py.reachLoc`, `py.instanceState` and `base.cellLoc`) stop with a gap,
+  since frames have no meaning at run time, and so does `base.old`, since a run doesn't keep the
+  state at the call.
 
 ### 13.4 Known differences
 

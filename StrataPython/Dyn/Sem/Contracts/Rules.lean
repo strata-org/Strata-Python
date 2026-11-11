@@ -51,6 +51,10 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
 @[dyn_sem Py.len] def lenRule (v : Value) (err : Target E [Value]) : Sem ε E Value :=
   runRuleFree err #[] (len (m := PyM σ .calls true) v)
 
+@[dyn_sem Py.reSearch] def reSearchRule (pattern : String) (s : Value) (err : Target E [Value]) :
+    Sem ε E Bool :=
+  runRuleFree err #[] (reSearch (m := PyM σ .reads true) pattern s)
+
 @[dyn_sem Py.strIsOneOf] def strIsOneOfRule (v : Value) (lits : Array String) : Sem ε E Bool :=
   runTotalFree "py.strIsOneOf" #[] (strIsOneOf (m := PyM σ .pure true) v lits)
 

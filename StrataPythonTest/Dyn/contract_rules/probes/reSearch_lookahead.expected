@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+s = 'ab'
+--- result __main__.__probe__
+--- gap py.reSearch: a pattern outside the modelled subset of re

@@ -7,6 +7,7 @@ module
 public import StrataPython.Dyn.Sem.Builtins.Classes
 public import StrataPython.Dyn.Sem.Proto.Iter
 public import StrataPython.Dyn.Sem.Proto.Values
+public import StrataPython.Dyn.Sem.Contracts.Regex
 
 set_option autoImplicit false
 
@@ -17,15 +18,16 @@ Generic over the record of primitives, as the other combinators of `Sem/Proto/` 
 its operation's docstring in `StrataPython/Dyn/Env.lean`:
 
 * the arguments of a call: `argOf`, `extraKwargs`, `bindsTo`;
-* the tests: `stdClass`, `typeIsSubclass`, `strIsOneOf`, `intIsOneOf`, `isImmutableScalar`,
-  `dictKeysWithin`; `isInstance` and `len` are the combinators of `isinstance` and `len`.
+* the tests: `stdClass`, `typeIsSubclass`, `reSearch`, `strIsOneOf`, `intIsOneOf`,
+  `isImmutableScalar`, `dictKeysWithin`; `isInstance` and `len` are the combinators of `isinstance`
+  and `len`.
 
 A key or a value counts as a `str` here only if it is exactly a `str`, which the model keeps as an
-immediate; an instance of a subclass of `str` is an object, and never counts.  So only
-`isInstance` and `len` run user code, as `isinstance` and `len` do.  An operand that is unassigned (`undef`) is no `str`, `int`, tuple or dict, so the
+immediate; an instance of a subclass of `str` is an object, and never counts, except for the subject
+of `reSearch`, as its docstring says. So only `isInstance` and `len` run user code, as `isinstance`
+and `len` do. An operand that is unassigned (`undef`) is no `str`, `int`, tuple or dict, so the
 operations whose docstrings are total in their operand's kind treat it as one of the other kinds,
-and the operations that would raise stop with a gap on it, since CPython has no unassigned
-values.
+and the operations that would raise stop with a gap on it, since CPython has no unassigned values.
 -/
 
 namespace StrataPython.Dyn.Sem.Contracts
@@ -159,6 +161,44 @@ def isInstance [PyCalls m V] (v cls : V) : m Bool := do
 def len [PyCalls m V] (v : V) : m V := do
   if ← PyPure.isUndef v then PyPure.gap "py.len: an operand is undefined"
   return PyPure.imm (m := m) (.int (← Proto.pyLen v))
+
+/-- The first class along the MRO of `type(s)` whose own namespace defines `name`, if any. -/
+def ownerAlongMro? [PyReads m V] (s : V) (name : String) : m (Option V) := do
+  let some mro ← Proto.mroOf (← PyReads.classOf s) |
+    PyPure.modelInvariant "py.reSearch: the type of a value has no MRO"
+  let k := PyPure.imm (m := m) (.str (.ofString name))
+  for c in mro do
+    if (← Proto.lookupOwnK c name k).isSome then return some c
+  return none
+
+/-- `py.reSearch pattern s`: whether `re.search(pattern, s)` finds a match. A pattern outside the
+subset that `Regex.parse` reads, an invalid one included, stops with a gap before `s` is looked at,
+as CPython compiles the pattern first; so does an undefined `s`. A `str`, or an instance of a
+subclass of `str`, is searched. Otherwise the first class along the MRO of `type(s)` that defines
+`__buffer__` decides: `bytes` raises `TypeError`, unless a class of the MRO defines
+`__release_buffer__`: CPython runs it first, so the rule stops with a gap; any other class stops
+with a gap, since CPython calls its `__buffer__`; and if no class defines it, the `TypeError` names
+the type. -/
+def reSearch [PyReads m V] (pattern : String) (s : V) : m Bool := do
+  let some r := Regex.parse pattern |
+    PyPure.gap "py.reSearch: a pattern outside the modelled subset of re"
+  if ← PyPure.isUndef s then PyPure.gap "py.reSearch: an operand is undefined"
+  let str? ← match ← PyPure.immViewAll s with
+    | some (.str t) => pure (some t)
+    | some _ => pure none
+    | none => PyReads.strView s
+  if let some t := str? then return Regex.search Regex.pyClasses r t.chars.get
+  match ← ownerAlongMro? s "__buffer__" with
+  | none =>
+    Proto.raiseBuiltin "TypeError"
+      s!"expected string or bytes-like object, got '{← Proto.typeName s}'"
+  | some c =>
+    if (← PyPure.immView c) matches some (.builtin .bytes) then
+      -- `bytes` and `object` define no `__release_buffer__`, so an owner is a program's class.
+      if (← ownerAlongMro? s "__release_buffer__").isSome then
+        PyPure.gap "py.reSearch: a subject whose class defines __release_buffer__ is not modelled"
+      Proto.raiseBuiltin "TypeError" "cannot use a string pattern on a bytes-like object"
+    PyPure.gap "py.reSearch: a subject whose class defines __buffer__ is not modelled"
 
 /-- `py.strIsOneOf v lits`: whether `v` is exactly a `str` with the characters of one of `lits`. -/
 def strIsOneOf [PyPure m V] (v : V) (lits : Array String) : m Bool := do

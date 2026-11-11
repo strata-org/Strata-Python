@@ -328,6 +328,20 @@ def callValues : String := "      %one.0 : py.Value = py.intLit(1)
 #guard_msgs in
 #eval run (mainBool (callValues ++ "      %b.0 : base.Bool = py.dictKeysWithin(%args.0, \"c\")"))
 
+/-! ## `reSearch` on an undefined subject -/
+
+-- An undefined subject stops with a gap, but only after the pattern is read.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "py.reSearch: an operand is undefined" -/
+#guard_msgs in
+#eval run (main "      %u.0 : py.Value = py.undef(\"u\")
+      %b.0 : base.Bool = py.reSearch(\"a\", %u.0) ^err.0()
+      %v.0 : py.Value = py.boolLit(true)")
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "py.reSearch: a pattern outside the modelled subset of re" -/
+#guard_msgs in
+#eval run (main "      %u.0 : py.Value = py.undef(\"u\")
+      %b.0 : base.Bool = py.reSearch(\"(\", %u.0) ^err.0()
+      %v.0 : py.Value = py.boolLit(true)")
+
 /-! ## An `int` whose value depends on the hash seed -/
 
 /-- The instructions that make `%h.0 = "a".__hash__()`, whose value depends on the hash seed. -/

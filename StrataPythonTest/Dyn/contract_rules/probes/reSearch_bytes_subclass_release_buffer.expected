@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+B = <class 'B'>
+__doc__ = None
+__name__ = '__main__'
+log = []
+s = <B object>
+--- result __main__.__probe__
+--- gap py.reSearch: a subject whose class defines __release_buffer__ is not modelled
