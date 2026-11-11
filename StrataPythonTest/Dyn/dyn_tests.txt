@@ -470,6 +470,7 @@ s318_getitem_iter_reentrant | yes |
 s319_length_hint_len_ends | yes |
 s320_bound_method_arity | yes |
 s321_kwargs_not_str | yes |
+s322_dunder_arity_messages | yes |
 s129_iter_builtins | yes |
 s130_iter_loops | yes |
 s131_dict_merge | yes |

@@ -1,0 +1,28 @@
+--- stdout 930
+TypeError expected 0 arguments, got 1
+TypeError wrapper __repr__() takes no keyword arguments
+TypeError expected 0 arguments, got 1
+TypeError expected 0 arguments, got 1
+TypeError dict.__contains__() takes exactly one argument (0 given)
+TypeError dict.__getitem__() takes exactly one argument (0 given)
+TypeError list.__getitem__() takes exactly one argument (0 given)
+TypeError list.__getitem__() takes exactly one argument (2 given)
+TypeError list.__getitem__() takes no keyword arguments
+TypeError expected 0 arguments, got 1
+TypeError expected 0 arguments, got 1
+TypeError expected 0 arguments, got 1
+TypeError expected 0 arguments, got 1
+TypeError expected 0 arguments, got 1
+set.__contains__() takes exactly one argument (0 given)
+set.__contains__() takes exactly one argument (2 given)
+' expected 1 argument, got 0'
+' expected 1 argument, got 2'
+' expected 1 argument, got 0'
+'wrapper __mul__() takes no keyword arguments'
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+call = <function object>

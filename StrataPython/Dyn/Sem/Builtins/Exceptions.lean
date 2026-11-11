@@ -140,12 +140,19 @@ def argsStr [PyCalls m V] (xs : Array V) : m String := do
   | #[x] => argStr x
   | _ => strTextOf (PyPure.imm (m := m) (.tuple xs))
 
+/-- The arguments of a slot wrapper that takes none, such as `__str__` and `__repr__`: CPython's
+"expected 0 arguments" and "takes no keyword arguments". -/
+def wrapperNoArgs [PyReads m V] (name : String) (args kwargs : V) : m Unit :=
+  discard <| bindBuiltinArgs { name, qualname := name, style := .wrapper, maxpos := 0 } args kwargs
+
 /-- **`BaseException.__str__`**. -/
-def baseExcStr [PyWrites m V] (self _args _kwargs : V) : m V := do
+def baseExcStr [PyWrites m V] (self args kwargs : V) : m V := do
+  wrapperNoArgs "__str__" args kwargs
   return PyPure.imm (m := m) (.str (.ofString (← argsStr (← excArgs self))))
 
 /-- **`KeyError.__str__`**: the `repr` of a single argument, else `BaseException.__str__`. -/
 def keyErrorStr [PyWrites m V] (self args kwargs : V) : m V := do
+  wrapperNoArgs "__str__" args kwargs
   match ← excArgs self with
   | #[x] => return PyPure.imm (m := m) (.str (.ofString (← reprTextOf x)))
   | _ => baseExcStr self args kwargs
@@ -156,13 +163,15 @@ def excField [PyReads m V] (e : V) (n : String) : m (Option V) := do
 
 /-- **`ImportError.__str__`**: `msg` if it is an exact `str`, else `BaseException.__str__`. -/
 def importErrorStr [PyWrites m V] (self args kwargs : V) : m V := do
+  wrapperNoArgs "__str__" args kwargs
   if let some msg ← excField self "msg" then
     if (← PyPure.immView msg) matches some (.str _) then return msg
   baseExcStr self args kwargs
 
 /-- **`BaseException.__repr__`**: the class's name, then `(arg)` for one argument or the args
 tuple's `repr`. -/
-def baseExcRepr [PyWrites m V] (self _args _kwargs : V) : m V := do
+def baseExcRepr [PyWrites m V] (self args kwargs : V) : m V := do
+  wrapperNoArgs "__repr__" args kwargs
   let n ← excTypeName self
   -- `%R` of the one argument, or of the args tuple.
   let s ← match ← excArgs self with
@@ -278,6 +287,7 @@ def osErrorInit [PyWrites m V] (self args kwargs : V) : m V := do
 `filename` is set, `[Errno n] strerror` when both are set, else `BaseException.__str__`; an unset
 `errno` or `strerror` prints as `None`. -/
 def osErrorStr [PyWrites m V] (self args kwargs : V) : m V := do
+  wrapperNoArgs "__str__" args kwargs
   let orNone (v : Option V) : m String := do
     match v with
     | some x => argStr x
@@ -356,7 +366,8 @@ def excGroupNew [PyWrites m V] (self args kwargs : V) : m V := do
   pure e
 
 /-- **`BaseExceptionGroup.__str__`**: `message (n sub-exception(s))`. -/
-def excGroupStr [PyWrites m V] (self _args _kwargs : V) : m V := do
+def excGroupStr [PyWrites m V] (self args kwargs : V) : m V := do
+  wrapperNoArgs "__str__" args kwargs
   let some msg ← excField self "message" | PyPure.gap "an exception group without message"
   let some ex ← excField self "exceptions" | PyPure.gap "an exception group without exceptions"
   let n := (← tupleItems ex).size

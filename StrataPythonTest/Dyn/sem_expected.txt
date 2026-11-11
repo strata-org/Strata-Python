@@ -425,6 +425,7 @@ s319_length_hint_len_ends | gap | a __len__ that ended the iterator it measures 
 s31_function_attrs | agree
 s320_bound_method_arity | gap | an argument error of the method BaseException.add_note bound to an instance of a subtype is not modelled yet
 s321_kwargs_not_str | gap | a call of a built-in with a keyword that is not a str is not modelled yet
+s322_dunder_arity_messages | agree
 s32_number_dunders | agree
 s33_repeat_index | agree
 s34_container_dunders | agree

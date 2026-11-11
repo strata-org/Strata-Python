@@ -1,0 +1,20 @@
+module top
+  BaseException: global implicit (referenced)
+  BaseExceptionGroup: global implicit (referenced)
+  Exception: global implicit (referenced)
+  ImportError: global implicit (referenced)
+  KeyError: global implicit (referenced)
+  NameError: global implicit (referenced)
+  OSError: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  call: local (assigned, referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  repr: global implicit (referenced)
+  type: global implicit (referenced)
+  function lambda
+  function lambda
+  function lambda
+  function lambda
+qualnames: <lambda>, <lambda>, <lambda>, <lambda>

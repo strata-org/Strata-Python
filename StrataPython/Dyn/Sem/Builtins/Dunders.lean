@@ -67,6 +67,25 @@ def oneArg [PyReads m V] (name : String) (args kwargs : V) : m V := do
   let #[some o] := b.params | PyPure.modelInvariant "a slot wrapper: the binder's assumption failed"
   pure o
 
+/-- The one argument of the dunder `name` of the built-in type `t`: bound as a method's
+(`METH_O`), with CPython's "t.name() takes exactly one argument", where `t`'s table has the
+dunder as a method (`list.__getitem__`, `dict.__contains__`); else as a slot wrapper's. -/
+def oneArgOf [PyReads m V] (t : Builtin) (name : String) (args kwargs : V) : m V := do
+  if (t.ownNames.find? (·.1 == name)) matches some (_, .method) then
+    let b ← bindBuiltinArgs { name, qualname := s!"{t.info.name}.{name}", style := .methO } args kwargs
+    let #[some o] := b.params | PyPure.modelInvariant "a method: the binder's assumption failed"
+    return o
+  oneArg name args kwargs
+
+/-- The one argument of a repetition's slot wrapper (`__mul__`, `__rmul__` and `__imul__` of a
+sequence, CPython's `wrap_indexargfunc`), whose count error has no name before "expected". -/
+def indexArg [PyReads m V] (name : String) (args kwargs : V) : m V := do
+  let some (.tuple xs) ← PyPure.immView args | PyPure.gap "an args value that is not a tuple"
+  if xs.size != 1 then
+    if (← PyReads.dictLen kwargs) == 0 then
+      raiseBuiltin "TypeError" s!" expected 1 argument, got {xs.size}"
+  oneArg name args kwargs
+
 /-- A slot wrapper's call with no argument. -/
 def noArg [PyReads m V] (name : String) (args kwargs : V) : m Unit := do
   discard <| bindBuiltinArgs (wrapperSig name 0) args kwargs
@@ -201,13 +220,13 @@ def lenBoolBody [PyWrites m V] (self args kwargs : V) : m V := do
   pure (PyPure.imm (m := m) (.bool ((← lenCore self) != 0)))
 
 /-- `t.__contains__(self, x)`. -/
-def containsBody [PyWrites m V] (self args kwargs : V) : m V := do
-  let x ← oneArg "__contains__" args kwargs
+def containsBody [PyWrites m V] (t : Builtin) (self args kwargs : V) : m V := do
+  let x ← oneArgOf t "__contains__" args kwargs
   pure (PyPure.imm (m := m) (.bool (← containsCore x self)))
 
 /-- `t.__getitem__(self, key)` for a sequence or a range. -/
-def getItemBody [PyWrites m V] (self args kwargs : V) : m V := do
-  getItemCore self (← oneArg "__getitem__" args kwargs)
+def getItemBody [PyWrites m V] (t : Builtin) (self args kwargs : V) : m V := do
+  getItemCore self (← oneArgOf t "__getitem__" args kwargs)
 
 /-- `t.__setitem__(self, key, value)`. -/
 def setItemBody [PyWrites m V] (self args kwargs : V) : m V := do
@@ -242,7 +261,7 @@ def seqAddBody [PyWrites m V] (t : Builtin) (self args kwargs : V) : m V := do
 /-- `t.__mul__(self, n)` and `t.__rmul__(self, n)` for a sequence: the repetition, or CPython's
 `TypeError` for a count without `__index__`. -/
 def seqMulBody [PyWrites m V] (name : String) (self args kwargs : V) : m V := do
-  let o ← oneArg name args kwargs
+  let o ← indexArg name args kwargs
   if let some r ← repeatSeq self o then return r
   raiseBuiltin "TypeError" s!"'{← typeName o}' object cannot be interpreted as an integer"
 
@@ -271,7 +290,7 @@ def listIaddBody [PyWrites m V] (self args kwargs : V) : m V := do
 
 /-- `list.__imul__(self, n)`: `self` repeated in place. -/
 def listImulBody [PyWrites m V] (self args kwargs : V) : m V := do
-  let o ← oneArg "__imul__" args kwargs
+  let o ← indexArg "__imul__" args kwargs
   if (← listOf? self).isNone then PyPure.gap "__imul__: the receiver is not a list"
   let some k ← repeatCount o |
     raiseBuiltin "TypeError" s!"'{← typeName o}' object cannot be interpreted as an integer"
@@ -287,8 +306,8 @@ def seqDunder (t : Builtin) (name : String) : Option BuiltinImpl :=
   if let some op := cmpOf? name then some fun {_} {_} [_] [_] => seqCmpBody t name op
   else match name with
     | "__len__" => some fun {_} {_} [_] [_] => lenBody
-    | "__contains__" => some fun {_} {_} [_] [_] => containsBody
-    | "__getitem__" => some fun {_} {_} [_] [_] => getItemBody
+    | "__contains__" => some fun {_} {_} [_] [_] => containsBody t
+    | "__getitem__" => some fun {_} {_} [_] [_] => getItemBody t
     | "__hash__" => if t == .list then none else some fun {_} {_} [_] [_] => valueHashBody
     | "__add__" => if t == .range then none else some fun {_} {_} [_] [_] => seqAddBody t
     | "__mul__" | "__rmul__" =>
@@ -303,7 +322,7 @@ def seqDunder (t : Builtin) (name : String) : Option BuiltinImpl :=
 /-- `dict.__getitem__(self, key)`: the value; for an instance of a subclass, its type's
 `__missing__` where the key is absent; else `KeyError`. -/
 def dictGetItemBody [PyWrites m V] (self args kwargs : V) : m V := do
-  let k ← oneArg "__getitem__" args kwargs
+  let k ← oneArgOf .dict "__getitem__" args kwargs
   if let some v ← dictFindKey self k then return v
   if !(← isDict self) then
     if let some r ← callSpecial? self "__missing__" #[k] then return r
@@ -363,7 +382,7 @@ def dictDunder (name : String) : Option BuiltinImpl :=
   if let some op := cmpOf? name then some fun {_} {_} [_] [_] => dictCmpBody name op
   else match name with
     | "__len__" => some fun {_} {_} [_] [_] => lenBody
-    | "__contains__" => some fun {_} {_} [_] [_] => containsBody
+    | "__contains__" => some fun {_} {_} [_] [_] => containsBody .dict
     | "__getitem__" => some fun {_} {_} [_] [_] => dictGetItemBody
     | "__setitem__" => some fun {_} {_} [_] [_] => setItemBody
     | "__delitem__" => some fun {_} {_} [_] [_] => delItemBody
@@ -421,7 +440,7 @@ def setDunder (t : Builtin) (name : String) : Option BuiltinImpl :=
   else if let some (op, r) := setOpOf? name then some fun {_} {_} [_] [_] => setBinBody name op r
   else match name with
     | "__len__" => some fun {_} {_} [_] [_] => lenBody
-    | "__contains__" => some fun {_} {_} [_] [_] => containsBody
+    | "__contains__" => some fun {_} {_} [_] [_] => containsBody t
     | "__hash__" => if t == .frozenset then some fun {_} {_} [_] [_] => frozensetHashBody else none
     | "__ior__" => if t == .set then some fun {_} {_} [_] [_] => setInplaceBody name .or else none
     | "__iand__" => if t == .set then some fun {_} {_} [_] [_] => setInplaceBody name .and else none
