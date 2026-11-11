@@ -1,0 +1,40 @@
+module top
+  A: local (assigned, referenced)
+  L: local (assigned, referenced)
+  d: local (assigned, referenced)
+  d1: local (assigned, referenced)
+  d2: local (assigned, referenced)
+  e: local (assigned, referenced)
+  it: local (assigned, referenced)
+  k: local (assigned, referenced)
+  keys: local (assigned, referenced)
+  len: global implicit (referenced)
+  n: local (assigned, referenced)
+  p: local (assigned, referenced)
+  pairs: local (assigned, referenced)
+  print: global implicit (referenced)
+  r: local (assigned, referenced)
+  repr: global implicit (referenced)
+  reversed: global implicit (referenced)
+  set: global implicit (referenced)
+  sorted: global implicit (referenced)
+  type: global implicit (referenced)
+  v: local (assigned, referenced)
+  function L
+    out: local (assigned, referenced)
+    view: local (parameter, referenced)
+    x: local (assigned, referenced)
+  class A
+    __eq__: local (assigned)
+    __hash__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __eq__
+      d2: global implicit (referenced)
+      other: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __hash__
+      self: local (parameter)
+qualnames: A, A.__eq__, A.__hash__, A.__init__, L

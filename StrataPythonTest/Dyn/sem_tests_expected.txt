@@ -142,8 +142,8 @@ test_dispatch_binary_protocol_case_08_subclass_reflected_priority | agree
 test_dispatch_binary_protocol_case_09_raise_stops_fallback | agree
 test_dispatch_binary_protocol_case_10_exhaustion_typeerror | agree
 test_dispatch_call_order_case_23_lookup_precedes_arguments | agree
-test_dispatch_container_lookup_case_18_dict_get_vs_subscription | gap | built-in method dict.get is not modelled yet
-test_dispatch_container_lookup_case_19_dict_get_propagates_hash_error | gap | built-in method dict.get is not modelled yet
+test_dispatch_container_lookup_case_18_dict_get_vs_subscription | agree
+test_dispatch_container_lookup_case_19_dict_get_propagates_hash_error | agree
 test_dispatch_descriptor_precedence_case_12_property_beats_instance_field | agree
 test_dispatch_descriptor_precedence_case_13_subclass_masks_base_property | agree
 test_dispatch_exception_evidence_case_30_attributes_and_binary | gap | the translator does not support generator expression
@@ -417,7 +417,7 @@ test_language_semantics_cpython_runtime_004_attribute_write_boundary | agree
 test_language_semantics_cpython_runtime_004_attribute_write_supported | agree
 test_language_semantics_cpython_runtime_005_method_call_boundary | agree
 test_language_semantics_cpython_runtime_005_method_call_supported | agree
-test_language_semantics_cpython_runtime_006_subscript_boundary | gap | built-in method dict.get is not modelled yet
+test_language_semantics_cpython_runtime_006_subscript_boundary | agree
 test_language_semantics_cpython_runtime_006_subscript_supported | gap | built-in method list.__class_getitem__ is not modelled yet
 test_language_semantics_cpython_runtime_007_iteration_boundary | gap | the translator does not support generator function
 test_language_semantics_cpython_runtime_007_iteration_supported | gap | built-in method list.__class_getitem__ is not modelled yet
@@ -458,8 +458,8 @@ test_language_semantics_exceptions_dispatch_binary_protocol_case_08_subclass_ref
 test_language_semantics_exceptions_dispatch_binary_protocol_case_09_raise_stops_fallback | agree
 test_language_semantics_exceptions_dispatch_binary_protocol_case_10_exhaustion_typeerror | agree
 test_language_semantics_exceptions_dispatch_call_order_case_23_lookup_precedes_arguments | agree
-test_language_semantics_exceptions_dispatch_container_lookup_case_18_dict_get_vs_subscription | gap | built-in method dict.get is not modelled yet
-test_language_semantics_exceptions_dispatch_container_lookup_case_19_dict_get_propagates_hash_error | gap | built-in method dict.get is not modelled yet
+test_language_semantics_exceptions_dispatch_container_lookup_case_18_dict_get_vs_subscription | agree
+test_language_semantics_exceptions_dispatch_container_lookup_case_19_dict_get_propagates_hash_error | agree
 test_language_semantics_exceptions_dispatch_descriptor_precedence_case_12_property_beats_instance_field | agree
 test_language_semantics_exceptions_dispatch_descriptor_precedence_case_13_subclass_masks_base_property | agree
 test_language_semantics_exceptions_dispatch_finally_interaction_case_05_preserves_dispatch_error | agree
@@ -1151,8 +1151,8 @@ test_pyresid_baseline_not_protocol | agree
 test_pyresid_baseline_string_protocol | agree
 test_pyresid_baseline_try_else_escape | agree
 test_pyresid_baseline_unbound_reads | agree
-test_pyresid_binary_dispatch_soundness | gap | built-in method dict.keys is not modelled yet
-test_pyresid_binary_protocol_effect_state | gap | built-in method dict.keys is not modelled yet
+test_pyresid_binary_dispatch_soundness | gap | built-in method type.__or__ is not modelled yet
+test_pyresid_binary_protocol_effect_state | agree
 test_pyresid_chain_demo | agree
 test_pyresid_comp | gap | the translator does not support generator expression
 test_pyresid_corr_flip_bug | agree
@@ -1242,7 +1242,7 @@ test_pyresid_gt_attr_named_list | agree
 test_pyresid_gt_aug_ok | agree
 test_pyresid_gt_bare_except | agree
 test_pyresid_gt_chained_cmp | agree
-test_pyresid_gt_dictcomp | gap | built-in method dict.get is not modelled yet
+test_pyresid_gt_dictcomp | agree
 test_pyresid_gt_docstrings | agree
 test_pyresid_gt_dunder_ok | agree
 test_pyresid_gt_eq_and_hash | agree
@@ -1253,7 +1253,7 @@ test_pyresid_gt_genexp | gap | the translator does not support generator express
 test_pyresid_gt_kwargs_at_call | agree
 test_pyresid_gt_method_named_builtin | agree
 test_pyresid_gt_raise_name_call | agree
-test_pyresid_gt_setcomp | gap | built-in method set.add is not modelled yet
+test_pyresid_gt_setcomp | agree
 test_pyresid_gt_single_gen_comp | agree
 test_pyresid_gt_ternary | agree
 test_pyresid_gt_typing_allowlist | gap | import of module typing is not modelled yet
@@ -1266,7 +1266,7 @@ test_pyresid_ix_diamond_mro | agree
 test_pyresid_ix_except_hierarchy | agree
 test_pyresid_ix_finally_modes | agree
 test_pyresid_ix_gen_send | gap | the translator does not support generator function
-test_pyresid_ix_havoc_narrow | gap | built-in method set.intersection_update is not modelled yet
+test_pyresid_ix_havoc_narrow | agree
 test_pyresid_ix_td_raise_eafp | gap | import of module typing is not modelled yet
 test_pyresid_key_presence_precision | gap | import of module typing is not modelled yet
 test_pyresid_matrix | gap | the translator does not support generator function
@@ -1355,7 +1355,7 @@ test_pyresid_t9_dunder | agree
 test_pyresid_td_demo | gap | import of module typing is not modelled yet
 test_pyresid_unary_operators | agree
 test_pyresid_v2_rule_inventory | gap | import of module typing is not modelled yet
-test_pyresid_wb_inventory | gap | built-in method dict.get is not modelled yet
+test_pyresid_wb_inventory | agree
 test_pyresid_wb_shapes | gap | import of module dataclasses is not modelled yet
 test_reassign_different_type | agree
 test_regex_negative | gap | import of module re is not modelled yet
@@ -1448,7 +1448,7 @@ test_type_checker_differentials_ty_001_unannotated_param_implicit_any_program | 
 test_type_checker_differentials_ty_002_unannotated_return_unknown_program | agree
 test_type_checker_differentials_ty_003_unknown_launders_through_return_annotation_program | agree
 test_type_checker_differentials_ty_004_unknown_launders_through_param_annotation_program | agree
-test_type_checker_differentials_ty_005_empty_dict_unknown_value_program | gap | built-in method dict.get is not modelled yet
+test_type_checker_differentials_ty_005_empty_dict_unknown_value_program | agree
 test_type_checker_differentials_ty_006_cast_unchecked_program | gap | import of module typing is not modelled yet
 test_type_checker_differentials_ty_007_unknown_launders_into_list_element_program | gap | built-in method list.__class_getitem__ is not modelled yet
 test_type_checker_differentials_ty_008_unknown_launders_into_dict_value_program | gap | built-in method dict.__class_getitem__ is not modelled yet

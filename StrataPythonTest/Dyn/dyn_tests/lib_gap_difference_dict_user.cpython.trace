@@ -1,0 +1,9 @@
+--- stdout 2
+2
+
+--- outcome
+ok
+--- globals
+U = <class 'U'>
+__doc__ = None
+__name__ = '__main__'

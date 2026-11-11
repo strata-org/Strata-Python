@@ -1,0 +1,99 @@
+module lib_view_mapping {
+  func @|lib_view_mapping.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("lib_view_mapping")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_view_mapping", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_view_mapping", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %int.0 : py.Value = py.intLit(1)
+      %str.1 : py.Value = py.strLit("a")
+      %dict.0 : py.Value = py.mkDict(%int.0, %str.1) ^propagate.0()
+      %d.cell.0 : base.Ref(py.Value) = py.globalCell("lib_view_mapping", "d")
+      %set.2 : base.Unit = base.refSet[py.Value](%d.cell.0, %dict.0)
+      %d.0 : py.Value = py.loadGlobal("lib_view_mapping", "d") ^propagate.0()
+      %keys.0 : py.Value = py.attr(%d.0, "keys") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%keys.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %mapping.0 : py.Value = py.attr(%call.0, "mapping") ^propagate.0()
+      %m.cell.0 : base.Ref(py.Value) = py.globalCell("lib_view_mapping", "m")
+      %set.3 : base.Unit = base.refSet[py.Value](%m.cell.0, %mapping.0)
+      %print.0 : py.Value = py.loadGlobal("lib_view_mapping", "print") ^propagate.0()
+      %m.7 : py.Value = py.loadGlobal("lib_view_mapping", "m") ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %item.0 : py.Value = py.getItem(%m.7, %int.1) ^propagate.0()
+      %d.1 : py.Value = py.loadGlobal("lib_view_mapping", "d") ^propagate.0()
+      %items.0 : py.Value = py.attr(%d.1, "items") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%items.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %mapping.1 : py.Value = py.attr(%call.1, "mapping") ^propagate.0()
+      %int.2 : py.Value = py.intLit(1)
+      %item.1 : py.Value = py.getItem(%mapping.1, %int.2) ^propagate.0()
+      %d.2 : py.Value = py.loadGlobal("lib_view_mapping", "d") ^propagate.0()
+      %values.0 : py.Value = py.attr(%d.2, "values") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%values.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %mapping.2 : py.Value = py.attr(%call.2, "mapping") ^propagate.0()
+      %int.3 : py.Value = py.intLit(1)
+      %item.2 : py.Value = py.getItem(%mapping.2, %int.3) ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%item.0, %item.1, %item.2)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.0, %tuple.3, %kwargs.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("b")
+      %d.3 : py.Value = py.loadGlobal("lib_view_mapping", "d") ^propagate.0()
+      %int.4 : py.Value = py.intLit(2)
+      %store.0 : base.Unit = py.setItem(%d.3, %int.4, %str.2) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("lib_view_mapping", "print") ^propagate.0()
+      %m.13 : py.Value = py.loadGlobal("lib_view_mapping", "m") ^propagate.0()
+      %int.5 : py.Value = py.intLit(2)
+      %item.3 : py.Value = py.getItem(%m.13, %int.5) ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%item.3)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.1, %tuple.4, %kwargs.4) ^propagate.0()
+      %m.15 : py.Value = py.loadGlobal("lib_view_mapping", "m") ^catch.0()
+      %int.6 : py.Value = py.intLit(3)
+      %item.4 : py.Value = py.getItem(%m.15, %int.6) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %KeyError.0 : py.Value = py.loadGlobal("lib_view_mapping", "KeyError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %KeyError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("lib_view_mapping", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.2 : py.Value = py.loadGlobal("lib_view_mapping", "print") ^clear.0()
+      %str.3 : py.Value = py.strLit("KeyError")
+      %e.0 : py.Value = py.loadGlobal("lib_view_mapping", "e") ^clear.0()
+      %tuple.5 : py.Value = py.mkTuple(%str.3, %e.0)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%print.2, %tuple.5, %kwargs.5) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("lib_view_mapping", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("lib_view_mapping", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+}
+

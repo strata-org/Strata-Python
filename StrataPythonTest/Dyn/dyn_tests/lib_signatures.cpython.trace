@@ -1,4 +1,4 @@
---- stdout 3271
+--- stdout 4553
 getattr expected at most 3 arguments, got 4
 hasattr expected 2 arguments, got 3
 setattr expected 3 arguments, got 4
@@ -71,6 +71,32 @@ tuple.count() takes exactly one argument (2 given)
 index expected at most 3 arguments, got 4
 range.count() takes exactly one argument (2 given)
 range.index() takes exactly one argument (2 given)
+get expected at most 2 arguments, got 3
+dict.items() takes no arguments (1 given)
+setdefault expected at most 2 arguments, got 3
+dict.clear() takes no arguments (1 given)
+pop expected at most 2 arguments, got 3
+dict.keys() takes no arguments (1 given)
+dict.values() takes no arguments (1 given)
+dict.copy() takes no arguments (1 given)
+dict.popitem() takes no arguments (1 given)
+fromkeys expected at most 2 arguments, got 3
+set.add() takes exactly one argument (2 given)
+set.clear() takes no arguments (1 given)
+set.pop() takes no arguments (1 given)
+set.remove() takes exactly one argument (2 given)
+set.copy() takes no arguments (1 given)
+set.discard() takes exactly one argument (2 given)
+set.issubset() takes exactly one argument (2 given)
+set.symmetric_difference() takes exactly one argument (2 given)
+set.issuperset() takes exactly one argument (2 given)
+set.isdisjoint() takes exactly one argument (2 given)
+set.symmetric_difference_update() takes exactly one argument (2 given)
+frozenset.copy() takes no arguments (1 given)
+frozenset.issubset() takes exactly one argument (2 given)
+frozenset.symmetric_difference() takes exactly one argument (2 given)
+frozenset.issuperset() takes exactly one argument (2 given)
+frozenset.isdisjoint() takes exactly one argument (2 given)
 maketrans expected at most 3 arguments, got 4
 
 --- outcome

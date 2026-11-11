@@ -1,0 +1,94 @@
+module top
+  B: local (assigned, referenced)
+  F: local (assigned, referenced)
+  H: local (assigned, referenced)
+  HS: local (assigned, referenced)
+  It: local (assigned, referenced)
+  LenSet: local (assigned, referenced)
+  S: local (assigned, referenced)
+  big: local (assigned, referenced)
+  f: local (assigned, referenced)
+  frozenset: global implicit (referenced)
+  fs: local (assigned, referenced)
+  it: local (assigned, referenced)
+  iter: global implicit (referenced)
+  len: global implicit (referenced)
+  list: global implicit (referenced)
+  p: local (assigned, referenced)
+  print: global implicit (referenced)
+  range: global implicit (referenced)
+  s: local (assigned, referenced)
+  set: global implicit (referenced)
+  show: local (assigned, referenced)
+  sorted: global implicit (referenced)
+  type: global implicit (referenced)
+  u: local (assigned, referenced)
+  v: local (assigned, referenced)
+  w: local (assigned, referenced)
+  class It
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __init__
+      list: global implicit (referenced)
+      self: local (parameter, referenced)
+      xs: local (parameter, referenced)
+    function __iter__
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+      x: local (assigned, referenced)
+  class H
+    __eq__: local (assigned)
+    __hash__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __hash__
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __eq__
+      H: global implicit (referenced)
+      isinstance: global implicit (referenced)
+      o: local (parameter, referenced)
+      self: local (parameter, referenced)
+  function show
+    KeyError: global implicit (referenced)
+    TypeError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    a: local (parameter, referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    frozenset: global implicit (referenced)
+    isinstance: global implicit (referenced)
+    k: local (parameter, referenced)
+    print: global implicit (referenced)
+    r: local (assigned, referenced)
+    set: global implicit (referenced)
+    sorted: global implicit (referenced)
+    type: global implicit (referenced)
+  class S
+  class F
+  class HS
+    __hash__: local (assigned)
+    function __hash__
+      self: local (parameter)
+  class B
+    __eq__: local (assigned)
+    __hash__: local (assigned)
+    function __hash__
+      self: local (parameter)
+    function __eq__
+      TypeError: global implicit (referenced)
+      other: local (parameter)
+      self: local (parameter)
+  class LenSet
+    __len__: local (assigned)
+    function __len__
+      print: global implicit (referenced)
+      self: local (parameter)
+qualnames: B, B.__eq__, B.__hash__, F, H, H.__eq__, H.__hash__, H.__init__, HS, HS.__hash__, It, It.__init__, It.__iter__, It.__next__, LenSet, LenSet.__len__, S, show

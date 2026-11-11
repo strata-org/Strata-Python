@@ -16,6 +16,7 @@ public import StrataPython.Dyn.Sem.Library.Iterators
 public import StrataPython.Dyn.Sem.Library.Machines
 public import StrataPython.Dyn.Sem.Library.StrTranslate
 public import StrataPython.Dyn.Sem.Library.StrFormat
+public import StrataPython.Dyn.Sem.Library.DictViewOps
 
 set_option autoImplicit false
 
@@ -129,16 +130,22 @@ def Impls.withNewCheck (impls : Impls) : Impls :=
       else if n == "tp_new" then impls.method t "__new__"
       else impls.method t n }
 
-/-- The bodies of `Library`'s built-in functions and methods. -/
-def libraryImpls : Impls where
-  function b := ((Library.iterablesFunction b).orElse fun _ => Library.functionsFunction b).orElse
-    fun _ => Library.sortingFunction b
-  method t n := ((Library.iteratorsMethod t n).orElse fun _ => Library.numbersMethod t n).orElse
-    fun _ => (Library.constructorsMethod t n).orElse fun _ =>
-      (Library.collectionsMethod t n).orElse fun _ => (Library.strMethodsMethod t n).orElse
-        fun _ => (Library.sequencesMethod t n).orElse fun _ => (Library.sortingMethod t n).orElse
-        fun _ => (Library.strTranslateMethod t n).orElse fun _ =>
-          (Library.unicodeErrorsMethod t n).orElse fun _ => Library.strFormatMethod t n
+/-- The tables of `Library`'s built-in functions and methods, in the order `libraryImpls` asks
+them. -/
+def libraryParts : List Impls :=
+  [{ function := Library.iterablesFunction }, { function := Library.functionsFunction },
+   { function := Library.sortingFunction }, { method := Library.iteratorsMethod },
+   { method := Library.numbersMethod }, { method := Library.constructorsMethod },
+   { method := Library.collectionsMethod }, { method := Library.strMethodsMethod },
+   { method := Library.sequencesMethod }, { method := Library.sortingMethod },
+   { method := Library.strTranslateMethod }, { method := Library.unicodeErrorsMethod },
+   { method := Library.strFormatMethod }, { method := Library.dictViewsMethod },
+   { method := Library.dictMethodsMethod }, { method := Library.setMethodsMethod },
+   { method := Library.dictViewOpsMethod }]
+
+/-- The bodies of `Library`'s built-in functions and methods: the first of `libraryParts` that has
+one. -/
+def libraryImpls : Impls := libraryParts.foldr Impls.join {}
 
 /-- Each piece's part, in the order the pieces build on each other. -/
 def Assembly.parts : List Impls := [opsImpls, libraryImpls]

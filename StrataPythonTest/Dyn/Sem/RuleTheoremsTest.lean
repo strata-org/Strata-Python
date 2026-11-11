@@ -1916,6 +1916,8 @@ public def frameValues : PyLoopState Value → List Value
   | .library (.listScan s) => [s.self, s.value]
   | .library (.sortKeys s _) => [s.self, s.items, s.keys, s.result] ++ s.key.toList
   | .library (.sortedCollect acc it kwargs) => [acc, it, kwargs]
+  | .library (.fromKeys s) => [s.d, s.it, s.value]
+  | .library (.setWalk s) => [s.self, s.target, s.so, s.it] ++ s.rest
 
 /-- A call of each container constructor over an iterator that gives one item per activation
 (`iter(li.__next__, 99)` over a list iterator `li`), resumed until it ends: for each, the number
@@ -2036,6 +2038,9 @@ public def resumeNoFit (err : Target E [Value]) : Sem ε E Value :=
 end
 
 public section
+-- The compiler specializes every piece's step machines into `py.call`'s implementation, which
+-- takes more than the default budget.
+set_option maxHeartbeats 1000000 in
 #dyn_sem_table PyTSem for PyT (world := World)
 end
 

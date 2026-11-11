@@ -1,0 +1,12 @@
+--- stdout 19
+a a a
+b
+KeyError 3
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+d = {1: 'a', 2: 'b'}
+m = <mappingproxy object>

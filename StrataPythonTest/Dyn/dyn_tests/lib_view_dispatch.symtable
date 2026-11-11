@@ -1,0 +1,12 @@
+module top
+  bool: global implicit (referenced)
+  d: local (assigned, referenced)
+  e: local (assigned, referenced)
+  i: local (assigned, referenced)
+  k: local (assigned, referenced)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  set: global implicit (referenced)
+  sorted: global implicit (referenced)
+  v: local (assigned, referenced)
+qualnames: 

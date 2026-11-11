@@ -52,6 +52,9 @@ variable {ε : Eff} {E : Type}
 end
 
 public section
+-- The compiler specializes every piece's step machines into `py.call`'s implementation, which
+-- takes more than the default budget.
+set_option maxHeartbeats 1000000 in
 #dyn_sem_table PerfSem for PyPerf (world := Sem.World)
 end
 

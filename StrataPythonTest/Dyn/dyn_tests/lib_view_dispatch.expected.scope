@@ -1,0 +1,11 @@
+module
+  d: local (assigned, referenced)
+  e: local (assigned, referenced)
+  k: local (assigned, referenced)
+  i: local (assigned, referenced)
+  v: local (assigned, referenced)
+  print: global implicit (referenced)
+  len: global implicit (referenced)
+  bool: global implicit (referenced)
+  set: global implicit (referenced)
+  sorted: global implicit (referenced)

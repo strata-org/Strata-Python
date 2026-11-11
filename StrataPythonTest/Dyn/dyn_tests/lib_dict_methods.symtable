@@ -1,0 +1,91 @@
+module top
+  D: local (assigned, referenced)
+  It: local (assigned, referenced)
+  K: local (assigned, referenced)
+  SortedDict: local (assigned, referenced)
+  c: local (assigned, referenced)
+  d: local (assigned, referenced)
+  dd: local (assigned, referenced)
+  dict: global implicit (referenced)
+  e: local (assigned, referenced)
+  frozenset: global implicit (referenced)
+  print: global implicit (referenced)
+  sd: local (assigned, referenced)
+  set: global implicit (referenced)
+  show: local (assigned, referenced)
+  type: global implicit (referenced)
+  u: local (assigned, referenced)
+  class K
+    __eq__: local (assigned)
+    __hash__: local (assigned)
+    __init__: local (assigned)
+    __repr__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __hash__
+      hash: global implicit (referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __eq__
+      K: global implicit (referenced)
+      isinstance: global implicit (referenced)
+      o: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __repr__
+      self: local (parameter, referenced)
+  function show
+    KeyError: global implicit (referenced)
+    TypeError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    a: local (parameter, referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    k: local (parameter, referenced)
+    print: global implicit (referenced)
+    repr: global implicit (referenced)
+    type: global implicit (referenced)
+  class D
+    __setitem__: local (assigned)
+    function __setitem__
+      __class__: free (referenced)
+      k: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+      super: global implicit (referenced)
+      v: local (parameter, referenced)
+  class It
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      self: local (parameter, referenced)
+  class SortedDict
+    __getitem__: local (assigned)
+    __iter__: local (assigned)
+    keys: local (assigned)
+    sorted_keys: local (assigned)
+    function sorted_keys
+      dict: global implicit (referenced)
+      k: local (assigned, referenced)
+      out: local (assigned, referenced)
+      self: local (parameter, referenced)
+    function __iter__
+      iter: global implicit (referenced)
+      self: local (parameter, referenced)
+    function keys
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __getitem__
+      __class__: free (referenced)
+      k: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+      super: global implicit (referenced)
+qualnames: D, D.__setitem__, It, It.__init__, It.__iter__, It.__next__, K, K.__eq__, K.__hash__, K.__init__, K.__repr__, SortedDict, SortedDict.__getitem__, SortedDict.__iter__, SortedDict.keys, SortedDict.sorted_keys, show

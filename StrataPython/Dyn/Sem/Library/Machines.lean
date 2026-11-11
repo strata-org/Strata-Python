@@ -6,6 +6,7 @@
 module
 public import StrataPython.Dyn.Sem.Library.Iterators
 public import StrataPython.Dyn.Sem.Library.Sort
+public import StrataPython.Dyn.Sem.Library.SetMethods
 
 set_option autoImplicit false
 
@@ -15,7 +16,8 @@ set_option autoImplicit false
 The frames of the library's step machines (`LoopState`), their first steps (`machineStart`) and
 their resume entry (`machineResume`): `any`, `all`, `sum`, `max` and `min` (`Iterables`), the
 container constructors (`Collections`), `str.join` (`StrMethods`), `list.extend` and the list
-searches (`Sequences`), and `list.sort` and `sorted` (`Sort`). `Assembly` joins `LoopState` into
+searches (`Sequences`), `list.sort` and `sorted` (`Sort`), `dict.update` and `dict.fromkeys`
+(`DictMethods`), and the set methods that walk an iterable (`SetMethods`). `Assembly` joins `LoopState` into
 `py.call`'s loop state.
 -/
 
@@ -49,6 +51,10 @@ inductive LoopState (V : Type) where
   /-- `sorted(…)` while the items of the iterator `it` are gathered into the list `acc`; the
   keywords `kwargs` go to its `sort`. -/
   | sortedCollect (acc it kwargs : V)
+  /-- `cls.fromkeys(…)` at the state `s`. -/
+  | fromKeys (s : FromKeys V)
+  /-- A set method's walk at the state `s`. -/
+  | setWalk (s : SetWalk V)
 
 section
 variable {m : Type → Type 1} {V : Type}
@@ -72,6 +78,8 @@ def stepNoCalls [PyWrites m V] [PyNew m V] : LoopState V → m (CallStep S V)
   | .collect st => do toCallStep .collect (← collectStep st)
   | .strJoin sep acc it => do toCallStep (.strJoin sep acc) (← joinStep sep acc it)
   | .listScan s => do toCallStep .listScan (← scanStep s)
+  | .fromKeys s => do toCallStep .fromKeys (← fromKeysStep s)
+  | .setWalk s => do toCallStep .setWalk (← setWalkStep s)
   | .minMax .. | .sortKeys .. | .sortedCollect .. =>
     PyPure.modelInvariant "a frame that makes calls reached the machines without calls"
 
@@ -134,16 +142,54 @@ def machineStart (f args kwargs : V) : m (Option (CallStep S V)) := do
     let xs ← tupleItems args
     let some sep := xs[0]? | PyPure.modelInvariant "str.join called without self"
     some <$> joinStart sep (PyPure.imm (m := m) (.tuple (xs.extract 1 xs.size)))
-  | some (.bound self .list n _) => listStart n self args
-  | some (.descr .list n _) =>
+  | some (.bound self .dict "update" _) => some <$> dictUpdateStart self args
+  | some (.descr .dict "update" _) =>
     let xs ← tupleItems args
-    let some self := xs[0]? | PyPure.modelInvariant "a method of list called without self"
-    listStart n self (PyPure.imm (m := m) (.tuple (xs.extract 1 xs.size)))
+    let some self := xs[0]? | PyPure.modelInvariant "dict.update called without self"
+    some <$> dictUpdateStart self (PyPure.imm (m := m) (.tuple (xs.extract 1 xs.size)))
+  | some (.bound cls .dict "fromkeys" _) =>
+    match ← fromKeysFirst cls args kwargs with
+    | .inl d => pure (some (.done d))
+    | .inr st => some <$> stepNoCalls (.fromKeys st)
+  | some (.bound self .set n _) => setStart .set n self args
+  | some (.bound self .frozenset n _) => setStart .frozenset n self args
+  | some (.descr t n _) =>
+    if t == .set || t == .frozenset then
+      let xs ← tupleItems args
+      let some self := xs[0]? | PyPure.modelInvariant "a method of set called without self"
+      setStart t n self (PyPure.imm (m := m) (.tuple (xs.extract 1 xs.size)))
+    else descrStart
+  | some (.bound self .list n _) => listStart n self args
+
   | _ =>
     match ← collectCallee f args with
     | some (t, name, xs) => some <$> (toCallStep .collect (← collectFirst t name xs kwargs))
     | none => pure none
 where
+  descrStart : m (Option (CallStep S V)) := do
+    match ← PyPure.immView f with
+    | some (.descr .list n _) =>
+      let xs ← tupleItems args
+      let some self := xs[0]? | PyPure.modelInvariant "a method of list called without self"
+      listStart n self (PyPure.imm (m := m) (.tuple (xs.extract 1 xs.size)))
+    | _ =>
+      match ← collectCallee f args with
+      | some (t, name, xs) => some <$> (toCallStep .collect (← collectFirst t name xs kwargs))
+      | none => pure none
+  setStart (t : Builtin) (n : String) (self rest : V) : m (Option (CallStep S V)) := do
+    match setJobOf t n with
+    | none =>
+      match ← collectCallee f args with
+      | some (t, name, xs) => some <$> (toCallStep .collect (← collectFirst t name xs kwargs))
+      | none => pure none
+    | some (job, sig) =>
+      match ← setJobFirst job self (← setJobArgs t self sig rest kwargs) with
+      | .inl v => pure (some (.done v))
+      | .inr st => some <$> stepNoCalls (.setWalk st)
+  dictUpdateStart (self rest : V) : m (CallStep S V) := do
+    match ← dictUpdateFirst self rest kwargs with
+    | none => pure (.done (PyPure.imm (m := m) .none))
+    | some st => toCallStep .collect (← collectStep st)
   listStart (n : String) (self rest : V) : m (Option (CallStep S V)) := do
     let scan (kind : ListSearch) : m (Option (CallStep S V)) := do
       some <$> stepNoCalls (.listScan (← scanFirst kind self rest kwargs))

@@ -310,9 +310,9 @@ test_descr.ClassPropertiesAndMethods.test_ipow | agree
 test_descr.ClassPropertiesAndMethods.test_ipow_returns_not_implemented | agree
 test_descr.ClassPropertiesAndMethods.test_keyword_arguments | gap | built-in method function.__call__ is not modelled yet
 test_descr.ClassPropertiesAndMethods.test_keywords | gap | import of module re is not modelled yet
-test_descr.ClassPropertiesAndMethods.test_meth_class_get | gap | built-in method dict.fromkeys is not modelled yet
+test_descr.ClassPropertiesAndMethods.test_meth_class_get | gap | the attribute type.__dict__ is not modelled yet
 test_descr.ClassPropertiesAndMethods.test_methods | gap | the attribute method.__func__ is not modelled yet
-test_descr.ClassPropertiesAndMethods.test_mixing_slot_wrappers | gap | built-in method dict.copy is not modelled yet
+test_descr.ClassPropertiesAndMethods.test_mixing_slot_wrappers | agree
 test_descr.ClassPropertiesAndMethods.test_monotonicity | agree
 test_descr.ClassPropertiesAndMethods.test_mutable_bases_catch_mro_conflict | gap | a class attribute write through the metaclass's data descriptor is not modelled yet
 test_descr.ClassPropertiesAndMethods.test_mutable_names | gap | a class attribute write through the metaclass's data descriptor is not modelled yet
@@ -340,7 +340,7 @@ test_descr.ClassPropertiesAndMethods.test_slots_trash | agree
 test_descr.ClassPropertiesAndMethods.test_specialized_method_calls_check_types | gap | import of module collections is not modelled yet
 test_descr.ClassPropertiesAndMethods.test_specials | gap | built-in id is not modelled yet
 test_descr.ClassPropertiesAndMethods.test_str_operations | agree
-test_descr.ClassPropertiesAndMethods.test_str_subclass_as_dict_key | gap | built-in method dict.get is not modelled yet
+test_descr.ClassPropertiesAndMethods.test_str_subclass_as_dict_key | agree
 test_descr.ClassPropertiesAndMethods.test_subclass_right_op | agree
 test_descr.ClassPropertiesAndMethods.test_subclassing_does_not_duplicate_dict_descriptors | gap | membership in this container is not modelled yet
 test_descr.ClassPropertiesAndMethods.test_testcapi_no_segfault | gap | import of module _testcapi is not modelled yet
@@ -358,81 +358,81 @@ test_descr.DictProxyTests.test_iter_keys | gap | built-in method mappingproxy.ke
 test_descr.DictProxyTests.test_iter_values | gap | built-in method mappingproxy.values is not modelled yet
 test_descr.DictProxyTests.test_repr | gap | built-in method mappingproxy.__repr__ is not modelled yet
 test_descr.MiscTests.test_type_lookup_mro_reference | gap | a class made without __module__ in its namespace is not modelled yet
-test_descr.MroTest.test_disappearing_custom_mro | gap | built-in method dict.get is not modelled yet
+test_descr.MroTest.test_disappearing_custom_mro | gap | a metaclass with its own mro() is not modelled yet
 test_descr.OperatorsTest.test_explicit_reverse_methods | gap | the translator does not support complex literal
 test_descr.OperatorsTest.test_wrap_lenfunc_bad_cast | gap | import of module sys is not modelled yet
 test_descr.PicklingTests.test_issue24097 | gap | import of module copyreg is not modelled yet
 test_descr.PicklingTests.test_object_reduce | gap | built-in method object.__reduce__ is not modelled yet
 test_dict.DictTest.test_bool | agree
-test_dict.DictTest.test_clear | gap | built-in method dict.clear is not modelled yet
+test_dict.DictTest.test_clear | agree
 test_dict.DictTest.test_constructor | agree
 test_dict.DictTest.test_container_iterator | gap | import of module gc is not modelled yet
 test_dict.DictTest.test_contains | agree
-test_dict.DictTest.test_copy | gap | built-in method dict.copy is not modelled yet
+test_dict.DictTest.test_copy | agree
 test_dict.DictTest.test_copy_fuzz | gap | import of module random is not modelled yet
 test_dict.DictTest.test_copy_maintains_tracking | gap | import of module gc is not modelled yet
-test_dict.DictTest.test_copy_noncompact | gap | built-in method dict.copy is not modelled yet
-test_dict.DictTest.test_dict_contain_use_after_free | gap | built-in method dict.clear is not modelled yet
+test_dict.DictTest.test_copy_noncompact | agree
+test_dict.DictTest.test_dict_contain_use_after_free | gap | a dict that changes during a lookup is not modelled yet
 test_dict.DictTest.test_dict_items_result_gc | gap | import of module gc is not modelled yet
 test_dict.DictTest.test_dict_items_result_gc_reversed | gap | import of module gc is not modelled yet
-test_dict.DictTest.test_dictitems_contains_use_after_free | gap | built-in method dict.items is not modelled yet
-test_dict.DictTest.test_dictview_mixed_set_operations | gap | built-in method dict.keys is not modelled yet
-test_dict.DictTest.test_dictview_set_operations_on_items | gap | built-in method dict.items is not modelled yet
-test_dict.DictTest.test_dictview_set_operations_on_keys | gap | built-in method dict.keys is not modelled yet
+test_dict.DictTest.test_dictitems_contains_use_after_free | agree
+test_dict.DictTest.test_dictview_mixed_set_operations | agree
+test_dict.DictTest.test_dictview_set_operations_on_items | agree
+test_dict.DictTest.test_dictview_set_operations_on_keys | agree
 test_dict.DictTest.test_empty_presized_dict_in_freelist | agree
 test_dict.DictTest.test_eq | agree
 test_dict.DictTest.test_equal_operator_modifying_operand | gap | a class with a finalizer is not modelled yet
-test_dict.DictTest.test_errors_in_view_containment_check | gap | built-in method dict.items is not modelled yet
+test_dict.DictTest.test_errors_in_view_containment_check | agree
 test_dict.DictTest.test_fromkeys | gap | the translator does not support generator function
 test_dict.DictTest.test_fromkeys_operator_modifying_dict_operand | gap | a dict lookup after a false __eq__ depends on CPython's table layout
-test_dict.DictTest.test_fromkeys_operator_modifying_set_operand | gap | built-in method dict.fromkeys is not modelled yet
-test_dict.DictTest.test_get | gap | built-in method dict.get is not modelled yet
+test_dict.DictTest.test_fromkeys_operator_modifying_set_operand | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+test_dict.DictTest.test_get | agree
 test_dict.DictTest.test_init_use_after_free | agree
 test_dict.DictTest.test_instance_dict_getattr_str_subclass | gap | an attribute name that is an instance of a subclass of str is not modelled yet
 test_dict.DictTest.test_invalid_keyword_arguments | gap | a call of a built-in with a keyword that is not a str is not modelled yet
 test_dict.DictTest.test_itemiterator_pickling | gap | import of module collections is not modelled yet
-test_dict.DictTest.test_items | gap | built-in method dict.items is not modelled yet
+test_dict.DictTest.test_items | agree
 test_dict.DictTest.test_items_symmetric_difference | gap | import of module random is not modelled yet
 test_dict.DictTest.test_iterator_pickling | gap | import of module pickle is not modelled yet
-test_dict.DictTest.test_keys | gap | built-in method dict.keys is not modelled yet
-test_dict.DictTest.test_keys_contained | gap | built-in method dict.keys is not modelled yet
+test_dict.DictTest.test_keys | agree
+test_dict.DictTest.test_keys_contained | agree
 test_dict.DictTest.test_len | agree
-test_dict.DictTest.test_merge_and_mutate | gap | built-in method dict.update is not modelled yet
-test_dict.DictTest.test_merge_operator | gap | built-in method dict.copy is not modelled yet
+test_dict.DictTest.test_merge_and_mutate | gap | a walk of a dict whose comparisons may run user code is not modelled yet
+test_dict.DictTest.test_merge_operator | gap | updating a dict from a value that is not a dict is not modelled yet
 test_dict.DictTest.test_mutating_iteration | agree
 test_dict.DictTest.test_mutating_iteration_delete | gap | a dict whose keys changed at the same size during its iteration is not modelled yet
-test_dict.DictTest.test_mutating_iteration_delete_over_items | gap | built-in method dict.items is not modelled yet
-test_dict.DictTest.test_mutating_iteration_delete_over_values | gap | built-in method dict.values is not modelled yet
+test_dict.DictTest.test_mutating_iteration_delete_over_items | gap | a dict whose keys changed at the same size during its iteration is not modelled yet
+test_dict.DictTest.test_mutating_iteration_delete_over_values | gap | a dict whose keys changed at the same size during its iteration is not modelled yet
 test_dict.DictTest.test_mutating_lookup | gap | a dict that changes during a lookup is not modelled yet
 test_dict.DictTest.test_object_set_item_single_instance_non_str_key | gap | == of an instance's __dict__ with more than one attribute is not modelled yet
 test_dict.DictTest.test_oob_indexing_dictiter_iternextitem | gap | a class with a finalizer is not modelled yet
-test_dict.DictTest.test_popitem | gap | built-in method dict.popitem is not modelled yet
+test_dict.DictTest.test_popitem | agree
 test_dict.DictTest.test_reentrant_insertion | gap | a class with a finalizer is not modelled yet
 test_dict.DictTest.test_repr | agree
 test_dict.DictTest.test_repr_deep | gap | import of module test is not modelled yet
 test_dict.DictTest.test_resize1 | agree
 test_dict.DictTest.test_resize2 | gap | a dict lookup after a false __eq__ depends on CPython's table layout
-test_dict.DictTest.test_reverse_iterator_for_empty_dict | gap | built-in method dict.items is not modelled yet
+test_dict.DictTest.test_reverse_iterator_for_empty_dict | agree
 test_dict.DictTest.test_reverse_iterator_for_shared_shared_dicts | agree
 test_dict.DictTest.test_reversed | agree
 test_dict.DictTest.test_reverseitemiterator_pickling | gap | import of module collections is not modelled yet
 test_dict.DictTest.test_reverseiterator_pickling | gap | import of module pickle is not modelled yet
 test_dict.DictTest.test_reversevaluesiterator_pickling | gap | import of module pickle is not modelled yet
 test_dict.DictTest.test_splittable_del | gap | import of module sys is not modelled yet
-test_dict.DictTest.test_splittable_pop | gap | built-in method dict.pop is not modelled yet
-test_dict.DictTest.test_splittable_pop_pending | gap | built-in method dict.pop is not modelled yet
+test_dict.DictTest.test_splittable_pop | agree
+test_dict.DictTest.test_splittable_pop_pending | agree
 test_dict.DictTest.test_splittable_popitem | gap | import of module sys is not modelled yet
 test_dict.DictTest.test_splittable_setdefault | gap | import of module sys is not modelled yet
 test_dict.DictTest.test_splittable_to_generic_combinedtable | gap | import of module sys is not modelled yet
-test_dict.DictTest.test_splittable_update | gap | built-in method dict.update is not modelled yet
+test_dict.DictTest.test_splittable_update | agree
 test_dict.DictTest.test_store_evilattr | gap | import of module gc is not modelled yet
 test_dict.DictTest.test_str_nonstr | gap | the translator does not support generator function
 test_dict.DictTest.test_string_keys_can_track_values | agree
 test_dict.DictTest.test_track_dynamic | gap | import of module gc is not modelled yet
 test_dict.DictTest.test_track_literals | gap | import of module gc is not modelled yet
 test_dict.DictTest.test_track_subtypes | gap | import of module gc is not modelled yet
-test_dict.DictTest.test_update | gap | built-in method dict.update is not modelled yet
-test_dict.DictTest.test_values | gap | built-in method dict.values is not modelled yet
+test_dict.DictTest.test_update | gap | built-in method dict_keyiterator.__length_hint__ is not modelled yet
+test_dict.DictTest.test_values | agree
 test_dict.DictTest.test_valuesiterator_pickling | gap | import of module pickle is not modelled yet
 test_dict.DictTest.test_views_mapping | gap | the attribute type.__dict__ is not modelled yet
 test_dictcomps.DictComprehensionTest.test_assignment_idiom_in_comprehensions | agree
@@ -444,20 +444,20 @@ test_dictcomps.DictComprehensionTest.test_scope_isolation | agree
 test_dictcomps.DictComprehensionTest.test_scope_isolation_from_global | agree
 test_dictcomps.DictComprehensionTest.test_star_expression | agree
 test_dictviews.DictSetTest.test_abc_registry | gap | import of module collections is not modelled yet
-test_dictviews.DictSetTest.test_compare_error | gap | built-in method dict.keys is not modelled yet
-test_dictviews.DictSetTest.test_constructors_not_callable | gap | built-in method dict.keys is not modelled yet
+test_dictviews.DictSetTest.test_compare_error | agree
+test_dictviews.DictSetTest.test_constructors_not_callable | gap | a class whose __new__ comes from another built-in base than its tp_new is not modelled yet
 test_dictviews.DictSetTest.test_copy | gap | import of module copy is not modelled yet
 test_dictviews.DictSetTest.test_deeply_nested_repr | gap | import of module test is not modelled yet
-test_dictviews.DictSetTest.test_dict_items | gap | built-in method dict.items is not modelled yet
-test_dictviews.DictSetTest.test_dict_keys | gap | built-in method dict.keys is not modelled yet
-test_dictviews.DictSetTest.test_dict_mixed_keys_items | gap | built-in method dict.keys is not modelled yet
-test_dictviews.DictSetTest.test_dict_repr | gap | built-in method dict.items is not modelled yet
-test_dictviews.DictSetTest.test_dict_values | gap | built-in method dict.values is not modelled yet
-test_dictviews.DictSetTest.test_items_set_operations | gap | built-in method dict.items is not modelled yet
+test_dictviews.DictSetTest.test_dict_items | agree
+test_dictviews.DictSetTest.test_dict_keys | agree
+test_dictviews.DictSetTest.test_dict_mixed_keys_items | agree
+test_dictviews.DictSetTest.test_dict_repr | agree
+test_dictviews.DictSetTest.test_dict_values | agree
+test_dictviews.DictSetTest.test_items_set_operations | gap | a slot of a set whose layout is inexact
 test_dictviews.DictSetTest.test_pickle | gap | import of module pickle is not modelled yet
-test_dictviews.DictSetTest.test_recursive_repr | gap | built-in method dict.values is not modelled yet
-test_dictviews.DictSetTest.test_set_operations_with_iterator | gap | built-in method dict.keys is not modelled yet
-test_dictviews.DictSetTest.test_set_operations_with_noniterable | gap | built-in method dict.keys is not modelled yet
+test_dictviews.DictSetTest.test_recursive_repr | agree
+test_dictviews.DictSetTest.test_set_operations_with_iterator | gap | the operators of this built-in type are not modelled yet
+test_dictviews.DictSetTest.test_set_operations_with_noniterable | agree
 test_enumerate.EnumerateTestCase.test_argumentcheck | gap | import of module pickle is not modelled yet
 test_enumerate.EnumerateTestCase.test_basicfunction | gap | import of module pickle is not modelled yet
 test_enumerate.EnumerateTestCase.test_enumerate_result_gc | gap | import of module pickle is not modelled yet
@@ -859,7 +859,7 @@ test_iter.TestCase.test_reduce_mutating_builtins_iter | gap | import of module f
 test_iter.TestCase.test_seq_class_for | gap | import of module pickle is not modelled yet
 test_iter.TestCase.test_seq_class_iter | gap | import of module pickle is not modelled yet
 test_iter.TestCase.test_sinkstate_callable | agree
-test_iter.TestCase.test_sinkstate_dict | gap | built-in method dict.keys is not modelled yet
+test_iter.TestCase.test_sinkstate_dict | gap | built-in method dict_keyiterator.__length_hint__ is not modelled yet
 test_iter.TestCase.test_sinkstate_enumerate | agree
 test_iter.TestCase.test_sinkstate_list | agree
 test_iter.TestCase.test_sinkstate_range | agree
@@ -870,7 +870,7 @@ test_iter.TestCase.test_sinkstate_yield | gap | the translator does not support 
 test_iter.TestCase.test_unicode_join_endcase | gap | import of module test is not modelled yet
 test_iter.TestCase.test_unpack_iter | gap | import of module test is not modelled yet
 test_iter.TestCase.test_writelines | gap | import of module test is not modelled yet
-test_keywordonlyarg.KeywordOnlyArgTestCase.testFunctionCall | gap | built-in method dict.values is not modelled yet
+test_keywordonlyarg.KeywordOnlyArgTestCase.testFunctionCall | agree
 test_keywordonlyarg.KeywordOnlyArgTestCase.testKwDefaults | gap | the attribute function.__code__ is not modelled yet
 test_keywordonlyarg.KeywordOnlyArgTestCase.testRaiseErrorFuncallWithUnexpectedKeywordArgument | agree
 test_keywordonlyarg.KeywordOnlyArgTestCase.test_issue13343 | gap | import of module unittest is not modelled yet
@@ -1095,10 +1095,10 @@ test_set.TestBinaryOps.test_intersection_non_overlap | agree
 test_set.TestBinaryOps.test_intersection_overlap | agree
 test_set.TestBinaryOps.test_intersection_subset | agree
 test_set.TestBinaryOps.test_intersection_superset | agree
-test_set.TestBinaryOps.test_isdisjoint_non_overlap | gap | built-in method set.isdisjoint is not modelled yet
-test_set.TestBinaryOps.test_isdisjoint_overlap | gap | built-in method set.isdisjoint is not modelled yet
-test_set.TestBinaryOps.test_isdisjoint_subset | gap | built-in method set.isdisjoint is not modelled yet
-test_set.TestBinaryOps.test_isdisjoint_superset | gap | built-in method set.isdisjoint is not modelled yet
+test_set.TestBinaryOps.test_isdisjoint_non_overlap | agree
+test_set.TestBinaryOps.test_isdisjoint_overlap | agree
+test_set.TestBinaryOps.test_isdisjoint_subset | agree
+test_set.TestBinaryOps.test_isdisjoint_superset | agree
 test_set.TestBinaryOps.test_sym_difference_non_overlap | agree
 test_set.TestBinaryOps.test_sym_difference_overlap | agree
 test_set.TestBinaryOps.test_sym_difference_subset | agree
@@ -1107,7 +1107,7 @@ test_set.TestBinaryOps.test_union_non_overlap | agree
 test_set.TestBinaryOps.test_union_overlap | agree
 test_set.TestBinaryOps.test_union_subset | agree
 test_set.TestBinaryOps.test_union_superset | agree
-test_set.TestExceptionPropagation.test_changingSizeWhileIterating | gap | built-in method set.update is not modelled yet
+test_set.TestExceptionPropagation.test_changingSizeWhileIterating | agree
 test_set.TestExceptionPropagation.test_instanceWithException | gap | the translator does not support generator function
 test_set.TestExceptionPropagation.test_instancesWithoutException | gap | the translator does not support generator function
 test_set.TestFrozenSet.test_constructor_identity | gap | the translator does not support generator function, generator expression
@@ -1123,19 +1123,19 @@ test_set.TestIdentities.test_binopsVsSubsets | agree
 test_set.TestIdentities.test_commutativity | agree
 test_set.TestIdentities.test_exclusion | agree
 test_set.TestIdentities.test_summations | agree
-test_set.TestMutate.test_add_absent | gap | built-in method set.add is not modelled yet
-test_set.TestMutate.test_add_present | gap | built-in method set.add is not modelled yet
-test_set.TestMutate.test_add_until_full | gap | built-in method set.add is not modelled yet
-test_set.TestMutate.test_clear | gap | built-in method set.clear is not modelled yet
-test_set.TestMutate.test_discard_absent | gap | built-in method set.discard is not modelled yet
-test_set.TestMutate.test_discard_present | gap | built-in method set.discard is not modelled yet
-test_set.TestMutate.test_pop | gap | built-in method set.pop is not modelled yet
-test_set.TestMutate.test_remove_absent | gap | built-in method set.remove is not modelled yet
-test_set.TestMutate.test_remove_present | gap | built-in method set.remove is not modelled yet
-test_set.TestMutate.test_remove_until_empty | gap | built-in method set.remove is not modelled yet
-test_set.TestMutate.test_update_empty_tuple | gap | built-in method set.update is not modelled yet
-test_set.TestMutate.test_update_unit_tuple_non_overlap | gap | built-in method set.update is not modelled yet
-test_set.TestMutate.test_update_unit_tuple_overlap | gap | built-in method set.update is not modelled yet
+test_set.TestMutate.test_add_absent | agree
+test_set.TestMutate.test_add_present | agree
+test_set.TestMutate.test_add_until_full | agree
+test_set.TestMutate.test_clear | agree
+test_set.TestMutate.test_discard_absent | agree
+test_set.TestMutate.test_discard_present | agree
+test_set.TestMutate.test_pop | gap | set.pop of a set whose order is not CPython's is not modelled yet
+test_set.TestMutate.test_remove_absent | agree
+test_set.TestMutate.test_remove_present | agree
+test_set.TestMutate.test_remove_until_empty | agree
+test_set.TestMutate.test_update_empty_tuple | agree
+test_set.TestMutate.test_update_unit_tuple_non_overlap | agree
+test_set.TestMutate.test_update_unit_tuple_overlap | agree
 test_set.TestSet.test_add | gap | the translator does not support generator function, generator expression
 test_set.TestSet.test_clear | gap | the translator does not support generator function, generator expression
 test_set.TestSet.test_constructor_identity | gap | the translator does not support generator function, generator expression
@@ -1161,23 +1161,23 @@ test_set.TestSet.test_set_literal_insertion_order | gap | the translator does no
 test_set.TestSet.test_symmetric_difference_update | gap | the translator does not support generator function, generator expression
 test_set.TestSet.test_update | gap | the translator does not support generator function, generator expression
 test_set.TestSet.test_weakref | gap | the translator does not support generator function, generator expression
-test_set.TestSetOfSets.test_constructor | gap | built-in method set.pop is not modelled yet
-test_set.TestUpdateOps.test_difference_method_call | gap | built-in method set.difference_update is not modelled yet
+test_set.TestSetOfSets.test_constructor | agree
+test_set.TestUpdateOps.test_difference_method_call | agree
 test_set.TestUpdateOps.test_difference_non_overlap | agree
 test_set.TestUpdateOps.test_difference_overlap | agree
 test_set.TestUpdateOps.test_difference_subset | agree
 test_set.TestUpdateOps.test_difference_superset | agree
-test_set.TestUpdateOps.test_intersection_method_call | gap | built-in method set.intersection_update is not modelled yet
+test_set.TestUpdateOps.test_intersection_method_call | agree
 test_set.TestUpdateOps.test_intersection_non_overlap | agree
 test_set.TestUpdateOps.test_intersection_overlap | agree
 test_set.TestUpdateOps.test_intersection_subset | agree
 test_set.TestUpdateOps.test_intersection_superset | agree
-test_set.TestUpdateOps.test_sym_difference_method_call | gap | built-in method set.symmetric_difference_update is not modelled yet
+test_set.TestUpdateOps.test_sym_difference_method_call | agree
 test_set.TestUpdateOps.test_sym_difference_non_overlap | agree
 test_set.TestUpdateOps.test_sym_difference_overlap | agree
 test_set.TestUpdateOps.test_sym_difference_subset | agree
 test_set.TestUpdateOps.test_sym_difference_superset | agree
-test_set.TestUpdateOps.test_union_method_call | gap | built-in method set.update is not modelled yet
+test_set.TestUpdateOps.test_union_method_call | agree
 test_set.TestUpdateOps.test_union_non_overlap | agree
 test_set.TestUpdateOps.test_union_overlap | agree
 test_set.TestUpdateOps.test_union_subset | agree
@@ -1185,9 +1185,9 @@ test_set.TestUpdateOps.test_union_superset | agree
 test_set.TestVariousIteratorArgs.test_constructor | gap | the translator does not support generator function
 test_set.TestVariousIteratorArgs.test_inline_methods | gap | the translator does not support generator function
 test_set.TestVariousIteratorArgs.test_inplace_methods | gap | the translator does not support generator function
-test_set.TestWeirdBugs.test_8420_set_merge | gap | built-in method set.update is not modelled yet
-test_set.TestWeirdBugs.test_iter_and_mutate | gap | built-in method set.clear is not modelled yet
-test_set.TestWeirdBugs.test_merge_and_mutate | gap | built-in method set.clear is not modelled yet
+test_set.TestWeirdBugs.test_8420_set_merge | gap | a walk of a dict whose comparisons may run user code is not modelled yet
+test_set.TestWeirdBugs.test_iter_and_mutate | agree
+test_set.TestWeirdBugs.test_merge_and_mutate | gap | a set lookup after a false __eq__ depends on CPython's table layout
 test_slice.SliceTest.test_cmp | gap | built-in method slice.__new__ is not modelled yet
 test_slice.SliceTest.test_constructor | gap | built-in method slice.__new__ is not modelled yet
 test_slice.SliceTest.test_copy | gap | import of module copy is not modelled yet
@@ -1240,7 +1240,7 @@ test_unary.UnaryOpTestCase.test_positive | gap | the translator does not support
 test_unicode.StringModuleTest.test_formatter_field_name_split | gap | import of module _string is not modelled yet
 test_unicode.StringModuleTest.test_formatter_parser | gap | import of module _string is not modelled yet
 test_unicode.StringModuleTest.test_str_subclass_attr | gap | built-in delattr is not modelled yet
-test_with.AssignmentTargetTestCase.testMultipleComplexTargets | gap | built-in method dict.values is not modelled yet
+test_with.AssignmentTargetTestCase.testMultipleComplexTargets | agree
 test_with.AssignmentTargetTestCase.testSingleComplexTarget | gap | the translator does not support generator function
 test_with.AssignmentTargetTestCase.testWithExtendedTargets | gap | import of module contextlib is not modelled yet
 test_with.ExitSwallowsExceptionTestCase.testExitFalseDoesntSwallowException | agree

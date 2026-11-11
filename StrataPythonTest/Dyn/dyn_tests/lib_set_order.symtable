@@ -1,0 +1,14 @@
+module top
+  TypeError: global implicit (referenced)
+  b: local (assigned, referenced)
+  c: local (assigned, referenced)
+  dict: global implicit (referenced)
+  e: local (assigned, referenced)
+  list: global implicit (referenced)
+  p: local (assigned, referenced)
+  print: global implicit (referenced)
+  range: global implicit (referenced)
+  s: local (assigned, referenced)
+  set: global implicit (referenced)
+  t: local (assigned, referenced)
+qualnames: 

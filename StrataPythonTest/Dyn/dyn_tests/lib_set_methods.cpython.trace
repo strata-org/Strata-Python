@@ -1,0 +1,99 @@
+--- stdout 1154
+set [1, 2, 3, 4, 5, 6]
+iter
+next 2
+next 9
+next 3
+next 1
+set [1, 2, 3]
+True [3]
+[1] [2, 3]
+iter
+next 1
+set [3]
+set [2, 3]
+iter
+next 3
+next 4
+set [1, 2, 4]
+iter
+next 1
+next 5
+bool False
+iter
+next 7
+next 2
+bool False
+bool True
+bool False
+bool True
+bool True
+frozenset [1, 2, 3]
+frozenset [1, 2]
+frozenset [1, 2]
+True set
+set [1, 2]
+frozenset [1, 2]
+frozenset
+iter
+next 3
+[1, 2, 3, 4, 5, 6]
+iter
+next 2
+next 3
+[2, 3]
+iter
+next 2
+[3, 4]
+iter
+next 3
+next 9
+[4, 9]
+[7, 9]
+hash 5
+3
+hash 5
+KeyError (99,)
+TypeError ("unhashable type: 'list'",)
+KeyError ({1},)
+set()
+KeyError ('pop from an empty set',)
+7 set()
+set()
+TypeError ("'int' object is not iterable",)
+TypeError ("'int' object is not iterable",)
+TypeError ('set.add() takes exactly one argument (0 given)',)
+TypeError ('set.add() takes exactly one argument (2 given)',)
+TypeError ('set.issubset() takes exactly one argument (0 given)',)
+TypeError ('set.copy() takes no arguments (1 given)',)
+[1, 2, 3] [1, 2, 3] True 0 False
+TypeError ("unhashable type: 'set'",)
+TypeError ("unhashable type: 'set'",)
+1
+len called
+len called
+False True
+set [0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+
+--- outcome
+ok
+--- globals
+B = <class 'B'>
+F = <class 'F'>
+H = <class 'H'>
+HS = <class 'HS'>
+It = <class 'It'>
+LenSet = <class 'LenSet'>
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'
+big = {0, 1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 2, 3, 4, 5, 6, 7, 8, 9}
+f = <builtin_function_or_method object>
+fs = frozenset({1})
+it = <list_iterator object>
+p = set()
+s = {1, 2, 3}
+show = <function object>
+u = set()
+v = set()
+w = {<B object>}

@@ -48,6 +48,9 @@ namespace StrataPython.Dyn.Sem
 open Strata.Dyn.Exec
 
 public section
+-- The compiler specializes every piece's step machines into `py.call`'s implementation, which
+-- takes more than the default budget.
+set_option maxHeartbeats 1000000 in
 #dyn_sem_table PySem for Py (world := World)
 end
 

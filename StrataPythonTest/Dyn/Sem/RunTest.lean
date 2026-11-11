@@ -68,6 +68,11 @@ def run (text : String) : IO Unit := do
 -- No built-in function or method gets a body from two pieces' parts: the first part would win
 -- silently.
 #guard Impls.overlaps Assembly.parts == []
+-- Nor from two of the library's parts.
+#guard Impls.overlaps libraryParts == []
+-- The check sees the library's methods: a part listed twice fills `str.upper` twice.
+#guard (Impls.overlaps [{ method := Library.strMethodsMethod }, { method := Library.strMethodsMethod }]).contains
+  "str.upper"
 -- The check finds an overlap: a part joined with itself fills `print` twice.
 #guard (Impls.overlaps [opsImpls, opsImpls]).contains "print"
 

@@ -1,0 +1,73 @@
+--- stdout 1103
+hash 1
+hash 1
+eq 1
+'a'
+hash 2
+0
+hash 3
+None
+hash 1
+eq 1
+'a'
+hash 9
+KeyError (K(9),)
+hash 9
+'dflt'
+KeyError (K(5),)
+1
+KeyError ('popitem(): dictionary is empty',)
+(3, 4)
+TypeError ('get expected at least 1 argument, got 0',)
+TypeError ('get expected at most 2 arguments, got 3',)
+TypeError ('pop expected at least 1 argument, got 0',)
+TypeError ('setdefault expected at least 1 argument, got 0',)
+TypeError ("unhashable type: 'list'",)
+TypeError ("unhashable type: 'list'",)
+KeyError ([1],)
+TypeError ('update expected at most 1 argument, got 2',)
+None
+{'k': 0, 1: 2, 'x': 3}
+None
+None
+{'k': 0, 1: 2, 'x': 4, 7: 8}
+{1: None, 2: None}
+{'a': 0, 'b': 0}
+{3: None, 5: None}
+TypeError ('fromkeys expected at least 1 argument, got 0',)
+TypeError ("'int' object is not iterable",)
+setitem 1
+setitem 2
+{1: None, 2: None}
+setitem 1
+D
+setitem 1
+{1: None}
+{1: 2} False dict
+TypeError ('dict.copy() takes no arguments (1 given)',)
+TypeError ('dict.clear() takes no arguments (1 given)',)
+{}
+{2: 'v', 1: 'v', 0: 'v'}
+{1: 'a', 2: 'b'}
+{1: 0, 2: 0, 3: 0} {4: None, 5: None}
+keys
+getitem 1
+getitem 2
+{1: 'a', 2: 'b'} {}
+
+--- outcome
+ok
+--- globals
+D = <class 'D'>
+It = <class 'It'>
+K = <class 'K'>
+SortedDict = <class 'SortedDict'>
+__doc__ = None
+__name__ = '__main__'
+c = {1: 2}
+d = {<K object>: 'a', <K object>: None}
+dd = {}
+e = {1: 'a', 2: 'b'}
+sd = <SortedDict object>
+show = <function object>
+u = {'k': 0, 1: 2, 'x': 4, 7: 8}

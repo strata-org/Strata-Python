@@ -1,0 +1,34 @@
+module
+  D: local (assigned, referenced)
+  dict: global implicit (referenced)
+  c: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  E: local (assigned, referenced)
+  AttributeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  class D
+    __iter__: local (assigned)
+    keys: local (assigned)
+    property: global implicit (referenced)
+    function D.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)
+    function D.keys
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+      lambda D.keys.<locals>.<lambda>
+  class E
+    __iter__: local (assigned)
+    __getattribute__: local (assigned)
+    function E.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)
+    function E.__getattribute__
+      params: self, n
+      self: local (parameter, referenced)
+      n: local (parameter, referenced)
+      object: global implicit (referenced)

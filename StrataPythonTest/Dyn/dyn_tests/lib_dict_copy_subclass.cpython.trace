@@ -1,0 +1,15 @@
+--- stdout 108
+keys looked up
+dict {'a': 0}
+AttributeError 'E' object has no attribute 'nokeys'
+keys looked up
+{'a': 2} {}
+
+--- outcome
+ok
+--- globals
+D = <class 'D'>
+E = <class 'E'>
+__doc__ = None
+__name__ = '__main__'
+c = {'a': 0}

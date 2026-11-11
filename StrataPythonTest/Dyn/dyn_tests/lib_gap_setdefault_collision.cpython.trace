@@ -1,0 +1,11 @@
+--- stdout 9
+eq 1 2
+b
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+d = {<K object>: 'a', <K object>: 'b'}

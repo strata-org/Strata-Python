@@ -1,0 +1,31 @@
+module top
+  AttributeError: global implicit (referenced)
+  D: local (assigned, referenced)
+  E: local (assigned, referenced)
+  c: local (assigned, referenced)
+  dict: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  class D
+    __iter__: local (assigned)
+    keys: local (assigned)
+    property: global implicit (referenced)
+    function __iter__
+      iter: global implicit (referenced)
+      self: local (parameter)
+    function keys
+      print: global implicit (referenced)
+      self: local (parameter)
+      function lambda
+  class E
+    __getattribute__: local (assigned)
+    __iter__: local (assigned)
+    function __iter__
+      iter: global implicit (referenced)
+      self: local (parameter)
+    function __getattribute__
+      n: local (parameter, referenced)
+      object: global implicit (referenced)
+      self: local (parameter, referenced)
+qualnames: D, D.__iter__, D.keys, D.keys.<locals>.<lambda>, E, E.__getattribute__, E.__iter__

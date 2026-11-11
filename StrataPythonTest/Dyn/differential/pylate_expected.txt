@@ -1,28 +1,28 @@
 dict_bad_pair_arity | agree
-dict_clear_normal | gap | built-in method dict.clear is not modelled yet
-dict_copy_normal | gap | built-in method dict.copy is not modelled yet
-dict_fromkeys_iterator_raises | gap | built-in method dict.fromkeys is not modelled yet
-dict_fromkeys_normal | gap | built-in method dict.fromkeys is not modelled yet
-dict_get_hash_hook_raises_after_effect | gap | built-in method dict.get is not modelled yet
-dict_get_normal | gap | built-in method dict.get is not modelled yet
-dict_get_unhashable_key | gap | built-in method dict.get is not modelled yet
-dict_items_live_view_observes_mutation | gap | built-in method dict.items is not modelled yet
-dict_items_normal | gap | built-in method dict.items is not modelled yet
-dict_keys_live_view_observes_mutation | gap | built-in method dict.keys is not modelled yet
-dict_keys_normal | gap | built-in method dict.keys is not modelled yet
+dict_clear_normal | agree
+dict_copy_normal | agree
+dict_fromkeys_iterator_raises | agree
+dict_fromkeys_normal | agree
+dict_get_hash_hook_raises_after_effect | agree
+dict_get_normal | agree
+dict_get_unhashable_key | agree
+dict_items_live_view_observes_mutation | agree
+dict_items_normal | agree
+dict_keys_live_view_observes_mutation | agree
+dict_keys_normal | agree
 dict_normal | agree
-dict_pop_missing | gap | built-in method dict.pop is not modelled yet
-dict_pop_normal | gap | built-in method dict.pop is not modelled yet
-dict_popitem_empty | gap | built-in method dict.popitem is not modelled yet
-dict_popitem_normal | gap | built-in method dict.popitem is not modelled yet
-dict_setdefault_normal | gap | built-in method dict.setdefault is not modelled yet
-dict_setdefault_unhashable_key | gap | built-in method dict.setdefault is not modelled yet
+dict_pop_missing | agree
+dict_pop_normal | agree
+dict_popitem_empty | agree
+dict_popitem_normal | agree
+dict_setdefault_normal | agree
+dict_setdefault_unhashable_key | agree
 dict_unhashable_key | agree
-dict_update_normal | gap | built-in method dict.update is not modelled yet
-dict_update_partial_pairs_then_bad_arity | gap | built-in method dict.update is not modelled yet
-dict_update_partial_pairs_then_unhashable | gap | built-in method dict.update is not modelled yet
-dict_values_live_view_observes_mutation | gap | built-in method dict.values is not modelled yet
-dict_values_normal | gap | built-in method dict.values is not modelled yet
+dict_update_normal | agree
+dict_update_partial_pairs_then_bad_arity | agree
+dict_update_partial_pairs_then_unhashable | agree
+dict_values_live_view_observes_mutation | agree
+dict_values_normal | agree
 fuzz_dict_arg_dict1 | agree
 fuzz_dict_arg_emptydict | agree
 fuzz_dict_arg_emptylist | agree
@@ -43,336 +43,336 @@ fuzz_dict_arg_strx | agree
 fuzz_dict_arg_true | agree
 fuzz_dict_arg_tuple1 | agree
 fuzz_dict_arg_zero | agree
-fuzz_dict_clear_arg_dict1 | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_emptydict | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_emptylist | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_emptyset | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_emptystr | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_emptytuple | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_float | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_list1 | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_nestedlist | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_none | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_one | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_pairs | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_range | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_set1 | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_shortpair | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_strab | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_strx | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_true | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_tuple1 | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_zero | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_args_emptydict_zero | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_args_emptystr_lita | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_args_list1_lit2 | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_args_list1_zero | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_args_lita_litb | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_args_lita_none | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_args_lita_zero | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_args_none_lita | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_args_one_list1 | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_args_strab_emptystr | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_args_zero_lita | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_args_zero_one | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arity0 | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_copy_arg_dict1 | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_emptydict | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_emptylist | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_emptyset | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_emptystr | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_emptytuple | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_float | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_list1 | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_nestedlist | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_none | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_one | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_pairs | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_range | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_set1 | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_shortpair | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_strab | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_strx | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_true | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_tuple1 | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_zero | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_args_emptydict_zero | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_args_emptystr_lita | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_args_list1_lit2 | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_args_list1_zero | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_args_lita_litb | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_args_lita_none | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_args_lita_zero | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_args_none_lita | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_args_one_list1 | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_args_strab_emptystr | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_args_zero_lita | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_args_zero_one | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arity0 | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_get_arg_dict1 | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_emptydict | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_emptylist | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_emptyset | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_emptystr | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_emptytuple | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_float | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_list1 | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_nestedlist | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_none | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_one | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_pairs | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_range | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_set1 | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_shortpair | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_strab | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_strx | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_true | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_tuple1 | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_zero | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_args_emptydict_zero | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_args_emptystr_lita | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_args_list1_lit2 | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_args_list1_zero | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_args_lita_litb | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_args_lita_none | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_args_lita_zero | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_args_none_lita | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_args_one_list1 | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_args_strab_emptystr | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_args_zero_lita | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_args_zero_one | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arity0 | gap | built-in method dict.get is not modelled yet
-fuzz_dict_items_arg_dict1 | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_emptydict | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_emptylist | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_emptyset | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_emptystr | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_emptytuple | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_float | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_list1 | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_nestedlist | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_none | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_one | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_pairs | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_range | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_set1 | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_shortpair | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_strab | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_strx | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_true | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_tuple1 | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_zero | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_args_emptydict_zero | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_args_emptystr_lita | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_args_list1_lit2 | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_args_list1_zero | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_args_lita_litb | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_args_lita_none | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_args_lita_zero | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_args_none_lita | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_args_one_list1 | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_args_strab_emptystr | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_args_zero_lita | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_args_zero_one | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arity0 | gap | built-in method dict.items is not modelled yet
-fuzz_dict_keys_arg_dict1 | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_emptydict | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_emptylist | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_emptyset | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_emptystr | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_emptytuple | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_float | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_list1 | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_nestedlist | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_none | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_one | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_pairs | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_range | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_set1 | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_shortpair | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_strab | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_strx | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_true | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_tuple1 | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_zero | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_args_emptydict_zero | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_args_emptystr_lita | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_args_list1_lit2 | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_args_list1_zero | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_args_lita_litb | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_args_lita_none | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_args_lita_zero | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_args_none_lita | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_args_one_list1 | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_args_strab_emptystr | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_args_zero_lita | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_args_zero_one | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arity0 | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_pop_arg_dict1 | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_emptydict | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_emptylist | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_emptyset | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_emptystr | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_emptytuple | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_float | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_list1 | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_nestedlist | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_none | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_one | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_pairs | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_range | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_set1 | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_shortpair | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_strab | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_strx | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_true | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_tuple1 | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_zero | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_args_emptydict_zero | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_args_emptystr_lita | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_args_list1_lit2 | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_args_list1_zero | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_args_lita_litb | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_args_lita_none | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_args_lita_zero | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_args_none_lita | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_args_one_list1 | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_args_strab_emptystr | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_args_zero_lita | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_args_zero_one | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arity0 | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_popitem_arg_dict1 | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_emptydict | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_emptylist | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_emptyset | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_emptystr | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_emptytuple | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_float | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_list1 | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_nestedlist | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_none | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_one | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_pairs | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_range | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_set1 | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_shortpair | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_strab | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_strx | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_true | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_tuple1 | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_zero | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_args_emptydict_zero | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_args_emptystr_lita | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_args_list1_lit2 | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_args_list1_zero | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_args_lita_litb | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_args_lita_none | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_args_lita_zero | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_args_none_lita | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_args_one_list1 | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_args_strab_emptystr | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_args_zero_lita | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_args_zero_one | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arity0 | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_setdefault_arg_dict1 | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_emptydict | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_emptylist | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_emptyset | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_emptystr | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_emptytuple | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_float | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_list1 | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_nestedlist | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_none | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_one | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_pairs | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_range | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_set1 | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_shortpair | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_strab | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_strx | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_true | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_tuple1 | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_zero | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_args_emptydict_zero | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_args_emptystr_lita | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_args_list1_lit2 | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_args_list1_zero | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_args_lita_litb | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_args_lita_none | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_args_lita_zero | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_args_none_lita | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_args_one_list1 | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_args_strab_emptystr | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_args_zero_lita | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_args_zero_one | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arity0 | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_update_arg_dict1 | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_emptydict | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_emptylist | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_emptyset | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_emptystr | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_emptytuple | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_float | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_list1 | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_nestedlist | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_none | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_one | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_pairs | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_range | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_set1 | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_shortpair | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_strab | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_strx | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_true | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_tuple1 | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_zero | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_args_emptydict_zero | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_args_emptystr_lita | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_args_list1_lit2 | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_args_list1_zero | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_args_lita_litb | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_args_lita_none | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_args_lita_zero | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_args_none_lita | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_args_one_list1 | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_args_strab_emptystr | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_args_zero_lita | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_args_zero_one | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arity0 | gap | built-in method dict.update is not modelled yet
-fuzz_dict_values_arg_dict1 | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_emptydict | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_emptylist | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_emptyset | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_emptystr | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_emptytuple | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_float | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_list1 | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_nestedlist | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_none | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_one | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_pairs | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_range | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_set1 | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_shortpair | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_strab | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_strx | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_true | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_tuple1 | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_zero | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_args_emptydict_zero | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_args_emptystr_lita | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_args_list1_lit2 | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_args_list1_zero | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_args_lita_litb | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_args_lita_none | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_args_lita_zero | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_args_none_lita | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_args_one_list1 | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_args_strab_emptystr | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_args_zero_lita | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_args_zero_one | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arity0 | gap | built-in method dict.values is not modelled yet
+fuzz_dict_clear_arg_dict1 | agree
+fuzz_dict_clear_arg_emptydict | agree
+fuzz_dict_clear_arg_emptylist | agree
+fuzz_dict_clear_arg_emptyset | agree
+fuzz_dict_clear_arg_emptystr | agree
+fuzz_dict_clear_arg_emptytuple | agree
+fuzz_dict_clear_arg_float | agree
+fuzz_dict_clear_arg_list1 | agree
+fuzz_dict_clear_arg_nestedlist | agree
+fuzz_dict_clear_arg_none | agree
+fuzz_dict_clear_arg_one | agree
+fuzz_dict_clear_arg_pairs | agree
+fuzz_dict_clear_arg_range | agree
+fuzz_dict_clear_arg_set1 | agree
+fuzz_dict_clear_arg_shortpair | agree
+fuzz_dict_clear_arg_strab | agree
+fuzz_dict_clear_arg_strx | agree
+fuzz_dict_clear_arg_true | agree
+fuzz_dict_clear_arg_tuple1 | agree
+fuzz_dict_clear_arg_zero | agree
+fuzz_dict_clear_args_emptydict_zero | agree
+fuzz_dict_clear_args_emptystr_lita | agree
+fuzz_dict_clear_args_list1_lit2 | agree
+fuzz_dict_clear_args_list1_zero | agree
+fuzz_dict_clear_args_lita_litb | agree
+fuzz_dict_clear_args_lita_none | agree
+fuzz_dict_clear_args_lita_zero | agree
+fuzz_dict_clear_args_none_lita | agree
+fuzz_dict_clear_args_one_list1 | agree
+fuzz_dict_clear_args_strab_emptystr | agree
+fuzz_dict_clear_args_zero_lita | agree
+fuzz_dict_clear_args_zero_one | agree
+fuzz_dict_clear_arity0 | agree
+fuzz_dict_copy_arg_dict1 | agree
+fuzz_dict_copy_arg_emptydict | agree
+fuzz_dict_copy_arg_emptylist | agree
+fuzz_dict_copy_arg_emptyset | agree
+fuzz_dict_copy_arg_emptystr | agree
+fuzz_dict_copy_arg_emptytuple | agree
+fuzz_dict_copy_arg_float | agree
+fuzz_dict_copy_arg_list1 | agree
+fuzz_dict_copy_arg_nestedlist | agree
+fuzz_dict_copy_arg_none | agree
+fuzz_dict_copy_arg_one | agree
+fuzz_dict_copy_arg_pairs | agree
+fuzz_dict_copy_arg_range | agree
+fuzz_dict_copy_arg_set1 | agree
+fuzz_dict_copy_arg_shortpair | agree
+fuzz_dict_copy_arg_strab | agree
+fuzz_dict_copy_arg_strx | agree
+fuzz_dict_copy_arg_true | agree
+fuzz_dict_copy_arg_tuple1 | agree
+fuzz_dict_copy_arg_zero | agree
+fuzz_dict_copy_args_emptydict_zero | agree
+fuzz_dict_copy_args_emptystr_lita | agree
+fuzz_dict_copy_args_list1_lit2 | agree
+fuzz_dict_copy_args_list1_zero | agree
+fuzz_dict_copy_args_lita_litb | agree
+fuzz_dict_copy_args_lita_none | agree
+fuzz_dict_copy_args_lita_zero | agree
+fuzz_dict_copy_args_none_lita | agree
+fuzz_dict_copy_args_one_list1 | agree
+fuzz_dict_copy_args_strab_emptystr | agree
+fuzz_dict_copy_args_zero_lita | agree
+fuzz_dict_copy_args_zero_one | agree
+fuzz_dict_copy_arity0 | agree
+fuzz_dict_get_arg_dict1 | agree
+fuzz_dict_get_arg_emptydict | agree
+fuzz_dict_get_arg_emptylist | agree
+fuzz_dict_get_arg_emptyset | agree
+fuzz_dict_get_arg_emptystr | agree
+fuzz_dict_get_arg_emptytuple | agree
+fuzz_dict_get_arg_float | agree
+fuzz_dict_get_arg_list1 | agree
+fuzz_dict_get_arg_nestedlist | agree
+fuzz_dict_get_arg_none | agree
+fuzz_dict_get_arg_one | agree
+fuzz_dict_get_arg_pairs | agree
+fuzz_dict_get_arg_range | agree
+fuzz_dict_get_arg_set1 | agree
+fuzz_dict_get_arg_shortpair | agree
+fuzz_dict_get_arg_strab | agree
+fuzz_dict_get_arg_strx | agree
+fuzz_dict_get_arg_true | agree
+fuzz_dict_get_arg_tuple1 | agree
+fuzz_dict_get_arg_zero | agree
+fuzz_dict_get_args_emptydict_zero | agree
+fuzz_dict_get_args_emptystr_lita | agree
+fuzz_dict_get_args_list1_lit2 | agree
+fuzz_dict_get_args_list1_zero | agree
+fuzz_dict_get_args_lita_litb | agree
+fuzz_dict_get_args_lita_none | agree
+fuzz_dict_get_args_lita_zero | agree
+fuzz_dict_get_args_none_lita | agree
+fuzz_dict_get_args_one_list1 | agree
+fuzz_dict_get_args_strab_emptystr | agree
+fuzz_dict_get_args_zero_lita | agree
+fuzz_dict_get_args_zero_one | agree
+fuzz_dict_get_arity0 | agree
+fuzz_dict_items_arg_dict1 | agree
+fuzz_dict_items_arg_emptydict | agree
+fuzz_dict_items_arg_emptylist | agree
+fuzz_dict_items_arg_emptyset | agree
+fuzz_dict_items_arg_emptystr | agree
+fuzz_dict_items_arg_emptytuple | agree
+fuzz_dict_items_arg_float | agree
+fuzz_dict_items_arg_list1 | agree
+fuzz_dict_items_arg_nestedlist | agree
+fuzz_dict_items_arg_none | agree
+fuzz_dict_items_arg_one | agree
+fuzz_dict_items_arg_pairs | agree
+fuzz_dict_items_arg_range | agree
+fuzz_dict_items_arg_set1 | agree
+fuzz_dict_items_arg_shortpair | agree
+fuzz_dict_items_arg_strab | agree
+fuzz_dict_items_arg_strx | agree
+fuzz_dict_items_arg_true | agree
+fuzz_dict_items_arg_tuple1 | agree
+fuzz_dict_items_arg_zero | agree
+fuzz_dict_items_args_emptydict_zero | agree
+fuzz_dict_items_args_emptystr_lita | agree
+fuzz_dict_items_args_list1_lit2 | agree
+fuzz_dict_items_args_list1_zero | agree
+fuzz_dict_items_args_lita_litb | agree
+fuzz_dict_items_args_lita_none | agree
+fuzz_dict_items_args_lita_zero | agree
+fuzz_dict_items_args_none_lita | agree
+fuzz_dict_items_args_one_list1 | agree
+fuzz_dict_items_args_strab_emptystr | agree
+fuzz_dict_items_args_zero_lita | agree
+fuzz_dict_items_args_zero_one | agree
+fuzz_dict_items_arity0 | agree
+fuzz_dict_keys_arg_dict1 | agree
+fuzz_dict_keys_arg_emptydict | agree
+fuzz_dict_keys_arg_emptylist | agree
+fuzz_dict_keys_arg_emptyset | agree
+fuzz_dict_keys_arg_emptystr | agree
+fuzz_dict_keys_arg_emptytuple | agree
+fuzz_dict_keys_arg_float | agree
+fuzz_dict_keys_arg_list1 | agree
+fuzz_dict_keys_arg_nestedlist | agree
+fuzz_dict_keys_arg_none | agree
+fuzz_dict_keys_arg_one | agree
+fuzz_dict_keys_arg_pairs | agree
+fuzz_dict_keys_arg_range | agree
+fuzz_dict_keys_arg_set1 | agree
+fuzz_dict_keys_arg_shortpair | agree
+fuzz_dict_keys_arg_strab | agree
+fuzz_dict_keys_arg_strx | agree
+fuzz_dict_keys_arg_true | agree
+fuzz_dict_keys_arg_tuple1 | agree
+fuzz_dict_keys_arg_zero | agree
+fuzz_dict_keys_args_emptydict_zero | agree
+fuzz_dict_keys_args_emptystr_lita | agree
+fuzz_dict_keys_args_list1_lit2 | agree
+fuzz_dict_keys_args_list1_zero | agree
+fuzz_dict_keys_args_lita_litb | agree
+fuzz_dict_keys_args_lita_none | agree
+fuzz_dict_keys_args_lita_zero | agree
+fuzz_dict_keys_args_none_lita | agree
+fuzz_dict_keys_args_one_list1 | agree
+fuzz_dict_keys_args_strab_emptystr | agree
+fuzz_dict_keys_args_zero_lita | agree
+fuzz_dict_keys_args_zero_one | agree
+fuzz_dict_keys_arity0 | agree
+fuzz_dict_pop_arg_dict1 | agree
+fuzz_dict_pop_arg_emptydict | agree
+fuzz_dict_pop_arg_emptylist | agree
+fuzz_dict_pop_arg_emptyset | agree
+fuzz_dict_pop_arg_emptystr | agree
+fuzz_dict_pop_arg_emptytuple | agree
+fuzz_dict_pop_arg_float | agree
+fuzz_dict_pop_arg_list1 | agree
+fuzz_dict_pop_arg_nestedlist | agree
+fuzz_dict_pop_arg_none | agree
+fuzz_dict_pop_arg_one | agree
+fuzz_dict_pop_arg_pairs | agree
+fuzz_dict_pop_arg_range | gap | the str() of an uncaught KeyError
+fuzz_dict_pop_arg_set1 | agree
+fuzz_dict_pop_arg_shortpair | agree
+fuzz_dict_pop_arg_strab | agree
+fuzz_dict_pop_arg_strx | agree
+fuzz_dict_pop_arg_true | agree
+fuzz_dict_pop_arg_tuple1 | agree
+fuzz_dict_pop_arg_zero | agree
+fuzz_dict_pop_args_emptydict_zero | agree
+fuzz_dict_pop_args_emptystr_lita | agree
+fuzz_dict_pop_args_list1_lit2 | agree
+fuzz_dict_pop_args_list1_zero | agree
+fuzz_dict_pop_args_lita_litb | agree
+fuzz_dict_pop_args_lita_none | agree
+fuzz_dict_pop_args_lita_zero | agree
+fuzz_dict_pop_args_none_lita | agree
+fuzz_dict_pop_args_one_list1 | agree
+fuzz_dict_pop_args_strab_emptystr | agree
+fuzz_dict_pop_args_zero_lita | agree
+fuzz_dict_pop_args_zero_one | agree
+fuzz_dict_pop_arity0 | agree
+fuzz_dict_popitem_arg_dict1 | agree
+fuzz_dict_popitem_arg_emptydict | agree
+fuzz_dict_popitem_arg_emptylist | agree
+fuzz_dict_popitem_arg_emptyset | agree
+fuzz_dict_popitem_arg_emptystr | agree
+fuzz_dict_popitem_arg_emptytuple | agree
+fuzz_dict_popitem_arg_float | agree
+fuzz_dict_popitem_arg_list1 | agree
+fuzz_dict_popitem_arg_nestedlist | agree
+fuzz_dict_popitem_arg_none | agree
+fuzz_dict_popitem_arg_one | agree
+fuzz_dict_popitem_arg_pairs | agree
+fuzz_dict_popitem_arg_range | agree
+fuzz_dict_popitem_arg_set1 | agree
+fuzz_dict_popitem_arg_shortpair | agree
+fuzz_dict_popitem_arg_strab | agree
+fuzz_dict_popitem_arg_strx | agree
+fuzz_dict_popitem_arg_true | agree
+fuzz_dict_popitem_arg_tuple1 | agree
+fuzz_dict_popitem_arg_zero | agree
+fuzz_dict_popitem_args_emptydict_zero | agree
+fuzz_dict_popitem_args_emptystr_lita | agree
+fuzz_dict_popitem_args_list1_lit2 | agree
+fuzz_dict_popitem_args_list1_zero | agree
+fuzz_dict_popitem_args_lita_litb | agree
+fuzz_dict_popitem_args_lita_none | agree
+fuzz_dict_popitem_args_lita_zero | agree
+fuzz_dict_popitem_args_none_lita | agree
+fuzz_dict_popitem_args_one_list1 | agree
+fuzz_dict_popitem_args_strab_emptystr | agree
+fuzz_dict_popitem_args_zero_lita | agree
+fuzz_dict_popitem_args_zero_one | agree
+fuzz_dict_popitem_arity0 | agree
+fuzz_dict_setdefault_arg_dict1 | agree
+fuzz_dict_setdefault_arg_emptydict | agree
+fuzz_dict_setdefault_arg_emptylist | agree
+fuzz_dict_setdefault_arg_emptyset | agree
+fuzz_dict_setdefault_arg_emptystr | agree
+fuzz_dict_setdefault_arg_emptytuple | agree
+fuzz_dict_setdefault_arg_float | agree
+fuzz_dict_setdefault_arg_list1 | agree
+fuzz_dict_setdefault_arg_nestedlist | agree
+fuzz_dict_setdefault_arg_none | agree
+fuzz_dict_setdefault_arg_one | agree
+fuzz_dict_setdefault_arg_pairs | agree
+fuzz_dict_setdefault_arg_range | agree
+fuzz_dict_setdefault_arg_set1 | agree
+fuzz_dict_setdefault_arg_shortpair | agree
+fuzz_dict_setdefault_arg_strab | agree
+fuzz_dict_setdefault_arg_strx | agree
+fuzz_dict_setdefault_arg_true | agree
+fuzz_dict_setdefault_arg_tuple1 | agree
+fuzz_dict_setdefault_arg_zero | agree
+fuzz_dict_setdefault_args_emptydict_zero | agree
+fuzz_dict_setdefault_args_emptystr_lita | agree
+fuzz_dict_setdefault_args_list1_lit2 | agree
+fuzz_dict_setdefault_args_list1_zero | agree
+fuzz_dict_setdefault_args_lita_litb | agree
+fuzz_dict_setdefault_args_lita_none | agree
+fuzz_dict_setdefault_args_lita_zero | agree
+fuzz_dict_setdefault_args_none_lita | agree
+fuzz_dict_setdefault_args_one_list1 | agree
+fuzz_dict_setdefault_args_strab_emptystr | agree
+fuzz_dict_setdefault_args_zero_lita | agree
+fuzz_dict_setdefault_args_zero_one | agree
+fuzz_dict_setdefault_arity0 | agree
+fuzz_dict_update_arg_dict1 | agree
+fuzz_dict_update_arg_emptydict | agree
+fuzz_dict_update_arg_emptylist | agree
+fuzz_dict_update_arg_emptyset | agree
+fuzz_dict_update_arg_emptystr | agree
+fuzz_dict_update_arg_emptytuple | agree
+fuzz_dict_update_arg_float | agree
+fuzz_dict_update_arg_list1 | agree
+fuzz_dict_update_arg_nestedlist | agree
+fuzz_dict_update_arg_none | agree
+fuzz_dict_update_arg_one | agree
+fuzz_dict_update_arg_pairs | agree
+fuzz_dict_update_arg_range | agree
+fuzz_dict_update_arg_set1 | gap | a slot of a set whose layout is inexact
+fuzz_dict_update_arg_shortpair | agree
+fuzz_dict_update_arg_strab | agree
+fuzz_dict_update_arg_strx | agree
+fuzz_dict_update_arg_true | agree
+fuzz_dict_update_arg_tuple1 | agree
+fuzz_dict_update_arg_zero | agree
+fuzz_dict_update_args_emptydict_zero | agree
+fuzz_dict_update_args_emptystr_lita | agree
+fuzz_dict_update_args_list1_lit2 | agree
+fuzz_dict_update_args_list1_zero | agree
+fuzz_dict_update_args_lita_litb | agree
+fuzz_dict_update_args_lita_none | agree
+fuzz_dict_update_args_lita_zero | agree
+fuzz_dict_update_args_none_lita | agree
+fuzz_dict_update_args_one_list1 | agree
+fuzz_dict_update_args_strab_emptystr | agree
+fuzz_dict_update_args_zero_lita | agree
+fuzz_dict_update_args_zero_one | agree
+fuzz_dict_update_arity0 | agree
+fuzz_dict_values_arg_dict1 | agree
+fuzz_dict_values_arg_emptydict | agree
+fuzz_dict_values_arg_emptylist | agree
+fuzz_dict_values_arg_emptyset | agree
+fuzz_dict_values_arg_emptystr | agree
+fuzz_dict_values_arg_emptytuple | agree
+fuzz_dict_values_arg_float | agree
+fuzz_dict_values_arg_list1 | agree
+fuzz_dict_values_arg_nestedlist | agree
+fuzz_dict_values_arg_none | agree
+fuzz_dict_values_arg_one | agree
+fuzz_dict_values_arg_pairs | agree
+fuzz_dict_values_arg_range | agree
+fuzz_dict_values_arg_set1 | agree
+fuzz_dict_values_arg_shortpair | agree
+fuzz_dict_values_arg_strab | agree
+fuzz_dict_values_arg_strx | agree
+fuzz_dict_values_arg_true | agree
+fuzz_dict_values_arg_tuple1 | agree
+fuzz_dict_values_arg_zero | agree
+fuzz_dict_values_args_emptydict_zero | agree
+fuzz_dict_values_args_emptystr_lita | agree
+fuzz_dict_values_args_list1_lit2 | agree
+fuzz_dict_values_args_list1_zero | agree
+fuzz_dict_values_args_lita_litb | agree
+fuzz_dict_values_args_lita_none | agree
+fuzz_dict_values_args_lita_zero | agree
+fuzz_dict_values_args_none_lita | agree
+fuzz_dict_values_args_one_list1 | agree
+fuzz_dict_values_args_strab_emptystr | agree
+fuzz_dict_values_args_zero_lita | agree
+fuzz_dict_values_args_zero_one | agree
+fuzz_dict_values_arity0 | agree
 fuzz_isinstance_arg_dict1 | agree
 fuzz_isinstance_arg_emptydict | agree
 fuzz_isinstance_arg_emptylist | agree
@@ -978,39 +978,39 @@ fuzz_repr_arg_strx | agree
 fuzz_repr_arg_true | agree
 fuzz_repr_arg_tuple1 | agree
 fuzz_repr_arg_zero | agree
-fuzz_set_add_arg_dict1 | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_emptydict | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_emptylist | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_emptyset | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_emptystr | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_emptytuple | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_float | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_list1 | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_nestedlist | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_none | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_one | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_pairs | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_range | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_set1 | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_shortpair | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_strab | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_strx | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_true | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_tuple1 | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_zero | gap | built-in method set.add is not modelled yet
-fuzz_set_add_args_emptydict_zero | gap | built-in method set.add is not modelled yet
-fuzz_set_add_args_emptystr_lita | gap | built-in method set.add is not modelled yet
-fuzz_set_add_args_list1_lit2 | gap | built-in method set.add is not modelled yet
-fuzz_set_add_args_list1_zero | gap | built-in method set.add is not modelled yet
-fuzz_set_add_args_lita_litb | gap | built-in method set.add is not modelled yet
-fuzz_set_add_args_lita_none | gap | built-in method set.add is not modelled yet
-fuzz_set_add_args_lita_zero | gap | built-in method set.add is not modelled yet
-fuzz_set_add_args_none_lita | gap | built-in method set.add is not modelled yet
-fuzz_set_add_args_one_list1 | gap | built-in method set.add is not modelled yet
-fuzz_set_add_args_strab_emptystr | gap | built-in method set.add is not modelled yet
-fuzz_set_add_args_zero_lita | gap | built-in method set.add is not modelled yet
-fuzz_set_add_args_zero_one | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arity0 | gap | built-in method set.add is not modelled yet
+fuzz_set_add_arg_dict1 | agree
+fuzz_set_add_arg_emptydict | agree
+fuzz_set_add_arg_emptylist | agree
+fuzz_set_add_arg_emptyset | agree
+fuzz_set_add_arg_emptystr | agree
+fuzz_set_add_arg_emptytuple | agree
+fuzz_set_add_arg_float | agree
+fuzz_set_add_arg_list1 | agree
+fuzz_set_add_arg_nestedlist | agree
+fuzz_set_add_arg_none | agree
+fuzz_set_add_arg_one | agree
+fuzz_set_add_arg_pairs | agree
+fuzz_set_add_arg_range | agree
+fuzz_set_add_arg_set1 | agree
+fuzz_set_add_arg_shortpair | agree
+fuzz_set_add_arg_strab | agree
+fuzz_set_add_arg_strx | agree
+fuzz_set_add_arg_true | agree
+fuzz_set_add_arg_tuple1 | agree
+fuzz_set_add_arg_zero | agree
+fuzz_set_add_args_emptydict_zero | agree
+fuzz_set_add_args_emptystr_lita | agree
+fuzz_set_add_args_list1_lit2 | agree
+fuzz_set_add_args_list1_zero | agree
+fuzz_set_add_args_lita_litb | agree
+fuzz_set_add_args_lita_none | agree
+fuzz_set_add_args_lita_zero | agree
+fuzz_set_add_args_none_lita | agree
+fuzz_set_add_args_one_list1 | agree
+fuzz_set_add_args_strab_emptystr | agree
+fuzz_set_add_args_zero_lita | agree
+fuzz_set_add_args_zero_one | agree
+fuzz_set_add_arity0 | agree
 fuzz_set_arg_dict1 | agree
 fuzz_set_arg_emptydict | agree
 fuzz_set_arg_emptylist | agree
@@ -1031,534 +1031,534 @@ fuzz_set_arg_strx | agree
 fuzz_set_arg_true | agree
 fuzz_set_arg_tuple1 | agree
 fuzz_set_arg_zero | agree
-fuzz_set_clear_arg_dict1 | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_emptydict | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_emptylist | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_emptyset | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_emptystr | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_emptytuple | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_float | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_list1 | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_nestedlist | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_none | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_one | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_pairs | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_range | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_set1 | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_shortpair | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_strab | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_strx | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_true | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_tuple1 | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_zero | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_args_emptydict_zero | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_args_emptystr_lita | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_args_list1_lit2 | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_args_list1_zero | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_args_lita_litb | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_args_lita_none | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_args_lita_zero | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_args_none_lita | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_args_one_list1 | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_args_strab_emptystr | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_args_zero_lita | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_args_zero_one | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arity0 | gap | built-in method set.clear is not modelled yet
-fuzz_set_copy_arg_dict1 | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_emptydict | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_emptylist | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_emptyset | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_emptystr | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_emptytuple | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_float | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_list1 | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_nestedlist | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_none | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_one | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_pairs | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_range | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_set1 | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_shortpair | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_strab | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_strx | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_true | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_tuple1 | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_zero | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_args_emptydict_zero | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_args_emptystr_lita | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_args_list1_lit2 | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_args_list1_zero | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_args_lita_litb | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_args_lita_none | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_args_lita_zero | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_args_none_lita | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_args_one_list1 | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_args_strab_emptystr | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_args_zero_lita | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_args_zero_one | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arity0 | gap | built-in method set.copy is not modelled yet
-fuzz_set_difference_arg_dict1 | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_emptydict | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_emptylist | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_emptyset | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_emptystr | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_emptytuple | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_float | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_list1 | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_nestedlist | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_none | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_one | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_pairs | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_range | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_set1 | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_shortpair | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_strab | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_strx | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_true | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_tuple1 | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_zero | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_args_emptydict_zero | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_args_emptystr_lita | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_args_list1_lit2 | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_args_list1_zero | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_args_lita_litb | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_args_lita_none | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_args_lita_zero | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_args_none_lita | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_args_one_list1 | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_args_strab_emptystr | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_args_zero_lita | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_args_zero_one | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arity0 | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_update_arg_dict1 | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_emptydict | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_emptylist | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_emptyset | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_emptystr | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_emptytuple | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_float | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_list1 | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_nestedlist | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_none | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_one | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_pairs | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_range | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_set1 | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_shortpair | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_strab | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_strx | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_true | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_tuple1 | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_zero | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_args_emptydict_zero | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_args_emptystr_lita | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_args_list1_lit2 | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_args_list1_zero | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_args_lita_litb | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_args_lita_none | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_args_lita_zero | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_args_none_lita | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_args_one_list1 | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_args_strab_emptystr | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_args_zero_lita | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_args_zero_one | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arity0 | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_discard_arg_dict1 | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_emptydict | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_emptylist | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_emptyset | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_emptystr | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_emptytuple | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_float | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_list1 | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_nestedlist | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_none | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_one | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_pairs | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_range | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_set1 | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_shortpair | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_strab | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_strx | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_true | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_tuple1 | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_zero | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_args_emptydict_zero | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_args_emptystr_lita | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_args_list1_lit2 | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_args_list1_zero | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_args_lita_litb | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_args_lita_none | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_args_lita_zero | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_args_none_lita | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_args_one_list1 | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_args_strab_emptystr | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_args_zero_lita | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_args_zero_one | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arity0 | gap | built-in method set.discard is not modelled yet
-fuzz_set_intersection_arg_dict1 | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_emptydict | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_emptylist | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_emptyset | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_emptystr | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_emptytuple | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_float | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_list1 | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_nestedlist | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_none | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_one | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_pairs | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_range | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_set1 | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_shortpair | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_strab | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_strx | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_true | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_tuple1 | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_zero | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_args_emptydict_zero | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_args_emptystr_lita | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_args_list1_lit2 | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_args_list1_zero | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_args_lita_litb | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_args_lita_none | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_args_lita_zero | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_args_none_lita | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_args_one_list1 | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_args_strab_emptystr | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_args_zero_lita | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_args_zero_one | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arity0 | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_update_arg_dict1 | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_emptydict | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_emptylist | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_emptyset | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_emptystr | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_emptytuple | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_float | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_list1 | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_nestedlist | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_none | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_one | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_pairs | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_range | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_set1 | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_shortpair | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_strab | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_strx | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_true | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_tuple1 | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_zero | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_args_emptydict_zero | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_args_emptystr_lita | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_args_list1_lit2 | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_args_list1_zero | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_args_lita_litb | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_args_lita_none | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_args_lita_zero | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_args_none_lita | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_args_one_list1 | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_args_strab_emptystr | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_args_zero_lita | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_args_zero_one | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arity0 | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_isdisjoint_arg_dict1 | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_emptydict | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_emptylist | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_emptyset | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_emptystr | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_emptytuple | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_float | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_list1 | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_nestedlist | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_none | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_one | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_pairs | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_range | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_set1 | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_shortpair | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_strab | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_strx | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_true | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_tuple1 | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_zero | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_args_emptydict_zero | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_args_emptystr_lita | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_args_list1_lit2 | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_args_list1_zero | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_args_lita_litb | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_args_lita_none | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_args_lita_zero | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_args_none_lita | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_args_one_list1 | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_args_strab_emptystr | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_args_zero_lita | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_args_zero_one | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arity0 | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_issubset_arg_dict1 | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_emptydict | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_emptylist | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_emptyset | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_emptystr | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_emptytuple | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_float | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_list1 | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_nestedlist | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_none | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_one | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_pairs | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_range | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_set1 | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_shortpair | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_strab | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_strx | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_true | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_tuple1 | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_zero | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_args_emptydict_zero | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_args_emptystr_lita | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_args_list1_lit2 | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_args_list1_zero | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_args_lita_litb | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_args_lita_none | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_args_lita_zero | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_args_none_lita | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_args_one_list1 | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_args_strab_emptystr | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_args_zero_lita | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_args_zero_one | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arity0 | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issuperset_arg_dict1 | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_emptydict | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_emptylist | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_emptyset | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_emptystr | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_emptytuple | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_float | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_list1 | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_nestedlist | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_none | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_one | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_pairs | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_range | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_set1 | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_shortpair | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_strab | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_strx | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_true | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_tuple1 | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_zero | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_args_emptydict_zero | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_args_emptystr_lita | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_args_list1_lit2 | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_args_list1_zero | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_args_lita_litb | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_args_lita_none | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_args_lita_zero | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_args_none_lita | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_args_one_list1 | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_args_strab_emptystr | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_args_zero_lita | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_args_zero_one | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arity0 | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_pop_arg_dict1 | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_emptydict | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_emptylist | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_emptyset | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_emptystr | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_emptytuple | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_float | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_list1 | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_nestedlist | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_none | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_one | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_pairs | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_range | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_set1 | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_shortpair | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_strab | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_strx | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_true | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_tuple1 | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_zero | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_args_emptydict_zero | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_args_emptystr_lita | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_args_list1_lit2 | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_args_list1_zero | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_args_lita_litb | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_args_lita_none | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_args_lita_zero | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_args_none_lita | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_args_one_list1 | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_args_strab_emptystr | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_args_zero_lita | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_args_zero_one | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arity0 | gap | built-in method set.pop is not modelled yet
-fuzz_set_remove_arg_dict1 | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_emptydict | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_emptylist | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_emptyset | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_emptystr | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_emptytuple | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_float | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_list1 | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_nestedlist | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_none | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_one | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_pairs | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_range | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_set1 | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_shortpair | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_strab | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_strx | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_true | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_tuple1 | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_zero | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_args_emptydict_zero | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_args_emptystr_lita | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_args_list1_lit2 | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_args_list1_zero | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_args_lita_litb | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_args_lita_none | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_args_lita_zero | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_args_none_lita | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_args_one_list1 | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_args_strab_emptystr | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_args_zero_lita | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_args_zero_one | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arity0 | gap | built-in method set.remove is not modelled yet
-fuzz_set_symmetric_difference_arg_dict1 | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_emptydict | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_emptylist | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_emptyset | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_emptystr | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_emptytuple | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_float | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_list1 | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_nestedlist | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_none | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_one | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_pairs | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_range | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_set1 | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_shortpair | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_strab | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_strx | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_true | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_tuple1 | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_zero | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_args_emptydict_zero | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_args_emptystr_lita | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_args_list1_lit2 | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_args_list1_zero | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_args_lita_litb | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_args_lita_none | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_args_lita_zero | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_args_none_lita | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_args_one_list1 | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_args_strab_emptystr | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_args_zero_lita | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_args_zero_one | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arity0 | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_update_arg_dict1 | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_emptydict | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_emptylist | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_emptyset | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_emptystr | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_emptytuple | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_float | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_list1 | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_nestedlist | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_none | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_one | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_pairs | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_range | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_set1 | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_shortpair | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_strab | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_strx | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_true | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_tuple1 | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_zero | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_args_emptydict_zero | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_args_emptystr_lita | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_args_list1_lit2 | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_args_list1_zero | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_args_lita_litb | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_args_lita_none | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_args_lita_zero | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_args_none_lita | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_args_one_list1 | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_args_strab_emptystr | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_args_zero_lita | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_args_zero_one | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arity0 | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_union_arg_dict1 | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_emptydict | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_emptylist | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_emptyset | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_emptystr | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_emptytuple | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_float | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_list1 | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_nestedlist | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_none | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_one | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_pairs | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_range | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_set1 | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_shortpair | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_strab | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_strx | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_true | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_tuple1 | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_zero | gap | built-in method set.union is not modelled yet
-fuzz_set_union_args_emptydict_zero | gap | built-in method set.union is not modelled yet
-fuzz_set_union_args_emptystr_lita | gap | built-in method set.union is not modelled yet
-fuzz_set_union_args_list1_lit2 | gap | built-in method set.union is not modelled yet
-fuzz_set_union_args_list1_zero | gap | built-in method set.union is not modelled yet
-fuzz_set_union_args_lita_litb | gap | built-in method set.union is not modelled yet
-fuzz_set_union_args_lita_none | gap | built-in method set.union is not modelled yet
-fuzz_set_union_args_lita_zero | gap | built-in method set.union is not modelled yet
-fuzz_set_union_args_none_lita | gap | built-in method set.union is not modelled yet
-fuzz_set_union_args_one_list1 | gap | built-in method set.union is not modelled yet
-fuzz_set_union_args_strab_emptystr | gap | built-in method set.union is not modelled yet
-fuzz_set_union_args_zero_lita | gap | built-in method set.union is not modelled yet
-fuzz_set_union_args_zero_one | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arity0 | gap | built-in method set.union is not modelled yet
-fuzz_set_update_arg_dict1 | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_emptydict | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_emptylist | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_emptyset | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_emptystr | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_emptytuple | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_float | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_list1 | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_nestedlist | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_none | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_one | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_pairs | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_range | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_set1 | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_shortpair | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_strab | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_strx | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_true | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_tuple1 | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_zero | gap | built-in method set.update is not modelled yet
-fuzz_set_update_args_emptydict_zero | gap | built-in method set.update is not modelled yet
-fuzz_set_update_args_emptystr_lita | gap | built-in method set.update is not modelled yet
-fuzz_set_update_args_list1_lit2 | gap | built-in method set.update is not modelled yet
-fuzz_set_update_args_list1_zero | gap | built-in method set.update is not modelled yet
-fuzz_set_update_args_lita_litb | gap | built-in method set.update is not modelled yet
-fuzz_set_update_args_lita_none | gap | built-in method set.update is not modelled yet
-fuzz_set_update_args_lita_zero | gap | built-in method set.update is not modelled yet
-fuzz_set_update_args_none_lita | gap | built-in method set.update is not modelled yet
-fuzz_set_update_args_one_list1 | gap | built-in method set.update is not modelled yet
-fuzz_set_update_args_strab_emptystr | gap | built-in method set.update is not modelled yet
-fuzz_set_update_args_zero_lita | gap | built-in method set.update is not modelled yet
-fuzz_set_update_args_zero_one | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arity0 | gap | built-in method set.update is not modelled yet
+fuzz_set_clear_arg_dict1 | agree
+fuzz_set_clear_arg_emptydict | agree
+fuzz_set_clear_arg_emptylist | agree
+fuzz_set_clear_arg_emptyset | agree
+fuzz_set_clear_arg_emptystr | agree
+fuzz_set_clear_arg_emptytuple | agree
+fuzz_set_clear_arg_float | agree
+fuzz_set_clear_arg_list1 | agree
+fuzz_set_clear_arg_nestedlist | agree
+fuzz_set_clear_arg_none | agree
+fuzz_set_clear_arg_one | agree
+fuzz_set_clear_arg_pairs | agree
+fuzz_set_clear_arg_range | agree
+fuzz_set_clear_arg_set1 | agree
+fuzz_set_clear_arg_shortpair | agree
+fuzz_set_clear_arg_strab | agree
+fuzz_set_clear_arg_strx | agree
+fuzz_set_clear_arg_true | agree
+fuzz_set_clear_arg_tuple1 | agree
+fuzz_set_clear_arg_zero | agree
+fuzz_set_clear_args_emptydict_zero | agree
+fuzz_set_clear_args_emptystr_lita | agree
+fuzz_set_clear_args_list1_lit2 | agree
+fuzz_set_clear_args_list1_zero | agree
+fuzz_set_clear_args_lita_litb | agree
+fuzz_set_clear_args_lita_none | agree
+fuzz_set_clear_args_lita_zero | agree
+fuzz_set_clear_args_none_lita | agree
+fuzz_set_clear_args_one_list1 | agree
+fuzz_set_clear_args_strab_emptystr | agree
+fuzz_set_clear_args_zero_lita | agree
+fuzz_set_clear_args_zero_one | agree
+fuzz_set_clear_arity0 | agree
+fuzz_set_copy_arg_dict1 | agree
+fuzz_set_copy_arg_emptydict | agree
+fuzz_set_copy_arg_emptylist | agree
+fuzz_set_copy_arg_emptyset | agree
+fuzz_set_copy_arg_emptystr | agree
+fuzz_set_copy_arg_emptytuple | agree
+fuzz_set_copy_arg_float | agree
+fuzz_set_copy_arg_list1 | agree
+fuzz_set_copy_arg_nestedlist | agree
+fuzz_set_copy_arg_none | agree
+fuzz_set_copy_arg_one | agree
+fuzz_set_copy_arg_pairs | agree
+fuzz_set_copy_arg_range | agree
+fuzz_set_copy_arg_set1 | agree
+fuzz_set_copy_arg_shortpair | agree
+fuzz_set_copy_arg_strab | agree
+fuzz_set_copy_arg_strx | agree
+fuzz_set_copy_arg_true | agree
+fuzz_set_copy_arg_tuple1 | agree
+fuzz_set_copy_arg_zero | agree
+fuzz_set_copy_args_emptydict_zero | agree
+fuzz_set_copy_args_emptystr_lita | agree
+fuzz_set_copy_args_list1_lit2 | agree
+fuzz_set_copy_args_list1_zero | agree
+fuzz_set_copy_args_lita_litb | agree
+fuzz_set_copy_args_lita_none | agree
+fuzz_set_copy_args_lita_zero | agree
+fuzz_set_copy_args_none_lita | agree
+fuzz_set_copy_args_one_list1 | agree
+fuzz_set_copy_args_strab_emptystr | agree
+fuzz_set_copy_args_zero_lita | agree
+fuzz_set_copy_args_zero_one | agree
+fuzz_set_copy_arity0 | agree
+fuzz_set_difference_arg_dict1 | agree
+fuzz_set_difference_arg_emptydict | agree
+fuzz_set_difference_arg_emptylist | agree
+fuzz_set_difference_arg_emptyset | agree
+fuzz_set_difference_arg_emptystr | agree
+fuzz_set_difference_arg_emptytuple | agree
+fuzz_set_difference_arg_float | agree
+fuzz_set_difference_arg_list1 | agree
+fuzz_set_difference_arg_nestedlist | agree
+fuzz_set_difference_arg_none | agree
+fuzz_set_difference_arg_one | agree
+fuzz_set_difference_arg_pairs | agree
+fuzz_set_difference_arg_range | agree
+fuzz_set_difference_arg_set1 | agree
+fuzz_set_difference_arg_shortpair | agree
+fuzz_set_difference_arg_strab | agree
+fuzz_set_difference_arg_strx | agree
+fuzz_set_difference_arg_true | agree
+fuzz_set_difference_arg_tuple1 | agree
+fuzz_set_difference_arg_zero | agree
+fuzz_set_difference_args_emptydict_zero | agree
+fuzz_set_difference_args_emptystr_lita | agree
+fuzz_set_difference_args_list1_lit2 | agree
+fuzz_set_difference_args_list1_zero | agree
+fuzz_set_difference_args_lita_litb | agree
+fuzz_set_difference_args_lita_none | agree
+fuzz_set_difference_args_lita_zero | agree
+fuzz_set_difference_args_none_lita | agree
+fuzz_set_difference_args_one_list1 | agree
+fuzz_set_difference_args_strab_emptystr | agree
+fuzz_set_difference_args_zero_lita | agree
+fuzz_set_difference_args_zero_one | agree
+fuzz_set_difference_arity0 | agree
+fuzz_set_difference_update_arg_dict1 | agree
+fuzz_set_difference_update_arg_emptydict | agree
+fuzz_set_difference_update_arg_emptylist | agree
+fuzz_set_difference_update_arg_emptyset | agree
+fuzz_set_difference_update_arg_emptystr | agree
+fuzz_set_difference_update_arg_emptytuple | agree
+fuzz_set_difference_update_arg_float | agree
+fuzz_set_difference_update_arg_list1 | agree
+fuzz_set_difference_update_arg_nestedlist | agree
+fuzz_set_difference_update_arg_none | agree
+fuzz_set_difference_update_arg_one | agree
+fuzz_set_difference_update_arg_pairs | agree
+fuzz_set_difference_update_arg_range | agree
+fuzz_set_difference_update_arg_set1 | agree
+fuzz_set_difference_update_arg_shortpair | agree
+fuzz_set_difference_update_arg_strab | agree
+fuzz_set_difference_update_arg_strx | agree
+fuzz_set_difference_update_arg_true | agree
+fuzz_set_difference_update_arg_tuple1 | agree
+fuzz_set_difference_update_arg_zero | agree
+fuzz_set_difference_update_args_emptydict_zero | agree
+fuzz_set_difference_update_args_emptystr_lita | agree
+fuzz_set_difference_update_args_list1_lit2 | agree
+fuzz_set_difference_update_args_list1_zero | agree
+fuzz_set_difference_update_args_lita_litb | agree
+fuzz_set_difference_update_args_lita_none | agree
+fuzz_set_difference_update_args_lita_zero | agree
+fuzz_set_difference_update_args_none_lita | agree
+fuzz_set_difference_update_args_one_list1 | agree
+fuzz_set_difference_update_args_strab_emptystr | agree
+fuzz_set_difference_update_args_zero_lita | agree
+fuzz_set_difference_update_args_zero_one | agree
+fuzz_set_difference_update_arity0 | agree
+fuzz_set_discard_arg_dict1 | agree
+fuzz_set_discard_arg_emptydict | agree
+fuzz_set_discard_arg_emptylist | agree
+fuzz_set_discard_arg_emptyset | agree
+fuzz_set_discard_arg_emptystr | agree
+fuzz_set_discard_arg_emptytuple | agree
+fuzz_set_discard_arg_float | agree
+fuzz_set_discard_arg_list1 | agree
+fuzz_set_discard_arg_nestedlist | agree
+fuzz_set_discard_arg_none | agree
+fuzz_set_discard_arg_one | agree
+fuzz_set_discard_arg_pairs | agree
+fuzz_set_discard_arg_range | agree
+fuzz_set_discard_arg_set1 | agree
+fuzz_set_discard_arg_shortpair | agree
+fuzz_set_discard_arg_strab | agree
+fuzz_set_discard_arg_strx | agree
+fuzz_set_discard_arg_true | agree
+fuzz_set_discard_arg_tuple1 | agree
+fuzz_set_discard_arg_zero | agree
+fuzz_set_discard_args_emptydict_zero | agree
+fuzz_set_discard_args_emptystr_lita | agree
+fuzz_set_discard_args_list1_lit2 | agree
+fuzz_set_discard_args_list1_zero | agree
+fuzz_set_discard_args_lita_litb | agree
+fuzz_set_discard_args_lita_none | agree
+fuzz_set_discard_args_lita_zero | agree
+fuzz_set_discard_args_none_lita | agree
+fuzz_set_discard_args_one_list1 | agree
+fuzz_set_discard_args_strab_emptystr | agree
+fuzz_set_discard_args_zero_lita | agree
+fuzz_set_discard_args_zero_one | agree
+fuzz_set_discard_arity0 | agree
+fuzz_set_intersection_arg_dict1 | agree
+fuzz_set_intersection_arg_emptydict | agree
+fuzz_set_intersection_arg_emptylist | agree
+fuzz_set_intersection_arg_emptyset | agree
+fuzz_set_intersection_arg_emptystr | agree
+fuzz_set_intersection_arg_emptytuple | agree
+fuzz_set_intersection_arg_float | agree
+fuzz_set_intersection_arg_list1 | agree
+fuzz_set_intersection_arg_nestedlist | agree
+fuzz_set_intersection_arg_none | agree
+fuzz_set_intersection_arg_one | agree
+fuzz_set_intersection_arg_pairs | agree
+fuzz_set_intersection_arg_range | agree
+fuzz_set_intersection_arg_set1 | agree
+fuzz_set_intersection_arg_shortpair | agree
+fuzz_set_intersection_arg_strab | agree
+fuzz_set_intersection_arg_strx | agree
+fuzz_set_intersection_arg_true | agree
+fuzz_set_intersection_arg_tuple1 | agree
+fuzz_set_intersection_arg_zero | agree
+fuzz_set_intersection_args_emptydict_zero | agree
+fuzz_set_intersection_args_emptystr_lita | agree
+fuzz_set_intersection_args_list1_lit2 | agree
+fuzz_set_intersection_args_list1_zero | agree
+fuzz_set_intersection_args_lita_litb | agree
+fuzz_set_intersection_args_lita_none | agree
+fuzz_set_intersection_args_lita_zero | agree
+fuzz_set_intersection_args_none_lita | agree
+fuzz_set_intersection_args_one_list1 | agree
+fuzz_set_intersection_args_strab_emptystr | agree
+fuzz_set_intersection_args_zero_lita | agree
+fuzz_set_intersection_args_zero_one | agree
+fuzz_set_intersection_arity0 | agree
+fuzz_set_intersection_update_arg_dict1 | agree
+fuzz_set_intersection_update_arg_emptydict | agree
+fuzz_set_intersection_update_arg_emptylist | agree
+fuzz_set_intersection_update_arg_emptyset | agree
+fuzz_set_intersection_update_arg_emptystr | agree
+fuzz_set_intersection_update_arg_emptytuple | agree
+fuzz_set_intersection_update_arg_float | agree
+fuzz_set_intersection_update_arg_list1 | agree
+fuzz_set_intersection_update_arg_nestedlist | agree
+fuzz_set_intersection_update_arg_none | agree
+fuzz_set_intersection_update_arg_one | agree
+fuzz_set_intersection_update_arg_pairs | agree
+fuzz_set_intersection_update_arg_range | agree
+fuzz_set_intersection_update_arg_set1 | agree
+fuzz_set_intersection_update_arg_shortpair | agree
+fuzz_set_intersection_update_arg_strab | agree
+fuzz_set_intersection_update_arg_strx | agree
+fuzz_set_intersection_update_arg_true | agree
+fuzz_set_intersection_update_arg_tuple1 | agree
+fuzz_set_intersection_update_arg_zero | agree
+fuzz_set_intersection_update_args_emptydict_zero | agree
+fuzz_set_intersection_update_args_emptystr_lita | agree
+fuzz_set_intersection_update_args_list1_lit2 | agree
+fuzz_set_intersection_update_args_list1_zero | agree
+fuzz_set_intersection_update_args_lita_litb | agree
+fuzz_set_intersection_update_args_lita_none | agree
+fuzz_set_intersection_update_args_lita_zero | agree
+fuzz_set_intersection_update_args_none_lita | agree
+fuzz_set_intersection_update_args_one_list1 | agree
+fuzz_set_intersection_update_args_strab_emptystr | agree
+fuzz_set_intersection_update_args_zero_lita | agree
+fuzz_set_intersection_update_args_zero_one | agree
+fuzz_set_intersection_update_arity0 | agree
+fuzz_set_isdisjoint_arg_dict1 | agree
+fuzz_set_isdisjoint_arg_emptydict | agree
+fuzz_set_isdisjoint_arg_emptylist | agree
+fuzz_set_isdisjoint_arg_emptyset | agree
+fuzz_set_isdisjoint_arg_emptystr | agree
+fuzz_set_isdisjoint_arg_emptytuple | agree
+fuzz_set_isdisjoint_arg_float | agree
+fuzz_set_isdisjoint_arg_list1 | agree
+fuzz_set_isdisjoint_arg_nestedlist | agree
+fuzz_set_isdisjoint_arg_none | agree
+fuzz_set_isdisjoint_arg_one | agree
+fuzz_set_isdisjoint_arg_pairs | agree
+fuzz_set_isdisjoint_arg_range | agree
+fuzz_set_isdisjoint_arg_set1 | agree
+fuzz_set_isdisjoint_arg_shortpair | agree
+fuzz_set_isdisjoint_arg_strab | agree
+fuzz_set_isdisjoint_arg_strx | agree
+fuzz_set_isdisjoint_arg_true | agree
+fuzz_set_isdisjoint_arg_tuple1 | agree
+fuzz_set_isdisjoint_arg_zero | agree
+fuzz_set_isdisjoint_args_emptydict_zero | agree
+fuzz_set_isdisjoint_args_emptystr_lita | agree
+fuzz_set_isdisjoint_args_list1_lit2 | agree
+fuzz_set_isdisjoint_args_list1_zero | agree
+fuzz_set_isdisjoint_args_lita_litb | agree
+fuzz_set_isdisjoint_args_lita_none | agree
+fuzz_set_isdisjoint_args_lita_zero | agree
+fuzz_set_isdisjoint_args_none_lita | agree
+fuzz_set_isdisjoint_args_one_list1 | agree
+fuzz_set_isdisjoint_args_strab_emptystr | agree
+fuzz_set_isdisjoint_args_zero_lita | agree
+fuzz_set_isdisjoint_args_zero_one | agree
+fuzz_set_isdisjoint_arity0 | agree
+fuzz_set_issubset_arg_dict1 | agree
+fuzz_set_issubset_arg_emptydict | agree
+fuzz_set_issubset_arg_emptylist | agree
+fuzz_set_issubset_arg_emptyset | agree
+fuzz_set_issubset_arg_emptystr | agree
+fuzz_set_issubset_arg_emptytuple | agree
+fuzz_set_issubset_arg_float | agree
+fuzz_set_issubset_arg_list1 | agree
+fuzz_set_issubset_arg_nestedlist | agree
+fuzz_set_issubset_arg_none | agree
+fuzz_set_issubset_arg_one | agree
+fuzz_set_issubset_arg_pairs | agree
+fuzz_set_issubset_arg_range | agree
+fuzz_set_issubset_arg_set1 | agree
+fuzz_set_issubset_arg_shortpair | agree
+fuzz_set_issubset_arg_strab | agree
+fuzz_set_issubset_arg_strx | agree
+fuzz_set_issubset_arg_true | agree
+fuzz_set_issubset_arg_tuple1 | agree
+fuzz_set_issubset_arg_zero | agree
+fuzz_set_issubset_args_emptydict_zero | agree
+fuzz_set_issubset_args_emptystr_lita | agree
+fuzz_set_issubset_args_list1_lit2 | agree
+fuzz_set_issubset_args_list1_zero | agree
+fuzz_set_issubset_args_lita_litb | agree
+fuzz_set_issubset_args_lita_none | agree
+fuzz_set_issubset_args_lita_zero | agree
+fuzz_set_issubset_args_none_lita | agree
+fuzz_set_issubset_args_one_list1 | agree
+fuzz_set_issubset_args_strab_emptystr | agree
+fuzz_set_issubset_args_zero_lita | agree
+fuzz_set_issubset_args_zero_one | agree
+fuzz_set_issubset_arity0 | agree
+fuzz_set_issuperset_arg_dict1 | agree
+fuzz_set_issuperset_arg_emptydict | agree
+fuzz_set_issuperset_arg_emptylist | agree
+fuzz_set_issuperset_arg_emptyset | agree
+fuzz_set_issuperset_arg_emptystr | agree
+fuzz_set_issuperset_arg_emptytuple | agree
+fuzz_set_issuperset_arg_float | agree
+fuzz_set_issuperset_arg_list1 | agree
+fuzz_set_issuperset_arg_nestedlist | agree
+fuzz_set_issuperset_arg_none | agree
+fuzz_set_issuperset_arg_one | agree
+fuzz_set_issuperset_arg_pairs | agree
+fuzz_set_issuperset_arg_range | agree
+fuzz_set_issuperset_arg_set1 | agree
+fuzz_set_issuperset_arg_shortpair | agree
+fuzz_set_issuperset_arg_strab | agree
+fuzz_set_issuperset_arg_strx | agree
+fuzz_set_issuperset_arg_true | agree
+fuzz_set_issuperset_arg_tuple1 | agree
+fuzz_set_issuperset_arg_zero | agree
+fuzz_set_issuperset_args_emptydict_zero | agree
+fuzz_set_issuperset_args_emptystr_lita | agree
+fuzz_set_issuperset_args_list1_lit2 | agree
+fuzz_set_issuperset_args_list1_zero | agree
+fuzz_set_issuperset_args_lita_litb | agree
+fuzz_set_issuperset_args_lita_none | agree
+fuzz_set_issuperset_args_lita_zero | agree
+fuzz_set_issuperset_args_none_lita | agree
+fuzz_set_issuperset_args_one_list1 | agree
+fuzz_set_issuperset_args_strab_emptystr | agree
+fuzz_set_issuperset_args_zero_lita | agree
+fuzz_set_issuperset_args_zero_one | agree
+fuzz_set_issuperset_arity0 | agree
+fuzz_set_pop_arg_dict1 | agree
+fuzz_set_pop_arg_emptydict | agree
+fuzz_set_pop_arg_emptylist | agree
+fuzz_set_pop_arg_emptyset | agree
+fuzz_set_pop_arg_emptystr | agree
+fuzz_set_pop_arg_emptytuple | agree
+fuzz_set_pop_arg_float | agree
+fuzz_set_pop_arg_list1 | agree
+fuzz_set_pop_arg_nestedlist | agree
+fuzz_set_pop_arg_none | agree
+fuzz_set_pop_arg_one | agree
+fuzz_set_pop_arg_pairs | agree
+fuzz_set_pop_arg_range | agree
+fuzz_set_pop_arg_set1 | agree
+fuzz_set_pop_arg_shortpair | agree
+fuzz_set_pop_arg_strab | agree
+fuzz_set_pop_arg_strx | agree
+fuzz_set_pop_arg_true | agree
+fuzz_set_pop_arg_tuple1 | agree
+fuzz_set_pop_arg_zero | agree
+fuzz_set_pop_args_emptydict_zero | agree
+fuzz_set_pop_args_emptystr_lita | agree
+fuzz_set_pop_args_list1_lit2 | agree
+fuzz_set_pop_args_list1_zero | agree
+fuzz_set_pop_args_lita_litb | agree
+fuzz_set_pop_args_lita_none | agree
+fuzz_set_pop_args_lita_zero | agree
+fuzz_set_pop_args_none_lita | agree
+fuzz_set_pop_args_one_list1 | agree
+fuzz_set_pop_args_strab_emptystr | agree
+fuzz_set_pop_args_zero_lita | agree
+fuzz_set_pop_args_zero_one | agree
+fuzz_set_pop_arity0 | gap | set.pop of a set whose order is not CPython's is not modelled yet
+fuzz_set_remove_arg_dict1 | agree
+fuzz_set_remove_arg_emptydict | agree
+fuzz_set_remove_arg_emptylist | agree
+fuzz_set_remove_arg_emptyset | gap | the str() of an uncaught KeyError
+fuzz_set_remove_arg_emptystr | agree
+fuzz_set_remove_arg_emptytuple | agree
+fuzz_set_remove_arg_float | agree
+fuzz_set_remove_arg_list1 | agree
+fuzz_set_remove_arg_nestedlist | agree
+fuzz_set_remove_arg_none | agree
+fuzz_set_remove_arg_one | agree
+fuzz_set_remove_arg_pairs | agree
+fuzz_set_remove_arg_range | gap | the str() of an uncaught KeyError
+fuzz_set_remove_arg_set1 | gap | the str() of an uncaught KeyError
+fuzz_set_remove_arg_shortpair | agree
+fuzz_set_remove_arg_strab | agree
+fuzz_set_remove_arg_strx | agree
+fuzz_set_remove_arg_true | agree
+fuzz_set_remove_arg_tuple1 | agree
+fuzz_set_remove_arg_zero | agree
+fuzz_set_remove_args_emptydict_zero | agree
+fuzz_set_remove_args_emptystr_lita | agree
+fuzz_set_remove_args_list1_lit2 | agree
+fuzz_set_remove_args_list1_zero | agree
+fuzz_set_remove_args_lita_litb | agree
+fuzz_set_remove_args_lita_none | agree
+fuzz_set_remove_args_lita_zero | agree
+fuzz_set_remove_args_none_lita | agree
+fuzz_set_remove_args_one_list1 | agree
+fuzz_set_remove_args_strab_emptystr | agree
+fuzz_set_remove_args_zero_lita | agree
+fuzz_set_remove_args_zero_one | agree
+fuzz_set_remove_arity0 | agree
+fuzz_set_symmetric_difference_arg_dict1 | agree
+fuzz_set_symmetric_difference_arg_emptydict | agree
+fuzz_set_symmetric_difference_arg_emptylist | agree
+fuzz_set_symmetric_difference_arg_emptyset | agree
+fuzz_set_symmetric_difference_arg_emptystr | agree
+fuzz_set_symmetric_difference_arg_emptytuple | agree
+fuzz_set_symmetric_difference_arg_float | agree
+fuzz_set_symmetric_difference_arg_list1 | agree
+fuzz_set_symmetric_difference_arg_nestedlist | agree
+fuzz_set_symmetric_difference_arg_none | agree
+fuzz_set_symmetric_difference_arg_one | agree
+fuzz_set_symmetric_difference_arg_pairs | agree
+fuzz_set_symmetric_difference_arg_range | agree
+fuzz_set_symmetric_difference_arg_set1 | agree
+fuzz_set_symmetric_difference_arg_shortpair | agree
+fuzz_set_symmetric_difference_arg_strab | agree
+fuzz_set_symmetric_difference_arg_strx | agree
+fuzz_set_symmetric_difference_arg_true | agree
+fuzz_set_symmetric_difference_arg_tuple1 | agree
+fuzz_set_symmetric_difference_arg_zero | agree
+fuzz_set_symmetric_difference_args_emptydict_zero | agree
+fuzz_set_symmetric_difference_args_emptystr_lita | agree
+fuzz_set_symmetric_difference_args_list1_lit2 | agree
+fuzz_set_symmetric_difference_args_list1_zero | agree
+fuzz_set_symmetric_difference_args_lita_litb | agree
+fuzz_set_symmetric_difference_args_lita_none | agree
+fuzz_set_symmetric_difference_args_lita_zero | agree
+fuzz_set_symmetric_difference_args_none_lita | agree
+fuzz_set_symmetric_difference_args_one_list1 | agree
+fuzz_set_symmetric_difference_args_strab_emptystr | agree
+fuzz_set_symmetric_difference_args_zero_lita | agree
+fuzz_set_symmetric_difference_args_zero_one | agree
+fuzz_set_symmetric_difference_arity0 | agree
+fuzz_set_symmetric_difference_update_arg_dict1 | agree
+fuzz_set_symmetric_difference_update_arg_emptydict | agree
+fuzz_set_symmetric_difference_update_arg_emptylist | agree
+fuzz_set_symmetric_difference_update_arg_emptyset | agree
+fuzz_set_symmetric_difference_update_arg_emptystr | agree
+fuzz_set_symmetric_difference_update_arg_emptytuple | agree
+fuzz_set_symmetric_difference_update_arg_float | agree
+fuzz_set_symmetric_difference_update_arg_list1 | agree
+fuzz_set_symmetric_difference_update_arg_nestedlist | agree
+fuzz_set_symmetric_difference_update_arg_none | agree
+fuzz_set_symmetric_difference_update_arg_one | agree
+fuzz_set_symmetric_difference_update_arg_pairs | agree
+fuzz_set_symmetric_difference_update_arg_range | agree
+fuzz_set_symmetric_difference_update_arg_set1 | agree
+fuzz_set_symmetric_difference_update_arg_shortpair | agree
+fuzz_set_symmetric_difference_update_arg_strab | agree
+fuzz_set_symmetric_difference_update_arg_strx | agree
+fuzz_set_symmetric_difference_update_arg_true | agree
+fuzz_set_symmetric_difference_update_arg_tuple1 | agree
+fuzz_set_symmetric_difference_update_arg_zero | agree
+fuzz_set_symmetric_difference_update_args_emptydict_zero | agree
+fuzz_set_symmetric_difference_update_args_emptystr_lita | agree
+fuzz_set_symmetric_difference_update_args_list1_lit2 | agree
+fuzz_set_symmetric_difference_update_args_list1_zero | agree
+fuzz_set_symmetric_difference_update_args_lita_litb | agree
+fuzz_set_symmetric_difference_update_args_lita_none | agree
+fuzz_set_symmetric_difference_update_args_lita_zero | agree
+fuzz_set_symmetric_difference_update_args_none_lita | agree
+fuzz_set_symmetric_difference_update_args_one_list1 | agree
+fuzz_set_symmetric_difference_update_args_strab_emptystr | agree
+fuzz_set_symmetric_difference_update_args_zero_lita | agree
+fuzz_set_symmetric_difference_update_args_zero_one | agree
+fuzz_set_symmetric_difference_update_arity0 | agree
+fuzz_set_union_arg_dict1 | agree
+fuzz_set_union_arg_emptydict | agree
+fuzz_set_union_arg_emptylist | agree
+fuzz_set_union_arg_emptyset | agree
+fuzz_set_union_arg_emptystr | agree
+fuzz_set_union_arg_emptytuple | agree
+fuzz_set_union_arg_float | agree
+fuzz_set_union_arg_list1 | agree
+fuzz_set_union_arg_nestedlist | agree
+fuzz_set_union_arg_none | agree
+fuzz_set_union_arg_one | agree
+fuzz_set_union_arg_pairs | agree
+fuzz_set_union_arg_range | agree
+fuzz_set_union_arg_set1 | agree
+fuzz_set_union_arg_shortpair | agree
+fuzz_set_union_arg_strab | agree
+fuzz_set_union_arg_strx | agree
+fuzz_set_union_arg_true | agree
+fuzz_set_union_arg_tuple1 | agree
+fuzz_set_union_arg_zero | agree
+fuzz_set_union_args_emptydict_zero | agree
+fuzz_set_union_args_emptystr_lita | agree
+fuzz_set_union_args_list1_lit2 | agree
+fuzz_set_union_args_list1_zero | agree
+fuzz_set_union_args_lita_litb | agree
+fuzz_set_union_args_lita_none | agree
+fuzz_set_union_args_lita_zero | agree
+fuzz_set_union_args_none_lita | agree
+fuzz_set_union_args_one_list1 | agree
+fuzz_set_union_args_strab_emptystr | agree
+fuzz_set_union_args_zero_lita | agree
+fuzz_set_union_args_zero_one | agree
+fuzz_set_union_arity0 | agree
+fuzz_set_update_arg_dict1 | agree
+fuzz_set_update_arg_emptydict | agree
+fuzz_set_update_arg_emptylist | agree
+fuzz_set_update_arg_emptyset | agree
+fuzz_set_update_arg_emptystr | agree
+fuzz_set_update_arg_emptytuple | agree
+fuzz_set_update_arg_float | agree
+fuzz_set_update_arg_list1 | agree
+fuzz_set_update_arg_nestedlist | agree
+fuzz_set_update_arg_none | agree
+fuzz_set_update_arg_one | agree
+fuzz_set_update_arg_pairs | agree
+fuzz_set_update_arg_range | agree
+fuzz_set_update_arg_set1 | agree
+fuzz_set_update_arg_shortpair | agree
+fuzz_set_update_arg_strab | agree
+fuzz_set_update_arg_strx | agree
+fuzz_set_update_arg_true | agree
+fuzz_set_update_arg_tuple1 | agree
+fuzz_set_update_arg_zero | agree
+fuzz_set_update_args_emptydict_zero | agree
+fuzz_set_update_args_emptystr_lita | agree
+fuzz_set_update_args_list1_lit2 | agree
+fuzz_set_update_args_list1_zero | agree
+fuzz_set_update_args_lita_litb | agree
+fuzz_set_update_args_lita_none | agree
+fuzz_set_update_args_lita_zero | agree
+fuzz_set_update_args_none_lita | agree
+fuzz_set_update_args_one_list1 | agree
+fuzz_set_update_args_strab_emptystr | agree
+fuzz_set_update_args_zero_lita | agree
+fuzz_set_update_args_zero_one | agree
+fuzz_set_update_arity0 | agree
 fuzz_str_arg_dict1 | agree
 fuzz_str_arg_emptydict | agree
 fuzz_str_arg_emptylist | agree
@@ -3125,36 +3125,36 @@ range_normal | agree
 range_zero_step | agree
 repr_invalid_hook_result | agree
 repr_normal | agree
-set_add_hash_hook_raises_after_effect | gap | built-in method set.add is not modelled yet
-set_add_normal | gap | built-in method set.add is not modelled yet
-set_add_unhashable | gap | built-in method set.add is not modelled yet
-set_clear_normal | gap | built-in method set.clear is not modelled yet
-set_copy_normal | gap | built-in method set.copy is not modelled yet
-set_difference_normal | gap | built-in method set.difference is not modelled yet
-set_difference_update_non_iterable | gap | built-in method set.difference_update is not modelled yet
-set_difference_update_normal | gap | built-in method set.difference_update is not modelled yet
-set_difference_update_self_alias | gap | built-in method set.difference_update is not modelled yet
-set_discard_normal | gap | built-in method set.discard is not modelled yet
-set_intersection_normal | gap | built-in method set.intersection is not modelled yet
-set_intersection_update_non_iterable | gap | built-in method set.intersection_update is not modelled yet
-set_intersection_update_normal | gap | built-in method set.intersection_update is not modelled yet
-set_intersection_update_self_alias | gap | built-in method set.intersection_update is not modelled yet
-set_isdisjoint_normal | gap | built-in method set.isdisjoint is not modelled yet
-set_issubset_normal | gap | built-in method set.issubset is not modelled yet
-set_issuperset_normal | gap | built-in method set.issuperset is not modelled yet
+set_add_hash_hook_raises_after_effect | agree
+set_add_normal | agree
+set_add_unhashable | agree
+set_clear_normal | agree
+set_copy_normal | agree
+set_difference_normal | agree
+set_difference_update_non_iterable | agree
+set_difference_update_normal | agree
+set_difference_update_self_alias | agree
+set_discard_normal | agree
+set_intersection_normal | agree
+set_intersection_update_non_iterable | agree
+set_intersection_update_normal | agree
+set_intersection_update_self_alias | agree
+set_isdisjoint_normal | agree
+set_issubset_normal | agree
+set_issuperset_normal | agree
 set_normal | agree
-set_pop_empty | gap | built-in method set.pop is not modelled yet
-set_pop_normal | gap | built-in method set.pop is not modelled yet
-set_remove_missing | gap | built-in method set.remove is not modelled yet
-set_remove_normal | gap | built-in method set.remove is not modelled yet
-set_symmetric_difference_normal | gap | built-in method set.symmetric_difference is not modelled yet
-set_symmetric_difference_update_non_iterable | gap | built-in method set.symmetric_difference_update is not modelled yet
-set_symmetric_difference_update_normal | gap | built-in method set.symmetric_difference_update is not modelled yet
-set_symmetric_difference_update_self_alias | gap | built-in method set.symmetric_difference_update is not modelled yet
+set_pop_empty | agree
+set_pop_normal | agree
+set_remove_missing | agree
+set_remove_normal | agree
+set_symmetric_difference_normal | agree
+set_symmetric_difference_update_non_iterable | agree
+set_symmetric_difference_update_normal | agree
+set_symmetric_difference_update_self_alias | agree
 set_unhashable_element | agree
-set_union_normal | gap | built-in method set.union is not modelled yet
-set_update_normal | gap | built-in method set.update is not modelled yet
-set_update_partial_update_then_unhashable | gap | built-in method set.update is not modelled yet
+set_union_normal | agree
+set_update_normal | agree
+set_update_partial_update_then_unhashable | agree
 str_capitalize_normal | agree
 str_casefold_normal | agree
 str_center_invalid_fillchar | agree
@@ -3427,14 +3427,14 @@ validity_transfer_comparison_reflected_eq_defaults_to_identity | agree
 validity_transfer_comparison_reflected_reflected_lt | agree
 validity_transfer_comprehension_scope_failing_element_abandons_binding | agree
 validity_transfer_comprehension_scope_target_does_not_leak | agree
-validity_transfer_dict_get_default_missing_yields_default | gap | built-in method dict.get is not modelled yet
-validity_transfer_dict_get_default_present_yields_value | gap | built-in method dict.get is not modelled yet
-validity_transfer_dict_pop_missing_missing_raises | gap | built-in method dict.pop is not modelled yet
-validity_transfer_dict_pop_missing_missing_with_default | gap | built-in method dict.pop is not modelled yet
-validity_transfer_dict_setdefault_inserts_inserts_and_returns | gap | built-in method dict.setdefault is not modelled yet
-validity_transfer_dict_update_keywords_keyword_keys | gap | built-in method dict.update is not modelled yet
-validity_transfer_dict_update_keywords_mapping_arg | gap | built-in method dict.update is not modelled yet
-validity_transfer_dict_view_types_keys_values_items | gap | built-in method dict.keys is not modelled yet
+validity_transfer_dict_get_default_missing_yields_default | agree
+validity_transfer_dict_get_default_present_yields_value | agree
+validity_transfer_dict_pop_missing_missing_raises | agree
+validity_transfer_dict_pop_missing_missing_with_default | agree
+validity_transfer_dict_setdefault_inserts_inserts_and_returns | agree
+validity_transfer_dict_update_keywords_keyword_keys | agree
+validity_transfer_dict_update_keywords_mapping_arg | agree
+validity_transfer_dict_view_types_keys_values_items | agree
 validity_transfer_finally_on_every_completion_after_break | agree
 validity_transfer_finally_on_every_completion_after_raise | agree
 validity_transfer_finally_on_every_completion_after_return | agree
@@ -3445,7 +3445,7 @@ validity_transfer_handler_target_cleanup_target_unbound_after_handler | agree
 validity_transfer_iteration_getitem_fallback_no_iter_uses_getitem | agree
 validity_transfer_iteration_stopiteration_ends_loop_empty_body_never_runs | agree
 validity_transfer_iteration_stopiteration_ends_loop_generator_exhausts | gap | the translator does not support generator function
-validity_transfer_iteration_unpack_arity_pairs_unpack | gap | built-in method dict.items is not modelled yet
+validity_transfer_iteration_unpack_arity_pairs_unpack | agree
 validity_transfer_iteration_unpack_arity_wrong_arity_raises | agree
 validity_transfer_len_calls_dunder_len_negative_len_raises | agree
 validity_transfer_len_calls_dunder_len_no_len_raises | agree

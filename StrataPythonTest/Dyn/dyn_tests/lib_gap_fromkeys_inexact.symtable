@@ -1,0 +1,7 @@
+module top
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  dict: global implicit (referenced)
+  print: global implicit (referenced)
+  set: global implicit (referenced)
+qualnames: 

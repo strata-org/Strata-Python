@@ -1,0 +1,7 @@
+module top
+  KeyError: global implicit (referenced)
+  d: local (assigned, referenced)
+  e: local (assigned, referenced)
+  m: local (assigned, referenced)
+  print: global implicit (referenced)
+qualnames: 

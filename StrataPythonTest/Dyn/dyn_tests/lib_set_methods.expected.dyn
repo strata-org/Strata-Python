@@ -1,0 +1,1481 @@
+module lib_set_methods {
+  func @|lib_set_methods.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("lib_set_methods")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|lib_set_methods.It.<body>|, "<body>", "lib_set_methods")
+      %str.1 : py.Value = py.strLit("It")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %It.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %It.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "It")
+      %set.2 : base.Unit = base.refSet[py.Value](%It.cell.0, %It.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|lib_set_methods.H.<body>|, "<body>", "lib_set_methods")
+      %str.2 : py.Value = py.strLit("H")
+      %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %H.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %H.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "H")
+      %set.3 : base.Unit = base.refSet[py.Value](%H.cell.0, %H.0)
+      %clo.2 : py.Value = py.mkClosure[[]](@lib_set_methods.show, "show", "lib_set_methods")
+      %show.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "show")
+      %set.4 : base.Unit = base.refSet[py.Value](%show.cell.0, %clo.2)
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %int.2 : py.Value = py.intLit(3)
+      %set.5 : py.Value = py.constSet(%int.0, %int.1, %int.2) ^propagate.0()
+      %s.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "s")
+      %set.6 : base.Unit = base.refSet[py.Value](%s.cell.0, %set.5)
+      %show.0 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.0 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %union.0 : py.Value = py.attr(%s.0, "union") ^propagate.0()
+      %int.3 : py.Value = py.intLit(4)
+      %list.0 : py.Value = py.mkList(%int.3)
+      %int.4 : py.Value = py.intLit(5)
+      %tuple.2 : py.Value = py.mkTuple(%int.4)
+      %int.5 : py.Value = py.intLit(6)
+      %int.6 : py.Value = py.intLit(0)
+      %dict.0 : py.Value = py.mkDict(%int.5, %int.6) ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%union.0, %list.0, %tuple.2, %dict.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%show.0, %tuple.3, %kwargs.2) ^propagate.0()
+      %show.1 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.1 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %intersection.0 : py.Value = py.attr(%s.1, "intersection") ^propagate.0()
+      %It.1 : py.Value = py.loadGlobal("lib_set_methods", "It") ^propagate.0()
+      %int.7 : py.Value = py.intLit(2)
+      %int.8 : py.Value = py.intLit(9)
+      %int.9 : py.Value = py.intLit(3)
+      %int.10 : py.Value = py.intLit(1)
+      %int.11 : py.Value = py.intLit(7)
+      %list.1 : py.Value = py.mkList(%int.7, %int.8, %int.9, %int.10, %int.11)
+      %tuple.4 : py.Value = py.mkTuple(%list.1)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%It.1, %tuple.4, %kwargs.3) ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple(%intersection.0, %call.1)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%show.1, %tuple.5, %kwargs.4) ^propagate.0()
+      %iter.0 : py.Value = py.loadGlobal("lib_set_methods", "iter") ^propagate.0()
+      %int.12 : py.Value = py.intLit(2)
+      %int.13 : py.Value = py.intLit(1)
+      %int.14 : py.Value = py.intLit(3)
+      %list.2 : py.Value = py.mkList(%int.12, %int.13, %int.14)
+      %tuple.6 : py.Value = py.mkTuple(%list.2)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%iter.0, %tuple.6, %kwargs.5) ^propagate.0()
+      %it.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "it")
+      %set.7 : base.Unit = base.refSet[py.Value](%it.cell.0, %call.3)
+      %print.0 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %int.15 : py.Value = py.intLit(1)
+      %set.8 : py.Value = py.constSet(%int.15) ^propagate.0()
+      %issubset.0 : py.Value = py.attr(%set.8, "issubset") ^propagate.0()
+      %it.0 : py.Value = py.loadGlobal("lib_set_methods", "it") ^propagate.0()
+      %tuple.7 : py.Value = py.mkTuple(%it.0)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%issubset.0, %tuple.7, %kwargs.6) ^propagate.0()
+      %list.3 : py.Value = py.loadGlobal("lib_set_methods", "list") ^propagate.0()
+      %it.1 : py.Value = py.loadGlobal("lib_set_methods", "it") ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple(%it.1)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%list.3, %tuple.8, %kwargs.7) ^propagate.0()
+      %tuple.9 : py.Value = py.mkTuple(%call.4, %call.5)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%print.0, %tuple.9, %kwargs.8) ^propagate.0()
+      %iter.1 : py.Value = py.loadGlobal("lib_set_methods", "iter") ^propagate.0()
+      %int.16 : py.Value = py.intLit(1)
+      %int.17 : py.Value = py.intLit(2)
+      %int.18 : py.Value = py.intLit(3)
+      %list.4 : py.Value = py.mkList(%int.16, %int.17, %int.18)
+      %tuple.10 : py.Value = py.mkTuple(%list.4)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%iter.1, %tuple.10, %kwargs.9) ^propagate.0()
+      %it.cell.1 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "it")
+      %set.9 : base.Unit = base.refSet[py.Value](%it.cell.1, %call.7)
+      %print.1 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %sorted.0 : py.Value = py.loadGlobal("lib_set_methods", "sorted") ^propagate.0()
+      %int.19 : py.Value = py.intLit(1)
+      %set.10 : py.Value = py.constSet(%int.19) ^propagate.0()
+      %intersection.1 : py.Value = py.attr(%set.10, "intersection") ^propagate.0()
+      %it.2 : py.Value = py.loadGlobal("lib_set_methods", "it") ^propagate.0()
+      %tuple.11 : py.Value = py.mkTuple(%it.2)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%intersection.1, %tuple.11, %kwargs.10) ^propagate.0()
+      %tuple.12 : py.Value = py.mkTuple(%call.8)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%sorted.0, %tuple.12, %kwargs.11) ^propagate.0()
+      %list.5 : py.Value = py.loadGlobal("lib_set_methods", "list") ^propagate.0()
+      %it.3 : py.Value = py.loadGlobal("lib_set_methods", "it") ^propagate.0()
+      %tuple.13 : py.Value = py.mkTuple(%it.3)
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%list.5, %tuple.13, %kwargs.12) ^propagate.0()
+      %tuple.14 : py.Value = py.mkTuple(%call.9, %call.10)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%print.1, %tuple.14, %kwargs.13) ^propagate.0()
+      %show.2 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.2 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %difference.0 : py.Value = py.attr(%s.2, "difference") ^propagate.0()
+      %It.2 : py.Value = py.loadGlobal("lib_set_methods", "It") ^propagate.0()
+      %int.20 : py.Value = py.intLit(1)
+      %list.6 : py.Value = py.mkList(%int.20)
+      %tuple.15 : py.Value = py.mkTuple(%list.6)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%It.2, %tuple.15, %kwargs.14) ^propagate.0()
+      %int.21 : py.Value = py.intLit(2)
+      %list.7 : py.Value = py.mkList(%int.21)
+      %tuple.16 : py.Value = py.mkTuple(%difference.0, %call.12, %list.7)
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%show.2, %tuple.16, %kwargs.15) ^propagate.0()
+      %show.3 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.3 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %difference.1 : py.Value = py.attr(%s.3, "difference") ^propagate.0()
+      %int.22 : py.Value = py.intLit(1)
+      %int.23 : py.Value = py.intLit(0)
+      %dict.1 : py.Value = py.mkDict(%int.22, %int.23) ^propagate.0()
+      %tuple.17 : py.Value = py.mkTuple(%difference.1, %dict.1)
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%show.3, %tuple.17, %kwargs.16) ^propagate.0()
+      %show.4 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.4 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %symmetric_difference.0 : py.Value = py.attr(%s.4, "symmetric_difference") ^propagate.0()
+      %It.3 : py.Value = py.loadGlobal("lib_set_methods", "It") ^propagate.0()
+      %int.24 : py.Value = py.intLit(3)
+      %int.25 : py.Value = py.intLit(4)
+      %list.8 : py.Value = py.mkList(%int.24, %int.25)
+      %tuple.18 : py.Value = py.mkTuple(%list.8)
+      %kwargs.17 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%It.3, %tuple.18, %kwargs.17) ^propagate.0()
+      %tuple.19 : py.Value = py.mkTuple(%symmetric_difference.0, %call.15)
+      %kwargs.18 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%show.4, %tuple.19, %kwargs.18) ^propagate.0()
+      %show.5 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.5 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %issuperset.0 : py.Value = py.attr(%s.5, "issuperset") ^propagate.0()
+      %It.4 : py.Value = py.loadGlobal("lib_set_methods", "It") ^propagate.0()
+      %int.26 : py.Value = py.intLit(1)
+      %int.27 : py.Value = py.intLit(5)
+      %int.28 : py.Value = py.intLit(2)
+      %list.9 : py.Value = py.mkList(%int.26, %int.27, %int.28)
+      %tuple.20 : py.Value = py.mkTuple(%list.9)
+      %kwargs.19 : py.Value = py.mkKwargs
+      %call.17 : py.Value = py.call(%It.4, %tuple.20, %kwargs.19) ^propagate.0()
+      %tuple.21 : py.Value = py.mkTuple(%issuperset.0, %call.17)
+      %kwargs.20 : py.Value = py.mkKwargs
+      %call.18 : py.Value = py.call(%show.5, %tuple.21, %kwargs.20) ^propagate.0()
+      %show.6 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.6 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %isdisjoint.0 : py.Value = py.attr(%s.6, "isdisjoint") ^propagate.0()
+      %It.5 : py.Value = py.loadGlobal("lib_set_methods", "It") ^propagate.0()
+      %int.29 : py.Value = py.intLit(7)
+      %int.30 : py.Value = py.intLit(2)
+      %int.31 : py.Value = py.intLit(8)
+      %list.10 : py.Value = py.mkList(%int.29, %int.30, %int.31)
+      %tuple.22 : py.Value = py.mkTuple(%list.10)
+      %kwargs.21 : py.Value = py.mkKwargs
+      %call.19 : py.Value = py.call(%It.5, %tuple.22, %kwargs.21) ^propagate.0()
+      %tuple.23 : py.Value = py.mkTuple(%isdisjoint.0, %call.19)
+      %kwargs.22 : py.Value = py.mkKwargs
+      %call.20 : py.Value = py.call(%show.6, %tuple.23, %kwargs.22) ^propagate.0()
+      %show.7 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.7 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %issubset.1 : py.Value = py.attr(%s.7, "issubset") ^propagate.0()
+      %int.32 : py.Value = py.intLit(1)
+      %int.33 : py.Value = py.intLit(2)
+      %int.34 : py.Value = py.intLit(3)
+      %int.35 : py.Value = py.intLit(4)
+      %list.11 : py.Value = py.mkList(%int.32, %int.33, %int.34, %int.35)
+      %tuple.24 : py.Value = py.mkTuple(%issubset.1, %list.11)
+      %kwargs.23 : py.Value = py.mkKwargs
+      %call.21 : py.Value = py.call(%show.7, %tuple.24, %kwargs.23) ^propagate.0()
+      %show.8 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.8 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %issubset.2 : py.Value = py.attr(%s.8, "issubset") ^propagate.0()
+      %int.36 : py.Value = py.intLit(1)
+      %int.37 : py.Value = py.intLit(2)
+      %set.11 : py.Value = py.constSet(%int.36, %int.37) ^propagate.0()
+      %tuple.25 : py.Value = py.mkTuple(%issubset.2, %set.11)
+      %kwargs.24 : py.Value = py.mkKwargs
+      %call.22 : py.Value = py.call(%show.8, %tuple.25, %kwargs.24) ^propagate.0()
+      %show.9 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.9 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %issuperset.1 : py.Value = py.attr(%s.9, "issuperset") ^propagate.0()
+      %int.38 : py.Value = py.intLit(1)
+      %set.12 : py.Value = py.constSet(%int.38) ^propagate.0()
+      %tuple.26 : py.Value = py.mkTuple(%issuperset.1, %set.12)
+      %kwargs.25 : py.Value = py.mkKwargs
+      %call.23 : py.Value = py.call(%show.9, %tuple.26, %kwargs.25) ^propagate.0()
+      %show.10 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.10 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %isdisjoint.1 : py.Value = py.attr(%s.10, "isdisjoint") ^propagate.0()
+      %int.39 : py.Value = py.intLit(9)
+      %set.13 : py.Value = py.constSet(%int.39) ^propagate.0()
+      %tuple.27 : py.Value = py.mkTuple(%isdisjoint.1, %set.13)
+      %kwargs.26 : py.Value = py.mkKwargs
+      %call.24 : py.Value = py.call(%show.10, %tuple.27, %kwargs.26) ^propagate.0()
+      %show.11 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %frozenset.0 : py.Value = py.loadGlobal("lib_set_methods", "frozenset") ^propagate.0()
+      %int.40 : py.Value = py.intLit(1)
+      %int.41 : py.Value = py.intLit(2)
+      %list.12 : py.Value = py.mkList(%int.40, %int.41)
+      %tuple.28 : py.Value = py.mkTuple(%list.12)
+      %kwargs.27 : py.Value = py.mkKwargs
+      %call.25 : py.Value = py.call(%frozenset.0, %tuple.28, %kwargs.27) ^propagate.0()
+      %union.1 : py.Value = py.attr(%call.25, "union") ^propagate.0()
+      %int.42 : py.Value = py.intLit(3)
+      %list.13 : py.Value = py.mkList(%int.42)
+      %tuple.29 : py.Value = py.mkTuple(%union.1, %list.13)
+      %kwargs.28 : py.Value = py.mkKwargs
+      %call.26 : py.Value = py.call(%show.11, %tuple.29, %kwargs.28) ^propagate.0()
+      %show.12 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %frozenset.1 : py.Value = py.loadGlobal("lib_set_methods", "frozenset") ^propagate.0()
+      %int.43 : py.Value = py.intLit(1)
+      %int.44 : py.Value = py.intLit(2)
+      %list.14 : py.Value = py.mkList(%int.43, %int.44)
+      %tuple.30 : py.Value = py.mkTuple(%list.14)
+      %kwargs.29 : py.Value = py.mkKwargs
+      %call.27 : py.Value = py.call(%frozenset.1, %tuple.30, %kwargs.29) ^propagate.0()
+      %intersection.2 : py.Value = py.attr(%call.27, "intersection") ^propagate.0()
+      %tuple.31 : py.Value = py.mkTuple(%intersection.2)
+      %kwargs.30 : py.Value = py.mkKwargs
+      %call.28 : py.Value = py.call(%show.12, %tuple.31, %kwargs.30) ^propagate.0()
+      %show.13 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %frozenset.2 : py.Value = py.loadGlobal("lib_set_methods", "frozenset") ^propagate.0()
+      %int.45 : py.Value = py.intLit(1)
+      %int.46 : py.Value = py.intLit(2)
+      %list.15 : py.Value = py.mkList(%int.45, %int.46)
+      %tuple.32 : py.Value = py.mkTuple(%list.15)
+      %kwargs.31 : py.Value = py.mkKwargs
+      %call.29 : py.Value = py.call(%frozenset.2, %tuple.32, %kwargs.31) ^propagate.0()
+      %difference.2 : py.Value = py.attr(%call.29, "difference") ^propagate.0()
+      %tuple.33 : py.Value = py.mkTuple(%difference.2)
+      %kwargs.32 : py.Value = py.mkKwargs
+      %call.30 : py.Value = py.call(%show.13, %tuple.33, %kwargs.32) ^propagate.0()
+      %frozenset.3 : py.Value = py.loadGlobal("lib_set_methods", "frozenset") ^propagate.0()
+      %int.47 : py.Value = py.intLit(1)
+      %list.16 : py.Value = py.mkList(%int.47)
+      %tuple.34 : py.Value = py.mkTuple(%list.16)
+      %kwargs.33 : py.Value = py.mkKwargs
+      %call.31 : py.Value = py.call(%frozenset.3, %tuple.34, %kwargs.33) ^propagate.0()
+      %fs.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "fs")
+      %set.14 : base.Unit = base.refSet[py.Value](%fs.cell.0, %call.31)
+      %print.2 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %fs.0 : py.Value = py.loadGlobal("lib_set_methods", "fs") ^propagate.0()
+      %copy.0 : py.Value = py.attr(%fs.0, "copy") ^propagate.0()
+      %tuple.35 : py.Value = py.mkTuple
+      %kwargs.34 : py.Value = py.mkKwargs
+      %call.32 : py.Value = py.call(%copy.0, %tuple.35, %kwargs.34) ^propagate.0()
+      %fs.1 : py.Value = py.loadGlobal("lib_set_methods", "fs") ^propagate.0()
+      %is.0 : py.Value = py.is(%call.32, %fs.1)
+      %type.0 : py.Value = py.loadGlobal("lib_set_methods", "type") ^propagate.0()
+      %set.15 : py.Value = py.loadGlobal("lib_set_methods", "set") ^propagate.0()
+      %int.48 : py.Value = py.intLit(1)
+      %list.17 : py.Value = py.mkList(%int.48)
+      %tuple.36 : py.Value = py.mkTuple(%list.17)
+      %kwargs.35 : py.Value = py.mkKwargs
+      %call.33 : py.Value = py.call(%set.15, %tuple.36, %kwargs.35) ^propagate.0()
+      %copy.1 : py.Value = py.attr(%call.33, "copy") ^propagate.0()
+      %tuple.37 : py.Value = py.mkTuple
+      %kwargs.36 : py.Value = py.mkKwargs
+      %call.34 : py.Value = py.call(%copy.1, %tuple.37, %kwargs.36) ^propagate.0()
+      %tuple.38 : py.Value = py.mkTuple(%call.34)
+      %kwargs.37 : py.Value = py.mkKwargs
+      %call.35 : py.Value = py.call(%type.0, %tuple.38, %kwargs.37) ^propagate.0()
+      %__name__.0 : py.Value = py.attr(%call.35, "__name__") ^propagate.0()
+      %tuple.39 : py.Value = py.mkTuple(%is.0, %__name__.0)
+      %kwargs.38 : py.Value = py.mkKwargs
+      %call.36 : py.Value = py.call(%print.2, %tuple.39, %kwargs.38) ^propagate.0()
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.3 : py.Value = py.mkClosure[[]](@|lib_set_methods.S.<body>|, "<body>", "lib_set_methods")
+      %str.3 : py.Value = py.strLit("S")
+      %set.16 : py.Value = py.loadGlobal("lib_set_methods", "set") ^propagate.0()
+      %tuple.40 : py.Value = py.mkTuple(%clo.3, %str.3, %set.16)
+      %kwargs.39 : py.Value = py.mkKwargs
+      %S.0 : py.Value = py.call(%__build_class__.2, %tuple.40, %kwargs.39) ^propagate.0()
+      %S.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "S")
+      %set.17 : base.Unit = base.refSet[py.Value](%S.cell.0, %S.0)
+      %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.4 : py.Value = py.mkClosure[[]](@|lib_set_methods.F.<body>|, "<body>", "lib_set_methods")
+      %str.4 : py.Value = py.strLit("F")
+      %frozenset.4 : py.Value = py.loadGlobal("lib_set_methods", "frozenset") ^propagate.0()
+      %tuple.41 : py.Value = py.mkTuple(%clo.4, %str.4, %frozenset.4)
+      %kwargs.40 : py.Value = py.mkKwargs
+      %F.0 : py.Value = py.call(%__build_class__.3, %tuple.41, %kwargs.40) ^propagate.0()
+      %F.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "F")
+      %set.18 : base.Unit = base.refSet[py.Value](%F.cell.0, %F.0)
+      %show.14 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %S.1 : py.Value = py.loadGlobal("lib_set_methods", "S") ^propagate.0()
+      %int.49 : py.Value = py.intLit(1)
+      %list.18 : py.Value = py.mkList(%int.49)
+      %tuple.42 : py.Value = py.mkTuple(%list.18)
+      %kwargs.41 : py.Value = py.mkKwargs
+      %call.37 : py.Value = py.call(%S.1, %tuple.42, %kwargs.41) ^propagate.0()
+      %union.2 : py.Value = py.attr(%call.37, "union") ^propagate.0()
+      %int.50 : py.Value = py.intLit(2)
+      %list.19 : py.Value = py.mkList(%int.50)
+      %tuple.43 : py.Value = py.mkTuple(%union.2, %list.19)
+      %kwargs.42 : py.Value = py.mkKwargs
+      %call.38 : py.Value = py.call(%show.14, %tuple.43, %kwargs.42) ^propagate.0()
+      %show.15 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %F.1 : py.Value = py.loadGlobal("lib_set_methods", "F") ^propagate.0()
+      %int.51 : py.Value = py.intLit(1)
+      %list.20 : py.Value = py.mkList(%int.51)
+      %tuple.44 : py.Value = py.mkTuple(%list.20)
+      %kwargs.43 : py.Value = py.mkKwargs
+      %call.39 : py.Value = py.call(%F.1, %tuple.44, %kwargs.43) ^propagate.0()
+      %union.3 : py.Value = py.attr(%call.39, "union") ^propagate.0()
+      %int.52 : py.Value = py.intLit(2)
+      %list.21 : py.Value = py.mkList(%int.52)
+      %tuple.45 : py.Value = py.mkTuple(%union.3, %list.21)
+      %kwargs.44 : py.Value = py.mkKwargs
+      %call.40 : py.Value = py.call(%show.15, %tuple.45, %kwargs.44) ^propagate.0()
+      %print.3 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %type.1 : py.Value = py.loadGlobal("lib_set_methods", "type") ^propagate.0()
+      %F.2 : py.Value = py.loadGlobal("lib_set_methods", "F") ^propagate.0()
+      %int.53 : py.Value = py.intLit(1)
+      %list.22 : py.Value = py.mkList(%int.53)
+      %tuple.46 : py.Value = py.mkTuple(%list.22)
+      %kwargs.45 : py.Value = py.mkKwargs
+      %call.41 : py.Value = py.call(%F.2, %tuple.46, %kwargs.45) ^propagate.0()
+      %copy.2 : py.Value = py.attr(%call.41, "copy") ^propagate.0()
+      %tuple.47 : py.Value = py.mkTuple
+      %kwargs.46 : py.Value = py.mkKwargs
+      %call.42 : py.Value = py.call(%copy.2, %tuple.47, %kwargs.46) ^propagate.0()
+      %tuple.48 : py.Value = py.mkTuple(%call.42)
+      %kwargs.47 : py.Value = py.mkKwargs
+      %call.43 : py.Value = py.call(%type.1, %tuple.48, %kwargs.47) ^propagate.0()
+      %__name__.1 : py.Value = py.attr(%call.43, "__name__") ^propagate.0()
+      %tuple.49 : py.Value = py.mkTuple(%__name__.1)
+      %kwargs.48 : py.Value = py.mkKwargs
+      %call.44 : py.Value = py.call(%print.3, %tuple.49, %kwargs.48) ^propagate.0()
+      %int.54 : py.Value = py.intLit(1)
+      %int.55 : py.Value = py.intLit(2)
+      %set.19 : py.Value = py.constSet(%int.54, %int.55) ^propagate.0()
+      %u.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "u")
+      %set.20 : base.Unit = base.refSet[py.Value](%u.cell.0, %set.19)
+      %u.0 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %update.0 : py.Value = py.attr(%u.0, "update") ^propagate.0()
+      %It.6 : py.Value = py.loadGlobal("lib_set_methods", "It") ^propagate.0()
+      %int.56 : py.Value = py.intLit(3)
+      %list.23 : py.Value = py.mkList(%int.56)
+      %tuple.50 : py.Value = py.mkTuple(%list.23)
+      %kwargs.49 : py.Value = py.mkKwargs
+      %call.45 : py.Value = py.call(%It.6, %tuple.50, %kwargs.49) ^propagate.0()
+      %int.57 : py.Value = py.intLit(4)
+      %set.21 : py.Value = py.constSet(%int.57) ^propagate.0()
+      %int.58 : py.Value = py.intLit(5)
+      %int.59 : py.Value = py.intLit(0)
+      %dict.2 : py.Value = py.mkDict(%int.58, %int.59) ^propagate.0()
+      %int.60 : py.Value = py.intLit(6)
+      %list.24 : py.Value = py.mkList(%int.60)
+      %tuple.51 : py.Value = py.mkTuple(%call.45, %set.21, %dict.2, %list.24)
+      %kwargs.50 : py.Value = py.mkKwargs
+      %call.46 : py.Value = py.call(%update.0, %tuple.51, %kwargs.50) ^propagate.0()
+      %print.4 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %sorted.1 : py.Value = py.loadGlobal("lib_set_methods", "sorted") ^propagate.0()
+      %u.1 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %tuple.52 : py.Value = py.mkTuple(%u.1)
+      %kwargs.51 : py.Value = py.mkKwargs
+      %call.47 : py.Value = py.call(%sorted.1, %tuple.52, %kwargs.51) ^propagate.0()
+      %tuple.53 : py.Value = py.mkTuple(%call.47)
+      %kwargs.52 : py.Value = py.mkKwargs
+      %call.48 : py.Value = py.call(%print.4, %tuple.53, %kwargs.52) ^propagate.0()
+      %u.2 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %intersection_update.0 : py.Value = py.attr(%u.2, "intersection_update") ^propagate.0()
+      %int.61 : py.Value = py.intLit(1)
+      %int.62 : py.Value = py.intLit(2)
+      %int.63 : py.Value = py.intLit(3)
+      %list.25 : py.Value = py.mkList(%int.61, %int.62, %int.63)
+      %It.7 : py.Value = py.loadGlobal("lib_set_methods", "It") ^propagate.0()
+      %int.64 : py.Value = py.intLit(2)
+      %int.65 : py.Value = py.intLit(3)
+      %list.26 : py.Value = py.mkList(%int.64, %int.65)
+      %tuple.54 : py.Value = py.mkTuple(%list.26)
+      %kwargs.53 : py.Value = py.mkKwargs
+      %call.49 : py.Value = py.call(%It.7, %tuple.54, %kwargs.53) ^propagate.0()
+      %tuple.55 : py.Value = py.mkTuple(%list.25, %call.49)
+      %kwargs.54 : py.Value = py.mkKwargs
+      %call.50 : py.Value = py.call(%intersection_update.0, %tuple.55, %kwargs.54) ^propagate.0()
+      %print.5 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %sorted.2 : py.Value = py.loadGlobal("lib_set_methods", "sorted") ^propagate.0()
+      %u.3 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %tuple.56 : py.Value = py.mkTuple(%u.3)
+      %kwargs.55 : py.Value = py.mkKwargs
+      %call.51 : py.Value = py.call(%sorted.2, %tuple.56, %kwargs.55) ^propagate.0()
+      %tuple.57 : py.Value = py.mkTuple(%call.51)
+      %kwargs.56 : py.Value = py.mkKwargs
+      %call.52 : py.Value = py.call(%print.5, %tuple.57, %kwargs.56) ^propagate.0()
+      %int.66 : py.Value = py.intLit(1)
+      %int.67 : py.Value = py.intLit(2)
+      %int.68 : py.Value = py.intLit(3)
+      %int.69 : py.Value = py.intLit(4)
+      %set.22 : py.Value = py.constSet(%int.66, %int.67, %int.68, %int.69) ^propagate.0()
+      %u.cell.1 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "u")
+      %set.23 : base.Unit = base.refSet[py.Value](%u.cell.1, %set.22)
+      %u.4 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %difference_update.0 : py.Value = py.attr(%u.4, "difference_update") ^propagate.0()
+      %int.70 : py.Value = py.intLit(1)
+      %list.27 : py.Value = py.mkList(%int.70)
+      %It.8 : py.Value = py.loadGlobal("lib_set_methods", "It") ^propagate.0()
+      %int.71 : py.Value = py.intLit(2)
+      %list.28 : py.Value = py.mkList(%int.71)
+      %tuple.58 : py.Value = py.mkTuple(%list.28)
+      %kwargs.57 : py.Value = py.mkKwargs
+      %call.53 : py.Value = py.call(%It.8, %tuple.58, %kwargs.57) ^propagate.0()
+      %tuple.59 : py.Value = py.mkTuple(%list.27, %call.53)
+      %kwargs.58 : py.Value = py.mkKwargs
+      %call.54 : py.Value = py.call(%difference_update.0, %tuple.59, %kwargs.58) ^propagate.0()
+      %print.6 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %sorted.3 : py.Value = py.loadGlobal("lib_set_methods", "sorted") ^propagate.0()
+      %u.5 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %tuple.60 : py.Value = py.mkTuple(%u.5)
+      %kwargs.59 : py.Value = py.mkKwargs
+      %call.55 : py.Value = py.call(%sorted.3, %tuple.60, %kwargs.59) ^propagate.0()
+      %tuple.61 : py.Value = py.mkTuple(%call.55)
+      %kwargs.60 : py.Value = py.mkKwargs
+      %call.56 : py.Value = py.call(%print.6, %tuple.61, %kwargs.60) ^propagate.0()
+      %u.6 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %symmetric_difference_update.0 : py.Value = py.attr(%u.6, "symmetric_difference_update") ^propagate.0()
+      %It.9 : py.Value = py.loadGlobal("lib_set_methods", "It") ^propagate.0()
+      %int.72 : py.Value = py.intLit(3)
+      %int.73 : py.Value = py.intLit(9)
+      %list.29 : py.Value = py.mkList(%int.72, %int.73)
+      %tuple.62 : py.Value = py.mkTuple(%list.29)
+      %kwargs.61 : py.Value = py.mkKwargs
+      %call.57 : py.Value = py.call(%It.9, %tuple.62, %kwargs.61) ^propagate.0()
+      %tuple.63 : py.Value = py.mkTuple(%call.57)
+      %kwargs.62 : py.Value = py.mkKwargs
+      %call.58 : py.Value = py.call(%symmetric_difference_update.0, %tuple.63, %kwargs.62) ^propagate.0()
+      %print.7 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %sorted.4 : py.Value = py.loadGlobal("lib_set_methods", "sorted") ^propagate.0()
+      %u.7 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %tuple.64 : py.Value = py.mkTuple(%u.7)
+      %kwargs.63 : py.Value = py.mkKwargs
+      %call.59 : py.Value = py.call(%sorted.4, %tuple.64, %kwargs.63) ^propagate.0()
+      %tuple.65 : py.Value = py.mkTuple(%call.59)
+      %kwargs.64 : py.Value = py.mkKwargs
+      %call.60 : py.Value = py.call(%print.7, %tuple.65, %kwargs.64) ^propagate.0()
+      %u.8 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %symmetric_difference_update.1 : py.Value = py.attr(%u.8, "symmetric_difference_update") ^propagate.0()
+      %int.74 : py.Value = py.intLit(4)
+      %int.75 : py.Value = py.intLit(0)
+      %int.76 : py.Value = py.intLit(7)
+      %int.77 : py.Value = py.intLit(0)
+      %dict.3 : py.Value = py.mkDict(%int.74, %int.75, %int.76, %int.77) ^propagate.0()
+      %tuple.66 : py.Value = py.mkTuple(%dict.3)
+      %kwargs.65 : py.Value = py.mkKwargs
+      %call.61 : py.Value = py.call(%symmetric_difference_update.1, %tuple.66, %kwargs.65) ^propagate.0()
+      %print.8 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %sorted.5 : py.Value = py.loadGlobal("lib_set_methods", "sorted") ^propagate.0()
+      %u.9 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %tuple.67 : py.Value = py.mkTuple(%u.9)
+      %kwargs.66 : py.Value = py.mkKwargs
+      %call.62 : py.Value = py.call(%sorted.5, %tuple.67, %kwargs.66) ^propagate.0()
+      %tuple.68 : py.Value = py.mkTuple(%call.62)
+      %kwargs.67 : py.Value = py.mkKwargs
+      %call.63 : py.Value = py.call(%print.8, %tuple.68, %kwargs.67) ^propagate.0()
+      %u.10 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %add.0 : py.Value = py.attr(%u.10, "add") ^propagate.0()
+      %H.1 : py.Value = py.loadGlobal("lib_set_methods", "H") ^propagate.0()
+      %int.78 : py.Value = py.intLit(5)
+      %tuple.69 : py.Value = py.mkTuple(%int.78)
+      %kwargs.68 : py.Value = py.mkKwargs
+      %call.64 : py.Value = py.call(%H.1, %tuple.69, %kwargs.68) ^propagate.0()
+      %tuple.70 : py.Value = py.mkTuple(%call.64)
+      %kwargs.69 : py.Value = py.mkKwargs
+      %call.65 : py.Value = py.call(%add.0, %tuple.70, %kwargs.69) ^propagate.0()
+      %print.9 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("lib_set_methods", "len") ^propagate.0()
+      %u.11 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %tuple.71 : py.Value = py.mkTuple(%u.11)
+      %kwargs.70 : py.Value = py.mkKwargs
+      %call.66 : py.Value = py.call(%len.0, %tuple.71, %kwargs.70) ^propagate.0()
+      %tuple.72 : py.Value = py.mkTuple(%call.66)
+      %kwargs.71 : py.Value = py.mkKwargs
+      %call.67 : py.Value = py.call(%print.9, %tuple.72, %kwargs.71) ^propagate.0()
+      %u.12 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %discard.0 : py.Value = py.attr(%u.12, "discard") ^propagate.0()
+      %H.2 : py.Value = py.loadGlobal("lib_set_methods", "H") ^propagate.0()
+      %int.79 : py.Value = py.intLit(5)
+      %tuple.73 : py.Value = py.mkTuple(%int.79)
+      %kwargs.72 : py.Value = py.mkKwargs
+      %call.68 : py.Value = py.call(%H.2, %tuple.73, %kwargs.72) ^propagate.0()
+      %tuple.74 : py.Value = py.mkTuple(%call.68)
+      %kwargs.73 : py.Value = py.mkKwargs
+      %call.69 : py.Value = py.call(%discard.0, %tuple.74, %kwargs.73) ^propagate.0()
+      %u.13 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %discard.1 : py.Value = py.attr(%u.13, "discard") ^propagate.0()
+      %int.80 : py.Value = py.intLit(99)
+      %tuple.75 : py.Value = py.mkTuple(%int.80)
+      %kwargs.74 : py.Value = py.mkKwargs
+      %call.70 : py.Value = py.call(%discard.1, %tuple.75, %kwargs.74) ^propagate.0()
+      %show.16 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %u.14 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %remove.0 : py.Value = py.attr(%u.14, "remove") ^propagate.0()
+      %int.81 : py.Value = py.intLit(99)
+      %tuple.76 : py.Value = py.mkTuple(%remove.0, %int.81)
+      %kwargs.75 : py.Value = py.mkKwargs
+      %call.71 : py.Value = py.call(%show.16, %tuple.76, %kwargs.75) ^propagate.0()
+      %show.17 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %u.15 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %remove.1 : py.Value = py.attr(%u.15, "remove") ^propagate.0()
+      %int.82 : py.Value = py.intLit(1)
+      %list.30 : py.Value = py.mkList(%int.82)
+      %tuple.77 : py.Value = py.mkTuple(%remove.1, %list.30)
+      %kwargs.76 : py.Value = py.mkKwargs
+      %call.72 : py.Value = py.call(%show.17, %tuple.77, %kwargs.76) ^propagate.0()
+      %u.16 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %discard.2 : py.Value = py.attr(%u.16, "discard") ^propagate.0()
+      %int.83 : py.Value = py.intLit(1)
+      %set.24 : py.Value = py.constSet(%int.83) ^propagate.0()
+      %tuple.78 : py.Value = py.mkTuple(%set.24)
+      %kwargs.77 : py.Value = py.mkKwargs
+      %call.73 : py.Value = py.call(%discard.2, %tuple.78, %kwargs.77) ^propagate.0()
+      %show.18 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %u.17 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %remove.2 : py.Value = py.attr(%u.17, "remove") ^propagate.0()
+      %int.84 : py.Value = py.intLit(1)
+      %set.25 : py.Value = py.constSet(%int.84) ^propagate.0()
+      %tuple.79 : py.Value = py.mkTuple(%remove.2, %set.25)
+      %kwargs.78 : py.Value = py.mkKwargs
+      %call.74 : py.Value = py.call(%show.18, %tuple.79, %kwargs.78) ^propagate.0()
+      %frozenset.5 : py.Value = py.loadGlobal("lib_set_methods", "frozenset") ^propagate.0()
+      %int.85 : py.Value = py.intLit(1)
+      %list.31 : py.Value = py.mkList(%int.85)
+      %tuple.80 : py.Value = py.mkTuple(%list.31)
+      %kwargs.79 : py.Value = py.mkKwargs
+      %call.75 : py.Value = py.call(%frozenset.5, %tuple.80, %kwargs.79) ^propagate.0()
+      %set.26 : py.Value = py.mkSet(%call.75) ^propagate.0()
+      %v.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "v")
+      %set.27 : base.Unit = base.refSet[py.Value](%v.cell.0, %set.26)
+      %v.0 : py.Value = py.loadGlobal("lib_set_methods", "v") ^propagate.0()
+      %remove.3 : py.Value = py.attr(%v.0, "remove") ^propagate.0()
+      %int.86 : py.Value = py.intLit(1)
+      %set.28 : py.Value = py.constSet(%int.86) ^propagate.0()
+      %tuple.81 : py.Value = py.mkTuple(%set.28)
+      %kwargs.80 : py.Value = py.mkKwargs
+      %call.76 : py.Value = py.call(%remove.3, %tuple.81, %kwargs.80) ^propagate.0()
+      %print.10 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %v.1 : py.Value = py.loadGlobal("lib_set_methods", "v") ^propagate.0()
+      %tuple.82 : py.Value = py.mkTuple(%v.1)
+      %kwargs.81 : py.Value = py.mkKwargs
+      %call.77 : py.Value = py.call(%print.10, %tuple.82, %kwargs.81) ^propagate.0()
+      %show.19 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %set.29 : py.Value = py.loadGlobal("lib_set_methods", "set") ^propagate.0()
+      %tuple.83 : py.Value = py.mkTuple
+      %kwargs.82 : py.Value = py.mkKwargs
+      %call.78 : py.Value = py.call(%set.29, %tuple.83, %kwargs.82) ^propagate.0()
+      %pop.0 : py.Value = py.attr(%call.78, "pop") ^propagate.0()
+      %tuple.84 : py.Value = py.mkTuple(%pop.0)
+      %kwargs.83 : py.Value = py.mkKwargs
+      %call.79 : py.Value = py.call(%show.19, %tuple.84, %kwargs.83) ^propagate.0()
+      %int.87 : py.Value = py.intLit(7)
+      %set.30 : py.Value = py.constSet(%int.87) ^propagate.0()
+      %p.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "p")
+      %set.31 : base.Unit = base.refSet[py.Value](%p.cell.0, %set.30)
+      %print.11 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %p.0 : py.Value = py.loadGlobal("lib_set_methods", "p") ^propagate.0()
+      %pop.1 : py.Value = py.attr(%p.0, "pop") ^propagate.0()
+      %tuple.85 : py.Value = py.mkTuple
+      %kwargs.84 : py.Value = py.mkKwargs
+      %call.80 : py.Value = py.call(%pop.1, %tuple.85, %kwargs.84) ^propagate.0()
+      %p.1 : py.Value = py.loadGlobal("lib_set_methods", "p") ^propagate.0()
+      %tuple.86 : py.Value = py.mkTuple(%call.80, %p.1)
+      %kwargs.85 : py.Value = py.mkKwargs
+      %call.81 : py.Value = py.call(%print.11, %tuple.86, %kwargs.85) ^propagate.0()
+      %u.18 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %clear.0 : py.Value = py.attr(%u.18, "clear") ^propagate.0()
+      %tuple.87 : py.Value = py.mkTuple
+      %kwargs.86 : py.Value = py.mkKwargs
+      %call.82 : py.Value = py.call(%clear.0, %tuple.87, %kwargs.86) ^propagate.0()
+      %print.12 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %u.19 : py.Value = py.loadGlobal("lib_set_methods", "u") ^propagate.0()
+      %tuple.88 : py.Value = py.mkTuple(%u.19)
+      %kwargs.87 : py.Value = py.mkKwargs
+      %call.83 : py.Value = py.call(%print.12, %tuple.88, %kwargs.87) ^propagate.0()
+      %show.20 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.11 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %union.4 : py.Value = py.attr(%s.11, "union") ^propagate.0()
+      %int.88 : py.Value = py.intLit(1)
+      %tuple.89 : py.Value = py.mkTuple(%union.4, %int.88)
+      %kwargs.88 : py.Value = py.mkKwargs
+      %call.84 : py.Value = py.call(%show.20, %tuple.89, %kwargs.88) ^propagate.0()
+      %show.21 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.12 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %update.1 : py.Value = py.attr(%s.12, "update") ^propagate.0()
+      %int.89 : py.Value = py.intLit(1)
+      %tuple.90 : py.Value = py.mkTuple(%update.1, %int.89)
+      %kwargs.89 : py.Value = py.mkKwargs
+      %call.85 : py.Value = py.call(%show.21, %tuple.90, %kwargs.89) ^propagate.0()
+      %show.22 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.13 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %add.1 : py.Value = py.attr(%s.13, "add") ^propagate.0()
+      %tuple.91 : py.Value = py.mkTuple(%add.1)
+      %kwargs.90 : py.Value = py.mkKwargs
+      %call.86 : py.Value = py.call(%show.22, %tuple.91, %kwargs.90) ^propagate.0()
+      %show.23 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.14 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %add.2 : py.Value = py.attr(%s.14, "add") ^propagate.0()
+      %int.90 : py.Value = py.intLit(1)
+      %int.91 : py.Value = py.intLit(2)
+      %tuple.92 : py.Value = py.mkTuple(%add.2, %int.90, %int.91)
+      %kwargs.91 : py.Value = py.mkKwargs
+      %call.87 : py.Value = py.call(%show.23, %tuple.92, %kwargs.91) ^propagate.0()
+      %show.24 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.15 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %issubset.3 : py.Value = py.attr(%s.15, "issubset") ^propagate.0()
+      %tuple.93 : py.Value = py.mkTuple(%issubset.3)
+      %kwargs.92 : py.Value = py.mkKwargs
+      %call.88 : py.Value = py.call(%show.24, %tuple.93, %kwargs.92) ^propagate.0()
+      %show.25 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %s.16 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %copy.3 : py.Value = py.attr(%s.16, "copy") ^propagate.0()
+      %int.92 : py.Value = py.intLit(1)
+      %tuple.94 : py.Value = py.mkTuple(%copy.3, %int.92)
+      %kwargs.93 : py.Value = py.mkKwargs
+      %call.89 : py.Value = py.call(%show.25, %tuple.94, %kwargs.93) ^propagate.0()
+      %print.13 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %sorted.6 : py.Value = py.loadGlobal("lib_set_methods", "sorted") ^propagate.0()
+      %s.17 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %union.5 : py.Value = py.attr(%s.17, "union") ^propagate.0()
+      %tuple.95 : py.Value = py.mkTuple
+      %kwargs.94 : py.Value = py.mkKwargs
+      %call.90 : py.Value = py.call(%union.5, %tuple.95, %kwargs.94) ^propagate.0()
+      %tuple.96 : py.Value = py.mkTuple(%call.90)
+      %kwargs.95 : py.Value = py.mkKwargs
+      %call.91 : py.Value = py.call(%sorted.6, %tuple.96, %kwargs.95) ^propagate.0()
+      %sorted.7 : py.Value = py.loadGlobal("lib_set_methods", "sorted") ^propagate.0()
+      %s.18 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %intersection.3 : py.Value = py.attr(%s.18, "intersection") ^propagate.0()
+      %s.19 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %tuple.97 : py.Value = py.mkTuple(%s.19)
+      %kwargs.96 : py.Value = py.mkKwargs
+      %call.92 : py.Value = py.call(%intersection.3, %tuple.97, %kwargs.96) ^propagate.0()
+      %tuple.98 : py.Value = py.mkTuple(%call.92)
+      %kwargs.97 : py.Value = py.mkKwargs
+      %call.93 : py.Value = py.call(%sorted.7, %tuple.98, %kwargs.97) ^propagate.0()
+      %s.20 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %difference.3 : py.Value = py.attr(%s.20, "difference") ^propagate.0()
+      %s.21 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %tuple.99 : py.Value = py.mkTuple(%s.21)
+      %kwargs.98 : py.Value = py.mkKwargs
+      %call.94 : py.Value = py.call(%difference.3, %tuple.99, %kwargs.98) ^propagate.0()
+      %set.32 : py.Value = py.loadGlobal("lib_set_methods", "set") ^propagate.0()
+      %tuple.100 : py.Value = py.mkTuple
+      %kwargs.99 : py.Value = py.mkKwargs
+      %call.95 : py.Value = py.call(%set.32, %tuple.100, %kwargs.99) ^propagate.0()
+      %eq.0 : py.Value = py.eq(%call.94, %call.95) ^propagate.0()
+      %len.1 : py.Value = py.loadGlobal("lib_set_methods", "len") ^propagate.0()
+      %s.22 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %symmetric_difference.1 : py.Value = py.attr(%s.22, "symmetric_difference") ^propagate.0()
+      %s.23 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %tuple.101 : py.Value = py.mkTuple(%s.23)
+      %kwargs.100 : py.Value = py.mkKwargs
+      %call.96 : py.Value = py.call(%symmetric_difference.1, %tuple.101, %kwargs.100) ^propagate.0()
+      %tuple.102 : py.Value = py.mkTuple(%call.96)
+      %kwargs.101 : py.Value = py.mkKwargs
+      %call.97 : py.Value = py.call(%len.1, %tuple.102, %kwargs.101) ^propagate.0()
+      %s.24 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %isdisjoint.2 : py.Value = py.attr(%s.24, "isdisjoint") ^propagate.0()
+      %s.25 : py.Value = py.loadGlobal("lib_set_methods", "s") ^propagate.0()
+      %tuple.103 : py.Value = py.mkTuple(%s.25)
+      %kwargs.102 : py.Value = py.mkKwargs
+      %call.98 : py.Value = py.call(%isdisjoint.2, %tuple.103, %kwargs.102) ^propagate.0()
+      %tuple.104 : py.Value = py.mkTuple(%call.91, %call.93, %eq.0, %call.97, %call.98)
+      %kwargs.103 : py.Value = py.mkKwargs
+      %call.99 : py.Value = py.call(%print.13, %tuple.104, %kwargs.103) ^propagate.0()
+      %set.33 : py.Value = py.loadGlobal("lib_set_methods", "set") ^propagate.0()
+      %frozenset.6 : py.Value = py.loadGlobal("lib_set_methods", "frozenset") ^propagate.0()
+      %int.93 : py.Value = py.intLit(1)
+      %list.32 : py.Value = py.mkList(%int.93)
+      %tuple.105 : py.Value = py.mkTuple(%list.32)
+      %kwargs.104 : py.Value = py.mkKwargs
+      %call.100 : py.Value = py.call(%frozenset.6, %tuple.105, %kwargs.104) ^propagate.0()
+      %int.94 : py.Value = py.intLit(2)
+      %list.33 : py.Value = py.mkList(%call.100, %int.94)
+      %tuple.106 : py.Value = py.mkTuple(%list.33)
+      %kwargs.105 : py.Value = py.mkKwargs
+      %call.101 : py.Value = py.call(%set.33, %tuple.106, %kwargs.105) ^propagate.0()
+      %difference.4 : py.Value = py.attr(%call.101, "difference") ^propagate.0()
+      %set.34 : py.Value = py.loadGlobal("lib_set_methods", "set") ^propagate.0()
+      %frozenset.7 : py.Value = py.loadGlobal("lib_set_methods", "frozenset") ^propagate.0()
+      %int.95 : py.Value = py.intLit(1)
+      %list.34 : py.Value = py.mkList(%int.95)
+      %tuple.107 : py.Value = py.mkTuple(%list.34)
+      %kwargs.106 : py.Value = py.mkKwargs
+      %call.102 : py.Value = py.call(%frozenset.7, %tuple.107, %kwargs.106) ^propagate.0()
+      %int.96 : py.Value = py.intLit(2)
+      %list.35 : py.Value = py.mkList(%call.102, %int.96)
+      %tuple.108 : py.Value = py.mkTuple(%list.35)
+      %kwargs.107 : py.Value = py.mkKwargs
+      %call.103 : py.Value = py.call(%set.34, %tuple.108, %kwargs.107) ^propagate.0()
+      %difference_update.1 : py.Value = py.attr(%call.103, "difference_update") ^propagate.0()
+      %list.36 : py.Value = py.mkList(%difference.4, %difference_update.1)
+      %iter.2 : py.Value = py.getIter(%list.36) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.2) ^stop.0()
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "f")
+      %set.35 : base.Unit = base.refSet[py.Value](%f.cell.0, %item.0)
+      %show.26 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %f.0 : py.Value = py.loadGlobal("lib_set_methods", "f") ^propagate.0()
+      %set.36 : py.Value = py.loadGlobal("lib_set_methods", "set") ^propagate.0()
+      %int.97 : py.Value = py.intLit(1)
+      %list.37 : py.Value = py.mkList(%int.97)
+      %tuple.109 : py.Value = py.mkTuple(%list.37)
+      %kwargs.108 : py.Value = py.mkKwargs
+      %call.104 : py.Value = py.call(%set.36, %tuple.109, %kwargs.108) ^propagate.0()
+      %list.38 : py.Value = py.mkList(%call.104)
+      %tuple.110 : py.Value = py.mkTuple(%f.0, %list.38)
+      %kwargs.109 : py.Value = py.mkKwargs
+      %call.105 : py.Value = py.call(%show.26, %tuple.110, %kwargs.109) ^propagate.0()
+      jump ^head.0()
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+    exit.0():
+      %__build_class__.4 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.5 : py.Value = py.mkClosure[[]](@|lib_set_methods.HS.<body>|, "<body>", "lib_set_methods")
+      %str.5 : py.Value = py.strLit("HS")
+      %set.37 : py.Value = py.loadGlobal("lib_set_methods", "set") ^propagate.0()
+      %tuple.111 : py.Value = py.mkTuple(%clo.5, %str.5, %set.37)
+      %kwargs.110 : py.Value = py.mkKwargs
+      %HS.0 : py.Value = py.call(%__build_class__.4, %tuple.111, %kwargs.110) ^propagate.0()
+      %HS.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "HS")
+      %set.38 : base.Unit = base.refSet[py.Value](%HS.cell.0, %HS.0)
+      %__build_class__.5 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.6 : py.Value = py.mkClosure[[]](@|lib_set_methods.B.<body>|, "<body>", "lib_set_methods")
+      %str.6 : py.Value = py.strLit("B")
+      %tuple.112 : py.Value = py.mkTuple(%clo.6, %str.6)
+      %kwargs.111 : py.Value = py.mkKwargs
+      %B.0 : py.Value = py.call(%__build_class__.5, %tuple.112, %kwargs.111) ^propagate.0()
+      %B.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "B")
+      %set.39 : base.Unit = base.refSet[py.Value](%B.cell.0, %B.0)
+      %set.40 : py.Value = py.loadGlobal("lib_set_methods", "set") ^propagate.0()
+      %B.1 : py.Value = py.loadGlobal("lib_set_methods", "B") ^propagate.0()
+      %tuple.113 : py.Value = py.mkTuple
+      %kwargs.112 : py.Value = py.mkKwargs
+      %call.106 : py.Value = py.call(%B.1, %tuple.113, %kwargs.112) ^propagate.0()
+      %frozenset.8 : py.Value = py.loadGlobal("lib_set_methods", "frozenset") ^propagate.0()
+      %int.98 : py.Value = py.intLit(1)
+      %list.39 : py.Value = py.mkList(%int.98)
+      %tuple.114 : py.Value = py.mkTuple(%list.39)
+      %kwargs.113 : py.Value = py.mkKwargs
+      %call.107 : py.Value = py.call(%frozenset.8, %tuple.114, %kwargs.113) ^propagate.0()
+      %list.40 : py.Value = py.mkList(%call.106, %call.107)
+      %tuple.115 : py.Value = py.mkTuple(%list.40)
+      %kwargs.114 : py.Value = py.mkKwargs
+      %call.108 : py.Value = py.call(%set.40, %tuple.115, %kwargs.114) ^propagate.0()
+      %w.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "w")
+      %set.41 : base.Unit = base.refSet[py.Value](%w.cell.0, %call.108)
+      %w.0 : py.Value = py.loadGlobal("lib_set_methods", "w") ^propagate.0()
+      %remove.4 : py.Value = py.attr(%w.0, "remove") ^propagate.0()
+      %HS.1 : py.Value = py.loadGlobal("lib_set_methods", "HS") ^propagate.0()
+      %int.99 : py.Value = py.intLit(1)
+      %list.41 : py.Value = py.mkList(%int.99)
+      %tuple.116 : py.Value = py.mkTuple(%list.41)
+      %kwargs.115 : py.Value = py.mkKwargs
+      %call.109 : py.Value = py.call(%HS.1, %tuple.116, %kwargs.115) ^propagate.0()
+      %tuple.117 : py.Value = py.mkTuple(%call.109)
+      %kwargs.116 : py.Value = py.mkKwargs
+      %call.110 : py.Value = py.call(%remove.4, %tuple.117, %kwargs.116) ^propagate.0()
+      %print.14 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %len.2 : py.Value = py.loadGlobal("lib_set_methods", "len") ^propagate.0()
+      %w.1 : py.Value = py.loadGlobal("lib_set_methods", "w") ^propagate.0()
+      %tuple.118 : py.Value = py.mkTuple(%w.1)
+      %kwargs.117 : py.Value = py.mkKwargs
+      %call.111 : py.Value = py.call(%len.2, %tuple.118, %kwargs.117) ^propagate.0()
+      %tuple.119 : py.Value = py.mkTuple(%call.111)
+      %kwargs.118 : py.Value = py.mkKwargs
+      %call.112 : py.Value = py.call(%print.14, %tuple.119, %kwargs.118) ^propagate.0()
+      %__build_class__.6 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.7 : py.Value = py.mkClosure[[]](@|lib_set_methods.LenSet.<body>|, "<body>", "lib_set_methods")
+      %str.7 : py.Value = py.strLit("LenSet")
+      %set.42 : py.Value = py.loadGlobal("lib_set_methods", "set") ^propagate.0()
+      %tuple.120 : py.Value = py.mkTuple(%clo.7, %str.7, %set.42)
+      %kwargs.119 : py.Value = py.mkKwargs
+      %LenSet.0 : py.Value = py.call(%__build_class__.6, %tuple.120, %kwargs.119) ^propagate.0()
+      %LenSet.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "LenSet")
+      %set.43 : base.Unit = base.refSet[py.Value](%LenSet.cell.0, %LenSet.0)
+      %print.15 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %int.100 : py.Value = py.intLit(1)
+      %int.101 : py.Value = py.intLit(2)
+      %dict.4 : py.Value = py.mkDict(%int.100, %int.101) ^propagate.0()
+      %keys.0 : py.Value = py.attr(%dict.4, "keys") ^propagate.0()
+      %tuple.121 : py.Value = py.mkTuple
+      %kwargs.120 : py.Value = py.mkKwargs
+      %call.113 : py.Value = py.call(%keys.0, %tuple.121, %kwargs.120) ^propagate.0()
+      %__eq__.0 : py.Value = py.attr(%call.113, "__eq__") ^propagate.0()
+      %LenSet.1 : py.Value = py.loadGlobal("lib_set_methods", "LenSet") ^propagate.0()
+      %int.102 : py.Value = py.intLit(1)
+      %list.42 : py.Value = py.mkList(%int.102)
+      %tuple.122 : py.Value = py.mkTuple(%list.42)
+      %kwargs.121 : py.Value = py.mkKwargs
+      %call.114 : py.Value = py.call(%LenSet.1, %tuple.122, %kwargs.121) ^propagate.0()
+      %tuple.123 : py.Value = py.mkTuple(%call.114)
+      %kwargs.122 : py.Value = py.mkKwargs
+      %call.115 : py.Value = py.call(%__eq__.0, %tuple.123, %kwargs.122) ^propagate.0()
+      %int.103 : py.Value = py.intLit(1)
+      %int.104 : py.Value = py.intLit(2)
+      %dict.5 : py.Value = py.mkDict(%int.103, %int.104) ^propagate.0()
+      %keys.1 : py.Value = py.attr(%dict.5, "keys") ^propagate.0()
+      %tuple.124 : py.Value = py.mkTuple
+      %kwargs.123 : py.Value = py.mkKwargs
+      %call.116 : py.Value = py.call(%keys.1, %tuple.124, %kwargs.123) ^propagate.0()
+      %isdisjoint.3 : py.Value = py.attr(%call.116, "isdisjoint") ^propagate.0()
+      %LenSet.2 : py.Value = py.loadGlobal("lib_set_methods", "LenSet") ^propagate.0()
+      %int.105 : py.Value = py.intLit(7)
+      %list.43 : py.Value = py.mkList(%int.105)
+      %tuple.125 : py.Value = py.mkTuple(%list.43)
+      %kwargs.124 : py.Value = py.mkKwargs
+      %call.117 : py.Value = py.call(%LenSet.2, %tuple.125, %kwargs.124) ^propagate.0()
+      %tuple.126 : py.Value = py.mkTuple(%call.117)
+      %kwargs.125 : py.Value = py.mkKwargs
+      %call.118 : py.Value = py.call(%isdisjoint.3, %tuple.126, %kwargs.125) ^propagate.0()
+      %tuple.127 : py.Value = py.mkTuple(%call.115, %call.118)
+      %kwargs.126 : py.Value = py.mkKwargs
+      %call.119 : py.Value = py.call(%print.15, %tuple.127, %kwargs.126) ^propagate.0()
+      %set.44 : py.Value = py.loadGlobal("lib_set_methods", "set") ^propagate.0()
+      %range.0 : py.Value = py.loadGlobal("lib_set_methods", "range") ^propagate.0()
+      %int.106 : py.Value = py.intLit(20)
+      %tuple.128 : py.Value = py.mkTuple(%int.106)
+      %kwargs.127 : py.Value = py.mkKwargs
+      %call.120 : py.Value = py.call(%range.0, %tuple.128, %kwargs.127) ^propagate.0()
+      %tuple.129 : py.Value = py.mkTuple(%call.120)
+      %kwargs.128 : py.Value = py.mkKwargs
+      %call.121 : py.Value = py.call(%set.44, %tuple.129, %kwargs.128) ^propagate.0()
+      %big.cell.0 : base.Ref(py.Value) = py.globalCell("lib_set_methods", "big")
+      %set.45 : base.Unit = base.refSet[py.Value](%big.cell.0, %call.121)
+      %show.27 : py.Value = py.loadGlobal("lib_set_methods", "show") ^propagate.0()
+      %big.0 : py.Value = py.loadGlobal("lib_set_methods", "big") ^propagate.0()
+      %difference.5 : py.Value = py.attr(%big.0, "difference") ^propagate.0()
+      %int.107 : py.Value = py.intLit(1)
+      %int.108 : py.Value = py.intLit(0)
+      %int.109 : py.Value = py.intLit(2)
+      %int.110 : py.Value = py.intLit(0)
+      %dict.6 : py.Value = py.mkDict(%int.107, %int.108, %int.109, %int.110) ^propagate.0()
+      %tuple.130 : py.Value = py.mkTuple(%difference.5, %dict.6)
+      %kwargs.129 : py.Value = py.mkKwargs
+      %call.122 : py.Value = py.call(%show.27, %tuple.130, %kwargs.129) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @|lib_set_methods.It.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_set_methods", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("It")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_set_methods.It.__init__, "__init__", "lib_set_methods")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_set_methods.It.__iter__, "__iter__", "lib_set_methods")
+      %str.5 : py.Value = py.strLit("__iter__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@lib_set_methods.It.__next__, "__next__", "lib_set_methods")
+      %str.6 : py.Value = py.strLit("__next__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_set_methods.H.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__hash__", binding = "def"}, {name = "__eq__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_set_methods", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("H")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_set_methods.H.__init__, "__init__", "lib_set_methods")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_set_methods.H.__hash__, "__hash__", "lib_set_methods")
+      %str.5 : py.Value = py.strLit("__hash__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@lib_set_methods.H.__eq__, "__eq__", "lib_set_methods")
+      %str.6 : py.Value = py.strLit("__eq__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_set_methods.show(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %f.0 : py.Value = py.undef("f")
+      %f.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%f.0)
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %r.0 : py.Value = py.undef("r")
+      %r.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%r.0)
+      %e.0 : py.Value = py.undef("e")
+      %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
+      %f.1 : py.Value = py.undef("f")
+      %defaults.0 : py.Value = py.mkTuple(%f.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "show", 0, 1, true, true, "f") ^propagate.0()
+      %f.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%f.cell.0, %f.2)
+      %a.1 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.1)
+      %k.1 : py.Value = py.tupleGet(%bound.0, 2)
+      %set.2 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.1)
+      %f.3 : py.Value = base.refGet[py.Value](%f.cell.0)
+      %f.4 : py.Value = py.requireDefined(%f.3, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
+      %a.2 : py.Value = base.refGet[py.Value](%a.cell.0)
+      %a.3 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^catch.0()
+      %kwargs.1 : py.Value = py.mkKwargs
+      %k.2 : py.Value = base.refGet[py.Value](%k.cell.0)
+      %k.3 : py.Value = py.requireDefined(%k.2, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^catch.0()
+      %merge.0 : py.Value = py.dictMerge(%f.4, %kwargs.1, %k.3) ^catch.0()
+      %args.1 : py.Value = py.argsTuple(%f.4, %a.3) ^catch.0()
+      %call.0 : py.Value = py.call(%f.4, %args.1, %merge.0) ^catch.0()
+      %set.3 : base.Unit = base.refSet[py.Value](%r.cell.0, %call.0)
+      %print.0 : py.Value = py.loadGlobal("lib_set_methods", "print") ^catch.0()
+      %type.0 : py.Value = py.loadGlobal("lib_set_methods", "type") ^catch.0()
+      %r.1 : py.Value = base.refGet[py.Value](%r.cell.0)
+      %r.2 : py.Value = py.requireDefined(%r.1, "r", "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple(%r.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%type.0, %tuple.0, %kwargs.2) ^catch.0()
+      %__name__.0 : py.Value = py.attr(%call.1, "__name__") ^catch.0()
+      %isinstance.0 : py.Value = py.loadGlobal("lib_set_methods", "isinstance") ^catch.0()
+      %r.3 : py.Value = base.refGet[py.Value](%r.cell.0)
+      %r.4 : py.Value = py.requireDefined(%r.3, "r", "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^catch.0()
+      %set.4 : py.Value = py.loadGlobal("lib_set_methods", "set") ^catch.0()
+      %frozenset.0 : py.Value = py.loadGlobal("lib_set_methods", "frozenset") ^catch.0()
+      %tuple.1 : py.Value = py.mkTuple(%set.4, %frozenset.0)
+      %tuple.2 : py.Value = py.mkTuple(%r.4, %tuple.1)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%isinstance.0, %tuple.2, %kwargs.3) ^catch.0()
+      %cond.0 : base.Bool = py.truthy(%call.2) ^catch.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %sorted.0 : py.Value = py.loadGlobal("lib_set_methods", "sorted") ^catch.0()
+      %r.5 : py.Value = base.refGet[py.Value](%r.cell.0)
+      %r.6 : py.Value = py.requireDefined(%r.5, "r", "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^catch.0()
+      %tuple.3 : py.Value = py.mkTuple(%r.6)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%sorted.0, %tuple.3, %kwargs.4) ^catch.0()
+      jump ^join.1(%call.3)
+    else.0():
+      %r.7 : py.Value = base.refGet[py.Value](%r.cell.0)
+      %r.8 : py.Value = py.requireDefined(%r.7, "r", "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^catch.0()
+      jump ^join.1(%r.8)
+    join.1(%ifexp.0 : py.Value):
+      %tuple.4 : py.Value = py.mkTuple(%__name__.0, %ifexp.0)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.0, %tuple.4, %kwargs.5) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("lib_set_methods", "TypeError") ^unwind.0()
+      %KeyError.0 : py.Value = py.loadGlobal("lib_set_methods", "KeyError") ^unwind.0()
+      %ValueError.0 : py.Value = py.loadGlobal("lib_set_methods", "ValueError") ^unwind.0()
+      %tuple.5 : py.Value = py.mkTuple(%TypeError.0, %KeyError.0, %ValueError.0)
+      %match.0 : base.Bool = py.excMatch(%exc.0, %tuple.5) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.1 : py.Value = py.loadGlobal("lib_set_methods", "print") ^clear.0()
+      %type.1 : py.Value = py.loadGlobal("lib_set_methods", "type") ^clear.0()
+      %e.8 : py.Value = base.refGet[py.Value](%e.cell.0)
+      %e.10 : py.Value = py.requireDefined(%e.8, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
+      %tuple.6 : py.Value = py.mkTuple(%e.10)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%type.1, %tuple.6, %kwargs.6) ^clear.0()
+      %__name__.1 : py.Value = py.attr(%call.5, "__name__") ^clear.0()
+      %e.11 : py.Value = base.refGet[py.Value](%e.cell.0)
+      %e.13 : py.Value = py.requireDefined(%e.11, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
+      %args.2 : py.Value = py.attr(%e.13, "args") ^clear.0()
+      %tuple.7 : py.Value = py.mkTuple(%__name__.1, %args.2)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%print.1, %tuple.7, %kwargs.7) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.14 : py.Value = py.undef("e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.0, %e.14)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.15 : py.Value = py.undef("e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.0, %e.15)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+  func @|lib_set_methods.S.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["set"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_set_methods", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("S")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_set_methods.F.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["frozenset"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_set_methods", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("F")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_set_methods.HS.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["set"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__hash__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_set_methods", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("HS")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_set_methods.HS.__hash__, "__hash__", "lib_set_methods")
+      %str.4 : py.Value = py.strLit("__hash__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_set_methods.B.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__hash__", binding = "def"}, {name = "__eq__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_set_methods", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("B")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_set_methods.B.__hash__, "__hash__", "lib_set_methods")
+      %str.4 : py.Value = py.strLit("__hash__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_set_methods.B.__eq__, "__eq__", "lib_set_methods")
+      %str.5 : py.Value = py.strLit("__eq__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_set_methods.LenSet.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["set"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__len__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_set_methods", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("LenSet")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_set_methods.LenSet.__len__, "__len__", "lib_set_methods")
+      %str.4 : py.Value = py.strLit("__len__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_set_methods.It.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %xs.0 : py.Value = py.undef("xs")
+      %xs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%xs.0)
+      %self.1 : py.Value = py.undef("self")
+      %xs.1 : py.Value = py.undef("xs")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %xs.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__init__", 0, 2, false, false, "self", "xs") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %xs.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      %list.0 : py.Value = py.loadGlobal("lib_set_methods", "list") ^propagate.0()
+      %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
+      %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%xs.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%list.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %xs.5 : base.Unit = py.setAttr(%self.4, "xs", %call.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_set_methods.It.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %print.0 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("iter")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_set_methods.It.__next__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__next__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %xs.0 : py.Value = py.attr(%self.4, "xs") ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%xs.0) ^propagate.0()
+      branch(%cond.0) ^else.0() ^then.0()
+    then.0():
+      %StopIteration.0 : py.Value = py.loadGlobal("lib_set_methods", "StopIteration") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    else.0():
+      jump ^join.0()
+    join.0():
+      %self.5 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.6 : py.Value = py.requireDefined(%self.5, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %xs.1 : py.Value = py.attr(%self.6, "xs") ^propagate.0()
+      %pop.0 : py.Value = py.attr(%xs.1, "pop") ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %tuple.0 : py.Value = py.mkTuple(%int.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%pop.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %call.0)
+      %print.0 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("next")
+      %x.1 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.2 : py.Value = py.requireDefined(%x.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%str.0, %x.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.4)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @lib_set_methods.H.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %v.0 : py.Value = py.undef("v")
+      %v.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%v.0)
+      %self.1 : py.Value = py.undef("self")
+      %v.1 : py.Value = py.undef("v")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %v.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "H.__init__", 0, 2, false, false, "self", "v") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %v.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%v.cell.0, %v.2)
+      %v.3 : py.Value = base.refGet[py.Value](%v.cell.0)
+      %v.4 : py.Value = py.requireDefined(%v.3, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %v.5 : base.Unit = py.setAttr(%self.4, "v", %v.4) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_set_methods.H.__hash__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "H.__hash__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %print.0 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("hash")
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %v.0 : py.Value = py.attr(%self.4, "v") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %v.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %self.5 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.6 : py.Value = py.requireDefined(%self.5, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %v.1 : py.Value = py.attr(%self.6, "v") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%v.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_set_methods.H.__eq__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %o.0 : py.Value = py.undef("o")
+      %o.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%o.0)
+      %self.1 : py.Value = py.undef("self")
+      %o.1 : py.Value = py.undef("o")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %o.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "H.__eq__", 0, 2, false, false, "self", "o") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%o.cell.0, %o.2)
+      %isinstance.0 : py.Value = py.loadGlobal("lib_set_methods", "isinstance") ^propagate.0()
+      %o.3 : py.Value = base.refGet[py.Value](%o.cell.0)
+      %o.4 : py.Value = py.requireDefined(%o.3, "o", "UnboundLocalError", "cannot access local variable 'o' where it is not associated with a value") ^propagate.0()
+      %H.0 : py.Value = py.loadGlobal("lib_set_methods", "H") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%o.4, %H.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%isinstance.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%call.0) ^propagate.0()
+      branch(%cond.0) ^and.0() ^join.0(%call.0)
+    and.0():
+      %o.5 : py.Value = base.refGet[py.Value](%o.cell.0)
+      %o.6 : py.Value = py.requireDefined(%o.5, "o", "UnboundLocalError", "cannot access local variable 'o' where it is not associated with a value") ^propagate.0()
+      %v.0 : py.Value = py.attr(%o.6, "v") ^propagate.0()
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %v.1 : py.Value = py.attr(%self.4, "v") ^propagate.0()
+      %eq.0 : py.Value = py.eq(%v.0, %v.1) ^propagate.0()
+      jump ^join.0(%eq.0)
+    join.0(%bool.0 : py.Value):
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%bool.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_set_methods.HS.__hash__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "HS.__hash__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %int.0 : py.Value = py.intLit(0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_set_methods.B.__hash__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.__hash__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %int.0 : py.Value = py.intLit(0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_set_methods.B.__eq__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %other.0 : py.Value = py.undef("other")
+      %other.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%other.0)
+      %self.1 : py.Value = py.undef("self")
+      %other.1 : py.Value = py.undef("other")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %other.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.__eq__", 0, 2, false, false, "self", "other") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %other.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      %TypeError.0 : py.Value = py.loadGlobal("lib_set_methods", "TypeError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("boom")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%TypeError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @lib_set_methods.LenSet.__len__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "LenSet.__len__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %print.0 : py.Value = py.loadGlobal("lib_set_methods", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("len called")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %int.0 : py.Value = py.intLit(5)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

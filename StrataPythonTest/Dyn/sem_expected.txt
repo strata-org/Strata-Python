@@ -60,6 +60,9 @@ lib_bytes | agree
 lib_collections | agree
 lib_constructors_more | agree
 lib_ctor_errors | agree
+lib_dict_copy_subclass | agree
+lib_dict_methods | agree
+lib_dict_views | agree
 lib_functions | agree
 lib_gap_attr_strsub | gap | an attribute name that is an instance of a subclass of str is not modelled yet
 lib_gap_bytes_buffer | gap | bytes() of an object with __buffer__ is not modelled yet
@@ -67,16 +70,20 @@ lib_gap_ctor_midstep | gap | a looping built-in was reached inside an operation
 lib_gap_decode_after_handler | gap | not modelled: a lone surrogate from decoding is not modelled
 lib_gap_dictrev_keys | gap | a dict whose keys changed at the same size during its iteration is not modelled yet
 lib_gap_dictrev_keys_inst | gap | a dict whose keys changed at the same size during its iteration is not modelled yet
+lib_gap_difference_dict_user | gap | a set difference with a dict whose comparisons may run user code is not modelled yet
+lib_gap_difference_user_hash | gap | a walk of a dict whose comparisons may run user code is not modelled yet
 lib_gap_enumerate_kw | gap | the message of this wrong call of enumerate depends on how it is called
 lib_gap_enumerate_noarg | gap | the message of this wrong call of enumerate depends on how it is called
 lib_gap_enumerate_sub | gap | a subclass of enumerate is not modelled
 lib_gap_expandtabs_large | gap | a padding too large to model, where CPython may raise MemoryError
 lib_gap_float_buffer | gap | float() of an object with __buffer__ is not modelled yet
 lib_gap_float_symhash | gap | float() of a hash whose number the model doesn't know
+lib_gap_fromkeys_inexact | gap | dict.fromkeys of a set whose order the model doesn't know
 lib_gap_int_buffer | gap | int() of an object with __buffer__ is not modelled yet
 lib_gap_int_sub_symhash | gap | an int subclass instance of an int whose number the model doesn't know
 lib_gap_issubclass_bases | gap | issubclass() of an object with __bases__ is not modelled
 lib_gap_issubclass_deep | gap | issubclass over tuples nested deeper than the model follows
+lib_gap_items_xor_resize | gap | a dict whose keys change while it has deleted entries, during a walk, is not modelled yet
 lib_gap_maketrans_intsub | gap | a key of maketrans that is an instance of a subclass of int is not modelled yet
 lib_gap_method_form | gap | the message of a wrong call of str.upper depends on how it is called
 lib_gap_pad_large | gap | a padding too large to model, where CPython may raise MemoryError
@@ -85,6 +92,7 @@ lib_gap_replace_large | gap | a replace result too large to model, where CPython
 lib_gap_reversed_lost | gap | a reversed whose sequence's class lost __getitem__ is not modelled yet
 lib_gap_reversed_sub | gap | a subclass of reversed is not modelled
 lib_gap_self_extend_iter | gap | a list subclass extended by itself through a user iterator is not modelled yet
+lib_gap_setdefault_collision | gap | a dict lookup after a false __eq__ depends on CPython's table layout
 lib_gap_sorted_residual | gap | a looping built-in was reached inside an operation
 lib_gap_str_buffer | gap | decoding an object with __buffer__ is not modelled yet
 lib_gap_translate_surrogate | gap | a lone surrogate is not modelled
@@ -107,8 +115,10 @@ lib_max_min_key | agree
 lib_order_free | agree
 lib_partition_sep_subclass | agree
 lib_residual_grow | gap | a looping built-in was reached inside an operation
-lib_reversed | gap | built-in method dict.values is not modelled yet
+lib_reversed | agree
 lib_scalars | agree
+lib_set_methods | agree
+lib_set_order | agree
 lib_signatures | agree
 lib_sizes | agree
 lib_sort | agree
@@ -123,6 +133,8 @@ lib_sum | agree
 lib_sum_residual | gap | a looping built-in was reached inside an operation
 lib_unicode_error_members | agree
 lib_unicode_errors | gap | not modelled: the codec nope is not modelled
+lib_view_dispatch | agree
+lib_view_mapping | agree
 lib_wrong_calls | agree
 lib_zip_enumerate | gap | the message of this wrong call of enumerate depends on how it is called
 m_annotations | gap | the translator does not support generator function

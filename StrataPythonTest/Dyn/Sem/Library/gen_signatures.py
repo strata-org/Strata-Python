@@ -60,8 +60,8 @@ METHODS = {
 # `lib_signatures.py` calls each of them wrongly once.
 PINNED = ["getattr", "hasattr", "setattr", "callable", "issubclass", "hash", "abs", "divmod",
           "hex", "any", "all", "sum"] + [
-    f"{t}_{n}" for t in ["str", "list", "tuple", "range"] for n in METHODS[t][1]
-    if (t, n) != ("str", "maketrans")] + ["str_maketrans"]
+    f"{t}_{n}" for t in ["str", "list", "tuple", "range", "dict", "set", "frozenset"]
+    for n in METHODS[t][1] if (t, n) != ("str", "maketrans")] + ["str_maketrans"]
 # `str.maketrans` comes last: the model can't read a static method's table entry yet, so the
 # program stops with a gap there.
 
@@ -324,8 +324,11 @@ def main():
         s = by_ident.get(ident)
         if s is None:
             continue
-        # Too many arguments, or a keyword for one that takes any number.
-        args = ", ".join(["None"] * (s.maxpos + 1)) if not s.varargs else "zz=None"
+        # Too many arguments. One that takes any number has no wrong call whose message is the
+        # same in every call form (a keyword's names the type only in a method call).
+        if s.varargs:
+            continue
+        args = ", ".join(["None"] * (s.maxpos + 1))
         prog.append(f"wrong({exprs[ident]}, {args})")
     outputs[PROGRAM] = "\n".join(prog) + "\n"
     if "--check" in sys.argv:

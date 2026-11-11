@@ -1,0 +1,15 @@
+module
+  U: local (assigned, referenced)
+  print: global implicit (referenced)
+  len: global implicit (referenced)
+  set: global implicit (referenced)
+  class U
+    __hash__: local (assigned)
+    __eq__: local (assigned)
+    function U.__hash__
+      params: self
+      self: local (parameter)
+    function U.__eq__
+      params: self, other
+      self: local (parameter)
+      other: local (parameter)

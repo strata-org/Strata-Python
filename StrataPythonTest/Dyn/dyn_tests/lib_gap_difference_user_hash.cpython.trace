@@ -1,0 +1,11 @@
+--- stdout 18
+hash 1
+hash 1
+100
+
+--- outcome
+ok
+--- globals
+H = <class 'H'>
+__doc__ = None
+__name__ = '__main__'

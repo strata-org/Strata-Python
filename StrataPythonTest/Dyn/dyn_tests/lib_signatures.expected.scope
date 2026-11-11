@@ -13,6 +13,8 @@ module
   all: global implicit (referenced)
   sum: global implicit (referenced)
   range: global implicit (referenced)
+  set: global implicit (referenced)
+  frozenset: global implicit (referenced)
   function wrong
     params: f, *args, **kwargs
     f: local (parameter, referenced)

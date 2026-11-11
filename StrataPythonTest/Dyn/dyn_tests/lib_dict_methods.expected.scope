@@ -1,0 +1,103 @@
+module
+  K: local (assigned, referenced)
+  show: local (assigned, referenced)
+  d: local (assigned, referenced)
+  u: local (assigned, referenced)
+  print: global implicit (referenced)
+  dict: global implicit (referenced)
+  D: local (assigned, referenced)
+  type: global implicit (referenced)
+  dd: local (assigned, referenced)
+  c: local (assigned, referenced)
+  It: local (assigned, referenced)
+  e: local (assigned, referenced)
+  set: global implicit (referenced)
+  frozenset: global implicit (referenced)
+  SortedDict: local (assigned, referenced)
+  sd: local (assigned, referenced)
+  class K
+    __init__: local (assigned)
+    __hash__: local (assigned)
+    __eq__: local (assigned)
+    __repr__: local (assigned)
+    function K.__init__
+      params: self, v
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function K.__hash__
+      params: self
+      self: local (parameter, referenced)
+      print: global implicit (referenced)
+      hash: global implicit (referenced)
+    function K.__eq__
+      params: self, o
+      self: local (parameter, referenced)
+      o: local (parameter, referenced)
+      print: global implicit (referenced)
+      isinstance: global implicit (referenced)
+      K: global implicit (referenced)
+    function K.__repr__
+      params: self
+      self: local (parameter, referenced)
+  function show
+    params: f, *a, **k
+    f: local (parameter, referenced)
+    a: local (parameter, referenced)
+    k: local (parameter, referenced)
+    print: global implicit (referenced)
+    repr: global implicit (referenced)
+    TypeError: global implicit (referenced)
+    KeyError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    e: local (assigned, referenced)
+    type: global implicit (referenced)
+  class D (needs __class__ cell)
+    __setitem__: local (assigned)
+    function D.__setitem__
+      params: self, k, v
+      self: local (parameter)
+      k: local (parameter, referenced)
+      v: local (parameter, referenced)
+      print: global implicit (referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+  class It
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function It.__init__
+      params: self
+      self: local (parameter, referenced)
+    function It.__iter__
+      params: self
+      self: local (parameter, referenced)
+    function It.__next__
+      params: self
+      self: local (parameter, referenced)
+      StopIteration: global implicit (referenced)
+  class SortedDict (needs __class__ cell)
+    sorted_keys: local (assigned)
+    __iter__: local (assigned)
+    keys: local (assigned)
+    __getitem__: local (assigned)
+    function SortedDict.sorted_keys
+      params: self
+      self: local (parameter, referenced)
+      out: local (assigned, referenced)
+      k: local (assigned, referenced)
+      dict: global implicit (referenced)
+    function SortedDict.__iter__
+      params: self
+      self: local (parameter, referenced)
+      iter: global implicit (referenced)
+    function SortedDict.keys
+      params: self
+      self: local (parameter, referenced)
+      print: global implicit (referenced)
+    function SortedDict.__getitem__
+      params: self, k
+      self: local (parameter)
+      k: local (parameter, referenced)
+      print: global implicit (referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)

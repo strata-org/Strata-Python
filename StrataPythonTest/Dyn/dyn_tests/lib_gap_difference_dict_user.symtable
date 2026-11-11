@@ -1,0 +1,14 @@
+module top
+  U: local (assigned, referenced)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  set: global implicit (referenced)
+  class U
+    __eq__: local (assigned)
+    __hash__: local (assigned)
+    function __hash__
+      self: local (parameter)
+    function __eq__
+      other: local (parameter)
+      self: local (parameter)
+qualnames: U, U.__eq__, U.__hash__

@@ -667,3 +667,15 @@ lib_unicode_error_members | yes |
 lib_partition_sep_subclass | yes |
 lib_str_encode_args | yes |
 lib_gap_replace_large | yes |
+lib_dict_methods | yes |
+lib_set_methods | yes |
+lib_gap_setdefault_collision | yes |
+lib_gap_difference_user_hash | yes |
+lib_set_order | yes |
+lib_dict_views | yes |
+lib_view_dispatch | yes |
+lib_view_mapping | yes |
+lib_gap_fromkeys_inexact | yes |
+lib_gap_difference_dict_user | yes |
+lib_gap_items_xor_resize | yes |
+lib_dict_copy_subclass | yes |

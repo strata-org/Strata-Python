@@ -1,0 +1,33 @@
+--- stdout 514
+dict_keys 2 [1, 2] ['a', 'b'] [(1, 'a'), (2, 'b')]
+3 [1, 2, 3] [3, 2, 1] ['c', 'b', 'a'] [(3, 'c'), (2, 'b'), (1, 'a')]
+dict_keys([1, 2, 3]) dict_values(['a', 'b', 'c']) dict_items([(1, 'a'), (2, 'b'), (3, 'c')])
+True False True False False False
+True False True True True True True NotImplemented
+True True
+[1] [1, 2, 3, 7] [2, 3] [2, 3, 9] [2] [1, 2, 3, 7] [8] [1, 2, 4]
+set True False False
+[(1, 10)] [(1, 10), (3, 30)] [(1, 10), (2, 20), (3, 30), (4, 40)]
+3 [1, 1, 5]
+dict_keys([]) [] 0
+dict_items([(1, ...)])
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+L = <function object>
+__doc__ = None
+__name__ = '__main__'
+d = {1: 'a', 2: 'b', 3: 'c'}
+d1 = {1: <A object>}
+d2 = {1: <A object>, 5: 0}
+e = {}
+it = <dict_items object>
+k = <dict_keys object>
+keys = [1, 1, 5]
+n = <dict_items object>
+p = (5, 0)
+pairs = {(1, <A object>), (1, <A object>), (5, 0)}
+r = {1: <dict_items object>}
+v = <dict_values object>
