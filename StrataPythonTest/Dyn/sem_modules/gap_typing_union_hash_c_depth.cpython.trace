@@ -1,0 +1,18 @@
+--- stdout 37
+inner True
+small True
+RecursionError
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+List = <_SpecialGenericAlias object>
+U1 = <_UnionGenericAlias object>
+U2 = <_UnionGenericAlias object>
+Union = <_SpecialForm object>
+X = <_GenericAlias object>
+__doc__ = None
+__name__ = '__main__'
+mk = <function object>
+nest = <function object>

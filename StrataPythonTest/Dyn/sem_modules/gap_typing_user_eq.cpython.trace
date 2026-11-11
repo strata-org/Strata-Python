@@ -1,0 +1,26 @@
+--- stdout 51
+eq
+eq
+eq
+eq
+eq
+eq
+eq
+eq
+eq
+eq
+eq
+eq
+eq
+eq
+eq
+eq
+eq
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+U = <class 'U'>
+__doc__ = None
+__name__ = '__main__'

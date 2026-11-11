@@ -1,0 +1,11 @@
+--- stdout 28
+typing.Optional[__main__.A]
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+Optional = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'
+d = {<_UnionGenericAlias object>: 1}

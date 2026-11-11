@@ -1,0 +1,9 @@
+--- stdout 5
+True
+
+--- outcome
+ok
+--- globals
+List = <_SpecialGenericAlias object>
+__doc__ = None
+__name__ = '__main__'

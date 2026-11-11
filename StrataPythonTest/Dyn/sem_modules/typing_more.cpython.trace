@@ -1,0 +1,31 @@
+--- stdout 939
+typing.Optional[typing.List[typing.Any]] typing.Optional[typing.Dict[str, typing.Any]] typing.Union[int, NoneType, str] typing.Optional[typing.List[int]]
+True True False
+1 2 3
+True False True
+True List List Optional
+<class 'list'> (<class 'str'>, <class 'int'>) () <class 'list'>
+typing () typing.Union[int, str]
+typing.Optional[int] typing.Union[int, NoneType, str] typing.Optional[int]
+<class 'typing._SpecialGenericAlias'> <class 'typing._GenericAlias'> <class 'typing._SpecialForm'> <class 'typing._UnionGenericAlias'> <class 'typing._AnyMeta'>
+TypeError: Type List cannot be instantiated; use list() instead
+TypeError: Cannot instantiate typing.Optional
+TypeError: Cannot instantiate typing.Union
+TypeError: typing.Optional requires a single type. Got (1, 2).
+TypeError: Plain typing.Optional is not valid as type argument
+TypeError: Cannot subclass typing.Optional
+AttributeError: type object 'list' has no attribute 'foo'
+True True
+
+--- outcome
+ok
+--- globals
+Any = <class 'Any'>
+Dict = <_SpecialGenericAlias object>
+List = <_SpecialGenericAlias object>
+Optional = <_SpecialForm object>
+Tuple = <_TupleType object>
+Union = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'
+bad = <function object>

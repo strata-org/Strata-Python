@@ -21,6 +21,7 @@ namespace StrataPython.Dyn.Sem.Modules
 
 /-- The names of `vars()` of each modelled module, by its name. -/
 def moduleNames : List (String × List String) := [
+  ("typing", ["ABCMeta", "AbstractSet", "Annotated", "Any", "AnyStr", "AsyncContextManager", "AsyncGenerator", "AsyncIterable", "AsyncIterator", "Awaitable", "BinaryIO", "ByteString", "CT_co", "Callable", "ChainMap", "ClassVar", "Collection", "Concatenate", "Container", "ContextManager", "Coroutine", "Counter", "DefaultDict", "Deque", "Dict", "EXCLUDED_ATTRIBUTES", "Final", "ForwardRef", "FrozenSet", "Generator", "Generic", "GenericAlias", "Hashable", "IO", "ItemsView", "Iterable", "Iterator", "KT", "KeysView", "List", "Literal", "LiteralString", "Mapping", "MappingView", "Match", "MethodDescriptorType", "MethodWrapperType", "MutableMapping", "MutableSequence", "MutableSet", "NamedTuple", "NamedTupleMeta", "Never", "NewType", "NoReturn", "NotRequired", "Optional", "OrderedDict", "ParamSpec", "ParamSpecArgs", "ParamSpecKwargs", "Pattern", "Protocol", "Required", "Reversible", "Self", "Sequence", "Set", "Sized", "SupportsAbs", "SupportsBytes", "SupportsComplex", "SupportsFloat", "SupportsIndex", "SupportsInt", "SupportsRound", "T", "TYPE_CHECKING", "T_co", "T_contra", "Text", "TextIO", "Tuple", "Type", "TypeAlias", "TypeAliasType", "TypeGuard", "TypeVar", "TypeVarTuple", "TypedDict", "Union", "Unpack", "VT", "VT_co", "V_co", "ValuesView", "WrapperDescriptorType", "_ASSERT_NEVER_REPR_MAX_LENGTH", "_AnnotatedAlias", "_AnyMeta", "_BaseGenericAlias", "_CallableGenericAlias", "_CallableType", "_ConcatenateGenericAlias", "_DeprecatedGenericAlias", "_DeprecatedType", "_Final", "_Func", "_GenericAlias", "_IdentityCallable", "_LiteralGenericAlias", "_LiteralSpecialForm", "_NamedTuple", "_NotIterable", "_PROTO_ALLOWLIST", "_PickleUsingNameMixin", "_ProtocolMeta", "_SPECIAL_NAMES", "_SpecialForm", "_SpecialGenericAlias", "_TYPING_INTERNALS", "_TupleType", "_TypedDict", "_TypedDictMeta", "_TypingEllipsis", "_UnionGenericAlias", "_UnpackGenericAlias", "__all__", "__builtins__", "__cached__", "__doc__", "__file__", "__loader__", "__name__", "__package__", "__spec__", "_alias", "_allow_reckless_class_checks", "_allowed_types", "_caches", "_caller", "_check_generic", "_cleanups", "_collect_parameters", "_compare_args_orderless", "_deduplicate", "_deduplicate_unhashable", "_eval_type", "_flatten_literal_params", "_generic_class_getitem", "_generic_init_subclass", "_get_protocol_attrs", "_idfunc", "_is_dunder", "_is_param_expr", "_is_typevar_like", "_is_unpacked_typevartuple", "_lazy_load_getattr_static", "_make_nmtuple", "_make_union", "_namedtuple_mro_entries", "_no_init_or_replace_init", "_overload_dummy", "_overload_registry", "_paramspec_prepare_subst", "_paramspec_subst", "_prohibited", "_proto_hook", "_remove_dups_flatten", "_should_unflatten_callable_args", "_special", "_strip_annotations", "_tp_cache", "_type_check", "_type_convert", "_type_repr", "_typevar_subst", "_typevartuple_prepare_subst", "_unpack_args", "_value_and_type_iter", "abstractmethod", "assert_never", "assert_type", "cast", "clear_overloads", "collections", "contextlib", "copyreg", "dataclass_transform", "defaultdict", "final", "functools", "get_args", "get_origin", "get_overloads", "get_type_hints", "io", "is_typeddict", "no_type_check", "no_type_check_decorator", "operator", "overload", "override", "re", "reveal_type", "runtime_checkable", "stdlib_re", "sys", "types", "warnings"])
 ]
 
 /-- The names of `vars()` of each class that the models' objects reach, by its
@@ -29,7 +30,90 @@ def classNames : List (String × List String) := [
   ("types.GenericAlias",
     ["__args__", "__call__", "__dir__", "__doc__", "__eq__", "__ge__", "__getattribute__", "__getitem__", "__gt__", "__hash__", "__instancecheck__", "__iter__", "__le__", "__lt__", "__mro_entries__", "__ne__", "__new__", "__or__", "__origin__", "__parameters__", "__reduce__", "__repr__", "__ror__", "__subclasscheck__", "__typing_unpacked_tuple_args__", "__unpacked__"]),
   ("types.UnionType",
-    ["__args__", "__doc__", "__eq__", "__ge__", "__getattribute__", "__getitem__", "__gt__", "__hash__", "__le__", "__lt__", "__ne__", "__or__", "__parameters__", "__repr__", "__ror__"])
+    ["__args__", "__doc__", "__eq__", "__ge__", "__getattribute__", "__getitem__", "__gt__", "__hash__", "__le__", "__lt__", "__ne__", "__or__", "__parameters__", "__repr__", "__ror__"]),
+  ("typing.Any",
+    ["__dict__", "__doc__", "__module__", "__new__", "__weakref__"]),
+  ("typing.ForwardRef",
+    ["__doc__", "__eq__", "__forward_arg__", "__forward_code__", "__forward_evaluated__", "__forward_is_argument__", "__forward_is_class__", "__forward_module__", "__forward_value__", "__hash__", "__init__", "__module__", "__or__", "__repr__", "__ror__", "__slots__", "_evaluate"]),
+  ("typing._AnyMeta",
+    ["__doc__", "__instancecheck__", "__module__", "__repr__"]),
+  ("typing._BaseGenericAlias",
+    ["__call__", "__dict__", "__dir__", "__doc__", "__getattr__", "__init__", "__instancecheck__", "__module__", "__mro_entries__", "__setattr__", "__subclasscheck__"]),
+  ("typing._Final",
+    ["__doc__", "__init_subclass__", "__module__", "__slots__", "__weakref__"]),
+  ("typing._GenericAlias",
+    ["__doc__", "__eq__", "__getitem__", "__hash__", "__init__", "__iter__", "__module__", "__mro_entries__", "__or__", "__reduce__", "__repr__", "__ror__", "_determine_new_args", "_make_substitution", "copy_with"]),
+  ("typing._NotIterable",
+    ["__doc__", "__iter__", "__module__", "__slots__"]),
+  ("typing._SpecialForm",
+    ["__call__", "__doc__", "__getattr__", "__getitem__", "__init__", "__instancecheck__", "__module__", "__mro_entries__", "__or__", "__reduce__", "__repr__", "__ror__", "__slots__", "__subclasscheck__", "_getitem", "_name"]),
+  ("typing._SpecialGenericAlias",
+    ["__dict__", "__doc__", "__getitem__", "__init__", "__module__", "__or__", "__reduce__", "__repr__", "__ror__", "__subclasscheck__", "__weakref__", "copy_with"]),
+  ("typing._TupleType",
+    ["__doc__", "__getitem__", "__module__"]),
+  ("typing._UnionGenericAlias",
+    ["__dict__", "__doc__", "__eq__", "__hash__", "__instancecheck__", "__module__", "__reduce__", "__repr__", "__subclasscheck__", "__weakref__", "copy_with"])
+]
+
+/-- The `str` values of `vars()` of those classes, by `module.qualname.name`, and the
+docstrings of the modules' objects, by `module.name`. -/
+def texts : List (String × String) := [
+  ("types.GenericAlias.__doc__",
+    "Represent a PEP 585 generic type\n\nE.g. for t = list[int], t.__origin__ is list and t.__args__ is (int,)."),
+  ("types.UnionType.__doc__",
+    "Represent a PEP 604 union type\n\nE.g. for int | str"),
+  ("typing.Any.__doc__",
+    "Special type indicating an unconstrained type.\n\n    - Any is compatible with every type.\n    - Any assumed to have all methods.\n    - All values assumed to be instances of Any.\n\n    Note that all the above statements are true from the point of view of\n    static type checkers. At runtime, Any should not be used with instance\n    checks.\n    "),
+  ("typing.Any.__module__",
+    "typing"),
+  ("typing.ForwardRef.__doc__",
+    "Internal wrapper to hold a forward reference."),
+  ("typing.ForwardRef.__module__",
+    "typing"),
+  ("typing._AnyMeta.__module__",
+    "typing"),
+  ("typing._BaseGenericAlias.__doc__",
+    "The central part of the internal API.\n\n    This represents a generic version of type 'origin' with type arguments 'params'.\n    There are two kind of these aliases: user defined and special. The special ones\n    are wrappers around builtin collections and ABCs in collections.abc. These must\n    have 'name' always set. If 'inst' is False, then the alias can't be instantiated;\n    this is used by e.g. typing.List and typing.Dict.\n    "),
+  ("typing._BaseGenericAlias.__module__",
+    "typing"),
+  ("typing._Final.__doc__",
+    "Mixin to prohibit subclassing."),
+  ("typing._Final.__module__",
+    "typing"),
+  ("typing._GenericAlias.__module__",
+    "typing"),
+  ("typing._NotIterable.__doc__",
+    "Mixin to prevent iteration, without being compatible with Iterable.\n\n    That is, we could do::\n\n        def __iter__(self): raise TypeError()\n\n    But this would make users of this mixin duck type-compatible with\n    collections.abc.Iterable - isinstance(foo, Iterable) would be True.\n\n    Luckily, we can instead prevent iteration by setting __iter__ to None, which\n    is treated specially.\n    "),
+  ("typing._NotIterable.__module__",
+    "typing"),
+  ("typing._SpecialForm.__module__",
+    "typing"),
+  ("typing._SpecialGenericAlias.__module__",
+    "typing"),
+  ("typing._TupleType.__module__",
+    "typing"),
+  ("typing._UnionGenericAlias.__module__",
+    "typing"),
+  ("typing.NotRequired",
+    "Special typing construct to mark a TypedDict key as potentially missing.\n\n    For example::\n\n        class Movie(TypedDict):\n            title: str\n            year: NotRequired[int]\n\n        m = Movie(\n            title='The Matrix',  # typechecker error if key is omitted\n            year=1999,\n        )\n    "),
+  ("typing.Optional",
+    "Optional[X] is equivalent to Union[X, None]."),
+  ("typing.Required",
+    "Special typing construct to mark a TypedDict key as required.\n\n    This is mainly useful for total=False TypedDicts.\n\n    For example::\n\n        class Movie(TypedDict, total=False):\n            title: Required[str]\n            year: int\n\n        m = Movie(\n            title='The Matrix',  # typechecker error if key is omitted\n            year=1999,\n        )\n\n    There is no runtime checking that a required key is actually provided\n    when instantiating a related TypedDict.\n    "),
+  ("typing.Tuple",
+    "Deprecated alias to builtins.tuple.\n\n    Tuple[X, Y] is the cross-product type of X and Y.\n\n    Example: Tuple[T1, T2] is a tuple of two elements corresponding\n    to type variables T1 and T2.  Tuple[int, float, str] is a tuple\n    of an int, a float and a string.\n\n    To specify a variable-length tuple of homogeneous type, use Tuple[T, ...].\n    "),
+  ("typing.TypeGuard",
+    "Special typing construct for marking user-defined type guard functions.\n\n    ``TypeGuard`` can be used to annotate the return type of a user-defined\n    type guard function.  ``TypeGuard`` only accepts a single type argument.\n    At runtime, functions marked this way should return a boolean.\n\n    ``TypeGuard`` aims to benefit *type narrowing* -- a technique used by static\n    type checkers to determine a more precise type of an expression within a\n    program's code flow.  Usually type narrowing is done by analyzing\n    conditional code flow and applying the narrowing to a block of code.  The\n    conditional expression here is sometimes referred to as a \"type guard\".\n\n    Sometimes it would be convenient to use a user-defined boolean function\n    as a type guard.  Such a function should use ``TypeGuard[...]`` as its\n    return type to alert static type checkers to this intention.\n\n    Using  ``-> TypeGuard`` tells the static type checker that for a given\n    function:\n\n    1. The return value is a boolean.\n    2. If the return value is ``True``, the type of its argument\n       is the type inside ``TypeGuard``.\n\n    For example::\n\n         def is_str_list(val: list[object]) -> TypeGuard[list[str]]:\n             '''Determines whether all objects in the list are strings'''\n             return all(isinstance(x, str) for x in val)\n\n         def func1(val: list[object]):\n             if is_str_list(val):\n                 # Type of ``val`` is narrowed to ``list[str]``.\n                 print(\" \".join(val))\n             else:\n                 # Type of ``val`` remains as ``list[object]``.\n                 print(\"Not a list of strings!\")\n\n    Strict type narrowing is not enforced -- ``TypeB`` need not be a narrower\n    form of ``TypeA`` (it can even be a wider form) and this may lead to\n    type-unsafe results.  The main reason is to allow for things like\n    narrowing ``list[object]`` to ``list[str]`` even though the latter is not\n    a subtype of the former, since ``list`` is invariant.  The responsibility of\n    writing type-safe type guards is left to the user.\n\n    ``TypeGuard`` also works with type variables.  For more information, see\n    PEP 647 (User-Defined Type Guards).\n    "),
+  ("typing.Union",
+    "Union type; Union[X, Y] means either X or Y.\n\n    On Python 3.10 and higher, the | operator\n    can also be used to denote unions;\n    X | Y means the same thing to the type checker as Union[X, Y].\n\n    To define a union, use e.g. Union[int, str]. Details:\n    - The arguments must be types and there must be at least one.\n    - None as an argument is a special case and is replaced by\n      type(None).\n    - Unions of unions are flattened, e.g.::\n\n        assert Union[Union[int, str], float] == Union[int, str, float]\n\n    - Unions of a single argument vanish, e.g.::\n\n        assert Union[int] == int  # The constructor actually returns int\n\n    - Redundant arguments are skipped, e.g.::\n\n        assert Union[int, str, int] == Union[int, str]\n\n    - When comparing unions, the argument order is ignored, e.g.::\n\n        assert Union[int, str] == Union[str, int]\n\n    - You cannot subclass or instantiate a union.\n    - You can use Optional[X] as a shorthand for Union[X, None].\n    ")
+]
+
+/-- The names of `vars()` of each of the model's functions whose CPython object has a
+`__dict__`, by the native key of the model's function; each stops with a gap. -/
+def functionNames : List (String × List String) := [
+  ("typing._SpecialForm.__getitem__", ["__wrapped__"]),
+  ("typing._SpecialGenericAlias.__getitem__", ["__wrapped__"]),
+  ("typing._TupleType.__getitem__", ["__wrapped__"])
 ]
 
 end

@@ -1,0 +1,14 @@
+--- stdout 10
+3003
+7473
+
+--- outcome
+ok
+--- globals
+D = 249
+List = <_SpecialGenericAlias object>
+Optional = <_SpecialForm object>
+Union = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'
+mk = <function object>

@@ -1,0 +1,144 @@
+--- stdout 1073
+0 True
+1 False
+2 True
+3 False
+4 True
+5 False
+6 True
+7 False
+8 True
+9 False
+10 True
+11 False
+12 True
+13 False
+14 True
+15 False
+16 True
+17 False
+18 True
+19 False
+20 True
+21 False
+22 True
+23 False
+24 True
+25 False
+26 True
+27 False
+28 True
+29 False
+30 True
+31 False
+32 True
+33 False
+34 True
+35 False
+36 True
+37 False
+38 True
+39 False
+40 True
+41 False
+42 True
+43 False
+44 True
+45 False
+46 True
+47 False
+48 True
+49 False
+50 True
+51 False
+52 True
+53 False
+54 True
+55 False
+56 True
+57 False
+58 True
+59 False
+60 True
+61 False
+62 True
+63 False
+64 True
+65 False
+66 True
+67 False
+68 True
+69 False
+70 True
+71 False
+72 True
+73 False
+74 True
+75 False
+76 True
+77 True
+78 True
+79 False
+80 True
+81 False
+82 True
+83 False
+84 True
+85 False
+86 True
+87 False
+88 True
+89 False
+90 True
+91 False
+92 True
+93 False
+94 True
+95 False
+96 True
+97 False
+98 True
+99 False
+100 True
+101 False
+102 True
+103 False
+104 True
+105 True
+106 True
+107 False
+108 True
+109 False
+110 True
+111 False
+112 True
+113 False
+114 True
+115 False
+116 True
+117 False
+118 True
+119 False
+True
+True
+True
+False
+False
+False
+False
+False
+
+--- outcome
+ok
+--- globals
+Any = <class 'Any'>
+C = <class 'C'>
+Dict = <_SpecialGenericAlias object>
+List = <_SpecialGenericAlias object>
+Optional = <_SpecialForm object>
+Required = <_SpecialForm object>
+Tuple = <_TupleType object>
+TypeGuard = <_SpecialForm object>
+Union = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'

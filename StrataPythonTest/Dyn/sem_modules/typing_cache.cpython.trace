@@ -1,0 +1,31 @@
+--- stdout 209
+True True True
+True False
+True True True
+True False True
+True
+after 127 others: True
+after 128 others: False
+True False False True
+True True True
+False True True
+True False True True
+True True True
+True False
+
+--- outcome
+ok
+--- globals
+Any = <class 'Any'>
+Dict = <_SpecialGenericAlias object>
+LA = <class 'LA'>
+LB = <class 'LB'>
+List = <_SpecialGenericAlias object>
+Optional = <_SpecialForm object>
+Tuple = <_TupleType object>
+Union = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'
+a = <_GenericAlias object>
+b = <_GenericAlias object>
+i = 127

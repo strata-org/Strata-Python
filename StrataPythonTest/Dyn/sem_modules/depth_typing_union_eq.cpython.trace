@@ -1,0 +1,18 @@
+--- stdout 10
+True
+True
+
+--- outcome
+ok
+--- globals
+A = <_UnionGenericAlias object>
+C = <_UnionGenericAlias object>
+D = 796
+List = <_SpecialGenericAlias object>
+Optional = <_SpecialForm object>
+Union = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'
+deep = <function object>
+mk = <function object>
+mk2 = <function object>

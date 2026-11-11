@@ -1,0 +1,10 @@
+--- stdout 29
+Optional
+AttributeError: foo
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'

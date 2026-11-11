@@ -4,6 +4,11 @@ alias_repr_list | gap | a list argument that shrinks while its repr is written
 alias_repr_order | agree
 depth_ga_eq | gap | a C recursion depth over 9000
 depth_ga_repr | gap | a C recursion depth over 9000
+depth_typing_alias_hash | gap | Python call depth over 900
+depth_typing_getitem | gap | Python call depth over 900
+depth_typing_repr | gap | Python call depth over 900
+depth_typing_union_eq | gap | Python call depth over 900
+depth_typing_union_repr | gap | Python call depth over 900
 depth_union_eq | gap | arguments nested deeper than the model of types.GenericAlias follows
 depth_union_repr | gap | a C recursion depth over 9000
 ga_basics | agree
@@ -15,9 +20,37 @@ gap_new_read | gap | the attribute GenericAlias.__new__ is not modelled yet
 gap_object_new | gap | object.__new__ of the C type types.GenericAlias is not modelled yet
 gap_params_origin | gap | __parameters__ of a type alias with arguments that the model doesn't know
 gap_subclass_ga | gap | a subclass of types.GenericAlias is not modelled yet
+gap_typing_alias_write | gap | a write to a typing alias is not modelled yet
+gap_typing_cache_c_depth | gap | a C recursion depth over 9000
+gap_typing_cache_deep_entry | gap | Python call depth over 900
+gap_typing_cache_wrapped | gap | the attribute __wrapped__ of the built-in _SpecialForm.__getitem__ is not modelled yet
+gap_typing_eq_c_depth | gap | a C recursion depth over 9000
+gap_typing_float_arg | gap | a typing subscription with arguments that the model doesn't know
+gap_typing_form_attr | gap | an AttributeError without name and obj from an attribute read is not modelled yet
+gap_typing_forward_code | gap | the attribute ForwardRef.__forward_code__ is not modelled yet
+gap_typing_forwardref_expr | gap | a ForwardRef of a string that is not a dotted name is not modelled yet
+gap_typing_hash_any | gap | hash(x) depends on an address
+gap_typing_hash_c_depth | gap | a C recursion depth over 9000
+gap_typing_hash_user | gap | hash(x) depends on an address
+gap_typing_metaclass_eq | gap | a typing subscription with arguments that the model doesn't know
+gap_typing_module_write | gap | an attribute write to the module typing is not modelled yet
+gap_typing_optional_any_key | gap | hash(x) depends on an address
+gap_typing_repr_c_depth | gap | a C recursion depth over 9000
+gap_typing_resubscript | gap | the attribute _GenericAlias.__getitem__ is not modelled yet
+gap_typing_subclass_alias | gap | the attribute _GenericAlias.__mro_entries__ is not modelled yet
+gap_typing_super | gap | an attribute write to a module is not modelled yet
+gap_typing_union_hash_c_depth | gap | a C recursion depth over 9000
+gap_typing_unmodelled_name | gap | the attribute typing.Generic is not modelled yet
+gap_typing_user_eq | gap | a typing subscription with arguments that the model doesn't know
 gap_union_base | gap | the attribute UnionType.__new__ is not modelled yet
 gap_union_call | gap | the attribute UnionType.__new__ is not modelled yet
 gap_union_metaclass | gap | comparing unions with arguments that the model doesn't know
 gap_union_str_subclass_name | gap | an attribute name that is an instance of a subclass of str is not modelled yet
+typing_cache | agree
+typing_cache_deep_evicted | agree
+typing_cache_property | agree
+typing_more | agree
+typing_names | agree
+typing_subscription | agree
 union_basics | agree
 union_wide | agree

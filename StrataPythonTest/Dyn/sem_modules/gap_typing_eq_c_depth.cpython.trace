@@ -1,0 +1,16 @@
+--- stdout 37
+inner True
+small True
+RecursionError
+
+--- outcome
+ok
+--- globals
+A = <_GenericAlias object>
+B = <_GenericAlias object>
+E = <class 'E'>
+TypeGuard = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'
+mk = <function object>
+nest = <function object>

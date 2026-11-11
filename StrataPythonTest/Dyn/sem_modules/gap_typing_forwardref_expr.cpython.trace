@@ -1,0 +1,10 @@
+--- stdout 35
+typing.Optional[ForwardRef('a.b')]
+
+--- outcome
+raised SyntaxError: Forward reference must be an expression -- got '1 +'
+  context SyntaxError
+--- globals
+Optional = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'

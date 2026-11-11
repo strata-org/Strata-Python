@@ -23,18 +23,18 @@ test_admitted_scope_case_03_static_local_classification | agree
 test_admitted_scope_case_04_module_target_cleanup | gap | import of module json is not modelled yet
 test_admitted_scope_case_05_nested_handler_targets | agree
 test_admitted_scope_case_06_path_dependent_boundness | agree
-test_any_arithmetic | gap | import of module typing is not modelled yet
-test_any_bool | gap | import of module typing is not modelled yet
-test_any_comparison | gap | import of module typing is not modelled yet
-test_any_dict | gap | import of module typing is not modelled yet
-test_any_in_if | gap | import of module typing is not modelled yet
-test_any_int | gap | import of module typing is not modelled yet
-test_any_list | gap | import of module typing is not modelled yet
-test_any_none | gap | import of module typing is not modelled yet
-test_any_reassign_type | gap | import of module typing is not modelled yet
-test_any_str | gap | import of module typing is not modelled yet
-test_any_to_int | gap | import of module typing is not modelled yet
-test_any_to_str | gap | import of module typing is not modelled yet
+test_any_arithmetic | agree
+test_any_bool | agree
+test_any_comparison | agree
+test_any_dict | agree
+test_any_in_if | agree
+test_any_int | agree
+test_any_list | agree
+test_any_none | agree
+test_any_reassign_type | agree
+test_any_str | agree
+test_any_to_int | agree
+test_any_to_str | agree
 test_arithmetic | agree
 test_assert_false | agree
 test_assert_no_msg | agree
@@ -90,14 +90,14 @@ test_cmp_gt | agree
 test_cmp_le | agree
 test_cmp_lt | agree
 test_cmp_neq | agree
-test_coerce_any_in_comparison | gap | import of module typing is not modelled yet
-test_coerce_any_str_concat | gap | import of module typing is not modelled yet
-test_coerce_any_to_bool_falsy | gap | import of module typing is not modelled yet
-test_coerce_any_to_bool_truthy | gap | import of module typing is not modelled yet
-test_coerce_int_in_any_list | gap | import of module typing is not modelled yet
-test_coerce_none_to_any | gap | import of module typing is not modelled yet
+test_coerce_any_in_comparison | agree
+test_coerce_any_str_concat | agree
+test_coerce_any_to_bool_falsy | agree
+test_coerce_any_to_bool_truthy | agree
+test_coerce_int_in_any_list | agree
+test_coerce_none_to_any | agree
 test_comparisons | agree
-test_composite_return | gap | import of module typing is not modelled yet
+test_composite_return | agree
 test_conditional_assign | agree
 test_control_flow | agree
 test_dataclass_decorator | gap | import of module dataclasses is not modelled yet
@@ -112,7 +112,7 @@ test_dict_add_key | agree
 test_dict_assign | agree
 test_dict_create | agree
 test_dict_in | agree
-test_dict_of_list | gap | import of module typing is not modelled yet
+test_dict_of_list | agree
 test_dict_operations | agree
 test_dict_overwrite | agree
 test_differential_monty_strata_001_closures_cells_late_binding_program | agree
@@ -191,7 +191,7 @@ test_for_else_break | agree
 test_for_loop | agree
 test_for_range | agree
 test_fstrings | agree
-test_func_input_type_constraints | gap | import of module typing is not modelled yet
+test_func_input_type_constraints | agree
 test_function_decorator_rejection | agree
 test_function_def_calls | gap | import of module test_helper is not modelled yet
 test_global_async_method_rejection | gap | the translator does not support async def
@@ -256,13 +256,13 @@ test_int_parens | agree
 test_int_pow | agree
 test_int_sub | agree
 test_int_sub_negative | agree
-test_int_to_any | gap | import of module typing is not modelled yet
+test_int_to_any | agree
 test_int_truthy | agree
 test_int_zero_add | agree
 test_interpret_factory_concrete_eval | agree
 test_interpret_pow_no_panic | gap | not modelled: an int with more than 2 ^ 32 bits
 test_interpret_rshift_no_panic | agree
-test_invalid_client_type | gap | import of module typing is not modelled yet
+test_invalid_client_type | gap | import of module test_helper is not modelled yet
 test_is_bool_not_int | agree
 test_is_non_none | agree
 test_is_none | agree
@@ -360,56 +360,56 @@ test_language_semantics_ast_bytecode_044_async_await_points_boundary | gap | bui
 test_language_semantics_ast_bytecode_044_async_await_points_supported | gap | import of module dis is not modelled yet
 test_language_semantics_ast_bytecode_045_generator_frame_preservation_boundary | gap | the translator does not support generator function
 test_language_semantics_ast_bytecode_045_generator_frame_preservation_supported | gap | the translator does not support generator function
-test_language_semantics_comprehensions_repros_d1_bindname | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_d1_bindname_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_d2_intlist | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_d2_intlist_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_d3_arith | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_d3_arith_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_d4_two_stage | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_d4_two_stage_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_d5_attr | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_d5_attr_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_ex1_filter | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_ex1_filter_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_ex2_nested | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_ex2_nested_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_ex3_order | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_ex3_order_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_ex4_late | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_ex4_late_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_ex5_empty | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_ex5_empty_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_ex6_setcomp | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_ex6_setcomp_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_ex7_dictcomp | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_ex7_dictcomp_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_d1_bindname | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_d1_bindname_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_d2_intlist | agree
+test_language_semantics_comprehensions_repros_d2_intlist_fail | agree
+test_language_semantics_comprehensions_repros_d3_arith | agree
+test_language_semantics_comprehensions_repros_d3_arith_fail | agree
+test_language_semantics_comprehensions_repros_d4_two_stage | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_d4_two_stage_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_d5_attr | agree
+test_language_semantics_comprehensions_repros_d5_attr_fail | agree
+test_language_semantics_comprehensions_repros_ex1_filter | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_ex1_filter_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_ex2_nested | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_ex2_nested_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_ex3_order | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_ex3_order_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_ex4_late | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_ex4_late_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_ex5_empty | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_ex5_empty_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_ex6_setcomp | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_ex6_setcomp_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_ex7_dictcomp | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_ex7_dictcomp_fail | gap | the attribute typing.TypedDict is not modelled yet
 test_language_semantics_comprehensions_repros_k1_dictclash | agree
 test_language_semantics_comprehensions_repros_k2_setdup | agree
 test_language_semantics_comprehensions_repros_k3_tuple_nodup | agree
 test_language_semantics_comprehensions_repros_k4_dictcomp_crash | agree
 test_language_semantics_comprehensions_repros_k5_clash_semantics | gap | a slot of a set whose layout is inexact
-test_language_semantics_comprehensions_repros_repro | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_repro_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_t1_typeddict_total | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_t1_typeddict_total_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_t2_typeddict_scan | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_t2_typeddict_scan_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_t3_neglen | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_t3_neglen_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_t4_neglen_direct | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_t4_neglen_direct_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_t5_presence | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_t5_presence_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_t6_presence_guarded | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_t6_presence_guarded_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_u1_puremap | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_u1_puremap_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_u2_srclen | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_u2_srclen_fail | gap | import of module typing is not modelled yet
+test_language_semantics_comprehensions_repros_repro | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_repro_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_t1_typeddict_total | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_t1_typeddict_total_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_t2_typeddict_scan | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_t2_typeddict_scan_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_t3_neglen | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_t3_neglen_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_t4_neglen_direct | agree
+test_language_semantics_comprehensions_repros_t4_neglen_direct_fail | agree
+test_language_semantics_comprehensions_repros_t5_presence | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_t5_presence_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_t6_presence_guarded | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_t6_presence_guarded_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_u1_puremap | agree
+test_language_semantics_comprehensions_repros_u1_puremap_fail | agree
+test_language_semantics_comprehensions_repros_u2_srclen | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_u2_srclen_fail | gap | the attribute typing.TypedDict is not modelled yet
 test_language_semantics_cpython_runtime_001_binary_operators_boundary | agree
 test_language_semantics_cpython_runtime_001_binary_operators_supported | agree
-test_language_semantics_cpython_runtime_002_inplace_operators_boundary | gap | import of module typing is not modelled yet
+test_language_semantics_cpython_runtime_002_inplace_operators_boundary | gap | built-in id is not modelled yet
 test_language_semantics_cpython_runtime_002_inplace_operators_supported | agree
 test_language_semantics_cpython_runtime_003_attribute_read_boundary | agree
 test_language_semantics_cpython_runtime_003_attribute_read_supported | agree
@@ -513,7 +513,7 @@ test_list_empty | agree
 test_list_falsy | agree
 test_list_in | agree
 test_list_negative_index | agree
-test_list_of_list | gap | import of module typing is not modelled yet
+test_list_of_list | agree
 test_list_slice | agree
 test_list_truthy | agree
 test_loops | agree
@@ -522,8 +522,8 @@ test_lshift_negative | agree
 test_method_call_with_kwargs | agree
 test_method_kwargs_no_hierarchy | agree
 test_method_param_reassign | agree
-test_missing_models | gap | import of module typing is not modelled yet
-test_missing_required_param | gap | import of module typing is not modelled yet
+test_missing_models | gap | import of module test_helper is not modelled yet
+test_missing_required_param | gap | import of module test_helper is not modelled yet
 test_mixed_types_list | agree
 test_mod_both_neg | agree
 test_mod_neg_divisor | agree
@@ -582,7 +582,7 @@ test_model_soundness_058_default_parameter_substitution_program | agree
 test_model_soundness_059_if_condition_non_bool_truthiness_program | agree
 test_model_soundness_060_string_concat_length_axioms_missing_program | agree
 test_model_soundness_061_subclass_fields_through_parent_type_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_062_is_none_narrowing_optional_program | gap | import of module typing is not modelled yet
+test_model_soundness_062_is_none_narrowing_optional_program | agree
 test_model_soundness_063_finally_block_always_executes_program | agree
 test_model_soundness_064_isinstance_narrowing_field_access_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_065_for_else_clause_break_semantics_program | agree
@@ -640,7 +640,7 @@ test_model_soundness_116_raise_in_except_replaces_original_program | agree
 test_model_soundness_117_nested_try_except_propagation_program | agree
 test_model_soundness_118_variable_assignment_copies_value_not_reference_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_119_method_mutation_requires_caller_reassignment_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_120_is_none_vs_eq_none_semantics_program | gap | import of module typing is not modelled yet
+test_model_soundness_120_is_none_vs_eq_none_semantics_program | agree
 test_model_soundness_121_object_identity_after_construction_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_122_function_local_mutation_invisible_to_caller_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_123_assert_statement_not_modeled_program | agree
@@ -657,7 +657,7 @@ test_model_soundness_133_str_startswith_endswith_no_model_program | agree
 test_model_soundness_134_str_find_returns_negative_one_program | agree
 test_model_soundness_135_str_replace_no_model_program | agree
 test_model_soundness_136_while_true_break_pattern_program | agree
-test_model_soundness_137_variable_narrowing_persists_through_branch_program | gap | import of module typing is not modelled yet
+test_model_soundness_137_variable_narrowing_persists_through_branch_program | agree
 test_model_soundness_138_str_join_no_model_program | agree
 test_model_soundness_139_bool_conversion_truthiness_program | agree
 test_model_soundness_140_float_conversion_from_int_program | agree
@@ -682,7 +682,7 @@ test_model_soundness_158_integer_comparison_transitivity_cross_type_program | ag
 test_model_soundness_159_method_chaining_intermediate_self_lost_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_160_try_except_finally_return_override_program | agree
 test_model_soundness_161_range_object_not_list_program | agree
-test_model_soundness_162_isinstance_narrowing_invalidated_by_reassignment_program | gap | import of module typing is not modelled yet
+test_model_soundness_162_isinstance_narrowing_invalidated_by_reassignment_program | agree
 test_model_soundness_163_dataclass_eq_with_none_fields_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_164_exception_message_access_program | agree
 test_model_soundness_165_multiple_return_statements_dead_code_program | agree
@@ -691,7 +691,7 @@ test_model_soundness_167_string_multiply_zero_or_negative_program | agree
 test_model_soundness_168_function_postcondition_not_assumed_at_callsite_program | agree
 test_model_soundness_169_while_loop_exit_condition_not_assumed_program | agree
 test_model_soundness_170_list_append_return_none_not_new_list_program | agree
-test_model_soundness_171_tuple_unrepresentable_in_any_program | gap | import of module typing is not modelled yet
+test_model_soundness_171_tuple_unrepresentable_in_any_program | agree
 test_model_soundness_172_classinstance_classname_string_no_hierarchy_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_173_exception_propagation_through_expressions_program | agree
 test_model_soundness_174_float_exact_real_division_diverges_program | agree
@@ -699,7 +699,7 @@ test_model_soundness_175_dict_int_keys_no_representation_program | agree
 test_model_soundness_176_list_pure_ops_iteration_rebinding_conflict_program | agree
 test_model_soundness_177_cross_object_method_value_semantics_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_178_tag_dispatch_no_reflected_radd_program | agree
-test_model_soundness_179_no_object_identity_is_operator_program | gap | import of module typing is not modelled yet
+test_model_soundness_179_no_object_identity_is_operator_program | agree
 test_model_soundness_180_composite_value_split_boundary_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_181_list_pop_remove_no_model_program | agree
 test_model_soundness_182_list_insert_at_index_program | agree
@@ -724,7 +724,7 @@ test_model_soundness_200_when_does_class_become_composite_program | gap | import
 test_model_soundness_201_operator_missing_tag_pair_falls_to_hole_program | agree
 test_model_soundness_202_comparison_chain_desugaring_tag_check_program | agree
 test_model_soundness_203_augmented_assign_dispatch_same_as_binary_program | agree
-test_model_soundness_204_operator_on_none_must_raise_not_hole_program | gap | import of module typing is not modelled yet
+test_model_soundness_204_operator_on_none_must_raise_not_hole_program | agree
 test_model_soundness_205_floor_div_mod_must_check_zero_divisor_program | agree
 test_model_soundness_206_exception_value_no_stack_unwinding_program | agree
 test_model_soundness_207_raise_must_produce_exception_tag_program | agree
@@ -738,13 +738,13 @@ test_model_soundness_214_nested_field_write_requires_chain_rebuild_program | gap
 test_model_soundness_215_for_loop_element_mutation_invisible_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_216_subset_allows_list_aliasing_via_for_program | agree
 test_model_soundness_217_subset_allows_dict_int_but_model_cant_program | agree
-test_model_soundness_218_subset_allows_tuple_but_no_any_tag_program | gap | import of module typing is not modelled yet
+test_model_soundness_218_subset_allows_tuple_but_no_any_tag_program | agree
 test_model_soundness_219_subset_allows_isinstance_but_no_hierarchy_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_220_subset_allows_str_methods_but_no_model_program | agree
 test_model_soundness_221_full_annotations_drive_tag_but_generics_lost_program | agree
 test_model_soundness_222_no_dynamic_features_but_property_is_dynamic_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_223_optional_annotation_requires_union_tag_set_program | gap | import of module typing is not modelled yet
-test_model_soundness_224_return_type_annotation_not_checked_at_all_exits_program | gap | import of module typing is not modelled yet
+test_model_soundness_223_optional_annotation_requires_union_tag_set_program | agree
+test_model_soundness_224_return_type_annotation_not_checked_at_all_exits_program | agree
 test_model_soundness_225_annotation_mismatch_between_caller_and_callee_program | agree
 test_model_soundness_226_walrus_operator_scope_leak_program | agree
 test_model_soundness_227_string_format_method_no_model_program | agree
@@ -790,7 +790,7 @@ test_model_soundness_266_floor_div_model_gives_wrong_number_program | agree
 test_model_soundness_267_modulo_model_gives_wrong_sign_program | agree
 test_model_soundness_268_division_by_zero_model_no_error_program | agree
 test_model_soundness_269_index_out_of_bounds_model_no_error_program | agree
-test_model_soundness_270_type_error_on_none_add_model_no_error_program | gap | import of module typing is not modelled yet
+test_model_soundness_270_type_error_on_none_add_model_no_error_program | agree
 test_model_soundness_271_root_cause_value_semantics_no_aliasing_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_272_root_cause_tag_dispatch_incomplete_program | agree
 test_model_soundness_273_root_cause_smt_div_not_python_floor_program | agree
@@ -996,7 +996,7 @@ test_model_soundness_472_multiple_return_values_tuple_field_access_no_model_prog
 test_model_soundness_473_exception_in_augmented_assign_partial_eval_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_474_for_loop_variable_reassignment_ignored_by_range_iterator_program | agree
 test_model_soundness_475_math_module_functions_no_model_program | gap | import of module math is not modelled yet
-test_model_soundness_476_isinstance_result_stored_no_narrowing_propagation_program | gap | import of module typing is not modelled yet
+test_model_soundness_476_isinstance_result_stored_no_narrowing_propagation_program | agree
 test_model_soundness_477_divmod_builtin_no_model_program | agree
 test_model_soundness_478_for_loop_range_variable_final_value_off_by_one_program | agree
 test_model_soundness_479_slice_with_step_no_model_program | agree
@@ -1008,7 +1008,7 @@ test_model_soundness_484_object_reference_semantics_program | agree
 test_model_soundness_485_integer_floordiv_mod_sign_program | agree
 test_model_soundness_486_exception_propagation_raise_program | agree
 test_model_soundness_487_exception_propagation_conditional_program | agree
-test_module_level | gap | import of module typing is not modelled yet
+test_module_level | agree
 test_multi_assign | agree
 test_multi_assign_triple | agree
 test_multi_function | gap | import of module test_helper is not modelled yet
@@ -1028,14 +1028,14 @@ test_nested_function_value_rejection | agree
 test_nested_function_vararg_capture_rejection | agree
 test_nested_if | agree
 test_nested_list | agree
-test_nested_optional | gap | import of module typing is not modelled yet
+test_nested_optional | agree
 test_none_assign | agree
 test_none_check | agree
 test_none_conditional | agree
 test_none_falsy | agree
 test_none_in_list | agree
-test_optional_int | gap | import of module typing is not modelled yet
-test_optional_str | gap | import of module typing is not modelled yet
+test_optional_int | agree
+test_optional_str | agree
 test_param_reassign | agree
 test_param_reassign_cross_module | gap | import of module param_reassign_helper is not modelled yet
 test_param_reassign_kwargs | agree
@@ -1059,8 +1059,8 @@ test_pyhard_04_exception_hierarchy_checked | gap | the translator does not suppo
 test_pyhard_05_boundness_and_loops | agree
 test_pyhard_05_boundness_and_loops_annotated | agree
 test_pyhard_05_boundness_and_loops_checked | gap | the translator does not support generator expression
-test_pyhard_06_typed_dict_shapes | gap | import of module typing is not modelled yet
-test_pyhard_06_typed_dict_shapes_annotated | gap | import of module typing is not modelled yet
+test_pyhard_06_typed_dict_shapes | gap | the attribute typing.TypedDict is not modelled yet
+test_pyhard_06_typed_dict_shapes_annotated | gap | the attribute typing.TypedDict is not modelled yet
 test_pyhard_06_typed_dict_shapes_checked | gap | the translator does not support generator expression
 test_pyhard_07_recursive_container_types | agree
 test_pyhard_07_recursive_container_types_annotated | agree
@@ -1068,8 +1068,8 @@ test_pyhard_07_recursive_container_types_checked | gap | the translator does not
 test_pyhard_08_pure_comprehension | agree
 test_pyhard_08_pure_comprehension_annotated | agree
 test_pyhard_08_pure_comprehension_checked | gap | the translator does not support generator expression
-test_pyhard_09_typed_dict_alias_presence | gap | import of module typing is not modelled yet
-test_pyhard_09_typed_dict_alias_presence_annotated | gap | import of module typing is not modelled yet
+test_pyhard_09_typed_dict_alias_presence | gap | the attribute typing.TypedDict is not modelled yet
+test_pyhard_09_typed_dict_alias_presence_annotated | gap | the attribute typing.TypedDict is not modelled yet
 test_pyhard_09_typed_dict_alias_presence_checked | gap | the translator does not support generator expression
 test_pyhard_10_builtin_binary_matrix | agree
 test_pyhard_10_builtin_binary_matrix_annotated | agree
@@ -1128,8 +1128,8 @@ test_pyhard_27_numeric_tower_checked | gap | the translator does not support gen
 test_pyhard_28_versioned_predicates | agree
 test_pyhard_28_versioned_predicates_annotated | agree
 test_pyhard_28_versioned_predicates_checked | gap | the translator does not support generator expression
-test_pyhard_29_mixed_lookup_chain | gap | import of module typing is not modelled yet
-test_pyhard_29_mixed_lookup_chain_annotated | gap | import of module typing is not modelled yet
+test_pyhard_29_mixed_lookup_chain | gap | the attribute typing.TypedDict is not modelled yet
+test_pyhard_29_mixed_lookup_chain_annotated | gap | the attribute typing.TypedDict is not modelled yet
 test_pyhard_29_mixed_lookup_chain_checked | gap | the translator does not support generator expression
 test_pyhard_test_audit | gap | the translator does not support from __future__ import annotations
 test_pyresid_bad_subset | gap | import of module os is not modelled yet
@@ -1186,7 +1186,7 @@ test_pyresid_gr_cb_ann_nonname | agree
 test_pyresid_gr_cb_expr | agree
 test_pyresid_gr_cb_field_default | agree
 test_pyresid_gr_cb_stmt | agree
-test_pyresid_gr_cb_td_method | gap | import of module typing is not modelled yet
+test_pyresid_gr_cb_td_method | gap | the attribute typing.TypedDict is not modelled yet
 test_pyresid_gr_cd_dataclass_kw | gap | import of module dataclasses is not modelled yet
 test_pyresid_gr_cd_expr | agree
 test_pyresid_gr_cd_nondataclass | agree
@@ -1197,7 +1197,7 @@ test_pyresid_gr_ho_setattr_hook | agree
 test_pyresid_gr_im_dataclasses_field | gap | import of module dataclasses is not modelled yet
 test_pyresid_gr_im_from | gap | import of module os is not modelled yet
 test_pyresid_gr_im_plain | gap | import of module os is not modelled yet
-test_pyresid_gr_im_typing_any | gap | import of module typing is not modelled yet
+test_pyresid_gr_im_typing_any | agree
 test_pyresid_gr_rd_iadd | agree
 test_pyresid_gr_rd_radd | agree
 test_pyresid_gr_sh_assign | agree
@@ -1256,7 +1256,7 @@ test_pyresid_gt_raise_name_call | agree
 test_pyresid_gt_setcomp | agree
 test_pyresid_gt_single_gen_comp | agree
 test_pyresid_gt_ternary | agree
-test_pyresid_gt_typing_allowlist | gap | import of module typing is not modelled yet
+test_pyresid_gt_typing_allowlist | gap | the attribute typing.TypedDict is not modelled yet
 test_pyresid_gt_uadd_ok | agree
 test_pyresid_gt_unary_invert_ok | gap | not modelled: ~ on a bool, which warns
 test_pyresid_ix_alias_strong | agree
@@ -1267,8 +1267,8 @@ test_pyresid_ix_except_hierarchy | agree
 test_pyresid_ix_finally_modes | agree
 test_pyresid_ix_gen_send | gap | the translator does not support generator function
 test_pyresid_ix_havoc_narrow | agree
-test_pyresid_ix_td_raise_eafp | gap | import of module typing is not modelled yet
-test_pyresid_key_presence_precision | gap | import of module typing is not modelled yet
+test_pyresid_ix_td_raise_eafp | gap | the attribute typing.TypedDict is not modelled yet
+test_pyresid_key_presence_precision | gap | the attribute typing.TypedDict is not modelled yet
 test_pyresid_matrix | gap | the translator does not support generator function
 test_pyresid_mb_unbound_frozen | gap | import of module dataclasses is not modelled yet
 test_pyresid_mb_wrong_types | agree
@@ -1280,10 +1280,10 @@ test_pyresid_pyhard_pyhard_02_nested_property_dispatch | agree
 test_pyresid_pyhard_pyhard_03_double_dispatch | agree
 test_pyresid_pyhard_pyhard_04_exception_hierarchy | agree
 test_pyresid_pyhard_pyhard_05_boundness_and_loops | agree
-test_pyresid_pyhard_pyhard_06_typed_dict_shapes | gap | import of module typing is not modelled yet
+test_pyresid_pyhard_pyhard_06_typed_dict_shapes | gap | the attribute typing.TypedDict is not modelled yet
 test_pyresid_pyhard_pyhard_07_recursive_container_types | agree
 test_pyresid_pyhard_pyhard_08_pure_comprehension | agree
-test_pyresid_pyhard_pyhard_09_typed_dict_alias_presence | gap | import of module typing is not modelled yet
+test_pyresid_pyhard_pyhard_09_typed_dict_alias_presence | gap | the attribute typing.TypedDict is not modelled yet
 test_pyresid_pyhard_pyhard_10_builtin_binary_matrix | agree
 test_pyresid_pyhard_pyhard_11_membership_protocols | agree
 test_pyresid_pyhard_pyhard_12_inherited_mro_dispatch | agree
@@ -1303,7 +1303,7 @@ test_pyresid_pyhard_pyhard_25_handler_loop_control | agree
 test_pyresid_pyhard_pyhard_26_comprehension_failure_boundness | agree
 test_pyresid_pyhard_pyhard_27_numeric_tower | agree
 test_pyresid_pyhard_pyhard_28_versioned_predicates | agree
-test_pyresid_pyhard_pyhard_29_mixed_lookup_chain | gap | import of module typing is not modelled yet
+test_pyresid_pyhard_pyhard_29_mixed_lookup_chain | gap | the attribute typing.TypedDict is not modelled yet
 test_pyresid_reject_async | gap | the translator does not support async def
 test_pyresid_reject_banned_builtin | gap | built-in eval is not modelled yet
 test_pyresid_reject_class_body_stmt | agree
@@ -1341,7 +1341,7 @@ test_pyresid_reject_unsupported_ops | gap | the translator does not support comp
 test_pyresid_reject_walrus | agree
 test_pyresid_reject_with | gap | built-in open is not modelled yet
 test_pyresid_run_all | gap | the translator does not support module attribute __file__, generator expression
-test_pyresid_soundness_heap_dispatch | gap | import of module typing is not modelled yet
+test_pyresid_soundness_heap_dispatch | gap | the attribute typing.TypedDict is not modelled yet
 test_pyresid_stress | gap | the translator does not support generator function
 test_pyresid_t1_recency | agree
 test_pyresid_t2_dispatch | agree
@@ -1352,9 +1352,9 @@ test_pyresid_t6_handler | agree
 test_pyresid_t7_init | agree
 test_pyresid_t8_annotations | agree
 test_pyresid_t9_dunder | agree
-test_pyresid_td_demo | gap | import of module typing is not modelled yet
+test_pyresid_td_demo | gap | the attribute typing.TypedDict is not modelled yet
 test_pyresid_unary_operators | agree
-test_pyresid_v2_rule_inventory | gap | import of module typing is not modelled yet
+test_pyresid_v2_rule_inventory | gap | the attribute typing.TypedDict is not modelled yet
 test_pyresid_wb_inventory | agree
 test_pyresid_wb_shapes | gap | import of module dataclasses is not modelled yet
 test_reassign_different_type | agree
@@ -1397,7 +1397,7 @@ test_try_except_scoping | agree
 test_try_finally_return_rejection | agree
 test_tuple_create | agree
 test_tuple_swap | agree
-test_tuple_type | gap | import of module typing is not modelled yet
+test_tuple_type | agree
 test_tuple_unpack | agree
 test_type_alias | agree
 test_type_bool | agree
@@ -1422,7 +1422,7 @@ test_type_checker_differentials_mypy_a34_staticmethod_class_var_program | agree
 test_type_checker_differentials_mypy_a35_str_repr_side_effect_program | agree
 test_type_checker_differentials_mypy_a36_dict_subscript_narrowing_program | agree
 test_type_checker_differentials_mypy_a3_narrowing_indirect_program | agree
-test_type_checker_differentials_mypy_a4_overload_narrowing_program | gap | import of module typing is not modelled yet
+test_type_checker_differentials_mypy_a4_overload_narrowing_program | agree
 test_type_checker_differentials_mypy_a5_dunder_side_effects_program | agree
 test_type_checker_differentials_mypy_a6_match_narrowing_program | gap | the translator does not support match
 test_type_checker_differentials_mypy_a7_implicit_calls_program | agree
@@ -1435,7 +1435,7 @@ test_type_checker_differentials_mypy_b4_missing_super_init_program | agree
 test_type_checker_differentials_mypy_b5_multilevel_override_program | agree
 test_type_checker_differentials_mypy_b6_property_covariant_override_program | agree
 test_type_checker_differentials_mypy_c1_dict_in_narrowing_program | agree
-test_type_checker_differentials_mypy_c2_typeddict_del_program | gap | import of module typing is not modelled yet
+test_type_checker_differentials_mypy_c2_typeddict_del_program | gap | the attribute typing.TypedDict is not modelled yet
 test_type_checker_differentials_mypy_c3_property_side_effect_program | agree
 test_type_checker_differentials_mypy_c4_getattr_fallback_program | agree
 test_type_checker_differentials_mypy_c5_setattr_override_program | agree
@@ -1449,30 +1449,30 @@ test_type_checker_differentials_ty_002_unannotated_return_unknown_program | agre
 test_type_checker_differentials_ty_003_unknown_launders_through_return_annotation_program | agree
 test_type_checker_differentials_ty_004_unknown_launders_through_param_annotation_program | agree
 test_type_checker_differentials_ty_005_empty_dict_unknown_value_program | agree
-test_type_checker_differentials_ty_006_cast_unchecked_program | gap | import of module typing is not modelled yet
+test_type_checker_differentials_ty_006_cast_unchecked_program | agree
 test_type_checker_differentials_ty_007_unknown_launders_into_list_element_program | agree
 test_type_checker_differentials_ty_008_unknown_launders_into_dict_value_program | agree
 test_type_checker_differentials_ty_009_unknown_launders_through_for_iterable_program | agree
 test_type_checker_differentials_ty_010_slice_variable_length_tuple_program | agree
-test_type_checker_differentials_ty_011_narrowing_survives_mutating_call_program | gap | import of module typing is not modelled yet
+test_type_checker_differentials_ty_011_narrowing_survives_mutating_call_program | agree
 test_type_checker_differentials_ty_012_any_from_stdlib_stub_program | gap | import of module json is not modelled yet
 test_type_checker_differentials_ty_013_subscript_narrowing_survives_mutating_call_program | agree
-test_type_checker_differentials_ty_014_typeguard_predicate_trusted_unchecked_program | gap | import of module typing is not modelled yet
+test_type_checker_differentials_ty_014_typeguard_predicate_trusted_unchecked_program | agree
 test_type_checker_differentials_ty_015_unpack_variable_length_tuple_arity_program | agree
 test_type_checker_differentials_ty_015_unpack_variable_length_tuple_arity_repro_minimal | agree
-test_type_dict_annotation | gap | import of module typing is not modelled yet
+test_type_dict_annotation | agree
 test_type_int | agree
-test_type_list_annotation | gap | import of module typing is not modelled yet
-test_type_optional_none | gap | import of module typing is not modelled yet
-test_type_optional_value | gap | import of module typing is not modelled yet
+test_type_list_annotation | agree
+test_type_optional_none | agree
+test_type_optional_value | agree
 test_type_str | agree
 test_unary_plus | agree
 test_unary_plus_float | agree
-test_union_type | gap | import of module typing is not modelled yet
+test_union_type | agree
 test_union_type_310 | agree
 test_unsupported_config | gap | import of module test_helper is not modelled yet
 test_untyped_var | agree
-test_user_error_metadata | gap | import of module typing is not modelled yet
+test_user_error_metadata | agree
 test_var_reassign | agree
 test_var_shadow_func | agree
 test_var_swap | agree

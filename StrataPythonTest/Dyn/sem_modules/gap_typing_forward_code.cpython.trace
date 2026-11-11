@@ -1,0 +1,11 @@
+--- stdout 33
+ForwardRef('N') N None True
+True
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'
+fr = <ForwardRef object>

@@ -3247,16 +3247,16 @@ tuple_index_missing | agree
 tuple_index_normal | agree
 tuple_non_iterable | agree
 tuple_normal | agree
-validity_ann_any_admits_anything | gap | import of module typing is not modelled yet
+validity_ann_any_admits_anything | agree
 validity_ann_atom_int_holds | agree
 validity_ann_atom_str_holds | agree
 validity_ann_generic_dict_of_str_int | agree
 validity_ann_generic_list_of_int | agree
-validity_ann_literal_holds | gap | import of module typing is not modelled yet
-validity_ann_notRequired_absent_key_raises | gap | import of module typing is not modelled yet
-validity_ann_notRequired_present_key_reads | gap | import of module typing is not modelled yet
-validity_ann_readOnly_reads | gap | import of module typing is not modelled yet
-validity_ann_required_present | gap | import of module typing is not modelled yet
+validity_ann_literal_holds | gap | the attribute typing.Literal is not modelled yet
+validity_ann_notRequired_absent_key_raises | gap | the attribute typing.TypedDict is not modelled yet
+validity_ann_notRequired_present_key_reads | gap | the attribute typing.TypedDict is not modelled yet
+validity_ann_readOnly_reads | gap | the attribute typing.TypedDict is not modelled yet
+validity_ann_required_present | gap | the attribute typing.TypedDict is not modelled yet
 validity_ann_union_takes_int | agree
 validity_ann_union_takes_none | agree
 validity_bytes_capitalize_normal | gap | built-in method bytes.capitalize is not modelled yet

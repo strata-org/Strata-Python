@@ -1,0 +1,9 @@
+--- stdout 6
+False
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+typing = <module object>

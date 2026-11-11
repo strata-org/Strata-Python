@@ -1,0 +1,29 @@
+--- stdout 865
+typing.List[int] typing.Dict[str, typing.Any] typing.Set[int] typing.Tuple[int, str] typing.Tuple[()] typing.Tuple[int, ...]
+typing.Optional[int] typing.Union[int, str] <class 'int'> <class 'NoneType'> typing.Optional[int]
+True True typing.List[1]
+typing.Union[int, NoneType, str] typing.Optional[typing.List[int]] typing.Union[int, str, NoneType]
+True False
+<class 'list'> (<class 'int'>,) (<class 'int'>, <class 'NoneType'>)
+True
+TypeError: Too many arguments for typing.List; actual 2, expected 1
+TypeError: Too few arguments for typing.Dict; actual 1, expected 2
+TypeError: typing.Optional requires a single type. Got (1, 2).
+TypeError: Cannot take a Union of no types.
+TypeError: Type List cannot be instantiated; use list() instead
+TypeError: Subscripted generics cannot be used with class and instance checks
+TypeError: '_SpecialForm' object is not iterable
+
+--- outcome
+ok
+--- globals
+Any = <class 'Any'>
+Dict = <_SpecialGenericAlias object>
+List = <_SpecialGenericAlias object>
+Optional = <_SpecialForm object>
+Set = <_SpecialGenericAlias object>
+Tuple = <_TupleType object>
+Union = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'
+bad = <function object>

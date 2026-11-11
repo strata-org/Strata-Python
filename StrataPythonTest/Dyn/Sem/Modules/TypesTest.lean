@@ -28,7 +28,7 @@ open StrataPython.Dyn.Sem
 stops with a gap on it, and holds no other name. It may stop with a gap on another name, whose
 lookup would go on to a base where CPython behaves otherwise (`UnionType` has no `__new__`, and
 CPython refuses to make one). -/
-def namesAgree (spec : ClassSpec) (key : String) : Bool :=
+public def namesAgree (spec : ClassSpec) (key : String) : Bool :=
   match classNames.lookup key with
   | some names =>
     names.all spec.names.contains && spec.entries.all (names.contains ·.name)
@@ -37,8 +37,6 @@ def namesAgree (spec : ClassSpec) (key : String) : Bool :=
 #guard namesAgree gaSpec "types.GenericAlias"
 #guard namesAgree unionSpec "types.UnionType"
 #guard !(classNames.lookup "types.UnionType").get!.contains "__new__" && unionSpec.gapped.contains "__new__"
--- The models' objects reach no other class outside `builtins`.
-#guard classNames.map (·.1) == ["types.GenericAlias", "types.UnionType"]
 
 #guard gaHash (.exact 5) (.exact 3) == .exact 6
 -- -1 comes out of two hashes that are not -1, and the body stops with a gap on it.

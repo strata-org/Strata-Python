@@ -6,6 +6,8 @@
 module
 public import StrataPython.Dyn.Sem.Builtins.Dunders
 public import StrataPython.Dyn.Sem.Proto.Attrs
+public import StrataPython.Dyn.Sem.Builtins.Classes
+public import StrataPython.Dyn.Sem.Modules.Names
 
 set_option autoImplicit false
 
@@ -35,6 +37,15 @@ variable {m : Type → Type 1} {V : Type}
 def lookupAttr? [PyCalls m V] (v : V) (name : String) : m (Option V) :=
   tryCatch (some <$> getAttrRaw v name) fun x => do
     if ← isAttributeError x then pure none else throw x
+
+/-- The object `name` of the model's module `mod`, which a port reads from the module's globals;
+the module exists, since an object of it exists. -/
+def modelGlobal [PyReads m V] (mod name : String) : m V := do
+  let some md ← PyReads.moduleGet mod | PyPure.modelInvariant s!"an object of {mod} before {mod}"
+  let some (.module _ _ _ (.made attrs)) ← PyReads.objView md |
+    PyPure.modelInvariant s!"{mod} is not a module that a piece made"
+  let some (_, v) := attrs.find? (·.1 == name) | PyPure.modelInvariant s!"{mod} has no {name}"
+  pure v
 
 /-- The class that `type()` gives for a native function of the kind `k`. -/
 def nativeClass : NativeKind → Builtin
@@ -72,20 +83,29 @@ where
     | some o => tpNameOf o
     | none => pure nf.qualname
 
-/-- An entry of a model's class namespace: a native method, or a `str` value. -/
+/-- An entry of a model's class namespace. -/
 inductive Entry where
   /-- A method with the native body `key`, of the native kind `kind`. -/
   | native (name key : String) (kind : NativeKind)
+  /-- A Python function of the model (a native of kind `function`) that keeps a cache: it captures
+  a new empty list. -/
+  | cached (name key : String)
+  /-- A `staticmethod` of a Python function of the model. -/
+  | staticNative (name key : String)
   | str (name text : String)
+  | none (name : String)
+  /-- A tuple of `str`s, such as `__slots__`. -/
+  | strs (name : String) (items : Array String)
+  /-- The member descriptor of the class's own slot `name`. -/
+  | slot (name : String)
 
 /-- The name that an entry binds. -/
 def Entry.name : Entry → String
-  | .native n _ _ => n
-  | .str n _ => n
+  | .native n _ _ | .cached n _ | .staticNative n _ | .str n _ | .none n | .strs n _ | .slot n => n
 
 /-- How a model describes one of its classes: CPython's names, its flags, the native methods and
-values of its namespace, and the names of its `vars()` that the model doesn't hold, whose
-lookup stops with a gap. Its base is `object`. -/
+values of its namespace, the names of its own slots in the order of their members, and the names
+of its `vars()` that the model doesn't hold, whose lookup stops with a gap. -/
 structure ClassSpec where
   name : String
   qualname : String
@@ -97,6 +117,7 @@ structure ClassSpec where
   instanceDict : Bool := false
   asBase : BaseRule := .allowed
   cType : Bool := false
+  slots : Array String := #[]
   entries : Array Entry
   gapped : Array String := #[]
 
@@ -111,40 +132,72 @@ module itself. A rule that reads the module table by a name that a program gives
 `sys.modules` or `__import__`) must skip the names that start with `<`. -/
 def modelClassModule (mod qualname : String) : String := s!"<the model's class {mod}.{qualname}>"
 
-/-- The class that `spec` describes, made at its first use in a run, with its methods as native
-functions: later uses get the same object, which a module of the module table keeps. -/
-def modelClass [PyWrites m V] [PyNew m V] (spec : ClassSpec) : m V := do
+/-- The model's class of `spec` in this run, if it was made already. -/
+def modelClass? [PyReads m V] (spec : ClassSpec) : m (Option V) := do
+  let some mod ← PyReads.moduleGet (modelClassModule spec.module spec.qualname) | return none
+  match ← PyReads.objView mod with
+  | some (.module _ _ _ (.made attrs)) =>
+    if let some (_, c) := attrs.find? (·.1 == "class") then return some c
+    PyPure.modelInvariant s!"the module of the model's class {spec.qualname} has no class"
+  | _ => PyPure.modelInvariant s!"the module of the model's class {spec.qualname} is not a module"
+
+/-- The class that `spec` describes, with the metaclass `mcls` and the bases `bases`, made at its
+first use in a run, with its methods as native functions: later uses get the same object, which a
+module of the module table keeps. Its MRO is C3's over `bases`. -/
+def modelClassWith [PyWrites m V] [PyNew m V] (spec : ClassSpec) (mcls : V) (bases : Array V) :
+    m V := do
+  if let some c ← modelClass? spec then return c
   let key := modelClassModule spec.module spec.qualname
-  if let some mod ← PyReads.moduleGet key then
-    match ← PyReads.objView mod with
-    | some (.module _ _ _ (.made attrs)) =>
-      if let some (_, c) := attrs.find? (·.1 == "class") then return c
-      PyPure.modelInvariant s!"the module of the model's class {spec.qualname} has no class"
-    | _ => PyPure.modelInvariant s!"the module of the model's class {spec.qualname} is not a module"
   let ns ← PyPure.allocDict
-  let obj := PyPure.imm (m := m) (.builtin .object)
-  let c ← PyPure.allocObj (PyPure.imm (m := m) (.builtin .type)) <| .cls
-    { name := spec.name, qualname := spec.qualname, «module» := spec.module, bases := #[obj],
-      mroTail := #[obj], ns, solidBase := obj, instanceDict := spec.instanceDict,
-      immutable := spec.immutable, gapped := spec.gapped, writesGap := spec.writesGap,
-      instanceWritesGap := spec.instanceWritesGap, tpName := spec.tpName, asBase := spec.asBase,
-      cType := spec.cType }
-  -- The namespace is filled after the class exists, so that each method knows its owner.
+  let tail ← c3Tail bases
+  let solid ← if !spec.slots.isEmpty then pure (PyPure.imm (m := m) .none)
+    else match bases[0]? with
+      | some b => solidBaseOf b
+      | none => PyPure.modelInvariant s!"the model's class {spec.qualname} without a base"
+  let c ← PyPure.allocObj mcls <| .cls
+    { name := spec.name, qualname := spec.qualname, «module» := spec.module, bases,
+      mroTail := tail, ns, solidBase := solid, instanceDict := spec.instanceDict,
+      slots := spec.slots, immutable := spec.immutable, gapped := spec.gapped,
+      writesGap := spec.writesGap, instanceWritesGap := spec.instanceWritesGap,
+      tpName := spec.tpName, asBase := spec.asBase, cType := spec.cType }
+  -- The namespace is filled after the class exists, so that each method knows its owner. The
+  -- members of the class's own slots follow the slots of the classes after it in the MRO.
+  let offset ← slotCountOf tail.toList
+  let fnData (name k : String) (captured : Array V) : NativeData V :=
+    { key := k, kind := .function, captured, name, qualname := spec.qualname ++ "." ++ name,
+      «module» := spec.module }
   for e in spec.entries do
-    match e with
-    | .native name k kind =>
-      let nd : NativeData V :=
-        { key := k, kind := kind, name := name, qualname := spec.qualname ++ "." ++ name,
-          «module» := spec.module, owner := some c }
-      let f ← allocNative nd
-      PyNew.dictSetNew ns (strKey (m := m) name) f none fun _ => pure false
-    | .str name text =>
-      PyNew.dictSetNew ns (strKey (m := m) name) (PyPure.imm (m := m) (.str (.ofString text))) none
-        fun _ => pure false
+    let v ← match e with
+      | .native name k kind =>
+        let nd : NativeData V :=
+          { key := k, kind := kind, name := name, qualname := spec.qualname ++ "." ++ name,
+            «module» := spec.module, owner := some c }
+        allocNative nd
+      | .cached name k => do
+        -- `functools.wraps` gives CPython's wrapper a `__dict__`; its names stop with a gap.
+        let gapped := ((functionNames.lookup k).getD []).toArray
+        allocNative { fnData name k #[← PyPure.allocList #[]] with gapped }
+      | .staticNative name k => do
+        let f ← allocNative (fnData name k #[])
+        PyPure.allocObj (PyPure.imm (m := m) (.builtin .staticmethod)) (.staticmethod (some f))
+      | .str _ text => pure (PyPure.imm (m := m) (.str (.ofString text)))
+      | .none _ => pure (PyPure.imm (m := m) .none)
+      | .strs _ items =>
+        pure (PyPure.imm (m := m) (.tuple (items.map fun t => PyPure.imm (m := m) (.str (.ofString t)))))
+      | .slot name =>
+        match spec.slots.idxOf? name with
+        | some i =>
+          PyPure.allocObj (PyPure.imm (m := m) (.builtin .member_descriptor)) (.member c name (offset + i))
+        | none => PyPure.modelInvariant s!"the model's class {spec.qualname} has no slot {name}"
+    PyNew.dictSetNew ns (strKey (m := m) e.name) v none fun _ => pure false
   let mod ← PyPure.allocObj (PyPure.imm (m := m) (.builtin .module))
     (.module key #[] true #[("class", c)])
   PyReads.moduleAdd key mod
   pure c
+
+/-- The class that `spec` describes, a class of `type` with the base `object` (`modelClassWith`). -/
+def modelClass [PyWrites m V] [PyNew m V] (spec : ClassSpec) : m V :=
+  modelClassWith spec (PyPure.imm (m := m) (.builtin .type)) #[PyPure.imm (m := m) (.builtin .object)]
 
 end
 

@@ -1,0 +1,11 @@
+--- stdout 28
+typing.Optional[typing.Any]
+
+--- outcome
+ok
+--- globals
+Any = <class 'Any'>
+Optional = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'
+d = {<_UnionGenericAlias object>: 1}

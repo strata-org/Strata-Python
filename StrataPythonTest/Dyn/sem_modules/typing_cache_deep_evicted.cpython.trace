@@ -1,0 +1,14 @@
+--- stdout 10
+True
+True
+
+--- outcome
+ok
+--- globals
+List = <_SpecialGenericAlias object>
+_ = 699
+__doc__ = None
+__name__ = '__main__'
+deep = <function object>
+i = 127
+t = <_GenericAlias object>

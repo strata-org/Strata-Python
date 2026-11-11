@@ -1,0 +1,14 @@
+--- stdout 7
+True A
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+List = <_SpecialGenericAlias object>
+M = <class 'M'>
+__doc__ = None
+__name__ = '__main__'
+x = <_GenericAlias object>
+y = <_GenericAlias object>

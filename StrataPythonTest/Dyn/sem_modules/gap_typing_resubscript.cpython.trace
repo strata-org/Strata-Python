@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: typing.Dict[str, int] is not a generic class
+--- globals
+Dict = <_SpecialGenericAlias object>
+__doc__ = None
+__name__ = '__main__'

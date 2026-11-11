@@ -4,7 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataPython.Dyn.Sem.Modules.Common
+public import StrataPython.Dyn.Sem.Modules.TypingSpecs
 public import StrataPython.Dyn.Sem.Proto.Repr
 
 set_option autoImplicit false
@@ -274,34 +274,103 @@ def aliasArgs [PyReads m V] (self : V) : m V := do
 `GenericAlias`; none of them has a `__typing_subst__`. -/
 def aliasOrigins : List Builtin := [.list, .dict, .tuple, .set, .frozenset, .type]
 
-/-- Whether `x` is a class whose metaclass is exactly `type`, so that its `==` and `hash` are
-`type`'s, by identity. -/
+/-- Whether `x` is a class whose metaclass is exactly `type` or `typing`'s `_AnyMeta`, so that its
+`==` and `hash` are `type`'s, by identity, and whose `__module__` is an exact `str`, which the
+`repr` of a `typing` alias compares with `'builtins'`. -/
 def plainClass [PyReads m V] (x : V) : m Bool := do
   if !(← isType x) then return false
-  return (← PyPure.identical (← PyReads.classOf x) (PyPure.imm (m := m) (.builtin .type))) == .yes
+  let mt ← PyReads.classOf x
+  if (← PyPure.identical mt (PyPure.imm (m := m) (.builtin .type))) != .yes then
+    let some am ← modelClass? anyMetaSpec | return false
+    if (← PyPure.identical mt am) != .yes then return false
+  match ← classData? x with
+  | some cd => match ← dictFindStr cd.ns "__module__" with
+    | some md => return ((← PyPure.immView md) matches some (.str _))
+    | none => return false
+  | none => return true
 
-/-- Whether every item of `xs` is a known value of this file's kind: `None`, `Ellipsis`, a `bool`,
-`int` or `str`, a tuple of known values, a class whose metaclass is exactly `type`, a
-`GenericAlias` whose origin is one of `aliasOrigins` and whose arguments are known, or a
-`UnionType` whose arguments are known; `fuel` bounds the nesting. A known value's `==` and `hash`
-run no user code, and reading its `__typing_subst__` and `__parameters__` runs none either, and
-finds no type parameter. -/
-def knownArgs [PyReads m V] : Nat → Array V → m Bool
+/-- The kinds of the objects of the model of `typing`. -/
+inductive TypingKind where
+  /-- A special form, such as `Optional`. -/
+  | form
+  /-- `List`, `Dict`, `Set` or `Tuple`. -/
+  | specialAlias
+  /-- A subscripted alias, such as `List[int]`; `union` for `Union[int, str]` and `Optional[int]`. -/
+  | alias (union : Bool)
+  | forwardRef
+  deriving DecidableEq
+
+/-- The kind of `v` if it is an object of the model of `typing`. -/
+def typingKind? [PyReads m V] (v : V) : m (Option TypingKind) := do
+  if (← PyPure.immView v).isSome then return none
+  let t ← PyReads.classOf v
+  let is (spec : ClassSpec) : m Bool := do
+    match ← modelClass? spec with
+    | some c => return (← PyPure.identical t c) == .yes
+    | none => return false
+  if ← is specialFormSpec then return some .form
+  if (← is specialGenericAliasSpec) || (← is tupleTypeSpec) then return some .specialAlias
+  if ← is genericAliasSpec then return some (.alias false)
+  if ← is unionGenericAliasSpec then return some (.alias true)
+  if ← is forwardRefSpec then return some .forwardRef
+  return none
+
+/-- The entry `name` of the instance dict of `v`, an alias of the model of `typing`, which the
+alias's `__init__` set and which no write can change. -/
+def aliasField [PyReads m V] (v : V) (name : String) : m V := do
+  let some d ← PyReads.objDict v | PyPure.modelInvariant "a typing alias without its dict"
+  let some x ← dictFindStr d name | PyPure.modelInvariant s!"a typing alias without its {name}"
+  pure x
+
+/-- The C levels that CPython's hash of a nested `typing` alias costs per Python frame of
+`knownDepth`: the slot call into its `__hash__`, and the hash of its `(origin, args)` tuple and of
+the item (measured with the Python recursion limit raised). -/
+def aliasHashLevels : Nat := 3
+
+/-- Whether every item of `xs` is a known value, and if so the number of Python frames that
+CPython's `hash` of the deepest of them spends (one per `typing` alias and `ForwardRef` on the
+way, whose `__hash__` is Python code): `None`, `Ellipsis`, a `bool`, `int` or `str`, a tuple of
+known values, a class whose metaclass is `type` or `_AnyMeta` (`plainClass`), a `GenericAlias`
+whose origin is one of `aliasOrigins` and whose arguments are known, a `UnionType` whose arguments
+are known, and an object of the model of `typing` whose origin and arguments are known; `fuel`
+bounds the nesting. A known value's `==` and `hash` run no user code, and reading its
+`__typing_subst__` and `__parameters__` runs none either, and finds no type parameter. A new kind
+of known value needs its kind in `KINDS` of `gen_modules.py`, whose program checks the typing
+cache's hits and misses against CPython. -/
+def knownDepth [PyReads m V] : Nat → Array V → m (Option Nat)
   | 0, _ => PyPure.gap "arguments nested deeper than the model of types.GenericAlias follows"
-  | n + 1, xs => xs.allM fun x => do
-    match ← PyPure.immView x with
-    | some .none | some .ellipsis | some (.bool _) | some (.int _) | some (.str _) => pure true
-    | some (.tuple ys) => knownArgs n ys
-    | some _ => plainClass x
-    | none =>
-      if ← isType x then return ← plainClass x
-      if let some (o, a) ← gaParts? x then
-        let builtinOrigin := match ← PyPure.immView o with
-          | some (.builtin b) => aliasOrigins.contains b
-          | _ => false
-        return builtinOrigin && (← knownArgs n (← tupleItems a))
-      if let some a ← unionArgs? x then return ← knownArgs n (← tupleItems a)
-      return false
+  | n + 1, xs => do
+    let mut depth := 0
+    for x in xs do
+      let d ← match ← PyPure.immView x with
+        | some .none | some .ellipsis | some (.bool _) | some (.int _) | some (.str _) => pure (some 0)
+        | some (.tuple ys) => knownDepth n ys
+        | some _ => pure (if ← plainClass x then some 0 else none)
+        | none => do
+          if ← isType x then return (if ← plainClass x then some 0 else none)
+          if let some (o, a) ← gaParts? x then
+            let builtinOrigin := match ← PyPure.immView o with
+              | some (.builtin b) => aliasOrigins.contains b
+              | _ => false
+            if !builtinOrigin then return none
+            knownDepth n (← tupleItems a)
+          else if let some a ← unionArgs? x then knownDepth n (← tupleItems a)
+          else match ← typingKind? x with
+            | some .form | some .specialAlias => pure (some 0)
+            | some .forwardRef => pure (some 1)
+            | some (.alias _) =>
+              let o ← aliasField x "__origin__"
+              let a ← aliasField x "__args__"
+              pure ((· + 1) <$> (← knownDepth n ((← tupleItems a).push o)))
+            | none => pure none
+      match d with
+      | some k => depth := max depth k
+      | none => return none
+    return some depth
+
+/-- Whether every item of `xs` is a known value (`knownDepth`). -/
+def knownArgs [PyReads m V] (fuel : Nat) (xs : Array V) : m Bool :=
+  return (← knownDepth fuel xs).isSome
 
 /-- **`__parameters__`** of a `GenericAlias` or a `UnionType`: `()` when its arguments are known
 (no known value holds a type variable); otherwise a gap, since CPython's `_Py_make_parameters`
@@ -386,13 +455,16 @@ def unionCmpBody [PyWrites m V] (name : String) (op : Arith.CmpOp) (self args kw
   if op != .eq && op != .ne then return notImpl (m := m)
   let xs ← tupleItems a
   let ys ← tupleItems b
-  if !(← knownArgs compareDepth xs) || !(← knownArgs compareDepth ys) then
+  -- `set(args)` hashes each argument, which costs a Python frame per nested `typing` alias.
+  let some depth ← knownDepth compareDepth (xs ++ ys) |
     PyPure.gap "comparing unions with arguments that the model doesn't know"
   -- Two sets of known values are equal when each holds the other's members; a member's
   -- comparison is a set's, two C levels down (the set, then the member).
   let xs ← distinctArgs xs
   let ys ← distinctArgs ys
   let inOther (zs : Array V) (x : V) : m Bool := zs.anyM fun z => PyReads.withDepth 2 (unionSame z x)
+  -- The hashes come first and return before the comparisons.
+  PyReads.withPyDepth depth (PyReads.withDepth (aliasHashLevels * depth) (pure ()))
   let eq ← if xs.size != ys.size then pure false else xs.allM (inOther ys)
   return boolV (if op == .eq then eq else !eq)
 

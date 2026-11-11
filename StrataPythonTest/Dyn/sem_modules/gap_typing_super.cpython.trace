@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: len() takes exactly one argument (0 given)
+--- globals
+List = <_SpecialGenericAlias object>
+__doc__ = None
+__name__ = '__main__'
+builtins = <module object>
