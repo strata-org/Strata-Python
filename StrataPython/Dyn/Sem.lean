@@ -71,6 +71,7 @@ public import StrataPython.Dyn.Sem.Library.Functions
 public import StrataPython.Dyn.Sem.Library.Constructors
 public import StrataPython.Dyn.Sem.Library.Collections
 public import StrataPython.Dyn.Sem.Library.Machines
+public import StrataPython.Dyn.Sem.Contracts.LocationsProps
 
 /-!
 # The Python semantics

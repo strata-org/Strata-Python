@@ -2720,6 +2720,10 @@ is recorded as caught.
   `__warningregistry__`, which a program can read, so where CPython 3.12 warns, the semantics
   stops with a gap: `~` on a `bool`, an `__index__` that returns a `bool` or an instance of a
   subclass of `int`, and the truth of `NotImplemented` (each a `DeprecationWarning`).
+- Contracts: the operations that make the locations of a frame (`py.attrLoc`, `py.itemLoc`,
+  `py.objLoc`, `py.reachLoc`, `py.instanceState` and `base.cellLoc`) stop with a gap, since
+  frames have no meaning at run time, and so does `base.old`, since a run doesn't keep the state
+  at the call.
 
 ### 13.4 Known differences
 
