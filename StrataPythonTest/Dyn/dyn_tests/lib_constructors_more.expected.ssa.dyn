@@ -1,0 +1,1956 @@
+module lib_constructors_more {
+  func @|lib_constructors_more.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("lib_constructors_more")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|lib_constructors_more.D.<body>|, "<body>", "lib_constructors_more")
+      %str.1 : py.Value = py.strLit("D")
+      %dict.0 : py.Value = py.loadGlobal("lib_constructors_more", "dict") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1, %dict.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %D.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %D.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "D")
+      %set.2 : base.Unit = base.refSet[py.Value](%D.cell.0, %D.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|lib_constructors_more.F.<body>|, "<body>", "lib_constructors_more")
+      %str.2 : py.Value = py.strLit("F")
+      %float.0 : py.Value = py.loadGlobal("lib_constructors_more", "float") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2, %float.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %F.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %F.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "F")
+      %set.3 : base.Unit = base.refSet[py.Value](%F.cell.0, %F.0)
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@|lib_constructors_more.T.<body>|, "<body>", "lib_constructors_more")
+      %str.3 : py.Value = py.strLit("T")
+      %tuple.2 : py.Value = py.loadGlobal("lib_constructors_more", "tuple") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%clo.2, %str.3, %tuple.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %T.0 : py.Value = py.call(%__build_class__.2, %tuple.3, %kwargs.2) ^propagate.0()
+      %T.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "T")
+      %set.4 : base.Unit = base.refSet[py.Value](%T.cell.0, %T.0)
+      %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.3 : py.Value = py.mkClosure[[]](@|lib_constructors_more.FS.<body>|, "<body>", "lib_constructors_more")
+      %str.4 : py.Value = py.strLit("FS")
+      %frozenset.0 : py.Value = py.loadGlobal("lib_constructors_more", "frozenset") ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%clo.3, %str.4, %frozenset.0)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %FS.0 : py.Value = py.call(%__build_class__.3, %tuple.4, %kwargs.3) ^propagate.0()
+      %FS.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "FS")
+      %set.5 : base.Unit = base.refSet[py.Value](%FS.cell.0, %FS.0)
+      %__build_class__.4 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %__class__.0 : py.Value = py.undef("__class__")
+      %__class__.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%__class__.0)
+      %clo.4 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|lib_constructors_more.L.<body>|, "<body>", "lib_constructors_more", %__class__.cell.0)
+      %str.5 : py.Value = py.strLit("L")
+      %list.0 : py.Value = py.loadGlobal("lib_constructors_more", "list") ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple(%clo.4, %str.5, %list.0)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %L.0 : py.Value = py.call(%__build_class__.4, %tuple.5, %kwargs.4) ^propagate.0()
+      %set.6 : base.Unit = base.refSet[py.Value](%__class__.cell.0, %L.0)
+      %L.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "L")
+      %set.7 : base.Unit = base.refSet[py.Value](%L.cell.0, %L.0)
+      %__build_class__.5 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.5 : py.Value = py.mkClosure[[]](@|lib_constructors_more.S.<body>|, "<body>", "lib_constructors_more")
+      %str.6 : py.Value = py.strLit("S")
+      %set.8 : py.Value = py.loadGlobal("lib_constructors_more", "set") ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple(%clo.5, %str.6, %set.8)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %S.0 : py.Value = py.call(%__build_class__.5, %tuple.6, %kwargs.5) ^propagate.0()
+      %S.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "S")
+      %set.9 : base.Unit = base.refSet[py.Value](%S.cell.0, %S.0)
+      %__build_class__.6 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.6 : py.Value = py.mkClosure[[]](@|lib_constructors_more.TT.<body>|, "<body>", "lib_constructors_more")
+      %str.7 : py.Value = py.strLit("TT")
+      %tuple.7 : py.Value = py.loadGlobal("lib_constructors_more", "tuple") ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple(%clo.6, %str.7, %tuple.7)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %TT.0 : py.Value = py.call(%__build_class__.6, %tuple.8, %kwargs.6) ^propagate.0()
+      %TT.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "TT")
+      %set.10 : base.Unit = base.refSet[py.Value](%TT.cell.0, %TT.0)
+      %__build_class__.7 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.7 : py.Value = py.mkClosure[[]](@|lib_constructors_more.Grow.<body>|, "<body>", "lib_constructors_more")
+      %str.8 : py.Value = py.strLit("Grow")
+      %tuple.9 : py.Value = py.mkTuple(%clo.7, %str.8)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %Grow.0 : py.Value = py.call(%__build_class__.7, %tuple.9, %kwargs.7) ^propagate.0()
+      %Grow.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "Grow")
+      %set.11 : base.Unit = base.refSet[py.Value](%Grow.cell.0, %Grow.0)
+      %__build_class__.8 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.8 : py.Value = py.mkClosure[[]](@|lib_constructors_more.P.<body>|, "<body>", "lib_constructors_more")
+      %str.9 : py.Value = py.strLit("P")
+      %tuple.10 : py.Value = py.mkTuple(%clo.8, %str.9)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %P.0 : py.Value = py.call(%__build_class__.8, %tuple.10, %kwargs.8) ^propagate.0()
+      %P.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "P")
+      %set.12 : base.Unit = base.refSet[py.Value](%P.cell.0, %P.0)
+      %__build_class__.9 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.9 : py.Value = py.mkClosure[[]](@|lib_constructors_more.PI.<body>|, "<body>", "lib_constructors_more")
+      %str.10 : py.Value = py.strLit("PI")
+      %tuple.11 : py.Value = py.mkTuple(%clo.9, %str.10)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %PI.0 : py.Value = py.call(%__build_class__.9, %tuple.11, %kwargs.9) ^propagate.0()
+      %PI.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "PI")
+      %set.13 : base.Unit = base.refSet[py.Value](%PI.cell.0, %PI.0)
+      %__build_class__.10 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.10 : py.Value = py.mkClosure[[]](@|lib_constructors_more.NegHint.<body>|, "<body>", "lib_constructors_more")
+      %str.11 : py.Value = py.strLit("NegHint")
+      %tuple.12 : py.Value = py.mkTuple(%clo.10, %str.11)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %NegHint.0 : py.Value = py.call(%__build_class__.10, %tuple.12, %kwargs.10) ^propagate.0()
+      %NegHint.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "NegHint")
+      %set.14 : base.Unit = base.refSet[py.Value](%NegHint.cell.0, %NegHint.0)
+      %__build_class__.11 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.11 : py.Value = py.mkClosure[[]](@|lib_constructors_more.BS.<body>|, "<body>", "lib_constructors_more")
+      %str.12 : py.Value = py.strLit("BS")
+      %bytes.0 : py.Value = py.loadGlobal("lib_constructors_more", "bytes") ^propagate.0()
+      %tuple.13 : py.Value = py.mkTuple(%clo.11, %str.12, %bytes.0)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %BS.0 : py.Value = py.call(%__build_class__.11, %tuple.13, %kwargs.11) ^propagate.0()
+      %BS.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "BS")
+      %set.15 : base.Unit = base.refSet[py.Value](%BS.cell.0, %BS.0)
+      %__build_class__.12 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.12 : py.Value = py.mkClosure[[]](@|lib_constructors_more.X.<body>|, "<body>", "lib_constructors_more")
+      %str.13 : py.Value = py.strLit("X")
+      %tuple.14 : py.Value = py.mkTuple(%clo.12, %str.13)
+      %kwargs.12 : py.Value = py.mkKwargs
+      %X.0 : py.Value = py.call(%__build_class__.12, %tuple.14, %kwargs.12) ^propagate.0()
+      %X.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "X")
+      %set.16 : base.Unit = base.refSet[py.Value](%X.cell.0, %X.0)
+      %clo.13 : py.Value = py.mkClosure[[]](@lib_constructors_more.errors, "errors", "lib_constructors_more")
+      %errors.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "errors")
+      %set.17 : base.Unit = base.refSet[py.Value](%errors.cell.0, %clo.13)
+      %dict.1 : py.Value = py.loadGlobal("lib_constructors_more", "dict") ^propagate.0()
+      %D.1 : py.Value = py.loadGlobal("lib_constructors_more", "D") ^propagate.0()
+      %tuple.15 : py.Value = py.mkTuple
+      %str.14 : py.Value = py.strLit("a")
+      %int.0 : py.Value = py.intLit(1)
+      %kwargs.13 : py.Value = py.mkKwargs(%str.14, %int.0)
+      %call.0 : py.Value = py.call(%D.1, %tuple.15, %kwargs.13) ^propagate.0()
+      %tuple.16 : py.Value = py.mkTuple(%call.0)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%dict.1, %tuple.16, %kwargs.14) ^propagate.0()
+      %d.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "d")
+      %set.18 : base.Unit = base.refSet[py.Value](%d.cell.0, %call.1)
+      %print.0 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("lib_constructors_more", "len") ^propagate.0()
+      %d.0 : py.Value = py.loadGlobal("lib_constructors_more", "d") ^propagate.0()
+      %tuple.17 : py.Value = py.mkTuple(%d.0)
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%len.0, %tuple.17, %kwargs.15) ^propagate.0()
+      %d.1 : py.Value = py.loadGlobal("lib_constructors_more", "d") ^propagate.0()
+      %str.15 : py.Value = py.strLit("a")
+      %item.0 : py.Value = py.getItem(%d.1, %str.15) ^propagate.0()
+      %tuple.18 : py.Value = py.mkTuple(%call.2, %item.0)
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.0, %tuple.18, %kwargs.16) ^propagate.0()
+      %F.1 : py.Value = py.loadGlobal("lib_constructors_more", "F") ^propagate.0()
+      %float.1 : py.Value = py.floatLit(1.5)
+      %tuple.19 : py.Value = py.mkTuple(%float.1)
+      %str.16 : py.Value = py.strLit("tag")
+      %int.1 : py.Value = py.intLit(2)
+      %kwargs.17 : py.Value = py.mkKwargs(%str.16, %int.1)
+      %call.4 : py.Value = py.call(%F.1, %tuple.19, %kwargs.17) ^propagate.0()
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "f")
+      %set.19 : base.Unit = base.refSet[py.Value](%f.cell.0, %call.4)
+      %print.1 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %f.0 : py.Value = py.loadGlobal("lib_constructors_more", "f") ^propagate.0()
+      %f.1 : py.Value = py.loadGlobal("lib_constructors_more", "f") ^propagate.0()
+      %tag.0 : py.Value = py.attr(%f.1, "tag") ^propagate.0()
+      %tuple.20 : py.Value = py.mkTuple(%f.0, %tag.0)
+      %kwargs.18 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%print.1, %tuple.20, %kwargs.18) ^propagate.0()
+      %T.1 : py.Value = py.loadGlobal("lib_constructors_more", "T") ^propagate.0()
+      %int.2 : py.Value = py.intLit(1)
+      %list.1 : py.Value = py.mkList(%int.2)
+      %tuple.21 : py.Value = py.mkTuple(%list.1)
+      %str.17 : py.Value = py.strLit("tag")
+      %int.3 : py.Value = py.intLit(3)
+      %kwargs.19 : py.Value = py.mkKwargs(%str.17, %int.3)
+      %call.6 : py.Value = py.call(%T.1, %tuple.21, %kwargs.19) ^propagate.0()
+      %t.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "t")
+      %set.20 : base.Unit = base.refSet[py.Value](%t.cell.0, %call.6)
+      %print.2 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %len.1 : py.Value = py.loadGlobal("lib_constructors_more", "len") ^propagate.0()
+      %t.0 : py.Value = py.loadGlobal("lib_constructors_more", "t") ^propagate.0()
+      %tuple.22 : py.Value = py.mkTuple(%t.0)
+      %kwargs.20 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%len.1, %tuple.22, %kwargs.20) ^propagate.0()
+      %t.1 : py.Value = py.loadGlobal("lib_constructors_more", "t") ^propagate.0()
+      %tag.1 : py.Value = py.attr(%t.1, "tag") ^propagate.0()
+      %tuple.23 : py.Value = py.mkTuple(%call.7, %tag.1)
+      %kwargs.21 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%print.2, %tuple.23, %kwargs.21) ^propagate.0()
+      %FS.1 : py.Value = py.loadGlobal("lib_constructors_more", "FS") ^propagate.0()
+      %int.4 : py.Value = py.intLit(1)
+      %list.2 : py.Value = py.mkList(%int.4)
+      %tuple.24 : py.Value = py.mkTuple(%list.2)
+      %str.18 : py.Value = py.strLit("tag")
+      %int.5 : py.Value = py.intLit(4)
+      %kwargs.22 : py.Value = py.mkKwargs(%str.18, %int.5)
+      %call.9 : py.Value = py.call(%FS.1, %tuple.24, %kwargs.22) ^propagate.0()
+      %fs.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "fs")
+      %set.21 : base.Unit = base.refSet[py.Value](%fs.cell.0, %call.9)
+      %print.3 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %len.2 : py.Value = py.loadGlobal("lib_constructors_more", "len") ^propagate.0()
+      %fs.0 : py.Value = py.loadGlobal("lib_constructors_more", "fs") ^propagate.0()
+      %tuple.25 : py.Value = py.mkTuple(%fs.0)
+      %kwargs.23 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%len.2, %tuple.25, %kwargs.23) ^propagate.0()
+      %fs.1 : py.Value = py.loadGlobal("lib_constructors_more", "fs") ^propagate.0()
+      %tag.2 : py.Value = py.attr(%fs.1, "tag") ^propagate.0()
+      %tuple.26 : py.Value = py.mkTuple(%call.10, %tag.2)
+      %kwargs.24 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%print.3, %tuple.26, %kwargs.24) ^propagate.0()
+      %print.4 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %len.3 : py.Value = py.loadGlobal("lib_constructors_more", "len") ^propagate.0()
+      %L.1 : py.Value = py.loadGlobal("lib_constructors_more", "L") ^propagate.0()
+      %int.6 : py.Value = py.intLit(1)
+      %int.7 : py.Value = py.intLit(2)
+      %list.3 : py.Value = py.mkList(%int.6, %int.7)
+      %tuple.27 : py.Value = py.mkTuple(%list.3)
+      %str.19 : py.Value = py.strLit("tag")
+      %int.8 : py.Value = py.intLit(5)
+      %kwargs.25 : py.Value = py.mkKwargs(%str.19, %int.8)
+      %call.12 : py.Value = py.call(%L.1, %tuple.27, %kwargs.25) ^propagate.0()
+      %tuple.28 : py.Value = py.mkTuple(%call.12)
+      %kwargs.26 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%len.3, %tuple.28, %kwargs.26) ^propagate.0()
+      %tuple.29 : py.Value = py.mkTuple(%call.13)
+      %kwargs.27 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%print.4, %tuple.29, %kwargs.27) ^propagate.0()
+      %errors.0 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %S.1 : py.Value = py.loadGlobal("lib_constructors_more", "S") ^propagate.0()
+      %int.9 : py.Value = py.intLit(1)
+      %list.4 : py.Value = py.mkList(%int.9)
+      %int.10 : py.Value = py.intLit(2)
+      %list.5 : py.Value = py.mkList(%int.10)
+      %tuple.30 : py.Value = py.mkTuple(%S.1, %list.4, %list.5)
+      %kwargs.28 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%errors.0, %tuple.30, %kwargs.28) ^propagate.0()
+      %errors.1 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %FS.2 : py.Value = py.loadGlobal("lib_constructors_more", "FS") ^propagate.0()
+      %int.11 : py.Value = py.intLit(1)
+      %list.6 : py.Value = py.mkList(%int.11)
+      %int.12 : py.Value = py.intLit(2)
+      %list.7 : py.Value = py.mkList(%int.12)
+      %int.13 : py.Value = py.intLit(3)
+      %list.8 : py.Value = py.mkList(%int.13)
+      %tuple.31 : py.Value = py.mkTuple(%FS.2, %list.6, %list.7, %list.8)
+      %kwargs.29 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%errors.1, %tuple.31, %kwargs.29) ^propagate.0()
+      %errors.2 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %frozenset.1 : py.Value = py.loadGlobal("lib_constructors_more", "frozenset") ^propagate.0()
+      %int.14 : py.Value = py.intLit(1)
+      %list.9 : py.Value = py.mkList(%int.14)
+      %tuple.32 : py.Value = py.mkTuple(%frozenset.1, %list.9)
+      %str.20 : py.Value = py.strLit("x")
+      %int.15 : py.Value = py.intLit(1)
+      %kwargs.30 : py.Value = py.mkKwargs(%str.20, %int.15)
+      %call.17 : py.Value = py.call(%errors.2, %tuple.32, %kwargs.30) ^propagate.0()
+      %print.5 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %issubclass.0 : py.Value = py.loadGlobal("lib_constructors_more", "issubclass") ^propagate.0()
+      %int.16 : py.Value = py.loadGlobal("lib_constructors_more", "int") ^propagate.0()
+      %TT.1 : py.Value = py.loadGlobal("lib_constructors_more", "TT") ^propagate.0()
+      %int.17 : py.Value = py.loadGlobal("lib_constructors_more", "int") ^propagate.0()
+      %tuple.33 : py.Value = py.mkTuple(%int.17)
+      %tuple.34 : py.Value = py.mkTuple(%tuple.33)
+      %kwargs.31 : py.Value = py.mkKwargs
+      %call.18 : py.Value = py.call(%TT.1, %tuple.34, %kwargs.31) ^propagate.0()
+      %tuple.35 : py.Value = py.mkTuple(%int.16, %call.18)
+      %kwargs.32 : py.Value = py.mkKwargs
+      %call.19 : py.Value = py.call(%issubclass.0, %tuple.35, %kwargs.32) ^propagate.0()
+      %issubclass.1 : py.Value = py.loadGlobal("lib_constructors_more", "issubclass") ^propagate.0()
+      %bool.0 : py.Value = py.loadGlobal("lib_constructors_more", "bool") ^propagate.0()
+      %TT.2 : py.Value = py.loadGlobal("lib_constructors_more", "TT") ^propagate.0()
+      %str.21 : py.Value = py.loadGlobal("lib_constructors_more", "str") ^propagate.0()
+      %int.18 : py.Value = py.loadGlobal("lib_constructors_more", "int") ^propagate.0()
+      %tuple.36 : py.Value = py.mkTuple(%str.21, %int.18)
+      %tuple.37 : py.Value = py.mkTuple(%tuple.36)
+      %kwargs.33 : py.Value = py.mkKwargs
+      %call.20 : py.Value = py.call(%TT.2, %tuple.37, %kwargs.33) ^propagate.0()
+      %tuple.38 : py.Value = py.mkTuple(%bool.0, %call.20)
+      %kwargs.34 : py.Value = py.mkKwargs
+      %call.21 : py.Value = py.call(%issubclass.1, %tuple.38, %kwargs.34) ^propagate.0()
+      %tuple.39 : py.Value = py.mkTuple(%call.19, %call.21)
+      %kwargs.35 : py.Value = py.mkKwargs
+      %call.22 : py.Value = py.call(%print.5, %tuple.39, %kwargs.35) ^propagate.0()
+      %print.6 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %callable.0 : py.Value = py.loadGlobal("lib_constructors_more", "callable") ^propagate.0()
+      %int.19 : py.Value = py.loadGlobal("lib_constructors_more", "int") ^propagate.0()
+      %real.0 : py.Value = py.attr(%int.19, "real") ^propagate.0()
+      %tuple.40 : py.Value = py.mkTuple(%real.0)
+      %kwargs.36 : py.Value = py.mkKwargs
+      %call.23 : py.Value = py.call(%callable.0, %tuple.40, %kwargs.36) ^propagate.0()
+      %callable.1 : py.Value = py.loadGlobal("lib_constructors_more", "callable") ^propagate.0()
+      %slice.0 : py.Value = py.loadGlobal("lib_constructors_more", "slice") ^propagate.0()
+      %start.0 : py.Value = py.attr(%slice.0, "start") ^propagate.0()
+      %tuple.41 : py.Value = py.mkTuple(%start.0)
+      %kwargs.37 : py.Value = py.mkKwargs
+      %call.24 : py.Value = py.call(%callable.1, %tuple.41, %kwargs.37) ^propagate.0()
+      %callable.2 : py.Value = py.loadGlobal("lib_constructors_more", "callable") ^propagate.0()
+      %str.22 : py.Value = py.loadGlobal("lib_constructors_more", "str") ^propagate.0()
+      %upper.0 : py.Value = py.attr(%str.22, "upper") ^propagate.0()
+      %tuple.42 : py.Value = py.mkTuple(%upper.0)
+      %kwargs.38 : py.Value = py.mkKwargs
+      %call.25 : py.Value = py.call(%callable.2, %tuple.42, %kwargs.38) ^propagate.0()
+      %callable.3 : py.Value = py.loadGlobal("lib_constructors_more", "callable") ^propagate.0()
+      %dict.2 : py.Value = py.loadGlobal("lib_constructors_more", "dict") ^propagate.0()
+      %fromkeys.0 : py.Value = py.attr(%dict.2, "fromkeys") ^propagate.0()
+      %tuple.43 : py.Value = py.mkTuple(%fromkeys.0)
+      %kwargs.39 : py.Value = py.mkKwargs
+      %call.26 : py.Value = py.call(%callable.3, %tuple.43, %kwargs.39) ^propagate.0()
+      %tuple.44 : py.Value = py.mkTuple(%call.23, %call.24, %call.25, %call.26)
+      %kwargs.40 : py.Value = py.mkKwargs
+      %call.27 : py.Value = py.call(%print.6, %tuple.44, %kwargs.40) ^propagate.0()
+      %dict.3 : py.Value = py.loadGlobal("lib_constructors_more", "dict") ^propagate.0()
+      %Grow.1 : py.Value = py.loadGlobal("lib_constructors_more", "Grow") ^propagate.0()
+      %tuple.45 : py.Value = py.mkTuple
+      %kwargs.41 : py.Value = py.mkKwargs
+      %call.28 : py.Value = py.call(%Grow.1, %tuple.45, %kwargs.41) ^propagate.0()
+      %tuple.46 : py.Value = py.mkTuple(%call.28)
+      %kwargs.42 : py.Value = py.mkKwargs
+      %call.29 : py.Value = py.call(%dict.3, %tuple.46, %kwargs.42) ^propagate.0()
+      %g.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "g")
+      %set.22 : base.Unit = base.refSet[py.Value](%g.cell.0, %call.29)
+      %print.7 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %len.4 : py.Value = py.loadGlobal("lib_constructors_more", "len") ^propagate.0()
+      %g.0 : py.Value = py.loadGlobal("lib_constructors_more", "g") ^propagate.0()
+      %tuple.47 : py.Value = py.mkTuple(%g.0)
+      %kwargs.43 : py.Value = py.mkKwargs
+      %call.30 : py.Value = py.call(%len.4, %tuple.47, %kwargs.43) ^propagate.0()
+      %g.1 : py.Value = py.loadGlobal("lib_constructors_more", "g") ^propagate.0()
+      %int.20 : py.Value = py.intLit(3)
+      %item.1 : py.Value = py.getItem(%g.1, %int.20) ^propagate.0()
+      %tuple.48 : py.Value = py.mkTuple(%call.30, %item.1)
+      %kwargs.44 : py.Value = py.mkKwargs
+      %call.31 : py.Value = py.call(%print.7, %tuple.48, %kwargs.44) ^propagate.0()
+      %dict.4 : py.Value = py.loadGlobal("lib_constructors_more", "dict") ^propagate.0()
+      %P.1 : py.Value = py.loadGlobal("lib_constructors_more", "P") ^propagate.0()
+      %tuple.49 : py.Value = py.mkTuple
+      %kwargs.45 : py.Value = py.mkKwargs
+      %call.32 : py.Value = py.call(%P.1, %tuple.49, %kwargs.45) ^propagate.0()
+      %list.10 : py.Value = py.mkList(%call.32)
+      %tuple.50 : py.Value = py.mkTuple(%list.10)
+      %kwargs.46 : py.Value = py.mkKwargs
+      %call.33 : py.Value = py.call(%dict.4, %tuple.50, %kwargs.46) ^propagate.0()
+      %d.cell.1 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "d")
+      %set.23 : base.Unit = base.refSet[py.Value](%d.cell.1, %call.33)
+      %print.8 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %d.2 : py.Value = py.loadGlobal("lib_constructors_more", "d") ^propagate.0()
+      %int.21 : py.Value = py.intLit(1)
+      %item.2 : py.Value = py.getItem(%d.2, %int.21) ^propagate.0()
+      %tuple.51 : py.Value = py.mkTuple(%item.2)
+      %kwargs.47 : py.Value = py.mkKwargs
+      %call.34 : py.Value = py.call(%print.8, %tuple.51, %kwargs.47) ^propagate.0()
+      %errors.3 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %dict.5 : py.Value = py.loadGlobal("lib_constructors_more", "dict") ^propagate.0()
+      %NegHint.1 : py.Value = py.loadGlobal("lib_constructors_more", "NegHint") ^propagate.0()
+      %tuple.52 : py.Value = py.mkTuple
+      %kwargs.48 : py.Value = py.mkKwargs
+      %call.35 : py.Value = py.call(%NegHint.1, %tuple.52, %kwargs.48) ^propagate.0()
+      %list.11 : py.Value = py.mkList(%call.35)
+      %tuple.53 : py.Value = py.mkTuple(%dict.5, %list.11)
+      %kwargs.49 : py.Value = py.mkKwargs
+      %call.36 : py.Value = py.call(%errors.3, %tuple.53, %kwargs.49) ^propagate.0()
+      %print.9 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %type.0 : py.Value = py.loadGlobal("lib_constructors_more", "type") ^propagate.0()
+      %bytes.1 : py.Value = py.loadGlobal("lib_constructors_more", "bytes") ^propagate.0()
+      %X.1 : py.Value = py.loadGlobal("lib_constructors_more", "X") ^propagate.0()
+      %tuple.54 : py.Value = py.mkTuple
+      %kwargs.50 : py.Value = py.mkKwargs
+      %call.37 : py.Value = py.call(%X.1, %tuple.54, %kwargs.50) ^propagate.0()
+      %tuple.55 : py.Value = py.mkTuple(%call.37)
+      %kwargs.51 : py.Value = py.mkKwargs
+      %call.38 : py.Value = py.call(%bytes.1, %tuple.55, %kwargs.51) ^propagate.0()
+      %tuple.56 : py.Value = py.mkTuple(%call.38)
+      %kwargs.52 : py.Value = py.mkKwargs
+      %call.39 : py.Value = py.call(%type.0, %tuple.56, %kwargs.52) ^propagate.0()
+      %__name__.0 : py.Value = py.attr(%call.39, "__name__") ^propagate.0()
+      %bytes.2 : py.Value = py.loadGlobal("lib_constructors_more", "bytes") ^propagate.0()
+      %X.2 : py.Value = py.loadGlobal("lib_constructors_more", "X") ^propagate.0()
+      %tuple.57 : py.Value = py.mkTuple
+      %kwargs.53 : py.Value = py.mkKwargs
+      %call.40 : py.Value = py.call(%X.2, %tuple.57, %kwargs.53) ^propagate.0()
+      %tuple.58 : py.Value = py.mkTuple(%call.40)
+      %kwargs.54 : py.Value = py.mkKwargs
+      %call.41 : py.Value = py.call(%bytes.2, %tuple.58, %kwargs.54) ^propagate.0()
+      %tuple.59 : py.Value = py.mkTuple(%__name__.0, %call.41)
+      %kwargs.55 : py.Value = py.mkKwargs
+      %call.42 : py.Value = py.call(%print.9, %tuple.59, %kwargs.55) ^propagate.0()
+      %errors.4 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %bytes.3 : py.Value = py.loadGlobal("lib_constructors_more", "bytes") ^propagate.0()
+      %int.22 : py.Value = py.intLit(10)
+      %int.23 : py.Value = py.intLit(30)
+      %pow.0 : py.Value = py.pow(%int.22, %int.23) ^propagate.0()
+      %neg.0 : py.Value = py.uSub(%pow.0) ^propagate.0()
+      %tuple.60 : py.Value = py.mkTuple(%bytes.3, %neg.0)
+      %kwargs.56 : py.Value = py.mkKwargs
+      %call.43 : py.Value = py.call(%errors.4, %tuple.60, %kwargs.56) ^propagate.0()
+      %errors.5 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %str.23 : py.Value = py.loadGlobal("lib_constructors_more", "str") ^propagate.0()
+      %tuple.61 : py.Value = py.mkTuple(%str.23)
+      %str.24 : py.Value = py.strLit("encoding")
+      %int.24 : py.Value = py.intLit(5)
+      %kwargs.57 : py.Value = py.mkKwargs(%str.24, %int.24)
+      %call.44 : py.Value = py.call(%errors.5, %tuple.61, %kwargs.57) ^propagate.0()
+      %errors.6 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %str.25 : py.Value = py.loadGlobal("lib_constructors_more", "str") ^propagate.0()
+      %tuple.62 : py.Value = py.mkTuple(%str.25)
+      %str.26 : py.Value = py.strLit("errors")
+      %int.25 : py.Value = py.intLit(5)
+      %kwargs.58 : py.Value = py.mkKwargs(%str.26, %int.25)
+      %call.45 : py.Value = py.call(%errors.6, %tuple.62, %kwargs.58) ^propagate.0()
+      %__build_class__.13 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.14 : py.Value = py.mkClosure[[]](@|lib_constructors_more.L0.<body>|, "<body>", "lib_constructors_more")
+      %str.27 : py.Value = py.strLit("L0")
+      %list.12 : py.Value = py.loadGlobal("lib_constructors_more", "list") ^propagate.0()
+      %tuple.63 : py.Value = py.mkTuple(%clo.14, %str.27, %list.12)
+      %kwargs.59 : py.Value = py.mkKwargs
+      %L0.0 : py.Value = py.call(%__build_class__.13, %tuple.63, %kwargs.59) ^propagate.0()
+      %L0.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "L0")
+      %set.24 : base.Unit = base.refSet[py.Value](%L0.cell.0, %L0.0)
+      %__build_class__.14 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.15 : py.Value = py.mkClosure[[]](@|lib_constructors_more.Lm.<body>|, "<body>", "lib_constructors_more")
+      %str.28 : py.Value = py.strLit("Lm")
+      %list.13 : py.Value = py.loadGlobal("lib_constructors_more", "list") ^propagate.0()
+      %tuple.64 : py.Value = py.mkTuple(%clo.15, %str.28, %list.13)
+      %kwargs.60 : py.Value = py.mkKwargs
+      %Lm.0 : py.Value = py.call(%__build_class__.14, %tuple.64, %kwargs.60) ^propagate.0()
+      %Lm.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "Lm")
+      %set.25 : base.Unit = base.refSet[py.Value](%Lm.cell.0, %Lm.0)
+      %__build_class__.15 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.16 : py.Value = py.mkClosure[[]](@|lib_constructors_more.F0.<body>|, "<body>", "lib_constructors_more")
+      %str.29 : py.Value = py.strLit("F0")
+      %float.2 : py.Value = py.loadGlobal("lib_constructors_more", "float") ^propagate.0()
+      %tuple.65 : py.Value = py.mkTuple(%clo.16, %str.29, %float.2)
+      %kwargs.61 : py.Value = py.mkKwargs
+      %F0.0 : py.Value = py.call(%__build_class__.15, %tuple.65, %kwargs.61) ^propagate.0()
+      %F0.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "F0")
+      %set.26 : base.Unit = base.refSet[py.Value](%F0.cell.0, %F0.0)
+      %__build_class__.16 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.17 : py.Value = py.mkClosure[[]](@|lib_constructors_more.T0.<body>|, "<body>", "lib_constructors_more")
+      %str.30 : py.Value = py.strLit("T0")
+      %tuple.66 : py.Value = py.loadGlobal("lib_constructors_more", "tuple") ^propagate.0()
+      %tuple.67 : py.Value = py.mkTuple(%clo.17, %str.30, %tuple.66)
+      %kwargs.62 : py.Value = py.mkKwargs
+      %T0.0 : py.Value = py.call(%__build_class__.16, %tuple.67, %kwargs.62) ^propagate.0()
+      %T0.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "T0")
+      %set.27 : base.Unit = base.refSet[py.Value](%T0.cell.0, %T0.0)
+      %__build_class__.17 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.18 : py.Value = py.mkClosure[[]](@|lib_constructors_more.FS0.<body>|, "<body>", "lib_constructors_more")
+      %str.31 : py.Value = py.strLit("FS0")
+      %frozenset.2 : py.Value = py.loadGlobal("lib_constructors_more", "frozenset") ^propagate.0()
+      %tuple.68 : py.Value = py.mkTuple(%clo.18, %str.31, %frozenset.2)
+      %kwargs.63 : py.Value = py.mkKwargs
+      %FS0.0 : py.Value = py.call(%__build_class__.17, %tuple.68, %kwargs.63) ^propagate.0()
+      %FS0.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "FS0")
+      %set.28 : base.Unit = base.refSet[py.Value](%FS0.cell.0, %FS0.0)
+      %errors.7 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %L0.1 : py.Value = py.loadGlobal("lib_constructors_more", "L0") ^propagate.0()
+      %int.26 : py.Value = py.intLit(1)
+      %list.14 : py.Value = py.mkList(%int.26)
+      %tuple.69 : py.Value = py.mkTuple(%L0.1, %list.14)
+      %str.32 : py.Value = py.strLit("tag")
+      %int.27 : py.Value = py.intLit(5)
+      %kwargs.64 : py.Value = py.mkKwargs(%str.32, %int.27)
+      %call.46 : py.Value = py.call(%errors.7, %tuple.69, %kwargs.64) ^propagate.0()
+      %errors.8 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %Lm.1 : py.Value = py.loadGlobal("lib_constructors_more", "Lm") ^propagate.0()
+      %int.28 : py.Value = py.intLit(1)
+      %list.15 : py.Value = py.mkList(%int.28)
+      %tuple.70 : py.Value = py.mkTuple(%Lm.1, %list.15)
+      %str.33 : py.Value = py.strLit("tag")
+      %int.29 : py.Value = py.intLit(5)
+      %kwargs.65 : py.Value = py.mkKwargs(%str.33, %int.29)
+      %call.47 : py.Value = py.call(%errors.8, %tuple.70, %kwargs.65) ^propagate.0()
+      %errors.9 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %F0.1 : py.Value = py.loadGlobal("lib_constructors_more", "F0") ^propagate.0()
+      %float.3 : py.Value = py.floatLit(1.5)
+      %tuple.71 : py.Value = py.mkTuple(%F0.1, %float.3)
+      %str.34 : py.Value = py.strLit("tag")
+      %int.30 : py.Value = py.intLit(5)
+      %kwargs.66 : py.Value = py.mkKwargs(%str.34, %int.30)
+      %call.48 : py.Value = py.call(%errors.9, %tuple.71, %kwargs.66) ^propagate.0()
+      %errors.10 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %T0.1 : py.Value = py.loadGlobal("lib_constructors_more", "T0") ^propagate.0()
+      %int.31 : py.Value = py.intLit(1)
+      %list.16 : py.Value = py.mkList(%int.31)
+      %tuple.72 : py.Value = py.mkTuple(%T0.1, %list.16)
+      %str.35 : py.Value = py.strLit("tag")
+      %int.32 : py.Value = py.intLit(5)
+      %kwargs.67 : py.Value = py.mkKwargs(%str.35, %int.32)
+      %call.49 : py.Value = py.call(%errors.10, %tuple.72, %kwargs.67) ^propagate.0()
+      %errors.11 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %FS0.1 : py.Value = py.loadGlobal("lib_constructors_more", "FS0") ^propagate.0()
+      %int.33 : py.Value = py.intLit(1)
+      %list.17 : py.Value = py.mkList(%int.33)
+      %tuple.73 : py.Value = py.mkTuple(%FS0.1, %list.17)
+      %str.36 : py.Value = py.strLit("tag")
+      %int.34 : py.Value = py.intLit(5)
+      %kwargs.68 : py.Value = py.mkKwargs(%str.36, %int.34)
+      %call.50 : py.Value = py.call(%errors.11, %tuple.73, %kwargs.68) ^propagate.0()
+      %__build_class__.18 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.19 : py.Value = py.mkClosure[[]](@|lib_constructors_more.Idx.<body>|, "<body>", "lib_constructors_more")
+      %str.37 : py.Value = py.strLit("Idx")
+      %tuple.74 : py.Value = py.mkTuple(%clo.19, %str.37)
+      %kwargs.69 : py.Value = py.mkKwargs
+      %Idx.0 : py.Value = py.call(%__build_class__.18, %tuple.74, %kwargs.69) ^propagate.0()
+      %Idx.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "Idx")
+      %set.29 : base.Unit = base.refSet[py.Value](%Idx.cell.0, %Idx.0)
+      %__build_class__.19 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.20 : py.Value = py.mkClosure[[]](@|lib_constructors_more.I.<body>|, "<body>", "lib_constructors_more")
+      %str.38 : py.Value = py.strLit("I")
+      %int.35 : py.Value = py.loadGlobal("lib_constructors_more", "int") ^propagate.0()
+      %tuple.75 : py.Value = py.mkTuple(%clo.20, %str.38, %int.35)
+      %kwargs.70 : py.Value = py.mkKwargs
+      %I.0 : py.Value = py.call(%__build_class__.19, %tuple.75, %kwargs.70) ^propagate.0()
+      %I.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "I")
+      %set.30 : base.Unit = base.refSet[py.Value](%I.cell.0, %I.0)
+      %errors.12 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %bytes.4 : py.Value = py.loadGlobal("lib_constructors_more", "bytes") ^propagate.0()
+      %Idx.1 : py.Value = py.loadGlobal("lib_constructors_more", "Idx") ^propagate.0()
+      %tuple.76 : py.Value = py.mkTuple
+      %kwargs.71 : py.Value = py.mkKwargs
+      %call.51 : py.Value = py.call(%Idx.1, %tuple.76, %kwargs.71) ^propagate.0()
+      %tuple.77 : py.Value = py.mkTuple(%bytes.4, %call.51)
+      %kwargs.72 : py.Value = py.mkKwargs
+      %call.52 : py.Value = py.call(%errors.12, %tuple.77, %kwargs.72) ^propagate.0()
+      %errors.13 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %bytes.5 : py.Value = py.loadGlobal("lib_constructors_more", "bytes") ^propagate.0()
+      %I.1 : py.Value = py.loadGlobal("lib_constructors_more", "I") ^propagate.0()
+      %int.36 : py.Value = py.intLit(10)
+      %int.37 : py.Value = py.intLit(30)
+      %pow.1 : py.Value = py.pow(%int.36, %int.37) ^propagate.0()
+      %tuple.78 : py.Value = py.mkTuple(%pow.1)
+      %kwargs.73 : py.Value = py.mkKwargs
+      %call.53 : py.Value = py.call(%I.1, %tuple.78, %kwargs.73) ^propagate.0()
+      %tuple.79 : py.Value = py.mkTuple(%bytes.5, %call.53)
+      %kwargs.74 : py.Value = py.mkKwargs
+      %call.54 : py.Value = py.call(%errors.13, %tuple.79, %kwargs.74) ^propagate.0()
+      %__build_class__.20 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.21 : py.Value = py.mkClosure[[]](@|lib_constructors_more.ASetSubclassWhoseNameIsLongerThanFiftyBytesInTotalLength.<body>|, "<body>", "lib_constructors_more")
+      %str.39 : py.Value = py.strLit("ASetSubclassWhoseNameIsLongerThanFiftyBytesInTotalLength")
+      %set.31 : py.Value = py.loadGlobal("lib_constructors_more", "set") ^propagate.0()
+      %tuple.80 : py.Value = py.mkTuple(%clo.21, %str.39, %set.31)
+      %kwargs.75 : py.Value = py.mkKwargs
+      %ASetSubclassWhoseNameIsLongerThanFiftyBytesInTotalLength.0 : py.Value = py.call(%__build_class__.20, %tuple.80, %kwargs.75) ^propagate.0()
+      %ASetSubclassWhoseNameIsLongerThanFiftyBytesInTotalLength.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "ASetSubclassWhoseNameIsLongerThanFiftyBytesInTotalLength")
+      %set.32 : base.Unit = base.refSet[py.Value](%ASetSubclassWhoseNameIsLongerThanFiftyBytesInTotalLength.cell.0, %ASetSubclassWhoseNameIsLongerThanFiftyBytesInTotalLength.0)
+      %print.10 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %len.5 : py.Value = py.loadGlobal("lib_constructors_more", "len") ^propagate.0()
+      %ASetSubclassWhoseNameIsLongerThanFiftyBytesInTotalLength.1 : py.Value = py.loadGlobal("lib_constructors_more", "ASetSubclassWhoseNameIsLongerThanFiftyBytesInTotalLength") ^propagate.0()
+      %int.38 : py.Value = py.intLit(1)
+      %int.39 : py.Value = py.intLit(2)
+      %list.18 : py.Value = py.mkList(%int.38, %int.39)
+      %tuple.81 : py.Value = py.mkTuple(%list.18)
+      %kwargs.76 : py.Value = py.mkKwargs
+      %call.55 : py.Value = py.call(%ASetSubclassWhoseNameIsLongerThanFiftyBytesInTotalLength.1, %tuple.81, %kwargs.76) ^propagate.0()
+      %tuple.82 : py.Value = py.mkTuple(%call.55)
+      %kwargs.77 : py.Value = py.mkKwargs
+      %call.56 : py.Value = py.call(%len.5, %tuple.82, %kwargs.77) ^propagate.0()
+      %tuple.83 : py.Value = py.mkTuple(%call.56)
+      %kwargs.78 : py.Value = py.mkKwargs
+      %call.57 : py.Value = py.call(%print.10, %tuple.83, %kwargs.78) ^propagate.0()
+      %__build_class__.21 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.22 : py.Value = py.mkClosure[[]](@|lib_constructors_more.M.<body>|, "<body>", "lib_constructors_more")
+      %str.40 : py.Value = py.strLit("M")
+      %tuple.84 : py.Value = py.mkTuple(%clo.22, %str.40)
+      %kwargs.79 : py.Value = py.mkKwargs
+      %M.0 : py.Value = py.call(%__build_class__.21, %tuple.84, %kwargs.79) ^propagate.0()
+      %M.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "M")
+      %set.33 : base.Unit = base.refSet[py.Value](%M.cell.0, %M.0)
+      %print.11 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %M.1 : py.Value = py.loadGlobal("lib_constructors_more", "M") ^propagate.0()
+      %tuple.85 : py.Value = py.mkTuple
+      %kwargs.80 : py.Value = py.mkKwargs
+      %call.58 : py.Value = py.call(%M.1, %tuple.85, %kwargs.80) ^propagate.0()
+      %p.0 : py.Value = py.attr(%call.58, "p") ^propagate.0()
+      %tuple.86 : py.Value = py.mkTuple(%p.0)
+      %kwargs.81 : py.Value = py.mkKwargs
+      %call.59 : py.Value = py.call(%print.11, %tuple.86, %kwargs.81) ^propagate.0()
+      %print.12 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %callable.4 : py.Value = py.loadGlobal("lib_constructors_more", "callable") ^propagate.0()
+      %exit.0 : py.Value = py.loadGlobal("lib_constructors_more", "exit") ^propagate.0()
+      %tuple.87 : py.Value = py.mkTuple(%exit.0)
+      %kwargs.82 : py.Value = py.mkKwargs
+      %call.60 : py.Value = py.call(%callable.4, %tuple.87, %kwargs.82) ^propagate.0()
+      %tuple.88 : py.Value = py.mkTuple(%call.60)
+      %kwargs.83 : py.Value = py.mkKwargs
+      %call.61 : py.Value = py.call(%print.12, %tuple.88, %kwargs.83) ^propagate.0()
+      %__build_class__.22 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.23 : py.Value = py.mkClosure[[]](@|lib_constructors_more.Meta.<body>|, "<body>", "lib_constructors_more")
+      %str.41 : py.Value = py.strLit("Meta")
+      %type.1 : py.Value = py.loadGlobal("lib_constructors_more", "type") ^propagate.0()
+      %tuple.89 : py.Value = py.mkTuple(%clo.23, %str.41, %type.1)
+      %kwargs.84 : py.Value = py.mkKwargs
+      %Meta.0 : py.Value = py.call(%__build_class__.22, %tuple.89, %kwargs.84) ^propagate.0()
+      %Meta.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "Meta")
+      %set.34 : base.Unit = base.refSet[py.Value](%Meta.cell.0, %Meta.0)
+      %__build_class__.23 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.24 : py.Value = py.mkClosure[[]](@|lib_constructors_more.C.<body>|, "<body>", "lib_constructors_more")
+      %str.42 : py.Value = py.strLit("C")
+      %tuple.90 : py.Value = py.mkTuple(%clo.24, %str.42)
+      %str.43 : py.Value = py.strLit("metaclass")
+      %Meta.1 : py.Value = py.loadGlobal("lib_constructors_more", "Meta") ^propagate.0()
+      %kwargs.85 : py.Value = py.mkKwargs(%str.43, %Meta.1)
+      %C.0 : py.Value = py.call(%__build_class__.23, %tuple.90, %kwargs.85) ^propagate.0()
+      %C.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "C")
+      %set.35 : base.Unit = base.refSet[py.Value](%C.cell.0, %C.0)
+      %__build_class__.24 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.25 : py.Value = py.mkClosure[[]](@|lib_constructors_more.E.<body>|, "<body>", "lib_constructors_more")
+      %str.44 : py.Value = py.strLit("E")
+      %C.1 : py.Value = py.loadGlobal("lib_constructors_more", "C") ^propagate.0()
+      %tuple.91 : py.Value = py.mkTuple(%clo.25, %str.44, %C.1)
+      %kwargs.86 : py.Value = py.mkKwargs
+      %E.0 : py.Value = py.call(%__build_class__.24, %tuple.91, %kwargs.86) ^propagate.0()
+      %E.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "E")
+      %set.36 : base.Unit = base.refSet[py.Value](%E.cell.0, %E.0)
+      %print.13 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %issubclass.2 : py.Value = py.loadGlobal("lib_constructors_more", "issubclass") ^propagate.0()
+      %E.1 : py.Value = py.loadGlobal("lib_constructors_more", "E") ^propagate.0()
+      %C.2 : py.Value = py.loadGlobal("lib_constructors_more", "C") ^propagate.0()
+      %tuple.92 : py.Value = py.mkTuple(%E.1, %C.2)
+      %kwargs.87 : py.Value = py.mkKwargs
+      %call.62 : py.Value = py.call(%issubclass.2, %tuple.92, %kwargs.87) ^propagate.0()
+      %issubclass.3 : py.Value = py.loadGlobal("lib_constructors_more", "issubclass") ^propagate.0()
+      %C.3 : py.Value = py.loadGlobal("lib_constructors_more", "C") ^propagate.0()
+      %E.2 : py.Value = py.loadGlobal("lib_constructors_more", "E") ^propagate.0()
+      %tuple.93 : py.Value = py.mkTuple(%C.3, %E.2)
+      %kwargs.88 : py.Value = py.mkKwargs
+      %call.63 : py.Value = py.call(%issubclass.3, %tuple.93, %kwargs.88) ^propagate.0()
+      %tuple.94 : py.Value = py.mkTuple(%call.62, %call.63)
+      %kwargs.89 : py.Value = py.mkKwargs
+      %call.64 : py.Value = py.call(%print.13, %tuple.94, %kwargs.89) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.D.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["dict"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "keys", binding = "def"}, {name = "__getitem__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("D")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_constructors_more.D.keys, "keys", "lib_constructors_more")
+      %str.4 : py.Value = py.strLit("keys")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_constructors_more.D.__getitem__, "__getitem__", "lib_constructors_more")
+      %str.5 : py.Value = py.strLit("__getitem__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.F.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["float"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("F")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_constructors_more.F.__init__, "__init__", "lib_constructors_more")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.T.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["tuple"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("T")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_constructors_more.T.__init__, "__init__", "lib_constructors_more")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.FS.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["frozenset"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("FS")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_constructors_more.FS.__init__, "__init__", "lib_constructors_more")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.L.<body>|(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["list"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__new__", binding = "def"}]]
+
+    entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("L")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@lib_constructors_more.L.__new__, "__new__", "lib_constructors_more", %__class__.cell.0)
+      %str.4 : py.Value = py.strLit("__new__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %__class__.0 : py.Value = py.undef(".class being created")
+      %set.0 : base.Unit = base.refSet[py.Value](%__class__.cell.0, %__class__.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__class__.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.S.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["set"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("S")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.TT.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["tuple"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("TT")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.Grow.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "keys", binding = "def"}, {name = "__getitem__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Grow")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_constructors_more.Grow.__init__, "__init__", "lib_constructors_more")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_constructors_more.Grow.keys, "keys", "lib_constructors_more")
+      %str.5 : py.Value = py.strLit("keys")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@lib_constructors_more.Grow.__getitem__, "__getitem__", "lib_constructors_more")
+      %str.6 : py.Value = py.strLit("__getitem__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.P.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__iter__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("P")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_constructors_more.P.__iter__, "__iter__", "lib_constructors_more")
+      %str.4 : py.Value = py.strLit("__iter__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.PI.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("PI")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_constructors_more.PI.__init__, "__init__", "lib_constructors_more")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_constructors_more.PI.__iter__, "__iter__", "lib_constructors_more")
+      %str.5 : py.Value = py.strLit("__iter__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@lib_constructors_more.PI.__next__, "__next__", "lib_constructors_more")
+      %str.6 : py.Value = py.strLit("__next__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.NegHint.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}, {name = "__length_hint__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("NegHint")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_constructors_more.NegHint.__iter__, "__iter__", "lib_constructors_more")
+      %str.4 : py.Value = py.strLit("__iter__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_constructors_more.NegHint.__next__, "__next__", "lib_constructors_more")
+      %str.5 : py.Value = py.strLit("__next__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@lib_constructors_more.NegHint.__length_hint__, "__length_hint__", "lib_constructors_more")
+      %str.6 : py.Value = py.strLit("__length_hint__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.BS.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["bytes"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("BS")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.X.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__bytes__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("X")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_constructors_more.X.__bytes__, "__bytes__", "lib_constructors_more")
+      %str.4 : py.Value = py.strLit("__bytes__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.errors(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %f.0 : py.Value = py.undef("f")
+      %f.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%f.0)
+      %args.1 : py.Value = py.undef("args")
+      %args.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%args.1)
+      %kwargs.1 : py.Value = py.undef("kwargs")
+      %kwargs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%kwargs.1)
+      %e.0 : py.Value = py.undef("e")
+      %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
+      %f.1 : py.Value = py.undef("f")
+      %defaults.0 : py.Value = py.mkTuple(%f.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "errors", 0, 1, true, true, "f") ^propagate.0()
+      %f.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %args.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %kwargs.2 : py.Value = py.tupleGet(%bound.0, 2)
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
+      %args.4 : py.Value = py.requireDefined(%args.2, "args", "UnboundLocalError", "cannot access local variable 'args' where it is not associated with a value") ^catch.0()
+      %kwargs.3 : py.Value = py.mkKwargs
+      %kwargs.5 : py.Value = py.requireDefined(%kwargs.2, "kwargs", "UnboundLocalError", "cannot access local variable 'kwargs' where it is not associated with a value") ^catch.0()
+      %merge.0 : py.Value = py.dictMerge(%f.4, %kwargs.3, %kwargs.5) ^catch.0()
+      %args.5 : py.Value = py.argsTuple(%f.4, %args.4) ^catch.0()
+      %call.0 : py.Value = py.call(%f.4, %args.5, %merge.0) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("lib_constructors_more", "TypeError") ^unwind.0()
+      %ValueError.0 : py.Value = py.loadGlobal("lib_constructors_more", "ValueError") ^unwind.0()
+      %OverflowError.0 : py.Value = py.loadGlobal("lib_constructors_more", "OverflowError") ^unwind.0()
+      %tuple.0 : py.Value = py.mkTuple(%TypeError.0, %ValueError.0, %OverflowError.0)
+      %match.0 : base.Bool = py.excMatch(%exc.0, %tuple.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %print.0 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^clear.0()
+      %type.0 : py.Value = py.loadGlobal("lib_constructors_more", "type") ^clear.0()
+      %e.6 : py.Value = py.requireDefined(%exc.0, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
+      %tuple.1 : py.Value = py.mkTuple(%e.6)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%type.0, %tuple.1, %kwargs.6) ^clear.0()
+      %__name__.0 : py.Value = py.attr(%call.1, "__name__") ^clear.0()
+      %e.9 : py.Value = py.requireDefined(%exc.0, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
+      %args.6 : py.Value = py.attr(%e.9, "args") ^clear.0()
+      %int.0 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.6, %int.0) ^clear.0()
+      %tuple.2 : py.Value = py.mkTuple(%__name__.0, %item.0)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.2, %kwargs.7) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.10 : py.Value = py.undef("e")
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.11 : py.Value = py.undef("e")
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+  func @|lib_constructors_more.L0.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["list"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("L0")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.Lm.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["list"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__new__", value = "list.__new__"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Lm")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %str.4 : py.Value = py.strLit("list")
+      %list.0 : py.Value = py.undef("list")
+      %list.1 : py.Value = py.getOptionalItem(%ns.0, %str.4, %list.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%list.1)
+      branch(%found.1) ^join.1(%list.1) ^absent.1()
+    absent.1():
+      %list.2 : py.Value = py.loadGlobal("lib_constructors_more", "list") ^propagate.0()
+      jump ^join.1(%list.2)
+    join.1(%list.3 : py.Value):
+      %__new__.0 : py.Value = py.attr(%list.3, "__new__") ^propagate.0()
+      %str.5 : py.Value = py.strLit("__new__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.5, %__new__.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.F0.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["float"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("F0")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.T0.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["tuple"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("T0")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.FS0.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["frozenset"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("FS0")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.Idx.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__index__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Idx")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_constructors_more.Idx.__index__, "__index__", "lib_constructors_more")
+      %str.4 : py.Value = py.strLit("__index__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.I.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["int"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("I")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.ASetSubclassWhoseNameIsLongerThanFiftyBytesInTotalLength.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["set"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("ASetSubclassWhoseNameIsLongerThanFiftyBytesInTotalLength")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.M.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "keys", binding = "def"}, {name = "__getitem__", binding = "def"}, {name = "p", value = {call = "property", args = ["dict"], keywords = []}}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("M")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_constructors_more.M.keys, "keys", "lib_constructors_more")
+      %str.4 : py.Value = py.strLit("keys")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_constructors_more.M.__getitem__, "__getitem__", "lib_constructors_more")
+      %str.5 : py.Value = py.strLit("__getitem__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %str.6 : py.Value = py.strLit("property")
+      %property.0 : py.Value = py.undef("property")
+      %property.1 : py.Value = py.getOptionalItem(%ns.0, %str.6, %property.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%property.1)
+      branch(%found.1) ^join.1(%property.1) ^absent.1()
+    absent.1():
+      %property.2 : py.Value = py.loadGlobal("lib_constructors_more", "property") ^propagate.0()
+      jump ^join.1(%property.2)
+    join.1(%property.3 : py.Value):
+      %str.7 : py.Value = py.strLit("dict")
+      %dict.0 : py.Value = py.undef("dict")
+      %dict.1 : py.Value = py.getOptionalItem(%ns.0, %str.7, %dict.0) ^propagate.0()
+      %found.2 : base.Bool = py.isDefined(%dict.1)
+      branch(%found.2) ^join.2(%dict.1) ^absent.2()
+    absent.2():
+      %dict.2 : py.Value = py.loadGlobal("lib_constructors_more", "dict") ^propagate.0()
+      jump ^join.2(%dict.2)
+    join.2(%dict.3 : py.Value):
+      %tuple.0 : py.Value = py.mkTuple(%dict.3)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%property.3, %tuple.0, %kwargs.1) ^propagate.0()
+      %str.8 : py.Value = py.strLit("p")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.8, %call.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.Meta.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["type"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Meta")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.keywords = [{name = "metaclass", value = "Meta"}]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("C")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_constructors_more.E.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["C"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_constructors_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("E")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.D.keys(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "D.keys", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %print.0 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("keys")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %str.1 : py.Value = py.strLit("a")
+      %str.2 : py.Value = py.strLit("b")
+      %list.0 : py.Value = py.mkList(%str.1, %str.2)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%list.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.D.__getitem__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %self.1 : py.Value = py.undef("self")
+      %k.1 : py.Value = py.undef("k")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %k.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "D.__getitem__", 0, 2, false, false, "self", "k") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %print.0 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("gi")
+      %k.4 : py.Value = py.requireDefined(%k.2, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %k.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.F.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %tag.0 : py.Value = py.undef("tag")
+      %tag.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%tag.0)
+      %self.1 : py.Value = py.undef("self")
+      %x.1 : py.Value = py.undef("x")
+      %none.0 : py.Value = py.noneLit
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %x.1, %none.0)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "F.__init__", 0, 3, false, false, "self", "x", "tag") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %x.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %tag.1 : py.Value = py.tupleGet(%bound.0, 2)
+      %tag.3 : py.Value = py.requireDefined(%tag.1, "tag", "UnboundLocalError", "cannot access local variable 'tag' where it is not associated with a value") ^propagate.0()
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %tag.4 : base.Unit = py.setAttr(%self.4, "tag", %tag.3) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.T.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %it.0 : py.Value = py.undef("it")
+      %it.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%it.0)
+      %tag.0 : py.Value = py.undef("tag")
+      %tag.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%tag.0)
+      %self.1 : py.Value = py.undef("self")
+      %it.1 : py.Value = py.undef("it")
+      %none.0 : py.Value = py.noneLit
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %it.1, %none.0)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "T.__init__", 0, 3, false, false, "self", "it", "tag") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %it.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %tag.1 : py.Value = py.tupleGet(%bound.0, 2)
+      %tag.3 : py.Value = py.requireDefined(%tag.1, "tag", "UnboundLocalError", "cannot access local variable 'tag' where it is not associated with a value") ^propagate.0()
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %tag.4 : base.Unit = py.setAttr(%self.4, "tag", %tag.3) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.FS.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %it.0 : py.Value = py.undef("it")
+      %it.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%it.0)
+      %tag.0 : py.Value = py.undef("tag")
+      %tag.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%tag.0)
+      %self.1 : py.Value = py.undef("self")
+      %it.1 : py.Value = py.undef("it")
+      %none.0 : py.Value = py.noneLit
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %it.1, %none.0)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "FS.__init__", 0, 3, false, false, "self", "it", "tag") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %it.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %tag.1 : py.Value = py.tupleGet(%bound.0, 2)
+      %tag.3 : py.Value = py.requireDefined(%tag.1, "tag", "UnboundLocalError", "cannot access local variable 'tag' where it is not associated with a value") ^propagate.0()
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %tag.4 : base.Unit = py.setAttr(%self.4, "tag", %tag.3) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.L.__new__(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %cls.0 : py.Value = py.undef("cls")
+      %cls.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%cls.0)
+      %args.1 : py.Value = py.undef("args")
+      %args.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%args.1)
+      %kwargs.1 : py.Value = py.undef("kwargs")
+      %kwargs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%kwargs.1)
+      %cls.1 : py.Value = py.undef("cls")
+      %defaults.0 : py.Value = py.mkTuple(%cls.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "L.__new__", 0, 1, true, true, "cls") ^propagate.0()
+      %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %args.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %kwargs.2 : py.Value = py.tupleGet(%bound.0, 2)
+      %super.0 : py.Value = py.loadGlobal("lib_constructors_more", "super") ^propagate.0()
+      %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
+      %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %cls.4 : py.Value = py.requireDefined(%cls.2, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()
+      %args.3 : py.Value = py.mkTuple(%__class__.1, %cls.4)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %super.1 : py.Value = py.call(%super.0, %args.3, %kwargs.3) ^propagate.0()
+      %__new__.0 : py.Value = py.attr(%super.1, "__new__") ^propagate.0()
+      %cls.6 : py.Value = py.requireDefined(%cls.2, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%cls.6)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%__new__.0, %tuple.0, %kwargs.4) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.Grow.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Grow.__init__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ks.0 : base.Unit = py.setAttr(%self.4, "ks", %list.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.Grow.keys(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Grow.keys", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ks.0 : py.Value = py.attr(%self.4, "ks") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%ks.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.Grow.__getitem__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %self.1 : py.Value = py.undef("self")
+      %k.1 : py.Value = py.undef("k")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %k.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Grow.__getitem__", 0, 2, false, false, "self", "k") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %k.4 : py.Value = py.requireDefined(%k.2, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %eq.0 : py.Value = py.eq(%k.4, %int.0) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%eq.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %int.1 : py.Value = py.intLit(3)
+      %list.0 : py.Value = py.mkList(%int.1)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ks.0 : py.Value = py.attr(%self.4, "ks") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("lib_constructors_more", "len") ^propagate.0()
+      %self.6 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ks.1 : py.Value = py.attr(%self.6, "ks") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%ks.1)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %none.1 : py.Value = py.noneLit
+      %slice.0 : py.Value = py.mkSlice(%call.0, %none.0, %none.1)
+      %store.0 : base.Unit = py.setItem(%ks.0, %slice.0, %list.0) ^propagate.0()
+      jump ^join.0()
+    else.0():
+      jump ^join.0()
+    join.0():
+      %k.6 : py.Value = py.requireDefined(%k.2, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
+      %int.2 : py.Value = py.intLit(10)
+      %mult.0 : py.Value = py.mult(%k.6, %int.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%mult.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.P.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "P.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %print.0 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("iter")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %PI.0 : py.Value = py.loadGlobal("lib_constructors_more", "PI") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%PI.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.PI.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "PI.__init__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(0)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.0 : base.Unit = py.setAttr(%self.4, "i", %int.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.PI.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "PI.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %print.0 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("iter")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.PI.__next__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "PI.__next__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.0 : py.Value = py.attr(%self.4, "i") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%i.0, %int.0) ^propagate.0()
+      %i.1 : base.Unit = py.setAttr(%self.4, "i", %iAdd.0) ^propagate.0()
+      %self.6 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.2 : py.Value = py.attr(%self.6, "i") ^propagate.0()
+      %int.1 : py.Value = py.intLit(2)
+      %gt.0 : py.Value = py.gt(%i.2, %int.1) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%gt.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %StopIteration.0 : py.Value = py.loadGlobal("lib_constructors_more", "StopIteration") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    else.0():
+      jump ^join.0()
+    join.0():
+      %self.8 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.3 : py.Value = py.attr(%self.8, "i") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.3)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @lib_constructors_more.NegHint.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "NegHint.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.NegHint.__next__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "NegHint.__next__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %StopIteration.0 : py.Value = py.loadGlobal("lib_constructors_more", "StopIteration") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @lib_constructors_more.NegHint.__length_hint__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "NegHint.__length_hint__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(1)
+      %neg.0 : py.Value = py.uSub(%int.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%neg.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.X.__bytes__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "X.__bytes__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %BS.0 : py.Value = py.loadGlobal("lib_constructors_more", "BS") ^propagate.0()
+      %bytes.0 : py.Value = py.bytesLit("x")
+      %tuple.0 : py.Value = py.mkTuple(%bytes.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%BS.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.Idx.__index__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Idx.__index__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(10)
+      %int.1 : py.Value = py.intLit(30)
+      %pow.0 : py.Value = py.pow(%int.0, %int.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%pow.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.M.keys(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.keys", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %str.0 : py.Value = py.strLit("a")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_constructors_more.M.__getitem__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %self.1 : py.Value = py.undef("self")
+      %k.1 : py.Value = py.undef("k")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %k.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.__getitem__", 0, 2, false, false, "self", "k") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %int.0 : py.Value = py.intLit(1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

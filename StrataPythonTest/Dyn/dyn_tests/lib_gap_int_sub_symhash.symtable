@@ -1,0 +1,8 @@
+module top
+  I: local (assigned, referenced)
+  hash: global implicit (referenced)
+  int: global implicit (referenced)
+  print: global implicit (referenced)
+  x: local (assigned)
+  class I
+qualnames: I

@@ -1,0 +1,93 @@
+--- stdout 1397
+-- list
+iter
+len
+iter
+hint
+2 2 4 0 3 3
+TypeError list expected at most 1 argument, got 2
+TypeError list() takes no keyword arguments
+TypeError 'int' object is not iterable
+-- tuple
+iter
+len
+iter
+hint
+2 2 4 0 3 3
+TypeError tuple expected at most 1 argument, got 2
+TypeError tuple() takes no keyword arguments
+TypeError 'int' object is not iterable
+-- set
+iter
+iter
+2 2 4 0 3 3
+TypeError set expected at most 1 argument, got 2
+TypeError set() takes no keyword arguments
+TypeError 'int' object is not iterable
+-- frozenset
+iter
+iter
+2 2 4 0 3 3
+TypeError frozenset expected at most 1 argument, got 2
+TypeError frozenset() takes no keyword arguments
+TypeError 'int' object is not iterable
+2 1 0 3
+2 0 3 True
+5 True True
+3 True True True
+1 3
+1 True
+keys
+get a
+get b
+aa bb 2
+1 c 4 9 4
+1 1
+2 0 1
+TypeError dict expected at most 1 argument, got 2
+TypeError cannot convert dictionary update sequence element #0 to a sequence
+ValueError dictionary update sequence element #0 has length 3; 2 is required
+TypeError 'int' object is not iterable
+2 L 2 T
+1 FS D 1 1
+TypeError FS expected at most 1 argument, got 2
+1 2 3 3
+TypeError cannot convert dictionary update sequence element #2 to a sequence
+ValueError dictionary update sequence element #0 has length 3; 2 is required
+next 2
+next 1
+next 0
+init 3
+3 LoggedT
+ValueError __len__() should return >= 0
+TypeError __length_hint__ must be an integer, not str
+0 0
+
+--- outcome
+ok
+--- globals
+BadHint = <class 'BadHint'>
+D = <class 'D'>
+Down = <class 'Down'>
+FS = <class 'FS'>
+H = <class 'H'>
+L = <class 'L'>
+LoggedT = <class 'LoggedT'>
+LoudDown = <class 'LoudDown'>
+Mp = <class 'Mp'>
+NegLen = <class 'NegLen'>
+Pair = <class 'Pair'>
+SlowPair = <class 'SlowPair'>
+T = <class 'T'>
+X = <class 'X'>
+__doc__ = None
+__name__ = '__main__'
+args = (5,)
+d = {'p': 1, 's': 2, 't': 3}
+errors = <function object>
+f = <class 'frozenset'>
+fs = frozenset({0, 1, 2})
+kwargs = {}
+l = [3]
+s = {5}
+t = <LoggedT object>

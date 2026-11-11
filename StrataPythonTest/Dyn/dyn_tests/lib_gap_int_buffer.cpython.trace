@@ -1,0 +1,9 @@
+--- stdout 3
+12
+
+--- outcome
+ok
+--- globals
+Buf = <class 'Buf'>
+__doc__ = None
+__name__ = '__main__'

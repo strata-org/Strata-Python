@@ -1,0 +1,30 @@
+module top
+  S: local (assigned, referenced)
+  abs: global implicit (referenced)
+  enumerate: global implicit (referenced)
+  float: global implicit (referenced)
+  hasattr: global implicit (referenced)
+  hex: global implicit (referenced)
+  int: global implicit (referenced)
+  min: global implicit (referenced)
+  reversed: global implicit (referenced)
+  set: global implicit (referenced)
+  setattr: global implicit (referenced)
+  wrong: local (assigned, referenced)
+  zip: global implicit (referenced)
+  class S
+    __getitem__: local (assigned)
+    __len__: local (assigned)
+    function __len__
+      self: local (parameter)
+    function __getitem__
+      i: local (parameter, referenced)
+      self: local (parameter)
+  function wrong
+    TypeError: global implicit (referenced)
+    args: local (parameter, referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+    print: global implicit (referenced)
+qualnames: S, S.__getitem__, S.__len__, wrong

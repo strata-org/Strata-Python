@@ -1,0 +1,57 @@
+module lib_gap_wrong_call_bool {
+  func @|lib_gap_wrong_call_bool.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("lib_gap_wrong_call_bool")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_wrong_call_bool", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_wrong_call_bool", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %bool.0 : py.Value = py.boolLit(true)
+      %__trunc__.0 : py.Value = py.attr(%bool.0, "__trunc__") ^catch.0()
+      %int.0 : py.Value = py.intLit(1)
+      %tuple.0 : py.Value = py.mkTuple(%int.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%__trunc__.0, %tuple.0, %kwargs.0) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("lib_gap_wrong_call_bool", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_wrong_call_bool", "e")
+      %set.2 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("lib_gap_wrong_call_bool", "print") ^clear.0()
+      %e.0 : py.Value = py.loadGlobal("lib_gap_wrong_call_bool", "e") ^clear.0()
+      %args.0 : py.Value = py.attr(%e.0, "args") ^clear.0()
+      %int.1 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.0, %int.1) ^clear.0()
+      %tuple.1 : py.Value = py.mkTuple(%item.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("lib_gap_wrong_call_bool", "e")
+      %set.3 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("lib_gap_wrong_call_bool", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+}
+

@@ -1,0 +1,20 @@
+--- PYTHONHASHSEED=0
+--- stdout 7
+before
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+x = 4.644417185603328e+18
+--- PYTHONHASHSEED=1
+--- stdout 7
+before
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+x = -3.0128951886371845e+18

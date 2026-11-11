@@ -1,0 +1,51 @@
+--- stdout 1517
+0 7 -2 1 -42 255 31 1000
+12 35 42 7 12 7
+2
+ValueError invalid literal for int() with base 10: 'x'
+ValueError int() base must be >= 2 and <= 36, or 0
+ValueError int() base must be >= 2 and <= 36, or 0
+TypeError int() can't convert non-string with explicit base
+TypeError int() can't convert non-string with explicit base
+TypeError int() argument must be a string, a bytes-like object or a real number, not 'list'
+TypeError __int__ returned non-int (type str)
+OverflowError cannot convert float infinity to integer
+TypeError int() takes at most 2 arguments (3 given)
+TypeError int() missing string argument
+TypeError 'x' is an invalid keyword argument for int()
+ValueError invalid literal for int() with base 10: b'x'
+0.0 3.0 1.5 -2500.0 inf True 1.0
+2.5 7.0 1.25 10.5 1.5
+ValueError could not convert string to float: 'x'
+TypeError float() argument must be a string or a real number, not 'list'
+TypeError BadFloat.__float__ returned non-float (type int)
+TypeError float expected at most 1 argument, got 2
+TypeError float() takes no keyword arguments
+OverflowError int too large to convert to float
+False False True False True True
+TypeError bool expected at most 1 argument, got 2
+TypeError bool() takes no keyword arguments
+ 5 1.5 text ab é None
+TypeError decoding to str: need a bytes-like object, int found
+TypeError decoding str is not supported
+TypeError str() argument 'encoding' must be str, not int
+TypeError str() takes at most 3 arguments (4 given)
+6 I 12 0 3.0 F True
+S True True 5 3 (3, 1)
+5 int 1.5 float
+
+--- outcome
+ok
+--- globals
+BadFloat = <class 'BadFloat'>
+BadInt = <class 'BadInt'>
+F = <class 'F'>
+HasFloat = <class 'HasFloat'>
+HasIndex = <class 'HasIndex'>
+HasInt = <class 'HasInt'>
+I = <class 'I'>
+S = <class 'S'>
+Text = <class 'Text'>
+__doc__ = None
+__name__ = '__main__'
+errors = <function object>

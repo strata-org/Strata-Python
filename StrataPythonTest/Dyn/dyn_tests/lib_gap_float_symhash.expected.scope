@@ -1,0 +1,5 @@
+module
+  print: global implicit (referenced)
+  x: local (assigned)
+  float: global implicit (referenced)
+  hash: global implicit (referenced)

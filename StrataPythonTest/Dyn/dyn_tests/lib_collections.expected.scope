@@ -1,0 +1,175 @@
+module
+  X: local (assigned, referenced)
+  H: local (assigned, referenced)
+  Down: local (assigned, referenced)
+  Mp: local (assigned, referenced)
+  L: local (assigned, referenced)
+  list: global implicit (referenced)
+  T: local (assigned, referenced)
+  tuple: global implicit (referenced)
+  FS: local (assigned, referenced)
+  frozenset: global implicit (referenced)
+  D: local (assigned, referenced)
+  dict: global implicit (referenced)
+  errors: local (assigned, referenced)
+  f: local (assigned, referenced)
+  set: global implicit (referenced)
+  print: global implicit (referenced)
+  len: global implicit (referenced)
+  range: global implicit (referenced)
+  args: local (assigned, referenced)
+  kwargs: local (assigned, referenced)
+  l: local (assigned, referenced)
+  t: local (assigned, referenced)
+  s: local (assigned, referenced)
+  fs: local (assigned, referenced)
+  hash: global implicit (referenced)
+  d: local (assigned, referenced)
+  type: global implicit (referenced)
+  Pair: local (assigned, referenced)
+  SlowPair: local (assigned, referenced)
+  LoggedT: local (assigned, referenced)
+  LoudDown: local (assigned, referenced)
+  NegLen: local (assigned, referenced)
+  BadHint: local (assigned, referenced)
+  class X
+    __init__: local (assigned)
+    __len__: local (assigned)
+    __length_hint__: local (assigned)
+    __iter__: local (assigned)
+    function X.__init__
+      params: self, n
+      self: local (parameter, referenced)
+      n: local (parameter, referenced)
+    function X.__len__
+      params: self
+      self: local (parameter, referenced)
+      print: global implicit (referenced)
+    function X.__length_hint__
+      params: self
+      self: local (parameter, referenced)
+      print: global implicit (referenced)
+    function X.__iter__
+      params: self
+      self: local (parameter, referenced)
+      print: global implicit (referenced)
+      iter: global implicit (referenced)
+      range: global implicit (referenced)
+  class H
+    __length_hint__: local (assigned)
+    __iter__: local (assigned)
+    function H.__length_hint__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+    function H.__iter__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+      iter: global implicit (referenced)
+  class Down
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function Down.__init__
+      params: self, n
+      self: local (parameter, referenced)
+      n: local (parameter, referenced)
+    function Down.__iter__
+      params: self
+      self: local (parameter, referenced)
+    function Down.__next__
+      params: self
+      self: local (parameter, referenced)
+      StopIteration: global implicit (referenced)
+  class Mp
+    keys: local (assigned)
+    __getitem__: local (assigned)
+    function Mp.keys
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+    function Mp.__getitem__
+      params: self, k
+      self: local (parameter)
+      k: local (parameter, referenced)
+      print: global implicit (referenced)
+  class L
+  class T
+  class FS
+  class D
+  function errors
+    params: f, *args, **kwargs
+    f: local (parameter, referenced)
+    args: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+    TypeError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    e: local (assigned, referenced)
+    print: global implicit (referenced)
+    type: global implicit (referenced)
+  class Pair
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    function Pair.__init__
+      params: self, k, v
+      self: local (parameter, referenced)
+      k: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function Pair.__iter__
+      params: self
+      self: local (parameter, referenced)
+      iter: global implicit (referenced)
+  class SlowPair
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function SlowPair.__init__
+      params: self, k, v
+      self: local (parameter, referenced)
+      k: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function SlowPair.__iter__
+      params: self
+      self: local (parameter, referenced)
+    function SlowPair.__next__
+      params: self
+      self: local (parameter, referenced)
+      StopIteration: global implicit (referenced)
+  class LoggedT
+    __init__: local (assigned)
+    function LoggedT.__init__
+      params: self, it
+      self: local (parameter, referenced)
+      it: local (parameter)
+      print: global implicit (referenced)
+      len: global implicit (referenced)
+  class LoudDown (needs __class__ cell)
+    __next__: local (assigned)
+    function LoudDown.__next__
+      params: self
+      self: local (parameter)
+      v: local (assigned, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+      print: global implicit (referenced)
+  class NegLen
+    __len__: local (assigned)
+    __iter__: local (assigned)
+    function NegLen.__len__
+      params: self
+      self: local (parameter)
+    function NegLen.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)
+  class BadHint
+    __length_hint__: local (assigned)
+    __iter__: local (assigned)
+    function BadHint.__length_hint__
+      params: self
+      self: local (parameter)
+    function BadHint.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)

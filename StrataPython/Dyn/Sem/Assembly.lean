@@ -13,6 +13,7 @@ public import StrataPython.Dyn.Sem.Builtins.Exceptions
 public import StrataPython.Dyn.Sem.Builtins.Iter
 public import StrataPython.Dyn.Sem.Builtins.Strings
 public import StrataPython.Dyn.Sem.Library.Iterators
+public import StrataPython.Dyn.Sem.Library.Machines
 
 set_option autoImplicit false
 
@@ -128,8 +129,9 @@ def Impls.withNewCheck (impls : Impls) : Impls :=
 
 /-- The bodies of `Library`'s built-in functions and methods. -/
 def libraryImpls : Impls where
-  function := Library.iterablesFunction
-  method := Library.iteratorsMethod
+  function b := (Library.iterablesFunction b).orElse fun _ => Library.functionsFunction b
+  method t n := ((Library.iteratorsMethod t n).orElse fun _ => Library.numbersMethod t n).orElse
+    fun _ => (Library.constructorsMethod t n).orElse fun _ => Library.collectionsMethod t n
 
 /-- Each piece's part, in the order the pieces build on each other. -/
 def Assembly.parts : List Impls := [opsImpls, libraryImpls]
@@ -199,6 +201,9 @@ def startChecks {m : Type → Type 1} {V : Type} [PyReads m V] (f args : V) : m 
       discard <| Proto.classDescrSelf t name args
   | _ => pure ()
 
+-- The compiler specializes every piece's machines into these two definitions, which takes more
+-- than the default budget.
+set_option maxHeartbeats 1000000 in
 mutual
 /-- **The first step of every piece's step machine of a built-in callable**, with the fuel `n` for
 the nested calls, after `startChecks`: `Library`'s machines, whose calls start and resume with

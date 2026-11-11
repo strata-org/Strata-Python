@@ -1,0 +1,10 @@
+--- stdout 7
+before
+
+--- outcome
+ok
+--- globals
+I = <class 'I'>
+__doc__ = None
+__name__ = '__main__'
+x = <I object>

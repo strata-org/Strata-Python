@@ -1,0 +1,8 @@
+--- stdout 45
+int.__trunc__() takes no arguments (1 given)
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'

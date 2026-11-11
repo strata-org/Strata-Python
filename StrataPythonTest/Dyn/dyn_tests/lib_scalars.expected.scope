@@ -1,0 +1,65 @@
+module
+  I: local (assigned, referenced)
+  int: global implicit (referenced)
+  F: local (assigned, referenced)
+  float: global implicit (referenced)
+  S: local (assigned, referenced)
+  str: global implicit (referenced)
+  HasInt: local (assigned, referenced)
+  HasIndex: local (assigned, referenced)
+  HasFloat: local (assigned, referenced)
+  BadInt: local (assigned, referenced)
+  BadFloat: local (assigned, referenced)
+  Text: local (assigned, referenced)
+  errors: local (assigned, referenced)
+  print: global implicit (referenced)
+  bool: global implicit (referenced)
+  type: global implicit (referenced)
+  isinstance: global implicit (referenced)
+  hash: global implicit (referenced)
+  abs: global implicit (referenced)
+  divmod: global implicit (referenced)
+  class I
+  class F
+  class S
+  class HasInt
+    __int__: local (assigned)
+    function HasInt.__int__
+      params: self
+      self: local (parameter)
+  class HasIndex
+    __index__: local (assigned)
+    function HasIndex.__index__
+      params: self
+      self: local (parameter)
+  class HasFloat
+    __float__: local (assigned)
+    function HasFloat.__float__
+      params: self
+      self: local (parameter)
+  class BadInt
+    __int__: local (assigned)
+    function BadInt.__int__
+      params: self
+      self: local (parameter)
+  class BadFloat
+    __float__: local (assigned)
+    function BadFloat.__float__
+      params: self
+      self: local (parameter)
+  class Text
+    __str__: local (assigned)
+    function Text.__str__
+      params: self
+      self: local (parameter)
+  function errors
+    params: f, *args, **kwargs
+    f: local (parameter, referenced)
+    args: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+    TypeError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    OverflowError: global implicit (referenced)
+    e: local (assigned, referenced)
+    print: global implicit (referenced)
+    type: global implicit (referenced)

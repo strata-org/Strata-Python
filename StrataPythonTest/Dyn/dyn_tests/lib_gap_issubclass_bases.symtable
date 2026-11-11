@@ -1,0 +1,7 @@
+module top
+  f: local (assigned, referenced)
+  int: global implicit (referenced)
+  issubclass: global implicit (referenced)
+  print: global implicit (referenced)
+  function f
+qualnames: f

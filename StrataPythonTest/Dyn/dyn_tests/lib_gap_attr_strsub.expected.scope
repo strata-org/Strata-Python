@@ -1,0 +1,6 @@
+module
+  S: local (assigned, referenced)
+  str: global implicit (referenced)
+  print: global implicit (referenced)
+  getattr: global implicit (referenced)
+  class S

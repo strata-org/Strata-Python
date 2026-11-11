@@ -1,0 +1,192 @@
+module
+  D: local (assigned, referenced)
+  dict: global implicit (referenced)
+  F: local (assigned, referenced)
+  float: global implicit (referenced)
+  T: local (assigned, referenced)
+  tuple: global implicit (referenced)
+  FS: local (assigned, referenced)
+  frozenset: global implicit (referenced)
+  L: local (assigned, referenced)
+  list: global implicit (referenced)
+  S: local (assigned, referenced)
+  set: global implicit (referenced)
+  TT: local (assigned, referenced)
+  Grow: local (assigned, referenced)
+  P: local (assigned, referenced)
+  PI: local (assigned)
+  NegHint: local (assigned, referenced)
+  BS: local (assigned)
+  bytes: global implicit (referenced)
+  X: local (assigned, referenced)
+  errors: local (assigned, referenced)
+  d: local (assigned, referenced)
+  print: global implicit (referenced)
+  len: global implicit (referenced)
+  f: local (assigned, referenced)
+  t: local (assigned, referenced)
+  fs: local (assigned, referenced)
+  issubclass: global implicit (referenced)
+  int: global implicit (referenced)
+  bool: global implicit (referenced)
+  str: global implicit (referenced)
+  callable: global implicit (referenced)
+  slice: global implicit (referenced)
+  g: local (assigned, referenced)
+  type: global implicit (referenced)
+  L0: local (assigned, referenced)
+  Lm: local (assigned, referenced)
+  F0: local (assigned, referenced)
+  T0: local (assigned, referenced)
+  FS0: local (assigned, referenced)
+  Idx: local (assigned, referenced)
+  I: local (assigned, referenced)
+  ASetSubclassWhoseNameIsLongerThanFiftyBytesInTotalLength: local (assigned, referenced)
+  M: local (assigned, referenced)
+  exit: global implicit (referenced)
+  Meta: local (assigned, referenced)
+  C: local (assigned, referenced)
+  E: local (assigned, referenced)
+  class D
+    keys: local (assigned)
+    __getitem__: local (assigned)
+    function D.keys
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+    function D.__getitem__
+      params: self, k
+      self: local (parameter)
+      k: local (parameter, referenced)
+      print: global implicit (referenced)
+  class F
+    __init__: local (assigned)
+    function F.__init__
+      params: self, x, tag
+      self: local (parameter, referenced)
+      x: local (parameter)
+      tag: local (parameter, referenced)
+  class T
+    __init__: local (assigned)
+    function T.__init__
+      params: self, it, tag
+      self: local (parameter, referenced)
+      it: local (parameter)
+      tag: local (parameter, referenced)
+  class FS
+    __init__: local (assigned)
+    function FS.__init__
+      params: self, it, tag
+      self: local (parameter, referenced)
+      it: local (parameter)
+      tag: local (parameter, referenced)
+  class L (needs __class__ cell)
+    __new__: local (assigned)
+    function L.__new__
+      params: cls, *args, **kwargs
+      cls: local (parameter, referenced)
+      args: local (parameter)
+      kwargs: local (parameter)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+  class S
+  class TT
+  class Grow
+    __init__: local (assigned)
+    keys: local (assigned)
+    __getitem__: local (assigned)
+    function Grow.__init__
+      params: self
+      self: local (parameter, referenced)
+    function Grow.keys
+      params: self
+      self: local (parameter, referenced)
+    function Grow.__getitem__
+      params: self, k
+      self: local (parameter, referenced)
+      k: local (parameter, referenced)
+      len: global implicit (referenced)
+  class P
+    __iter__: local (assigned)
+    function P.__iter__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+      PI: global implicit (referenced)
+  class PI
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function PI.__init__
+      params: self
+      self: local (parameter, referenced)
+    function PI.__iter__
+      params: self
+      self: local (parameter, referenced)
+      print: global implicit (referenced)
+    function PI.__next__
+      params: self
+      self: local (parameter, referenced)
+      StopIteration: global implicit (referenced)
+  class NegHint
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    __length_hint__: local (assigned)
+    function NegHint.__iter__
+      params: self
+      self: local (parameter, referenced)
+    function NegHint.__next__
+      params: self
+      self: local (parameter)
+      StopIteration: global implicit (referenced)
+    function NegHint.__length_hint__
+      params: self
+      self: local (parameter)
+  class BS
+  class X
+    __bytes__: local (assigned)
+    function X.__bytes__
+      params: self
+      self: local (parameter)
+      BS: global implicit (referenced)
+  function errors
+    params: f, *args, **kwargs
+    f: local (parameter, referenced)
+    args: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+    TypeError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    OverflowError: global implicit (referenced)
+    e: local (assigned, referenced)
+    print: global implicit (referenced)
+    type: global implicit (referenced)
+  class L0
+  class Lm
+    __new__: local (assigned)
+    list: global implicit (referenced)
+  class F0
+  class T0
+  class FS0
+  class Idx
+    __index__: local (assigned)
+    function Idx.__index__
+      params: self
+      self: local (parameter)
+  class I
+  class ASetSubclassWhoseNameIsLongerThanFiftyBytesInTotalLength
+  class M
+    keys: local (assigned)
+    __getitem__: local (assigned)
+    p: local (assigned)
+    property: global implicit (referenced)
+    dict: global implicit (referenced)
+    function M.keys
+      params: self
+      self: local (parameter)
+    function M.__getitem__
+      params: self, k
+      self: local (parameter)
+      k: local (parameter)
+  class Meta
+  class C
+  class E

@@ -65,6 +65,10 @@ public environment PyT extends Py where
   insn viewBare (k : base.Int) (^err (exc : Value)) : Value
   insn setExactCase (^err (exc : Value)) : Value
   insn stubHooks (k : base.Int) (^err (exc : Value)) : Value
+  insn stubIssubclass (k : base.Int) (^err (exc : Value)) : Value
+  insn callableOpaque (^err (exc : Value)) : Value
+  insn callableTpNew (^err (exc : Value)) : Value
+  insn sequenceCheckProxy (^err (exc : Value)) : Value
   insn regionValue (c : cell) (&body (x : Value) : raising base.Unit) (^err (exc : Value)) : Value
   insn regionCell (c : cell) (&body (r : cell) : raising base.Unit) (^err (exc : Value)) : Value
   insn regionArity (k : base.Int) (&body (x : Value) : raising base.Unit) (^err (exc : Value)) : Value
@@ -113,6 +117,7 @@ public environment PyT extends Py where
   insn dictRevNext (^err (exc : Value)) : Value
   insn startZero (^err (exc : Value)) : Value
   insn staleSlice (^err (exc : Value)) : Value
+  insn tpNewNoLeak (^err (exc : Value)) : Value
   end pt
 
 #dyn_types PyT
@@ -1485,6 +1490,61 @@ isn't a C type, `U.__dict__["__doc__"]` (`20`), `U.__doc__` when `U` holds and g
       pure (.bool ((← PyPure.identical q1 q2) matches .yes))
     : PyM σ .writes true Value)
 
+/-- The bodies of `stubIssubclass`'s case `k`: none for `2`, else `stubImpls`. -/
+public def stubIssubclassImpls (k : Int) : Impls :=
+  if k == 2 then {} else stubImpls (k == 1)
+
+/-- `issubclass(bool, u)` for an object `u` with opaque state, through the union hook of
+`stubImpls`: the hook gives `(str, int)` (`0`), so the result is `True`; it gives `None` (`1`), so
+the call goes on to `recursive_issubclass`, which raises `TypeError` for `u`, an object without
+`__bases__`; and with no body for the hook (`2`), the call stops with the hook's gap. -/
+@[dyn_sem PyT.stubIssubclass, expose] public def stubIssubclass (k : Int)
+    (err : Target E [Value]) : Sem ε E Value :=
+  runRule err #[] (do
+    letI : PyWrites (PyM σ .writes true) Value :=
+      writesRecord (callBuiltinWith (stubIssubclassImpls k) 5000)
+    do
+      let ns ← PyPure.allocDict
+      let a ← PyPure.allocObj (.builtin .type) (.cls
+        { name := "U", qualname := "U", «module» := "m", bases := #[.builtin .object],
+          mroTail := #[.builtin .object], ns, solidBase := .builtin .object })
+      let u ← PyPure.allocObj a (.opaque "u" #[])
+      pure (.bool (← Library.issubclassN 5 (.builtin .bool) u))
+    : PyM σ .writes true Value)
+
+/-- `callable(u)` for an object `u` with opaque state, which no built-in of `Library` makes: it
+stops with a gap. -/
+@[dyn_sem PyT.callableOpaque, expose] public def callableOpaque (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let ns ← PyPure.allocDict
+    let a ← PyPure.allocObj (.builtin .type) (.cls
+      { name := "U", qualname := "U", «module» := "m", bases := #[.builtin .object],
+        mroTail := #[.builtin .object], ns, solidBase := .builtin .object })
+    let u ← PyPure.allocObj a (.opaque "u" #[])
+    pure (.bool (← Library.isCallable u))
+    : PyM σ .reads false Value)
+
+/-- `callable(f)` for a class call's own callee, `int.__new__` bound to `int` as `tp_new`, which no
+attribute lookup gives: a model invariant, as for its unbound form. -/
+@[dyn_sem PyT.callableTpNew, expose] public def callableTpNew (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    pure (.bool (← Library.isCallable (Value.bound (.builtin .int) .int "__new__" .tpNew)))
+    : PyM σ .reads false Value)
+
+/-- `PySequence_Check` of a `mappingproxy`, a built-in type whose `__getitem__` is not one of the
+five sequence types': it stops with a gap. -/
+@[dyn_sem PyT.sequenceCheckProxy, expose] public def sequenceCheckProxy (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    letI : PyWrites (PyM σ .writes true) Value := writesRecord (callBuiltinWith {} 5000)
+    do
+      let d ← PyPure.allocDict
+      let p ← PyPure.allocObj (.builtin .mappingproxy) (.mappingProxy d d)
+      pure (.bool (← Library.sequenceCheck p))
+    : PyM σ .writes true Value)
+
 /-- Region `0` on `1`, with a cell operand that it doesn't pass: a region whose parameter holds no
 ref, which `#py_rule_theorems` proves. -/
 @[dyn_sem PyT.regionValue, expose] public def regionValue (_c : Ref σ Value)
@@ -1829,6 +1889,72 @@ makes (`0`), and of an object with opaque state whose class `A`'s `__call__` is 
     pure (showStep (← Proto.callResumable (S := TState) 5 f (.tuple #[]) (← PyPure.allocDict) []))
     : PyM σ .writes true Value)
 
+/-- The values that a frame of `py.call`'s loop state holds. -/
+public def frameValues : PyLoopState Value → List Value
+  | .ops (.typeNew cls args kwargs) => [cls, args, kwargs]
+  | .ops (.typeInit obj) => [obj]
+  | .ops .callLevel => []
+  | .library (.collect (.list self it)) => [self, it]
+  | .library (.collect (.tuple cls acc it)) => [cls, acc, it]
+  | .library (.collect (.set self it)) => [self, it]
+  | .library (.collect (.frozenset self it)) => [self, it]
+  | .library (.collect (.dictKeys self other it kwargs acc)) => [self, other, it, kwargs, acc]
+  | .library (.collect (.dictKeysList self other keys kwargs _)) => [self, other, keys, kwargs]
+  | .library (.collect (.dictPairs self it kwargs _ inner)) =>
+    [self, it, kwargs] ++ (inner.map fun (p, got) => [p, got]).getD []
+  | .library (.collect (.bytes cls acc it)) => [cls, acc, it]
+  | .library (.anyAll _ it) => [it]
+  | .library (.sum it _) => [it]
+  | .library (.minMax _ it key dflt best pending) =>
+    [it] ++ key.toList ++ dflt.toList ++ (best.map fun (a, b) => [a, b]).getD [] ++ pending.toList
+
+/-- A call of each container constructor over an iterator that gives one item per activation
+(`iter(li.__next__, 99)` over a list iterator `li`), resumed until it ends: for each, the number
+of activations, and whether a frame or the result held a value of the internal kind `.tpNew`. -/
+public def tpNewNoLeakM : PyM σ .writes true Value := do
+  -- A value of the kind `.tpNew`, also inside a tuple or a list, one level down.
+  let isTpNew (v : Value) : PyM σ .writes true Bool := do
+    let one (w : Value) : PyM σ .writes true Bool := do
+      return (← PyPure.immViewAll w) matches some (.bound _ _ _ .tpNew)
+    if ← one v then return true
+    let inner ← match ← PyPure.immViewAll v with
+      | some (.tuple xs) => pure xs
+      | _ => pure ((← Proto.listOf? (m := PyM σ .writes true) v).getD #[])
+    inner.anyM one
+  -- A user subclass of `tuple`, whose call goes through `type.__call__`'s `typeNew` frame.
+  let tup := Value.builtin .tuple
+  let sub ← PyPure.allocObj (.builtin .type) (.cls
+    { name := "T", qualname := "T", «module» := "m", bases := #[tup],
+      mroTail := #[tup, .builtin .object], ns := ← PyPure.allocDict, solidBase := tup })
+  let mut out : Array Value := #[]
+  for t in [Value.builtin .tuple, .builtin .frozenset, .builtin .bytes, .builtin .list,
+      .builtin .set, sub] do
+    let li ← Proto.getIter (m := PyM σ .writes true) (← intList [65, 66, 67])
+    let nxt ← Proto.getAttr (m := PyM σ .writes true) li "__next__"
+    let cit ← Proto.newIter (m := PyM σ .writes true) .callable_iterator (.callable nxt (.int 99))
+    let kw ← PyPure.allocDict
+    let mut saved : List (PyLoopState Value) := []
+    let mut steps := 0
+    let mut leaked := false
+    let mut done := false
+    for _ in [0:20] do
+      if done then break
+      steps := steps + 1
+      match ← Proto.callResumable (S := PyLoopState Value) 5 t (.tuple #[cit]) kw saved with
+      | .done v =>
+        leaked := leaked || (← isTpNew v)
+        done := true
+      | .suspend fs =>
+        for fr in fs do
+          for v in frameValues fr do leaked := leaked || (← isTpNew v)
+        saved := fs
+    out := out.push (.tuple #[.int steps, .bool leaked])
+  pure (.tuple out)
+
+@[dyn_sem PyT.tpNewNoLeak, expose]
+public def tpNewNoLeak (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[] tpNewNoLeakM
+
 /-- `callResumable` with saved frames resumes the frame's machine with no dispatch of the callee
 (here `None`). -/
 public def resumeDirectM : PyM σ .writes true Value := do
@@ -1870,13 +1996,15 @@ def ptEffect : String → Effects.Level
   | "pt.setAny" => .writes
   | "pt.dictPrims" | "pt.setPrims" | "pt.slotInexact" | "pt.popInexact" | "pt.listPrims"
   | "pt.newPrims" | "pt.bindCase" | "pt.setExactCase" => .reads
-  | "pt.oldPrims" | "pt.frozenSeal" | "pt.nativeDepth" | "pt.nativeGapped" | "pt.nextView" | "pt.setUpdateSub" | "pt.classDescr" | "pt.startCheck" | "pt.hooks" | "pt.partHooks" | "pt.staticDescr" | "pt.heapAttrs" | "pt.dictProxyCase" | "pt.viewOps" | "pt.viewBare" | "pt.cTypeStep" | "pt.stubHooks" => .writes
+  | "pt.oldPrims" | "pt.frozenSeal" | "pt.nativeDepth" | "pt.nativeGapped" | "pt.nextView" | "pt.setUpdateSub" | "pt.classDescr" | "pt.startCheck" | "pt.hooks" | "pt.partHooks" | "pt.staticDescr" | "pt.heapAttrs" | "pt.dictProxyCase" | "pt.viewOps" | "pt.viewBare" | "pt.cTypeStep" | "pt.stubHooks" | "pt.stubIssubclass" => .writes
+  | "pt.sequenceCheckProxy" => .writes
+  | "pt.callableOpaque" | "pt.callableTpNew" => .reads
   | "pt.frozenOr" | "pt.frozenAdd" | "pt.objPrims" => .writes
   | "pt.frozenWalk" | "pt.frozenMerge" | "pt.subclassOps" => .calls
   | "pt.subclassContainers" | "pt.seqSlotSub" | "pt.seqSlotCleared" | "pt.strSetSubOps" | "pt.callInst" | "pt.callLevelStep" | "pt.resumeCase" | "pt.resumeDirect" | "pt.resumeNoFit"
   | "pt.foreignIter" | "pt.foreignLen" | "pt.strSubIter" | "pt.iterBounds" | "pt.zipNext"
   | "pt.enumNext" | "pt.revNext" | "pt.listRevNext" | "pt.dictRevNext" | "pt.startZero"
-  | "pt.staleSlice" => .writes
+  | "pt.staleSlice" | "pt.tpNewNoLeak" => .writes
   | _ => .pure
 
 /-- The tags of `PyLang` in `PyTSem`. -/
@@ -3450,6 +3578,44 @@ info: fault: Strata.Dyn.Exec.Fault.gap "isinstance with a second argument that i
 #eval run "      %v.0 : py.Value = pt.stubHooks(1) ^err.0()"
 
 /--
+info: StrataPython.Dyn.Sem.Value.bool true
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubIssubclass(0) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "issubclass() arg 2 must be a class, a tuple of classes, or a union", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubIssubclass(1) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "union args is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubIssubclass(2) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "callable() of this object is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.callableOpaque ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "whether a mappingproxy is a sequence is not modelled"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.sequenceCheckProxy ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "model invariant: callable() of a class call's own callee"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.callableTpNew ^err.0()"
+
+/--
 info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
   #[StrataPython.Dyn.Sem.Value.str
       { s := "unsupported operand type(s) for |: 'type' and 'type'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
@@ -3835,6 +4001,21 @@ info: StrataPython.Dyn.Sem.Value.tuple
 -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.staleSlice ^err.0()"
+
+-- The container constructors' machines keep no callee of the internal kind `.tpNew` in their
+-- frames or results (nor in a tuple or a list there), over the activations that an iterator of
+-- one item per activation needs; the last call is of a subclass of `tuple`.
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 4, StrataPython.Dyn.Sem.Value.bool false],
+    StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 4, StrataPython.Dyn.Sem.Value.bool false],
+    StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 4, StrataPython.Dyn.Sem.Value.bool false],
+    StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 4, StrataPython.Dyn.Sem.Value.bool false],
+    StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 4, StrataPython.Dyn.Sem.Value.bool false],
+    StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 4, StrataPython.Dyn.Sem.Value.bool false]]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.tpNewNoLeak ^err.0()"
 
 -- `machinesStart` with no fuel left stops with a gap.
 /-- info: fault: Strata.Dyn.Exec.Fault.gap "a call dispatch nested deeper than the model follows" -/

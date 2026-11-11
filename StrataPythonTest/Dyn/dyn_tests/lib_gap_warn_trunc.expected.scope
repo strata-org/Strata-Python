@@ -1,0 +1,10 @@
+module
+  A: local (assigned, referenced)
+  print: global implicit (referenced)
+  x: local (assigned)
+  int: global implicit (referenced)
+  class A
+    __trunc__: local (assigned)
+    function A.__trunc__
+      params: self
+      self: local (parameter)

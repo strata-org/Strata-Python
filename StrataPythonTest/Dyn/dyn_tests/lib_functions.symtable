@@ -1,0 +1,79 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  C: local (assigned, referenced)
+  D: local (assigned, referenced)
+  F: local (assigned, referenced)
+  G: local (assigned, referenced)
+  I: local (assigned, referenced)
+  Idx: local (assigned, referenced)
+  M: local (assigned, referenced)
+  Meta: local (assigned, referenced)
+  a: local (assigned, referenced)
+  abs: global implicit (referenced)
+  bool: global implicit (referenced)
+  callable: global implicit (referenced)
+  divmod: global implicit (referenced)
+  errors: local (assigned, referenced)
+  float: global implicit (referenced)
+  g: local (assigned, referenced)
+  getattr: global implicit (referenced)
+  hasattr: global implicit (referenced)
+  hash: global implicit (referenced)
+  hex: global implicit (referenced)
+  inf: local (assigned, referenced)
+  int: global implicit (referenced)
+  issubclass: global implicit (referenced)
+  len: global implicit (referenced)
+  object: global implicit (referenced)
+  print: global implicit (referenced)
+  setattr: global implicit (referenced)
+  type: global implicit (referenced)
+  class A
+    x: local (assigned)
+  class G
+    __getattr__: local (assigned)
+    function __getattr__
+      ValueError: global implicit (referenced)
+      name: local (parameter, referenced)
+      self: local (parameter)
+  class Meta
+    __subclasscheck__: local (assigned)
+    function __subclasscheck__
+      cls: local (parameter)
+      print: global implicit (referenced)
+      sub: local (parameter, referenced)
+  class M
+  class B
+  class C
+    __call__: local (assigned)
+    function __call__
+      self: local (parameter)
+  class I
+  class F
+  class D
+    __divmod__: local (assigned)
+    __rdivmod__: local (assigned)
+    function __divmod__
+      other: local (parameter, referenced)
+      self: local (parameter)
+    function __rdivmod__
+      other: local (parameter, referenced)
+      self: local (parameter)
+  class Idx
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+  function errors
+    AttributeError: global implicit (referenced)
+    OverflowError: global implicit (referenced)
+    TypeError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    ZeroDivisionError: global implicit (referenced)
+    args: local (parameter, referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+    print: global implicit (referenced)
+    type: global implicit (referenced)
+qualnames: A, B, C, C.__call__, D, D.__divmod__, D.__rdivmod__, F, G, G.__getattr__, I, Idx, Idx.__index__, M, Meta, Meta.__subclasscheck__, errors

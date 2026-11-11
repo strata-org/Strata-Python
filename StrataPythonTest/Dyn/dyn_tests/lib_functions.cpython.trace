@@ -1,0 +1,62 @@
+--- stdout 1604
+1 5 True False
+AttributeError 'A' object has no attribute 'y'
+7 True
+ValueError boom
+ValueError boom
+TypeError attribute name must be string, not 'int'
+TypeError attribute name must be string, not 'int'
+TypeError getattr expected at least 2 arguments, got 1
+TypeError getattr expected at most 3 arguments, got 4
+TypeError getattr() takes no keyword arguments
+3 True
+TypeError attribute name must be string, not 'int'
+AttributeError 'int' object has no attribute 'x'
+True True False True False True True
+TypeError callable() takes exactly one argument (0 given)
+check B
+True False True True
+TypeError issubclass() arg 1 must be a class
+TypeError issubclass() arg 2 must be a class, a tuple of classes, or a union
+TypeError issubclass expected 2 arguments, got 1
+1 -2 1 1 1152921504606846978 5740354900026072187 -3550055125485641917 True
+TypeError unhashable type: 'list'
+TypeError hash() takes exactly one argument (0 given)
+3 2.5 0.0 1 3
+TypeError bad operand type for abs(): 'str'
+(3, 1) (-4, 1) (3.0, 1.5) (0, 1)
+('divmod', 1) ('rdivmod', 1) (-4.0, 1.0) (-4.0, -1.0)
+ZeroDivisionError integer division or modulo by zero
+ZeroDivisionError float divmod()
+TypeError unsupported operand type(s) for divmod(): 'str' and 'int'
+TypeError divmod expected 2 arguments, got 1
+0xff -0xff 0x0 0xff 0x1
+TypeError 'float' object cannot be interpreted as an integer
+(3, 1) (3, 1) (3.0, 1.0) NotImplemented
+5 5.0 5 1 int
+2 -2 1.5 1.5
+OverflowError cannot convert float infinity to integer
+ValueError cannot convert float NaN to integer
+OverflowError int too large to convert to float
+5 3 3 (3, 1) 0x10
+5 int 1.5 float
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+C = <class 'C'>
+D = <class 'D'>
+F = <class 'F'>
+G = <class 'G'>
+I = <class 'I'>
+Idx = <class 'Idx'>
+M = <class 'M'>
+Meta = <class 'Meta'>
+__doc__ = None
+__name__ = '__main__'
+a = <A object>
+errors = <function object>
+g = <G object>
+inf = inf

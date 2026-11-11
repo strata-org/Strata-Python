@@ -1,0 +1,7 @@
+module
+  t: local (assigned, referenced)
+  str: global implicit (referenced)
+  i: local (assigned)
+  range: global implicit (referenced)
+  print: global implicit (referenced)
+  issubclass: global implicit (referenced)

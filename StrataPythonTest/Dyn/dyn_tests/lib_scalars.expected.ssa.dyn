@@ -1,0 +1,1144 @@
+module lib_scalars {
+  func @|lib_scalars.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("lib_scalars")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_scalars", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_scalars", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|lib_scalars.I.<body>|, "<body>", "lib_scalars")
+      %str.1 : py.Value = py.strLit("I")
+      %int.0 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1, %int.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %I.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %I.cell.0 : base.Ref(py.Value) = py.globalCell("lib_scalars", "I")
+      %set.2 : base.Unit = base.refSet[py.Value](%I.cell.0, %I.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|lib_scalars.F.<body>|, "<body>", "lib_scalars")
+      %str.2 : py.Value = py.strLit("F")
+      %float.0 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2, %float.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %F.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %F.cell.0 : base.Ref(py.Value) = py.globalCell("lib_scalars", "F")
+      %set.3 : base.Unit = base.refSet[py.Value](%F.cell.0, %F.0)
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@|lib_scalars.S.<body>|, "<body>", "lib_scalars")
+      %str.3 : py.Value = py.strLit("S")
+      %str.4 : py.Value = py.loadGlobal("lib_scalars", "str") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%clo.2, %str.3, %str.4)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %S.0 : py.Value = py.call(%__build_class__.2, %tuple.2, %kwargs.2) ^propagate.0()
+      %S.cell.0 : base.Ref(py.Value) = py.globalCell("lib_scalars", "S")
+      %set.4 : base.Unit = base.refSet[py.Value](%S.cell.0, %S.0)
+      %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.3 : py.Value = py.mkClosure[[]](@|lib_scalars.HasInt.<body>|, "<body>", "lib_scalars")
+      %str.5 : py.Value = py.strLit("HasInt")
+      %tuple.3 : py.Value = py.mkTuple(%clo.3, %str.5)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %HasInt.0 : py.Value = py.call(%__build_class__.3, %tuple.3, %kwargs.3) ^propagate.0()
+      %HasInt.cell.0 : base.Ref(py.Value) = py.globalCell("lib_scalars", "HasInt")
+      %set.5 : base.Unit = base.refSet[py.Value](%HasInt.cell.0, %HasInt.0)
+      %__build_class__.4 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.4 : py.Value = py.mkClosure[[]](@|lib_scalars.HasIndex.<body>|, "<body>", "lib_scalars")
+      %str.6 : py.Value = py.strLit("HasIndex")
+      %tuple.4 : py.Value = py.mkTuple(%clo.4, %str.6)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %HasIndex.0 : py.Value = py.call(%__build_class__.4, %tuple.4, %kwargs.4) ^propagate.0()
+      %HasIndex.cell.0 : base.Ref(py.Value) = py.globalCell("lib_scalars", "HasIndex")
+      %set.6 : base.Unit = base.refSet[py.Value](%HasIndex.cell.0, %HasIndex.0)
+      %__build_class__.5 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.5 : py.Value = py.mkClosure[[]](@|lib_scalars.HasFloat.<body>|, "<body>", "lib_scalars")
+      %str.7 : py.Value = py.strLit("HasFloat")
+      %tuple.5 : py.Value = py.mkTuple(%clo.5, %str.7)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %HasFloat.0 : py.Value = py.call(%__build_class__.5, %tuple.5, %kwargs.5) ^propagate.0()
+      %HasFloat.cell.0 : base.Ref(py.Value) = py.globalCell("lib_scalars", "HasFloat")
+      %set.7 : base.Unit = base.refSet[py.Value](%HasFloat.cell.0, %HasFloat.0)
+      %__build_class__.6 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.6 : py.Value = py.mkClosure[[]](@|lib_scalars.BadInt.<body>|, "<body>", "lib_scalars")
+      %str.8 : py.Value = py.strLit("BadInt")
+      %tuple.6 : py.Value = py.mkTuple(%clo.6, %str.8)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %BadInt.0 : py.Value = py.call(%__build_class__.6, %tuple.6, %kwargs.6) ^propagate.0()
+      %BadInt.cell.0 : base.Ref(py.Value) = py.globalCell("lib_scalars", "BadInt")
+      %set.8 : base.Unit = base.refSet[py.Value](%BadInt.cell.0, %BadInt.0)
+      %__build_class__.7 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.7 : py.Value = py.mkClosure[[]](@|lib_scalars.BadFloat.<body>|, "<body>", "lib_scalars")
+      %str.9 : py.Value = py.strLit("BadFloat")
+      %tuple.7 : py.Value = py.mkTuple(%clo.7, %str.9)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %BadFloat.0 : py.Value = py.call(%__build_class__.7, %tuple.7, %kwargs.7) ^propagate.0()
+      %BadFloat.cell.0 : base.Ref(py.Value) = py.globalCell("lib_scalars", "BadFloat")
+      %set.9 : base.Unit = base.refSet[py.Value](%BadFloat.cell.0, %BadFloat.0)
+      %__build_class__.8 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.8 : py.Value = py.mkClosure[[]](@|lib_scalars.Text.<body>|, "<body>", "lib_scalars")
+      %str.10 : py.Value = py.strLit("Text")
+      %tuple.8 : py.Value = py.mkTuple(%clo.8, %str.10)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %Text.0 : py.Value = py.call(%__build_class__.8, %tuple.8, %kwargs.8) ^propagate.0()
+      %Text.cell.0 : base.Ref(py.Value) = py.globalCell("lib_scalars", "Text")
+      %set.10 : base.Unit = base.refSet[py.Value](%Text.cell.0, %Text.0)
+      %clo.9 : py.Value = py.mkClosure[[]](@lib_scalars.errors, "errors", "lib_scalars")
+      %errors.cell.0 : base.Ref(py.Value) = py.globalCell("lib_scalars", "errors")
+      %set.11 : base.Unit = base.refSet[py.Value](%errors.cell.0, %clo.9)
+      %print.0 : py.Value = py.loadGlobal("lib_scalars", "print") ^propagate.0()
+      %int.1 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %tuple.9 : py.Value = py.mkTuple
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%int.1, %tuple.9, %kwargs.9) ^propagate.0()
+      %int.2 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %int.3 : py.Value = py.intLit(7)
+      %tuple.10 : py.Value = py.mkTuple(%int.3)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%int.2, %tuple.10, %kwargs.10) ^propagate.0()
+      %int.4 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %float.1 : py.Value = py.floatLit(2.9)
+      %neg.0 : py.Value = py.uSub(%float.1) ^propagate.0()
+      %tuple.11 : py.Value = py.mkTuple(%neg.0)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%int.4, %tuple.11, %kwargs.11) ^propagate.0()
+      %int.5 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %bool.0 : py.Value = py.boolLit(true)
+      %tuple.12 : py.Value = py.mkTuple(%bool.0)
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%int.5, %tuple.12, %kwargs.12) ^propagate.0()
+      %int.6 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %str.11 : py.Value = py.strLit("  -42 ")
+      %tuple.13 : py.Value = py.mkTuple(%str.11)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%int.6, %tuple.13, %kwargs.13) ^propagate.0()
+      %int.7 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %str.12 : py.Value = py.strLit("ff")
+      %int.8 : py.Value = py.intLit(16)
+      %tuple.14 : py.Value = py.mkTuple(%str.12, %int.8)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%int.7, %tuple.14, %kwargs.14) ^propagate.0()
+      %int.9 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %str.13 : py.Value = py.strLit("0x1f")
+      %int.10 : py.Value = py.intLit(0)
+      %tuple.15 : py.Value = py.mkTuple(%str.13, %int.10)
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%int.9, %tuple.15, %kwargs.15) ^propagate.0()
+      %int.11 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %str.14 : py.Value = py.strLit("1_000")
+      %tuple.16 : py.Value = py.mkTuple(%str.14)
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%int.11, %tuple.16, %kwargs.16) ^propagate.0()
+      %tuple.17 : py.Value = py.mkTuple(%call.0, %call.1, %call.2, %call.3, %call.4, %call.5, %call.6, %call.7)
+      %kwargs.17 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%print.0, %tuple.17, %kwargs.17) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("lib_scalars", "print") ^propagate.0()
+      %int.12 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %bytes.0 : py.Value = py.bytesLit("12")
+      %tuple.18 : py.Value = py.mkTuple(%bytes.0)
+      %kwargs.18 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%int.12, %tuple.18, %kwargs.18) ^propagate.0()
+      %int.13 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %bytes.1 : py.Value = py.bytesLit("z")
+      %int.14 : py.Value = py.intLit(36)
+      %tuple.19 : py.Value = py.mkTuple(%bytes.1, %int.14)
+      %kwargs.19 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%int.13, %tuple.19, %kwargs.19) ^propagate.0()
+      %int.15 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %HasInt.1 : py.Value = py.loadGlobal("lib_scalars", "HasInt") ^propagate.0()
+      %tuple.20 : py.Value = py.mkTuple
+      %kwargs.20 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%HasInt.1, %tuple.20, %kwargs.20) ^propagate.0()
+      %tuple.21 : py.Value = py.mkTuple(%call.11)
+      %kwargs.21 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%int.15, %tuple.21, %kwargs.21) ^propagate.0()
+      %int.16 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %HasIndex.1 : py.Value = py.loadGlobal("lib_scalars", "HasIndex") ^propagate.0()
+      %tuple.22 : py.Value = py.mkTuple
+      %kwargs.22 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%HasIndex.1, %tuple.22, %kwargs.22) ^propagate.0()
+      %tuple.23 : py.Value = py.mkTuple(%call.13)
+      %kwargs.23 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%int.16, %tuple.23, %kwargs.23) ^propagate.0()
+      %int.17 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %str.15 : py.Value = py.strLit("١٢")
+      %tuple.24 : py.Value = py.mkTuple(%str.15)
+      %kwargs.24 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%int.17, %tuple.24, %kwargs.24) ^propagate.0()
+      %int.18 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %str.16 : py.Value = py.strLit(" 7\t")
+      %tuple.25 : py.Value = py.mkTuple(%str.16)
+      %kwargs.25 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%int.18, %tuple.25, %kwargs.25) ^propagate.0()
+      %tuple.26 : py.Value = py.mkTuple(%call.9, %call.10, %call.12, %call.14, %call.15, %call.16)
+      %kwargs.26 : py.Value = py.mkKwargs
+      %call.17 : py.Value = py.call(%print.1, %tuple.26, %kwargs.26) ^propagate.0()
+      %print.2 : py.Value = py.loadGlobal("lib_scalars", "print") ^propagate.0()
+      %bool.1 : py.Value = py.boolLit(false)
+      %cond.0 : base.Bool = py.truthy(%bool.1) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %int.19 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %int.20 : py.Value = py.intLit(7)
+      %tuple.27 : py.Value = py.mkTuple(%int.20)
+      %str.17 : py.Value = py.strLit("base")
+      %int.21 : py.Value = py.intLit(10)
+      %kwargs.27 : py.Value = py.mkKwargs(%str.17, %int.21)
+      %call.18 : py.Value = py.call(%int.19, %tuple.27, %kwargs.27) ^propagate.0()
+      jump ^join.0(%call.18)
+    else.0():
+      %int.22 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %str.18 : py.Value = py.strLit("10")
+      %tuple.28 : py.Value = py.mkTuple(%str.18)
+      %str.19 : py.Value = py.strLit("base")
+      %int.23 : py.Value = py.intLit(2)
+      %kwargs.28 : py.Value = py.mkKwargs(%str.19, %int.23)
+      %call.19 : py.Value = py.call(%int.22, %tuple.28, %kwargs.28) ^propagate.0()
+      jump ^join.0(%call.19)
+    join.0(%ifexp.0 : py.Value):
+      %tuple.29 : py.Value = py.mkTuple(%ifexp.0)
+      %kwargs.29 : py.Value = py.mkKwargs
+      %call.20 : py.Value = py.call(%print.2, %tuple.29, %kwargs.29) ^propagate.0()
+      %errors.0 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %int.24 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %str.20 : py.Value = py.strLit("x")
+      %tuple.30 : py.Value = py.mkTuple(%int.24, %str.20)
+      %kwargs.30 : py.Value = py.mkKwargs
+      %call.21 : py.Value = py.call(%errors.0, %tuple.30, %kwargs.30) ^propagate.0()
+      %errors.1 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %int.25 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %str.21 : py.Value = py.strLit("12")
+      %int.26 : py.Value = py.intLit(1)
+      %tuple.31 : py.Value = py.mkTuple(%int.25, %str.21, %int.26)
+      %kwargs.31 : py.Value = py.mkKwargs
+      %call.22 : py.Value = py.call(%errors.1, %tuple.31, %kwargs.31) ^propagate.0()
+      %errors.2 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %int.27 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %str.22 : py.Value = py.strLit("12")
+      %int.28 : py.Value = py.intLit(37)
+      %tuple.32 : py.Value = py.mkTuple(%int.27, %str.22, %int.28)
+      %kwargs.32 : py.Value = py.mkKwargs
+      %call.23 : py.Value = py.call(%errors.2, %tuple.32, %kwargs.32) ^propagate.0()
+      %errors.3 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %int.29 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %int.30 : py.Value = py.intLit(1)
+      %int.31 : py.Value = py.intLit(2)
+      %tuple.33 : py.Value = py.mkTuple(%int.29, %int.30, %int.31)
+      %kwargs.33 : py.Value = py.mkKwargs
+      %call.24 : py.Value = py.call(%errors.3, %tuple.33, %kwargs.33) ^propagate.0()
+      %errors.4 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %int.32 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %float.2 : py.Value = py.floatLit(1.5)
+      %int.33 : py.Value = py.intLit(2)
+      %tuple.34 : py.Value = py.mkTuple(%int.32, %float.2, %int.33)
+      %kwargs.34 : py.Value = py.mkKwargs
+      %call.25 : py.Value = py.call(%errors.4, %tuple.34, %kwargs.34) ^propagate.0()
+      %errors.5 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %int.34 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %list.0 : py.Value = py.mkList
+      %tuple.35 : py.Value = py.mkTuple(%int.34, %list.0)
+      %kwargs.35 : py.Value = py.mkKwargs
+      %call.26 : py.Value = py.call(%errors.5, %tuple.35, %kwargs.35) ^propagate.0()
+      %errors.6 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %int.35 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %BadInt.1 : py.Value = py.loadGlobal("lib_scalars", "BadInt") ^propagate.0()
+      %tuple.36 : py.Value = py.mkTuple
+      %kwargs.36 : py.Value = py.mkKwargs
+      %call.27 : py.Value = py.call(%BadInt.1, %tuple.36, %kwargs.36) ^propagate.0()
+      %tuple.37 : py.Value = py.mkTuple(%int.35, %call.27)
+      %kwargs.37 : py.Value = py.mkKwargs
+      %call.28 : py.Value = py.call(%errors.6, %tuple.37, %kwargs.37) ^propagate.0()
+      %errors.7 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %int.36 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %float.3 : py.Value = py.floatLit(1e308)
+      %int.37 : py.Value = py.intLit(10)
+      %mult.0 : py.Value = py.mult(%float.3, %int.37) ^propagate.0()
+      %tuple.38 : py.Value = py.mkTuple(%int.36, %mult.0)
+      %kwargs.38 : py.Value = py.mkKwargs
+      %call.29 : py.Value = py.call(%errors.7, %tuple.38, %kwargs.38) ^propagate.0()
+      %errors.8 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %int.38 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %int.39 : py.Value = py.intLit(1)
+      %int.40 : py.Value = py.intLit(2)
+      %int.41 : py.Value = py.intLit(3)
+      %tuple.39 : py.Value = py.mkTuple(%int.38, %int.39, %int.40, %int.41)
+      %kwargs.39 : py.Value = py.mkKwargs
+      %call.30 : py.Value = py.call(%errors.8, %tuple.39, %kwargs.39) ^propagate.0()
+      %errors.9 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %int.42 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %tuple.40 : py.Value = py.mkTuple(%int.42)
+      %str.23 : py.Value = py.strLit("base")
+      %int.43 : py.Value = py.intLit(2)
+      %kwargs.40 : py.Value = py.mkKwargs(%str.23, %int.43)
+      %call.31 : py.Value = py.call(%errors.9, %tuple.40, %kwargs.40) ^propagate.0()
+      %errors.10 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %int.44 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %tuple.41 : py.Value = py.mkTuple(%int.44)
+      %str.24 : py.Value = py.strLit("x")
+      %int.45 : py.Value = py.intLit(1)
+      %kwargs.41 : py.Value = py.mkKwargs(%str.24, %int.45)
+      %call.32 : py.Value = py.call(%errors.10, %tuple.41, %kwargs.41) ^propagate.0()
+      %errors.11 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %int.46 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %bytes.2 : py.Value = py.bytesLit("x")
+      %tuple.42 : py.Value = py.mkTuple(%int.46, %bytes.2)
+      %kwargs.42 : py.Value = py.mkKwargs
+      %call.33 : py.Value = py.call(%errors.11, %tuple.42, %kwargs.42) ^propagate.0()
+      %print.3 : py.Value = py.loadGlobal("lib_scalars", "print") ^propagate.0()
+      %float.4 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %tuple.43 : py.Value = py.mkTuple
+      %kwargs.43 : py.Value = py.mkKwargs
+      %call.34 : py.Value = py.call(%float.4, %tuple.43, %kwargs.43) ^propagate.0()
+      %float.5 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %int.47 : py.Value = py.intLit(3)
+      %tuple.44 : py.Value = py.mkTuple(%int.47)
+      %kwargs.44 : py.Value = py.mkKwargs
+      %call.35 : py.Value = py.call(%float.5, %tuple.44, %kwargs.44) ^propagate.0()
+      %float.6 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %str.25 : py.Value = py.strLit("1.5")
+      %tuple.45 : py.Value = py.mkTuple(%str.25)
+      %kwargs.45 : py.Value = py.mkKwargs
+      %call.36 : py.Value = py.call(%float.6, %tuple.45, %kwargs.45) ^propagate.0()
+      %float.7 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %str.26 : py.Value = py.strLit(" -2.5e3 ")
+      %tuple.46 : py.Value = py.mkTuple(%str.26)
+      %kwargs.46 : py.Value = py.mkKwargs
+      %call.37 : py.Value = py.call(%float.7, %tuple.46, %kwargs.46) ^propagate.0()
+      %float.8 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %str.27 : py.Value = py.strLit("inf")
+      %tuple.47 : py.Value = py.mkTuple(%str.27)
+      %kwargs.47 : py.Value = py.mkKwargs
+      %call.38 : py.Value = py.call(%float.8, %tuple.47, %kwargs.47) ^propagate.0()
+      %float.9 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %str.28 : py.Value = py.strLit("-nan")
+      %tuple.48 : py.Value = py.mkTuple(%str.28)
+      %kwargs.48 : py.Value = py.mkKwargs
+      %call.39 : py.Value = py.call(%float.9, %tuple.48, %kwargs.48) ^propagate.0()
+      %int.48 : py.Value = py.intLit(0)
+      %notEq.0 : py.Value = py.notEq(%call.39, %int.48) ^propagate.0()
+      %float.10 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %bool.2 : py.Value = py.boolLit(true)
+      %tuple.49 : py.Value = py.mkTuple(%bool.2)
+      %kwargs.49 : py.Value = py.mkKwargs
+      %call.40 : py.Value = py.call(%float.10, %tuple.49, %kwargs.49) ^propagate.0()
+      %tuple.50 : py.Value = py.mkTuple(%call.34, %call.35, %call.36, %call.37, %call.38, %notEq.0, %call.40)
+      %kwargs.50 : py.Value = py.mkKwargs
+      %call.41 : py.Value = py.call(%print.3, %tuple.50, %kwargs.50) ^propagate.0()
+      %print.4 : py.Value = py.loadGlobal("lib_scalars", "print") ^propagate.0()
+      %float.11 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %HasFloat.1 : py.Value = py.loadGlobal("lib_scalars", "HasFloat") ^propagate.0()
+      %tuple.51 : py.Value = py.mkTuple
+      %kwargs.51 : py.Value = py.mkKwargs
+      %call.42 : py.Value = py.call(%HasFloat.1, %tuple.51, %kwargs.51) ^propagate.0()
+      %tuple.52 : py.Value = py.mkTuple(%call.42)
+      %kwargs.52 : py.Value = py.mkKwargs
+      %call.43 : py.Value = py.call(%float.11, %tuple.52, %kwargs.52) ^propagate.0()
+      %float.12 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %HasIndex.2 : py.Value = py.loadGlobal("lib_scalars", "HasIndex") ^propagate.0()
+      %tuple.53 : py.Value = py.mkTuple
+      %kwargs.53 : py.Value = py.mkKwargs
+      %call.44 : py.Value = py.call(%HasIndex.2, %tuple.53, %kwargs.53) ^propagate.0()
+      %tuple.54 : py.Value = py.mkTuple(%call.44)
+      %kwargs.54 : py.Value = py.mkKwargs
+      %call.45 : py.Value = py.call(%float.12, %tuple.54, %kwargs.54) ^propagate.0()
+      %float.13 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %bytes.3 : py.Value = py.bytesLit("1.25")
+      %tuple.55 : py.Value = py.mkTuple(%bytes.3)
+      %kwargs.55 : py.Value = py.mkKwargs
+      %call.46 : py.Value = py.call(%float.13, %tuple.55, %kwargs.55) ^propagate.0()
+      %float.14 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %str.29 : py.Value = py.strLit("1_0.5")
+      %tuple.56 : py.Value = py.mkTuple(%str.29)
+      %kwargs.56 : py.Value = py.mkKwargs
+      %call.47 : py.Value = py.call(%float.14, %tuple.56, %kwargs.56) ^propagate.0()
+      %float.15 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %str.30 : py.Value = py.strLit("١.٥")
+      %tuple.57 : py.Value = py.mkTuple(%str.30)
+      %kwargs.57 : py.Value = py.mkKwargs
+      %call.48 : py.Value = py.call(%float.15, %tuple.57, %kwargs.57) ^propagate.0()
+      %tuple.58 : py.Value = py.mkTuple(%call.43, %call.45, %call.46, %call.47, %call.48)
+      %kwargs.58 : py.Value = py.mkKwargs
+      %call.49 : py.Value = py.call(%print.4, %tuple.58, %kwargs.58) ^propagate.0()
+      %errors.12 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %float.16 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %str.31 : py.Value = py.strLit("x")
+      %tuple.59 : py.Value = py.mkTuple(%float.16, %str.31)
+      %kwargs.59 : py.Value = py.mkKwargs
+      %call.50 : py.Value = py.call(%errors.12, %tuple.59, %kwargs.59) ^propagate.0()
+      %errors.13 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %float.17 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %list.1 : py.Value = py.mkList
+      %tuple.60 : py.Value = py.mkTuple(%float.17, %list.1)
+      %kwargs.60 : py.Value = py.mkKwargs
+      %call.51 : py.Value = py.call(%errors.13, %tuple.60, %kwargs.60) ^propagate.0()
+      %errors.14 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %float.18 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %BadFloat.1 : py.Value = py.loadGlobal("lib_scalars", "BadFloat") ^propagate.0()
+      %tuple.61 : py.Value = py.mkTuple
+      %kwargs.61 : py.Value = py.mkKwargs
+      %call.52 : py.Value = py.call(%BadFloat.1, %tuple.61, %kwargs.61) ^propagate.0()
+      %tuple.62 : py.Value = py.mkTuple(%float.18, %call.52)
+      %kwargs.62 : py.Value = py.mkKwargs
+      %call.53 : py.Value = py.call(%errors.14, %tuple.62, %kwargs.62) ^propagate.0()
+      %errors.15 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %float.19 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %int.49 : py.Value = py.intLit(1)
+      %int.50 : py.Value = py.intLit(2)
+      %tuple.63 : py.Value = py.mkTuple(%float.19, %int.49, %int.50)
+      %kwargs.63 : py.Value = py.mkKwargs
+      %call.54 : py.Value = py.call(%errors.15, %tuple.63, %kwargs.63) ^propagate.0()
+      %errors.16 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %float.20 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %tuple.64 : py.Value = py.mkTuple(%float.20)
+      %str.32 : py.Value = py.strLit("x")
+      %int.51 : py.Value = py.intLit(1)
+      %kwargs.64 : py.Value = py.mkKwargs(%str.32, %int.51)
+      %call.55 : py.Value = py.call(%errors.16, %tuple.64, %kwargs.64) ^propagate.0()
+      %errors.17 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %float.21 : py.Value = py.loadGlobal("lib_scalars", "float") ^propagate.0()
+      %int.52 : py.Value = py.intLit(10)
+      %int.53 : py.Value = py.intLit(400)
+      %pow.0 : py.Value = py.pow(%int.52, %int.53) ^propagate.0()
+      %tuple.65 : py.Value = py.mkTuple(%float.21, %pow.0)
+      %kwargs.65 : py.Value = py.mkKwargs
+      %call.56 : py.Value = py.call(%errors.17, %tuple.65, %kwargs.65) ^propagate.0()
+      %print.5 : py.Value = py.loadGlobal("lib_scalars", "print") ^propagate.0()
+      %bool.3 : py.Value = py.loadGlobal("lib_scalars", "bool") ^propagate.0()
+      %tuple.66 : py.Value = py.mkTuple
+      %kwargs.66 : py.Value = py.mkKwargs
+      %call.57 : py.Value = py.call(%bool.3, %tuple.66, %kwargs.66) ^propagate.0()
+      %bool.4 : py.Value = py.loadGlobal("lib_scalars", "bool") ^propagate.0()
+      %int.54 : py.Value = py.intLit(0)
+      %tuple.67 : py.Value = py.mkTuple(%int.54)
+      %kwargs.67 : py.Value = py.mkKwargs
+      %call.58 : py.Value = py.call(%bool.4, %tuple.67, %kwargs.67) ^propagate.0()
+      %bool.5 : py.Value = py.loadGlobal("lib_scalars", "bool") ^propagate.0()
+      %int.55 : py.Value = py.intLit(3)
+      %tuple.68 : py.Value = py.mkTuple(%int.55)
+      %kwargs.68 : py.Value = py.mkKwargs
+      %call.59 : py.Value = py.call(%bool.5, %tuple.68, %kwargs.68) ^propagate.0()
+      %bool.6 : py.Value = py.loadGlobal("lib_scalars", "bool") ^propagate.0()
+      %str.33 : py.Value = py.strLit("")
+      %tuple.69 : py.Value = py.mkTuple(%str.33)
+      %kwargs.69 : py.Value = py.mkKwargs
+      %call.60 : py.Value = py.call(%bool.6, %tuple.69, %kwargs.69) ^propagate.0()
+      %bool.7 : py.Value = py.loadGlobal("lib_scalars", "bool") ^propagate.0()
+      %int.56 : py.Value = py.intLit(1)
+      %list.2 : py.Value = py.mkList(%int.56)
+      %tuple.70 : py.Value = py.mkTuple(%list.2)
+      %kwargs.70 : py.Value = py.mkKwargs
+      %call.61 : py.Value = py.call(%bool.7, %tuple.70, %kwargs.70) ^propagate.0()
+      %bool.8 : py.Value = py.loadGlobal("lib_scalars", "bool") ^propagate.0()
+      %Text.1 : py.Value = py.loadGlobal("lib_scalars", "Text") ^propagate.0()
+      %tuple.71 : py.Value = py.mkTuple
+      %kwargs.71 : py.Value = py.mkKwargs
+      %call.62 : py.Value = py.call(%Text.1, %tuple.71, %kwargs.71) ^propagate.0()
+      %tuple.72 : py.Value = py.mkTuple(%call.62)
+      %kwargs.72 : py.Value = py.mkKwargs
+      %call.63 : py.Value = py.call(%bool.8, %tuple.72, %kwargs.72) ^propagate.0()
+      %tuple.73 : py.Value = py.mkTuple(%call.57, %call.58, %call.59, %call.60, %call.61, %call.63)
+      %kwargs.73 : py.Value = py.mkKwargs
+      %call.64 : py.Value = py.call(%print.5, %tuple.73, %kwargs.73) ^propagate.0()
+      %errors.18 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %bool.9 : py.Value = py.loadGlobal("lib_scalars", "bool") ^propagate.0()
+      %int.57 : py.Value = py.intLit(1)
+      %int.58 : py.Value = py.intLit(2)
+      %tuple.74 : py.Value = py.mkTuple(%bool.9, %int.57, %int.58)
+      %kwargs.74 : py.Value = py.mkKwargs
+      %call.65 : py.Value = py.call(%errors.18, %tuple.74, %kwargs.74) ^propagate.0()
+      %errors.19 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %bool.10 : py.Value = py.loadGlobal("lib_scalars", "bool") ^propagate.0()
+      %tuple.75 : py.Value = py.mkTuple(%bool.10)
+      %str.34 : py.Value = py.strLit("x")
+      %int.59 : py.Value = py.intLit(1)
+      %kwargs.75 : py.Value = py.mkKwargs(%str.34, %int.59)
+      %call.66 : py.Value = py.call(%errors.19, %tuple.75, %kwargs.75) ^propagate.0()
+      %print.6 : py.Value = py.loadGlobal("lib_scalars", "print") ^propagate.0()
+      %str.35 : py.Value = py.loadGlobal("lib_scalars", "str") ^propagate.0()
+      %tuple.76 : py.Value = py.mkTuple
+      %kwargs.76 : py.Value = py.mkKwargs
+      %call.67 : py.Value = py.call(%str.35, %tuple.76, %kwargs.76) ^propagate.0()
+      %str.36 : py.Value = py.loadGlobal("lib_scalars", "str") ^propagate.0()
+      %int.60 : py.Value = py.intLit(5)
+      %tuple.77 : py.Value = py.mkTuple(%int.60)
+      %kwargs.77 : py.Value = py.mkKwargs
+      %call.68 : py.Value = py.call(%str.36, %tuple.77, %kwargs.77) ^propagate.0()
+      %str.37 : py.Value = py.loadGlobal("lib_scalars", "str") ^propagate.0()
+      %float.22 : py.Value = py.floatLit(1.5)
+      %tuple.78 : py.Value = py.mkTuple(%float.22)
+      %kwargs.78 : py.Value = py.mkKwargs
+      %call.69 : py.Value = py.call(%str.37, %tuple.78, %kwargs.78) ^propagate.0()
+      %str.38 : py.Value = py.loadGlobal("lib_scalars", "str") ^propagate.0()
+      %Text.2 : py.Value = py.loadGlobal("lib_scalars", "Text") ^propagate.0()
+      %tuple.79 : py.Value = py.mkTuple
+      %kwargs.79 : py.Value = py.mkKwargs
+      %call.70 : py.Value = py.call(%Text.2, %tuple.79, %kwargs.79) ^propagate.0()
+      %tuple.80 : py.Value = py.mkTuple(%call.70)
+      %kwargs.80 : py.Value = py.mkKwargs
+      %call.71 : py.Value = py.call(%str.38, %tuple.80, %kwargs.80) ^propagate.0()
+      %str.39 : py.Value = py.loadGlobal("lib_scalars", "str") ^propagate.0()
+      %bytes.4 : py.Value = py.bytesLit("ab")
+      %str.40 : py.Value = py.strLit("ascii")
+      %tuple.81 : py.Value = py.mkTuple(%bytes.4, %str.40)
+      %kwargs.81 : py.Value = py.mkKwargs
+      %call.72 : py.Value = py.call(%str.39, %tuple.81, %kwargs.81) ^propagate.0()
+      %str.41 : py.Value = py.loadGlobal("lib_scalars", "str") ^propagate.0()
+      %bytes.5 : py.Value = py.bytesLit("Ã©")
+      %tuple.82 : py.Value = py.mkTuple(%bytes.5)
+      %str.42 : py.Value = py.strLit("encoding")
+      %str.43 : py.Value = py.strLit("utf-8")
+      %kwargs.82 : py.Value = py.mkKwargs(%str.42, %str.43)
+      %call.73 : py.Value = py.call(%str.41, %tuple.82, %kwargs.82) ^propagate.0()
+      %str.44 : py.Value = py.loadGlobal("lib_scalars", "str") ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %tuple.83 : py.Value = py.mkTuple(%none.1)
+      %kwargs.83 : py.Value = py.mkKwargs
+      %call.74 : py.Value = py.call(%str.44, %tuple.83, %kwargs.83) ^propagate.0()
+      %tuple.84 : py.Value = py.mkTuple(%call.67, %call.68, %call.69, %call.71, %call.72, %call.73, %call.74)
+      %kwargs.84 : py.Value = py.mkKwargs
+      %call.75 : py.Value = py.call(%print.6, %tuple.84, %kwargs.84) ^propagate.0()
+      %errors.20 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %str.45 : py.Value = py.loadGlobal("lib_scalars", "str") ^propagate.0()
+      %int.61 : py.Value = py.intLit(1)
+      %str.46 : py.Value = py.strLit("utf-8")
+      %tuple.85 : py.Value = py.mkTuple(%str.45, %int.61, %str.46)
+      %kwargs.85 : py.Value = py.mkKwargs
+      %call.76 : py.Value = py.call(%errors.20, %tuple.85, %kwargs.85) ^propagate.0()
+      %errors.21 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %str.47 : py.Value = py.loadGlobal("lib_scalars", "str") ^propagate.0()
+      %str.48 : py.Value = py.strLit("a")
+      %str.49 : py.Value = py.strLit("utf-8")
+      %tuple.86 : py.Value = py.mkTuple(%str.47, %str.48, %str.49)
+      %kwargs.86 : py.Value = py.mkKwargs
+      %call.77 : py.Value = py.call(%errors.21, %tuple.86, %kwargs.86) ^propagate.0()
+      %errors.22 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %str.50 : py.Value = py.loadGlobal("lib_scalars", "str") ^propagate.0()
+      %bytes.6 : py.Value = py.bytesLit("a")
+      %int.62 : py.Value = py.intLit(1)
+      %tuple.87 : py.Value = py.mkTuple(%str.50, %bytes.6, %int.62)
+      %kwargs.87 : py.Value = py.mkKwargs
+      %call.78 : py.Value = py.call(%errors.22, %tuple.87, %kwargs.87) ^propagate.0()
+      %errors.23 : py.Value = py.loadGlobal("lib_scalars", "errors") ^propagate.0()
+      %str.51 : py.Value = py.loadGlobal("lib_scalars", "str") ^propagate.0()
+      %int.63 : py.Value = py.intLit(1)
+      %int.64 : py.Value = py.intLit(2)
+      %int.65 : py.Value = py.intLit(3)
+      %int.66 : py.Value = py.intLit(4)
+      %tuple.88 : py.Value = py.mkTuple(%str.51, %int.63, %int.64, %int.65, %int.66)
+      %kwargs.88 : py.Value = py.mkKwargs
+      %call.79 : py.Value = py.call(%errors.23, %tuple.88, %kwargs.88) ^propagate.0()
+      %print.7 : py.Value = py.loadGlobal("lib_scalars", "print") ^propagate.0()
+      %I.1 : py.Value = py.loadGlobal("lib_scalars", "I") ^propagate.0()
+      %int.67 : py.Value = py.intLit(5)
+      %tuple.89 : py.Value = py.mkTuple(%int.67)
+      %kwargs.89 : py.Value = py.mkKwargs
+      %call.80 : py.Value = py.call(%I.1, %tuple.89, %kwargs.89) ^propagate.0()
+      %int.68 : py.Value = py.intLit(1)
+      %add.0 : py.Value = py.add(%call.80, %int.68) ^propagate.0()
+      %type.0 : py.Value = py.loadGlobal("lib_scalars", "type") ^propagate.0()
+      %I.2 : py.Value = py.loadGlobal("lib_scalars", "I") ^propagate.0()
+      %int.69 : py.Value = py.intLit(5)
+      %tuple.90 : py.Value = py.mkTuple(%int.69)
+      %kwargs.90 : py.Value = py.mkKwargs
+      %call.81 : py.Value = py.call(%I.2, %tuple.90, %kwargs.90) ^propagate.0()
+      %tuple.91 : py.Value = py.mkTuple(%call.81)
+      %kwargs.91 : py.Value = py.mkKwargs
+      %call.82 : py.Value = py.call(%type.0, %tuple.91, %kwargs.91) ^propagate.0()
+      %__name__.0 : py.Value = py.attr(%call.82, "__name__") ^propagate.0()
+      %I.3 : py.Value = py.loadGlobal("lib_scalars", "I") ^propagate.0()
+      %str.52 : py.Value = py.strLit("12")
+      %tuple.92 : py.Value = py.mkTuple(%str.52)
+      %kwargs.92 : py.Value = py.mkKwargs
+      %call.83 : py.Value = py.call(%I.3, %tuple.92, %kwargs.92) ^propagate.0()
+      %I.4 : py.Value = py.loadGlobal("lib_scalars", "I") ^propagate.0()
+      %tuple.93 : py.Value = py.mkTuple
+      %kwargs.93 : py.Value = py.mkKwargs
+      %call.84 : py.Value = py.call(%I.4, %tuple.93, %kwargs.93) ^propagate.0()
+      %F.1 : py.Value = py.loadGlobal("lib_scalars", "F") ^propagate.0()
+      %float.23 : py.Value = py.floatLit(1.5)
+      %tuple.94 : py.Value = py.mkTuple(%float.23)
+      %kwargs.94 : py.Value = py.mkKwargs
+      %call.85 : py.Value = py.call(%F.1, %tuple.94, %kwargs.94) ^propagate.0()
+      %int.70 : py.Value = py.intLit(2)
+      %mult.1 : py.Value = py.mult(%call.85, %int.70) ^propagate.0()
+      %type.1 : py.Value = py.loadGlobal("lib_scalars", "type") ^propagate.0()
+      %F.2 : py.Value = py.loadGlobal("lib_scalars", "F") ^propagate.0()
+      %str.53 : py.Value = py.strLit("2")
+      %tuple.95 : py.Value = py.mkTuple(%str.53)
+      %kwargs.95 : py.Value = py.mkKwargs
+      %call.86 : py.Value = py.call(%F.2, %tuple.95, %kwargs.95) ^propagate.0()
+      %tuple.96 : py.Value = py.mkTuple(%call.86)
+      %kwargs.96 : py.Value = py.mkKwargs
+      %call.87 : py.Value = py.call(%type.1, %tuple.96, %kwargs.96) ^propagate.0()
+      %__name__.1 : py.Value = py.attr(%call.87, "__name__") ^propagate.0()
+      %bool.11 : py.Value = py.boolLit(false)
+      %cond.1 : base.Bool = py.truthy(%bool.11) ^propagate.0()
+      branch(%cond.1) ^then.1() ^else.1()
+    then.1():
+      %S.1 : py.Value = py.loadGlobal("lib_scalars", "S") ^propagate.0()
+      %str.54 : py.Value = py.strLit("ab")
+      %tuple.97 : py.Value = py.mkTuple(%str.54)
+      %kwargs.97 : py.Value = py.mkKwargs
+      %call.88 : py.Value = py.call(%S.1, %tuple.97, %kwargs.97) ^propagate.0()
+      %upper.0 : py.Value = py.attr(%call.88, "upper") ^propagate.0()
+      %tuple.98 : py.Value = py.mkTuple
+      %kwargs.98 : py.Value = py.mkKwargs
+      %call.89 : py.Value = py.call(%upper.0, %tuple.98, %kwargs.98) ^propagate.0()
+      jump ^join.1(%call.89)
+    else.1():
+      %S.2 : py.Value = py.loadGlobal("lib_scalars", "S") ^propagate.0()
+      %int.71 : py.Value = py.intLit(5)
+      %tuple.99 : py.Value = py.mkTuple(%int.71)
+      %kwargs.99 : py.Value = py.mkKwargs
+      %call.90 : py.Value = py.call(%S.2, %tuple.99, %kwargs.99) ^propagate.0()
+      %str.55 : py.Value = py.strLit("5")
+      %eq.0 : py.Value = py.eq(%call.90, %str.55) ^propagate.0()
+      jump ^join.1(%eq.0)
+    join.1(%ifexp.1 : py.Value):
+      %tuple.100 : py.Value = py.mkTuple(%add.0, %__name__.0, %call.83, %call.84, %mult.1, %__name__.1, %ifexp.1)
+      %kwargs.100 : py.Value = py.mkKwargs
+      %call.91 : py.Value = py.call(%print.7, %tuple.100, %kwargs.100) ^propagate.0()
+      %print.8 : py.Value = py.loadGlobal("lib_scalars", "print") ^propagate.0()
+      %type.2 : py.Value = py.loadGlobal("lib_scalars", "type") ^propagate.0()
+      %S.3 : py.Value = py.loadGlobal("lib_scalars", "S") ^propagate.0()
+      %int.72 : py.Value = py.intLit(5)
+      %tuple.101 : py.Value = py.mkTuple(%int.72)
+      %kwargs.101 : py.Value = py.mkKwargs
+      %call.92 : py.Value = py.call(%S.3, %tuple.101, %kwargs.101) ^propagate.0()
+      %tuple.102 : py.Value = py.mkTuple(%call.92)
+      %kwargs.102 : py.Value = py.mkKwargs
+      %call.93 : py.Value = py.call(%type.2, %tuple.102, %kwargs.102) ^propagate.0()
+      %__name__.2 : py.Value = py.attr(%call.93, "__name__") ^propagate.0()
+      %isinstance.0 : py.Value = py.loadGlobal("lib_scalars", "isinstance") ^propagate.0()
+      %I.5 : py.Value = py.loadGlobal("lib_scalars", "I") ^propagate.0()
+      %int.73 : py.Value = py.intLit(3)
+      %tuple.103 : py.Value = py.mkTuple(%int.73)
+      %kwargs.103 : py.Value = py.mkKwargs
+      %call.94 : py.Value = py.call(%I.5, %tuple.103, %kwargs.103) ^propagate.0()
+      %int.74 : py.Value = py.loadGlobal("lib_scalars", "int") ^propagate.0()
+      %tuple.104 : py.Value = py.mkTuple(%call.94, %int.74)
+      %kwargs.104 : py.Value = py.mkKwargs
+      %call.95 : py.Value = py.call(%isinstance.0, %tuple.104, %kwargs.104) ^propagate.0()
+      %I.6 : py.Value = py.loadGlobal("lib_scalars", "I") ^propagate.0()
+      %int.75 : py.Value = py.intLit(3)
+      %tuple.105 : py.Value = py.mkTuple(%int.75)
+      %kwargs.105 : py.Value = py.mkKwargs
+      %call.96 : py.Value = py.call(%I.6, %tuple.105, %kwargs.105) ^propagate.0()
+      %int.76 : py.Value = py.intLit(3)
+      %eq.1 : py.Value = py.eq(%call.96, %int.76) ^propagate.0()
+      %hash.0 : py.Value = py.loadGlobal("lib_scalars", "hash") ^propagate.0()
+      %I.7 : py.Value = py.loadGlobal("lib_scalars", "I") ^propagate.0()
+      %int.77 : py.Value = py.intLit(5)
+      %tuple.106 : py.Value = py.mkTuple(%int.77)
+      %kwargs.106 : py.Value = py.mkKwargs
+      %call.97 : py.Value = py.call(%I.7, %tuple.106, %kwargs.106) ^propagate.0()
+      %tuple.107 : py.Value = py.mkTuple(%call.97)
+      %kwargs.107 : py.Value = py.mkKwargs
+      %call.98 : py.Value = py.call(%hash.0, %tuple.107, %kwargs.107) ^propagate.0()
+      %abs.0 : py.Value = py.loadGlobal("lib_scalars", "abs") ^propagate.0()
+      %I.8 : py.Value = py.loadGlobal("lib_scalars", "I") ^propagate.0()
+      %int.78 : py.Value = py.intLit(3)
+      %neg.1 : py.Value = py.uSub(%int.78) ^propagate.0()
+      %tuple.108 : py.Value = py.mkTuple(%neg.1)
+      %kwargs.108 : py.Value = py.mkKwargs
+      %call.99 : py.Value = py.call(%I.8, %tuple.108, %kwargs.108) ^propagate.0()
+      %tuple.109 : py.Value = py.mkTuple(%call.99)
+      %kwargs.109 : py.Value = py.mkKwargs
+      %call.100 : py.Value = py.call(%abs.0, %tuple.109, %kwargs.109) ^propagate.0()
+      %divmod.0 : py.Value = py.loadGlobal("lib_scalars", "divmod") ^propagate.0()
+      %I.9 : py.Value = py.loadGlobal("lib_scalars", "I") ^propagate.0()
+      %int.79 : py.Value = py.intLit(7)
+      %tuple.110 : py.Value = py.mkTuple(%int.79)
+      %kwargs.110 : py.Value = py.mkKwargs
+      %call.101 : py.Value = py.call(%I.9, %tuple.110, %kwargs.110) ^propagate.0()
+      %int.80 : py.Value = py.intLit(2)
+      %tuple.111 : py.Value = py.mkTuple(%call.101, %int.80)
+      %kwargs.111 : py.Value = py.mkKwargs
+      %call.102 : py.Value = py.call(%divmod.0, %tuple.111, %kwargs.111) ^propagate.0()
+      %tuple.112 : py.Value = py.mkTuple(%__name__.2, %call.95, %eq.1, %call.98, %call.100, %call.102)
+      %kwargs.112 : py.Value = py.mkKwargs
+      %call.103 : py.Value = py.call(%print.8, %tuple.112, %kwargs.112) ^propagate.0()
+      %print.9 : py.Value = py.loadGlobal("lib_scalars", "print") ^propagate.0()
+      %I.10 : py.Value = py.loadGlobal("lib_scalars", "I") ^propagate.0()
+      %int.81 : py.Value = py.intLit(5)
+      %tuple.113 : py.Value = py.mkTuple(%int.81)
+      %kwargs.113 : py.Value = py.mkKwargs
+      %call.104 : py.Value = py.call(%I.10, %tuple.113, %kwargs.113) ^propagate.0()
+      %__int__.0 : py.Value = py.attr(%call.104, "__int__") ^propagate.0()
+      %tuple.114 : py.Value = py.mkTuple
+      %kwargs.114 : py.Value = py.mkKwargs
+      %call.105 : py.Value = py.call(%__int__.0, %tuple.114, %kwargs.114) ^propagate.0()
+      %type.3 : py.Value = py.loadGlobal("lib_scalars", "type") ^propagate.0()
+      %I.11 : py.Value = py.loadGlobal("lib_scalars", "I") ^propagate.0()
+      %int.82 : py.Value = py.intLit(5)
+      %tuple.115 : py.Value = py.mkTuple(%int.82)
+      %kwargs.115 : py.Value = py.mkKwargs
+      %call.106 : py.Value = py.call(%I.11, %tuple.115, %kwargs.115) ^propagate.0()
+      %__int__.1 : py.Value = py.attr(%call.106, "__int__") ^propagate.0()
+      %tuple.116 : py.Value = py.mkTuple
+      %kwargs.116 : py.Value = py.mkKwargs
+      %call.107 : py.Value = py.call(%__int__.1, %tuple.116, %kwargs.116) ^propagate.0()
+      %tuple.117 : py.Value = py.mkTuple(%call.107)
+      %kwargs.117 : py.Value = py.mkKwargs
+      %call.108 : py.Value = py.call(%type.3, %tuple.117, %kwargs.117) ^propagate.0()
+      %__name__.3 : py.Value = py.attr(%call.108, "__name__") ^propagate.0()
+      %F.3 : py.Value = py.loadGlobal("lib_scalars", "F") ^propagate.0()
+      %float.24 : py.Value = py.floatLit(1.5)
+      %tuple.118 : py.Value = py.mkTuple(%float.24)
+      %kwargs.118 : py.Value = py.mkKwargs
+      %call.109 : py.Value = py.call(%F.3, %tuple.118, %kwargs.118) ^propagate.0()
+      %__float__.0 : py.Value = py.attr(%call.109, "__float__") ^propagate.0()
+      %tuple.119 : py.Value = py.mkTuple
+      %kwargs.119 : py.Value = py.mkKwargs
+      %call.110 : py.Value = py.call(%__float__.0, %tuple.119, %kwargs.119) ^propagate.0()
+      %type.4 : py.Value = py.loadGlobal("lib_scalars", "type") ^propagate.0()
+      %F.4 : py.Value = py.loadGlobal("lib_scalars", "F") ^propagate.0()
+      %float.25 : py.Value = py.floatLit(1.5)
+      %tuple.120 : py.Value = py.mkTuple(%float.25)
+      %kwargs.120 : py.Value = py.mkKwargs
+      %call.111 : py.Value = py.call(%F.4, %tuple.120, %kwargs.120) ^propagate.0()
+      %__float__.1 : py.Value = py.attr(%call.111, "__float__") ^propagate.0()
+      %tuple.121 : py.Value = py.mkTuple
+      %kwargs.121 : py.Value = py.mkKwargs
+      %call.112 : py.Value = py.call(%__float__.1, %tuple.121, %kwargs.121) ^propagate.0()
+      %tuple.122 : py.Value = py.mkTuple(%call.112)
+      %kwargs.122 : py.Value = py.mkKwargs
+      %call.113 : py.Value = py.call(%type.4, %tuple.122, %kwargs.122) ^propagate.0()
+      %__name__.4 : py.Value = py.attr(%call.113, "__name__") ^propagate.0()
+      %tuple.123 : py.Value = py.mkTuple(%call.105, %__name__.3, %call.110, %__name__.4)
+      %kwargs.123 : py.Value = py.mkKwargs
+      %call.114 : py.Value = py.call(%print.9, %tuple.123, %kwargs.123) ^propagate.0()
+      %none.2 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_scalars.I.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["int"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_scalars", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("I")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_scalars.F.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["float"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_scalars", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("F")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_scalars.S.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["str"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_scalars", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("S")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_scalars.HasInt.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__int__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_scalars", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("HasInt")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_scalars.HasInt.__int__, "__int__", "lib_scalars")
+      %str.4 : py.Value = py.strLit("__int__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_scalars.HasIndex.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__index__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_scalars", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("HasIndex")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_scalars.HasIndex.__index__, "__index__", "lib_scalars")
+      %str.4 : py.Value = py.strLit("__index__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_scalars.HasFloat.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__float__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_scalars", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("HasFloat")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_scalars.HasFloat.__float__, "__float__", "lib_scalars")
+      %str.4 : py.Value = py.strLit("__float__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_scalars.BadInt.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__int__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_scalars", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("BadInt")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_scalars.BadInt.__int__, "__int__", "lib_scalars")
+      %str.4 : py.Value = py.strLit("__int__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_scalars.BadFloat.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__float__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_scalars", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("BadFloat")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_scalars.BadFloat.__float__, "__float__", "lib_scalars")
+      %str.4 : py.Value = py.strLit("__float__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_scalars.Text.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__str__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_scalars", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Text")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_scalars.Text.__str__, "__str__", "lib_scalars")
+      %str.4 : py.Value = py.strLit("__str__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_scalars.errors(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %f.0 : py.Value = py.undef("f")
+      %f.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%f.0)
+      %args.1 : py.Value = py.undef("args")
+      %args.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%args.1)
+      %kwargs.1 : py.Value = py.undef("kwargs")
+      %kwargs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%kwargs.1)
+      %e.0 : py.Value = py.undef("e")
+      %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
+      %f.1 : py.Value = py.undef("f")
+      %defaults.0 : py.Value = py.mkTuple(%f.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "errors", 0, 1, true, true, "f") ^propagate.0()
+      %f.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %args.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %kwargs.2 : py.Value = py.tupleGet(%bound.0, 2)
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
+      %args.4 : py.Value = py.requireDefined(%args.2, "args", "UnboundLocalError", "cannot access local variable 'args' where it is not associated with a value") ^catch.0()
+      %kwargs.3 : py.Value = py.mkKwargs
+      %kwargs.5 : py.Value = py.requireDefined(%kwargs.2, "kwargs", "UnboundLocalError", "cannot access local variable 'kwargs' where it is not associated with a value") ^catch.0()
+      %merge.0 : py.Value = py.dictMerge(%f.4, %kwargs.3, %kwargs.5) ^catch.0()
+      %args.5 : py.Value = py.argsTuple(%f.4, %args.4) ^catch.0()
+      %call.0 : py.Value = py.call(%f.4, %args.5, %merge.0) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("lib_scalars", "TypeError") ^unwind.0()
+      %ValueError.0 : py.Value = py.loadGlobal("lib_scalars", "ValueError") ^unwind.0()
+      %OverflowError.0 : py.Value = py.loadGlobal("lib_scalars", "OverflowError") ^unwind.0()
+      %tuple.0 : py.Value = py.mkTuple(%TypeError.0, %ValueError.0, %OverflowError.0)
+      %match.0 : base.Bool = py.excMatch(%exc.0, %tuple.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %print.0 : py.Value = py.loadGlobal("lib_scalars", "print") ^clear.0()
+      %type.0 : py.Value = py.loadGlobal("lib_scalars", "type") ^clear.0()
+      %e.6 : py.Value = py.requireDefined(%exc.0, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
+      %tuple.1 : py.Value = py.mkTuple(%e.6)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%type.0, %tuple.1, %kwargs.6) ^clear.0()
+      %__name__.0 : py.Value = py.attr(%call.1, "__name__") ^clear.0()
+      %e.9 : py.Value = py.requireDefined(%exc.0, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
+      %args.6 : py.Value = py.attr(%e.9, "args") ^clear.0()
+      %int.0 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.6, %int.0) ^clear.0()
+      %tuple.2 : py.Value = py.mkTuple(%__name__.0, %item.0)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.2, %kwargs.7) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.10 : py.Value = py.undef("e")
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.11 : py.Value = py.undef("e")
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+  func @lib_scalars.HasInt.__int__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "HasInt.__int__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(42)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_scalars.HasIndex.__index__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "HasIndex.__index__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(7)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_scalars.HasFloat.__float__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "HasFloat.__float__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %float.0 : py.Value = py.floatLit(2.5)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%float.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_scalars.BadInt.__int__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "BadInt.__int__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %str.0 : py.Value = py.strLit("x")
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_scalars.BadFloat.__float__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "BadFloat.__float__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_scalars.Text.__str__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Text.__str__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %str.0 : py.Value = py.strLit("text")
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

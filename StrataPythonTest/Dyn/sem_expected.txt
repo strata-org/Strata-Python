@@ -47,23 +47,43 @@ fw10_return_value_timing | agree
 i01_call_forms | agree
 i02_param_kinds | agree
 i03_defaults | agree
-i04_dict_unpack | gap | built-in method dict.__new__ is not modelled yet
+i04_dict_unpack | agree
 i05_kwargs_mutation | gap | built-in method list.append is not modelled yet
 i06_call_errors | gap | a TypeError that names a function is not modelled yet
 i07_methods | agree
 i08_binding_errors | agree
 i09_assigned_defaults | gap | a write to the attribute function.__defaults__ is not modelled yet
-i10_keyword_subclass | gap | built-in method str.__new__ is not modelled yet
+i10_keyword_subclass | gap | a walk of a dict whose comparisons may run user code is not modelled yet
 i11_constant_default | gap | is on two equal immediates depends on CPython's caching
 lib_any_all | agree
+lib_bytes | agree
+lib_collections | agree
+lib_constructors_more | agree
+lib_ctor_errors | agree
+lib_functions | agree
+lib_gap_attr_strsub | gap | an attribute name that is an instance of a subclass of str is not modelled yet
+lib_gap_bytes_buffer | gap | bytes() of an object with __buffer__ is not modelled yet
+lib_gap_ctor_midstep | gap | a looping built-in was reached inside an operation
 lib_gap_dictrev_keys | gap | a dict whose keys changed at the same size during its iteration is not modelled yet
 lib_gap_dictrev_keys_inst | gap | a dict whose keys changed at the same size during its iteration is not modelled yet
 lib_gap_enumerate_kw | gap | the message of this wrong call of enumerate depends on how it is called
 lib_gap_enumerate_noarg | gap | the message of this wrong call of enumerate depends on how it is called
 lib_gap_enumerate_sub | gap | a subclass of enumerate is not modelled
+lib_gap_float_buffer | gap | float() of an object with __buffer__ is not modelled yet
+lib_gap_float_symhash | gap | float() of a hash whose number the model doesn't know
+lib_gap_int_buffer | gap | int() of an object with __buffer__ is not modelled yet
+lib_gap_int_sub_symhash | gap | an int subclass instance of an int whose number the model doesn't know
+lib_gap_issubclass_bases | gap | issubclass() of an object with __bases__ is not modelled
+lib_gap_issubclass_deep | gap | issubclass over tuples nested deeper than the model follows
 lib_gap_reversed_lost | gap | a reversed whose sequence's class lost __getitem__ is not modelled yet
 lib_gap_reversed_sub | gap | a subclass of reversed is not modelled
+lib_gap_str_buffer | gap | decoding an object with __buffer__ is not modelled yet
 lib_gap_type_zip_sub | gap | a subclass of zip is not modelled
+lib_gap_warn_float_sub | gap | a __float__ that returns an instance of a subclass of float warns, which writes __warningregistry__
+lib_gap_warn_int_bool | gap | an __int__ that returns a bool warns, which writes __warningregistry__
+lib_gap_warn_int_sub | gap | an __int__ that returns an instance of a subclass of int warns, which writes __warningregistry__
+lib_gap_warn_trunc | gap | int() of an object with __trunc__ warns, which writes __warningregistry__
+lib_gap_wrong_call_bool | gap | the message of a wrong call of int.__trunc__ depends on how it is called
 lib_gap_zip_new_sub | gap | a subclass of zip is not modelled
 lib_gap_zip_sub | gap | a subclass of zip is not modelled
 lib_iter_mutate | gap | a slot of a set whose layout is inexact
@@ -73,8 +93,10 @@ lib_max_min_key | agree
 lib_order_free | agree
 lib_residual_grow | gap | a looping built-in was reached inside an operation
 lib_reversed | gap | built-in method dict.values is not modelled yet
-lib_sum | gap | built-in method int.__new__ is not modelled yet
+lib_scalars | agree
+lib_sum | agree
 lib_sum_residual | gap | a looping built-in was reached inside an operation
+lib_wrong_calls | agree
 lib_zip_enumerate | gap | the message of this wrong call of enumerate depends on how it is called
 m_annotations | gap | the translator does not support generator function
 m_annotations_nested | gap | the translator does not support match, try/except*
@@ -82,7 +104,7 @@ m_assert | agree
 m_attr_mangle | agree
 m_builtins | agree
 m_calls | agree
-m_class_namespace | gap | built-in method dict.__new__ is not modelled yet
+m_class_namespace | gap | a __prepare__ that returns a mapping other than a dict
 m_class_return | syntax
 m_classes | gap | import of module os is not modelled yet
 m_closures | agree
@@ -244,7 +266,7 @@ s12_positional_only_keyword | gap | a keyword that names a positional-only param
 s130_iter_loops | agree
 s131_dict_merge | agree
 s132_iter_states | agree
-s133_set_subclass_update | gap | built-in method set.__new__ is not modelled yet
+s133_set_subclass_update | agree
 s134_loop_inside_gap | gap | a looping built-in was reached inside an operation
 s135_printf_gap | agree
 s136_iter_protocol | agree
@@ -491,8 +513,8 @@ s359_seq_slot_binary_other_type | gap | a slot wrapper bound to an object of ano
 s35_live_set_walks | agree
 s360_seq_slot_compare | gap | a slot wrapper bound to an object of another type is not modelled yet
 s361_seq_slot_reflected | agree
-s362_seq_slot_subclass_radd | gap | built-in method list.__new__ is not modelled yet
-s363_seq_slot_subclass_alias | gap | built-in method list.__new__ is not modelled yet
+s362_seq_slot_subclass_radd | gap | a list slot on an instance of a subclass of list with its own __radd__ is not modelled yet
+s363_seq_slot_subclass_alias | gap | a list slot found as __radd__ on an instance of a subclass of list is not modelled yet
 s364_module_frame_depth_runs | agree
 s365_module_frame_depth_stops | gap | Python call depth over 900
 s366_utf8_bom | agree
@@ -573,7 +595,7 @@ t06_function | agree
 t07_try_except | agree
 t08_try_finally | agree
 t09_nested_try | agree
-t10_except_type | gap | built-in method str.__new__ is not modelled yet
+t10_except_type | agree
 t11_with | agree
 t12_class | agree
 t13_fstring | agree

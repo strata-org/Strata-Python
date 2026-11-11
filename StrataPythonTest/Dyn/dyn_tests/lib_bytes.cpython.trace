@@ -1,0 +1,29 @@
+--- stdout 731
+b'' b'\x00\x00\x00' b'AB' b'C' b'DE' b'\x00\x00\x00'
+b'from bytes' b'\xc3\xa9' b'ab' b'xy' b'BA@'
+b'A' b'q' Bs b'F'
+ValueError negative count
+TypeError string argument without an encoding
+TypeError cannot convert 'float' object to bytes
+ValueError bytes must be in range(0, 256)
+ValueError bytes must be in range(0, 256)
+TypeError 'str' object cannot be interpreted as an integer
+TypeError encoding without a string argument
+TypeError string argument without an encoding
+TypeError encoding without a string argument
+TypeError errors without a string argument
+TypeError bytes() argument 'encoding' must be str, not int
+TypeError bytes() takes at most 3 arguments (4 given)
+OverflowError cannot fit 'int' into an index-sized integer
+
+--- outcome
+ok
+--- globals
+B = <class 'B'>
+BadIdx = <class 'BadIdx'>
+Bs = <class 'Bs'>
+Down = <class 'Down'>
+Idx = <class 'Idx'>
+__doc__ = None
+__name__ = '__main__'
+errors = <function object>

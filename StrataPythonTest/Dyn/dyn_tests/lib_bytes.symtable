@@ -1,0 +1,52 @@
+module top
+  B: local (assigned, referenced)
+  BadIdx: local (assigned, referenced)
+  Bs: local (assigned, referenced)
+  Down: local (assigned, referenced)
+  Idx: local (assigned, referenced)
+  bytes: global implicit (referenced)
+  errors: local (assigned, referenced)
+  print: global implicit (referenced)
+  range: global implicit (referenced)
+  type: global implicit (referenced)
+  class B
+    __bytes__: local (assigned)
+    function __bytes__
+      self: local (parameter)
+  class Idx
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+  class BadIdx
+    __index__: local (assigned)
+    __iter__: local (assigned)
+    function __index__
+      TypeError: global implicit (referenced)
+      self: local (parameter)
+    function __iter__
+      iter: global implicit (referenced)
+      self: local (parameter)
+  class Down
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      self: local (parameter, referenced)
+  class Bs
+  function errors
+    OverflowError: global implicit (referenced)
+    TypeError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    args: local (parameter, referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+    print: global implicit (referenced)
+    type: global implicit (referenced)
+qualnames: B, B.__bytes__, BadIdx, BadIdx.__index__, BadIdx.__iter__, Bs, Down, Down.__init__, Down.__iter__, Down.__next__, Idx, Idx.__index__, errors

@@ -1,0 +1,11 @@
+module
+  Buf: local (assigned, referenced)
+  print: global implicit (referenced)
+  str: global implicit (referenced)
+  class Buf
+    __buffer__: local (assigned)
+    function Buf.__buffer__
+      params: self, flags
+      self: local (parameter)
+      flags: local (parameter)
+      memoryview: global implicit (referenced)

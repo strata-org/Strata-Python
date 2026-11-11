@@ -1,0 +1,59 @@
+module
+  B: local (assigned, referenced)
+  Idx: local (assigned, referenced)
+  BadIdx: local (assigned, referenced)
+  Down: local (assigned, referenced)
+  Bs: local (assigned, referenced)
+  bytes: global implicit (referenced)
+  errors: local (assigned, referenced)
+  print: global implicit (referenced)
+  range: global implicit (referenced)
+  type: global implicit (referenced)
+  class B
+    __bytes__: local (assigned)
+    function B.__bytes__
+      params: self
+      self: local (parameter)
+  class Idx
+    __index__: local (assigned)
+    function Idx.__index__
+      params: self
+      self: local (parameter)
+  class BadIdx
+    __index__: local (assigned)
+    __iter__: local (assigned)
+    function BadIdx.__index__
+      params: self
+      self: local (parameter)
+      TypeError: global implicit (referenced)
+    function BadIdx.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)
+  class Down
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function Down.__init__
+      params: self, n
+      self: local (parameter, referenced)
+      n: local (parameter, referenced)
+    function Down.__iter__
+      params: self
+      self: local (parameter, referenced)
+    function Down.__next__
+      params: self
+      self: local (parameter, referenced)
+      StopIteration: global implicit (referenced)
+  class Bs
+  function errors
+    params: f, *args, **kwargs
+    f: local (parameter, referenced)
+    args: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+    TypeError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    OverflowError: global implicit (referenced)
+    e: local (assigned, referenced)
+    print: global implicit (referenced)
+    type: global implicit (referenced)

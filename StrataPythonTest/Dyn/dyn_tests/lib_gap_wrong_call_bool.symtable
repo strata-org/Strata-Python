@@ -1,0 +1,5 @@
+module top
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+qualnames: 

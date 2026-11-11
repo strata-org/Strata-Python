@@ -1,0 +1,10 @@
+module top
+  A: local (assigned, referenced)
+  int: global implicit (referenced)
+  print: global implicit (referenced)
+  x: local (assigned)
+  class A
+    __int__: local (assigned)
+    function __int__
+      self: local (parameter)
+qualnames: A, A.__int__

@@ -1,0 +1,32 @@
+--- stdout 626
+S.__repr__
+ValueError invalid literal for int() with base 10: SSS
+S.__repr__
+ValueError invalid literal for int() with base 16: SSS
+S.__repr__
+ValueError could not convert string to float: SSS
+B.__repr__
+ValueError could not convert string to float: BBB
+ValueError invalid literal for int() with base 10: b'xyz'
+KeyError 'repr'
+13.5
+240 xxxxxx
+Exceeds the limit (4300 digits
+invalid literal for int() with
+Exceeds the limit (4300 digits
+ValueError embedded null character
+ValueError embedded null character
+ValueError embedded null character
+ValueError embedded null character
+set()
+TypeError set() takes no keyword arguments
+
+--- outcome
+ok
+--- globals
+B = <class 'B'>
+R = <class 'R'>
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'
+show = <function object>

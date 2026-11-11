@@ -1,0 +1,13 @@
+module
+  F: local (assigned)
+  float: global implicit (referenced)
+  A: local (assigned, referenced)
+  print: global implicit (referenced)
+  x: local (assigned)
+  class F
+  class A
+    __float__: local (assigned)
+    function A.__float__
+      params: self
+      self: local (parameter)
+      F: global implicit (referenced)

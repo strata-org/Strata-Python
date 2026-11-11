@@ -1,4 +1,4 @@
-dict_bad_pair_arity | gap | built-in method dict.__new__ is not modelled yet
+dict_bad_pair_arity | agree
 dict_clear_normal | gap | built-in method dict.clear is not modelled yet
 dict_copy_normal | gap | built-in method dict.copy is not modelled yet
 dict_fromkeys_iterator_raises | gap | built-in method dict.fromkeys is not modelled yet
@@ -10,43 +10,43 @@ dict_items_live_view_observes_mutation | gap | built-in method dict.items is not
 dict_items_normal | gap | built-in method dict.items is not modelled yet
 dict_keys_live_view_observes_mutation | gap | built-in method dict.keys is not modelled yet
 dict_keys_normal | gap | built-in method dict.keys is not modelled yet
-dict_normal | gap | built-in method dict.__new__ is not modelled yet
+dict_normal | agree
 dict_pop_missing | gap | built-in method dict.pop is not modelled yet
 dict_pop_normal | gap | built-in method dict.pop is not modelled yet
 dict_popitem_empty | gap | built-in method dict.popitem is not modelled yet
 dict_popitem_normal | gap | built-in method dict.popitem is not modelled yet
 dict_setdefault_normal | gap | built-in method dict.setdefault is not modelled yet
 dict_setdefault_unhashable_key | gap | built-in method dict.setdefault is not modelled yet
-dict_unhashable_key | gap | built-in method dict.__new__ is not modelled yet
+dict_unhashable_key | agree
 dict_update_normal | gap | built-in method dict.update is not modelled yet
 dict_update_partial_pairs_then_bad_arity | gap | built-in method dict.update is not modelled yet
 dict_update_partial_pairs_then_unhashable | gap | built-in method dict.update is not modelled yet
 dict_values_live_view_observes_mutation | gap | built-in method dict.values is not modelled yet
 dict_values_normal | gap | built-in method dict.values is not modelled yet
-fuzz_dict_arg_dict1 | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_emptydict | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_emptylist | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
-fuzz_dict_arg_emptystr | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_emptytuple | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_float | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_list1 | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_nestedlist | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_none | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_one | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_pairs | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_range | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_set1 | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_shortpair | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_strab | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_strx | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_true | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_tuple1 | gap | built-in method dict.__new__ is not modelled yet
-fuzz_dict_arg_zero | gap | built-in method dict.__new__ is not modelled yet
+fuzz_dict_arg_dict1 | agree
+fuzz_dict_arg_emptydict | agree
+fuzz_dict_arg_emptylist | agree
+fuzz_dict_arg_emptyset | agree
+fuzz_dict_arg_emptystr | agree
+fuzz_dict_arg_emptytuple | agree
+fuzz_dict_arg_float | agree
+fuzz_dict_arg_list1 | agree
+fuzz_dict_arg_nestedlist | agree
+fuzz_dict_arg_none | agree
+fuzz_dict_arg_one | agree
+fuzz_dict_arg_pairs | agree
+fuzz_dict_arg_range | agree
+fuzz_dict_arg_set1 | gap | a slot of a set whose layout is inexact
+fuzz_dict_arg_shortpair | agree
+fuzz_dict_arg_strab | agree
+fuzz_dict_arg_strx | agree
+fuzz_dict_arg_true | agree
+fuzz_dict_arg_tuple1 | agree
+fuzz_dict_arg_zero | agree
 fuzz_dict_clear_arg_dict1 | gap | built-in method dict.clear is not modelled yet
 fuzz_dict_clear_arg_emptydict | gap | built-in method dict.clear is not modelled yet
 fuzz_dict_clear_arg_emptylist | gap | built-in method dict.clear is not modelled yet
-fuzz_dict_clear_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_dict_clear_arg_emptyset | gap | built-in method dict.clear is not modelled yet
 fuzz_dict_clear_arg_emptystr | gap | built-in method dict.clear is not modelled yet
 fuzz_dict_clear_arg_emptytuple | gap | built-in method dict.clear is not modelled yet
 fuzz_dict_clear_arg_float | gap | built-in method dict.clear is not modelled yet
@@ -79,7 +79,7 @@ fuzz_dict_clear_arity0 | gap | built-in method dict.clear is not modelled yet
 fuzz_dict_copy_arg_dict1 | gap | built-in method dict.copy is not modelled yet
 fuzz_dict_copy_arg_emptydict | gap | built-in method dict.copy is not modelled yet
 fuzz_dict_copy_arg_emptylist | gap | built-in method dict.copy is not modelled yet
-fuzz_dict_copy_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_dict_copy_arg_emptyset | gap | built-in method dict.copy is not modelled yet
 fuzz_dict_copy_arg_emptystr | gap | built-in method dict.copy is not modelled yet
 fuzz_dict_copy_arg_emptytuple | gap | built-in method dict.copy is not modelled yet
 fuzz_dict_copy_arg_float | gap | built-in method dict.copy is not modelled yet
@@ -112,7 +112,7 @@ fuzz_dict_copy_arity0 | gap | built-in method dict.copy is not modelled yet
 fuzz_dict_get_arg_dict1 | gap | built-in method dict.get is not modelled yet
 fuzz_dict_get_arg_emptydict | gap | built-in method dict.get is not modelled yet
 fuzz_dict_get_arg_emptylist | gap | built-in method dict.get is not modelled yet
-fuzz_dict_get_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_dict_get_arg_emptyset | gap | built-in method dict.get is not modelled yet
 fuzz_dict_get_arg_emptystr | gap | built-in method dict.get is not modelled yet
 fuzz_dict_get_arg_emptytuple | gap | built-in method dict.get is not modelled yet
 fuzz_dict_get_arg_float | gap | built-in method dict.get is not modelled yet
@@ -145,7 +145,7 @@ fuzz_dict_get_arity0 | gap | built-in method dict.get is not modelled yet
 fuzz_dict_items_arg_dict1 | gap | built-in method dict.items is not modelled yet
 fuzz_dict_items_arg_emptydict | gap | built-in method dict.items is not modelled yet
 fuzz_dict_items_arg_emptylist | gap | built-in method dict.items is not modelled yet
-fuzz_dict_items_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_dict_items_arg_emptyset | gap | built-in method dict.items is not modelled yet
 fuzz_dict_items_arg_emptystr | gap | built-in method dict.items is not modelled yet
 fuzz_dict_items_arg_emptytuple | gap | built-in method dict.items is not modelled yet
 fuzz_dict_items_arg_float | gap | built-in method dict.items is not modelled yet
@@ -178,7 +178,7 @@ fuzz_dict_items_arity0 | gap | built-in method dict.items is not modelled yet
 fuzz_dict_keys_arg_dict1 | gap | built-in method dict.keys is not modelled yet
 fuzz_dict_keys_arg_emptydict | gap | built-in method dict.keys is not modelled yet
 fuzz_dict_keys_arg_emptylist | gap | built-in method dict.keys is not modelled yet
-fuzz_dict_keys_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_dict_keys_arg_emptyset | gap | built-in method dict.keys is not modelled yet
 fuzz_dict_keys_arg_emptystr | gap | built-in method dict.keys is not modelled yet
 fuzz_dict_keys_arg_emptytuple | gap | built-in method dict.keys is not modelled yet
 fuzz_dict_keys_arg_float | gap | built-in method dict.keys is not modelled yet
@@ -211,7 +211,7 @@ fuzz_dict_keys_arity0 | gap | built-in method dict.keys is not modelled yet
 fuzz_dict_pop_arg_dict1 | gap | built-in method dict.pop is not modelled yet
 fuzz_dict_pop_arg_emptydict | gap | built-in method dict.pop is not modelled yet
 fuzz_dict_pop_arg_emptylist | gap | built-in method dict.pop is not modelled yet
-fuzz_dict_pop_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_dict_pop_arg_emptyset | gap | built-in method dict.pop is not modelled yet
 fuzz_dict_pop_arg_emptystr | gap | built-in method dict.pop is not modelled yet
 fuzz_dict_pop_arg_emptytuple | gap | built-in method dict.pop is not modelled yet
 fuzz_dict_pop_arg_float | gap | built-in method dict.pop is not modelled yet
@@ -244,7 +244,7 @@ fuzz_dict_pop_arity0 | gap | built-in method dict.pop is not modelled yet
 fuzz_dict_popitem_arg_dict1 | gap | built-in method dict.popitem is not modelled yet
 fuzz_dict_popitem_arg_emptydict | gap | built-in method dict.popitem is not modelled yet
 fuzz_dict_popitem_arg_emptylist | gap | built-in method dict.popitem is not modelled yet
-fuzz_dict_popitem_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_dict_popitem_arg_emptyset | gap | built-in method dict.popitem is not modelled yet
 fuzz_dict_popitem_arg_emptystr | gap | built-in method dict.popitem is not modelled yet
 fuzz_dict_popitem_arg_emptytuple | gap | built-in method dict.popitem is not modelled yet
 fuzz_dict_popitem_arg_float | gap | built-in method dict.popitem is not modelled yet
@@ -277,7 +277,7 @@ fuzz_dict_popitem_arity0 | gap | built-in method dict.popitem is not modelled ye
 fuzz_dict_setdefault_arg_dict1 | gap | built-in method dict.setdefault is not modelled yet
 fuzz_dict_setdefault_arg_emptydict | gap | built-in method dict.setdefault is not modelled yet
 fuzz_dict_setdefault_arg_emptylist | gap | built-in method dict.setdefault is not modelled yet
-fuzz_dict_setdefault_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_dict_setdefault_arg_emptyset | gap | built-in method dict.setdefault is not modelled yet
 fuzz_dict_setdefault_arg_emptystr | gap | built-in method dict.setdefault is not modelled yet
 fuzz_dict_setdefault_arg_emptytuple | gap | built-in method dict.setdefault is not modelled yet
 fuzz_dict_setdefault_arg_float | gap | built-in method dict.setdefault is not modelled yet
@@ -310,7 +310,7 @@ fuzz_dict_setdefault_arity0 | gap | built-in method dict.setdefault is not model
 fuzz_dict_update_arg_dict1 | gap | built-in method dict.update is not modelled yet
 fuzz_dict_update_arg_emptydict | gap | built-in method dict.update is not modelled yet
 fuzz_dict_update_arg_emptylist | gap | built-in method dict.update is not modelled yet
-fuzz_dict_update_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_dict_update_arg_emptyset | gap | built-in method dict.update is not modelled yet
 fuzz_dict_update_arg_emptystr | gap | built-in method dict.update is not modelled yet
 fuzz_dict_update_arg_emptytuple | gap | built-in method dict.update is not modelled yet
 fuzz_dict_update_arg_float | gap | built-in method dict.update is not modelled yet
@@ -343,7 +343,7 @@ fuzz_dict_update_arity0 | gap | built-in method dict.update is not modelled yet
 fuzz_dict_values_arg_dict1 | gap | built-in method dict.values is not modelled yet
 fuzz_dict_values_arg_emptydict | gap | built-in method dict.values is not modelled yet
 fuzz_dict_values_arg_emptylist | gap | built-in method dict.values is not modelled yet
-fuzz_dict_values_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_dict_values_arg_emptyset | gap | built-in method dict.values is not modelled yet
 fuzz_dict_values_arg_emptystr | gap | built-in method dict.values is not modelled yet
 fuzz_dict_values_arg_emptytuple | gap | built-in method dict.values is not modelled yet
 fuzz_dict_values_arg_float | gap | built-in method dict.values is not modelled yet
@@ -376,7 +376,7 @@ fuzz_dict_values_arity0 | gap | built-in method dict.values is not modelled yet
 fuzz_isinstance_arg_dict1 | agree
 fuzz_isinstance_arg_emptydict | agree
 fuzz_isinstance_arg_emptylist | agree
-fuzz_isinstance_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_isinstance_arg_emptyset | agree
 fuzz_isinstance_arg_emptystr | agree
 fuzz_isinstance_arg_emptytuple | agree
 fuzz_isinstance_arg_float | agree
@@ -405,30 +405,30 @@ fuzz_isinstance_args_one_list1 | agree
 fuzz_isinstance_args_strab_emptystr | agree
 fuzz_isinstance_args_zero_lita | agree
 fuzz_isinstance_args_zero_one | agree
-fuzz_iter_arg_dict1 | gap | built-in method list.__new__ is not modelled yet
-fuzz_iter_arg_emptydict | gap | built-in method list.__new__ is not modelled yet
-fuzz_iter_arg_emptylist | gap | built-in method list.__new__ is not modelled yet
-fuzz_iter_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
-fuzz_iter_arg_emptystr | gap | built-in method list.__new__ is not modelled yet
-fuzz_iter_arg_emptytuple | gap | built-in method list.__new__ is not modelled yet
+fuzz_iter_arg_dict1 | gap | built-in method dict_keyiterator.__length_hint__ is not modelled yet
+fuzz_iter_arg_emptydict | gap | built-in method dict_keyiterator.__length_hint__ is not modelled yet
+fuzz_iter_arg_emptylist | agree
+fuzz_iter_arg_emptyset | agree
+fuzz_iter_arg_emptystr | agree
+fuzz_iter_arg_emptytuple | agree
 fuzz_iter_arg_float | agree
-fuzz_iter_arg_list1 | gap | built-in method list.__new__ is not modelled yet
-fuzz_iter_arg_nestedlist | gap | built-in method list.__new__ is not modelled yet
+fuzz_iter_arg_list1 | agree
+fuzz_iter_arg_nestedlist | agree
 fuzz_iter_arg_none | agree
 fuzz_iter_arg_one | agree
-fuzz_iter_arg_pairs | gap | built-in method list.__new__ is not modelled yet
-fuzz_iter_arg_range | gap | built-in method list.__new__ is not modelled yet
-fuzz_iter_arg_set1 | gap | built-in method list.__new__ is not modelled yet
-fuzz_iter_arg_shortpair | gap | built-in method list.__new__ is not modelled yet
-fuzz_iter_arg_strab | gap | built-in method list.__new__ is not modelled yet
-fuzz_iter_arg_strx | gap | built-in method list.__new__ is not modelled yet
+fuzz_iter_arg_pairs | agree
+fuzz_iter_arg_range | agree
+fuzz_iter_arg_set1 | gap | a slot of a set whose layout is inexact
+fuzz_iter_arg_shortpair | agree
+fuzz_iter_arg_strab | agree
+fuzz_iter_arg_strx | agree
 fuzz_iter_arg_true | agree
-fuzz_iter_arg_tuple1 | gap | built-in method list.__new__ is not modelled yet
+fuzz_iter_arg_tuple1 | agree
 fuzz_iter_arg_zero | agree
 fuzz_len_arg_dict1 | agree
 fuzz_len_arg_emptydict | agree
 fuzz_len_arg_emptylist | agree
-fuzz_len_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_len_arg_emptyset | agree
 fuzz_len_arg_emptystr | agree
 fuzz_len_arg_emptytuple | agree
 fuzz_len_arg_float | agree
@@ -448,7 +448,7 @@ fuzz_len_arg_zero | agree
 fuzz_list_append_arg_dict1 | gap | built-in method list.append is not modelled yet
 fuzz_list_append_arg_emptydict | gap | built-in method list.append is not modelled yet
 fuzz_list_append_arg_emptylist | gap | built-in method list.append is not modelled yet
-fuzz_list_append_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_list_append_arg_emptyset | gap | built-in method list.append is not modelled yet
 fuzz_list_append_arg_emptystr | gap | built-in method list.append is not modelled yet
 fuzz_list_append_arg_emptytuple | gap | built-in method list.append is not modelled yet
 fuzz_list_append_arg_float | gap | built-in method list.append is not modelled yet
@@ -478,30 +478,30 @@ fuzz_list_append_args_strab_emptystr | gap | built-in method list.append is not 
 fuzz_list_append_args_zero_lita | gap | built-in method list.append is not modelled yet
 fuzz_list_append_args_zero_one | gap | built-in method list.append is not modelled yet
 fuzz_list_append_arity0 | gap | built-in method list.append is not modelled yet
-fuzz_list_arg_dict1 | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_emptydict | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_emptylist | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
-fuzz_list_arg_emptystr | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_emptytuple | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_float | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_list1 | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_nestedlist | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_none | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_one | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_pairs | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_range | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_set1 | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_shortpair | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_strab | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_strx | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_true | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_tuple1 | gap | built-in method list.__new__ is not modelled yet
-fuzz_list_arg_zero | gap | built-in method list.__new__ is not modelled yet
+fuzz_list_arg_dict1 | agree
+fuzz_list_arg_emptydict | agree
+fuzz_list_arg_emptylist | agree
+fuzz_list_arg_emptyset | agree
+fuzz_list_arg_emptystr | agree
+fuzz_list_arg_emptytuple | agree
+fuzz_list_arg_float | agree
+fuzz_list_arg_list1 | agree
+fuzz_list_arg_nestedlist | agree
+fuzz_list_arg_none | agree
+fuzz_list_arg_one | agree
+fuzz_list_arg_pairs | agree
+fuzz_list_arg_range | agree
+fuzz_list_arg_set1 | gap | a slot of a set whose layout is inexact
+fuzz_list_arg_shortpair | agree
+fuzz_list_arg_strab | agree
+fuzz_list_arg_strx | agree
+fuzz_list_arg_true | agree
+fuzz_list_arg_tuple1 | agree
+fuzz_list_arg_zero | agree
 fuzz_list_clear_arg_dict1 | gap | built-in method list.clear is not modelled yet
 fuzz_list_clear_arg_emptydict | gap | built-in method list.clear is not modelled yet
 fuzz_list_clear_arg_emptylist | gap | built-in method list.clear is not modelled yet
-fuzz_list_clear_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_list_clear_arg_emptyset | gap | built-in method list.clear is not modelled yet
 fuzz_list_clear_arg_emptystr | gap | built-in method list.clear is not modelled yet
 fuzz_list_clear_arg_emptytuple | gap | built-in method list.clear is not modelled yet
 fuzz_list_clear_arg_float | gap | built-in method list.clear is not modelled yet
@@ -534,7 +534,7 @@ fuzz_list_clear_arity0 | gap | built-in method list.clear is not modelled yet
 fuzz_list_copy_arg_dict1 | gap | built-in method list.copy is not modelled yet
 fuzz_list_copy_arg_emptydict | gap | built-in method list.copy is not modelled yet
 fuzz_list_copy_arg_emptylist | gap | built-in method list.copy is not modelled yet
-fuzz_list_copy_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_list_copy_arg_emptyset | gap | built-in method list.copy is not modelled yet
 fuzz_list_copy_arg_emptystr | gap | built-in method list.copy is not modelled yet
 fuzz_list_copy_arg_emptytuple | gap | built-in method list.copy is not modelled yet
 fuzz_list_copy_arg_float | gap | built-in method list.copy is not modelled yet
@@ -567,7 +567,7 @@ fuzz_list_copy_arity0 | gap | built-in method list.copy is not modelled yet
 fuzz_list_count_arg_dict1 | gap | built-in method list.count is not modelled yet
 fuzz_list_count_arg_emptydict | gap | built-in method list.count is not modelled yet
 fuzz_list_count_arg_emptylist | gap | built-in method list.count is not modelled yet
-fuzz_list_count_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_list_count_arg_emptyset | gap | built-in method list.count is not modelled yet
 fuzz_list_count_arg_emptystr | gap | built-in method list.count is not modelled yet
 fuzz_list_count_arg_emptytuple | gap | built-in method list.count is not modelled yet
 fuzz_list_count_arg_float | gap | built-in method list.count is not modelled yet
@@ -600,7 +600,7 @@ fuzz_list_count_arity0 | gap | built-in method list.count is not modelled yet
 fuzz_list_extend_arg_dict1 | gap | built-in method list.extend is not modelled yet
 fuzz_list_extend_arg_emptydict | gap | built-in method list.extend is not modelled yet
 fuzz_list_extend_arg_emptylist | gap | built-in method list.extend is not modelled yet
-fuzz_list_extend_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_list_extend_arg_emptyset | gap | built-in method list.extend is not modelled yet
 fuzz_list_extend_arg_emptystr | gap | built-in method list.extend is not modelled yet
 fuzz_list_extend_arg_emptytuple | gap | built-in method list.extend is not modelled yet
 fuzz_list_extend_arg_float | gap | built-in method list.extend is not modelled yet
@@ -633,7 +633,7 @@ fuzz_list_extend_arity0 | gap | built-in method list.extend is not modelled yet
 fuzz_list_index_arg_dict1 | gap | built-in method list.index is not modelled yet
 fuzz_list_index_arg_emptydict | gap | built-in method list.index is not modelled yet
 fuzz_list_index_arg_emptylist | gap | built-in method list.index is not modelled yet
-fuzz_list_index_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_list_index_arg_emptyset | gap | built-in method list.index is not modelled yet
 fuzz_list_index_arg_emptystr | gap | built-in method list.index is not modelled yet
 fuzz_list_index_arg_emptytuple | gap | built-in method list.index is not modelled yet
 fuzz_list_index_arg_float | gap | built-in method list.index is not modelled yet
@@ -666,7 +666,7 @@ fuzz_list_index_arity0 | gap | built-in method list.index is not modelled yet
 fuzz_list_insert_arg_dict1 | gap | built-in method list.insert is not modelled yet
 fuzz_list_insert_arg_emptydict | gap | built-in method list.insert is not modelled yet
 fuzz_list_insert_arg_emptylist | gap | built-in method list.insert is not modelled yet
-fuzz_list_insert_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_list_insert_arg_emptyset | gap | built-in method list.insert is not modelled yet
 fuzz_list_insert_arg_emptystr | gap | built-in method list.insert is not modelled yet
 fuzz_list_insert_arg_emptytuple | gap | built-in method list.insert is not modelled yet
 fuzz_list_insert_arg_float | gap | built-in method list.insert is not modelled yet
@@ -699,7 +699,7 @@ fuzz_list_insert_arity0 | gap | built-in method list.insert is not modelled yet
 fuzz_list_pop_arg_dict1 | gap | built-in method list.pop is not modelled yet
 fuzz_list_pop_arg_emptydict | gap | built-in method list.pop is not modelled yet
 fuzz_list_pop_arg_emptylist | gap | built-in method list.pop is not modelled yet
-fuzz_list_pop_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_list_pop_arg_emptyset | gap | built-in method list.pop is not modelled yet
 fuzz_list_pop_arg_emptystr | gap | built-in method list.pop is not modelled yet
 fuzz_list_pop_arg_emptytuple | gap | built-in method list.pop is not modelled yet
 fuzz_list_pop_arg_float | gap | built-in method list.pop is not modelled yet
@@ -732,7 +732,7 @@ fuzz_list_pop_arity0 | gap | built-in method list.pop is not modelled yet
 fuzz_list_remove_arg_dict1 | gap | built-in method list.remove is not modelled yet
 fuzz_list_remove_arg_emptydict | gap | built-in method list.remove is not modelled yet
 fuzz_list_remove_arg_emptylist | gap | built-in method list.remove is not modelled yet
-fuzz_list_remove_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_list_remove_arg_emptyset | gap | built-in method list.remove is not modelled yet
 fuzz_list_remove_arg_emptystr | gap | built-in method list.remove is not modelled yet
 fuzz_list_remove_arg_emptytuple | gap | built-in method list.remove is not modelled yet
 fuzz_list_remove_arg_float | gap | built-in method list.remove is not modelled yet
@@ -765,7 +765,7 @@ fuzz_list_remove_arity0 | gap | built-in method list.remove is not modelled yet
 fuzz_list_reverse_arg_dict1 | gap | built-in method list.reverse is not modelled yet
 fuzz_list_reverse_arg_emptydict | gap | built-in method list.reverse is not modelled yet
 fuzz_list_reverse_arg_emptylist | gap | built-in method list.reverse is not modelled yet
-fuzz_list_reverse_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_list_reverse_arg_emptyset | gap | built-in method list.reverse is not modelled yet
 fuzz_list_reverse_arg_emptystr | gap | built-in method list.reverse is not modelled yet
 fuzz_list_reverse_arg_emptytuple | gap | built-in method list.reverse is not modelled yet
 fuzz_list_reverse_arg_float | gap | built-in method list.reverse is not modelled yet
@@ -798,7 +798,7 @@ fuzz_list_reverse_arity0 | gap | built-in method list.reverse is not modelled ye
 fuzz_list_sort_arg_dict1 | gap | built-in method list.sort is not modelled yet
 fuzz_list_sort_arg_emptydict | gap | built-in method list.sort is not modelled yet
 fuzz_list_sort_arg_emptylist | gap | built-in method list.sort is not modelled yet
-fuzz_list_sort_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_list_sort_arg_emptyset | gap | built-in method list.sort is not modelled yet
 fuzz_list_sort_arg_emptystr | gap | built-in method list.sort is not modelled yet
 fuzz_list_sort_arg_emptytuple | gap | built-in method list.sort is not modelled yet
 fuzz_list_sort_arg_float | gap | built-in method list.sort is not modelled yet
@@ -831,7 +831,7 @@ fuzz_list_sort_arity0 | gap | built-in method list.sort is not modelled yet
 fuzz_next_arg_dict1 | agree
 fuzz_next_arg_emptydict | agree
 fuzz_next_arg_emptylist | agree
-fuzz_next_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_next_arg_emptyset | agree
 fuzz_next_arg_emptystr | agree
 fuzz_next_arg_emptytuple | agree
 fuzz_next_arg_float | agree
@@ -863,7 +863,7 @@ fuzz_next_args_zero_one | agree
 fuzz_range_arg_dict1 | agree
 fuzz_range_arg_emptydict | agree
 fuzz_range_arg_emptylist | agree
-fuzz_range_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_range_arg_emptyset | agree
 fuzz_range_arg_emptystr | agree
 fuzz_range_arg_emptytuple | agree
 fuzz_range_arg_float | agree
@@ -895,7 +895,7 @@ fuzz_range_args_zero_one | agree
 fuzz_range_count_arg_dict1 | gap | built-in method range.count is not modelled yet
 fuzz_range_count_arg_emptydict | gap | built-in method range.count is not modelled yet
 fuzz_range_count_arg_emptylist | gap | built-in method range.count is not modelled yet
-fuzz_range_count_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_range_count_arg_emptyset | gap | built-in method range.count is not modelled yet
 fuzz_range_count_arg_emptystr | gap | built-in method range.count is not modelled yet
 fuzz_range_count_arg_emptytuple | gap | built-in method range.count is not modelled yet
 fuzz_range_count_arg_float | gap | built-in method range.count is not modelled yet
@@ -928,7 +928,7 @@ fuzz_range_count_arity0 | gap | built-in method range.count is not modelled yet
 fuzz_range_index_arg_dict1 | gap | built-in method range.index is not modelled yet
 fuzz_range_index_arg_emptydict | gap | built-in method range.index is not modelled yet
 fuzz_range_index_arg_emptylist | gap | built-in method range.index is not modelled yet
-fuzz_range_index_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_range_index_arg_emptyset | gap | built-in method range.index is not modelled yet
 fuzz_range_index_arg_emptystr | gap | built-in method range.index is not modelled yet
 fuzz_range_index_arg_emptytuple | gap | built-in method range.index is not modelled yet
 fuzz_range_index_arg_float | gap | built-in method range.index is not modelled yet
@@ -961,7 +961,7 @@ fuzz_range_index_arity0 | gap | built-in method range.index is not modelled yet
 fuzz_repr_arg_dict1 | agree
 fuzz_repr_arg_emptydict | agree
 fuzz_repr_arg_emptylist | agree
-fuzz_repr_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_repr_arg_emptyset | agree
 fuzz_repr_arg_emptystr | agree
 fuzz_repr_arg_emptytuple | agree
 fuzz_repr_arg_float | agree
@@ -981,7 +981,7 @@ fuzz_repr_arg_zero | agree
 fuzz_set_add_arg_dict1 | gap | built-in method set.add is not modelled yet
 fuzz_set_add_arg_emptydict | gap | built-in method set.add is not modelled yet
 fuzz_set_add_arg_emptylist | gap | built-in method set.add is not modelled yet
-fuzz_set_add_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_add_arg_emptyset | gap | built-in method set.add is not modelled yet
 fuzz_set_add_arg_emptystr | gap | built-in method set.add is not modelled yet
 fuzz_set_add_arg_emptytuple | gap | built-in method set.add is not modelled yet
 fuzz_set_add_arg_float | gap | built-in method set.add is not modelled yet
@@ -1011,30 +1011,30 @@ fuzz_set_add_args_strab_emptystr | gap | built-in method set.add is not modelled
 fuzz_set_add_args_zero_lita | gap | built-in method set.add is not modelled yet
 fuzz_set_add_args_zero_one | gap | built-in method set.add is not modelled yet
 fuzz_set_add_arity0 | gap | built-in method set.add is not modelled yet
-fuzz_set_arg_dict1 | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_emptydict | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_emptylist | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_emptystr | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_emptytuple | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_float | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_list1 | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_nestedlist | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_none | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_one | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_pairs | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_range | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_set1 | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_shortpair | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_strab | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_strx | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_true | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_tuple1 | gap | built-in method set.__new__ is not modelled yet
-fuzz_set_arg_zero | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_arg_dict1 | agree
+fuzz_set_arg_emptydict | agree
+fuzz_set_arg_emptylist | agree
+fuzz_set_arg_emptyset | agree
+fuzz_set_arg_emptystr | agree
+fuzz_set_arg_emptytuple | agree
+fuzz_set_arg_float | agree
+fuzz_set_arg_list1 | agree
+fuzz_set_arg_nestedlist | agree
+fuzz_set_arg_none | agree
+fuzz_set_arg_one | agree
+fuzz_set_arg_pairs | agree
+fuzz_set_arg_range | agree
+fuzz_set_arg_set1 | agree
+fuzz_set_arg_shortpair | agree
+fuzz_set_arg_strab | agree
+fuzz_set_arg_strx | agree
+fuzz_set_arg_true | agree
+fuzz_set_arg_tuple1 | agree
+fuzz_set_arg_zero | agree
 fuzz_set_clear_arg_dict1 | gap | built-in method set.clear is not modelled yet
 fuzz_set_clear_arg_emptydict | gap | built-in method set.clear is not modelled yet
 fuzz_set_clear_arg_emptylist | gap | built-in method set.clear is not modelled yet
-fuzz_set_clear_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_clear_arg_emptyset | gap | built-in method set.clear is not modelled yet
 fuzz_set_clear_arg_emptystr | gap | built-in method set.clear is not modelled yet
 fuzz_set_clear_arg_emptytuple | gap | built-in method set.clear is not modelled yet
 fuzz_set_clear_arg_float | gap | built-in method set.clear is not modelled yet
@@ -1067,7 +1067,7 @@ fuzz_set_clear_arity0 | gap | built-in method set.clear is not modelled yet
 fuzz_set_copy_arg_dict1 | gap | built-in method set.copy is not modelled yet
 fuzz_set_copy_arg_emptydict | gap | built-in method set.copy is not modelled yet
 fuzz_set_copy_arg_emptylist | gap | built-in method set.copy is not modelled yet
-fuzz_set_copy_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_copy_arg_emptyset | gap | built-in method set.copy is not modelled yet
 fuzz_set_copy_arg_emptystr | gap | built-in method set.copy is not modelled yet
 fuzz_set_copy_arg_emptytuple | gap | built-in method set.copy is not modelled yet
 fuzz_set_copy_arg_float | gap | built-in method set.copy is not modelled yet
@@ -1100,7 +1100,7 @@ fuzz_set_copy_arity0 | gap | built-in method set.copy is not modelled yet
 fuzz_set_difference_arg_dict1 | gap | built-in method set.difference is not modelled yet
 fuzz_set_difference_arg_emptydict | gap | built-in method set.difference is not modelled yet
 fuzz_set_difference_arg_emptylist | gap | built-in method set.difference is not modelled yet
-fuzz_set_difference_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_difference_arg_emptyset | gap | built-in method set.difference is not modelled yet
 fuzz_set_difference_arg_emptystr | gap | built-in method set.difference is not modelled yet
 fuzz_set_difference_arg_emptytuple | gap | built-in method set.difference is not modelled yet
 fuzz_set_difference_arg_float | gap | built-in method set.difference is not modelled yet
@@ -1133,7 +1133,7 @@ fuzz_set_difference_arity0 | gap | built-in method set.difference is not modelle
 fuzz_set_difference_update_arg_dict1 | gap | built-in method set.difference_update is not modelled yet
 fuzz_set_difference_update_arg_emptydict | gap | built-in method set.difference_update is not modelled yet
 fuzz_set_difference_update_arg_emptylist | gap | built-in method set.difference_update is not modelled yet
-fuzz_set_difference_update_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_difference_update_arg_emptyset | gap | built-in method set.difference_update is not modelled yet
 fuzz_set_difference_update_arg_emptystr | gap | built-in method set.difference_update is not modelled yet
 fuzz_set_difference_update_arg_emptytuple | gap | built-in method set.difference_update is not modelled yet
 fuzz_set_difference_update_arg_float | gap | built-in method set.difference_update is not modelled yet
@@ -1166,7 +1166,7 @@ fuzz_set_difference_update_arity0 | gap | built-in method set.difference_update 
 fuzz_set_discard_arg_dict1 | gap | built-in method set.discard is not modelled yet
 fuzz_set_discard_arg_emptydict | gap | built-in method set.discard is not modelled yet
 fuzz_set_discard_arg_emptylist | gap | built-in method set.discard is not modelled yet
-fuzz_set_discard_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_discard_arg_emptyset | gap | built-in method set.discard is not modelled yet
 fuzz_set_discard_arg_emptystr | gap | built-in method set.discard is not modelled yet
 fuzz_set_discard_arg_emptytuple | gap | built-in method set.discard is not modelled yet
 fuzz_set_discard_arg_float | gap | built-in method set.discard is not modelled yet
@@ -1199,7 +1199,7 @@ fuzz_set_discard_arity0 | gap | built-in method set.discard is not modelled yet
 fuzz_set_intersection_arg_dict1 | gap | built-in method set.intersection is not modelled yet
 fuzz_set_intersection_arg_emptydict | gap | built-in method set.intersection is not modelled yet
 fuzz_set_intersection_arg_emptylist | gap | built-in method set.intersection is not modelled yet
-fuzz_set_intersection_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_intersection_arg_emptyset | gap | built-in method set.intersection is not modelled yet
 fuzz_set_intersection_arg_emptystr | gap | built-in method set.intersection is not modelled yet
 fuzz_set_intersection_arg_emptytuple | gap | built-in method set.intersection is not modelled yet
 fuzz_set_intersection_arg_float | gap | built-in method set.intersection is not modelled yet
@@ -1232,7 +1232,7 @@ fuzz_set_intersection_arity0 | gap | built-in method set.intersection is not mod
 fuzz_set_intersection_update_arg_dict1 | gap | built-in method set.intersection_update is not modelled yet
 fuzz_set_intersection_update_arg_emptydict | gap | built-in method set.intersection_update is not modelled yet
 fuzz_set_intersection_update_arg_emptylist | gap | built-in method set.intersection_update is not modelled yet
-fuzz_set_intersection_update_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_intersection_update_arg_emptyset | gap | built-in method set.intersection_update is not modelled yet
 fuzz_set_intersection_update_arg_emptystr | gap | built-in method set.intersection_update is not modelled yet
 fuzz_set_intersection_update_arg_emptytuple | gap | built-in method set.intersection_update is not modelled yet
 fuzz_set_intersection_update_arg_float | gap | built-in method set.intersection_update is not modelled yet
@@ -1265,7 +1265,7 @@ fuzz_set_intersection_update_arity0 | gap | built-in method set.intersection_upd
 fuzz_set_isdisjoint_arg_dict1 | gap | built-in method set.isdisjoint is not modelled yet
 fuzz_set_isdisjoint_arg_emptydict | gap | built-in method set.isdisjoint is not modelled yet
 fuzz_set_isdisjoint_arg_emptylist | gap | built-in method set.isdisjoint is not modelled yet
-fuzz_set_isdisjoint_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_isdisjoint_arg_emptyset | gap | built-in method set.isdisjoint is not modelled yet
 fuzz_set_isdisjoint_arg_emptystr | gap | built-in method set.isdisjoint is not modelled yet
 fuzz_set_isdisjoint_arg_emptytuple | gap | built-in method set.isdisjoint is not modelled yet
 fuzz_set_isdisjoint_arg_float | gap | built-in method set.isdisjoint is not modelled yet
@@ -1298,7 +1298,7 @@ fuzz_set_isdisjoint_arity0 | gap | built-in method set.isdisjoint is not modelle
 fuzz_set_issubset_arg_dict1 | gap | built-in method set.issubset is not modelled yet
 fuzz_set_issubset_arg_emptydict | gap | built-in method set.issubset is not modelled yet
 fuzz_set_issubset_arg_emptylist | gap | built-in method set.issubset is not modelled yet
-fuzz_set_issubset_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_issubset_arg_emptyset | gap | built-in method set.issubset is not modelled yet
 fuzz_set_issubset_arg_emptystr | gap | built-in method set.issubset is not modelled yet
 fuzz_set_issubset_arg_emptytuple | gap | built-in method set.issubset is not modelled yet
 fuzz_set_issubset_arg_float | gap | built-in method set.issubset is not modelled yet
@@ -1331,7 +1331,7 @@ fuzz_set_issubset_arity0 | gap | built-in method set.issubset is not modelled ye
 fuzz_set_issuperset_arg_dict1 | gap | built-in method set.issuperset is not modelled yet
 fuzz_set_issuperset_arg_emptydict | gap | built-in method set.issuperset is not modelled yet
 fuzz_set_issuperset_arg_emptylist | gap | built-in method set.issuperset is not modelled yet
-fuzz_set_issuperset_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_issuperset_arg_emptyset | gap | built-in method set.issuperset is not modelled yet
 fuzz_set_issuperset_arg_emptystr | gap | built-in method set.issuperset is not modelled yet
 fuzz_set_issuperset_arg_emptytuple | gap | built-in method set.issuperset is not modelled yet
 fuzz_set_issuperset_arg_float | gap | built-in method set.issuperset is not modelled yet
@@ -1364,7 +1364,7 @@ fuzz_set_issuperset_arity0 | gap | built-in method set.issuperset is not modelle
 fuzz_set_pop_arg_dict1 | gap | built-in method set.pop is not modelled yet
 fuzz_set_pop_arg_emptydict | gap | built-in method set.pop is not modelled yet
 fuzz_set_pop_arg_emptylist | gap | built-in method set.pop is not modelled yet
-fuzz_set_pop_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_pop_arg_emptyset | gap | built-in method set.pop is not modelled yet
 fuzz_set_pop_arg_emptystr | gap | built-in method set.pop is not modelled yet
 fuzz_set_pop_arg_emptytuple | gap | built-in method set.pop is not modelled yet
 fuzz_set_pop_arg_float | gap | built-in method set.pop is not modelled yet
@@ -1397,7 +1397,7 @@ fuzz_set_pop_arity0 | gap | built-in method set.pop is not modelled yet
 fuzz_set_remove_arg_dict1 | gap | built-in method set.remove is not modelled yet
 fuzz_set_remove_arg_emptydict | gap | built-in method set.remove is not modelled yet
 fuzz_set_remove_arg_emptylist | gap | built-in method set.remove is not modelled yet
-fuzz_set_remove_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_remove_arg_emptyset | gap | built-in method set.remove is not modelled yet
 fuzz_set_remove_arg_emptystr | gap | built-in method set.remove is not modelled yet
 fuzz_set_remove_arg_emptytuple | gap | built-in method set.remove is not modelled yet
 fuzz_set_remove_arg_float | gap | built-in method set.remove is not modelled yet
@@ -1430,7 +1430,7 @@ fuzz_set_remove_arity0 | gap | built-in method set.remove is not modelled yet
 fuzz_set_symmetric_difference_arg_dict1 | gap | built-in method set.symmetric_difference is not modelled yet
 fuzz_set_symmetric_difference_arg_emptydict | gap | built-in method set.symmetric_difference is not modelled yet
 fuzz_set_symmetric_difference_arg_emptylist | gap | built-in method set.symmetric_difference is not modelled yet
-fuzz_set_symmetric_difference_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_symmetric_difference_arg_emptyset | gap | built-in method set.symmetric_difference is not modelled yet
 fuzz_set_symmetric_difference_arg_emptystr | gap | built-in method set.symmetric_difference is not modelled yet
 fuzz_set_symmetric_difference_arg_emptytuple | gap | built-in method set.symmetric_difference is not modelled yet
 fuzz_set_symmetric_difference_arg_float | gap | built-in method set.symmetric_difference is not modelled yet
@@ -1463,7 +1463,7 @@ fuzz_set_symmetric_difference_arity0 | gap | built-in method set.symmetric_diffe
 fuzz_set_symmetric_difference_update_arg_dict1 | gap | built-in method set.symmetric_difference_update is not modelled yet
 fuzz_set_symmetric_difference_update_arg_emptydict | gap | built-in method set.symmetric_difference_update is not modelled yet
 fuzz_set_symmetric_difference_update_arg_emptylist | gap | built-in method set.symmetric_difference_update is not modelled yet
-fuzz_set_symmetric_difference_update_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_symmetric_difference_update_arg_emptyset | gap | built-in method set.symmetric_difference_update is not modelled yet
 fuzz_set_symmetric_difference_update_arg_emptystr | gap | built-in method set.symmetric_difference_update is not modelled yet
 fuzz_set_symmetric_difference_update_arg_emptytuple | gap | built-in method set.symmetric_difference_update is not modelled yet
 fuzz_set_symmetric_difference_update_arg_float | gap | built-in method set.symmetric_difference_update is not modelled yet
@@ -1496,7 +1496,7 @@ fuzz_set_symmetric_difference_update_arity0 | gap | built-in method set.symmetri
 fuzz_set_union_arg_dict1 | gap | built-in method set.union is not modelled yet
 fuzz_set_union_arg_emptydict | gap | built-in method set.union is not modelled yet
 fuzz_set_union_arg_emptylist | gap | built-in method set.union is not modelled yet
-fuzz_set_union_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_union_arg_emptyset | gap | built-in method set.union is not modelled yet
 fuzz_set_union_arg_emptystr | gap | built-in method set.union is not modelled yet
 fuzz_set_union_arg_emptytuple | gap | built-in method set.union is not modelled yet
 fuzz_set_union_arg_float | gap | built-in method set.union is not modelled yet
@@ -1529,7 +1529,7 @@ fuzz_set_union_arity0 | gap | built-in method set.union is not modelled yet
 fuzz_set_update_arg_dict1 | gap | built-in method set.update is not modelled yet
 fuzz_set_update_arg_emptydict | gap | built-in method set.update is not modelled yet
 fuzz_set_update_arg_emptylist | gap | built-in method set.update is not modelled yet
-fuzz_set_update_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_set_update_arg_emptyset | gap | built-in method set.update is not modelled yet
 fuzz_set_update_arg_emptystr | gap | built-in method set.update is not modelled yet
 fuzz_set_update_arg_emptytuple | gap | built-in method set.update is not modelled yet
 fuzz_set_update_arg_float | gap | built-in method set.update is not modelled yet
@@ -1559,30 +1559,30 @@ fuzz_set_update_args_strab_emptystr | gap | built-in method set.update is not mo
 fuzz_set_update_args_zero_lita | gap | built-in method set.update is not modelled yet
 fuzz_set_update_args_zero_one | gap | built-in method set.update is not modelled yet
 fuzz_set_update_arity0 | gap | built-in method set.update is not modelled yet
-fuzz_str_arg_dict1 | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_emptydict | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_emptylist | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
-fuzz_str_arg_emptystr | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_emptytuple | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_float | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_list1 | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_nestedlist | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_none | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_one | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_pairs | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_range | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_set1 | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_shortpair | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_strab | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_strx | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_true | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_tuple1 | gap | built-in method str.__new__ is not modelled yet
-fuzz_str_arg_zero | gap | built-in method str.__new__ is not modelled yet
+fuzz_str_arg_dict1 | agree
+fuzz_str_arg_emptydict | agree
+fuzz_str_arg_emptylist | agree
+fuzz_str_arg_emptyset | agree
+fuzz_str_arg_emptystr | agree
+fuzz_str_arg_emptytuple | agree
+fuzz_str_arg_float | agree
+fuzz_str_arg_list1 | agree
+fuzz_str_arg_nestedlist | agree
+fuzz_str_arg_none | agree
+fuzz_str_arg_one | agree
+fuzz_str_arg_pairs | agree
+fuzz_str_arg_range | agree
+fuzz_str_arg_set1 | agree
+fuzz_str_arg_shortpair | agree
+fuzz_str_arg_strab | agree
+fuzz_str_arg_strx | agree
+fuzz_str_arg_true | agree
+fuzz_str_arg_tuple1 | agree
+fuzz_str_arg_zero | agree
 fuzz_str_capitalize_arg_dict1 | gap | built-in method str.capitalize is not modelled yet
 fuzz_str_capitalize_arg_emptydict | gap | built-in method str.capitalize is not modelled yet
 fuzz_str_capitalize_arg_emptylist | gap | built-in method str.capitalize is not modelled yet
-fuzz_str_capitalize_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_capitalize_arg_emptyset | gap | built-in method str.capitalize is not modelled yet
 fuzz_str_capitalize_arg_emptystr | gap | built-in method str.capitalize is not modelled yet
 fuzz_str_capitalize_arg_emptytuple | gap | built-in method str.capitalize is not modelled yet
 fuzz_str_capitalize_arg_float | gap | built-in method str.capitalize is not modelled yet
@@ -1615,7 +1615,7 @@ fuzz_str_capitalize_arity0 | gap | built-in method str.capitalize is not modelle
 fuzz_str_casefold_arg_dict1 | gap | built-in method str.casefold is not modelled yet
 fuzz_str_casefold_arg_emptydict | gap | built-in method str.casefold is not modelled yet
 fuzz_str_casefold_arg_emptylist | gap | built-in method str.casefold is not modelled yet
-fuzz_str_casefold_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_casefold_arg_emptyset | gap | built-in method str.casefold is not modelled yet
 fuzz_str_casefold_arg_emptystr | gap | built-in method str.casefold is not modelled yet
 fuzz_str_casefold_arg_emptytuple | gap | built-in method str.casefold is not modelled yet
 fuzz_str_casefold_arg_float | gap | built-in method str.casefold is not modelled yet
@@ -1648,7 +1648,7 @@ fuzz_str_casefold_arity0 | gap | built-in method str.casefold is not modelled ye
 fuzz_str_center_arg_dict1 | gap | built-in method str.center is not modelled yet
 fuzz_str_center_arg_emptydict | gap | built-in method str.center is not modelled yet
 fuzz_str_center_arg_emptylist | gap | built-in method str.center is not modelled yet
-fuzz_str_center_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_center_arg_emptyset | gap | built-in method str.center is not modelled yet
 fuzz_str_center_arg_emptystr | gap | built-in method str.center is not modelled yet
 fuzz_str_center_arg_emptytuple | gap | built-in method str.center is not modelled yet
 fuzz_str_center_arg_float | gap | built-in method str.center is not modelled yet
@@ -1681,7 +1681,7 @@ fuzz_str_center_arity0 | gap | built-in method str.center is not modelled yet
 fuzz_str_count_arg_dict1 | gap | built-in method str.count is not modelled yet
 fuzz_str_count_arg_emptydict | gap | built-in method str.count is not modelled yet
 fuzz_str_count_arg_emptylist | gap | built-in method str.count is not modelled yet
-fuzz_str_count_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_count_arg_emptyset | gap | built-in method str.count is not modelled yet
 fuzz_str_count_arg_emptystr | gap | built-in method str.count is not modelled yet
 fuzz_str_count_arg_emptytuple | gap | built-in method str.count is not modelled yet
 fuzz_str_count_arg_float | gap | built-in method str.count is not modelled yet
@@ -1714,7 +1714,7 @@ fuzz_str_count_arity0 | gap | built-in method str.count is not modelled yet
 fuzz_str_endswith_arg_dict1 | gap | built-in method str.endswith is not modelled yet
 fuzz_str_endswith_arg_emptydict | gap | built-in method str.endswith is not modelled yet
 fuzz_str_endswith_arg_emptylist | gap | built-in method str.endswith is not modelled yet
-fuzz_str_endswith_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_endswith_arg_emptyset | gap | built-in method str.endswith is not modelled yet
 fuzz_str_endswith_arg_emptystr | gap | built-in method str.endswith is not modelled yet
 fuzz_str_endswith_arg_emptytuple | gap | built-in method str.endswith is not modelled yet
 fuzz_str_endswith_arg_float | gap | built-in method str.endswith is not modelled yet
@@ -1747,7 +1747,7 @@ fuzz_str_endswith_arity0 | gap | built-in method str.endswith is not modelled ye
 fuzz_str_expandtabs_arg_dict1 | gap | built-in method str.expandtabs is not modelled yet
 fuzz_str_expandtabs_arg_emptydict | gap | built-in method str.expandtabs is not modelled yet
 fuzz_str_expandtabs_arg_emptylist | gap | built-in method str.expandtabs is not modelled yet
-fuzz_str_expandtabs_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_expandtabs_arg_emptyset | gap | built-in method str.expandtabs is not modelled yet
 fuzz_str_expandtabs_arg_emptystr | gap | built-in method str.expandtabs is not modelled yet
 fuzz_str_expandtabs_arg_emptytuple | gap | built-in method str.expandtabs is not modelled yet
 fuzz_str_expandtabs_arg_float | gap | built-in method str.expandtabs is not modelled yet
@@ -1780,7 +1780,7 @@ fuzz_str_expandtabs_arity0 | gap | built-in method str.expandtabs is not modelle
 fuzz_str_find_arg_dict1 | gap | built-in method str.find is not modelled yet
 fuzz_str_find_arg_emptydict | gap | built-in method str.find is not modelled yet
 fuzz_str_find_arg_emptylist | gap | built-in method str.find is not modelled yet
-fuzz_str_find_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_find_arg_emptyset | gap | built-in method str.find is not modelled yet
 fuzz_str_find_arg_emptystr | gap | built-in method str.find is not modelled yet
 fuzz_str_find_arg_emptytuple | gap | built-in method str.find is not modelled yet
 fuzz_str_find_arg_float | gap | built-in method str.find is not modelled yet
@@ -1813,7 +1813,7 @@ fuzz_str_find_arity0 | gap | built-in method str.find is not modelled yet
 fuzz_str_index_arg_dict1 | gap | built-in method str.index is not modelled yet
 fuzz_str_index_arg_emptydict | gap | built-in method str.index is not modelled yet
 fuzz_str_index_arg_emptylist | gap | built-in method str.index is not modelled yet
-fuzz_str_index_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_index_arg_emptyset | gap | built-in method str.index is not modelled yet
 fuzz_str_index_arg_emptystr | gap | built-in method str.index is not modelled yet
 fuzz_str_index_arg_emptytuple | gap | built-in method str.index is not modelled yet
 fuzz_str_index_arg_float | gap | built-in method str.index is not modelled yet
@@ -1846,7 +1846,7 @@ fuzz_str_index_arity0 | gap | built-in method str.index is not modelled yet
 fuzz_str_isalnum_arg_dict1 | gap | built-in method str.isalnum is not modelled yet
 fuzz_str_isalnum_arg_emptydict | gap | built-in method str.isalnum is not modelled yet
 fuzz_str_isalnum_arg_emptylist | gap | built-in method str.isalnum is not modelled yet
-fuzz_str_isalnum_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_isalnum_arg_emptyset | gap | built-in method str.isalnum is not modelled yet
 fuzz_str_isalnum_arg_emptystr | gap | built-in method str.isalnum is not modelled yet
 fuzz_str_isalnum_arg_emptytuple | gap | built-in method str.isalnum is not modelled yet
 fuzz_str_isalnum_arg_float | gap | built-in method str.isalnum is not modelled yet
@@ -1879,7 +1879,7 @@ fuzz_str_isalnum_arity0 | gap | built-in method str.isalnum is not modelled yet
 fuzz_str_isalpha_arg_dict1 | gap | built-in method str.isalpha is not modelled yet
 fuzz_str_isalpha_arg_emptydict | gap | built-in method str.isalpha is not modelled yet
 fuzz_str_isalpha_arg_emptylist | gap | built-in method str.isalpha is not modelled yet
-fuzz_str_isalpha_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_isalpha_arg_emptyset | gap | built-in method str.isalpha is not modelled yet
 fuzz_str_isalpha_arg_emptystr | gap | built-in method str.isalpha is not modelled yet
 fuzz_str_isalpha_arg_emptytuple | gap | built-in method str.isalpha is not modelled yet
 fuzz_str_isalpha_arg_float | gap | built-in method str.isalpha is not modelled yet
@@ -1912,7 +1912,7 @@ fuzz_str_isalpha_arity0 | gap | built-in method str.isalpha is not modelled yet
 fuzz_str_isascii_arg_dict1 | gap | built-in method str.isascii is not modelled yet
 fuzz_str_isascii_arg_emptydict | gap | built-in method str.isascii is not modelled yet
 fuzz_str_isascii_arg_emptylist | gap | built-in method str.isascii is not modelled yet
-fuzz_str_isascii_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_isascii_arg_emptyset | gap | built-in method str.isascii is not modelled yet
 fuzz_str_isascii_arg_emptystr | gap | built-in method str.isascii is not modelled yet
 fuzz_str_isascii_arg_emptytuple | gap | built-in method str.isascii is not modelled yet
 fuzz_str_isascii_arg_float | gap | built-in method str.isascii is not modelled yet
@@ -1945,7 +1945,7 @@ fuzz_str_isascii_arity0 | gap | built-in method str.isascii is not modelled yet
 fuzz_str_isdecimal_arg_dict1 | gap | built-in method str.isdecimal is not modelled yet
 fuzz_str_isdecimal_arg_emptydict | gap | built-in method str.isdecimal is not modelled yet
 fuzz_str_isdecimal_arg_emptylist | gap | built-in method str.isdecimal is not modelled yet
-fuzz_str_isdecimal_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_isdecimal_arg_emptyset | gap | built-in method str.isdecimal is not modelled yet
 fuzz_str_isdecimal_arg_emptystr | gap | built-in method str.isdecimal is not modelled yet
 fuzz_str_isdecimal_arg_emptytuple | gap | built-in method str.isdecimal is not modelled yet
 fuzz_str_isdecimal_arg_float | gap | built-in method str.isdecimal is not modelled yet
@@ -1978,7 +1978,7 @@ fuzz_str_isdecimal_arity0 | gap | built-in method str.isdecimal is not modelled 
 fuzz_str_isdigit_arg_dict1 | gap | built-in method str.isdigit is not modelled yet
 fuzz_str_isdigit_arg_emptydict | gap | built-in method str.isdigit is not modelled yet
 fuzz_str_isdigit_arg_emptylist | gap | built-in method str.isdigit is not modelled yet
-fuzz_str_isdigit_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_isdigit_arg_emptyset | gap | built-in method str.isdigit is not modelled yet
 fuzz_str_isdigit_arg_emptystr | gap | built-in method str.isdigit is not modelled yet
 fuzz_str_isdigit_arg_emptytuple | gap | built-in method str.isdigit is not modelled yet
 fuzz_str_isdigit_arg_float | gap | built-in method str.isdigit is not modelled yet
@@ -2011,7 +2011,7 @@ fuzz_str_isdigit_arity0 | gap | built-in method str.isdigit is not modelled yet
 fuzz_str_isidentifier_arg_dict1 | gap | built-in method str.isidentifier is not modelled yet
 fuzz_str_isidentifier_arg_emptydict | gap | built-in method str.isidentifier is not modelled yet
 fuzz_str_isidentifier_arg_emptylist | gap | built-in method str.isidentifier is not modelled yet
-fuzz_str_isidentifier_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_isidentifier_arg_emptyset | gap | built-in method str.isidentifier is not modelled yet
 fuzz_str_isidentifier_arg_emptystr | gap | built-in method str.isidentifier is not modelled yet
 fuzz_str_isidentifier_arg_emptytuple | gap | built-in method str.isidentifier is not modelled yet
 fuzz_str_isidentifier_arg_float | gap | built-in method str.isidentifier is not modelled yet
@@ -2044,7 +2044,7 @@ fuzz_str_isidentifier_arity0 | gap | built-in method str.isidentifier is not mod
 fuzz_str_islower_arg_dict1 | gap | built-in method str.islower is not modelled yet
 fuzz_str_islower_arg_emptydict | gap | built-in method str.islower is not modelled yet
 fuzz_str_islower_arg_emptylist | gap | built-in method str.islower is not modelled yet
-fuzz_str_islower_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_islower_arg_emptyset | gap | built-in method str.islower is not modelled yet
 fuzz_str_islower_arg_emptystr | gap | built-in method str.islower is not modelled yet
 fuzz_str_islower_arg_emptytuple | gap | built-in method str.islower is not modelled yet
 fuzz_str_islower_arg_float | gap | built-in method str.islower is not modelled yet
@@ -2077,7 +2077,7 @@ fuzz_str_islower_arity0 | gap | built-in method str.islower is not modelled yet
 fuzz_str_isnumeric_arg_dict1 | gap | built-in method str.isnumeric is not modelled yet
 fuzz_str_isnumeric_arg_emptydict | gap | built-in method str.isnumeric is not modelled yet
 fuzz_str_isnumeric_arg_emptylist | gap | built-in method str.isnumeric is not modelled yet
-fuzz_str_isnumeric_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_isnumeric_arg_emptyset | gap | built-in method str.isnumeric is not modelled yet
 fuzz_str_isnumeric_arg_emptystr | gap | built-in method str.isnumeric is not modelled yet
 fuzz_str_isnumeric_arg_emptytuple | gap | built-in method str.isnumeric is not modelled yet
 fuzz_str_isnumeric_arg_float | gap | built-in method str.isnumeric is not modelled yet
@@ -2110,7 +2110,7 @@ fuzz_str_isnumeric_arity0 | gap | built-in method str.isnumeric is not modelled 
 fuzz_str_isprintable_arg_dict1 | gap | built-in method str.isprintable is not modelled yet
 fuzz_str_isprintable_arg_emptydict | gap | built-in method str.isprintable is not modelled yet
 fuzz_str_isprintable_arg_emptylist | gap | built-in method str.isprintable is not modelled yet
-fuzz_str_isprintable_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_isprintable_arg_emptyset | gap | built-in method str.isprintable is not modelled yet
 fuzz_str_isprintable_arg_emptystr | gap | built-in method str.isprintable is not modelled yet
 fuzz_str_isprintable_arg_emptytuple | gap | built-in method str.isprintable is not modelled yet
 fuzz_str_isprintable_arg_float | gap | built-in method str.isprintable is not modelled yet
@@ -2143,7 +2143,7 @@ fuzz_str_isprintable_arity0 | gap | built-in method str.isprintable is not model
 fuzz_str_isspace_arg_dict1 | gap | built-in method str.isspace is not modelled yet
 fuzz_str_isspace_arg_emptydict | gap | built-in method str.isspace is not modelled yet
 fuzz_str_isspace_arg_emptylist | gap | built-in method str.isspace is not modelled yet
-fuzz_str_isspace_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_isspace_arg_emptyset | gap | built-in method str.isspace is not modelled yet
 fuzz_str_isspace_arg_emptystr | gap | built-in method str.isspace is not modelled yet
 fuzz_str_isspace_arg_emptytuple | gap | built-in method str.isspace is not modelled yet
 fuzz_str_isspace_arg_float | gap | built-in method str.isspace is not modelled yet
@@ -2176,7 +2176,7 @@ fuzz_str_isspace_arity0 | gap | built-in method str.isspace is not modelled yet
 fuzz_str_istitle_arg_dict1 | gap | built-in method str.istitle is not modelled yet
 fuzz_str_istitle_arg_emptydict | gap | built-in method str.istitle is not modelled yet
 fuzz_str_istitle_arg_emptylist | gap | built-in method str.istitle is not modelled yet
-fuzz_str_istitle_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_istitle_arg_emptyset | gap | built-in method str.istitle is not modelled yet
 fuzz_str_istitle_arg_emptystr | gap | built-in method str.istitle is not modelled yet
 fuzz_str_istitle_arg_emptytuple | gap | built-in method str.istitle is not modelled yet
 fuzz_str_istitle_arg_float | gap | built-in method str.istitle is not modelled yet
@@ -2209,7 +2209,7 @@ fuzz_str_istitle_arity0 | gap | built-in method str.istitle is not modelled yet
 fuzz_str_isupper_arg_dict1 | gap | built-in method str.isupper is not modelled yet
 fuzz_str_isupper_arg_emptydict | gap | built-in method str.isupper is not modelled yet
 fuzz_str_isupper_arg_emptylist | gap | built-in method str.isupper is not modelled yet
-fuzz_str_isupper_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_isupper_arg_emptyset | gap | built-in method str.isupper is not modelled yet
 fuzz_str_isupper_arg_emptystr | gap | built-in method str.isupper is not modelled yet
 fuzz_str_isupper_arg_emptytuple | gap | built-in method str.isupper is not modelled yet
 fuzz_str_isupper_arg_float | gap | built-in method str.isupper is not modelled yet
@@ -2242,7 +2242,7 @@ fuzz_str_isupper_arity0 | gap | built-in method str.isupper is not modelled yet
 fuzz_str_join_arg_dict1 | gap | built-in method str.join is not modelled yet
 fuzz_str_join_arg_emptydict | gap | built-in method str.join is not modelled yet
 fuzz_str_join_arg_emptylist | gap | built-in method str.join is not modelled yet
-fuzz_str_join_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_join_arg_emptyset | gap | built-in method str.join is not modelled yet
 fuzz_str_join_arg_emptystr | gap | built-in method str.join is not modelled yet
 fuzz_str_join_arg_emptytuple | gap | built-in method str.join is not modelled yet
 fuzz_str_join_arg_float | gap | built-in method str.join is not modelled yet
@@ -2275,7 +2275,7 @@ fuzz_str_join_arity0 | gap | built-in method str.join is not modelled yet
 fuzz_str_ljust_arg_dict1 | gap | built-in method str.ljust is not modelled yet
 fuzz_str_ljust_arg_emptydict | gap | built-in method str.ljust is not modelled yet
 fuzz_str_ljust_arg_emptylist | gap | built-in method str.ljust is not modelled yet
-fuzz_str_ljust_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_ljust_arg_emptyset | gap | built-in method str.ljust is not modelled yet
 fuzz_str_ljust_arg_emptystr | gap | built-in method str.ljust is not modelled yet
 fuzz_str_ljust_arg_emptytuple | gap | built-in method str.ljust is not modelled yet
 fuzz_str_ljust_arg_float | gap | built-in method str.ljust is not modelled yet
@@ -2308,7 +2308,7 @@ fuzz_str_ljust_arity0 | gap | built-in method str.ljust is not modelled yet
 fuzz_str_lower_arg_dict1 | gap | built-in method str.lower is not modelled yet
 fuzz_str_lower_arg_emptydict | gap | built-in method str.lower is not modelled yet
 fuzz_str_lower_arg_emptylist | gap | built-in method str.lower is not modelled yet
-fuzz_str_lower_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_lower_arg_emptyset | gap | built-in method str.lower is not modelled yet
 fuzz_str_lower_arg_emptystr | gap | built-in method str.lower is not modelled yet
 fuzz_str_lower_arg_emptytuple | gap | built-in method str.lower is not modelled yet
 fuzz_str_lower_arg_float | gap | built-in method str.lower is not modelled yet
@@ -2341,7 +2341,7 @@ fuzz_str_lower_arity0 | gap | built-in method str.lower is not modelled yet
 fuzz_str_lstrip_arg_dict1 | gap | built-in method str.lstrip is not modelled yet
 fuzz_str_lstrip_arg_emptydict | gap | built-in method str.lstrip is not modelled yet
 fuzz_str_lstrip_arg_emptylist | gap | built-in method str.lstrip is not modelled yet
-fuzz_str_lstrip_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_lstrip_arg_emptyset | gap | built-in method str.lstrip is not modelled yet
 fuzz_str_lstrip_arg_emptystr | gap | built-in method str.lstrip is not modelled yet
 fuzz_str_lstrip_arg_emptytuple | gap | built-in method str.lstrip is not modelled yet
 fuzz_str_lstrip_arg_float | gap | built-in method str.lstrip is not modelled yet
@@ -2374,7 +2374,7 @@ fuzz_str_lstrip_arity0 | gap | built-in method str.lstrip is not modelled yet
 fuzz_str_partition_arg_dict1 | gap | built-in method str.partition is not modelled yet
 fuzz_str_partition_arg_emptydict | gap | built-in method str.partition is not modelled yet
 fuzz_str_partition_arg_emptylist | gap | built-in method str.partition is not modelled yet
-fuzz_str_partition_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_partition_arg_emptyset | gap | built-in method str.partition is not modelled yet
 fuzz_str_partition_arg_emptystr | gap | built-in method str.partition is not modelled yet
 fuzz_str_partition_arg_emptytuple | gap | built-in method str.partition is not modelled yet
 fuzz_str_partition_arg_float | gap | built-in method str.partition is not modelled yet
@@ -2407,7 +2407,7 @@ fuzz_str_partition_arity0 | gap | built-in method str.partition is not modelled 
 fuzz_str_removeprefix_arg_dict1 | gap | built-in method str.removeprefix is not modelled yet
 fuzz_str_removeprefix_arg_emptydict | gap | built-in method str.removeprefix is not modelled yet
 fuzz_str_removeprefix_arg_emptylist | gap | built-in method str.removeprefix is not modelled yet
-fuzz_str_removeprefix_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_removeprefix_arg_emptyset | gap | built-in method str.removeprefix is not modelled yet
 fuzz_str_removeprefix_arg_emptystr | gap | built-in method str.removeprefix is not modelled yet
 fuzz_str_removeprefix_arg_emptytuple | gap | built-in method str.removeprefix is not modelled yet
 fuzz_str_removeprefix_arg_float | gap | built-in method str.removeprefix is not modelled yet
@@ -2440,7 +2440,7 @@ fuzz_str_removeprefix_arity0 | gap | built-in method str.removeprefix is not mod
 fuzz_str_removesuffix_arg_dict1 | gap | built-in method str.removesuffix is not modelled yet
 fuzz_str_removesuffix_arg_emptydict | gap | built-in method str.removesuffix is not modelled yet
 fuzz_str_removesuffix_arg_emptylist | gap | built-in method str.removesuffix is not modelled yet
-fuzz_str_removesuffix_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_removesuffix_arg_emptyset | gap | built-in method str.removesuffix is not modelled yet
 fuzz_str_removesuffix_arg_emptystr | gap | built-in method str.removesuffix is not modelled yet
 fuzz_str_removesuffix_arg_emptytuple | gap | built-in method str.removesuffix is not modelled yet
 fuzz_str_removesuffix_arg_float | gap | built-in method str.removesuffix is not modelled yet
@@ -2473,7 +2473,7 @@ fuzz_str_removesuffix_arity0 | gap | built-in method str.removesuffix is not mod
 fuzz_str_replace_arg_dict1 | gap | built-in method str.replace is not modelled yet
 fuzz_str_replace_arg_emptydict | gap | built-in method str.replace is not modelled yet
 fuzz_str_replace_arg_emptylist | gap | built-in method str.replace is not modelled yet
-fuzz_str_replace_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_replace_arg_emptyset | gap | built-in method str.replace is not modelled yet
 fuzz_str_replace_arg_emptystr | gap | built-in method str.replace is not modelled yet
 fuzz_str_replace_arg_emptytuple | gap | built-in method str.replace is not modelled yet
 fuzz_str_replace_arg_float | gap | built-in method str.replace is not modelled yet
@@ -2506,7 +2506,7 @@ fuzz_str_replace_arity0 | gap | built-in method str.replace is not modelled yet
 fuzz_str_rfind_arg_dict1 | gap | built-in method str.rfind is not modelled yet
 fuzz_str_rfind_arg_emptydict | gap | built-in method str.rfind is not modelled yet
 fuzz_str_rfind_arg_emptylist | gap | built-in method str.rfind is not modelled yet
-fuzz_str_rfind_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_rfind_arg_emptyset | gap | built-in method str.rfind is not modelled yet
 fuzz_str_rfind_arg_emptystr | gap | built-in method str.rfind is not modelled yet
 fuzz_str_rfind_arg_emptytuple | gap | built-in method str.rfind is not modelled yet
 fuzz_str_rfind_arg_float | gap | built-in method str.rfind is not modelled yet
@@ -2539,7 +2539,7 @@ fuzz_str_rfind_arity0 | gap | built-in method str.rfind is not modelled yet
 fuzz_str_rindex_arg_dict1 | gap | built-in method str.rindex is not modelled yet
 fuzz_str_rindex_arg_emptydict | gap | built-in method str.rindex is not modelled yet
 fuzz_str_rindex_arg_emptylist | gap | built-in method str.rindex is not modelled yet
-fuzz_str_rindex_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_rindex_arg_emptyset | gap | built-in method str.rindex is not modelled yet
 fuzz_str_rindex_arg_emptystr | gap | built-in method str.rindex is not modelled yet
 fuzz_str_rindex_arg_emptytuple | gap | built-in method str.rindex is not modelled yet
 fuzz_str_rindex_arg_float | gap | built-in method str.rindex is not modelled yet
@@ -2572,7 +2572,7 @@ fuzz_str_rindex_arity0 | gap | built-in method str.rindex is not modelled yet
 fuzz_str_rjust_arg_dict1 | gap | built-in method str.rjust is not modelled yet
 fuzz_str_rjust_arg_emptydict | gap | built-in method str.rjust is not modelled yet
 fuzz_str_rjust_arg_emptylist | gap | built-in method str.rjust is not modelled yet
-fuzz_str_rjust_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_rjust_arg_emptyset | gap | built-in method str.rjust is not modelled yet
 fuzz_str_rjust_arg_emptystr | gap | built-in method str.rjust is not modelled yet
 fuzz_str_rjust_arg_emptytuple | gap | built-in method str.rjust is not modelled yet
 fuzz_str_rjust_arg_float | gap | built-in method str.rjust is not modelled yet
@@ -2605,7 +2605,7 @@ fuzz_str_rjust_arity0 | gap | built-in method str.rjust is not modelled yet
 fuzz_str_rpartition_arg_dict1 | gap | built-in method str.rpartition is not modelled yet
 fuzz_str_rpartition_arg_emptydict | gap | built-in method str.rpartition is not modelled yet
 fuzz_str_rpartition_arg_emptylist | gap | built-in method str.rpartition is not modelled yet
-fuzz_str_rpartition_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_rpartition_arg_emptyset | gap | built-in method str.rpartition is not modelled yet
 fuzz_str_rpartition_arg_emptystr | gap | built-in method str.rpartition is not modelled yet
 fuzz_str_rpartition_arg_emptytuple | gap | built-in method str.rpartition is not modelled yet
 fuzz_str_rpartition_arg_float | gap | built-in method str.rpartition is not modelled yet
@@ -2638,7 +2638,7 @@ fuzz_str_rpartition_arity0 | gap | built-in method str.rpartition is not modelle
 fuzz_str_rsplit_arg_dict1 | gap | built-in method str.rsplit is not modelled yet
 fuzz_str_rsplit_arg_emptydict | gap | built-in method str.rsplit is not modelled yet
 fuzz_str_rsplit_arg_emptylist | gap | built-in method str.rsplit is not modelled yet
-fuzz_str_rsplit_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_rsplit_arg_emptyset | gap | built-in method str.rsplit is not modelled yet
 fuzz_str_rsplit_arg_emptystr | gap | built-in method str.rsplit is not modelled yet
 fuzz_str_rsplit_arg_emptytuple | gap | built-in method str.rsplit is not modelled yet
 fuzz_str_rsplit_arg_float | gap | built-in method str.rsplit is not modelled yet
@@ -2671,7 +2671,7 @@ fuzz_str_rsplit_arity0 | gap | built-in method str.rsplit is not modelled yet
 fuzz_str_rstrip_arg_dict1 | gap | built-in method str.rstrip is not modelled yet
 fuzz_str_rstrip_arg_emptydict | gap | built-in method str.rstrip is not modelled yet
 fuzz_str_rstrip_arg_emptylist | gap | built-in method str.rstrip is not modelled yet
-fuzz_str_rstrip_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_rstrip_arg_emptyset | gap | built-in method str.rstrip is not modelled yet
 fuzz_str_rstrip_arg_emptystr | gap | built-in method str.rstrip is not modelled yet
 fuzz_str_rstrip_arg_emptytuple | gap | built-in method str.rstrip is not modelled yet
 fuzz_str_rstrip_arg_float | gap | built-in method str.rstrip is not modelled yet
@@ -2704,7 +2704,7 @@ fuzz_str_rstrip_arity0 | gap | built-in method str.rstrip is not modelled yet
 fuzz_str_split_arg_dict1 | gap | built-in method str.split is not modelled yet
 fuzz_str_split_arg_emptydict | gap | built-in method str.split is not modelled yet
 fuzz_str_split_arg_emptylist | gap | built-in method str.split is not modelled yet
-fuzz_str_split_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_split_arg_emptyset | gap | built-in method str.split is not modelled yet
 fuzz_str_split_arg_emptystr | gap | built-in method str.split is not modelled yet
 fuzz_str_split_arg_emptytuple | gap | built-in method str.split is not modelled yet
 fuzz_str_split_arg_float | gap | built-in method str.split is not modelled yet
@@ -2737,7 +2737,7 @@ fuzz_str_split_arity0 | gap | built-in method str.split is not modelled yet
 fuzz_str_splitlines_arg_dict1 | gap | built-in method str.splitlines is not modelled yet
 fuzz_str_splitlines_arg_emptydict | gap | built-in method str.splitlines is not modelled yet
 fuzz_str_splitlines_arg_emptylist | gap | built-in method str.splitlines is not modelled yet
-fuzz_str_splitlines_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_splitlines_arg_emptyset | gap | built-in method str.splitlines is not modelled yet
 fuzz_str_splitlines_arg_emptystr | gap | built-in method str.splitlines is not modelled yet
 fuzz_str_splitlines_arg_emptytuple | gap | built-in method str.splitlines is not modelled yet
 fuzz_str_splitlines_arg_float | gap | built-in method str.splitlines is not modelled yet
@@ -2770,7 +2770,7 @@ fuzz_str_splitlines_arity0 | gap | built-in method str.splitlines is not modelle
 fuzz_str_startswith_arg_dict1 | gap | built-in method str.startswith is not modelled yet
 fuzz_str_startswith_arg_emptydict | gap | built-in method str.startswith is not modelled yet
 fuzz_str_startswith_arg_emptylist | gap | built-in method str.startswith is not modelled yet
-fuzz_str_startswith_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_startswith_arg_emptyset | gap | built-in method str.startswith is not modelled yet
 fuzz_str_startswith_arg_emptystr | gap | built-in method str.startswith is not modelled yet
 fuzz_str_startswith_arg_emptytuple | gap | built-in method str.startswith is not modelled yet
 fuzz_str_startswith_arg_float | gap | built-in method str.startswith is not modelled yet
@@ -2803,7 +2803,7 @@ fuzz_str_startswith_arity0 | gap | built-in method str.startswith is not modelle
 fuzz_str_strip_arg_dict1 | gap | built-in method str.strip is not modelled yet
 fuzz_str_strip_arg_emptydict | gap | built-in method str.strip is not modelled yet
 fuzz_str_strip_arg_emptylist | gap | built-in method str.strip is not modelled yet
-fuzz_str_strip_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_strip_arg_emptyset | gap | built-in method str.strip is not modelled yet
 fuzz_str_strip_arg_emptystr | gap | built-in method str.strip is not modelled yet
 fuzz_str_strip_arg_emptytuple | gap | built-in method str.strip is not modelled yet
 fuzz_str_strip_arg_float | gap | built-in method str.strip is not modelled yet
@@ -2836,7 +2836,7 @@ fuzz_str_strip_arity0 | gap | built-in method str.strip is not modelled yet
 fuzz_str_swapcase_arg_dict1 | gap | built-in method str.swapcase is not modelled yet
 fuzz_str_swapcase_arg_emptydict | gap | built-in method str.swapcase is not modelled yet
 fuzz_str_swapcase_arg_emptylist | gap | built-in method str.swapcase is not modelled yet
-fuzz_str_swapcase_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_swapcase_arg_emptyset | gap | built-in method str.swapcase is not modelled yet
 fuzz_str_swapcase_arg_emptystr | gap | built-in method str.swapcase is not modelled yet
 fuzz_str_swapcase_arg_emptytuple | gap | built-in method str.swapcase is not modelled yet
 fuzz_str_swapcase_arg_float | gap | built-in method str.swapcase is not modelled yet
@@ -2869,7 +2869,7 @@ fuzz_str_swapcase_arity0 | gap | built-in method str.swapcase is not modelled ye
 fuzz_str_title_arg_dict1 | gap | built-in method str.title is not modelled yet
 fuzz_str_title_arg_emptydict | gap | built-in method str.title is not modelled yet
 fuzz_str_title_arg_emptylist | gap | built-in method str.title is not modelled yet
-fuzz_str_title_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_title_arg_emptyset | gap | built-in method str.title is not modelled yet
 fuzz_str_title_arg_emptystr | gap | built-in method str.title is not modelled yet
 fuzz_str_title_arg_emptytuple | gap | built-in method str.title is not modelled yet
 fuzz_str_title_arg_float | gap | built-in method str.title is not modelled yet
@@ -2902,7 +2902,7 @@ fuzz_str_title_arity0 | gap | built-in method str.title is not modelled yet
 fuzz_str_upper_arg_dict1 | gap | built-in method str.upper is not modelled yet
 fuzz_str_upper_arg_emptydict | gap | built-in method str.upper is not modelled yet
 fuzz_str_upper_arg_emptylist | gap | built-in method str.upper is not modelled yet
-fuzz_str_upper_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_upper_arg_emptyset | gap | built-in method str.upper is not modelled yet
 fuzz_str_upper_arg_emptystr | gap | built-in method str.upper is not modelled yet
 fuzz_str_upper_arg_emptytuple | gap | built-in method str.upper is not modelled yet
 fuzz_str_upper_arg_float | gap | built-in method str.upper is not modelled yet
@@ -2935,7 +2935,7 @@ fuzz_str_upper_arity0 | gap | built-in method str.upper is not modelled yet
 fuzz_str_zfill_arg_dict1 | gap | built-in method str.zfill is not modelled yet
 fuzz_str_zfill_arg_emptydict | gap | built-in method str.zfill is not modelled yet
 fuzz_str_zfill_arg_emptylist | gap | built-in method str.zfill is not modelled yet
-fuzz_str_zfill_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_str_zfill_arg_emptyset | gap | built-in method str.zfill is not modelled yet
 fuzz_str_zfill_arg_emptystr | gap | built-in method str.zfill is not modelled yet
 fuzz_str_zfill_arg_emptytuple | gap | built-in method str.zfill is not modelled yet
 fuzz_str_zfill_arg_float | gap | built-in method str.zfill is not modelled yet
@@ -2965,30 +2965,30 @@ fuzz_str_zfill_args_strab_emptystr | gap | built-in method str.zfill is not mode
 fuzz_str_zfill_args_zero_lita | gap | built-in method str.zfill is not modelled yet
 fuzz_str_zfill_args_zero_one | gap | built-in method str.zfill is not modelled yet
 fuzz_str_zfill_arity0 | gap | built-in method str.zfill is not modelled yet
-fuzz_tuple_arg_dict1 | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_emptydict | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_emptylist | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
-fuzz_tuple_arg_emptystr | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_emptytuple | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_float | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_list1 | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_nestedlist | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_none | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_one | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_pairs | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_range | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_set1 | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_shortpair | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_strab | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_strx | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_true | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_tuple1 | gap | built-in method tuple.__new__ is not modelled yet
-fuzz_tuple_arg_zero | gap | built-in method tuple.__new__ is not modelled yet
+fuzz_tuple_arg_dict1 | agree
+fuzz_tuple_arg_emptydict | agree
+fuzz_tuple_arg_emptylist | agree
+fuzz_tuple_arg_emptyset | agree
+fuzz_tuple_arg_emptystr | agree
+fuzz_tuple_arg_emptytuple | agree
+fuzz_tuple_arg_float | agree
+fuzz_tuple_arg_list1 | agree
+fuzz_tuple_arg_nestedlist | agree
+fuzz_tuple_arg_none | agree
+fuzz_tuple_arg_one | agree
+fuzz_tuple_arg_pairs | agree
+fuzz_tuple_arg_range | agree
+fuzz_tuple_arg_set1 | gap | a slot of a set whose layout is inexact
+fuzz_tuple_arg_shortpair | agree
+fuzz_tuple_arg_strab | agree
+fuzz_tuple_arg_strx | agree
+fuzz_tuple_arg_true | agree
+fuzz_tuple_arg_tuple1 | agree
+fuzz_tuple_arg_zero | agree
 fuzz_tuple_count_arg_dict1 | gap | built-in method tuple.count is not modelled yet
 fuzz_tuple_count_arg_emptydict | gap | built-in method tuple.count is not modelled yet
 fuzz_tuple_count_arg_emptylist | gap | built-in method tuple.count is not modelled yet
-fuzz_tuple_count_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_tuple_count_arg_emptyset | gap | built-in method tuple.count is not modelled yet
 fuzz_tuple_count_arg_emptystr | gap | built-in method tuple.count is not modelled yet
 fuzz_tuple_count_arg_emptytuple | gap | built-in method tuple.count is not modelled yet
 fuzz_tuple_count_arg_float | gap | built-in method tuple.count is not modelled yet
@@ -3021,7 +3021,7 @@ fuzz_tuple_count_arity0 | gap | built-in method tuple.count is not modelled yet
 fuzz_tuple_index_arg_dict1 | gap | built-in method tuple.index is not modelled yet
 fuzz_tuple_index_arg_emptydict | gap | built-in method tuple.index is not modelled yet
 fuzz_tuple_index_arg_emptylist | gap | built-in method tuple.index is not modelled yet
-fuzz_tuple_index_arg_emptyset | gap | built-in method set.__new__ is not modelled yet
+fuzz_tuple_index_arg_emptyset | gap | built-in method tuple.index is not modelled yet
 fuzz_tuple_index_arg_emptystr | gap | built-in method tuple.index is not modelled yet
 fuzz_tuple_index_arg_emptytuple | gap | built-in method tuple.index is not modelled yet
 fuzz_tuple_index_arg_float | gap | built-in method tuple.index is not modelled yet
@@ -3061,8 +3061,8 @@ gen_throw_uncaught_injected_exception | gap | the translator does not support ge
 isinstance_invalid_classinfo | agree
 isinstance_normal | agree
 iter_non_iterable | agree
-iter_normal | gap | built-in method list.__new__ is not modelled yet
-iter_sequence_fallback | gap | built-in method list.__new__ is not modelled yet
+iter_normal | agree
+iter_sequence_fallback | gap | built-in method list.append is not modelled yet
 len_negative_hook_result | gap | built-in method list.append is not modelled yet
 len_normal | agree
 len_unsized | agree
@@ -3082,9 +3082,9 @@ list_insert_index_hook_effect | gap | built-in method list.insert is not modelle
 list_insert_index_hook_raises_after_effect | gap | built-in method list.insert is not modelled yet
 list_insert_invalid_index_type | gap | built-in method list.insert is not modelled yet
 list_insert_normal | gap | built-in method list.insert is not modelled yet
-list_iterator_raises_after_yield | gap | built-in method list.__new__ is not modelled yet
-list_non_iterable | gap | built-in method list.__new__ is not modelled yet
-list_normal | gap | built-in method list.__new__ is not modelled yet
+list_iterator_raises_after_yield | gap | built-in method list.append is not modelled yet
+list_non_iterable | agree
+list_normal | agree
 list_pop_empty | gap | built-in method list.pop is not modelled yet
 list_pop_invalid_index_type | gap | built-in method list.pop is not modelled yet
 list_pop_normal | gap | built-in method list.pop is not modelled yet
@@ -3096,7 +3096,7 @@ list_sort_key_callback_raises | gap | built-in method list.sort is not modelled 
 list_sort_normal | gap | built-in method list.sort is not modelled yet
 next_exhausted | agree
 next_non_iterator | agree
-next_normal | gap | built-in method list.__new__ is not modelled yet
+next_normal | agree
 print_file_write_raises | gap | print's keyword argument file is not modelled yet
 print_normal | gap | print's keyword argument file is not modelled yet
 probe_format_float_conversion | gap | built-in method list.append is not modelled yet
@@ -3142,8 +3142,8 @@ set_intersection_update_self_alias | gap | built-in method set.intersection_upda
 set_isdisjoint_normal | gap | built-in method set.isdisjoint is not modelled yet
 set_issubset_normal | gap | built-in method set.issubset is not modelled yet
 set_issuperset_normal | gap | built-in method set.issuperset is not modelled yet
-set_normal | gap | built-in method set.__new__ is not modelled yet
-set_pop_empty | gap | built-in method set.__new__ is not modelled yet
+set_normal | agree
+set_pop_empty | gap | built-in method set.pop is not modelled yet
 set_pop_normal | gap | built-in method set.pop is not modelled yet
 set_remove_missing | gap | built-in method set.remove is not modelled yet
 set_remove_normal | gap | built-in method set.remove is not modelled yet
@@ -3151,7 +3151,7 @@ set_symmetric_difference_normal | gap | built-in method set.symmetric_difference
 set_symmetric_difference_update_non_iterable | gap | built-in method set.symmetric_difference_update is not modelled yet
 set_symmetric_difference_update_normal | gap | built-in method set.symmetric_difference_update is not modelled yet
 set_symmetric_difference_update_self_alias | gap | built-in method set.symmetric_difference_update is not modelled yet
-set_unhashable_element | gap | built-in method set.__new__ is not modelled yet
+set_unhashable_element | agree
 set_union_normal | gap | built-in method set.union is not modelled yet
 set_update_normal | gap | built-in method set.update is not modelled yet
 set_update_partial_update_then_unhashable | gap | built-in method set.update is not modelled yet
@@ -3178,7 +3178,7 @@ str_format_missing_attribute | gap | built-in method str.format is not modelled 
 str_format_normal | gap | built-in method str.format is not modelled yet
 str_index_missing | gap | built-in method str.index is not modelled yet
 str_index_normal | gap | built-in method str.index is not modelled yet
-str_invalid_hook_result | gap | built-in method str.__new__ is not modelled yet
+str_invalid_hook_result | gap | built-in method list.append is not modelled yet
 str_isalnum_normal | gap | built-in method str.isalnum is not modelled yet
 str_isalpha_normal | gap | built-in method str.isalpha is not modelled yet
 str_isascii_normal | gap | built-in method str.isascii is not modelled yet
@@ -3201,7 +3201,7 @@ str_lstrip_invalid_chars | gap | built-in method str.lstrip is not modelled yet
 str_lstrip_normal | gap | built-in method str.lstrip is not modelled yet
 str_maketrans_normal | gap | built-in method str.maketrans is not modelled yet
 str_maketrans_unequal_lengths | gap | built-in method str.maketrans is not modelled yet
-str_normal | gap | built-in method str.__new__ is not modelled yet
+str_normal | agree
 str_partition_empty_separator | gap | built-in method str.partition is not modelled yet
 str_partition_invalid_separator | gap | built-in method str.partition is not modelled yet
 str_partition_normal | gap | built-in method str.partition is not modelled yet
@@ -3245,8 +3245,8 @@ tuple_count_normal | gap | built-in method tuple.count is not modelled yet
 tuple_index_invalid_bound_type | gap | built-in method tuple.index is not modelled yet
 tuple_index_missing | gap | built-in method tuple.index is not modelled yet
 tuple_index_normal | gap | built-in method tuple.index is not modelled yet
-tuple_non_iterable | gap | built-in method tuple.__new__ is not modelled yet
-tuple_normal | gap | built-in method tuple.__new__ is not modelled yet
+tuple_non_iterable | agree
+tuple_normal | agree
 validity_ann_any_admits_anything | gap | import of module typing is not modelled yet
 validity_ann_atom_int_holds | agree
 validity_ann_atom_str_holds | agree
@@ -3326,7 +3326,7 @@ validity_expr_boolAnd_falsy_left_yields_left | agree
 validity_expr_boolAnd_truthy_left_yields_right | agree
 validity_expr_boolOr_falsy_left_yields_right | agree
 validity_expr_boolOr_truthy_left_yields_left | agree
-validity_expr_call_builtin | gap | built-in method str.__new__ is not modelled yet
+validity_expr_call_builtin | agree
 validity_expr_call_user | agree
 validity_expr_call_wrong_arity | agree
 validity_expr_cmp_chained | agree
@@ -3335,7 +3335,7 @@ validity_expr_cmp_membership | agree
 validity_expr_cmp_ordering | agree
 validity_expr_cmp_unorderable | agree
 validity_expr_const_each | agree
-validity_expr_dictComp_normal | gap | built-in method str.__new__ is not modelled yet
+validity_expr_dictComp_normal | agree
 validity_expr_dictlit_mixed | agree
 validity_expr_fstr_interpolates | agree
 validity_expr_genComp_lazy | gap | the translator does not support generator expression
@@ -3457,8 +3457,8 @@ validity_transfer_membership_contains_then_iter_then_getitem_contains_wins | agr
 validity_transfer_membership_contains_then_iter_then_getitem_getitem_fallback | agree
 validity_transfer_membership_contains_then_iter_then_getitem_iter_fallback | agree
 validity_transfer_membership_getitem_stop_is_false_indexerror_subclass_means_absent | agree
-validity_transfer_str_calls_dunder_str_default_str_is_repr_like | gap | built-in method str.__new__ is not modelled yet
-validity_transfer_str_calls_dunder_str_user_str | gap | built-in method str.__new__ is not modelled yet
+validity_transfer_str_calls_dunder_str_default_str_is_repr_like | gap | a repr that shows an object's address is not modelled yet
+validity_transfer_str_calls_dunder_str_user_str | agree
 validity_transfer_subscript_getitem_dunder_getitem_raises | agree
 validity_transfer_subscript_getitem_dunder_user_getitem | agree
 validity_transfer_subscript_setitem_dunder_user_setitem | agree

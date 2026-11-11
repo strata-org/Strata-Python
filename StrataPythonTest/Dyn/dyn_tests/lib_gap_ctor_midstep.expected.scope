@@ -1,0 +1,28 @@
+module
+  It: local (assigned)
+  U: local (assigned, referenced)
+  print: global implicit (referenced)
+  x: local (assigned)
+  class It
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function It.__init__
+      params: self
+      self: local (parameter, referenced)
+    function It.__iter__
+      params: self
+      self: local (parameter, referenced)
+    function It.__next__
+      params: self
+      self: local (parameter, referenced)
+      StopIteration: global implicit (referenced)
+  class U
+    p: local (assigned)
+    property: global implicit (referenced)
+    frozenset: global implicit (referenced)
+    __iter__: local (assigned)
+    function U.__iter__
+      params: self
+      self: local (parameter)
+      It: global implicit (referenced)

@@ -65,6 +65,10 @@ public import StrataPython.Dyn.Sem.Library.Sum
 public import StrataPython.Dyn.Sem.Library.SumProps
 public import StrataPython.Dyn.Sem.Library.Iterables
 public import StrataPython.Dyn.Sem.Library.Iterators
+public import StrataPython.Dyn.Sem.Library.Functions
+public import StrataPython.Dyn.Sem.Library.Constructors
+public import StrataPython.Dyn.Sem.Library.Collections
+public import StrataPython.Dyn.Sem.Library.Machines
 
 /-!
 # The Python semantics

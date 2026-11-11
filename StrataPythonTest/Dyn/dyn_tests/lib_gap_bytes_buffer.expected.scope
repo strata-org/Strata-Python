@@ -1,0 +1,12 @@
+module
+  B: local (assigned, referenced)
+  print: global implicit (referenced)
+  x: local (assigned)
+  bytes: global implicit (referenced)
+  class B
+    __buffer__: local (assigned)
+    function B.__buffer__
+      params: self, flags
+      self: local (parameter)
+      flags: local (parameter)
+      memoryview: global implicit (referenced)

@@ -1,0 +1,10 @@
+--- stdout 7
+before
+
+--- outcome
+ok
+--- globals
+B = <class 'B'>
+__doc__ = None
+__name__ = '__main__'
+x = b'x'

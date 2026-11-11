@@ -1,0 +1,9 @@
+--- stdout 7
+before
+
+--- outcome
+ok
+--- globals
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'

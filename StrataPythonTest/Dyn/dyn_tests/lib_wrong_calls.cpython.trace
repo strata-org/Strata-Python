@@ -1,0 +1,36 @@
+--- stdout 1073
+hasattr expected 2 arguments, got 1
+setattr expected 3 arguments, got 2
+abs() takes exactly one argument (0 given)
+hex() takes exactly one argument (0 given)
+'foo' is an invalid keyword argument for min()
+expected 0 arguments, got 1
+wrapper __int__() takes no keyword arguments
+int.__trunc__() takes no arguments (1 given)
+float.__trunc__() takes no arguments (1 given)
+expected 0 arguments, got 1
+expected 1 argument, got 0
+expected 1 argument, got 0
+expected 0 arguments, got 1
+expected 0 arguments, got 1
+expected 0 arguments, got 1
+expected 0 arguments, got 1
+expected 0 arguments, got 1
+expected 0 arguments, got 1
+list_reverseiterator.__length_hint__() takes no arguments (1 given)
+reversed.__length_hint__() takes no arguments (1 given)
+dict_reversekeyiterator.__length_hint__() takes no arguments (1 given)
+list.__reversed__() takes no arguments (1 given)
+dict.__reversed__() takes no arguments (1 given)
+bytes.__bytes__() takes no arguments (1 given)
+list expected at most 1 argument, got 2
+set() takes no keyword arguments
+dict expected at most 1 argument, got 2
+
+--- outcome
+ok
+--- globals
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'
+wrong = <function object>

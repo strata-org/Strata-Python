@@ -1,0 +1,8 @@
+module top
+  i: local (assigned)
+  issubclass: global implicit (referenced)
+  print: global implicit (referenced)
+  range: global implicit (referenced)
+  str: global implicit (referenced)
+  t: local (assigned, referenced)
+qualnames: 

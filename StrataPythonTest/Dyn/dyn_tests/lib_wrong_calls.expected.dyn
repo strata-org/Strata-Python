@@ -1,0 +1,407 @@
+module lib_wrong_calls {
+  func @|lib_wrong_calls.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("lib_wrong_calls")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_wrong_calls", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_wrong_calls", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|lib_wrong_calls.S.<body>|, "<body>", "lib_wrong_calls")
+      %str.1 : py.Value = py.strLit("S")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %S.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %S.cell.0 : base.Ref(py.Value) = py.globalCell("lib_wrong_calls", "S")
+      %set.2 : base.Unit = base.refSet[py.Value](%S.cell.0, %S.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_wrong_calls.wrong, "wrong", "lib_wrong_calls")
+      %wrong.cell.0 : base.Ref(py.Value) = py.globalCell("lib_wrong_calls", "wrong")
+      %set.3 : base.Unit = base.refSet[py.Value](%wrong.cell.0, %clo.1)
+      %wrong.0 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %hasattr.0 : py.Value = py.loadGlobal("lib_wrong_calls", "hasattr") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %tuple.1 : py.Value = py.mkTuple(%hasattr.0, %int.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%wrong.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %wrong.1 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %setattr.0 : py.Value = py.loadGlobal("lib_wrong_calls", "setattr") ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %int.2 : py.Value = py.intLit(2)
+      %tuple.2 : py.Value = py.mkTuple(%setattr.0, %int.1, %int.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%wrong.1, %tuple.2, %kwargs.2) ^propagate.0()
+      %wrong.2 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %abs.0 : py.Value = py.loadGlobal("lib_wrong_calls", "abs") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%abs.0)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%wrong.2, %tuple.3, %kwargs.3) ^propagate.0()
+      %wrong.3 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %hex.0 : py.Value = py.loadGlobal("lib_wrong_calls", "hex") ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%hex.0)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%wrong.3, %tuple.4, %kwargs.4) ^propagate.0()
+      %wrong.4 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %min.0 : py.Value = py.loadGlobal("lib_wrong_calls", "min") ^propagate.0()
+      %int.3 : py.Value = py.intLit(1)
+      %list.0 : py.Value = py.mkList(%int.3)
+      %tuple.5 : py.Value = py.mkTuple(%min.0, %list.0)
+      %str.2 : py.Value = py.strLit("foo")
+      %int.4 : py.Value = py.intLit(1)
+      %kwargs.5 : py.Value = py.mkKwargs(%str.2, %int.4)
+      %call.4 : py.Value = py.call(%wrong.4, %tuple.5, %kwargs.5) ^propagate.0()
+      %wrong.5 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %int.5 : py.Value = py.intLit(5)
+      %__abs__.0 : py.Value = py.attr(%int.5, "__abs__") ^propagate.0()
+      %int.6 : py.Value = py.intLit(1)
+      %tuple.6 : py.Value = py.mkTuple(%__abs__.0, %int.6)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%wrong.5, %tuple.6, %kwargs.6) ^propagate.0()
+      %wrong.6 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %int.7 : py.Value = py.intLit(5)
+      %__int__.0 : py.Value = py.attr(%int.7, "__int__") ^propagate.0()
+      %tuple.7 : py.Value = py.mkTuple(%__int__.0)
+      %str.3 : py.Value = py.strLit("x")
+      %int.8 : py.Value = py.intLit(1)
+      %kwargs.7 : py.Value = py.mkKwargs(%str.3, %int.8)
+      %call.6 : py.Value = py.call(%wrong.6, %tuple.7, %kwargs.7) ^propagate.0()
+      %wrong.7 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %int.9 : py.Value = py.intLit(5)
+      %__trunc__.0 : py.Value = py.attr(%int.9, "__trunc__") ^propagate.0()
+      %int.10 : py.Value = py.intLit(1)
+      %tuple.8 : py.Value = py.mkTuple(%__trunc__.0, %int.10)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%wrong.7, %tuple.8, %kwargs.8) ^propagate.0()
+      %wrong.8 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %float.0 : py.Value = py.floatLit(1.5)
+      %__trunc__.1 : py.Value = py.attr(%float.0, "__trunc__") ^propagate.0()
+      %int.11 : py.Value = py.intLit(1)
+      %tuple.9 : py.Value = py.mkTuple(%__trunc__.1, %int.11)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%wrong.8, %tuple.9, %kwargs.9) ^propagate.0()
+      %wrong.9 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %float.1 : py.Value = py.floatLit(1.5)
+      %__float__.0 : py.Value = py.attr(%float.1, "__float__") ^propagate.0()
+      %int.12 : py.Value = py.intLit(1)
+      %tuple.10 : py.Value = py.mkTuple(%__float__.0, %int.12)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%wrong.9, %tuple.10, %kwargs.10) ^propagate.0()
+      %wrong.10 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %int.13 : py.Value = py.loadGlobal("lib_wrong_calls", "int") ^propagate.0()
+      %__divmod__.0 : py.Value = py.attr(%int.13, "__divmod__") ^propagate.0()
+      %int.14 : py.Value = py.intLit(7)
+      %tuple.11 : py.Value = py.mkTuple(%__divmod__.0, %int.14)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%wrong.10, %tuple.11, %kwargs.11) ^propagate.0()
+      %wrong.11 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %float.2 : py.Value = py.loadGlobal("lib_wrong_calls", "float") ^propagate.0()
+      %__rdivmod__.0 : py.Value = py.attr(%float.2, "__rdivmod__") ^propagate.0()
+      %float.3 : py.Value = py.floatLit(7.0)
+      %tuple.12 : py.Value = py.mkTuple(%__rdivmod__.0, %float.3)
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%wrong.11, %tuple.12, %kwargs.12) ^propagate.0()
+      %wrong.12 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %zip.0 : py.Value = py.loadGlobal("lib_wrong_calls", "zip") ^propagate.0()
+      %tuple.13 : py.Value = py.mkTuple
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%zip.0, %tuple.13, %kwargs.13) ^propagate.0()
+      %__next__.0 : py.Value = py.attr(%call.12, "__next__") ^propagate.0()
+      %int.15 : py.Value = py.intLit(1)
+      %tuple.14 : py.Value = py.mkTuple(%__next__.0, %int.15)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%wrong.12, %tuple.14, %kwargs.14) ^propagate.0()
+      %wrong.13 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %zip.1 : py.Value = py.loadGlobal("lib_wrong_calls", "zip") ^propagate.0()
+      %tuple.15 : py.Value = py.mkTuple
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%zip.1, %tuple.15, %kwargs.15) ^propagate.0()
+      %__iter__.0 : py.Value = py.attr(%call.14, "__iter__") ^propagate.0()
+      %int.16 : py.Value = py.intLit(1)
+      %tuple.16 : py.Value = py.mkTuple(%__iter__.0, %int.16)
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%wrong.13, %tuple.16, %kwargs.16) ^propagate.0()
+      %wrong.14 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %enumerate.0 : py.Value = py.loadGlobal("lib_wrong_calls", "enumerate") ^propagate.0()
+      %list.1 : py.Value = py.mkList
+      %tuple.17 : py.Value = py.mkTuple(%list.1)
+      %kwargs.17 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%enumerate.0, %tuple.17, %kwargs.17) ^propagate.0()
+      %__next__.1 : py.Value = py.attr(%call.16, "__next__") ^propagate.0()
+      %int.17 : py.Value = py.intLit(1)
+      %tuple.18 : py.Value = py.mkTuple(%__next__.1, %int.17)
+      %kwargs.18 : py.Value = py.mkKwargs
+      %call.17 : py.Value = py.call(%wrong.14, %tuple.18, %kwargs.18) ^propagate.0()
+      %wrong.15 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %reversed.0 : py.Value = py.loadGlobal("lib_wrong_calls", "reversed") ^propagate.0()
+      %S.1 : py.Value = py.loadGlobal("lib_wrong_calls", "S") ^propagate.0()
+      %tuple.19 : py.Value = py.mkTuple
+      %kwargs.19 : py.Value = py.mkKwargs
+      %call.18 : py.Value = py.call(%S.1, %tuple.19, %kwargs.19) ^propagate.0()
+      %tuple.20 : py.Value = py.mkTuple(%call.18)
+      %kwargs.20 : py.Value = py.mkKwargs
+      %call.19 : py.Value = py.call(%reversed.0, %tuple.20, %kwargs.20) ^propagate.0()
+      %__next__.2 : py.Value = py.attr(%call.19, "__next__") ^propagate.0()
+      %int.18 : py.Value = py.intLit(1)
+      %tuple.21 : py.Value = py.mkTuple(%__next__.2, %int.18)
+      %kwargs.21 : py.Value = py.mkKwargs
+      %call.20 : py.Value = py.call(%wrong.15, %tuple.21, %kwargs.21) ^propagate.0()
+      %wrong.16 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %reversed.1 : py.Value = py.loadGlobal("lib_wrong_calls", "reversed") ^propagate.0()
+      %int.19 : py.Value = py.intLit(1)
+      %list.2 : py.Value = py.mkList(%int.19)
+      %tuple.22 : py.Value = py.mkTuple(%list.2)
+      %kwargs.22 : py.Value = py.mkKwargs
+      %call.21 : py.Value = py.call(%reversed.1, %tuple.22, %kwargs.22) ^propagate.0()
+      %__next__.3 : py.Value = py.attr(%call.21, "__next__") ^propagate.0()
+      %int.20 : py.Value = py.intLit(1)
+      %tuple.23 : py.Value = py.mkTuple(%__next__.3, %int.20)
+      %kwargs.23 : py.Value = py.mkKwargs
+      %call.22 : py.Value = py.call(%wrong.16, %tuple.23, %kwargs.23) ^propagate.0()
+      %wrong.17 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %reversed.2 : py.Value = py.loadGlobal("lib_wrong_calls", "reversed") ^propagate.0()
+      %int.21 : py.Value = py.intLit(1)
+      %int.22 : py.Value = py.intLit(2)
+      %dict.0 : py.Value = py.mkDict(%int.21, %int.22) ^propagate.0()
+      %tuple.24 : py.Value = py.mkTuple(%dict.0)
+      %kwargs.24 : py.Value = py.mkKwargs
+      %call.23 : py.Value = py.call(%reversed.2, %tuple.24, %kwargs.24) ^propagate.0()
+      %__next__.4 : py.Value = py.attr(%call.23, "__next__") ^propagate.0()
+      %int.23 : py.Value = py.intLit(1)
+      %tuple.25 : py.Value = py.mkTuple(%__next__.4, %int.23)
+      %kwargs.25 : py.Value = py.mkKwargs
+      %call.24 : py.Value = py.call(%wrong.17, %tuple.25, %kwargs.25) ^propagate.0()
+      %wrong.18 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %reversed.3 : py.Value = py.loadGlobal("lib_wrong_calls", "reversed") ^propagate.0()
+      %int.24 : py.Value = py.intLit(1)
+      %list.3 : py.Value = py.mkList(%int.24)
+      %tuple.26 : py.Value = py.mkTuple(%list.3)
+      %kwargs.26 : py.Value = py.mkKwargs
+      %call.25 : py.Value = py.call(%reversed.3, %tuple.26, %kwargs.26) ^propagate.0()
+      %__length_hint__.0 : py.Value = py.attr(%call.25, "__length_hint__") ^propagate.0()
+      %int.25 : py.Value = py.intLit(1)
+      %tuple.27 : py.Value = py.mkTuple(%__length_hint__.0, %int.25)
+      %kwargs.27 : py.Value = py.mkKwargs
+      %call.26 : py.Value = py.call(%wrong.18, %tuple.27, %kwargs.27) ^propagate.0()
+      %wrong.19 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %reversed.4 : py.Value = py.loadGlobal("lib_wrong_calls", "reversed") ^propagate.0()
+      %S.2 : py.Value = py.loadGlobal("lib_wrong_calls", "S") ^propagate.0()
+      %tuple.28 : py.Value = py.mkTuple
+      %kwargs.28 : py.Value = py.mkKwargs
+      %call.27 : py.Value = py.call(%S.2, %tuple.28, %kwargs.28) ^propagate.0()
+      %tuple.29 : py.Value = py.mkTuple(%call.27)
+      %kwargs.29 : py.Value = py.mkKwargs
+      %call.28 : py.Value = py.call(%reversed.4, %tuple.29, %kwargs.29) ^propagate.0()
+      %__length_hint__.1 : py.Value = py.attr(%call.28, "__length_hint__") ^propagate.0()
+      %int.26 : py.Value = py.intLit(1)
+      %tuple.30 : py.Value = py.mkTuple(%__length_hint__.1, %int.26)
+      %kwargs.30 : py.Value = py.mkKwargs
+      %call.29 : py.Value = py.call(%wrong.19, %tuple.30, %kwargs.30) ^propagate.0()
+      %wrong.20 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %reversed.5 : py.Value = py.loadGlobal("lib_wrong_calls", "reversed") ^propagate.0()
+      %int.27 : py.Value = py.intLit(1)
+      %int.28 : py.Value = py.intLit(2)
+      %dict.1 : py.Value = py.mkDict(%int.27, %int.28) ^propagate.0()
+      %tuple.31 : py.Value = py.mkTuple(%dict.1)
+      %kwargs.31 : py.Value = py.mkKwargs
+      %call.30 : py.Value = py.call(%reversed.5, %tuple.31, %kwargs.31) ^propagate.0()
+      %__length_hint__.2 : py.Value = py.attr(%call.30, "__length_hint__") ^propagate.0()
+      %int.29 : py.Value = py.intLit(1)
+      %tuple.32 : py.Value = py.mkTuple(%__length_hint__.2, %int.29)
+      %kwargs.32 : py.Value = py.mkKwargs
+      %call.31 : py.Value = py.call(%wrong.20, %tuple.32, %kwargs.32) ^propagate.0()
+      %wrong.21 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %list.4 : py.Value = py.mkList
+      %__reversed__.0 : py.Value = py.attr(%list.4, "__reversed__") ^propagate.0()
+      %int.30 : py.Value = py.intLit(1)
+      %tuple.33 : py.Value = py.mkTuple(%__reversed__.0, %int.30)
+      %kwargs.33 : py.Value = py.mkKwargs
+      %call.32 : py.Value = py.call(%wrong.21, %tuple.33, %kwargs.33) ^propagate.0()
+      %wrong.22 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %dict.2 : py.Value = py.mkDict ^propagate.0()
+      %__reversed__.1 : py.Value = py.attr(%dict.2, "__reversed__") ^propagate.0()
+      %int.31 : py.Value = py.intLit(1)
+      %tuple.34 : py.Value = py.mkTuple(%__reversed__.1, %int.31)
+      %kwargs.34 : py.Value = py.mkKwargs
+      %call.33 : py.Value = py.call(%wrong.22, %tuple.34, %kwargs.34) ^propagate.0()
+      %wrong.23 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %bytes.0 : py.Value = py.bytesLit("")
+      %__bytes__.0 : py.Value = py.attr(%bytes.0, "__bytes__") ^propagate.0()
+      %int.32 : py.Value = py.intLit(1)
+      %tuple.35 : py.Value = py.mkTuple(%__bytes__.0, %int.32)
+      %kwargs.35 : py.Value = py.mkKwargs
+      %call.34 : py.Value = py.call(%wrong.23, %tuple.35, %kwargs.35) ^propagate.0()
+      %wrong.24 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %list.5 : py.Value = py.mkList
+      %__init__.0 : py.Value = py.attr(%list.5, "__init__") ^propagate.0()
+      %int.33 : py.Value = py.intLit(1)
+      %int.34 : py.Value = py.intLit(2)
+      %tuple.36 : py.Value = py.mkTuple(%__init__.0, %int.33, %int.34)
+      %kwargs.36 : py.Value = py.mkKwargs
+      %call.35 : py.Value = py.call(%wrong.24, %tuple.36, %kwargs.36) ^propagate.0()
+      %wrong.25 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %set.4 : py.Value = py.loadGlobal("lib_wrong_calls", "set") ^propagate.0()
+      %tuple.37 : py.Value = py.mkTuple
+      %kwargs.37 : py.Value = py.mkKwargs
+      %call.36 : py.Value = py.call(%set.4, %tuple.37, %kwargs.37) ^propagate.0()
+      %__init__.1 : py.Value = py.attr(%call.36, "__init__") ^propagate.0()
+      %tuple.38 : py.Value = py.mkTuple(%__init__.1)
+      %str.4 : py.Value = py.strLit("x")
+      %int.35 : py.Value = py.intLit(1)
+      %kwargs.38 : py.Value = py.mkKwargs(%str.4, %int.35)
+      %call.37 : py.Value = py.call(%wrong.25, %tuple.38, %kwargs.38) ^propagate.0()
+      %wrong.26 : py.Value = py.loadGlobal("lib_wrong_calls", "wrong") ^propagate.0()
+      %dict.3 : py.Value = py.mkDict ^propagate.0()
+      %__init__.2 : py.Value = py.attr(%dict.3, "__init__") ^propagate.0()
+      %int.36 : py.Value = py.intLit(1)
+      %int.37 : py.Value = py.intLit(2)
+      %tuple.39 : py.Value = py.mkTuple(%__init__.2, %int.36, %int.37)
+      %kwargs.39 : py.Value = py.mkKwargs
+      %call.38 : py.Value = py.call(%wrong.26, %tuple.39, %kwargs.39) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_wrong_calls.S.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__len__", binding = "def"}, {name = "__getitem__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_wrong_calls", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("S")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_wrong_calls.S.__len__, "__len__", "lib_wrong_calls")
+      %str.4 : py.Value = py.strLit("__len__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_wrong_calls.S.__getitem__, "__getitem__", "lib_wrong_calls")
+      %str.5 : py.Value = py.strLit("__getitem__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_wrong_calls.wrong(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %f.0 : py.Value = py.undef("f")
+      %f.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%f.0)
+      %args.1 : py.Value = py.undef("args")
+      %args.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%args.1)
+      %kwargs.1 : py.Value = py.undef("kwargs")
+      %kwargs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%kwargs.1)
+      %e.0 : py.Value = py.undef("e")
+      %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
+      %f.1 : py.Value = py.undef("f")
+      %defaults.0 : py.Value = py.mkTuple(%f.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "wrong", 0, 1, true, true, "f") ^propagate.0()
+      %f.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%f.cell.0, %f.2)
+      %args.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
+      %kwargs.2 : py.Value = py.tupleGet(%bound.0, 2)
+      %set.2 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %kwargs.2)
+      %f.3 : py.Value = base.refGet[py.Value](%f.cell.0)
+      %f.4 : py.Value = py.requireDefined(%f.3, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
+      %args.3 : py.Value = base.refGet[py.Value](%args.cell.0)
+      %args.4 : py.Value = py.requireDefined(%args.3, "args", "UnboundLocalError", "cannot access local variable 'args' where it is not associated with a value") ^catch.0()
+      %kwargs.3 : py.Value = py.mkKwargs
+      %kwargs.4 : py.Value = base.refGet[py.Value](%kwargs.cell.0)
+      %kwargs.5 : py.Value = py.requireDefined(%kwargs.4, "kwargs", "UnboundLocalError", "cannot access local variable 'kwargs' where it is not associated with a value") ^catch.0()
+      %merge.0 : py.Value = py.dictMerge(%f.4, %kwargs.3, %kwargs.5) ^catch.0()
+      %args.5 : py.Value = py.argsTuple(%f.4, %args.4) ^catch.0()
+      %call.0 : py.Value = py.call(%f.4, %args.5, %merge.0) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("lib_wrong_calls", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %set.3 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("lib_wrong_calls", "print") ^clear.0()
+      %e.4 : py.Value = base.refGet[py.Value](%e.cell.0)
+      %e.6 : py.Value = py.requireDefined(%e.4, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
+      %args.6 : py.Value = py.attr(%e.6, "args") ^clear.0()
+      %int.0 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.6, %int.0) ^clear.0()
+      %tuple.0 : py.Value = py.mkTuple(%item.0)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.0, %kwargs.6) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.7 : py.Value = py.undef("e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %e.7)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.8 : py.Value = py.undef("e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.0, %e.8)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+  func @lib_wrong_calls.S.__len__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "S.__len__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %int.0 : py.Value = py.intLit(1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_wrong_calls.S.__getitem__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %self.1 : py.Value = py.undef("self")
+      %i.1 : py.Value = py.undef("i")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %i.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "S.__getitem__", 0, 2, false, false, "self", "i") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %i.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%i.cell.0, %i.2)
+      %i.3 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.4 : py.Value = py.requireDefined(%i.3, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

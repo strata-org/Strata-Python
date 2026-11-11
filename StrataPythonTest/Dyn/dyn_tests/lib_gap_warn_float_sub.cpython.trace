@@ -1,0 +1,11 @@
+--- stdout 7
+before
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+F = <class 'F'>
+__doc__ = None
+__name__ = '__main__'
+x = 1.5

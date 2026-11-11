@@ -1,0 +1,72 @@
+module
+  S: local (assigned)
+  str: global implicit (referenced)
+  B: local (assigned)
+  bytes: global implicit (referenced)
+  R: local (assigned)
+  show: local (assigned, referenced)
+  int: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  len: global implicit (referenced)
+  class S
+    __repr__: local (assigned)
+    function S.__repr__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+  class B
+    __repr__: local (assigned)
+    function B.__repr__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+  class R
+    __repr__: local (assigned)
+    function R.__repr__
+      params: self
+      self: local (parameter)
+      KeyError: global implicit (referenced)
+  function show
+    params: f
+    f: local (parameter, referenced)
+    print: global implicit (referenced)
+    repr: global implicit (referenced)
+    Exception: global implicit (referenced)
+    e: local (assigned, referenced)
+    type: global implicit (referenced)
+  lambda <lambda>
+    int: global implicit (referenced)
+    S: global implicit (referenced)
+  lambda <lambda>
+    int: global implicit (referenced)
+    S: global implicit (referenced)
+  lambda <lambda>
+    float: global implicit (referenced)
+    S: global implicit (referenced)
+  lambda <lambda>
+    float: global implicit (referenced)
+    B: global implicit (referenced)
+  lambda <lambda>
+    int: global implicit (referenced)
+    B: global implicit (referenced)
+  lambda <lambda>
+    int: global implicit (referenced)
+    R: global implicit (referenced)
+  lambda <lambda>
+    int: global implicit (referenced)
+    S: global implicit (referenced)
+    float: global implicit (referenced)
+  lambda <lambda>
+    str: global implicit (referenced)
+  lambda <lambda>
+    str: global implicit (referenced)
+  lambda <lambda>
+    bytes: global implicit (referenced)
+  lambda <lambda>
+    bytes: global implicit (referenced)
+  lambda <lambda>
+    set: global implicit (referenced)
+  lambda <lambda>
+    set: global implicit (referenced)

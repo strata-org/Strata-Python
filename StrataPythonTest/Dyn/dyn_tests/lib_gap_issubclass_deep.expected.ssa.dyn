@@ -1,0 +1,51 @@
+module lib_gap_issubclass_deep {
+  func @|lib_gap_issubclass_deep.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("lib_gap_issubclass_deep")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_issubclass_deep", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_issubclass_deep", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %str.1 : py.Value = py.loadGlobal("lib_gap_issubclass_deep", "str") ^propagate.0()
+      %t.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_issubclass_deep", "t")
+      %set.2 : base.Unit = base.refSet[py.Value](%t.cell.0, %str.1)
+      %range.0 : py.Value = py.loadGlobal("lib_gap_issubclass_deep", "range") ^propagate.0()
+      %int.0 : py.Value = py.intLit(200)
+      %tuple.0 : py.Value = py.mkTuple(%int.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%range.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%call.0) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %i.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_issubclass_deep", "i")
+      %set.3 : base.Unit = base.refSet[py.Value](%i.cell.0, %item.0)
+      %t.0 : py.Value = py.loadGlobal("lib_gap_issubclass_deep", "t") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%t.0)
+      %t.cell.1 : base.Ref(py.Value) = py.globalCell("lib_gap_issubclass_deep", "t")
+      %set.4 : base.Unit = base.refSet[py.Value](%t.cell.1, %tuple.1)
+      jump ^head.0()
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+    exit.0():
+      %print.0 : py.Value = py.loadGlobal("lib_gap_issubclass_deep", "print") ^propagate.0()
+      %issubclass.0 : py.Value = py.loadGlobal("lib_gap_issubclass_deep", "issubclass") ^propagate.0()
+      %str.2 : py.Value = py.loadGlobal("lib_gap_issubclass_deep", "str") ^propagate.0()
+      %t.1 : py.Value = py.loadGlobal("lib_gap_issubclass_deep", "t") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%str.2, %t.1)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%issubclass.0, %tuple.2, %kwargs.1) ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%call.1)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.3, %kwargs.2) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+}
+
