@@ -424,9 +424,15 @@ def builtinGetsetGet [PyReads m V] (t : Builtin) (name : String) (obj : V) : m V
       | some dict => pure dict
       | none => PyPure.gap "the __dict__ of an exception that has none yet is not modelled yet"
     | n, some AttrKind.member =>
-      -- The unicode errors' and the `SyntaxError` family's members are not all objects.
+      let field := (d.fields.find? (·.1 == n)).map (·.2)
+      -- `UnicodeEncodeError` and `UnicodeDecodeError`: `start` and `end` are C integers, 0 until
+      -- they are set; the other members are objects, `None` until they are set.
+      if t.info.mro.any ([Builtin.UnicodeEncodeError, .UnicodeDecodeError].contains ·) then
+        return field.getD (if n == "start" || n == "end" then PyPure.imm (m := m) (.int 0)
+          else PyPure.imm (m := m) .none)
+      -- The other unicode errors' and the `SyntaxError` family's members are not all objects.
       if t.info.mro.any ([Builtin.UnicodeError, .SyntaxError].contains ·) then gapIt else
-      pure ((d.fields.find? (·.1 == n)).map (·.2) |>.getD (PyPure.imm (m := m) .none))
+      pure (field.getD (PyPure.imm (m := m) .none))
     | _, _ => gapIt
 
 /-- The args tuple `args` with `x` in front. -/

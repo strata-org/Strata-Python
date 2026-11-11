@@ -1,0 +1,93 @@
+module top
+  E: local (assigned, referenced)
+  Grow: local (assigned, referenced)
+  I: local (assigned, referenced)
+  It: local (assigned, referenced)
+  L: local (assigned, referenced)
+  R: local (assigned, referenced)
+  Refill: local (assigned, referenced)
+  T: local (assigned, referenced)
+  c: local (assigned, referenced)
+  g: local (assigned, referenced)
+  l: local (assigned, referenced)
+  len: global implicit (referenced)
+  lg: local (assigned, referenced)
+  list: global implicit (referenced)
+  log: local (assigned, referenced)
+  lr: local (assigned, referenced)
+  lt: local (assigned, referenced)
+  m: local (assigned, referenced)
+  print: global implicit (referenced)
+  r: local (assigned, referenced)
+  range: global implicit (referenced)
+  show: local (assigned, referenced)
+  t: local (assigned, referenced)
+  tuple: global implicit (referenced)
+  x: local (assigned, referenced)
+  y: local (assigned, referenced)
+  zip: global implicit (referenced)
+  class E
+    __eq__: local (assigned)
+    __init__: local (assigned)
+    __repr__: local (assigned)
+    function __init__
+      log: local (parameter, referenced)
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __eq__
+      len: global implicit (referenced)
+      other: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __repr__
+      self: local (parameter, referenced)
+  class I
+    __index__: local (assigned)
+    function __index__
+      print: global implicit (referenced)
+      self: local (parameter)
+  class It
+    __iter__: local (assigned)
+    function __iter__
+      iter: global implicit (referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+  function show
+    IndexError: global implicit (referenced)
+    OverflowError: global implicit (referenced)
+    TypeError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    args: local (parameter, referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    print: global implicit (referenced)
+    repr: global implicit (referenced)
+    type: global implicit (referenced)
+  class Refill
+    __index__: local (assigned)
+    function __index__
+      lr: global implicit (referenced)
+      self: local (parameter)
+  class Grow
+    __index__: local (assigned)
+    function __index__
+      lg: global implicit (referenced)
+      self: local (parameter)
+  class L
+    __iter__: local (assigned)
+    function __iter__
+      iter: global implicit (referenced)
+      self: local (parameter)
+  class R
+    __eq__: local (assigned)
+    function __eq__
+      lr: global implicit (referenced)
+      other: local (parameter)
+      self: local (parameter)
+  class T
+    __eq__: local (assigned)
+    function __eq__
+      lt: global implicit (referenced)
+      other: local (parameter)
+      self: local (parameter)
+qualnames: E, E.__eq__, E.__init__, E.__repr__, Grow, Grow.__index__, I, I.__index__, It, It.__iter__, L, L.__iter__, R, R.__eq__, Refill, Refill.__index__, T, T.__eq__, show

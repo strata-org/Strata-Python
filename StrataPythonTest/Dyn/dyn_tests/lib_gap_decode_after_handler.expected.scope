@@ -1,0 +1,5 @@
+module
+  str: global implicit (referenced)
+  UnicodeDecodeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)

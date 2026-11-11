@@ -627,8 +627,30 @@ module lib_constructors_more {
       %tuple.94 : py.Value = py.mkTuple(%call.62, %call.63)
       %kwargs.89 : py.Value = py.mkKwargs
       %call.64 : py.Value = py.call(%print.13, %tuple.94, %kwargs.89) ^propagate.0()
+      %errors.14 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %str.45 : py.Value = py.loadGlobal("lib_constructors_more", "str") ^propagate.0()
+      %bytes.6 : py.Value = py.bytesLit("a")
       %none.1 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      %tuple.95 : py.Value = py.mkTuple(%str.45, %bytes.6, %none.1)
+      %kwargs.90 : py.Value = py.mkKwargs
+      %call.65 : py.Value = py.call(%errors.14, %tuple.95, %kwargs.90) ^propagate.0()
+      %errors.15 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %str.46 : py.Value = py.loadGlobal("lib_constructors_more", "str") ^propagate.0()
+      %bytes.7 : py.Value = py.bytesLit("a")
+      %str.47 : py.Value = py.strLit("utf-8")
+      %none.2 : py.Value = py.noneLit
+      %tuple.96 : py.Value = py.mkTuple(%str.46, %bytes.7, %str.47, %none.2)
+      %kwargs.91 : py.Value = py.mkKwargs
+      %call.66 : py.Value = py.call(%errors.15, %tuple.96, %kwargs.91) ^propagate.0()
+      %errors.16 : py.Value = py.loadGlobal("lib_constructors_more", "errors") ^propagate.0()
+      %bytes.8 : py.Value = py.loadGlobal("lib_constructors_more", "bytes") ^propagate.0()
+      %str.48 : py.Value = py.strLit("a")
+      %none.3 : py.Value = py.noneLit
+      %tuple.97 : py.Value = py.mkTuple(%bytes.8, %str.48, %none.3)
+      %kwargs.92 : py.Value = py.mkKwargs
+      %call.67 : py.Value = py.call(%errors.16, %tuple.97, %kwargs.92) ^propagate.0()
+      %none.4 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.4)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

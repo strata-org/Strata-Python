@@ -6,6 +6,7 @@
 module
 public import StrataPython.Dyn.Sem.Builtins.Classes
 public import StrataPython.Dyn.Sem.Library.Iterables
+public import StrataPython.Dyn.Sem.Library.Signatures
 public import StrataPython.Dyn.Sem.Proto.Repr
 
 set_option autoImplicit false
@@ -55,8 +56,7 @@ def attrName [PyReads m V] (v : V) : m String := do
 /-- **`getattr(object, name[, default])`**, CPython's `builtin_getattr`: with `default`, an
 `AttributeError` gives it, and any other exception propagates. -/
 def getattrFn [PyWrites m V] (_self args kwargs : V) : m V := do
-  let sig : BuiltinSig :=
-    { name := "getattr", qualname := "getattr", style := .posOnly, minpos := 2, maxpos := 3 }
+  let sig := Signatures.getattr
   let ps ← params sig 3 args kwargs
   let obj ← given "getattr" ps 0
   let name ← attrName (← given "getattr" ps 1)
@@ -69,8 +69,7 @@ def getattrFn [PyWrites m V] (_self args kwargs : V) : m V := do
 /-- **`hasattr(obj, name)`**, CPython's `builtin_hasattr_impl`: `False` on an `AttributeError`;
 any other exception propagates. -/
 def hasattrFn [PyWrites m V] (_self args kwargs : V) : m V := do
-  let sig : BuiltinSig :=
-    { name := "hasattr", qualname := "hasattr", style := .posOnly, minpos := 2, maxpos := 2 }
+  let sig := Signatures.hasattr
   let ps ← params sig 2 args kwargs
   let obj ← given "hasattr" ps 0
   let name ← attrName (← given "hasattr" ps 1)
@@ -80,8 +79,7 @@ def hasattrFn [PyWrites m V] (_self args kwargs : V) : m V := do
 
 /-- **`setattr(obj, name, value)`**, CPython's `builtin_setattr_impl`. -/
 def setattrFn [PyWrites m V] (_self args kwargs : V) : m V := do
-  let sig : BuiltinSig :=
-    { name := "setattr", qualname := "setattr", style := .posOnly, minpos := 3, maxpos := 3 }
+  let sig := Signatures.setattr
   let ps ← params sig 3 args kwargs
   let obj ← given "setattr" ps 0
   let name ← attrName (← given "setattr" ps 1)
@@ -125,8 +123,7 @@ def isCallable [PyReads m V] (v : V) : m Bool := do
 
 /-- **`callable(obj)`**. -/
 def callableFn [PyWrites m V] (_self args kwargs : V) : m V := do
-  let sig : BuiltinSig :=
-    { name := "callable", qualname := "callable", style := .methO }
+  let sig := Signatures.callable
   let ps ← params sig 1 args kwargs
   return PyPure.imm (m := m) (.bool (← isCallable (← given "callable" ps 0)))
 
@@ -184,8 +181,7 @@ def issubclassN [PyCalls m V] : Nat → V → V → m Bool
 
 /-- **`issubclass(cls, class_or_tuple)`**. -/
 def issubclassFn [PyWrites m V] (_self args kwargs : V) : m V := do
-  let sig : BuiltinSig :=
-    { name := "issubclass", qualname := "issubclass", style := .posOnly, minpos := 2, maxpos := 2 }
+  let sig := Signatures.issubclass
   let ps ← params sig 2 args kwargs
   let r ← issubclassN dispatchDepth (← given "issubclass" ps 0) (← given "issubclass" ps 1)
   return PyPure.imm (m := m) (.bool r)
@@ -194,17 +190,24 @@ def issubclassFn [PyWrites m V] (_self args kwargs : V) : m V := do
 
 /-- **`hash(obj)`**: `PyObject_Hash`, as the record's `hashValue` turns a hash into an `int`. -/
 def hashFn [PyWrites m V] (_self args kwargs : V) : m V := do
-  let sig : BuiltinSig :=
-    { name := "hash", qualname := "hash", style := .methO }
+  let sig := Signatures.hash
   let ps ← params sig 1 args kwargs
   PyPure.hashValue (← hash (← given "hash" ps 0))
 
 /-- **`abs(x)`**: `PyNumber_Absolute`, the unary operator's protocol. -/
 def absFn [PyWrites m V] (_self args kwargs : V) : m V := do
-  let sig : BuiltinSig :=
-    { name := "abs", qualname := "abs", style := .methO }
+  let sig := Signatures.abs
   let ps ← params sig 1 args kwargs
   unaryOp .abs (← given "abs" ps 0)
+
+/-- The argument `v` as a `Py_ssize_t`, as Argument Clinic's converter takes it: through
+`__index__`, with CPython's `TypeError` and `OverflowError`. -/
+def ssizeArg [PyCalls m V] (v : V) : m Int := do
+  let some n ← indexValue? v |
+    raiseBuiltin "TypeError" s!"'{← typeName v}' object cannot be interpreted as an integer"
+  if n > (Format.ssizeMax : Int) || n < Arith.ssizeMin then
+    raiseBuiltin "OverflowError" "Python int too large to convert to C ssize_t"
+  return n
 
 /-- `divmod` of two numbers as a tuple of two numbers, with CPython's errors. -/
 def numDivmod [PyCalls m V] (a b : Arith.Num) : m V := do
@@ -220,8 +223,7 @@ def numDivmod [PyCalls m V] (a b : Arith.Num) : m V := do
 /-- **`divmod(a, b)`**, `PyNumber_Divmod`: two numbers directly; else `__divmod__` and
 `__rdivmod__` by the binary protocol; else `TypeError`. -/
 def divmodFn [PyWrites m V] (_self args kwargs : V) : m V := do
-  let sig : BuiltinSig :=
-    { name := "divmod", qualname := "divmod", style := .posOnly, minpos := 2, maxpos := 2 }
+  let sig := Signatures.divmod
   let ps ← params sig 2 args kwargs
   let a ← given "divmod" ps 0
   let b ← given "divmod" ps 1
@@ -236,8 +238,7 @@ def divmodFn [PyWrites m V] (_self args kwargs : V) : m V := do
 
 /-- **`hex(x)`**, `PyNumber_ToBase(x, 16)`: `x` through `PyNumber_Index`. -/
 def hexFn [PyWrites m V] (_self args kwargs : V) : m V := do
-  let sig : BuiltinSig :=
-    { name := "hex", qualname := "hex", style := .methO }
+  let sig := Signatures.hex
   let ps ← params sig 1 args kwargs
   let x ← given "hex" ps 0
   let some n ← indexValue? x |

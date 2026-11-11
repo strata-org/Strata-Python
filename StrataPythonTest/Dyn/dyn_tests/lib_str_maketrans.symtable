@@ -1,0 +1,14 @@
+module top
+  print: global implicit (referenced)
+  show: local (assigned, referenced)
+  str: global implicit (referenced)
+  function show
+    TypeError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    args: local (parameter, referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    print: global implicit (referenced)
+    repr: global implicit (referenced)
+    type: global implicit (referenced)
+qualnames: show

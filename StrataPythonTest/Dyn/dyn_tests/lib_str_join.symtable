@@ -1,0 +1,43 @@
+module top
+  It: local (assigned, referenced)
+  P: local (assigned, referenced)
+  S: local (assigned, referenced)
+  iter: global implicit (referenced)
+  list: global implicit (referenced)
+  print: global implicit (referenced)
+  show: local (assigned, referenced)
+  sorted: global implicit (referenced)
+  str: global implicit (referenced)
+  type: global implicit (referenced)
+  class S
+  class It
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __length_hint__: local (assigned)
+    __next__: local (assigned)
+    function __init__
+      list: global implicit (referenced)
+      self: local (parameter, referenced)
+      xs: local (parameter, referenced)
+    function __iter__
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+      x: local (assigned, referenced)
+    function __length_hint__
+      print: global implicit (referenced)
+      self: local (parameter)
+  function show
+    TypeError: global implicit (referenced)
+    args: local (parameter, referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    print: global implicit (referenced)
+    repr: global implicit (referenced)
+  class P
+    p: local (assigned)
+    property: global implicit (referenced)
+qualnames: It, It.__init__, It.__iter__, It.__length_hint__, It.__next__, P, S, show

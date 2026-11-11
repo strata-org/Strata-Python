@@ -1,0 +1,23 @@
+module
+  wrong: local (assigned, referenced)
+  getattr: global implicit (referenced)
+  hasattr: global implicit (referenced)
+  setattr: global implicit (referenced)
+  callable: global implicit (referenced)
+  issubclass: global implicit (referenced)
+  hash: global implicit (referenced)
+  abs: global implicit (referenced)
+  divmod: global implicit (referenced)
+  hex: global implicit (referenced)
+  any: global implicit (referenced)
+  all: global implicit (referenced)
+  sum: global implicit (referenced)
+  range: global implicit (referenced)
+  function wrong
+    params: f, *args, **kwargs
+    f: local (parameter, referenced)
+    args: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+    TypeError: global implicit (referenced)
+    e: local (assigned, referenced)
+    print: global implicit (referenced)

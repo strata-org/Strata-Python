@@ -1,0 +1,287 @@
+module lib_sizes {
+  func @|lib_sizes.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("lib_sizes")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_sizes", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_sizes", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %list.0 : py.Value = py.mkList
+      %l.cell.0 : base.Ref(py.Value) = py.globalCell("lib_sizes", "l")
+      %set.2 : base.Unit = base.refSet[py.Value](%l.cell.0, %list.0)
+      %range.0 : py.Value = py.loadGlobal("lib_sizes", "range") ^propagate.0()
+      %int.0 : py.Value = py.intLit(5000)
+      %tuple.0 : py.Value = py.mkTuple(%int.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%range.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%call.0) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %i.cell.0 : base.Ref(py.Value) = py.globalCell("lib_sizes", "i")
+      %set.3 : base.Unit = base.refSet[py.Value](%i.cell.0, %item.0)
+      %l.0 : py.Value = py.loadGlobal("lib_sizes", "l") ^propagate.0()
+      %append.0 : py.Value = py.attr(%l.0, "append") ^propagate.0()
+      %int.1 : py.Value = py.intLit(5000)
+      %i.0 : py.Value = py.loadGlobal("lib_sizes", "i") ^propagate.0()
+      %sub.0 : py.Value = py.sub(%int.1, %i.0) ^propagate.0()
+      %i.1 : py.Value = py.loadGlobal("lib_sizes", "i") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%sub.0, %i.1)
+      %tuple.2 : py.Value = py.mkTuple(%tuple.1)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%append.0, %tuple.2, %kwargs.1) ^propagate.0()
+      jump ^head.0()
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+    exit.0():
+      %l.1 : py.Value = py.loadGlobal("lib_sizes", "l") ^propagate.0()
+      %sort.0 : py.Value = py.attr(%l.1, "sort") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%sort.0, %tuple.3, %kwargs.2) ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("lib_sizes", "print") ^propagate.0()
+      %l.2 : py.Value = py.loadGlobal("lib_sizes", "l") ^propagate.0()
+      %int.2 : py.Value = py.intLit(0)
+      %item.1 : py.Value = py.getItem(%l.2, %int.2) ^propagate.0()
+      %l.3 : py.Value = py.loadGlobal("lib_sizes", "l") ^propagate.0()
+      %int.3 : py.Value = py.intLit(1)
+      %neg.0 : py.Value = py.uSub(%int.3) ^propagate.0()
+      %item.2 : py.Value = py.getItem(%l.3, %neg.0) ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%item.1, %item.2)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.0, %tuple.4, %kwargs.3) ^propagate.0()
+      %list.1 : py.Value = py.mkList
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("lib_sizes", "f")
+      %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %list.1)
+      %range.1 : py.Value = py.loadGlobal("lib_sizes", "range") ^propagate.0()
+      %int.4 : py.Value = py.intLit(3001)
+      %tuple.5 : py.Value = py.mkTuple(%int.4)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%range.1, %tuple.5, %kwargs.4) ^propagate.0()
+      %iter.1 : py.Value = py.getIter(%call.4) ^propagate.0()
+      jump ^head.1()
+    head.1():
+      %item.3 : py.Value = py.next(%iter.1) ^stop.1()
+      %i.cell.1 : base.Ref(py.Value) = py.globalCell("lib_sizes", "i")
+      %set.5 : base.Unit = base.refSet[py.Value](%i.cell.1, %item.3)
+      %f.0 : py.Value = py.loadGlobal("lib_sizes", "f") ^propagate.0()
+      %append.1 : py.Value = py.attr(%f.0, "append") ^propagate.0()
+      %float.0 : py.Value = py.loadGlobal("lib_sizes", "float") ^propagate.0()
+      %i.2 : py.Value = py.loadGlobal("lib_sizes", "i") ^propagate.0()
+      %int.5 : py.Value = py.intLit(7)
+      %mod.0 : py.Value = py.mod(%i.2, %int.5) ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple(%mod.0)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%float.0, %tuple.6, %kwargs.5) ^propagate.0()
+      %tuple.7 : py.Value = py.mkTuple(%call.5)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%append.1, %tuple.7, %kwargs.6) ^propagate.0()
+      jump ^head.1()
+    stop.1(%exc.1 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.1)
+      branch(%done.1) ^exit.1() ^propagate.0(%exc.1)
+    exit.1():
+      %f.1 : py.Value = py.loadGlobal("lib_sizes", "f") ^propagate.0()
+      %append.2 : py.Value = py.attr(%f.1, "append") ^propagate.0()
+      %float.1 : py.Value = py.loadGlobal("lib_sizes", "float") ^propagate.0()
+      %str.1 : py.Value = py.strLit("nan")
+      %tuple.8 : py.Value = py.mkTuple(%str.1)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%float.1, %tuple.8, %kwargs.7) ^propagate.0()
+      %tuple.9 : py.Value = py.mkTuple(%call.7)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%append.2, %tuple.9, %kwargs.8) ^propagate.0()
+      %f.2 : py.Value = py.loadGlobal("lib_sizes", "f") ^propagate.0()
+      %sort.1 : py.Value = py.attr(%f.2, "sort") ^propagate.0()
+      %tuple.10 : py.Value = py.mkTuple
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%sort.1, %tuple.10, %kwargs.9) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("lib_sizes", "print") ^propagate.0()
+      %f.3 : py.Value = py.loadGlobal("lib_sizes", "f") ^propagate.0()
+      %int.6 : py.Value = py.intLit(0)
+      %item.4 : py.Value = py.getItem(%f.3, %int.6) ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("lib_sizes", "len") ^propagate.0()
+      %f.4 : py.Value = py.loadGlobal("lib_sizes", "f") ^propagate.0()
+      %tuple.11 : py.Value = py.mkTuple(%f.4)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%len.0, %tuple.11, %kwargs.10) ^propagate.0()
+      %tuple.12 : py.Value = py.mkTuple(%item.4, %call.10)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%print.1, %tuple.12, %kwargs.11) ^propagate.0()
+      %print.2 : py.Value = py.loadGlobal("lib_sizes", "print") ^propagate.0()
+      %int.7 : py.Value = py.intLit(0)
+      %tuple.13 : py.Value = py.mkTuple(%int.7)
+      %int.8 : py.Value = py.intLit(400000)
+      %mult.0 : py.Value = py.mult(%tuple.13, %int.8) ^propagate.0()
+      %count.0 : py.Value = py.attr(%mult.0, "count") ^propagate.0()
+      %int.9 : py.Value = py.intLit(0)
+      %tuple.14 : py.Value = py.mkTuple(%int.9)
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%count.0, %tuple.14, %kwargs.12) ^propagate.0()
+      %int.10 : py.Value = py.intLit(1)
+      %tuple.15 : py.Value = py.mkTuple(%int.10)
+      %int.11 : py.Value = py.intLit(300000)
+      %mult.1 : py.Value = py.mult(%tuple.15, %int.11) ^propagate.0()
+      %int.12 : py.Value = py.intLit(2)
+      %tuple.16 : py.Value = py.mkTuple(%int.12)
+      %add.0 : py.Value = py.add(%mult.1, %tuple.16) ^propagate.0()
+      %index.0 : py.Value = py.attr(%add.0, "index") ^propagate.0()
+      %int.13 : py.Value = py.intLit(2)
+      %tuple.17 : py.Value = py.mkTuple(%int.13)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%index.0, %tuple.17, %kwargs.13) ^propagate.0()
+      %tuple.18 : py.Value = py.mkTuple(%call.12, %call.13)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%print.2, %tuple.18, %kwargs.14) ^propagate.0()
+      %sorted.0 : py.Value = py.loadGlobal("lib_sizes", "sorted") ^propagate.0()
+      %range.2 : py.Value = py.loadGlobal("lib_sizes", "range") ^propagate.0()
+      %int.14 : py.Value = py.intLit(400000)
+      %int.15 : py.Value = py.intLit(0)
+      %int.16 : py.Value = py.intLit(1)
+      %neg.1 : py.Value = py.uSub(%int.16) ^propagate.0()
+      %tuple.19 : py.Value = py.mkTuple(%int.14, %int.15, %neg.1)
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%range.2, %tuple.19, %kwargs.15) ^propagate.0()
+      %tuple.20 : py.Value = py.mkTuple(%call.15)
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%sorted.0, %tuple.20, %kwargs.16) ^propagate.0()
+      %s.cell.0 : base.Ref(py.Value) = py.globalCell("lib_sizes", "s")
+      %set.6 : base.Unit = base.refSet[py.Value](%s.cell.0, %call.16)
+      %print.3 : py.Value = py.loadGlobal("lib_sizes", "print") ^propagate.0()
+      %s.0 : py.Value = py.loadGlobal("lib_sizes", "s") ^propagate.0()
+      %int.17 : py.Value = py.intLit(0)
+      %item.5 : py.Value = py.getItem(%s.0, %int.17) ^propagate.0()
+      %s.1 : py.Value = py.loadGlobal("lib_sizes", "s") ^propagate.0()
+      %int.18 : py.Value = py.intLit(1)
+      %neg.2 : py.Value = py.uSub(%int.18) ^propagate.0()
+      %item.6 : py.Value = py.getItem(%s.1, %neg.2) ^propagate.0()
+      %tuple.21 : py.Value = py.mkTuple(%item.5, %item.6)
+      %kwargs.17 : py.Value = py.mkKwargs
+      %call.17 : py.Value = py.call(%print.3, %tuple.21, %kwargs.17) ^propagate.0()
+      %print.4 : py.Value = py.loadGlobal("lib_sizes", "print") ^propagate.0()
+      %len.1 : py.Value = py.loadGlobal("lib_sizes", "len") ^propagate.0()
+      %str.2 : py.Value = py.strLit("")
+      %join.0 : py.Value = py.attr(%str.2, "join") ^propagate.0()
+      %str.3 : py.Value = py.strLit("a")
+      %list.2 : py.Value = py.mkList(%str.3)
+      %int.19 : py.Value = py.intLit(200000)
+      %mult.2 : py.Value = py.mult(%list.2, %int.19) ^propagate.0()
+      %tuple.22 : py.Value = py.mkTuple(%mult.2)
+      %kwargs.18 : py.Value = py.mkKwargs
+      %call.18 : py.Value = py.call(%join.0, %tuple.22, %kwargs.18) ^propagate.0()
+      %tuple.23 : py.Value = py.mkTuple(%call.18)
+      %kwargs.19 : py.Value = py.mkKwargs
+      %call.19 : py.Value = py.call(%len.1, %tuple.23, %kwargs.19) ^propagate.0()
+      %tuple.24 : py.Value = py.mkTuple(%call.19)
+      %kwargs.20 : py.Value = py.mkKwargs
+      %call.20 : py.Value = py.call(%print.4, %tuple.24, %kwargs.20) ^propagate.0()
+      %print.5 : py.Value = py.loadGlobal("lib_sizes", "print") ^propagate.0()
+      %len.2 : py.Value = py.loadGlobal("lib_sizes", "len") ^propagate.0()
+      %str.4 : py.Value = py.strLit("ab")
+      %int.20 : py.Value = py.intLit(80000)
+      %mult.3 : py.Value = py.mult(%str.4, %int.20) ^propagate.0()
+      %translate.0 : py.Value = py.attr(%mult.3, "translate") ^propagate.0()
+      %int.21 : py.Value = py.intLit(97)
+      %str.5 : py.Value = py.strLit("c")
+      %dict.0 : py.Value = py.mkDict(%int.21, %str.5) ^propagate.0()
+      %tuple.25 : py.Value = py.mkTuple(%dict.0)
+      %kwargs.21 : py.Value = py.mkKwargs
+      %call.21 : py.Value = py.call(%translate.0, %tuple.25, %kwargs.21) ^propagate.0()
+      %tuple.26 : py.Value = py.mkTuple(%call.21)
+      %kwargs.22 : py.Value = py.mkKwargs
+      %call.22 : py.Value = py.call(%len.2, %tuple.26, %kwargs.22) ^propagate.0()
+      %tuple.27 : py.Value = py.mkTuple(%call.22)
+      %kwargs.23 : py.Value = py.mkKwargs
+      %call.23 : py.Value = py.call(%print.5, %tuple.27, %kwargs.23) ^propagate.0()
+      %print.6 : py.Value = py.loadGlobal("lib_sizes", "print") ^propagate.0()
+      %len.3 : py.Value = py.loadGlobal("lib_sizes", "len") ^propagate.0()
+      %str.6 : py.Value = py.strLit("éb")
+      %int.22 : py.Value = py.intLit(30000)
+      %mult.4 : py.Value = py.mult(%str.6, %int.22) ^propagate.0()
+      %translate.1 : py.Value = py.attr(%mult.4, "translate") ^propagate.0()
+      %int.23 : py.Value = py.intLit(98)
+      %none.1 : py.Value = py.noneLit
+      %dict.1 : py.Value = py.mkDict(%int.23, %none.1) ^propagate.0()
+      %tuple.28 : py.Value = py.mkTuple(%dict.1)
+      %kwargs.24 : py.Value = py.mkKwargs
+      %call.24 : py.Value = py.call(%translate.1, %tuple.28, %kwargs.24) ^propagate.0()
+      %tuple.29 : py.Value = py.mkTuple(%call.24)
+      %kwargs.25 : py.Value = py.mkKwargs
+      %call.25 : py.Value = py.call(%len.3, %tuple.29, %kwargs.25) ^propagate.0()
+      %len.4 : py.Value = py.loadGlobal("lib_sizes", "len") ^propagate.0()
+      %str.7 : py.Value = py.strLit("ab")
+      %int.24 : py.Value = py.intLit(30000)
+      %mult.5 : py.Value = py.mult(%str.7, %int.24) ^propagate.0()
+      %translate.2 : py.Value = py.attr(%mult.5, "translate") ^propagate.0()
+      %int.25 : py.Value = py.intLit(97)
+      %str.8 : py.Value = py.strLit("xy")
+      %int.26 : py.Value = py.intLit(98)
+      %none.2 : py.Value = py.noneLit
+      %dict.2 : py.Value = py.mkDict(%int.25, %str.8, %int.26, %none.2) ^propagate.0()
+      %tuple.30 : py.Value = py.mkTuple(%dict.2)
+      %kwargs.26 : py.Value = py.mkKwargs
+      %call.26 : py.Value = py.call(%translate.2, %tuple.30, %kwargs.26) ^propagate.0()
+      %tuple.31 : py.Value = py.mkTuple(%call.26)
+      %kwargs.27 : py.Value = py.mkKwargs
+      %call.27 : py.Value = py.call(%len.4, %tuple.31, %kwargs.27) ^propagate.0()
+      %tuple.32 : py.Value = py.mkTuple(%call.25, %call.27)
+      %kwargs.28 : py.Value = py.mkKwargs
+      %call.28 : py.Value = py.call(%print.6, %tuple.32, %kwargs.28) ^propagate.0()
+      %list.3 : py.Value = py.mkList
+      %m.cell.0 : base.Ref(py.Value) = py.globalCell("lib_sizes", "m")
+      %set.7 : base.Unit = base.refSet[py.Value](%m.cell.0, %list.3)
+      %range.3 : py.Value = py.loadGlobal("lib_sizes", "range") ^propagate.0()
+      %int.27 : py.Value = py.intLit(20000)
+      %tuple.33 : py.Value = py.mkTuple(%int.27)
+      %kwargs.29 : py.Value = py.mkKwargs
+      %call.29 : py.Value = py.call(%range.3, %tuple.33, %kwargs.29) ^propagate.0()
+      %iter.2 : py.Value = py.getIter(%call.29) ^propagate.0()
+      jump ^head.2()
+    head.2():
+      %item.7 : py.Value = py.next(%iter.2) ^stop.2()
+      %i.cell.2 : base.Ref(py.Value) = py.globalCell("lib_sizes", "i")
+      %set.8 : base.Unit = base.refSet[py.Value](%i.cell.2, %item.7)
+      %m.43 : py.Value = py.loadGlobal("lib_sizes", "m") ^propagate.0()
+      %append.3 : py.Value = py.attr(%m.43, "append") ^propagate.0()
+      %i.3 : py.Value = py.loadGlobal("lib_sizes", "i") ^propagate.0()
+      %int.28 : py.Value = py.intLit(7919)
+      %mult.6 : py.Value = py.mult(%i.3, %int.28) ^propagate.0()
+      %int.29 : py.Value = py.intLit(101)
+      %mod.1 : py.Value = py.mod(%mult.6, %int.29) ^propagate.0()
+      %i.4 : py.Value = py.loadGlobal("lib_sizes", "i") ^propagate.0()
+      %tuple.34 : py.Value = py.mkTuple(%mod.1, %i.4)
+      %tuple.35 : py.Value = py.mkTuple(%tuple.34)
+      %kwargs.30 : py.Value = py.mkKwargs
+      %call.30 : py.Value = py.call(%append.3, %tuple.35, %kwargs.30) ^propagate.0()
+      jump ^head.2()
+    stop.2(%exc.2 : py.Value):
+      %done.2 : base.Bool = py.isStopIteration(%exc.2)
+      branch(%done.2) ^exit.2() ^propagate.0(%exc.2)
+    exit.2():
+      %m.47 : py.Value = py.loadGlobal("lib_sizes", "m") ^propagate.0()
+      %sort.2 : py.Value = py.attr(%m.47, "sort") ^propagate.0()
+      %tuple.36 : py.Value = py.mkTuple
+      %kwargs.31 : py.Value = py.mkKwargs
+      %call.31 : py.Value = py.call(%sort.2, %tuple.36, %kwargs.31) ^propagate.0()
+      %print.7 : py.Value = py.loadGlobal("lib_sizes", "print") ^propagate.0()
+      %m.50 : py.Value = py.loadGlobal("lib_sizes", "m") ^propagate.0()
+      %int.30 : py.Value = py.intLit(0)
+      %item.8 : py.Value = py.getItem(%m.50, %int.30) ^propagate.0()
+      %m.52 : py.Value = py.loadGlobal("lib_sizes", "m") ^propagate.0()
+      %int.31 : py.Value = py.intLit(1)
+      %neg.3 : py.Value = py.uSub(%int.31) ^propagate.0()
+      %item.9 : py.Value = py.getItem(%m.52, %neg.3) ^propagate.0()
+      %tuple.37 : py.Value = py.mkTuple(%item.8, %item.9)
+      %kwargs.32 : py.Value = py.mkKwargs
+      %call.32 : py.Value = py.call(%print.7, %tuple.37, %kwargs.32) ^propagate.0()
+      %none.3 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.3)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+}
+

@@ -1,0 +1,81 @@
+--- stdout 3271
+getattr expected at most 3 arguments, got 4
+hasattr expected 2 arguments, got 3
+setattr expected 3 arguments, got 4
+callable() takes exactly one argument (2 given)
+issubclass expected 2 arguments, got 3
+hash() takes exactly one argument (2 given)
+abs() takes exactly one argument (2 given)
+divmod expected 2 arguments, got 3
+hex() takes exactly one argument (2 given)
+any() takes exactly one argument (2 given)
+all() takes exactly one argument (2 given)
+sum() takes at most 2 arguments (3 given)
+str.upper() takes no arguments (1 given)
+str.join() takes exactly one argument (2 given)
+split() takes at most 2 arguments (3 given)
+str.lower() takes no arguments (1 given)
+strip expected at most 1 argument, got 2
+startswith() takes at most 3 arguments (4 given)
+replace expected at most 3 arguments, got 4
+find() takes at most 3 arguments (4 given)
+count() takes at most 3 arguments (4 given)
+endswith() takes at most 3 arguments (4 given)
+str.translate() takes exactly one argument (2 given)
+rstrip expected at most 1 argument, got 2
+splitlines() takes at most 1 argument (2 given)
+index() takes at most 3 arguments (4 given)
+rsplit() takes at most 2 arguments (3 given)
+str.isalpha() takes no arguments (1 given)
+str.capitalize() takes no arguments (1 given)
+ljust expected at most 2 arguments, got 3
+str.casefold() takes no arguments (1 given)
+str.isprintable() takes no arguments (1 given)
+str.isupper() takes no arguments (1 given)
+lstrip expected at most 1 argument, got 2
+rindex() takes at most 3 arguments (4 given)
+str.istitle() takes no arguments (1 given)
+expandtabs() takes at most 1 argument (2 given)
+str.isalnum() takes no arguments (1 given)
+str.removeprefix() takes exactly one argument (2 given)
+center expected at most 2 arguments, got 3
+str.isdigit() takes no arguments (1 given)
+str.islower() takes no arguments (1 given)
+str.isspace() takes no arguments (1 given)
+str.zfill() takes exactly one argument (2 given)
+str.isdecimal() takes no arguments (1 given)
+str.isnumeric() takes no arguments (1 given)
+rfind() takes at most 3 arguments (4 given)
+str.title() takes no arguments (1 given)
+str.isidentifier() takes no arguments (1 given)
+rjust expected at most 2 arguments, got 3
+str.removesuffix() takes exactly one argument (2 given)
+str.swapcase() takes no arguments (1 given)
+str.isascii() takes no arguments (1 given)
+str.partition() takes exactly one argument (2 given)
+encode() takes at most 2 arguments (3 given)
+str.format_map() takes exactly one argument (2 given)
+str.rpartition() takes exactly one argument (2 given)
+list.append() takes exactly one argument (2 given)
+list.clear() takes no arguments (1 given)
+pop expected at most 1 argument, got 2
+insert expected 2 arguments, got 3
+list.count() takes exactly one argument (2 given)
+list.remove() takes exactly one argument (2 given)
+sort() takes no positional arguments
+list.extend() takes exactly one argument (2 given)
+list.copy() takes no arguments (1 given)
+index expected at most 3 arguments, got 4
+list.reverse() takes no arguments (1 given)
+tuple.count() takes exactly one argument (2 given)
+index expected at most 3 arguments, got 4
+range.count() takes exactly one argument (2 given)
+range.index() takes exactly one argument (2 given)
+maketrans expected at most 3 arguments, got 4
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+wrong = <function object>

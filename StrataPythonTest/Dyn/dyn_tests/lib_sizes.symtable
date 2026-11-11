@@ -1,0 +1,12 @@
+module top
+  f: local (assigned, referenced)
+  float: global implicit (referenced)
+  i: local (assigned, referenced)
+  l: local (assigned, referenced)
+  len: global implicit (referenced)
+  m: local (assigned, referenced)
+  print: global implicit (referenced)
+  range: global implicit (referenced)
+  s: local (assigned, referenced)
+  sorted: global implicit (referenced)
+qualnames: 

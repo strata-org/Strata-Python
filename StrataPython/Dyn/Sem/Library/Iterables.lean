@@ -9,6 +9,7 @@ public import StrataPython.Dyn.Sem.Proto.Containers
 public import StrataPython.Dyn.Sem.Proto.Calls
 public import StrataPython.Dyn.Sem.Proto.Iter
 public import StrataPython.Dyn.Sem.Library.Sum
+public import StrataPython.Dyn.Sem.Library.Signatures
 
 set_option autoImplicit false
 
@@ -85,9 +86,10 @@ def orderFree [PyReads m V] (v : V) : m V := do
     if kinds.all (· == some k) then return PyPure.imm (m := m) (.tuple xs) else return v
   | some none => return v
 
-/-- The iterator of the argument of `any` or `all` (`METH_O`). -/
-def anyAllIter [PyWrites m V] (name : String) (args kwargs : V) : m V := do
-  let b ← bindBuiltinArgs { name, qualname := name, style := .methO } args kwargs
+/-- The iterator of the argument of `any` or `all`. -/
+def anyAllIter [PyWrites m V] (sig : BuiltinSig) (args kwargs : V) : m V := do
+  let name := sig.name
+  let b ← bindBuiltinArgs sig args kwargs
   let #[some x] := b.params |
     PyPure.modelInvariant s!"{name}: the binder gave a parameter array of another shape"
   getIter (← orderFree x)
@@ -133,10 +135,7 @@ def sumStart [PyReads m V] : Option V → m (Sum.Start V)
 /-- The iterator and the first phase of a call of `sum`: CPython makes the iterator before it
 checks the start. -/
 def sumInit [PyWrites m V] (args kwargs : V) : m (V × Sum.State V) := do
-  let sig : BuiltinSig :=
-    { name := "sum", qualname := "sum", style := .keywords, posonly := 1, minpos := 1,
-      maxpos := 2, kwnames := #["start"] }
-  let b ← bindBuiltinArgs sig args kwargs
+  let b ← bindBuiltinArgs Signatures.sum args kwargs
   let #[some iterable, start] := b.params |
     PyPure.modelInvariant "sum: the binder gave a parameter array of another shape"
   let st ← sumStart start
@@ -171,8 +170,8 @@ def sumStep [PyWrites m V] (it : V) (s : Sum.State V) : m (LoopStep (Sum.State V
 
 /-- **`any(it)` and `all(it)` inside another operation's step**: one walk, which must end. -/
 def anyAllBody [PyWrites m V] (stopAt : Bool) (_self args kwargs : V) : m V := do
-  let name := if stopAt then "any" else "all"
-  match ← anyAllStep stopAt (← anyAllIter name args kwargs) with
+  let sig := if stopAt then Signatures.any else Signatures.all
+  match ← anyAllStep stopAt (← anyAllIter sig args kwargs) with
   | .done r => pure (PyPure.imm (m := m) (.bool r))
   | .more _ => midStepGap
 

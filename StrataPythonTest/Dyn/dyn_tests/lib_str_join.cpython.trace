@@ -1,0 +1,36 @@
+--- stdout 409
+a, b, c
+x-y
+ only
+iter
+iter
+hint
+next a
+next b
+next c
+a.b.c
+aa|bb
+a,b
+p/q str
+k:v
+TypeError can only join an iterable
+TypeError sequence item 0: expected str instance, int found
+TypeError sequence item 1: expected str instance, int found
+iter
+iter
+hint
+next a
+next 3
+TypeError sequence item 1: expected str instance, int found
+TypeError descriptor 'join' for 'str' objects doesn't apply to a 'int' object
+m n
+
+--- outcome
+ok
+--- globals
+It = <class 'It'>
+P = <class 'P'>
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'
+show = <function object>

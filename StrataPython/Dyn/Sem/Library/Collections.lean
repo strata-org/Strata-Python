@@ -73,24 +73,6 @@ def listNew [PyWrites m V] (_self args _kwargs : V) : m V := do
   if ← isExact cls .list then return ← PyPure.allocList #[]
   newSubInstance cls (.list #[])
 
-/-- The first step of `list.__init__(self, iterable)`: the list is cleared; an exact list or tuple
-is appended at once (`list_extend`'s fast path, with no iterator); otherwise the iterator, after
-the length hint and the reservation it gives. -/
-def listInitFirst [PyWrites m V] (self x : V) : m (Option V) := do
-  let some xs ← listOf? self | PyPure.modelInvariant "list.__init__ of a value that is not a list"
-  PyWrites.listSplice self 0 xs.size #[]
-  if (← classIs x .list) || (← classIs x .tuple) then
-    let items ← match ← listOf? x with
-      | some ys => pure ys
-      | none => tupleItems x
-    for y in items do PyWrites.listAppend self y
-    return none
-  let it ← getIter x
-  let n ← lengthHint x 8
-  hintCheck n
-  if n > 0 then PyWrites.listReserve self n
-  return some it
-
 /-- One activation of a `list.__init__` walk. -/
 def listStep [PyWrites m V] (self it : V) : m (LoopStep V Unit) := do
   match ← forEachItem iterNext it () fun y _ => do
@@ -98,6 +80,45 @@ def listStep [PyWrites m V] (self it : V) : m (LoopStep V Unit) := do
       pure (.next ()) with
   | .done _ => return .done ()
   | .more _ => return .more it
+
+/-- The walk of `list_extend(self, x)` over an object that has no fast path: the iterator of
+`x`, after the length hint and the reservation it gives. -/
+def listExtendIter [PyWrites m V] (self x : V) : m V := do
+  let it ← getIter x
+  let n ← lengthHint x 8
+  hintCheck n
+  if n > 0 then PyWrites.listReserve self n
+  return it
+
+/-- The first step of `list_extend(self, iterable)`: an exact list or tuple is appended at once;
+so is the list itself, its items as they are before the first append, which for an instance of
+a subclass `PySequence_Fast` gathers through its iterator first. Otherwise the iterator, after
+the length hint and the reservation it gives. -/
+def listExtendFirst [PyWrites m V] (self x : V) : m (Option V) := do
+  if (← classIs x .list) || (← classIs x .tuple) then
+    let items ← match ← listOf? x with
+      | some ys => pure ys
+      | none => tupleItems x
+    for y in items do PyWrites.listAppend self y
+    return none
+  if (← PyPure.identical self x) == .yes then
+    let it ← tryCatch (getIter x) fun e => do
+      if ← isTypeErrorExc e then raiseBuiltin "TypeError" "argument must be iterable"
+      throw e
+    -- `PySequence_List(it)`: a new list, extended by the iterator.
+    let acc ← PyPure.allocList #[]
+    let it2 ← listExtendIter acc it
+    if (← listStep acc it2) matches .more _ then
+      PyPure.gap "a list subclass extended by itself through a user iterator is not modelled yet"
+    for y in (← listOf? acc).getD #[] do PyWrites.listAppend self y
+    return none
+  some <$> listExtendIter self x
+
+/-- The first step of `list.__init__(self, iterable)`: the list is cleared, then extended. -/
+def listInitFirst [PyWrites m V] (self x : V) : m (Option V) := do
+  let some xs ← listOf? self | PyPure.modelInvariant "list.__init__ of a value that is not a list"
+  PyWrites.listSplice self 0 xs.size #[]
+  listExtendFirst self x
 
 /-! ## `tuple` -/
 
@@ -383,9 +404,7 @@ def bytesFirst [PyWrites m V] (cls : V) (xs : Array V) (kwargs : V) : m (Sum V (
     let some s := text | raiseBuiltin "TypeError" "encoding without a string argument"
     match Codecs.encodeWith enc err s with
     | .ok o => return .inl (← bytesResult cls o)
-    | .error (.raise c msg) => raiseBuiltin c msg
-    | .error (.notModelled what) => PyPure.gap s!"not modelled: {what}"
-    | .error _ => PyPure.gap "a UnicodeEncodeError is not modelled yet"
+    | .error e => raiseCodecError e x
   if err.isSome then
     raiseBuiltin "TypeError"
       (if text.isSome then "string argument without an encoding" else "errors without a string argument")

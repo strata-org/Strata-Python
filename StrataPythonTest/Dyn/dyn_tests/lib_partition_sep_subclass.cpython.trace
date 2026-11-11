@@ -1,0 +1,13 @@
+--- stdout 63
+S True ('a', 'b', '')
+S True ('a', 'b', '')
+str ('ac', '', '')
+
+--- outcome
+ok
+--- globals
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'
+r = ('ac', '', '')
+s = <S object>

@@ -1,0 +1,8 @@
+module
+  S: local (assigned, referenced)
+  str: global implicit (referenced)
+  f: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  class S

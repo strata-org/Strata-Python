@@ -1,0 +1,15 @@
+module top
+  show: local (assigned, referenced)
+  function show
+    Exception: global implicit (referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    print: global implicit (referenced)
+    repr: global implicit (referenced)
+    type: global implicit (referenced)
+  function lambda
+  function lambda
+  function lambda
+  function lambda
+  function lambda
+qualnames: <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, show

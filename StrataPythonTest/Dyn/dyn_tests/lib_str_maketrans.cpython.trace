@@ -1,0 +1,18 @@
+--- stdout 533
+xy
+{97: 99, 98: 100} {97: 1, 98: 'x', 99: None}
+{97: 99, 98: 100, 101: None} {}
+TypeError if you give only one argument to maketrans it must be a dict
+TypeError keys in translate table must be strings or integers
+ValueError the first two maketrans arguments must have equal length
+TypeError maketrans() argument 2 must be str, not int
+ValueError string keys in translate table must be of length 1
+TypeError maketrans() argument 3 must be str, not int
+TypeError first maketrans argument must be a string if there is a second argument
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+show = <function object>

@@ -1,0 +1,215 @@
+module lib_str_maketrans {
+  func @|lib_str_maketrans.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("lib_str_maketrans")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_str_maketrans", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_str_maketrans", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_str_maketrans.show, "show", "lib_str_maketrans")
+      %show.cell.0 : base.Ref(py.Value) = py.globalCell("lib_str_maketrans", "show")
+      %set.2 : base.Unit = base.refSet[py.Value](%show.cell.0, %clo.0)
+      %print.0 : py.Value = py.loadGlobal("lib_str_maketrans", "print") ^propagate.0()
+      %str.1 : py.Value = py.strLit("abc")
+      %translate.0 : py.Value = py.attr(%str.1, "translate") ^propagate.0()
+      %str.2 : py.Value = py.loadGlobal("lib_str_maketrans", "str") ^propagate.0()
+      %maketrans.0 : py.Value = py.attr(%str.2, "maketrans") ^propagate.0()
+      %str.3 : py.Value = py.strLit("ab")
+      %str.4 : py.Value = py.strLit("xy")
+      %str.5 : py.Value = py.strLit("c")
+      %tuple.0 : py.Value = py.mkTuple(%str.3, %str.4, %str.5)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%maketrans.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%call.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%translate.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%call.1)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("lib_str_maketrans", "print") ^propagate.0()
+      %str.6 : py.Value = py.loadGlobal("lib_str_maketrans", "str") ^propagate.0()
+      %maketrans.1 : py.Value = py.attr(%str.6, "maketrans") ^propagate.0()
+      %str.7 : py.Value = py.strLit("ab")
+      %str.8 : py.Value = py.strLit("cd")
+      %tuple.3 : py.Value = py.mkTuple(%str.7, %str.8)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%maketrans.1, %tuple.3, %kwargs.3) ^propagate.0()
+      %str.9 : py.Value = py.loadGlobal("lib_str_maketrans", "str") ^propagate.0()
+      %maketrans.2 : py.Value = py.attr(%str.9, "maketrans") ^propagate.0()
+      %str.10 : py.Value = py.strLit("a")
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(98)
+      %str.11 : py.Value = py.strLit("x")
+      %str.12 : py.Value = py.strLit("c")
+      %none.1 : py.Value = py.noneLit
+      %dict.0 : py.Value = py.mkDict(%str.10, %int.0, %int.1, %str.11, %str.12, %none.1) ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%dict.0)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%maketrans.2, %tuple.4, %kwargs.4) ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple(%call.3, %call.4)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%print.1, %tuple.5, %kwargs.5) ^propagate.0()
+      %print.2 : py.Value = py.loadGlobal("lib_str_maketrans", "print") ^propagate.0()
+      %str.13 : py.Value = py.loadGlobal("lib_str_maketrans", "str") ^propagate.0()
+      %maketrans.3 : py.Value = py.attr(%str.13, "maketrans") ^propagate.0()
+      %str.14 : py.Value = py.strLit("ab")
+      %str.15 : py.Value = py.strLit("cd")
+      %str.16 : py.Value = py.strLit("e")
+      %tuple.6 : py.Value = py.mkTuple(%str.14, %str.15, %str.16)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%maketrans.3, %tuple.6, %kwargs.6) ^propagate.0()
+      %str.17 : py.Value = py.strLit("")
+      %maketrans.4 : py.Value = py.attr(%str.17, "maketrans") ^propagate.0()
+      %str.18 : py.Value = py.strLit("")
+      %str.19 : py.Value = py.strLit("")
+      %tuple.7 : py.Value = py.mkTuple(%str.18, %str.19)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%maketrans.4, %tuple.7, %kwargs.7) ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple(%call.6, %call.7)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%print.2, %tuple.8, %kwargs.8) ^propagate.0()
+      %show.0 : py.Value = py.loadGlobal("lib_str_maketrans", "show") ^propagate.0()
+      %str.20 : py.Value = py.loadGlobal("lib_str_maketrans", "str") ^propagate.0()
+      %maketrans.5 : py.Value = py.attr(%str.20, "maketrans") ^propagate.0()
+      %int.2 : py.Value = py.intLit(1)
+      %tuple.9 : py.Value = py.mkTuple(%maketrans.5, %int.2)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%show.0, %tuple.9, %kwargs.9) ^propagate.0()
+      %show.1 : py.Value = py.loadGlobal("lib_str_maketrans", "show") ^propagate.0()
+      %str.21 : py.Value = py.loadGlobal("lib_str_maketrans", "str") ^propagate.0()
+      %maketrans.6 : py.Value = py.attr(%str.21, "maketrans") ^propagate.0()
+      %float.0 : py.Value = py.floatLit(1.5)
+      %int.3 : py.Value = py.intLit(1)
+      %dict.1 : py.Value = py.mkDict(%float.0, %int.3) ^propagate.0()
+      %tuple.10 : py.Value = py.mkTuple(%maketrans.6, %dict.1)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%show.1, %tuple.10, %kwargs.10) ^propagate.0()
+      %show.2 : py.Value = py.loadGlobal("lib_str_maketrans", "show") ^propagate.0()
+      %str.22 : py.Value = py.loadGlobal("lib_str_maketrans", "str") ^propagate.0()
+      %maketrans.7 : py.Value = py.attr(%str.22, "maketrans") ^propagate.0()
+      %str.23 : py.Value = py.strLit("ab")
+      %str.24 : py.Value = py.strLit("c")
+      %tuple.11 : py.Value = py.mkTuple(%maketrans.7, %str.23, %str.24)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%show.2, %tuple.11, %kwargs.11) ^propagate.0()
+      %show.3 : py.Value = py.loadGlobal("lib_str_maketrans", "show") ^propagate.0()
+      %str.25 : py.Value = py.loadGlobal("lib_str_maketrans", "str") ^propagate.0()
+      %maketrans.8 : py.Value = py.attr(%str.25, "maketrans") ^propagate.0()
+      %str.26 : py.Value = py.strLit("a")
+      %int.4 : py.Value = py.intLit(1)
+      %tuple.12 : py.Value = py.mkTuple(%maketrans.8, %str.26, %int.4)
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%show.3, %tuple.12, %kwargs.12) ^propagate.0()
+      %show.4 : py.Value = py.loadGlobal("lib_str_maketrans", "show") ^propagate.0()
+      %str.27 : py.Value = py.loadGlobal("lib_str_maketrans", "str") ^propagate.0()
+      %maketrans.9 : py.Value = py.attr(%str.27, "maketrans") ^propagate.0()
+      %str.28 : py.Value = py.strLit("ab")
+      %int.5 : py.Value = py.intLit(1)
+      %dict.2 : py.Value = py.mkDict(%str.28, %int.5) ^propagate.0()
+      %tuple.13 : py.Value = py.mkTuple(%maketrans.9, %dict.2)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%show.4, %tuple.13, %kwargs.13) ^propagate.0()
+      %show.5 : py.Value = py.loadGlobal("lib_str_maketrans", "show") ^propagate.0()
+      %str.29 : py.Value = py.loadGlobal("lib_str_maketrans", "str") ^propagate.0()
+      %maketrans.10 : py.Value = py.attr(%str.29, "maketrans") ^propagate.0()
+      %str.30 : py.Value = py.strLit("a")
+      %str.31 : py.Value = py.strLit("b")
+      %int.6 : py.Value = py.intLit(1)
+      %tuple.14 : py.Value = py.mkTuple(%maketrans.10, %str.30, %str.31, %int.6)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%show.5, %tuple.14, %kwargs.14) ^propagate.0()
+      %show.6 : py.Value = py.loadGlobal("lib_str_maketrans", "show") ^propagate.0()
+      %str.32 : py.Value = py.loadGlobal("lib_str_maketrans", "str") ^propagate.0()
+      %maketrans.11 : py.Value = py.attr(%str.32, "maketrans") ^propagate.0()
+      %int.7 : py.Value = py.intLit(1)
+      %str.33 : py.Value = py.strLit("b")
+      %tuple.15 : py.Value = py.mkTuple(%maketrans.11, %int.7, %str.33)
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%show.6, %tuple.15, %kwargs.15) ^propagate.0()
+      %none.2 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_str_maketrans.show(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %f.0 : py.Value = py.undef("f")
+      %f.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%f.0)
+      %args.1 : py.Value = py.undef("args")
+      %args.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%args.1)
+      %e.0 : py.Value = py.undef("e")
+      %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
+      %f.1 : py.Value = py.undef("f")
+      %defaults.0 : py.Value = py.mkTuple(%f.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "show", 0, 1, true, false, "f") ^propagate.0()
+      %f.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%f.cell.0, %f.2)
+      %args.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
+      %print.0 : py.Value = py.loadGlobal("lib_str_maketrans", "print") ^catch.0()
+      %repr.0 : py.Value = py.loadGlobal("lib_str_maketrans", "repr") ^catch.0()
+      %f.3 : py.Value = base.refGet[py.Value](%f.cell.0)
+      %f.4 : py.Value = py.requireDefined(%f.3, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
+      %args.3 : py.Value = base.refGet[py.Value](%args.cell.0)
+      %args.4 : py.Value = py.requireDefined(%args.3, "args", "UnboundLocalError", "cannot access local variable 'args' where it is not associated with a value") ^catch.0()
+      %kwargs.1 : py.Value = py.mkKwargs
+      %args.5 : py.Value = py.argsTuple(%f.4, %args.4) ^catch.0()
+      %call.0 : py.Value = py.call(%f.4, %args.5, %kwargs.1) ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple(%call.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%repr.0, %tuple.0, %kwargs.2) ^catch.0()
+      %tuple.1 : py.Value = py.mkTuple(%call.1)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.1, %kwargs.3) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("lib_str_maketrans", "TypeError") ^unwind.0()
+      %ValueError.0 : py.Value = py.loadGlobal("lib_str_maketrans", "ValueError") ^unwind.0()
+      %tuple.2 : py.Value = py.mkTuple(%TypeError.0, %ValueError.0)
+      %match.0 : base.Bool = py.excMatch(%exc.0, %tuple.2) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %set.2 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.1 : py.Value = py.loadGlobal("lib_str_maketrans", "print") ^clear.0()
+      %type.0 : py.Value = py.loadGlobal("lib_str_maketrans", "type") ^clear.0()
+      %e.3 : py.Value = base.refGet[py.Value](%e.cell.0)
+      %e.5 : py.Value = py.requireDefined(%e.3, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
+      %tuple.3 : py.Value = py.mkTuple(%e.5)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%type.0, %tuple.3, %kwargs.4) ^clear.0()
+      %__name__.0 : py.Value = py.attr(%call.3, "__name__") ^clear.0()
+      %e.6 : py.Value = base.refGet[py.Value](%e.cell.0)
+      %e.8 : py.Value = py.requireDefined(%e.6, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
+      %args.6 : py.Value = py.attr(%e.8, "args") ^clear.0()
+      %int.0 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.6, %int.0) ^clear.0()
+      %tuple.4 : py.Value = py.mkTuple(%__name__.0, %item.0)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.1, %tuple.4, %kwargs.5) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.9 : py.Value = py.undef("e")
+      %set.3 : base.Unit = base.refSet[py.Value](%e.cell.0, %e.9)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.10 : py.Value = py.undef("e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %e.10)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+}
+

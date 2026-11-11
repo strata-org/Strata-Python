@@ -1,6 +1,6 @@
 test_augassign.AugAssignTest.testBasic | agree
 test_augassign.AugAssignTest.testCustomMethods1 | agree
-test_augassign.AugAssignTest.testCustomMethods2 | gap | built-in method list.append is not modelled yet
+test_augassign.AugAssignTest.testCustomMethods2 | agree
 test_augassign.AugAssignTest.testInDict | agree
 test_augassign.AugAssignTest.testInList | agree
 test_augassign.AugAssignTest.testSequences | agree
@@ -41,7 +41,7 @@ test_bool.BoolTest.test_picklevalues | gap | import of module pickle is not mode
 test_bool.BoolTest.test_real_and_imag | gap | the attribute int.real is not modelled yet
 test_bool.BoolTest.test_sane_len | agree
 test_bool.BoolTest.test_str | agree
-test_bool.BoolTest.test_string | gap | built-in method str.endswith is not modelled yet
+test_bool.BoolTest.test_string | agree
 test_bool.BoolTest.test_subclass | gap | int.__new__ of a class whose static base is bool is not modelled yet
 test_bool.BoolTest.test_types | agree
 test_builtin.BuiltinTest.test___ne__ | gap | import of module platform is not modelled yet
@@ -96,8 +96,8 @@ test_builtin.BuiltinTest.test_zip_strict_error_handling | gap | import of module
 test_builtin.BuiltinTest.test_zip_strict_error_handling_stopiteration | gap | import of module platform is not modelled yet
 test_builtin.BuiltinTest.test_zip_strict_iterators | gap | import of module platform is not modelled yet
 test_builtin.ShutdownTest.test_cleanup | gap | import of module test is not modelled yet
-test_builtin.TestSorted.test_bad_arguments | gap | built-in sorted is not modelled yet
-test_builtin.TestSorted.test_baddecorator | gap | built-in method str.split is not modelled yet
+test_builtin.TestSorted.test_bad_arguments | agree
+test_builtin.TestSorted.test_baddecorator | agree
 test_builtin.TestSorted.test_basic | gap | import of module random is not modelled yet
 test_builtin.TestSorted.test_inputtypes | gap | import of module types is not modelled yet
 test_builtin.TestType.test_bad_args | gap | import of module types is not modelled yet
@@ -339,8 +339,8 @@ test_descr.ClassPropertiesAndMethods.test_slots_special | gap | the __weakref__ 
 test_descr.ClassPropertiesAndMethods.test_slots_trash | agree
 test_descr.ClassPropertiesAndMethods.test_specialized_method_calls_check_types | gap | import of module collections is not modelled yet
 test_descr.ClassPropertiesAndMethods.test_specials | gap | built-in id is not modelled yet
-test_descr.ClassPropertiesAndMethods.test_str_operations | gap | built-in method str.split is not modelled yet
-test_descr.ClassPropertiesAndMethods.test_str_subclass_as_dict_key | gap | built-in method str.lower is not modelled yet
+test_descr.ClassPropertiesAndMethods.test_str_operations | agree
+test_descr.ClassPropertiesAndMethods.test_str_subclass_as_dict_key | gap | built-in method dict.get is not modelled yet
 test_descr.ClassPropertiesAndMethods.test_subclass_right_op | agree
 test_descr.ClassPropertiesAndMethods.test_subclassing_does_not_duplicate_dict_descriptors | gap | membership in this container is not modelled yet
 test_descr.ClassPropertiesAndMethods.test_testcapi_no_segfault | gap | import of module _testcapi is not modelled yet
@@ -419,8 +419,8 @@ test_dict.DictTest.test_reverseitemiterator_pickling | gap | import of module co
 test_dict.DictTest.test_reverseiterator_pickling | gap | import of module pickle is not modelled yet
 test_dict.DictTest.test_reversevaluesiterator_pickling | gap | import of module pickle is not modelled yet
 test_dict.DictTest.test_splittable_del | gap | import of module sys is not modelled yet
-test_dict.DictTest.test_splittable_pop | gap | built-in method list.append is not modelled yet
-test_dict.DictTest.test_splittable_pop_pending | gap | built-in method list.append is not modelled yet
+test_dict.DictTest.test_splittable_pop | gap | built-in method dict.pop is not modelled yet
+test_dict.DictTest.test_splittable_pop_pending | gap | built-in method dict.pop is not modelled yet
 test_dict.DictTest.test_splittable_popitem | gap | import of module sys is not modelled yet
 test_dict.DictTest.test_splittable_setdefault | gap | import of module sys is not modelled yet
 test_dict.DictTest.test_splittable_to_generic_combinedtable | gap | import of module sys is not modelled yet
@@ -437,7 +437,7 @@ test_dict.DictTest.test_valuesiterator_pickling | gap | import of module pickle 
 test_dict.DictTest.test_views_mapping | gap | the attribute type.__dict__ is not modelled yet
 test_dictcomps.DictComprehensionTest.test_assignment_idiom_in_comprehensions | agree
 test_dictcomps.DictComprehensionTest.test_basics | agree
-test_dictcomps.DictComprehensionTest.test_evaluation_order | gap | built-in method list.append is not modelled yet
+test_dictcomps.DictComprehensionTest.test_evaluation_order | agree
 test_dictcomps.DictComprehensionTest.test_global_visibility | agree
 test_dictcomps.DictComprehensionTest.test_local_visibility | agree
 test_dictcomps.DictComprehensionTest.test_scope_isolation | agree
@@ -570,9 +570,9 @@ test_exceptions.ExceptionTests.test_recursion_in_except_handler | gap | import o
 test_exceptions.ExceptionTests.test_setstate | gap | built-in method BaseException.__setstate__ is not modelled yet
 test_exceptions.ExceptionTests.test_str | agree
 test_exceptions.ExceptionTests.test_trashcan_recursion | gap | import of module test is not modelled yet
-test_exceptions.ExceptionTests.test_unicode_change_attributes | gap | built-in method UnicodeEncodeError.__new__ is not modelled yet
+test_exceptions.ExceptionTests.test_unicode_change_attributes | gap | a write to the attribute UnicodeEncodeError.end is not modelled yet
 test_exceptions.ExceptionTests.test_unicode_error_str_does_not_crash | gap | import of module itertools is not modelled yet
-test_exceptions.ExceptionTests.test_unicode_errors_no_object | gap | built-in method UnicodeEncodeError.__new__ is not modelled yet
+test_exceptions.ExceptionTests.test_unicode_errors_no_object | gap | built-in method UnicodeTranslateError.__new__ is not modelled yet
 test_exceptions.ExceptionTests.test_unraisable | gap | import of module test is not modelled yet
 test_exceptions.ExceptionTests.test_yield_in_nested_try_excepts | gap | the translator does not support generator function
 test_exceptions.ImportErrorTests.test_attributes | gap | import of module re is not modelled yet
@@ -592,7 +592,7 @@ test_float.FormatTestCase.test_issue35560 | gap | built-in format is not modelle
 test_float.FormatTestCase.test_issue5864 | gap | built-in format is not modelled yet
 test_float.GeneralFloatCases.test_float | gap | import of module re is not modelled yet
 test_float.GeneralFloatCases.test_float_ceil | gap | built-in method float.__ceil__ is not modelled yet
-test_float.GeneralFloatCases.test_float_containment | gap | built-in method list.count is not modelled yet
+test_float.GeneralFloatCases.test_float_containment | gap | comparing values whose identity is unknown and that are not equal (a NaN)
 test_float.GeneralFloatCases.test_float_floor | gap | built-in method float.__floor__ is not modelled yet
 test_float.GeneralFloatCases.test_float_memoryview | gap | built-in method memoryview.__new__ is not modelled yet
 test_float.GeneralFloatCases.test_floatasratio | gap | import of module fractions is not modelled yet
@@ -660,7 +660,7 @@ test_fstring.TestCase.test_not_equal | agree
 test_fstring.TestCase.test_roundtrip_raw_quotes | agree
 test_fstring.TestCase.test_shadowed_global | agree
 test_fstring.TestCase.test_side_effect_order | agree
-test_fstring.TestCase.test_str_format_differences | gap | built-in method str.format is not modelled yet
+test_fstring.TestCase.test_str_format_differences | agree
 test_fstring.TestCase.test_syntax_warning_infinite_recursion_in_file | gap | import of module test is not modelled yet
 test_fstring.TestCase.test_valid_prefixes | agree
 test_fstring.TestCase.test_walrus | agree
@@ -710,13 +710,13 @@ test_genericclass.TestClassGetitem.test_class_getitem_metaclass_first | agree
 test_genericclass.TestClassGetitem.test_class_getitem_patched | agree
 test_genericclass.TestClassGetitem.test_class_getitem_with_builtins | agree
 test_genericclass.TestClassGetitem.test_class_getitem_with_metaclass | agree
-test_genericclass.TestMROEntry.test_mro_entry | gap | built-in method list.append is not modelled yet
+test_genericclass.TestMROEntry.test_mro_entry | agree
 test_genericclass.TestMROEntry.test_mro_entry_errors | agree
 test_genericclass.TestMROEntry.test_mro_entry_errors_2 | agree
-test_genericclass.TestMROEntry.test_mro_entry_none | gap | built-in method list.append is not modelled yet
+test_genericclass.TestMROEntry.test_mro_entry_none | agree
 test_genericclass.TestMROEntry.test_mro_entry_type_call | gap | import of module re is not modelled yet
-test_genericclass.TestMROEntry.test_mro_entry_with_builtins | gap | built-in method list.append is not modelled yet
-test_genericclass.TestMROEntry.test_mro_entry_with_builtins_2 | gap | built-in method list.append is not modelled yet
+test_genericclass.TestMROEntry.test_mro_entry_with_builtins | agree
+test_genericclass.TestMROEntry.test_mro_entry_with_builtins_2 | agree
 test_grammar.GrammarTests.test_additive_ops | gap | the translator does not support import *
 test_grammar.GrammarTests.test_assert | gap | the translator does not support import *
 test_grammar.GrammarTests.test_assert_failures | gap | the translator does not support import *
@@ -827,7 +827,7 @@ test_iter.TestCase.test_builtin_max_min | gap | import of module test is not mod
 test_iter.TestCase.test_builtin_tuple | gap | import of module test is not modelled yet
 test_iter.TestCase.test_countOf | gap | the translator does not support complex literal
 test_iter.TestCase.test_error_iter | agree
-test_iter.TestCase.test_exception_function | gap | built-in method list.append is not modelled yet
+test_iter.TestCase.test_exception_function | agree
 test_iter.TestCase.test_extending_list_with_iterator_does_not_segfault | gap | the translator does not support generator function
 test_iter.TestCase.test_in_and_not_in | gap | the translator does not support complex literal
 test_iter.TestCase.test_indexOf | gap | import of module test is not modelled yet
@@ -844,7 +844,7 @@ test_iter.TestCase.test_iter_function | gap | import of module pickle is not mod
 test_iter.TestCase.test_iter_function_concealing_reentrant_exhaustion | agree
 test_iter.TestCase.test_iter_function_stop | gap | import of module pickle is not modelled yet
 test_iter.TestCase.test_iter_idempotency | agree
-test_iter.TestCase.test_iter_independence | gap | built-in method list.append is not modelled yet
+test_iter.TestCase.test_iter_independence | agree
 test_iter.TestCase.test_iter_neg_setstate | gap | built-in method iterator.__setstate__ is not modelled yet
 test_iter.TestCase.test_iter_overflow | gap | import of module sys is not modelled yet
 test_iter.TestCase.test_iter_range | gap | import of module pickle is not modelled yet
@@ -861,7 +861,7 @@ test_iter.TestCase.test_seq_class_iter | gap | import of module pickle is not mo
 test_iter.TestCase.test_sinkstate_callable | agree
 test_iter.TestCase.test_sinkstate_dict | gap | built-in method dict.keys is not modelled yet
 test_iter.TestCase.test_sinkstate_enumerate | agree
-test_iter.TestCase.test_sinkstate_list | gap | built-in method list.extend is not modelled yet
+test_iter.TestCase.test_sinkstate_list | agree
 test_iter.TestCase.test_sinkstate_range | agree
 test_iter.TestCase.test_sinkstate_sequence | agree
 test_iter.TestCase.test_sinkstate_string | agree
@@ -1066,7 +1066,7 @@ test_scope.ScopeTests.testCellLeak | gap | import of module weakref is not model
 test_scope.ScopeTests.testExtraNesting | agree
 test_scope.ScopeTests.testLambdas | agree
 test_scope.ScopeTests.testLeaks | gap | import of module test is not modelled yet
-test_scope.ScopeTests.testListCompLocalVars | gap | built-in method str.split is not modelled yet
+test_scope.ScopeTests.testListCompLocalVars | agree
 test_scope.ScopeTests.testMixedFreevarsAndCellvars | agree
 test_scope.ScopeTests.testNearestEnclosingScope | agree
 test_scope.ScopeTests.testNestedNonLocal | agree
@@ -1198,7 +1198,7 @@ test_slice.SliceTest.test_indices | gap | import of module itertools is not mode
 test_slice.SliceTest.test_members | gap | built-in method slice.__new__ is not modelled yet
 test_slice.SliceTest.test_pickle | gap | import of module pickle is not modelled yet
 test_slice.SliceTest.test_repr | gap | built-in method slice.__new__ is not modelled yet
-test_slice.SliceTest.test_setslice_without_getslice | gap | built-in method list.append is not modelled yet
+test_slice.SliceTest.test_setslice_without_getslice | gap | built-in method slice.__new__ is not modelled yet
 test_string_literals.TestLiterals.test_eval_bytes_incomplete | gap | import of module sys is not modelled yet
 test_string_literals.TestLiterals.test_eval_str_incomplete | gap | import of module sys is not modelled yet
 test_string_literals.TestLiterals.test_file_iso_8859_1 | gap | import of module os is not modelled yet
@@ -1286,5 +1286,5 @@ test_yield_from.TestPEP380Operation.test_send_tuple_with_custom_generator | gap 
 test_yield_from.TestPEP380Operation.test_throwing_GeneratorExit_into_subgen_that_raises | gap | the translator does not support generator function
 test_yield_from.TestPEP380Operation.test_throwing_GeneratorExit_into_subgen_that_returns | gap | the translator does not support generator function
 test_yield_from.TestPEP380Operation.test_throwing_GeneratorExit_into_subgenerator_that_yields | gap | the translator does not support generator function
-test_yield_from.TestPEP380Operation.test_value_attribute_of_StopIteration_exception | gap | built-in method list.append is not modelled yet
+test_yield_from.TestPEP380Operation.test_value_attribute_of_StopIteration_exception | agree
 test_yield_from.TestPEP380Operation.test_yield_from_empty | gap | the translator does not support generator function

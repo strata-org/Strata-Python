@@ -1,0 +1,13 @@
+--- stdout 193
+ValueError embedded null character
+TypeError encode() argument 'encoding' must be str, not int
+ValueError embedded null character
+TypeError encode() argument 'errors' must be str, not int
+b'x'
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+show = <function object>

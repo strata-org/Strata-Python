@@ -1,0 +1,23 @@
+module
+  U: local (assigned, referenced)
+  C: local (assigned, referenced)
+  print: global implicit (referenced)
+  sum: global implicit (referenced)
+  class U
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function U.__init__
+      params: self
+      self: local (parameter, referenced)
+    function U.__iter__
+      params: self
+      self: local (parameter, referenced)
+    function U.__next__
+      params: self
+      self: local (parameter, referenced)
+      StopIteration: global implicit (referenced)
+  class C
+    __radd__: local (assigned)
+    staticmethod: global implicit (referenced)
+    sorted: global implicit (referenced)

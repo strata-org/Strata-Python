@@ -14,6 +14,8 @@ public import StrataPython.Dyn.Sem.Builtins.Iter
 public import StrataPython.Dyn.Sem.Builtins.Strings
 public import StrataPython.Dyn.Sem.Library.Iterators
 public import StrataPython.Dyn.Sem.Library.Machines
+public import StrataPython.Dyn.Sem.Library.StrTranslate
+public import StrataPython.Dyn.Sem.Library.StrFormat
 
 set_option autoImplicit false
 
@@ -129,9 +131,14 @@ def Impls.withNewCheck (impls : Impls) : Impls :=
 
 /-- The bodies of `Library`'s built-in functions and methods. -/
 def libraryImpls : Impls where
-  function b := (Library.iterablesFunction b).orElse fun _ => Library.functionsFunction b
+  function b := ((Library.iterablesFunction b).orElse fun _ => Library.functionsFunction b).orElse
+    fun _ => Library.sortingFunction b
   method t n := ((Library.iteratorsMethod t n).orElse fun _ => Library.numbersMethod t n).orElse
-    fun _ => (Library.constructorsMethod t n).orElse fun _ => Library.collectionsMethod t n
+    fun _ => (Library.constructorsMethod t n).orElse fun _ =>
+      (Library.collectionsMethod t n).orElse fun _ => (Library.strMethodsMethod t n).orElse
+        fun _ => (Library.sequencesMethod t n).orElse fun _ => (Library.sortingMethod t n).orElse
+        fun _ => (Library.strTranslateMethod t n).orElse fun _ =>
+          (Library.unicodeErrorsMethod t n).orElse fun _ => Library.strFormatMethod t n
 
 /-- Each piece's part, in the order the pieces build on each other. -/
 def Assembly.parts : List Impls := [opsImpls, libraryImpls]

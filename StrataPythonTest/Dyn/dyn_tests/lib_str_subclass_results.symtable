@@ -1,0 +1,21 @@
+module top
+  F: local (assigned, referenced)
+  S: local (assigned, referenced)
+  a: local (assigned, referenced)
+  print: global implicit (referenced)
+  r: local (assigned, referenced)
+  str: global implicit (referenced)
+  t: local (assigned, referenced)
+  type: global implicit (referenced)
+  x: local (assigned, referenced)
+  class S
+    __str__: local (assigned)
+    function __str__
+      self: local (parameter)
+  class F
+    __format__: local (assigned)
+    function __format__
+      S: global implicit (referenced)
+      self: local (parameter)
+      spec: local (parameter, referenced)
+qualnames: F, F.__format__, S, S.__str__

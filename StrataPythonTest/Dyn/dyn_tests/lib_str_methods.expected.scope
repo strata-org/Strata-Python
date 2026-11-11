@@ -1,0 +1,31 @@
+module
+  S: local (assigned, referenced)
+  str: global implicit (referenced)
+  I: local (assigned, referenced)
+  show: local (assigned, referenced)
+  s: local (assigned, referenced)
+  name: local (assigned, referenced)
+  print: global implicit (referenced)
+  repr: global implicit (referenced)
+  getattr: global implicit (referenced)
+  t: local (assigned, referenced)
+  type: global implicit (referenced)
+  class S
+  class I
+    __index__: local (assigned)
+    function I.__index__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+  function show
+    params: f, *args, **kwargs
+    f: local (parameter, referenced)
+    args: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+    print: global implicit (referenced)
+    repr: global implicit (referenced)
+    TypeError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    OverflowError: global implicit (referenced)
+    e: local (assigned, referenced)
+    type: global implicit (referenced)

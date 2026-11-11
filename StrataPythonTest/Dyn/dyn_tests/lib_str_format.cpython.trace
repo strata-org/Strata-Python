@@ -1,0 +1,42 @@
+--- stdout 988
+1 and a yxy 1-2
+{} 'é' é '\xe9'    ab|3.14|ff
+getitem 3
+format 3 ''
+getitem 'k'
+format k ''
+7 <3:> <k:>
+format 1 'w'
+<1:w>      3.5
+format 2 ''
+<2:>     P(2)
+map 'x'
+map 'y'
+a1b1
+1 b v
+ValueError cannot switch from automatic field numbering to manual field specification
+ValueError cannot switch from manual field specification to automatic field numbering
+IndexError Replacement index 5 out of range for positional args tuple
+KeyError x
+AttributeError 'int' object has no attribute 'nope'
+ValueError Unknown conversion specifier z
+ValueError Single '{' encountered in format string
+ValueError Single '}' encountered in format string
+ValueError Max string recursion exceeded
+ValueError Format string contains positional fields
+KeyError x
+ValueError expected '}' before end of string
+ValueError Empty attribute in format string
+ValueError Unknown format code 'd' for object of type 'str'
+TypeError descriptor 'format' for 'str' objects doesn't apply to a 'int' object
+format 3 ''
+1-2 <3:>
+
+--- outcome
+ok
+--- globals
+M = <class 'M'>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+show = <function object>

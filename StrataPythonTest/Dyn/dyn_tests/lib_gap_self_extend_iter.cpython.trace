@@ -1,0 +1,11 @@
+--- stdout 13
+[1, 2, 1, 0]
+
+--- outcome
+ok
+--- globals
+It = <class 'It'>
+L = <class 'L'>
+__doc__ = None
+__name__ = '__main__'
+x = <L object>

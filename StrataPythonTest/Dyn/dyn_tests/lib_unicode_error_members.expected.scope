@@ -1,0 +1,62 @@
+module
+  e: local (assigned, referenced)
+  UnicodeEncodeError: global implicit (referenced)
+  print: global implicit (referenced)
+  d: local (assigned, referenced)
+  BaseException: global implicit (referenced)
+  UnicodeDecodeError: global implicit (referenced)
+  E: local (assigned, referenced)
+  D: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  x: local (assigned, referenced)
+  repr: global implicit (referenced)
+  str: global implicit (referenced)
+  I: local (assigned, referenced)
+  ValueError: global implicit (referenced)
+  J: local (assigned, referenced)
+  class E (needs __class__ cell)
+    __init__: local (assigned)
+    function E.__init__
+      params: self, *a
+      self: local (parameter)
+      a: local (parameter, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+      TypeError: global implicit (referenced)
+      x: local (assigned, referenced)
+      print: global implicit (referenced)
+  class D (needs __class__ cell)
+    __init__: local (assigned)
+    function D.__init__
+      params: self, *a
+      self: local (parameter)
+      a: local (parameter, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+      TypeError: global implicit (referenced)
+      x: local (assigned, referenced)
+      print: global implicit (referenced)
+  class E (needs __class__ cell)
+    __init__: local (assigned)
+    function E.__init__
+      params: self, *a
+      self: local (parameter)
+      a: local (parameter, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+      TypeError: global implicit (referenced)
+  class I
+    __index__: local (assigned)
+    function I.__index__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+      e: global implicit (referenced)
+  class J
+    __index__: local (assigned)
+    function J.__index__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+      str: global implicit (referenced)
+      e: global implicit (referenced)

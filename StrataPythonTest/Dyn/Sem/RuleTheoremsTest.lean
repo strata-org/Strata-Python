@@ -118,6 +118,11 @@ public environment PyT extends Py where
   insn startZero (^err (exc : Value)) : Value
   insn staleSlice (^err (exc : Value)) : Value
   insn tpNewNoLeak (^err (exc : Value)) : Value
+  insn sortInts (^err (exc : Value)) : Value
+  insn sortNaN (^err (exc : Value)) : Value
+  insn strLowerSigma (^err (exc : Value)) : Value
+  insn maketransRule (^err (exc : Value)) : Value
+  insn decodeBytearray (^err (exc : Value)) : Value
   end pt
 
 #dyn_types PyT
@@ -1907,6 +1912,10 @@ public def frameValues : PyLoopState Value → List Value
   | .library (.sum it _) => [it]
   | .library (.minMax _ it key dflt best pending) =>
     [it] ++ key.toList ++ dflt.toList ++ (best.map fun (a, b) => [a, b]).getD [] ++ pending.toList
+  | .library (.strJoin sep acc it) => [sep, acc, it]
+  | .library (.listScan s) => [s.self, s.value]
+  | .library (.sortKeys s _) => [s.self, s.items, s.keys, s.result] ++ s.key.toList
+  | .library (.sortedCollect acc it kwargs) => [acc, it, kwargs]
 
 /-- A call of each container constructor over an iterator that gives one item per activation
 (`iter(li.__next__, 99)` over a list iterator `li`), resumed until it ends: for each, the number
@@ -1954,6 +1963,54 @@ public def tpNewNoLeakM : PyM σ .writes true Value := do
 @[dyn_sem PyT.tpNewNoLeak, expose]
 public def tpNewNoLeak (err : Target E [Value]) : Sem ε E Value :=
   runRuleFree err #[] tpNewNoLeakM
+
+/-- `l.sort()` on the list `xs`, and the list after it. -/
+public def sortedItems (xs : Array Value) : PyM σ .writes true Value := do
+  let l ← PyPure.allocList xs
+  discard <| Library.sortBody (m := PyM σ .writes true) l (.tuple #[]) (← PyPure.allocDict)
+  let some ys ← Proto.listOf? (m := PyM σ .writes true) l | pure (.ofString "not a list")
+  pure (.tuple ys)
+
+/-- `[3, 1, True, 2, 1.0].sort()`: the fast path, stable among the equal keys. -/
+@[dyn_sem PyT.sortInts, expose] public def sortInts (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[] (sortedItems #[.int 3, .int 1, .bool true, .int 2, .float 0x3FF0000000000000])
+
+/-- `[2.0, nan, 1.0].sort()`: a NaN takes CPython's port, which keeps the list as it is. -/
+@[dyn_sem PyT.sortNaN, expose] public def sortNaN (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[]
+    (sortedItems #[.float 0x4000000000000000, .float 0x7FF8000000000000, .float 0x3FF0000000000000])
+
+/-- `str.maketrans('ab', 'cd', 'e')` and `str.maketrans({'a': 1, 98: 'x'})`, as the pairs of the
+two dicts. -/
+@[dyn_sem PyT.maketransRule, expose]
+public def maketransRule (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[] (do
+    let pairs (d : Value) : PyM σ .writes true Value := do
+      pure (.tuple ((← PyReads.dictEntries d).map fun (k, v, _) => .tuple #[k, v]))
+    let a ← Library.maketransFn (m := PyM σ .writes true) .none
+      (.tuple #[.ofString "ab", .ofString "cd", .ofString "e"]) (← PyPure.allocDict)
+    let d ← PyPure.allocDict
+    PyNew.dictSetNew d (Value.ofString "a") (.int 1) none fun _ => pure false
+    PyNew.dictSetNew d (.int 98) (.ofString "x") none fun _ => pure false
+    let b ← Library.maketransFn (m := PyM σ .writes true) .none (.tuple #[d]) (← PyPure.allocDict)
+    pure (.tuple #[← pairs a, ← pairs b]))
+
+/-- `UnicodeDecodeError('utf-8', bytearray(), 0, 1, 'r')`: a bytes-like object other than `bytes`
+stops with a gap. -/
+@[dyn_sem PyT.decodeBytearray, expose]
+public def decodeBytearray (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[] (do
+    let e ← PyReads.allocInstance (.builtin .UnicodeDecodeError) (.exc #[]) #[] #[]
+    let ba ← PyReads.allocInstance (.builtin .bytearray) .plain #[] #[]
+    Library.unicodeErrorInit (m := PyM σ .writes true) true e
+      (.tuple #[.ofString "utf-8", ba, .int 0, .int 1, .ofString "r"]) (← PyPure.allocDict))
+
+/-- `'ΑΣ'.lower()`, with the final sigma. -/
+@[dyn_sem PyT.strLowerSigma, expose]
+public def strLowerSigma (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[] (do
+    Library.textMethod (m := PyM σ .writes true) Library.Signatures.str_lower Library.Unicode.lower
+      (.ofString "ΑΣ") (.tuple #[]) (← PyPure.allocDict))
 
 /-- `callResumable` with saved frames resumes the frame's machine with no dispatch of the callee
 (here `None`). -/
@@ -2004,7 +2061,8 @@ def ptEffect : String → Effects.Level
   | "pt.subclassContainers" | "pt.seqSlotSub" | "pt.seqSlotCleared" | "pt.strSetSubOps" | "pt.callInst" | "pt.callLevelStep" | "pt.resumeCase" | "pt.resumeDirect" | "pt.resumeNoFit"
   | "pt.foreignIter" | "pt.foreignLen" | "pt.strSubIter" | "pt.iterBounds" | "pt.zipNext"
   | "pt.enumNext" | "pt.revNext" | "pt.listRevNext" | "pt.dictRevNext" | "pt.startZero"
-  | "pt.staleSlice" | "pt.tpNewNoLeak" => .writes
+  | "pt.staleSlice" | "pt.tpNewNoLeak" | "pt.sortInts" | "pt.sortNaN" | "pt.strLowerSigma"
+  | "pt.maketransRule" | "pt.decodeBytearray" => .writes
   | _ => .pure
 
 /-- The tags of `PyLang` in `PyTSem`. -/
@@ -4088,5 +4146,44 @@ def regionArityRun (k : Nat) : IO Unit :=
 /-- info: StrataPython.Dyn.Sem.Value.none -/
 #guard_msgs in
 #eval regionArityRun 2
+
+-- The rules of `list.sort` and `str.lower` on Lean values, as CPython 3.12 gives them:
+-- `[1, True, 1.0, 2, 3]`, `[2.0, nan, 1.0]` and `'ας'`.
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.int 1, StrataPython.Dyn.Sem.Value.bool true,
+    StrataPython.Dyn.Sem.Value.float 4607182418800017408, StrataPython.Dyn.Sem.Value.int 2,
+    StrataPython.Dyn.Sem.Value.int 3]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.sortInts ^err.0()"
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.float 4611686018427387904, StrataPython.Dyn.Sem.Value.float 9221120237041090560,
+    StrataPython.Dyn.Sem.Value.float 4607182418800017408]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.sortNaN ^err.0()"
+/-- info: StrataPython.Dyn.Sem.Value.str { s := "ας", ascii := false, ascii_eq := _ } -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strLowerSigma ^err.0()"
+-- `{97: 99, 98: 100, 101: None}` and `{97: 1, 98: 'x'}`; and the gap of a bytearray.
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.tuple
+      #[StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 97, StrataPython.Dyn.Sem.Value.int 99],
+        StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 98, StrataPython.Dyn.Sem.Value.int 100],
+        StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 101, StrataPython.Dyn.Sem.Value.none]],
+    StrataPython.Dyn.Sem.Value.tuple
+      #[StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 97, StrataPython.Dyn.Sem.Value.int 1],
+        StrataPython.Dyn.Sem.Value.tuple
+          #[StrataPython.Dyn.Sem.Value.int 98,
+            StrataPython.Dyn.Sem.Value.str { s := "x", ascii := true, ascii_eq := _ }]]]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.maketransRule ^err.0()"
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a UnicodeDecodeError of a bytes-like object other than bytes is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.decodeBytearray ^err.0()"
 
 end StrataPython.Dyn.Sem.RuleTheoremsTest

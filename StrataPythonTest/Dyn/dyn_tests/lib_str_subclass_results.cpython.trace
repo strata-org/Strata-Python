@@ -1,0 +1,33 @@
+--- stdout 151
+S STR
+S STR
+S STR
+str ab
+str ab
+S STR
+str 
+S STR
+str 
+str b
+S STR
+str a{b
+S STR
+str 
+{} S STR
+{:x} S STR
+a{} str aq
+{}{} S STR
+{}{} str q
+{!s} str STR
+
+--- outcome
+ok
+--- globals
+F = <class 'F'>
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'
+a = (<S object>,)
+r = 'STR'
+t = '{!s}'
+x = <S object>

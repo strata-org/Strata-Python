@@ -27,6 +27,7 @@ def caseFiles : List (System.FilePath × System.FilePath) :=
    (dir / "gen_strmethod_cases.py", dir / "StrMethodCases.lean"),
    (dir / "gen_number_cases.py", dir / "NumberCases.lean"),
    (dir / "gen_codec_cases.py", dir / "CodecCases.lean"),
+   (dir / "gen_format_string_cases.py", dir / "FormatStringCases.lean"),
    (dir / "gen_sum_cases.py", dir / "SumCases.lean")]
 def scratchDir : System.FilePath := ".lake/build/library-cases-check"
 

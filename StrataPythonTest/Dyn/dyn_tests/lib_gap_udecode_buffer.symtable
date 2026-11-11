@@ -1,0 +1,11 @@
+module top
+  Buf: local (assigned, referenced)
+  UnicodeDecodeError: global implicit (referenced)
+  print: global implicit (referenced)
+  class Buf
+    __buffer__: local (assigned)
+    function __buffer__
+      flags: local (parameter)
+      memoryview: global implicit (referenced)
+      self: local (parameter)
+qualnames: Buf, Buf.__buffer__

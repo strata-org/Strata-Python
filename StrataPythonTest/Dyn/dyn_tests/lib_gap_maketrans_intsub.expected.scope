@@ -1,0 +1,6 @@
+module
+  I: local (assigned, referenced)
+  int: global implicit (referenced)
+  print: global implicit (referenced)
+  str: global implicit (referenced)
+  class I

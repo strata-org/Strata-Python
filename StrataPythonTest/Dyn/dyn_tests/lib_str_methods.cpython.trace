@@ -1,0 +1,113 @@
+--- stdout 2999
+upper 'HELLO WORLD\tAB' 'ΑΣ' ''
+lower 'hello world\tab' 'ας' ''
+casefold 'hello world\tab' 'ασ' ''
+swapcase 'hELLO wORLD\tAB' 'ας' ''
+capitalize 'Hello world\tab' 'Ας' ''
+title 'Hello World\tAb' 'Ας' ''
+isalpha False True False
+isdecimal False False False
+isdigit False False False
+isnumeric False False False
+isalnum False True False
+isspace False False False
+isupper False True False
+islower False False False
+istitle False False False
+isidentifier False True False
+isprintable False True True
+isascii True False True
+4
+7
+index
+4
+7
+ValueError substring not found
+ValueError substring not found
+3
+15
+TypeError must be str, not int
+TypeError slice indices must be integers or None or have an __index__ method
+TypeError slice indices must be integers or None or have an __index__ method
+True
+True
+TypeError tuple for startswith must only contain str, not int
+index
+False
+TypeError startswith first arg must be str or a tuple of str, not int
+TypeError endswith first arg must be str or a tuple of str, not list
+'HeLLo WorLd\tab'
+'HeLlo World\tab'
+index
+'-H-ello World\tab'
+TypeError replace() argument 1 must be str, not int
+TypeError replace() argument 2 must be str, not int
+TypeError 'str' object cannot be interpreted as an integer
+OverflowError Python int too large to convert to C ssize_t
+['Hello', 'World', 'ab']
+['Hell', ' W', 'rld\tab']
+['Hello', 'World\tab']
+['He', 'lo World\tab']
+['Hello W', 'rld\tab']
+['Hello World', 'ab']
+TypeError must be str or None, not int
+ValueError empty separator
+TypeError 'float' object cannot be interpreted as an integer
+OverflowError Python int too large to convert to C ssize_t
+['a', 'b', 'c']
+['a\n', 'b\r\n', 'c']
+['a\n', 'b']
+('Hell', 'o', ' World\tab')
+('Hello W', 'o', 'rld\tab')
+('Hello World\tab', '', '')
+TypeError must be str, not int
+ValueError empty separator
+'ab'
+'ab'
+'ab  '
+'  ab'
+TypeError strip arg must be None or str
+TypeError lstrip arg must be None or str
+TypeError rstrip arg must be None or str
+'lo World\tab'
+'Hello World\t'
+TypeError removeprefix() argument must be str, not int
+TypeError removesuffix() argument must be str, not int
+'ab   '
+'***ab'
+'---ab--'
+index
+'ab'
+TypeError 'str' object cannot be interpreted as an integer
+TypeError The fill character must be exactly one character long
+TypeError The fill character must be a unicode character, not int
+OverflowError Python int too large to convert to C ssize_t
+'-00042'
+TypeError 'str' object cannot be interpreted as an integer
+'a       bc      d'
+'a   bc  d'
+index
+'a b'
+TypeError 'str' object cannot be interpreted as an integer
+OverflowError Python int too large to convert to C int
+str HELLO 2 ['He', '', 'o'] str
+AB 3
+TypeError descriptor 'upper' for 'str' objects doesn't apply to a 'int' object
+SS ʼN i̇ Fi
+TypeError removeprefix() argument must be str, not None
+TypeError replace() argument 1 must be str, not None
+TypeError replace() argument 2 must be str, not None
+TypeError encode() argument 'encoding' must be str, not None
+TypeError must be str, not NoneType
+
+--- outcome
+ok
+--- globals
+I = <class 'I'>
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'
+name = 'isascii'
+s = 'Hello World\tab'
+show = <function object>
+t = <S object>

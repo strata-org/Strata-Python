@@ -1,0 +1,52 @@
+--- stdout 523
+get 97
+get 98
+xxb
+get 97
+get 98
+get 98
+get 99
+get 97
+get 98
+get 98
+yycyy
+get 97
+get 98
+get 98
+get 99
+get 97
+aéca
+get 97
+get 88
+get 98
+get 98
+get 89
+get 97
+get 97
+aéa
+get 233
+get 97
+get 97
+get 233
+z
+get 233
+get 97
+get 97
+get 98
+get 98
+b
+Jeo abc
+TypeError 'int' object is not subscriptable
+TypeError character mapping must return integer, None or str
+ValueError character mapping must be in range(0x110000)
+ValueError character mapping must be in range(0x110000)
+ValueError character mapping must be in range(0x110000)
+'abc'
+
+--- outcome
+ok
+--- globals
+M = <class 'M'>
+__doc__ = None
+__name__ = '__main__'
+show = <function object>

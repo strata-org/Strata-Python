@@ -1,0 +1,30 @@
+--- stdout 691
+new-only None None 0 0 None
+base-new None None 0 0 None
+  init raised: 'str' object cannot be interpreted as an integer
+partial-encode None None 5 0 None
+  init raised: a bytes-like object is required, not 'int'
+decode-bad-object None None 1 2 None
+  reinit raised: function takes exactly 5 arguments (1 given)
+reinit-fail None None 1 2 None
+normal 'ascii' 'é' 0 1 'ordinal not in range(128)' 'ascii' codec can't encode character '\xe9' in position 0: ordinal not in range(128)
+codec ascii 'é' 0 1 ordinal not in range(128)
+'' (1,)
+''
+ascii x None
+0 1 r
+ascii b'x' None
+'ascii' codec can't encode characters in position 0--1: <NULL>
+'ascii' codec can't decode bytes in position 0--1: <NULL>
+
+--- outcome
+ok
+--- globals
+D = <class 'D'>
+E = <class 'E'>
+I = <class 'I'>
+J = <class 'J'>
+__doc__ = None
+__name__ = '__main__'
+d = <D object>
+e = <UnicodeDecodeError object>

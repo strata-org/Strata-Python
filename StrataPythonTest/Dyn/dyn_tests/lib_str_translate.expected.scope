@@ -1,0 +1,27 @@
+module
+  M: local (assigned, referenced)
+  show: local (assigned, referenced)
+  print: global implicit (referenced)
+  class M
+    __init__: local (assigned)
+    __getitem__: local (assigned)
+    function M.__init__
+      params: self, d
+      self: local (parameter, referenced)
+      d: local (parameter, referenced)
+    function M.__getitem__
+      params: self, k
+      self: local (parameter, referenced)
+      k: local (parameter, referenced)
+      print: global implicit (referenced)
+  function show
+    params: f, *args
+    f: local (parameter, referenced)
+    args: local (parameter, referenced)
+    print: global implicit (referenced)
+    repr: global implicit (referenced)
+    TypeError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    OverflowError: global implicit (referenced)
+    e: local (assigned, referenced)
+    type: global implicit (referenced)

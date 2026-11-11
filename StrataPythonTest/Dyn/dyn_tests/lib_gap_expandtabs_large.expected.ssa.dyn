@@ -1,0 +1,36 @@
+module lib_gap_expandtabs_large {
+  func @|lib_gap_expandtabs_large.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("lib_gap_expandtabs_large")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_expandtabs_large", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_expandtabs_large", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %print.0 : py.Value = py.loadGlobal("lib_gap_expandtabs_large", "print") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("lib_gap_expandtabs_large", "len") ^propagate.0()
+      %str.1 : py.Value = py.strLit("\t")
+      %expandtabs.0 : py.Value = py.attr(%str.1, "expandtabs") ^propagate.0()
+      %int.0 : py.Value = py.intLit(2)
+      %int.1 : py.Value = py.intLit(28)
+      %pow.0 : py.Value = py.pow(%int.0, %int.1) ^propagate.0()
+      %int.2 : py.Value = py.intLit(1)
+      %add.0 : py.Value = py.add(%pow.0, %int.2) ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%add.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%expandtabs.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%call.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%len.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%call.1)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

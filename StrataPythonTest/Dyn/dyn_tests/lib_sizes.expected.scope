@@ -1,0 +1,11 @@
+module
+  l: local (assigned, referenced)
+  i: local (assigned, referenced)
+  range: global implicit (referenced)
+  print: global implicit (referenced)
+  f: local (assigned, referenced)
+  float: global implicit (referenced)
+  len: global implicit (referenced)
+  s: local (assigned, referenced)
+  sorted: global implicit (referenced)
+  m: local (assigned, referenced)

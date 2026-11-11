@@ -1,0 +1,49 @@
+module top
+  M: local (assigned, referenced)
+  P: local (assigned, referenced)
+  print: global implicit (referenced)
+  show: local (assigned, referenced)
+  str: global implicit (referenced)
+  class P
+    __format__: local (assigned)
+    __getitem__: local (assigned)
+    __init__: local (assigned)
+    __repr__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __format__
+      print: global implicit (referenced)
+      repr: global implicit (referenced)
+      self: local (parameter, referenced)
+      spec: local (parameter, referenced)
+    function __repr__
+      self: local (parameter, referenced)
+    function __getitem__
+      P: global implicit (referenced)
+      k: local (parameter, referenced)
+      print: global implicit (referenced)
+      repr: global implicit (referenced)
+      self: local (parameter)
+  class M
+    __getitem__: local (assigned)
+    function __getitem__
+      k: local (parameter, referenced)
+      len: global implicit (referenced)
+      print: global implicit (referenced)
+      repr: global implicit (referenced)
+      self: local (parameter)
+  function show
+    AttributeError: global implicit (referenced)
+    IndexError: global implicit (referenced)
+    KeyError: global implicit (referenced)
+    TypeError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    args: local (parameter, referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+    print: global implicit (referenced)
+    repr: global implicit (referenced)
+    type: global implicit (referenced)
+qualnames: M, M.__getitem__, P, P.__format__, P.__getitem__, P.__init__, P.__repr__, show

@@ -6,7 +6,7 @@
 module
 public import StrataPython.Dyn.Sem.Library.Functions
 public import StrataPython.Dyn.Sem.Library.Numbers
-public import StrataPython.Dyn.Sem.Library.Codecs
+public import StrataPython.Dyn.Sem.Library.UnicodeErrors
 public import StrataPython.Dyn.Sem.Builtins.Iter
 
 set_option autoImplicit false
@@ -72,18 +72,6 @@ def sameEntry [PyReads m V] (cls : V) (t : Builtin) (name : String) : m Bool := 
 def newSubInstance [PyReads m V] (cls : V) (p : BuiltinPart V) : m V := do
   let some mro ← mroOf cls | PyPure.modelInvariant "a constructor's class has no MRO"
   PyReads.allocInstance cls p #[] (Array.replicate (← slotCountOf mro.toList) none)
-
-/-- The text of a `str`, a subclass included. -/
-def strText? [PyReads m V] (v : V) : m (Option String) := do
-  if let some s ← str? v then return some s
-  return (← PyReads.strView v).map (·.s)
-
-/-- The octets of a `bytes`, a subclass included. -/
-def bytesOctets? [PyReads m V] (v : V) : m (Option (Array UInt8)) := do
-  match ← PyPure.immView v with
-  | some (.bytes b) => return some b
-  | some _ => return none
-  | none => PyReads.bytesView v
 
 /-- Raise what `Numbers` says CPython raises. -/
 def failure [PyCalls m V] {α : Type} : Format.Failure → m α := ofFailure
@@ -292,14 +280,12 @@ def boolNew [PyWrites m V] (_self args kwargs : V) : m V := do
 def codecName [PyCalls m V] (fn what : String) : Option V → m (Option String)
   | none => pure none
   | some v => do
-    let some s ← strText? v |
-      raiseBuiltin "TypeError" s!"{fn}() argument '{what}' must be str, not {← typeName v}"
+    let s ← clinicStrArg s!"{fn}() argument '{what}' must be str, not " v
     if s.toList.contains '\x00' then raiseBuiltin "ValueError" "embedded null character"
     return some s
 
 /-- **`str.__new__(cls, object='', encoding='utf-8', errors='strict')`**: `str(object)` without
-a codec name; with one, the decoding of a `bytes`. A decoding error is a `UnicodeDecodeError`,
-whose class the model doesn't build yet, so it stops with a gap. -/
+a codec name; with one, the decoding of a `bytes`. -/
 def strNew [PyWrites m V] (_self args kwargs : V) : m V := do
   let (cls, xs) ← classAndArgs .str args
   let sig : BuiltinSig :=
@@ -323,10 +309,7 @@ def strNew [PyWrites m V] (_self args kwargs : V) : m V := do
         raiseBuiltin "TypeError" s!"decoding to str: need a bytes-like object, {← typeName o} found"
       match Codecs.decodeWith enc err octets with
       | .ok s => pure (strValue (m := m) s)
-      | .error (.raise c msg) => raiseBuiltin c msg
-      | .error (.notModelled what) => PyPure.gap s!"not modelled: {what}"
-      | .error (.decode ..) | .error (.encode ..) =>
-        PyPure.gap "a UnicodeDecodeError is not modelled yet"
+      | .error e => raiseCodecError e
   if ← isExact cls .str then return v
   match ← PyPure.immView v with
   | some (.str t) => newSubInstance cls (.str t)

@@ -1,0 +1,20 @@
+module
+  a: local (assigned, referenced)
+  UnicodeEncodeError: global implicit (referenced)
+  Exception: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  UnicodeDecodeError: global implicit (referenced)
+  str: global implicit (referenced)
+  UnicodeError: global implicit (referenced)
+  bytes: global implicit (referenced)
+  U: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  SE: local (assigned, referenced)
+  class U
+  class SE
+    __repr__: local (assigned)
+    function SE.__repr__
+      params: self
+      self: local (parameter)

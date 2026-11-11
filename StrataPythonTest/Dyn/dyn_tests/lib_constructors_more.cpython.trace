@@ -1,4 +1,4 @@
---- stdout 810
+--- stdout 984
 1 1
 1.5 2
 1 3
@@ -29,6 +29,9 @@ OverflowError cannot fit 'I' into an index-sized integer
 {'a': 1}
 True
 True False
+TypeError str() argument 'encoding' must be str, not None
+TypeError str() argument 'errors' must be str, not None
+TypeError bytes() argument 'encoding' must be str, not None
 
 --- outcome
 ok

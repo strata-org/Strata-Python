@@ -197,3 +197,6 @@ class E(C):
 
 
 print(issubclass(E, C), issubclass(C, E))
+errors(str, b"a", None)
+errors(str, b"a", "utf-8", None)
+errors(bytes, "a", None)

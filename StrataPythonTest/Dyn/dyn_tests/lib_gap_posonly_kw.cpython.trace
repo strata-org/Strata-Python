@@ -1,0 +1,10 @@
+--- stdout 35
+L.pop() takes no keyword arguments
+
+--- outcome
+ok
+--- globals
+L = <class 'L'>
+__doc__ = None
+__name__ = '__main__'
+f = <builtin_function_or_method object>

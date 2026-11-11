@@ -1,0 +1,158 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  Caller: local (assigned, referenced)
+  Flip: local (assigned, referenced)
+  Group: local (assigned, referenced)
+  Late: local (assigned)
+  Rows: local (assigned, referenced)
+  churn: local (assigned, referenced)
+  float: global implicit (referenced)
+  grow: local (assigned, referenced)
+  inf: local (assigned, referenced)
+  iter: global implicit (referenced)
+  k1: local (assigned, referenced)
+  k2: local (assigned, referenced)
+  key: local (assigned, referenced)
+  l: local (assigned, referenced)
+  late_sort: local (assigned, referenced)
+  len: global implicit (referenced)
+  list: global implicit (referenced)
+  m: local (assigned, referenced)
+  n: local (assigned, referenced)
+  peek: local (assigned, referenced)
+  print: global implicit (referenced)
+  quiet: local (assigned, referenced)
+  r: local (assigned, referenced)
+  range: global implicit (referenced)
+  show: local (assigned, referenced)
+  sorted: global implicit (referenced)
+  class A
+    __gt__: local (assigned)
+    __init__: local (assigned)
+    __lt__: local (assigned)
+    __repr__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __lt__
+      NotImplemented: global implicit (referenced)
+      other: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __gt__
+      other: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __repr__
+      self: local (parameter, referenced)
+  class B
+    __eq__: local (assigned)
+    __init__: local (assigned)
+    __lt__: local (assigned)
+    __repr__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __lt__
+      other: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __eq__
+      other: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __repr__
+      self: local (parameter, referenced)
+  function show
+    TypeError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    ZeroDivisionError: global implicit (referenced)
+    args: local (parameter, referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+    print: global implicit (referenced)
+    repr: global implicit (referenced)
+    type: global implicit (referenced)
+  function lambda
+    x: local (parameter, referenced)
+  function key
+    print: global implicit (referenced)
+    x: local (parameter, referenced)
+  function lambda
+    x: local (parameter, referenced)
+  function grow
+    m: global implicit (referenced)
+    x: local (parameter, referenced)
+  function peek
+    len: global implicit (referenced)
+    n: global implicit (referenced)
+    print: global implicit (referenced)
+    x: local (parameter, referenced)
+  function lambda
+    t: local (parameter, referenced)
+  class Rows
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      xs: local (parameter, referenced)
+    function __iter__
+      iter: global implicit (referenced)
+      self: local (parameter, referenced)
+  class Group
+    __new__: local (assigned)
+    function __new__
+      __class__: free (referenced)
+      args: local (parameter)
+      cls: local (parameter, referenced)
+      print: global implicit (referenced)
+      super: global implicit (referenced)
+  class Caller
+    __call__: local (assigned)
+    list: global implicit (referenced)
+    staticmethod: global implicit (referenced)
+  class Flip
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      xs: local (parameter, referenced)
+    function __iter__
+      Caller: global implicit (referenced)
+      iter: global implicit (referenced)
+      self: local (parameter, referenced)
+      staticmethod: global implicit (referenced)
+      tuple: global implicit (referenced)
+  function churn
+    k1: global implicit (referenced)
+    x: local (parameter, referenced)
+  function quiet
+    iter: global implicit (referenced)
+    k2: global implicit (referenced)
+    x: local (parameter, referenced)
+  class Late
+    __init__: local (assigned)
+    __lt__: local (assigned)
+    count: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __lt__
+      Late: global implicit (referenced)
+      ValueError: global implicit (referenced)
+      other: local (parameter, referenced)
+      self: local (parameter, referenced)
+  function late_sort
+    Late: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    i: local (assigned, referenced)
+    items: local (assigned, referenced)
+    print: global implicit (referenced)
+    range: global implicit (referenced)
+    reverse: local (parameter, referenced)
+    stop: local (parameter, referenced)
+    vs: local (assigned, referenced)
+    x: local (assigned, referenced)
+qualnames: <lambda>, <lambda>, <lambda>, A, A.__gt__, A.__init__, A.__lt__, A.__repr__, B, B.__eq__, B.__init__, B.__lt__, B.__repr__, Caller, Flip, Flip.__init__, Flip.__iter__, Group, Group.__new__, Late, Late.__init__, Late.__lt__, Rows, Rows.__init__, Rows.__iter__, churn, grow, key, late_sort, peek, quiet, show

@@ -1,0 +1,4 @@
+module
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)

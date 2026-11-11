@@ -1,0 +1,23 @@
+module top
+  abs: global implicit (referenced)
+  all: global implicit (referenced)
+  any: global implicit (referenced)
+  callable: global implicit (referenced)
+  divmod: global implicit (referenced)
+  getattr: global implicit (referenced)
+  hasattr: global implicit (referenced)
+  hash: global implicit (referenced)
+  hex: global implicit (referenced)
+  issubclass: global implicit (referenced)
+  range: global implicit (referenced)
+  setattr: global implicit (referenced)
+  sum: global implicit (referenced)
+  wrong: local (assigned, referenced)
+  function wrong
+    TypeError: global implicit (referenced)
+    args: local (parameter, referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+    print: global implicit (referenced)
+qualnames: wrong

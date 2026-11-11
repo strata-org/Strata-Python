@@ -1,0 +1,58 @@
+module top
+  BaseException: global implicit (referenced)
+  D: local (assigned, referenced)
+  E: local (assigned, referenced)
+  I: local (assigned, referenced)
+  J: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  UnicodeDecodeError: global implicit (referenced)
+  UnicodeEncodeError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  d: local (assigned, referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  repr: global implicit (referenced)
+  str: global implicit (referenced)
+  x: local (assigned, referenced)
+  class E
+    __init__: local (assigned)
+    function __init__
+      TypeError: global implicit (referenced)
+      __class__: free (referenced)
+      a: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+      super: global implicit (referenced)
+      x: local (assigned, referenced)
+  class D
+    __init__: local (assigned)
+    function __init__
+      TypeError: global implicit (referenced)
+      __class__: free (referenced)
+      a: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+      super: global implicit (referenced)
+      x: local (assigned, referenced)
+  class E
+    __init__: local (assigned)
+    function __init__
+      TypeError: global implicit (referenced)
+      __class__: free (referenced)
+      a: local (parameter, referenced)
+      self: local (parameter)
+      super: global implicit (referenced)
+  class I
+    __index__: local (assigned)
+    function __index__
+      e: global implicit (referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+  class J
+    __index__: local (assigned)
+    function __index__
+      e: global implicit (referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+      str: global implicit (referenced)
+qualnames: D, D.__init__, E, E, E.__init__, E.__init__, I, I.__index__, J, J.__index__

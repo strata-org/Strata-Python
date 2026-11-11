@@ -1,0 +1,10 @@
+--- stdout 10
+[0, 1, 2]
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+U = <class 'U'>
+__doc__ = None
+__name__ = '__main__'

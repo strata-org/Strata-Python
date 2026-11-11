@@ -1,0 +1,39 @@
+--- stdout 1745
+TypeError function takes exactly 5 arguments (0 given)
+TypeError function takes exactly 5 arguments (1 given)
+TypeError argument 1 must be str, not int
+TypeError argument 2 must be str, not int
+TypeError 'str' object cannot be interpreted as an integer
+TypeError argument 5 must be str, not int
+OverflowError Python int too large to convert to C ssize_t
+TypeError a bytes-like object is required, not 'int'
+'a' codec can't decode byte 0x78 in position 0: r
+TypeError a bytes-like object is required, not 'str'
+TypeError UnicodeEncodeError() takes no keyword arguments
+'ascii' codec can't encode character '\xe9' in position 1: bad ('ascii', 'aé', 1, 2, 'bad')
+'ascii' codec can't encode characters in position -1-4: bad
+'utf-8' codec can't decode byte 0xff in position 0: bad
+'utf-8' codec can't decode bytes in position 0-1: bad
+'ascii' codec can't encode character '\xe9' in position 0: ordinal not in range(128) ('ascii', 'é', 0, 1, 'ordinal not in range(128)')
+'utf-8' codec can't decode byte 0xff in position 0: invalid start byte ('utf-8', b'\xff', 0, 1, 'invalid start byte')
+UnicodeDecodeError 'ascii' codec can't decode byte 0xff in position 1: ordinal not in range(128)
+UnicodeEncodeError 'ascii' codec can't encode character '\xe9' in position 0: ordinal not in range(128)
+'x' codec can't encode characters in position 0-1: z
+'str' object cannot be interpreted as an integer
+argument 5 must be str, not int
+a bytes-like object is required, not 'int'
+('ascii', SE!, 0, 1, 'ordinal not in range(128)')
+('ascii', SE!, 0, 1, 'ordinal not in range(128)')
+b'\xc3\xa9' b'\xe9' b'a?' b'x'
+TypeError encode() argument 'encoding' must be str, not int
+TypeError encode() argument 'errors' must be str, not int
+LookupError unknown encoding: nope
+
+--- outcome
+ok
+--- globals
+SE = <class 'SE'>
+U = <class 'U'>
+__doc__ = None
+__name__ = '__main__'
+a = ('utf-8', 'nope')

@@ -61,8 +61,10 @@ public import StrataPython.Dyn.Sem.Library.Unicode
 public import StrataPython.Dyn.Sem.Library.Str
 public import StrataPython.Dyn.Sem.Library.Numbers
 public import StrataPython.Dyn.Sem.Library.Codecs
+public import StrataPython.Dyn.Sem.Library.FormatString
 public import StrataPython.Dyn.Sem.Library.Sum
 public import StrataPython.Dyn.Sem.Library.SumProps
+public import StrataPython.Dyn.Sem.Library.SortProps
 public import StrataPython.Dyn.Sem.Library.Iterables
 public import StrataPython.Dyn.Sem.Library.Iterators
 public import StrataPython.Dyn.Sem.Library.Functions
