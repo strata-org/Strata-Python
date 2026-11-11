@@ -1,0 +1,11 @@
+--- stdout 12
+13003
+64964
+
+--- outcome
+ok
+--- globals
+D = 4997
+__doc__ = None
+__name__ = '__main__'
+mk = <function object>

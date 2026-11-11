@@ -3250,15 +3250,15 @@ tuple_normal | agree
 validity_ann_any_admits_anything | gap | import of module typing is not modelled yet
 validity_ann_atom_int_holds | agree
 validity_ann_atom_str_holds | agree
-validity_ann_generic_dict_of_str_int | gap | built-in method dict.__class_getitem__ is not modelled yet
-validity_ann_generic_list_of_int | gap | built-in method list.__class_getitem__ is not modelled yet
+validity_ann_generic_dict_of_str_int | agree
+validity_ann_generic_list_of_int | agree
 validity_ann_literal_holds | gap | import of module typing is not modelled yet
 validity_ann_notRequired_absent_key_raises | gap | import of module typing is not modelled yet
 validity_ann_notRequired_present_key_reads | gap | import of module typing is not modelled yet
 validity_ann_readOnly_reads | gap | import of module typing is not modelled yet
 validity_ann_required_present | gap | import of module typing is not modelled yet
-validity_ann_union_takes_int | gap | built-in method type.__or__ is not modelled yet
-validity_ann_union_takes_none | gap | built-in method type.__or__ is not modelled yet
+validity_ann_union_takes_int | agree
+validity_ann_union_takes_none | agree
 validity_bytes_capitalize_normal | gap | built-in method bytes.capitalize is not modelled yet
 validity_bytes_center_fill | gap | built-in method bytes.center is not modelled yet
 validity_bytes_center_width | gap | built-in method bytes.center is not modelled yet

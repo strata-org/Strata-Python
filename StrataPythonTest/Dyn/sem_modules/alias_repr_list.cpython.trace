@@ -1,0 +1,13 @@
+--- stdout 40
+dict[[A, str], str]
+dict[[S, int], str]
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'
+lst = [<A object>, <class 'str'>]
+lst2 = [<S object>]

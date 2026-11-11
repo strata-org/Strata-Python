@@ -1,0 +1,10 @@
+--- stdout 31
+(<class 'int'>, <class 'str'>)
+
+--- outcome
+ok
+--- globals
+S = <class 'S'>
+U = <class 'UnionType'>
+__doc__ = None
+__name__ = '__main__'

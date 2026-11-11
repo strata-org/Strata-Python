@@ -11,11 +11,12 @@ meta import StrataPythonTest.Util.SemDiff
 
 /-! # The Python semantics against CPython
 
-Runs every program of two suites with the Python semantics and compares its trace with CPython
+Runs every program of three suites with the Python semantics and compares its trace with CPython
 3.12's (`StrataPythonTest.Util.SemDiff`): the corpus `StrataPythonTest/Dyn/dyn_tests/`, whose
-verdicts are pinned in `StrataPythonTest/Dyn/sem_expected.txt`, and the test programs
-`StrataPythonTest/tests/`, whose verdicts are pinned in `StrataPythonTest/Dyn/sem_tests_expected.txt`
-(`Strata.Dyn.Exec.Diff`).  The test fails on any change of verdict:
+verdicts are pinned in `StrataPythonTest/Dyn/sem_expected.txt`, the test programs
+`StrataPythonTest/tests/`, whose verdicts are pinned in `StrataPythonTest/Dyn/sem_tests_expected.txt`,
+and the programs of the library modules' models `StrataPythonTest/Dyn/sem_modules/`, whose
+verdicts are pinned in `StrataPythonTest/Dyn/sem_modules_expected.txt` (`Strata.Dyn.Exec.Diff`).  The test fails on any change of verdict:
 
 * `agree`: the two traces are equal;
 * `gap`: the run stops with a gap, after agreeing with CPython up to it, or the translator does
@@ -27,7 +28,7 @@ verdicts are pinned in `StrataPythonTest/Dyn/sem_expected.txt`, and the test pro
 A difference that is none of these fails, and so does a run out of fuel, except for a program
 whose CPython run doesn't end within `SemDiff.cpythonSeconds`: its run must not end with a result
 (`SemDiff.judge`).  CPython's traces are
-goldens, `NAME.cpython.trace` beside the corpus's `NAME.py` and in
+goldens, `NAME.cpython.trace` beside the `NAME.py` of the corpus and of the models' programs, and in
 `StrataPythonTest/Dyn/test_traces/` for the test programs, so the check runs no CPython program;
 it still needs Python with `strata_python`, which parses the programs.  Set `SEM_UPDATE=1` to
 rewrite the goldens and the verdict files.
@@ -54,7 +55,9 @@ private meta def suites : List Suite := [
   ⟨"corpus", "StrataPythonTest" / "Dyn" / "dyn_tests", "StrataPythonTest" / "Dyn" / "dyn_tests",
     "StrataPythonTest" / "Dyn" / "sem_expected.txt", true⟩,
   ⟨"tests", "StrataPythonTest" / "tests", "StrataPythonTest" / "Dyn" / "test_traces",
-    "StrataPythonTest" / "Dyn" / "sem_tests_expected.txt", false⟩]
+    "StrataPythonTest" / "Dyn" / "sem_tests_expected.txt", false⟩,
+  ⟨"modules", "StrataPythonTest" / "Dyn" / "sem_modules", "StrataPythonTest" / "Dyn" / "sem_modules",
+    "StrataPythonTest" / "Dyn" / "sem_modules_expected.txt", true⟩]
 
 /-- The golden of a program that the translator rejects, in a suite that doesn't keep its trace. -/
 private meta def rejectedTrace : String := "--- not kept: the translator rejects the program\n"

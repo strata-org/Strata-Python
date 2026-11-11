@@ -1,0 +1,25 @@
+--- stdout 543
+list[int] dict[str, int] tuple[()] tuple[int, ...] set[int] frozenset[str] type[int]
+True False False True False None
+<class 'list'> (<class 'int'>,) () False list[1] list[list[int]]
+True (<class 'list'>,) True
+GenericAlias GenericAlias
+dict[[int], str] list[...]
+TypeError: type 'C' is not subscriptable
+TypeError: isinstance() argument 2 cannot be a parameterized generic
+TypeError: list[int] is not a generic class
+TypeError: cannot set 'x' attribute of immutable type 'types.GenericAlias'
+1
+<class 'int'>
+types
+[] [0, 1, 2] <class 'list'>
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+a = <GenericAlias object>
+b = <GenericAlias object>
+d = {<GenericAlias object>: 1}

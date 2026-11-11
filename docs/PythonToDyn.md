@@ -2521,11 +2521,13 @@ to read file ... containing non UTF-8 data", where CPython runs the program
 
 ### 13.2 The differential test
 
-`StrataPythonTestExtra/SemDiffTest.lean` runs every program of two suites with `pydyn run`, and
+`StrataPythonTestExtra/SemDiffTest.lean` runs every program of three suites with `pydyn run`, and
 compares its trace with CPython's, which `StrataPythonTest/Dyn/trace.py` prints in the same form.
 The suites are the corpus, `StrataPythonTest/Dyn/dyn_tests/`, with its verdicts in
-`StrataPythonTest/Dyn/sem_expected.txt`, and the test programs, `StrataPythonTest/tests/`, with
-their verdicts in `StrataPythonTest/Dyn/sem_tests_expected.txt`. Each program gets a verdict:
+`StrataPythonTest/Dyn/sem_expected.txt`, the test programs, `StrataPythonTest/tests/`, with
+their verdicts in `StrataPythonTest/Dyn/sem_tests_expected.txt`, and the programs of the library
+modules' models, `StrataPythonTest/Dyn/sem_modules/`, with their verdicts in
+`StrataPythonTest/Dyn/sem_modules_expected.txt`. Each program gets a verdict:
 
 ```
 <name> | agree                  (the two traces are equal)
@@ -2541,7 +2543,7 @@ needs only a beginning of CPython's output. A later gap needs the whole output, 
 before the gap, to be CPython's. The test fails on any other difference, on a run out of fuel, on
 a fault, on a model-invariant gap, on an internal error of the translator, and on any change of
 verdict or of a known difference's trace. CPython's traces are goldens, `NAME.cpython.trace` beside
-the corpus's `NAME.py`, and in `StrataPythonTest/Dyn/test_traces/` for the test programs; the
+the `NAME.py` of the corpus and of the models' programs, and in `StrataPythonTest/Dyn/test_traces/` for the test programs; the
 golden of a test program that the translator rejects is a fixed line, since it is never compared.
 A CPython run that doesn't end within 60 seconds has a fixed golden too. Then the semantics runs
 the program with a fuel of 1,000,000 steps, and its run must run out of fuel or stop with a gap:
@@ -2710,6 +2712,17 @@ is recorded as caught.
     `int()` of an object with `__trunc__`;
   - a dict built in the order of a set whose order may differ from CPython's (`dict.fromkeys(s)`),
     and the length hint of a forward dict iterator.
+- The parameterized types `types.GenericAlias` (`list[int]`, from `__class_getitem__` of `list`,
+  `dict`, `tuple`, `set` and `frozenset`, and `type[int]`) and `types.UnionType` (`int | None`, from
+  `type.__or__`): their `repr`, `==`, `hash`, attributes, call, subscription, `__mro_entries__`,
+  `isinstance` and `issubclass`. These stop with a gap: a call of either class, their `__new__`, an
+  attribute write on an instance, `__iter__` and `__reduce__` of an alias, the `hash` and `==` of a
+  union with an argument that is not a known value, and `__parameters__` of an alias with such an
+  argument. A known value is `None`, `Ellipsis`, a `bool`, `int` or `str`, a class whose metaclass
+  is `type`, an alias of `list`, `dict`, `tuple`, `set`, `frozenset` or `type` with known arguments,
+  or a tuple or union of known values. `StrataPythonTest/Dyn/Sem/gen_modules.py` writes the names of
+  the classes' `vars()`, which the models hold or stop with a gap on, and the programs that check
+  the recursion limits of their nested `repr` and `==`.
 - CPython's recursion limit: nested comparisons, calls into Python and calls of built-in callables
   count toward it, at least as many levels as CPython counts, and a run stops with a gap when its
   count passes 9,000, 995 below CPython's limit, where CPython raises `RecursionError`. A call of a

@@ -1562,19 +1562,21 @@ def mainTotal (body : String) : String := s!"module m \{
       %t.0 : py.Value = py.iBitOr(%a.0, %c.0) ^err.0()
       %v.0 : py.Value = py.unpackSeq(%a.0, 2) ^err.0()")
 
--- `|` of a class asks `type.__or__`, or `type.__ror__` of a class on the right, whose bodies a
--- piece of the built-in library gives.
-/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in method type.__or__ is not modelled yet" -/
+-- `|` of a class asks `type.__or__`, or `type.__ror__` of a class on the right, which make a
+-- `types.UnionType`.
+/-- info: 'int | str' -/
 #guard_msgs in
 #eval run (main "      %a.0 : py.Value = py.loadGlobal(\"m\", \"int\") ^err.0()
       %b.0 : py.Value = py.loadGlobal(\"m\", \"str\") ^err.0()
-      %v.0 : py.Value = py.bitOr(%a.0, %b.0) ^err.0()")
+      %u.0 : py.Value = py.bitOr(%a.0, %b.0) ^err.0()
+      %v.0 : py.Value = py.repr(%u.0) ^err.0()")
 
-/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in method type.__ror__ is not modelled yet" -/
+/-- info: 'None | int' -/
 #guard_msgs in
 #eval run (main "      %a.0 : py.Value = py.loadGlobal(\"m\", \"int\") ^err.0()
       %b.0 : py.Value = py.noneLit()
-      %v.0 : py.Value = py.bitOr(%b.0, %a.0) ^err.0()")
+      %u.0 : py.Value = py.bitOr(%b.0, %a.0) ^err.0()
+      %v.0 : py.Value = py.repr(%u.0) ^err.0()")
 
 -- A NaN is equal to itself inside a container in CPython; the model doesn't know identity.
 /-- info: fault: Strata.Dyn.Exec.Fault.gap "comparing values whose identity is unknown and that are not equal (a NaN)" -/

@@ -1,5 +1,11 @@
 --- stdout 0
 
---- gap built-in method type.__or__ is not modelled yet
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+u = <UnionType object>
+x = 1
 --- result __main__.__probe__
---- gap built-in method type.__or__ is not modelled yet
+raised TypeError: typeIsSubclass() arg 2 must be a class or a tuple of classes

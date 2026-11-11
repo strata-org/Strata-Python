@@ -1,0 +1,15 @@
+--- stdout 53
+get L
+get B
+get E
+__main__.L[__main__.B, __main__.E]
+
+--- outcome
+ok
+--- globals
+B = <class 'B'>
+D = <class 'D'>
+E = <class 'E'>
+L = <class 'L'>
+__doc__ = None
+__name__ = '__main__'

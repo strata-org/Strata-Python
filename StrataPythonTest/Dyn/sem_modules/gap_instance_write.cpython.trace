@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised AttributeError: 'types.GenericAlias' object has no attribute 'foo'
+--- globals
+__doc__ = None
+__name__ = '__main__'
+x = <GenericAlias object>

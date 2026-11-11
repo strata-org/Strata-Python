@@ -1,0 +1,20 @@
+--- stdout 973
+TypeError: descriptor '__eq__' requires a 'types.GenericAlias' object but received a 'int'
+TypeError: descriptor '__mro_entries__' for 'types.GenericAlias' objects doesn't apply to a 'int' object
+TypeError: descriptor '__getattribute__' requires a 'types.GenericAlias' object but received a 'int'
+TypeError: descriptor '__or__' requires a 'types.UnionType' object but received a 'int'
+TypeError: descriptor '__getitem__' requires a 'types.GenericAlias' object but received a 'int'
+TypeError: descriptor '__repr__' requires a 'types.GenericAlias' object but received a 'int'
+TypeError: descriptor '__repr__' requires a 'types.UnionType' object but received a 'int'
+TypeError: descriptor '__getitem__' requires a 'types.GenericAlias' object but received a 'types.UnionType'
+TypeError: descriptor '__getitem__' requires a 'types.UnionType' object but received a 'types.GenericAlias'
+TypeError: descriptor '__hash__' requires a 'types.GenericAlias' object but received a 'int'
+
+--- outcome
+ok
+--- globals
+GA = <class 'GenericAlias'>
+U = <class 'UnionType'>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>

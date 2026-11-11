@@ -1,0 +1,21 @@
+--- stdout 447
+int | None int | str | None None | int <class 'int'> list[int] | None <class 'NoneType'>
+True True True False (<class 'int'>, <class 'NoneType'>) ()
+(<class 'int'>, <class 'str'>) UnionType
+list[int] int | list[int] int | str
+True True False
+True
+TypeError: isinstance() argument 2 cannot be a parameterized generic
+TypeError: unsupported operand type(s) for |: 'type' and 'str'
+TypeError: int | str is not a generic class
+1
+types
+True True False
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+d = {<UnionType object>: 1}
+u = <UnionType object>

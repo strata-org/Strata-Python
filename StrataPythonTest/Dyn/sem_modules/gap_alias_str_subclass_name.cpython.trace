@@ -1,0 +1,11 @@
+--- stdout 51
+<class 'list'>
+<method 'append' of 'list' objects>
+
+--- outcome
+ok
+--- globals
+GA = <class 'GenericAlias'>
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'

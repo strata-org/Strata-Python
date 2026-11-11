@@ -1,0 +1,11 @@
+--- stdout 10
+True
+True
+
+--- outcome
+ok
+--- globals
+D = 2498
+__doc__ = None
+__name__ = '__main__'
+mk = <function object>

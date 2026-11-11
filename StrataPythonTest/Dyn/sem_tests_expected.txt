@@ -115,7 +115,7 @@ test_dict_in | agree
 test_dict_of_list | gap | import of module typing is not modelled yet
 test_dict_operations | agree
 test_dict_overwrite | agree
-test_differential_monty_strata_001_closures_cells_late_binding_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_differential_monty_strata_001_closures_cells_late_binding_program | agree
 test_differential_monty_strata_002_decorators_program | agree
 test_differential_monty_strata_003_dynamic_attr_builtins_program | agree
 test_differential_monty_strata_004_object_identity_id_is_program | gap | built-in id is not modelled yet
@@ -234,7 +234,7 @@ test_global_var | agree
 test_global_while_unmodeled_condition | gap | import of module os is not modelled yet
 test_global_wildcard_import_rejection | gap | the translator does not support import *
 test_global_with_binding | agree
-test_havoc_callee_after_hole_call | gap | built-in method list.__class_getitem__ is not modelled yet
+test_havoc_callee_after_hole_call | agree
 test_if_elif | agree
 test_if_elif_chain | agree
 test_if_else | agree
@@ -410,7 +410,7 @@ test_language_semantics_comprehensions_repros_u2_srclen_fail | gap | import of m
 test_language_semantics_cpython_runtime_001_binary_operators_boundary | agree
 test_language_semantics_cpython_runtime_001_binary_operators_supported | agree
 test_language_semantics_cpython_runtime_002_inplace_operators_boundary | gap | import of module typing is not modelled yet
-test_language_semantics_cpython_runtime_002_inplace_operators_supported | gap | built-in method list.__class_getitem__ is not modelled yet
+test_language_semantics_cpython_runtime_002_inplace_operators_supported | agree
 test_language_semantics_cpython_runtime_003_attribute_read_boundary | agree
 test_language_semantics_cpython_runtime_003_attribute_read_supported | agree
 test_language_semantics_cpython_runtime_004_attribute_write_boundary | agree
@@ -418,13 +418,13 @@ test_language_semantics_cpython_runtime_004_attribute_write_supported | agree
 test_language_semantics_cpython_runtime_005_method_call_boundary | agree
 test_language_semantics_cpython_runtime_005_method_call_supported | agree
 test_language_semantics_cpython_runtime_006_subscript_boundary | agree
-test_language_semantics_cpython_runtime_006_subscript_supported | gap | built-in method list.__class_getitem__ is not modelled yet
+test_language_semantics_cpython_runtime_006_subscript_supported | agree
 test_language_semantics_cpython_runtime_007_iteration_boundary | gap | the translator does not support generator function
-test_language_semantics_cpython_runtime_007_iteration_supported | gap | built-in method list.__class_getitem__ is not modelled yet
+test_language_semantics_cpython_runtime_007_iteration_supported | agree
 test_language_semantics_cpython_runtime_008_comparison_boundary | agree
-test_language_semantics_cpython_runtime_008_comparison_supported | gap | built-in method tuple.__class_getitem__ is not modelled yet
+test_language_semantics_cpython_runtime_008_comparison_supported | agree
 test_language_semantics_cpython_runtime_009_truth_testing_boundary | agree
-test_language_semantics_cpython_runtime_009_truth_testing_supported | gap | built-in method list.__class_getitem__ is not modelled yet
+test_language_semantics_cpython_runtime_009_truth_testing_supported | agree
 test_language_semantics_cpython_runtime_010_class_instantiation_boundary | agree
 test_language_semantics_cpython_runtime_010_class_instantiation_supported | agree
 test_language_semantics_exceptions_admitted_completion_case_07_finally_all_completions | agree
@@ -529,30 +529,30 @@ test_mod_both_neg | agree
 test_mod_neg_divisor | agree
 test_mod_sign_property | agree
 test_model_soundness_006_attribute_access_4step_protocol_program | agree
-test_model_soundness_009_list_method_return_value_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_010_augmented_assign_list_semantics_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_009_list_method_return_value_program | agree
+test_model_soundness_010_augmented_assign_list_semantics_program | agree
 test_model_soundness_011_class_field_mutation_through_method_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_012_int_division_truncation_direction_program | agree
-test_model_soundness_013_boolean_subtype_arithmetic_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_013_boolean_subtype_arithmetic_program | agree
 test_model_soundness_014_raise_silently_dropped_program | agree
-test_model_soundness_015_string_list_repeat_negative_multiplier_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_015_string_list_repeat_negative_multiplier_program | agree
 test_model_soundness_016_class_instance_truthiness_unconstrained_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_017_int_conversion_missing_model_program | agree
 test_model_soundness_018_bool_arithmetic_int_promotion_program | agree
 test_model_soundness_019_str_split_no_model_program | agree
-test_model_soundness_020_negative_list_index_wrap_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_020_negative_list_index_wrap_program | agree
 test_model_soundness_021_power_zero_exponent_program | agree
 test_model_soundness_022_comparison_bool_int_cross_type_program | agree
 test_model_soundness_023_true_division_returns_float_program | agree
 test_model_soundness_024_mixed_int_float_promotion_program | agree
-test_model_soundness_025_try_except_builtin_exception_not_raised_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_026_min_max_abs_sum_no_model_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_025_try_except_builtin_exception_not_raised_program | agree
+test_model_soundness_026_min_max_abs_sum_no_model_program | agree
 test_model_soundness_027_isinstance_inheritance_not_modeled_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_028_tuple_no_representation_program | gap | built-in method tuple.__class_getitem__ is not modelled yet
-test_model_soundness_029_dict_int_keys_not_supported_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_028_tuple_no_representation_program | agree
+test_model_soundness_029_dict_int_keys_not_supported_program | agree
 test_model_soundness_030_str_conversion_class_instance_no_dispatch_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_031_for_loop_iterator_snapshot_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_032_dict_len_counts_duplicates_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_031_for_loop_iterator_snapshot_program | agree
+test_model_soundness_032_dict_len_counts_duplicates_program | agree
 test_model_soundness_033_nested_object_field_aliasing_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_034_optional_class_any_composite_split_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_035_int_times_str_no_reflected_dispatch_program | agree
@@ -560,64 +560,64 @@ test_model_soundness_036_exception_value_not_checked_after_call_program | agree
 test_model_soundness_037_equality_identity_vs_structural_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_038_property_descriptor_not_in_instance_dict_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_039_modulo_negative_dividend_wrong_sign_program | agree
-test_model_soundness_040_list_equality_structural_vs_elementwise_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_040_list_equality_structural_vs_elementwise_program | agree
 test_model_soundness_041_dict_equality_order_dependent_program | agree
 test_model_soundness_042_float_modeled_as_real_not_ieee754_program | agree
-test_model_soundness_043_bool_index_into_list_rejected_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_043_bool_index_into_list_rejected_program | agree
 test_model_soundness_044_short_circuit_evaluation_not_lazy_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_045_range_negative_step_empty_range_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_046_string_in_operator_substring_not_element_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_047_string_ordering_comparison_no_model_program | gap | built-in method tuple.__class_getitem__ is not modelled yet
+test_model_soundness_045_range_negative_step_empty_range_program | agree
+test_model_soundness_046_string_in_operator_substring_not_element_program | agree
+test_model_soundness_047_string_ordering_comparison_no_model_program | agree
 test_model_soundness_048_augmented_assign_field_value_semantics_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_049_while_loop_condition_reevaluation_side_effects_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_050_floor_div_mod_float_return_type_program | agree
-test_model_soundness_051_dict_iteration_yields_keys_not_entries_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_052_return_does_not_terminate_control_flow_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_051_dict_iteration_yields_keys_not_entries_program | agree
+test_model_soundness_052_return_does_not_terminate_control_flow_program | agree
 test_model_soundness_053_str_int_conversion_roundtrip_no_axioms_program | agree
-test_model_soundness_054_break_continue_control_flow_not_modeled_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_054_break_continue_control_flow_not_modeled_program | agree
 test_model_soundness_055_method_override_no_virtual_dispatch_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_056_and_or_return_operand_not_bool_program | agree
-test_model_soundness_057_not_operator_non_bool_operand_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_057_not_operator_non_bool_operand_program | agree
 test_model_soundness_058_default_parameter_substitution_program | agree
-test_model_soundness_059_if_condition_non_bool_truthiness_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_060_string_concat_length_axioms_missing_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_059_if_condition_non_bool_truthiness_program | agree
+test_model_soundness_060_string_concat_length_axioms_missing_program | agree
 test_model_soundness_061_subclass_fields_through_parent_type_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_062_is_none_narrowing_optional_program | gap | import of module typing is not modelled yet
-test_model_soundness_063_finally_block_always_executes_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_063_finally_block_always_executes_program | agree
 test_model_soundness_064_isinstance_narrowing_field_access_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_065_for_else_clause_break_semantics_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_065_for_else_clause_break_semantics_program | agree
 test_model_soundness_066_chained_comparison_single_eval_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_067_recursive_dataclass_optional_self_ref_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_068_list_slice_no_model_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_068_list_slice_no_model_program | agree
 test_model_soundness_069_string_subscript_returns_str_program | agree
 test_model_soundness_070_ternary_expression_short_circuit_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_071_dict_get_default_no_model_program | gap | built-in method dict.__class_getitem__ is not modelled yet
+test_model_soundness_071_dict_get_default_no_model_program | agree
 test_model_soundness_072_augmented_assign_target_evaluated_once_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_073_unary_minus_bool_float_dispatch_program | gap | built-in method tuple.__class_getitem__ is not modelled yet
-test_model_soundness_074_list_concatenation_no_model_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_073_unary_minus_bool_float_dispatch_program | agree
+test_model_soundness_074_list_concatenation_no_model_program | agree
 test_model_soundness_075_len_on_strings_no_axioms_program | agree
-test_model_soundness_076_cross_tag_equality_none_and_types_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_076_cross_tag_equality_none_and_types_program | agree
 test_model_soundness_077_unary_plus_identity_no_model_program | agree
-test_model_soundness_078_list_element_assignment_cons_rebuild_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_078_list_element_assignment_cons_rebuild_program | agree
 test_model_soundness_079_exception_tag_poisons_operators_program | agree
-test_model_soundness_080_float_division_by_zero_no_exception_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_080_float_division_by_zero_no_exception_program | agree
 test_model_soundness_081_classinstance_missing_field_read_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_082_dict_key_overwrite_assoc_list_growth_program | gap | built-in method dict.__class_getitem__ is not modelled yet
+test_model_soundness_082_dict_key_overwrite_assoc_list_growth_program | agree
 test_model_soundness_083_fstring_interpolation_no_model_program | agree
-test_model_soundness_084_dict_missing_key_no_keyerror_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_085_not_in_operator_no_negation_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_084_dict_missing_key_no_keyerror_program | agree
+test_model_soundness_085_not_in_operator_no_negation_program | agree
 test_model_soundness_086_class_method_returns_new_instance_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_087_list_of_class_instances_element_mutation_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_088_list_len_no_relationship_to_operations_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_089_list_literal_construction_cons_order_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_090_nested_list_access_double_unwrap_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_091_list_equality_length_mismatch_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_092_for_loop_list_length_invariant_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_088_list_len_no_relationship_to_operations_program | agree
+test_model_soundness_089_list_literal_construction_cons_order_program | agree
+test_model_soundness_090_nested_list_access_double_unwrap_program | agree
+test_model_soundness_091_list_equality_length_mismatch_program | agree
+test_model_soundness_092_for_loop_list_length_invariant_program | agree
 test_model_soundness_093_dict_literal_postconditions_missing_program | agree
-test_model_soundness_094_dict_passed_to_function_caller_unchanged_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_095_dict_in_checks_keys_not_values_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_096_dict_iteration_order_insertion_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_097_dict_len_after_new_key_vs_overwrite_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_094_dict_passed_to_function_caller_unchanged_program | agree
+test_model_soundness_095_dict_in_checks_keys_not_values_program | agree
+test_model_soundness_096_dict_iteration_order_insertion_program | agree
+test_model_soundness_097_dict_len_after_new_key_vs_overwrite_program | agree
 test_model_soundness_098_self_field_write_then_read_same_method_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_099_object_stored_in_container_stale_copy_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_100_dataclass_default_values_not_modeled_program | gap | import of module dataclasses is not modelled yet
@@ -629,12 +629,12 @@ test_model_soundness_105_value_composite_coercion_list_of_objects_program | gap 
 test_model_soundness_106_heap_frame_preservation_after_call_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_107_composite_field_type_not_any_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_108_operator_type_error_returns_hole_not_exception_program | agree
-test_model_soundness_109_not_equal_operator_separate_or_negation_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_110_comparison_return_type_must_be_bool_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_109_not_equal_operator_separate_or_negation_program | agree
+test_model_soundness_110_comparison_return_type_must_be_bool_program | agree
 test_model_soundness_111_operator_on_incompatible_tags_no_error_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_112_subtraction_cross_type_dispatch_gaps_program | agree
-test_model_soundness_113_try_except_type_matching_no_dispatch_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_114_exception_as_variable_in_handler_program | gap | built-in method dict.__class_getitem__ is not modelled yet
+test_model_soundness_113_try_except_type_matching_no_dispatch_program | agree
+test_model_soundness_114_exception_as_variable_in_handler_program | agree
 test_model_soundness_115_multiple_except_clauses_dispatch_order_program | agree
 test_model_soundness_116_raise_in_except_replaces_original_program | agree
 test_model_soundness_117_nested_try_except_propagation_program | agree
@@ -643,40 +643,40 @@ test_model_soundness_119_method_mutation_requires_caller_reassignment_program | 
 test_model_soundness_120_is_none_vs_eq_none_semantics_program | gap | import of module typing is not modelled yet
 test_model_soundness_121_object_identity_after_construction_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_122_function_local_mutation_invisible_to_caller_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_123_assert_statement_not_modeled_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_124_recursive_function_termination_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_123_assert_statement_not_modeled_program | agree
+test_model_soundness_124_recursive_function_termination_program | agree
 test_model_soundness_125_staticmethod_translation_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_126_module_level_variable_access_program | agree
 test_model_soundness_127_print_implicit_str_conversion_program | agree
-test_model_soundness_128_keyword_arguments_position_mapping_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_129_implicit_return_none_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_128_keyword_arguments_position_mapping_program | agree
+test_model_soundness_129_implicit_return_none_program | agree
 test_model_soundness_130_type_annotations_drive_tag_assertions_program | agree
 test_model_soundness_131_return_type_enforcement_program | agree
 test_model_soundness_132_function_call_argument_evaluation_order_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_133_str_startswith_endswith_no_model_program | agree
 test_model_soundness_134_str_find_returns_negative_one_program | agree
 test_model_soundness_135_str_replace_no_model_program | agree
-test_model_soundness_136_while_true_break_pattern_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_136_while_true_break_pattern_program | agree
 test_model_soundness_137_variable_narrowing_persists_through_branch_program | gap | import of module typing is not modelled yet
-test_model_soundness_138_str_join_no_model_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_139_bool_conversion_truthiness_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_140_float_conversion_from_int_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_138_str_join_no_model_program | agree
+test_model_soundness_139_bool_conversion_truthiness_program | agree
+test_model_soundness_140_float_conversion_from_int_program | agree
 test_model_soundness_141_dataclass_field_access_after_construction_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_142_multiple_return_values_via_class_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_143_dataclass_inheritance_field_union_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_144_str_strip_lower_upper_no_model_program | agree
-test_model_soundness_145_list_membership_type_coercion_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_146_dict_construction_from_loop_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_145_list_membership_type_coercion_program | agree
+test_model_soundness_146_dict_construction_from_loop_program | agree
 test_model_soundness_147_method_call_on_function_return_value_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_148_isinstance_bool_is_int_subclass_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_148_isinstance_bool_is_int_subclass_program | agree
 test_model_soundness_149_dataclass_optional_field_construction_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_150_bounds_check_pattern_and_conjunction_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_151_empty_container_return_value_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_152_string_equality_case_sensitive_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_150_bounds_check_pattern_and_conjunction_program | agree
+test_model_soundness_151_empty_container_return_value_program | agree
+test_model_soundness_152_string_equality_case_sensitive_program | agree
 test_model_soundness_153_dict_overwrite_then_read_same_key_program | agree
-test_model_soundness_154_list_grow_in_while_loop_rebinding_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_154_list_grow_in_while_loop_rebinding_program | agree
 test_model_soundness_155_nested_if_narrowing_lost_at_merge_program | agree
-test_model_soundness_156_for_loop_variable_scope_after_loop_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_156_for_loop_variable_scope_after_loop_program | agree
 test_model_soundness_157_dataclass_default_factory_shared_state_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_158_integer_comparison_transitivity_cross_type_program | agree
 test_model_soundness_159_method_chaining_intermediate_self_lost_program | gap | import of module dataclasses is not modelled yet
@@ -685,31 +685,31 @@ test_model_soundness_161_range_object_not_list_program | agree
 test_model_soundness_162_isinstance_narrowing_invalidated_by_reassignment_program | gap | import of module typing is not modelled yet
 test_model_soundness_163_dataclass_eq_with_none_fields_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_164_exception_message_access_program | agree
-test_model_soundness_165_multiple_return_statements_dead_code_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_166_bool_is_int_subclass_tag_mismatch_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_165_multiple_return_statements_dead_code_program | agree
+test_model_soundness_166_bool_is_int_subclass_tag_mismatch_program | agree
 test_model_soundness_167_string_multiply_zero_or_negative_program | agree
 test_model_soundness_168_function_postcondition_not_assumed_at_callsite_program | agree
-test_model_soundness_169_while_loop_exit_condition_not_assumed_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_170_list_append_return_none_not_new_list_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_169_while_loop_exit_condition_not_assumed_program | agree
+test_model_soundness_170_list_append_return_none_not_new_list_program | agree
 test_model_soundness_171_tuple_unrepresentable_in_any_program | gap | import of module typing is not modelled yet
 test_model_soundness_172_classinstance_classname_string_no_hierarchy_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_173_exception_propagation_through_expressions_program | agree
 test_model_soundness_174_float_exact_real_division_diverges_program | agree
-test_model_soundness_175_dict_int_keys_no_representation_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_176_list_pure_ops_iteration_rebinding_conflict_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_175_dict_int_keys_no_representation_program | agree
+test_model_soundness_176_list_pure_ops_iteration_rebinding_conflict_program | agree
 test_model_soundness_177_cross_object_method_value_semantics_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_178_tag_dispatch_no_reflected_radd_program | agree
 test_model_soundness_179_no_object_identity_is_operator_program | gap | import of module typing is not modelled yet
 test_model_soundness_180_composite_value_split_boundary_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_181_list_pop_remove_no_model_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_182_list_insert_at_index_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_183_cons_list_index_is_o_n_no_random_access_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_184_list_passed_to_function_pure_copy_semantics_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_185_list_comparison_operators_lt_gt_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_186_dict_del_key_no_model_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_187_dict_update_merge_no_model_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_188_dict_keys_values_items_iteration_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_189_dict_setdefault_no_model_program | gap | built-in method dict.__class_getitem__ is not modelled yet
+test_model_soundness_181_list_pop_remove_no_model_program | agree
+test_model_soundness_182_list_insert_at_index_program | agree
+test_model_soundness_183_cons_list_index_is_o_n_no_random_access_program | agree
+test_model_soundness_184_list_passed_to_function_pure_copy_semantics_program | agree
+test_model_soundness_185_list_comparison_operators_lt_gt_program | agree
+test_model_soundness_186_dict_del_key_no_model_program | agree
+test_model_soundness_187_dict_update_merge_no_model_program | agree
+test_model_soundness_188_dict_keys_values_items_iteration_program | agree
+test_model_soundness_189_dict_setdefault_no_model_program | agree
 test_model_soundness_190_assoc_list_shadowing_breaks_len_contains_program | agree
 test_model_soundness_191_field_write_requires_full_reconstruction_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_192_method_self_not_rebound_to_caller_program | gap | import of module dataclasses is not modelled yet
@@ -721,11 +721,11 @@ test_model_soundness_197_composite_fresh_allocation_identity_program | gap | imp
 test_model_soundness_198_composite_aliasing_write_through_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_199_composite_frame_condition_unrelated_objects_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_200_when_does_class_become_composite_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_201_operator_missing_tag_pair_falls_to_hole_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_201_operator_missing_tag_pair_falls_to_hole_program | agree
 test_model_soundness_202_comparison_chain_desugaring_tag_check_program | agree
-test_model_soundness_203_augmented_assign_dispatch_same_as_binary_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_203_augmented_assign_dispatch_same_as_binary_program | agree
 test_model_soundness_204_operator_on_none_must_raise_not_hole_program | gap | import of module typing is not modelled yet
-test_model_soundness_205_floor_div_mod_must_check_zero_divisor_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_205_floor_div_mod_must_check_zero_divisor_program | agree
 test_model_soundness_206_exception_value_no_stack_unwinding_program | agree
 test_model_soundness_207_raise_must_produce_exception_tag_program | agree
 test_model_soundness_208_except_clause_must_match_error_type_program | agree
@@ -736,44 +736,44 @@ test_model_soundness_212_no_aliasing_ast_check_completeness_program | gap | impo
 test_model_soundness_213_no_identity_dataclass_eq_correct_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_214_nested_field_write_requires_chain_rebuild_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_215_for_loop_element_mutation_invisible_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_216_subset_allows_list_aliasing_via_for_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_217_subset_allows_dict_int_but_model_cant_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_216_subset_allows_list_aliasing_via_for_program | agree
+test_model_soundness_217_subset_allows_dict_int_but_model_cant_program | agree
 test_model_soundness_218_subset_allows_tuple_but_no_any_tag_program | gap | import of module typing is not modelled yet
 test_model_soundness_219_subset_allows_isinstance_but_no_hierarchy_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_220_subset_allows_str_methods_but_no_model_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_221_full_annotations_drive_tag_but_generics_lost_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_220_subset_allows_str_methods_but_no_model_program | agree
+test_model_soundness_221_full_annotations_drive_tag_but_generics_lost_program | agree
 test_model_soundness_222_no_dynamic_features_but_property_is_dynamic_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_223_optional_annotation_requires_union_tag_set_program | gap | import of module typing is not modelled yet
 test_model_soundness_224_return_type_annotation_not_checked_at_all_exits_program | gap | import of module typing is not modelled yet
 test_model_soundness_225_annotation_mismatch_between_caller_and_callee_program | agree
-test_model_soundness_226_walrus_operator_scope_leak_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_227_string_format_method_no_model_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_228_list_count_index_no_model_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_226_walrus_operator_scope_leak_program | agree
+test_model_soundness_227_string_format_method_no_model_program | agree
+test_model_soundness_228_list_count_index_no_model_program | agree
 test_model_soundness_229_int_overflow_compact_range_unchecked_program | agree
 test_model_soundness_230_dataclass_field_order_in_eq_and_init_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_231_global_constant_access_from_function_program | agree
-test_model_soundness_232_str_len_after_concat_no_axiom_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_232_str_len_after_concat_no_axiom_program | agree
 test_model_soundness_233_list_literal_plus_append_length_tracking_program | agree
 test_model_soundness_234_dataclass_method_reads_field_after_caller_write_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_235_isinstance_narrows_but_field_access_still_fails_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_236_enumerate_no_model_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_237_str_concatenation_in_loop_quadratic_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_238_dict_comprehension_equivalent_loop_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_236_enumerate_no_model_program | agree
+test_model_soundness_237_str_concatenation_in_loop_quadratic_program | agree
+test_model_soundness_238_dict_comprehension_equivalent_loop_program | agree
 test_model_soundness_239_multiple_assignment_same_line_program | agree
 test_model_soundness_240_method_called_on_literal_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_241_recursive_function_base_case_unreachable_program | agree
 test_model_soundness_242_nested_function_call_as_argument_program | agree
-test_model_soundness_243_boolean_short_circuit_guards_division_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_243_boolean_short_circuit_guards_division_program | agree
 test_model_soundness_244_dataclass_field_default_none_vs_missing_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_245_comparison_result_stored_in_variable_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_245_comparison_result_stored_in_variable_program | agree
 test_model_soundness_246_property_with_conditional_logic_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_247_method_calling_another_method_on_self_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_248_for_loop_over_dict_keys_type_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_249_try_except_in_loop_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_248_for_loop_over_dict_keys_type_program | agree
+test_model_soundness_249_try_except_in_loop_program | agree
 test_model_soundness_250_dataclass_eq_used_in_list_contains_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_251_int_negation_of_min_int_program | agree
 test_model_soundness_252_string_equality_after_concat_not_provable_program | agree
-test_model_soundness_253_list_element_overwrite_old_value_persists_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_253_list_element_overwrite_old_value_persists_program | agree
 test_model_soundness_254_dict_get_on_just_set_key_returns_hole_program | agree
 test_model_soundness_255_if_else_both_branches_assign_merge_lost_program | agree
 test_model_soundness_256_int_plus_float_returns_float_not_int_program | agree
@@ -781,23 +781,23 @@ test_model_soundness_257_true_division_int_int_returns_float_program | agree
 test_model_soundness_258_floor_div_negative_rounds_toward_neg_inf_program | agree
 test_model_soundness_259_modulo_sign_follows_divisor_program | agree
 test_model_soundness_260_not_operator_returns_bool_not_operand_program | agree
-test_model_soundness_261_bool_plus_bool_returns_int_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_261_bool_plus_bool_returns_int_program | agree
 test_model_soundness_262_str_multiply_returns_str_not_hole_program | agree
-test_model_soundness_263_list_plus_list_returns_concatenated_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_263_list_plus_list_returns_concatenated_program | agree
 test_model_soundness_264_none_equality_cross_type_program | agree
 test_model_soundness_265_int_to_bool_comparison_program | agree
-test_model_soundness_266_floor_div_model_gives_wrong_number_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_267_modulo_model_gives_wrong_sign_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_266_floor_div_model_gives_wrong_number_program | agree
+test_model_soundness_267_modulo_model_gives_wrong_sign_program | agree
 test_model_soundness_268_division_by_zero_model_no_error_program | agree
 test_model_soundness_269_index_out_of_bounds_model_no_error_program | agree
 test_model_soundness_270_type_error_on_none_add_model_no_error_program | gap | import of module typing is not modelled yet
 test_model_soundness_271_root_cause_value_semantics_no_aliasing_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_272_root_cause_tag_dispatch_incomplete_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_272_root_cause_tag_dispatch_incomplete_program | agree
 test_model_soundness_273_root_cause_smt_div_not_python_floor_program | agree
 test_model_soundness_274_root_cause_exception_as_value_no_propagation_program | agree
 test_model_soundness_275_root_cause_uninterpreted_functions_no_axioms_program | agree
-test_model_soundness_276_value_sem_list_param_mutation_lost_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_277_value_sem_dict_param_mutation_lost_program | gap | built-in method dict.__class_getitem__ is not modelled yet
+test_model_soundness_276_value_sem_list_param_mutation_lost_program | agree
+test_model_soundness_277_value_sem_dict_param_mutation_lost_program | agree
 test_model_soundness_278_value_sem_object_param_field_write_lost_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_279_value_sem_list_in_object_field_stale_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_280_value_sem_method_mutates_self_caller_unchanged_program | gap | import of module dataclasses is not modelled yet
@@ -805,92 +805,92 @@ test_model_soundness_281_reflected_int_times_str_program | agree
 test_model_soundness_282_reflected_int_plus_float_program | agree
 test_model_soundness_283_reflected_int_sub_float_program | agree
 test_model_soundness_284_reflected_int_div_float_program | agree
-test_model_soundness_285_reflected_int_times_list_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_285_reflected_int_times_list_program | agree
 test_model_soundness_286_missing_exception_str_plus_int_program | agree
 test_model_soundness_287_missing_exception_int_subscript_str_program | agree
 test_model_soundness_288_missing_exception_dict_missing_key_program | agree
 test_model_soundness_289_missing_exception_int_call_on_non_number_program | agree
 test_model_soundness_290_missing_exception_unpack_wrong_length_program | agree
-test_model_soundness_291_incorrect_floor_div_negative_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_292_incorrect_mod_negative_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_293_incorrect_true_div_returns_int_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_291_incorrect_floor_div_negative_program | agree
+test_model_soundness_292_incorrect_mod_negative_program | agree
+test_model_soundness_293_incorrect_true_div_returns_int_program | agree
 test_model_soundness_294_incorrect_eq_bool_int_cross_program | agree
-test_model_soundness_295_incorrect_power_zero_exponent_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_295_incorrect_power_zero_exponent_program | agree
 test_model_soundness_296_fix_operator_dispatch_complete_table_program | agree
 test_model_soundness_297_fix_div_mod_python_semantics_program | agree
-test_model_soundness_298_fix_exception_propagation_pattern_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_298_fix_exception_propagation_pattern_program | agree
 test_model_soundness_299_fix_mccarthy_axioms_containers_program | agree
 test_model_soundness_300_fix_ast_rejection_rules_aliasing_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_301_list_multiply_no_model_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_301_list_multiply_no_model_program | agree
 test_model_soundness_302_isinstance_tuple_of_types_program | agree
-test_model_soundness_303_dict_pop_dual_effect_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_304_string_in_vs_dict_in_dispatch_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_305_for_loop_range_len_pattern_no_index_axiom_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_306_except_as_variable_deleted_after_handler_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_307_nested_for_loop_variable_rebinding_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_303_dict_pop_dual_effect_program | agree
+test_model_soundness_304_string_in_vs_dict_in_dispatch_program | agree
+test_model_soundness_305_for_loop_range_len_pattern_no_index_axiom_program | agree
+test_model_soundness_306_except_as_variable_deleted_after_handler_program | agree
+test_model_soundness_307_nested_for_loop_variable_rebinding_program | agree
 test_model_soundness_308_class_level_attribute_no_representation_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_309_for_loop_body_break_index_value_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_309_for_loop_body_break_index_value_program | agree
 test_model_soundness_310_string_method_returns_new_no_rebind_needed_program | agree
-test_model_soundness_311_while_break_unsound_postcondition_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_312_try_except_else_clause_no_model_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_311_while_break_unsound_postcondition_program | agree
+test_model_soundness_312_try_except_else_clause_no_model_program | agree
 test_model_soundness_313_inherited_method_not_found_on_child_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_314_str_bool_produces_true_false_not_int_program | agree
-test_model_soundness_315_continue_nested_loop_target_conflation_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_316_while_else_clause_no_model_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_315_continue_nested_loop_target_conflation_program | agree
+test_model_soundness_316_while_else_clause_no_model_program | agree
 test_model_soundness_317_int_float_truncates_toward_zero_program | agree
 test_model_soundness_318_ordering_comparison_dataclass_no_lt_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_319_bool_return_where_int_declared_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_319_bool_return_where_int_declared_program | agree
 test_model_soundness_320_str_float_no_conversion_model_program | agree
 test_model_soundness_321_string_negative_index_no_wrap_program | agree
-test_model_soundness_322_container_truthiness_needs_length_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_323_isinstance_none_type_no_match_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_322_container_truthiness_needs_length_program | agree
+test_model_soundness_323_isinstance_none_type_no_match_program | agree
 test_model_soundness_324_string_slice_no_model_program | agree
-test_model_soundness_325_min_max_empty_list_valueerror_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_325_min_max_empty_list_valueerror_program | agree
 test_model_soundness_326_abs_float_no_model_program | agree
 test_model_soundness_327_dataclass_cross_class_equality_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_328_range_membership_test_no_model_program | agree
-test_model_soundness_329_sum_list_return_type_depends_on_elements_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_330_for_loop_else_break_in_nested_if_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_329_sum_list_return_type_depends_on_elements_program | agree
+test_model_soundness_330_for_loop_else_break_in_nested_if_program | agree
 test_model_soundness_331_assert_failure_raises_assertionerror_program | agree
 test_model_soundness_332_chained_string_methods_hole_propagation_program | agree
-test_model_soundness_333_dict_get_default_return_type_program | gap | built-in method dict.__class_getitem__ is not modelled yet
+test_model_soundness_333_dict_get_default_return_type_program | agree
 test_model_soundness_334_isinstance_narrowing_killed_by_else_assign_program | agree
 test_model_soundness_335_dataclass_field_type_in_operator_dispatch_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_336_augmented_assign_dict_subscript_program | gap | built-in method dict.__class_getitem__ is not modelled yet
+test_model_soundness_336_augmented_assign_dict_subscript_program | agree
 test_model_soundness_337_inherited_property_not_resolved_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_338_str_none_no_model_program | agree
 test_model_soundness_339_isinstance_elif_exhaustive_narrowing_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_340_dataclass_post_init_silently_dropped_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_341_list_subscript_augmented_assign_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_341_list_subscript_augmented_assign_program | agree
 test_model_soundness_342_super_method_call_not_translated_program | agree
 test_model_soundness_343_isinstance_none_returns_false_for_all_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_344_early_return_in_for_loop_iteration_continues_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_344_early_return_in_for_loop_iteration_continues_program | agree
 test_model_soundness_345_dataclass_field_reuse_across_instances_no_fresh_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_346_bool_as_dict_key_hash_equivalence_program | gap | built-in method dict.__class_getitem__ is not modelled yet
+test_model_soundness_346_bool_as_dict_key_hash_equivalence_program | agree
 test_model_soundness_347_exception_flows_into_field_access_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_348_float_modulo_no_case_program | agree
 test_model_soundness_349_method_call_on_exception_value_no_propagation_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_350_list_of_optional_element_narrowing_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_351_int_power_negative_exponent_returns_float_program | agree
-test_model_soundness_352_dict_value_access_type_lost_program | gap | built-in method dict.__class_getitem__ is not modelled yet
+test_model_soundness_352_dict_value_access_type_lost_program | agree
 test_model_soundness_353_classinstance_subtype_at_function_boundary_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_354_float_floor_div_returns_float_not_int_program | agree
 test_model_soundness_355_and_or_return_operand_value_not_bool_program | agree
-test_model_soundness_356_for_loop_append_requires_rebind_each_iteration_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_357_non_dataclass_eq_is_identity_not_structural_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_358_list_method_expression_value_vs_side_effect_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_359_dict_in_operator_checks_keys_not_values_type_dispatch_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_356_for_loop_append_requires_rebind_each_iteration_program | agree
+test_model_soundness_357_non_dataclass_eq_is_identity_not_structural_program | agree
+test_model_soundness_358_list_method_expression_value_vs_side_effect_program | agree
+test_model_soundness_359_dict_in_operator_checks_keys_not_values_type_dispatch_program | agree
 test_model_soundness_360_classinstance_field_write_then_method_call_stale_self_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_361_list_multiply_objects_shared_vs_independent_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_362_cons_list_append_len_axiom_missing_program | agree
-test_model_soundness_363_for_loop_iteration_count_not_connected_to_len_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_363_for_loop_iteration_count_not_connected_to_len_program | agree
 test_model_soundness_364_list_returned_from_function_independence_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_365_cons_list_set_then_get_different_index_preservation_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_366_dict_frame_axiom_set_preserves_other_keys_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_367_dict_contains_after_set_no_axiom_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_368_dict_len_conditional_on_key_existence_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_369_dict_equality_order_independent_assoc_list_not_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_370_dict_construction_loop_final_contents_unprovable_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_365_cons_list_set_then_get_different_index_preservation_program | agree
+test_model_soundness_366_dict_frame_axiom_set_preserves_other_keys_program | agree
+test_model_soundness_367_dict_contains_after_set_no_axiom_program | agree
+test_model_soundness_368_dict_len_conditional_on_key_existence_program | agree
+test_model_soundness_369_dict_equality_order_independent_assoc_list_not_program | agree
+test_model_soundness_370_dict_construction_loop_final_contents_unprovable_program | agree
 test_model_soundness_371_classinstance_field_write_frame_axiom_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_372_classinstance_classname_preserved_after_field_write_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_373_functional_update_pattern_caller_must_rebind_program | gap | import of module dataclasses is not modelled yet
@@ -902,13 +902,13 @@ test_model_soundness_378_fresh_allocation_in_loop_distinct_references_program | 
 test_model_soundness_379_composite_classinstance_split_equality_broken_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_380_heap_threading_missing_for_pure_methods_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_381_non_commutative_operators_operand_order_matters_program | agree
-test_model_soundness_382_comparison_operators_gt_le_ge_derived_from_lt_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_382_comparison_operators_gt_le_ge_derived_from_lt_program | agree
 test_model_soundness_383_bool_float_cross_type_two_step_promotion_program | agree
 test_model_soundness_384_eq_on_classinstance_must_check_classname_first_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_385_operator_catch_all_must_be_typeerror_not_hole_program | agree
 test_model_soundness_386_exception_passed_as_function_argument_program | agree
 test_model_soundness_387_exception_persists_in_variable_used_later_program | agree
-test_model_soundness_388_exception_stored_in_container_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_388_exception_stored_in_container_program | agree
 test_model_soundness_389_exception_in_comparison_operand_program | agree
 test_model_soundness_390_multiple_exceptions_one_expression_first_wins_program | agree
 test_model_soundness_391_same_object_two_parameters_aliasing_undetected_program | gap | import of module dataclasses is not modelled yet
@@ -916,67 +916,67 @@ test_model_soundness_392_object_in_two_dict_values_modification_invisible_progra
 test_model_soundness_393_list_element_is_same_object_as_variable_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_394_no_aliasing_makes_primitives_trivially_correct_program | agree
 test_model_soundness_395_function_receives_and_returns_same_object_no_link_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_396_subset_promises_str_split_but_model_returns_hole_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_397_division_precondition_not_emitted_zero_silent_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_396_subset_promises_str_split_but_model_returns_hole_program | agree
+test_model_soundness_397_division_precondition_not_emitted_zero_silent_program | agree
 test_model_soundness_398_subset_promises_isinstance_user_class_model_cant_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_399_range_step_negative_loop_semantics_wrong_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_400_subset_example_count_words_uses_split_no_model_program | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_model_soundness_401_while_loop_exit_condition_n_equals_zero_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_402_optional_narrowing_then_arithmetic_full_chain_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_399_range_step_negative_loop_semantics_wrong_program | agree
+test_model_soundness_400_subset_example_count_words_uses_split_no_model_program | agree
+test_model_soundness_401_while_loop_exit_condition_n_equals_zero_program | agree
+test_model_soundness_402_optional_narrowing_then_arithmetic_full_chain_program | agree
 test_model_soundness_403_nested_function_call_return_type_flows_to_param_program | agree
 test_model_soundness_404_function_called_twice_independent_results_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_405_while_true_break_postcondition_from_break_guard_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_406_try_except_handler_return_value_not_modeled_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_405_while_true_break_postcondition_from_break_guard_program | agree
+test_model_soundness_406_try_except_handler_return_value_not_modeled_program | agree
 test_model_soundness_407_int_str_conversion_in_subset_example_no_model_program | agree
 test_model_soundness_408_string_concatenation_result_not_equal_to_literal_program | agree
 test_model_soundness_409_dataclass_field_access_after_method_return_no_postcondition_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_410_for_loop_break_value_vs_default_value_merge_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_410_for_loop_break_value_vs_default_value_merge_program | agree
 test_model_soundness_411_dataclass_constructor_field_value_unprovable_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_412_list_literal_len_unprovable_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_412_list_literal_len_unprovable_program | agree
 test_model_soundness_413_if_else_variable_value_at_merge_point_program | agree
 test_model_soundness_414_while_loop_counter_final_value_program | agree
-test_model_soundness_415_string_comparison_ordering_unprovable_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_416_recursive_function_base_case_value_lost_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_417_list_concat_length_not_sum_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_418_comparison_result_used_in_arithmetic_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_415_string_comparison_ordering_unprovable_program | agree
+test_model_soundness_416_recursive_function_base_case_value_lost_program | agree
+test_model_soundness_417_list_concat_length_not_sum_program | agree
+test_model_soundness_418_comparison_result_used_in_arithmetic_program | agree
 test_model_soundness_419_nested_dataclass_field_access_chain_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_420_try_except_normal_path_return_value_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_420_try_except_normal_path_return_value_program | agree
 test_model_soundness_421_default_parameter_not_substituted_at_call_program | agree
-test_model_soundness_422_early_return_guard_pattern_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_422_early_return_guard_pattern_program | agree
 test_model_soundness_423_staticmethod_called_on_class_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_424_property_computed_value_not_modeled_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_425_for_range_step_two_skips_elements_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_426_keyword_arguments_reordered_at_call_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_427_assert_as_assume_loses_error_path_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_428_string_in_string_substring_check_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_425_for_range_step_two_skips_elements_program | agree
+test_model_soundness_426_keyword_arguments_reordered_at_call_program | agree
+test_model_soundness_427_assert_as_assume_loses_error_path_program | agree
+test_model_soundness_428_string_in_string_substring_check_program | agree
 test_model_soundness_429_chained_comparison_single_eval_program | agree
 test_model_soundness_430_dataclass_equality_field_by_field_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_431_negative_index_wraps_around_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_431_negative_index_wraps_around_program | agree
 test_model_soundness_432_string_multiply_zero_gives_empty_program | agree
-test_model_soundness_433_integer_division_always_truncates_toward_negative_infinity_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_434_modulo_result_sign_follows_divisor_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_435_boolean_not_on_integer_returns_bool_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_436_true_division_int_int_returns_float_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_437_bool_equals_int_cross_tag_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_438_empty_list_truthiness_is_false_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_433_integer_division_always_truncates_toward_negative_infinity_program | agree
+test_model_soundness_434_modulo_result_sign_follows_divisor_program | agree
+test_model_soundness_435_boolean_not_on_integer_returns_bool_program | agree
+test_model_soundness_436_true_division_int_int_returns_float_program | agree
+test_model_soundness_437_bool_equals_int_cross_tag_program | agree
+test_model_soundness_438_empty_list_truthiness_is_false_program | agree
 test_model_soundness_439_string_len_after_concat_program | agree
 test_model_soundness_440_int_times_string_reflected_program | agree
 test_model_soundness_441_repeated_field_access_narrowing_lost_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_442_bare_raise_reraises_current_exception_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_442_bare_raise_reraises_current_exception_program | agree
 test_model_soundness_443_dataclass_order_true_comparison_no_dispatch_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_444_try_body_partial_execution_side_effects_visible_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_445_for_loop_range_stop_exclusive_off_by_one_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_446_dict_items_iteration_yields_tuple_no_tag_program | gap | built-in method dict.__class_getitem__ is not modelled yet
+test_model_soundness_445_for_loop_range_stop_exclusive_off_by_one_program | agree
+test_model_soundness_446_dict_items_iteration_yields_tuple_no_tag_program | agree
 test_model_soundness_447_optional_narrowing_incomplete_ordering_typeerror_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_448_int_conversion_bool_tag_normalization_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_449_list_extend_no_model_length_unprovable_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_448_int_conversion_bool_tag_normalization_program | agree
+test_model_soundness_449_list_extend_no_model_length_unprovable_program | agree
 test_model_soundness_450_dataclass_method_modifies_field_caller_stale_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_451_except_tuple_of_types_no_translation_program | agree
 test_model_soundness_452_frozen_dataclass_field_write_no_error_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_453_dict_add_key_during_iteration_no_runtime_error_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_454_parent_method_self_call_child_override_not_dispatched_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_455_continue_break_inside_try_finally_interaction_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_456_for_loop_else_exception_propagation_skips_else_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_455_continue_break_inside_try_finally_interaction_program | agree
+test_model_soundness_456_for_loop_else_exception_propagation_skips_else_program | agree
 test_model_soundness_457_dataclass_inheritance_positional_arg_ordering_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_458_tuple_unpack_assignment_at_call_site_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_459_isinstance_narrowing_killed_by_unrelated_call_program | gap | import of module dataclasses is not modelled yet
@@ -989,7 +989,7 @@ test_model_soundness_465_string_repeat_length_no_axiom_connection_program | agre
 test_model_soundness_466_exception_in_dataclass_constructor_argument_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_467_method_call_on_narrowed_optional_field_no_dispatch_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_468_while_loop_modifies_object_field_condition_reads_stale_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_469_for_loop_else_normal_completion_variable_unbound_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_469_for_loop_else_normal_completion_variable_unbound_program | agree
 test_model_soundness_470_dataclass_field_default_factory_list_shared_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_471_isinstance_narrowing_in_or_condition_no_assume_program | gap | import of module dataclasses is not modelled yet
 test_model_soundness_472_multiple_return_values_tuple_field_access_no_model_program | gap | import of module dataclasses is not modelled yet
@@ -998,12 +998,12 @@ test_model_soundness_474_for_loop_variable_reassignment_ignored_by_range_iterato
 test_model_soundness_475_math_module_functions_no_model_program | gap | import of module math is not modelled yet
 test_model_soundness_476_isinstance_result_stored_no_narrowing_propagation_program | gap | import of module typing is not modelled yet
 test_model_soundness_477_divmod_builtin_no_model_program | agree
-test_model_soundness_478_for_loop_range_variable_final_value_off_by_one_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_479_slice_with_step_no_model_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_480_augmented_assign_missing_key_no_keyerror_program | gap | built-in method dict.__class_getitem__ is not modelled yet
+test_model_soundness_478_for_loop_range_variable_final_value_off_by_one_program | agree
+test_model_soundness_479_slice_with_step_no_model_program | agree
+test_model_soundness_480_augmented_assign_missing_key_no_keyerror_program | agree
 test_model_soundness_481_property_getter_raises_exception_lost_program | gap | import of module dataclasses is not modelled yet
-test_model_soundness_482_range_len_while_translation_reeval_bound_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_model_soundness_483_list_negative_index_write_no_wrap_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_model_soundness_482_range_len_while_translation_reeval_bound_program | agree
+test_model_soundness_483_list_negative_index_write_no_wrap_program | agree
 test_model_soundness_484_object_reference_semantics_program | agree
 test_model_soundness_485_integer_floordiv_mod_sign_program | agree
 test_model_soundness_486_exception_propagation_raise_program | agree
@@ -1044,17 +1044,17 @@ test_pin_any | agree
 test_power | agree
 test_precondition_verification | gap | import of module test_helper is not modelled yet
 test_procedure_in_assert | gap | import of module datetime is not modelled yet
-test_pyhard_01_correlated_dispatch | gap | built-in method type.__or__ is not modelled yet
-test_pyhard_01_correlated_dispatch_annotated | gap | built-in method type.__or__ is not modelled yet
+test_pyhard_01_correlated_dispatch | agree
+test_pyhard_01_correlated_dispatch_annotated | agree
 test_pyhard_01_correlated_dispatch_checked | gap | the translator does not support generator expression
 test_pyhard_02_nested_property_dispatch | agree
 test_pyhard_02_nested_property_dispatch_annotated | agree
 test_pyhard_02_nested_property_dispatch_checked | gap | the translator does not support generator expression
-test_pyhard_03_double_dispatch | gap | built-in method type.__or__ is not modelled yet
-test_pyhard_03_double_dispatch_annotated | gap | built-in method type.__or__ is not modelled yet
+test_pyhard_03_double_dispatch | agree
+test_pyhard_03_double_dispatch_annotated | agree
 test_pyhard_03_double_dispatch_checked | gap | the translator does not support generator expression
-test_pyhard_04_exception_hierarchy | gap | built-in method type.__or__ is not modelled yet
-test_pyhard_04_exception_hierarchy_annotated | gap | built-in method type.__or__ is not modelled yet
+test_pyhard_04_exception_hierarchy | agree
+test_pyhard_04_exception_hierarchy_annotated | agree
 test_pyhard_04_exception_hierarchy_checked | gap | the translator does not support generator expression
 test_pyhard_05_boundness_and_loops | agree
 test_pyhard_05_boundness_and_loops_annotated | agree
@@ -1062,38 +1062,38 @@ test_pyhard_05_boundness_and_loops_checked | gap | the translator does not suppo
 test_pyhard_06_typed_dict_shapes | gap | import of module typing is not modelled yet
 test_pyhard_06_typed_dict_shapes_annotated | gap | import of module typing is not modelled yet
 test_pyhard_06_typed_dict_shapes_checked | gap | the translator does not support generator expression
-test_pyhard_07_recursive_container_types | gap | built-in method type.__or__ is not modelled yet
-test_pyhard_07_recursive_container_types_annotated | gap | built-in method type.__or__ is not modelled yet
+test_pyhard_07_recursive_container_types | agree
+test_pyhard_07_recursive_container_types_annotated | agree
 test_pyhard_07_recursive_container_types_checked | gap | the translator does not support generator expression
-test_pyhard_08_pure_comprehension | gap | built-in method list.__class_getitem__ is not modelled yet
-test_pyhard_08_pure_comprehension_annotated | gap | built-in method list.__class_getitem__ is not modelled yet
+test_pyhard_08_pure_comprehension | agree
+test_pyhard_08_pure_comprehension_annotated | agree
 test_pyhard_08_pure_comprehension_checked | gap | the translator does not support generator expression
 test_pyhard_09_typed_dict_alias_presence | gap | import of module typing is not modelled yet
 test_pyhard_09_typed_dict_alias_presence_annotated | gap | import of module typing is not modelled yet
 test_pyhard_09_typed_dict_alias_presence_checked | gap | the translator does not support generator expression
-test_pyhard_10_builtin_binary_matrix | gap | built-in method tuple.__class_getitem__ is not modelled yet
-test_pyhard_10_builtin_binary_matrix_annotated | gap | built-in method tuple.__class_getitem__ is not modelled yet
+test_pyhard_10_builtin_binary_matrix | agree
+test_pyhard_10_builtin_binary_matrix_annotated | agree
 test_pyhard_10_builtin_binary_matrix_checked | gap | the translator does not support generator expression
-test_pyhard_11_membership_protocols | gap | built-in method list.__class_getitem__ is not modelled yet
-test_pyhard_11_membership_protocols_annotated | gap | built-in method list.__class_getitem__ is not modelled yet
+test_pyhard_11_membership_protocols | agree
+test_pyhard_11_membership_protocols_annotated | agree
 test_pyhard_11_membership_protocols_checked | gap | the translator does not support generator expression
-test_pyhard_12_inherited_mro_dispatch | gap | built-in method tuple.__class_getitem__ is not modelled yet
-test_pyhard_12_inherited_mro_dispatch_annotated | gap | built-in method tuple.__class_getitem__ is not modelled yet
+test_pyhard_12_inherited_mro_dispatch | agree
+test_pyhard_12_inherited_mro_dispatch_annotated | agree
 test_pyhard_12_inherited_mro_dispatch_checked | gap | the translator does not support generator expression
-test_pyhard_13_subscript_read_write | gap | built-in method list.__class_getitem__ is not modelled yet
-test_pyhard_13_subscript_read_write_annotated | gap | built-in method list.__class_getitem__ is not modelled yet
+test_pyhard_13_subscript_read_write | agree
+test_pyhard_13_subscript_read_write_annotated | agree
 test_pyhard_13_subscript_read_write_checked | gap | the translator does not support generator expression
 test_pyhard_14_chained_comparisons | agree
 test_pyhard_14_chained_comparisons_annotated | agree
 test_pyhard_14_chained_comparisons_checked | gap | the translator does not support generator expression
-test_pyhard_15_short_circuit_values | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_pyhard_15_short_circuit_values_annotated | gap | built-in method dict.__class_getitem__ is not modelled yet
+test_pyhard_15_short_circuit_values | agree
+test_pyhard_15_short_circuit_values_annotated | agree
 test_pyhard_15_short_circuit_values_checked | gap | the translator does not support generator expression
-test_pyhard_16_conditional_expression | gap | built-in method type.__or__ is not modelled yet
-test_pyhard_16_conditional_expression_annotated | gap | built-in method type.__or__ is not modelled yet
+test_pyhard_16_conditional_expression | agree
+test_pyhard_16_conditional_expression_annotated | agree
 test_pyhard_16_conditional_expression_checked | gap | the translator does not support generator expression
-test_pyhard_17_for_else_boundness | gap | built-in method list.__class_getitem__ is not modelled yet
-test_pyhard_17_for_else_boundness_annotated | gap | built-in method list.__class_getitem__ is not modelled yet
+test_pyhard_17_for_else_boundness | agree
+test_pyhard_17_for_else_boundness_annotated | agree
 test_pyhard_17_for_else_boundness_checked | gap | the translator does not support generator expression
 test_pyhard_18_exception_routing | agree
 test_pyhard_18_exception_routing_annotated | agree
@@ -1107,23 +1107,23 @@ test_pyhard_20_frozen_dataclass_fields_checked | gap | the translator does not s
 test_pyhard_21_exception_target_lifetime | agree
 test_pyhard_21_exception_target_lifetime_annotated | agree
 test_pyhard_21_exception_target_lifetime_checked | gap | the translator does not support generator expression
-test_pyhard_22_exceptional_assignment | gap | built-in method list.__class_getitem__ is not modelled yet
-test_pyhard_22_exceptional_assignment_annotated | gap | built-in method list.__class_getitem__ is not modelled yet
+test_pyhard_22_exceptional_assignment | agree
+test_pyhard_22_exceptional_assignment_annotated | agree
 test_pyhard_22_exceptional_assignment_checked | gap | the translator does not support generator expression
-test_pyhard_23_exception_path_value_sets | gap | built-in method type.__or__ is not modelled yet
-test_pyhard_23_exception_path_value_sets_annotated | gap | built-in method type.__or__ is not modelled yet
+test_pyhard_23_exception_path_value_sets | agree
+test_pyhard_23_exception_path_value_sets_annotated | agree
 test_pyhard_23_exception_path_value_sets_checked | gap | the translator does not support generator expression
-test_pyhard_24_alias_transitions | gap | built-in method list.__class_getitem__ is not modelled yet
-test_pyhard_24_alias_transitions_annotated | gap | built-in method list.__class_getitem__ is not modelled yet
+test_pyhard_24_alias_transitions | agree
+test_pyhard_24_alias_transitions_annotated | agree
 test_pyhard_24_alias_transitions_checked | gap | the translator does not support generator expression
-test_pyhard_25_handler_loop_control | gap | built-in method list.__class_getitem__ is not modelled yet
-test_pyhard_25_handler_loop_control_annotated | gap | built-in method list.__class_getitem__ is not modelled yet
+test_pyhard_25_handler_loop_control | agree
+test_pyhard_25_handler_loop_control_annotated | agree
 test_pyhard_25_handler_loop_control_checked | gap | the translator does not support generator expression
-test_pyhard_26_comprehension_failure_boundness | gap | built-in method list.__class_getitem__ is not modelled yet
-test_pyhard_26_comprehension_failure_boundness_annotated | gap | built-in method list.__class_getitem__ is not modelled yet
+test_pyhard_26_comprehension_failure_boundness | agree
+test_pyhard_26_comprehension_failure_boundness_annotated | agree
 test_pyhard_26_comprehension_failure_boundness_checked | gap | the translator does not support generator expression
-test_pyhard_27_numeric_tower | gap | built-in method tuple.__class_getitem__ is not modelled yet
-test_pyhard_27_numeric_tower_annotated | gap | built-in method tuple.__class_getitem__ is not modelled yet
+test_pyhard_27_numeric_tower | agree
+test_pyhard_27_numeric_tower_annotated | agree
 test_pyhard_27_numeric_tower_checked | gap | the translator does not support generator expression
 test_pyhard_28_versioned_predicates | agree
 test_pyhard_28_versioned_predicates_annotated | agree
@@ -1133,7 +1133,7 @@ test_pyhard_29_mixed_lookup_chain_annotated | gap | import of module typing is n
 test_pyhard_29_mixed_lookup_chain_checked | gap | the translator does not support generator expression
 test_pyhard_test_audit | gap | the translator does not support from __future__ import annotations
 test_pyresid_bad_subset | gap | import of module os is not modelled yet
-test_pyresid_baseline_assignment_target_order | gap | built-in method list.__class_getitem__ is not modelled yet
+test_pyresid_baseline_assignment_target_order | agree
 test_pyresid_baseline_builtin_protocol | agree
 test_pyresid_baseline_callee_order | agree
 test_pyresid_baseline_comparison_protocol | agree
@@ -1145,13 +1145,13 @@ test_pyresid_baseline_genexpr_kind | gap | the translator does not support gener
 test_pyresid_baseline_init_failure | agree
 test_pyresid_baseline_loop_fixpoint | agree
 test_pyresid_baseline_membership_protocol | agree
-test_pyresid_baseline_nested_annotations | gap | built-in method list.__class_getitem__ is not modelled yet
+test_pyresid_baseline_nested_annotations | agree
 test_pyresid_baseline_no_backward_flow | agree
 test_pyresid_baseline_not_protocol | agree
 test_pyresid_baseline_string_protocol | agree
 test_pyresid_baseline_try_else_escape | agree
 test_pyresid_baseline_unbound_reads | agree
-test_pyresid_binary_dispatch_soundness | gap | built-in method type.__or__ is not modelled yet
+test_pyresid_binary_dispatch_soundness | agree
 test_pyresid_binary_protocol_effect_state | agree
 test_pyresid_chain_demo | agree
 test_pyresid_comp | gap | the translator does not support generator expression
@@ -1159,7 +1159,7 @@ test_pyresid_corr_flip_bug | agree
 test_pyresid_corr_flip_ok | agree
 test_pyresid_corr_isinstance | agree
 test_pyresid_defects | gap | the translator does not support generator function
-test_pyresid_dict_store_key_presence | gap | built-in method list.__class_getitem__ is not modelled yet
+test_pyresid_dict_store_key_presence | agree
 test_pyresid_fuzz | agree
 test_pyresid_gen_pairs | gap | the translator does not support module attribute __file__, generator expression
 test_pyresid_gen_reject | gap | the translator does not support module attribute __file__, generator expression
@@ -1275,33 +1275,33 @@ test_pyresid_mb_wrong_types | agree
 test_pyresid_ops_demo | gap | import of module dataclasses is not modelled yet
 test_pyresid_policy_eafp | agree
 test_pyresid_policy_strict | agree
-test_pyresid_pyhard_pyhard_01_correlated_dispatch | gap | built-in method type.__or__ is not modelled yet
+test_pyresid_pyhard_pyhard_01_correlated_dispatch | agree
 test_pyresid_pyhard_pyhard_02_nested_property_dispatch | agree
-test_pyresid_pyhard_pyhard_03_double_dispatch | gap | built-in method type.__or__ is not modelled yet
-test_pyresid_pyhard_pyhard_04_exception_hierarchy | gap | built-in method type.__or__ is not modelled yet
+test_pyresid_pyhard_pyhard_03_double_dispatch | agree
+test_pyresid_pyhard_pyhard_04_exception_hierarchy | agree
 test_pyresid_pyhard_pyhard_05_boundness_and_loops | agree
 test_pyresid_pyhard_pyhard_06_typed_dict_shapes | gap | import of module typing is not modelled yet
-test_pyresid_pyhard_pyhard_07_recursive_container_types | gap | built-in method type.__or__ is not modelled yet
-test_pyresid_pyhard_pyhard_08_pure_comprehension | gap | built-in method list.__class_getitem__ is not modelled yet
+test_pyresid_pyhard_pyhard_07_recursive_container_types | agree
+test_pyresid_pyhard_pyhard_08_pure_comprehension | agree
 test_pyresid_pyhard_pyhard_09_typed_dict_alias_presence | gap | import of module typing is not modelled yet
-test_pyresid_pyhard_pyhard_10_builtin_binary_matrix | gap | built-in method tuple.__class_getitem__ is not modelled yet
-test_pyresid_pyhard_pyhard_11_membership_protocols | gap | built-in method list.__class_getitem__ is not modelled yet
-test_pyresid_pyhard_pyhard_12_inherited_mro_dispatch | gap | built-in method tuple.__class_getitem__ is not modelled yet
-test_pyresid_pyhard_pyhard_13_subscript_read_write | gap | built-in method list.__class_getitem__ is not modelled yet
+test_pyresid_pyhard_pyhard_10_builtin_binary_matrix | agree
+test_pyresid_pyhard_pyhard_11_membership_protocols | agree
+test_pyresid_pyhard_pyhard_12_inherited_mro_dispatch | agree
+test_pyresid_pyhard_pyhard_13_subscript_read_write | agree
 test_pyresid_pyhard_pyhard_14_chained_comparisons | agree
-test_pyresid_pyhard_pyhard_15_short_circuit_values | gap | built-in method dict.__class_getitem__ is not modelled yet
-test_pyresid_pyhard_pyhard_16_conditional_expression | gap | built-in method type.__or__ is not modelled yet
-test_pyresid_pyhard_pyhard_17_for_else_boundness | gap | built-in method list.__class_getitem__ is not modelled yet
+test_pyresid_pyhard_pyhard_15_short_circuit_values | agree
+test_pyresid_pyhard_pyhard_16_conditional_expression | agree
+test_pyresid_pyhard_pyhard_17_for_else_boundness | agree
 test_pyresid_pyhard_pyhard_18_exception_routing | agree
 test_pyresid_pyhard_pyhard_19_delete_and_rebind | agree
 test_pyresid_pyhard_pyhard_20_frozen_dataclass_fields | gap | import of module dataclasses is not modelled yet
 test_pyresid_pyhard_pyhard_21_exception_target_lifetime | agree
-test_pyresid_pyhard_pyhard_22_exceptional_assignment | gap | built-in method list.__class_getitem__ is not modelled yet
-test_pyresid_pyhard_pyhard_23_exception_path_value_sets | gap | built-in method type.__or__ is not modelled yet
-test_pyresid_pyhard_pyhard_24_alias_transitions | gap | built-in method list.__class_getitem__ is not modelled yet
-test_pyresid_pyhard_pyhard_25_handler_loop_control | gap | built-in method list.__class_getitem__ is not modelled yet
-test_pyresid_pyhard_pyhard_26_comprehension_failure_boundness | gap | built-in method list.__class_getitem__ is not modelled yet
-test_pyresid_pyhard_pyhard_27_numeric_tower | gap | built-in method tuple.__class_getitem__ is not modelled yet
+test_pyresid_pyhard_pyhard_22_exceptional_assignment | agree
+test_pyresid_pyhard_pyhard_23_exception_path_value_sets | agree
+test_pyresid_pyhard_pyhard_24_alias_transitions | agree
+test_pyresid_pyhard_pyhard_25_handler_loop_control | agree
+test_pyresid_pyhard_pyhard_26_comprehension_failure_boundness | agree
+test_pyresid_pyhard_pyhard_27_numeric_tower | agree
 test_pyresid_pyhard_pyhard_28_versioned_predicates | agree
 test_pyresid_pyhard_pyhard_29_mixed_lookup_chain | gap | import of module typing is not modelled yet
 test_pyresid_reject_async | gap | the translator does not support async def
@@ -1401,16 +1401,16 @@ test_tuple_type | gap | import of module typing is not modelled yet
 test_tuple_unpack | agree
 test_type_alias | agree
 test_type_bool | agree
-test_type_checker_differentials_mypy_a10_mutable_default_program | gap | built-in method list.__class_getitem__ is not modelled yet
+test_type_checker_differentials_mypy_a10_mutable_default_program | agree
 test_type_checker_differentials_mypy_a11_linked_structure_program | gap | the translator does not support from __future__ import annotations
 test_type_checker_differentials_mypy_a12_multiple_fields_program | agree
 test_type_checker_differentials_mypy_a13_enum_narrowing_program | gap | import of module enum is not modelled yet
-test_type_checker_differentials_mypy_a14_classmethod_cls_program | gap | built-in method type.__or__ is not modelled yet
+test_type_checker_differentials_mypy_a14_classmethod_cls_program | agree
 test_type_checker_differentials_mypy_a15_super_mutation_program | agree
 test_type_checker_differentials_mypy_a16_tuple_element_narrowing_program | agree
 test_type_checker_differentials_mypy_a17_expression_eval_order_program | agree
 test_type_checker_differentials_mypy_a18_finally_mutation_program | agree
-test_type_checker_differentials_mypy_a1_narrowing_method_program | gap | built-in method type.__or__ is not modelled yet
+test_type_checker_differentials_mypy_a1_narrowing_method_program | agree
 test_type_checker_differentials_mypy_a20_list_narrowing_mutation_program | agree
 test_type_checker_differentials_mypy_a21_exception_handler_narrowing_program | agree
 test_type_checker_differentials_mypy_a23_shared_composition_program | agree
@@ -1418,25 +1418,25 @@ test_type_checker_differentials_mypy_a2_narrowing_alias_program | agree
 test_type_checker_differentials_mypy_a31_try_else_narrowing_program | agree
 test_type_checker_differentials_mypy_a32_property_setter_side_effect_program | agree
 test_type_checker_differentials_mypy_a33_conditional_init_program | agree
-test_type_checker_differentials_mypy_a34_staticmethod_class_var_program | gap | built-in method type.__or__ is not modelled yet
+test_type_checker_differentials_mypy_a34_staticmethod_class_var_program | agree
 test_type_checker_differentials_mypy_a35_str_repr_side_effect_program | agree
 test_type_checker_differentials_mypy_a36_dict_subscript_narrowing_program | agree
 test_type_checker_differentials_mypy_a3_narrowing_indirect_program | agree
 test_type_checker_differentials_mypy_a4_overload_narrowing_program | gap | import of module typing is not modelled yet
-test_type_checker_differentials_mypy_a5_dunder_side_effects_program | gap | built-in method type.__or__ is not modelled yet
+test_type_checker_differentials_mypy_a5_dunder_side_effects_program | agree
 test_type_checker_differentials_mypy_a6_match_narrowing_program | gap | the translator does not support match
 test_type_checker_differentials_mypy_a7_implicit_calls_program | agree
 test_type_checker_differentials_mypy_a8_context_manager_program | agree
 test_type_checker_differentials_mypy_a9_condition_side_effects_program | gap | the translator does not support generator expression
-test_type_checker_differentials_mypy_b1_mutable_override_program | gap | built-in method type.__or__ is not modelled yet
-test_type_checker_differentials_mypy_b2_mutable_override_ops_program | gap | built-in method type.__or__ is not modelled yet
-test_type_checker_differentials_mypy_b3_diamond_inheritance_program | gap | built-in method type.__or__ is not modelled yet
-test_type_checker_differentials_mypy_b4_missing_super_init_program | gap | built-in method type.__or__ is not modelled yet
-test_type_checker_differentials_mypy_b5_multilevel_override_program | gap | built-in method type.__or__ is not modelled yet
-test_type_checker_differentials_mypy_b6_property_covariant_override_program | gap | built-in method type.__or__ is not modelled yet
+test_type_checker_differentials_mypy_b1_mutable_override_program | agree
+test_type_checker_differentials_mypy_b2_mutable_override_ops_program | agree
+test_type_checker_differentials_mypy_b3_diamond_inheritance_program | agree
+test_type_checker_differentials_mypy_b4_missing_super_init_program | agree
+test_type_checker_differentials_mypy_b5_multilevel_override_program | agree
+test_type_checker_differentials_mypy_b6_property_covariant_override_program | agree
 test_type_checker_differentials_mypy_c1_dict_in_narrowing_program | agree
 test_type_checker_differentials_mypy_c2_typeddict_del_program | gap | import of module typing is not modelled yet
-test_type_checker_differentials_mypy_c3_property_side_effect_program | gap | built-in method type.__or__ is not modelled yet
+test_type_checker_differentials_mypy_c3_property_side_effect_program | agree
 test_type_checker_differentials_mypy_c4_getattr_fallback_program | agree
 test_type_checker_differentials_mypy_c5_setattr_override_program | agree
 test_type_checker_differentials_mypy_c6_getattribute_override_program | agree
@@ -1450,16 +1450,16 @@ test_type_checker_differentials_ty_003_unknown_launders_through_return_annotatio
 test_type_checker_differentials_ty_004_unknown_launders_through_param_annotation_program | agree
 test_type_checker_differentials_ty_005_empty_dict_unknown_value_program | agree
 test_type_checker_differentials_ty_006_cast_unchecked_program | gap | import of module typing is not modelled yet
-test_type_checker_differentials_ty_007_unknown_launders_into_list_element_program | gap | built-in method list.__class_getitem__ is not modelled yet
-test_type_checker_differentials_ty_008_unknown_launders_into_dict_value_program | gap | built-in method dict.__class_getitem__ is not modelled yet
+test_type_checker_differentials_ty_007_unknown_launders_into_list_element_program | agree
+test_type_checker_differentials_ty_008_unknown_launders_into_dict_value_program | agree
 test_type_checker_differentials_ty_009_unknown_launders_through_for_iterable_program | agree
-test_type_checker_differentials_ty_010_slice_variable_length_tuple_program | gap | built-in method tuple.__class_getitem__ is not modelled yet
+test_type_checker_differentials_ty_010_slice_variable_length_tuple_program | agree
 test_type_checker_differentials_ty_011_narrowing_survives_mutating_call_program | gap | import of module typing is not modelled yet
 test_type_checker_differentials_ty_012_any_from_stdlib_stub_program | gap | import of module json is not modelled yet
-test_type_checker_differentials_ty_013_subscript_narrowing_survives_mutating_call_program | gap | built-in method type.__or__ is not modelled yet
+test_type_checker_differentials_ty_013_subscript_narrowing_survives_mutating_call_program | agree
 test_type_checker_differentials_ty_014_typeguard_predicate_trusted_unchecked_program | gap | import of module typing is not modelled yet
-test_type_checker_differentials_ty_015_unpack_variable_length_tuple_arity_program | gap | built-in method tuple.__class_getitem__ is not modelled yet
-test_type_checker_differentials_ty_015_unpack_variable_length_tuple_arity_repro_minimal | gap | built-in method tuple.__class_getitem__ is not modelled yet
+test_type_checker_differentials_ty_015_unpack_variable_length_tuple_arity_program | agree
+test_type_checker_differentials_ty_015_unpack_variable_length_tuple_arity_repro_minimal | agree
 test_type_dict_annotation | gap | import of module typing is not modelled yet
 test_type_int | agree
 test_type_list_annotation | gap | import of module typing is not modelled yet

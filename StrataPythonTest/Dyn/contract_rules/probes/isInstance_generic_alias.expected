@@ -1,5 +1,11 @@
 --- stdout 0
 
---- gap built-in method list.__class_getitem__ is not modelled yet
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+g = <GenericAlias object>
+x = []
 --- result __main__.__probe__
---- gap built-in method list.__class_getitem__ is not modelled yet
+raised TypeError: isinstance() argument 2 cannot be a parameterized generic

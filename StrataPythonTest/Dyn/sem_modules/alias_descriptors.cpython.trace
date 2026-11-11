@@ -1,0 +1,23 @@
+--- stdout 1000
+wrapper_descriptor method_descriptor
+method-wrapper builtin_function_or_method
+NotImplemented NotImplemented True
+TypeError: descriptor '__eq__' requires a 'types.GenericAlias' object but received a 'types.UnionType'
+TypeError: descriptor '__mro_entries__' for 'types.GenericAlias' objects doesn't apply to a 'types.UnionType' object
+TypeError: descriptor '__repr__' requires a 'types.UnionType' object but received a 'types.GenericAlias'
+TypeError: descriptor '__eq__' of 'types.GenericAlias' object needs an argument
+TypeError: unbound method GenericAlias.__mro_entries__() needs an argument
+TypeError: list.__class_getitem__() takes exactly one argument (0 given)
+TypeError: GenericAlias.__mro_entries__() takes exactly one argument (0 given)
+TypeError: GenericAlias.__instancecheck__() takes exactly one argument (0 given)
+TypeError: type 'types.UnionType' is not an acceptable base type
+TypeError: descriptor '__eq__' for 'types.GenericAlias' objects doesn't apply to a 'types.UnionType' object
+
+--- outcome
+ok
+--- globals
+GA = <class 'GenericAlias'>
+U = <class 'UnionType'>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
