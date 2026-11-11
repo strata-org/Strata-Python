@@ -1,0 +1,18 @@
+--- stdout 243
+False () typing (<class 'typing.X'>, <class 'dict'>, <class 'object'>)
+TypeError: type.__init__() takes 1 or 3 arguments
+False _TypedDictMeta
+_TypedDictMeta typing
+TypeError: _TypedDictMeta.__new__() got an unexpected keyword argument 'other'
+
+--- outcome
+ok
+--- globals
+M = <class '_TypedDictMeta'>
+TypedDict = <function object>
+W = <class 'W'>
+X = <class 'X'>
+Z = <class 'Z'>
+__doc__ = None
+__name__ = '__main__'
+typing = <module object>

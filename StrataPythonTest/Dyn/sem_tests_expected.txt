@@ -360,53 +360,53 @@ test_language_semantics_ast_bytecode_044_async_await_points_boundary | gap | bui
 test_language_semantics_ast_bytecode_044_async_await_points_supported | gap | import of module dis is not modelled yet
 test_language_semantics_ast_bytecode_045_generator_frame_preservation_boundary | gap | the translator does not support generator function
 test_language_semantics_ast_bytecode_045_generator_frame_preservation_supported | gap | the translator does not support generator function
-test_language_semantics_comprehensions_repros_d1_bindname | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_d1_bindname_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_d1_bindname | agree
+test_language_semantics_comprehensions_repros_d1_bindname_fail | agree
 test_language_semantics_comprehensions_repros_d2_intlist | agree
 test_language_semantics_comprehensions_repros_d2_intlist_fail | agree
 test_language_semantics_comprehensions_repros_d3_arith | agree
 test_language_semantics_comprehensions_repros_d3_arith_fail | agree
-test_language_semantics_comprehensions_repros_d4_two_stage | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_d4_two_stage_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_d4_two_stage | agree
+test_language_semantics_comprehensions_repros_d4_two_stage_fail | agree
 test_language_semantics_comprehensions_repros_d5_attr | agree
 test_language_semantics_comprehensions_repros_d5_attr_fail | agree
-test_language_semantics_comprehensions_repros_ex1_filter | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_ex1_filter_fail | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_ex2_nested | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_ex2_nested_fail | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_ex3_order | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_ex3_order_fail | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_ex4_late | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_ex4_late_fail | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_ex5_empty | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_ex5_empty_fail | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_ex6_setcomp | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_ex6_setcomp_fail | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_ex7_dictcomp | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_ex7_dictcomp_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_ex1_filter | agree
+test_language_semantics_comprehensions_repros_ex1_filter_fail | agree
+test_language_semantics_comprehensions_repros_ex2_nested | agree
+test_language_semantics_comprehensions_repros_ex2_nested_fail | agree
+test_language_semantics_comprehensions_repros_ex3_order | agree
+test_language_semantics_comprehensions_repros_ex3_order_fail | agree
+test_language_semantics_comprehensions_repros_ex4_late | agree
+test_language_semantics_comprehensions_repros_ex4_late_fail | agree
+test_language_semantics_comprehensions_repros_ex5_empty | agree
+test_language_semantics_comprehensions_repros_ex5_empty_fail | agree
+test_language_semantics_comprehensions_repros_ex6_setcomp | agree
+test_language_semantics_comprehensions_repros_ex6_setcomp_fail | agree
+test_language_semantics_comprehensions_repros_ex7_dictcomp | agree
+test_language_semantics_comprehensions_repros_ex7_dictcomp_fail | agree
 test_language_semantics_comprehensions_repros_k1_dictclash | agree
 test_language_semantics_comprehensions_repros_k2_setdup | agree
 test_language_semantics_comprehensions_repros_k3_tuple_nodup | agree
 test_language_semantics_comprehensions_repros_k4_dictcomp_crash | agree
 test_language_semantics_comprehensions_repros_k5_clash_semantics | gap | a slot of a set whose layout is inexact
-test_language_semantics_comprehensions_repros_repro | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_repro_fail | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_t1_typeddict_total | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_t1_typeddict_total_fail | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_t2_typeddict_scan | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_t2_typeddict_scan_fail | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_t3_neglen | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_t3_neglen_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_repro | agree
+test_language_semantics_comprehensions_repros_repro_fail | agree
+test_language_semantics_comprehensions_repros_t1_typeddict_total | agree
+test_language_semantics_comprehensions_repros_t1_typeddict_total_fail | agree
+test_language_semantics_comprehensions_repros_t2_typeddict_scan | agree
+test_language_semantics_comprehensions_repros_t2_typeddict_scan_fail | agree
+test_language_semantics_comprehensions_repros_t3_neglen | agree
+test_language_semantics_comprehensions_repros_t3_neglen_fail | agree
 test_language_semantics_comprehensions_repros_t4_neglen_direct | agree
 test_language_semantics_comprehensions_repros_t4_neglen_direct_fail | agree
-test_language_semantics_comprehensions_repros_t5_presence | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_t5_presence_fail | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_t6_presence_guarded | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_t6_presence_guarded_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_t5_presence | agree
+test_language_semantics_comprehensions_repros_t5_presence_fail | agree
+test_language_semantics_comprehensions_repros_t6_presence_guarded | agree
+test_language_semantics_comprehensions_repros_t6_presence_guarded_fail | agree
 test_language_semantics_comprehensions_repros_u1_puremap | agree
 test_language_semantics_comprehensions_repros_u1_puremap_fail | agree
-test_language_semantics_comprehensions_repros_u2_srclen | gap | the attribute typing.TypedDict is not modelled yet
-test_language_semantics_comprehensions_repros_u2_srclen_fail | gap | the attribute typing.TypedDict is not modelled yet
+test_language_semantics_comprehensions_repros_u2_srclen | agree
+test_language_semantics_comprehensions_repros_u2_srclen_fail | agree
 test_language_semantics_cpython_runtime_001_binary_operators_boundary | agree
 test_language_semantics_cpython_runtime_001_binary_operators_supported | agree
 test_language_semantics_cpython_runtime_002_inplace_operators_boundary | gap | built-in id is not modelled yet
@@ -1059,8 +1059,8 @@ test_pyhard_04_exception_hierarchy_checked | gap | the translator does not suppo
 test_pyhard_05_boundness_and_loops | agree
 test_pyhard_05_boundness_and_loops_annotated | agree
 test_pyhard_05_boundness_and_loops_checked | gap | the translator does not support generator expression
-test_pyhard_06_typed_dict_shapes | gap | the attribute typing.TypedDict is not modelled yet
-test_pyhard_06_typed_dict_shapes_annotated | gap | the attribute typing.TypedDict is not modelled yet
+test_pyhard_06_typed_dict_shapes | agree
+test_pyhard_06_typed_dict_shapes_annotated | agree
 test_pyhard_06_typed_dict_shapes_checked | gap | the translator does not support generator expression
 test_pyhard_07_recursive_container_types | agree
 test_pyhard_07_recursive_container_types_annotated | agree
@@ -1068,8 +1068,8 @@ test_pyhard_07_recursive_container_types_checked | gap | the translator does not
 test_pyhard_08_pure_comprehension | agree
 test_pyhard_08_pure_comprehension_annotated | agree
 test_pyhard_08_pure_comprehension_checked | gap | the translator does not support generator expression
-test_pyhard_09_typed_dict_alias_presence | gap | the attribute typing.TypedDict is not modelled yet
-test_pyhard_09_typed_dict_alias_presence_annotated | gap | the attribute typing.TypedDict is not modelled yet
+test_pyhard_09_typed_dict_alias_presence | agree
+test_pyhard_09_typed_dict_alias_presence_annotated | agree
 test_pyhard_09_typed_dict_alias_presence_checked | gap | the translator does not support generator expression
 test_pyhard_10_builtin_binary_matrix | agree
 test_pyhard_10_builtin_binary_matrix_annotated | agree
@@ -1128,8 +1128,8 @@ test_pyhard_27_numeric_tower_checked | gap | the translator does not support gen
 test_pyhard_28_versioned_predicates | agree
 test_pyhard_28_versioned_predicates_annotated | agree
 test_pyhard_28_versioned_predicates_checked | gap | the translator does not support generator expression
-test_pyhard_29_mixed_lookup_chain | gap | the attribute typing.TypedDict is not modelled yet
-test_pyhard_29_mixed_lookup_chain_annotated | gap | the attribute typing.TypedDict is not modelled yet
+test_pyhard_29_mixed_lookup_chain | agree
+test_pyhard_29_mixed_lookup_chain_annotated | agree
 test_pyhard_29_mixed_lookup_chain_checked | gap | the translator does not support generator expression
 test_pyhard_test_audit | gap | the translator does not support from __future__ import annotations
 test_pyresid_bad_subset | gap | import of module os is not modelled yet
@@ -1186,7 +1186,7 @@ test_pyresid_gr_cb_ann_nonname | agree
 test_pyresid_gr_cb_expr | agree
 test_pyresid_gr_cb_field_default | agree
 test_pyresid_gr_cb_stmt | agree
-test_pyresid_gr_cb_td_method | gap | the attribute typing.TypedDict is not modelled yet
+test_pyresid_gr_cb_td_method | agree
 test_pyresid_gr_cd_dataclass_kw | gap | import of module dataclasses is not modelled yet
 test_pyresid_gr_cd_expr | agree
 test_pyresid_gr_cd_nondataclass | agree
@@ -1256,7 +1256,7 @@ test_pyresid_gt_raise_name_call | agree
 test_pyresid_gt_setcomp | agree
 test_pyresid_gt_single_gen_comp | agree
 test_pyresid_gt_ternary | agree
-test_pyresid_gt_typing_allowlist | gap | the attribute typing.TypedDict is not modelled yet
+test_pyresid_gt_typing_allowlist | agree
 test_pyresid_gt_uadd_ok | agree
 test_pyresid_gt_unary_invert_ok | gap | not modelled: ~ on a bool, which warns
 test_pyresid_ix_alias_strong | agree
@@ -1267,8 +1267,8 @@ test_pyresid_ix_except_hierarchy | agree
 test_pyresid_ix_finally_modes | agree
 test_pyresid_ix_gen_send | gap | the translator does not support generator function
 test_pyresid_ix_havoc_narrow | agree
-test_pyresid_ix_td_raise_eafp | gap | the attribute typing.TypedDict is not modelled yet
-test_pyresid_key_presence_precision | gap | the attribute typing.TypedDict is not modelled yet
+test_pyresid_ix_td_raise_eafp | agree
+test_pyresid_key_presence_precision | agree
 test_pyresid_matrix | gap | the translator does not support generator function
 test_pyresid_mb_unbound_frozen | gap | import of module dataclasses is not modelled yet
 test_pyresid_mb_wrong_types | agree
@@ -1280,10 +1280,10 @@ test_pyresid_pyhard_pyhard_02_nested_property_dispatch | agree
 test_pyresid_pyhard_pyhard_03_double_dispatch | agree
 test_pyresid_pyhard_pyhard_04_exception_hierarchy | agree
 test_pyresid_pyhard_pyhard_05_boundness_and_loops | agree
-test_pyresid_pyhard_pyhard_06_typed_dict_shapes | gap | the attribute typing.TypedDict is not modelled yet
+test_pyresid_pyhard_pyhard_06_typed_dict_shapes | agree
 test_pyresid_pyhard_pyhard_07_recursive_container_types | agree
 test_pyresid_pyhard_pyhard_08_pure_comprehension | agree
-test_pyresid_pyhard_pyhard_09_typed_dict_alias_presence | gap | the attribute typing.TypedDict is not modelled yet
+test_pyresid_pyhard_pyhard_09_typed_dict_alias_presence | agree
 test_pyresid_pyhard_pyhard_10_builtin_binary_matrix | agree
 test_pyresid_pyhard_pyhard_11_membership_protocols | agree
 test_pyresid_pyhard_pyhard_12_inherited_mro_dispatch | agree
@@ -1303,7 +1303,7 @@ test_pyresid_pyhard_pyhard_25_handler_loop_control | agree
 test_pyresid_pyhard_pyhard_26_comprehension_failure_boundness | agree
 test_pyresid_pyhard_pyhard_27_numeric_tower | agree
 test_pyresid_pyhard_pyhard_28_versioned_predicates | agree
-test_pyresid_pyhard_pyhard_29_mixed_lookup_chain | gap | the attribute typing.TypedDict is not modelled yet
+test_pyresid_pyhard_pyhard_29_mixed_lookup_chain | agree
 test_pyresid_reject_async | gap | the translator does not support async def
 test_pyresid_reject_banned_builtin | gap | built-in eval is not modelled yet
 test_pyresid_reject_class_body_stmt | agree
@@ -1341,7 +1341,7 @@ test_pyresid_reject_unsupported_ops | gap | the translator does not support comp
 test_pyresid_reject_walrus | agree
 test_pyresid_reject_with | gap | built-in open is not modelled yet
 test_pyresid_run_all | gap | the translator does not support module attribute __file__, generator expression
-test_pyresid_soundness_heap_dispatch | gap | the attribute typing.TypedDict is not modelled yet
+test_pyresid_soundness_heap_dispatch | agree
 test_pyresid_stress | gap | the translator does not support generator function
 test_pyresid_t1_recency | agree
 test_pyresid_t2_dispatch | agree
@@ -1352,9 +1352,9 @@ test_pyresid_t6_handler | agree
 test_pyresid_t7_init | agree
 test_pyresid_t8_annotations | agree
 test_pyresid_t9_dunder | agree
-test_pyresid_td_demo | gap | the attribute typing.TypedDict is not modelled yet
+test_pyresid_td_demo | agree
 test_pyresid_unary_operators | agree
-test_pyresid_v2_rule_inventory | gap | the attribute typing.TypedDict is not modelled yet
+test_pyresid_v2_rule_inventory | gap | print's keyword argument flush is not modelled yet
 test_pyresid_wb_inventory | agree
 test_pyresid_wb_shapes | gap | import of module dataclasses is not modelled yet
 test_reassign_different_type | agree
@@ -1435,7 +1435,7 @@ test_type_checker_differentials_mypy_b4_missing_super_init_program | agree
 test_type_checker_differentials_mypy_b5_multilevel_override_program | agree
 test_type_checker_differentials_mypy_b6_property_covariant_override_program | agree
 test_type_checker_differentials_mypy_c1_dict_in_narrowing_program | agree
-test_type_checker_differentials_mypy_c2_typeddict_del_program | gap | the attribute typing.TypedDict is not modelled yet
+test_type_checker_differentials_mypy_c2_typeddict_del_program | agree
 test_type_checker_differentials_mypy_c3_property_side_effect_program | agree
 test_type_checker_differentials_mypy_c4_getattr_fallback_program | agree
 test_type_checker_differentials_mypy_c5_setattr_override_program | agree

@@ -1,0 +1,10 @@
+--- stdout 64
+TypeError: unsupported operand type(s) for |=: 'set' and 'list'
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'

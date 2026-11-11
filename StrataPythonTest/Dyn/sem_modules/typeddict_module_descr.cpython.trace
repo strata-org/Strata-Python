@@ -1,0 +1,11 @@
+--- stdout 7
+E made
+
+--- outcome
+ok
+--- globals
+D = <class 'D'>
+E = <class 'E'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'

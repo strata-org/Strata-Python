@@ -23,7 +23,8 @@ TRACE = f"{ROOT}/StrataPythonTest/Dyn/trace.py"
 # The seeds of the closure: the objects that the models make.
 SEEDS = [list[int], int | None, typing.List, typing.List[int], typing.Tuple, typing.Tuple[int],
          typing.Optional, typing.Optional[int], typing.Union[int, str], typing.Required[int],
-         typing.Any, typing.ForwardRef("x"), typing.cast, typing.overload]
+         typing.Any, typing.ForwardRef("x"), typing.cast, typing.overload,
+         typing.TypedDict.__mro_entries__((typing.TypedDict,))[0]]
 MODULES = [typing]
 # The objects whose docstring a model holds, by the name that `Names.lean` gives them.
 DOCS = {f"typing.{n}": getattr(typing, n).__doc__

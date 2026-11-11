@@ -2724,20 +2724,26 @@ is recorded as caught.
   the classes' `vars()`, which the models hold or stop with a gap on, and the programs that check
   the recursion limits of their nested `repr` and `==`.
 - `import typing` and its names `TYPE_CHECKING`, `cast`, `overload`, `Any`, `Optional`, `Union`,
-  `NotRequired`, `Required`, `TypeGuard`, `List`, `Dict`, `Set`, `Tuple` and `ForwardRef`, ported
-  from CPython's `typing.py`: subscription with its checks and messages, the subscription caches of
-  128 entries, the aliases' `repr`, `==`, `hash`, `|`, attributes and calls, and `isinstance` with
-  a union. Every other name of `vars(typing)` stops with a gap, and so do: a subscription with an
-  argument that is not a known value (above, with `typing`'s objects added, and with classes
-  whose metaclass is `type` or `typing._AnyMeta` and whose `__module__` is a `str`); a `str`
-  argument of a subscription that is not a dotted name; a method of `typing`'s classes called on
-  a value of another class, with its receiver as a keyword, or (`__getitem__`) with keyword
-  arguments; a direct call of a special form's `_getitem` on values that are not known; an
-  attribute hook called with a name that is not a `str`; a `typing` check of `isinstance` on a
-  value whose `__class__` is not its class; `overload` of a function whose `__module__` is not a
-  `str` or `None`; subclassing an alias
-  or a special form's class; subscribing an alias again; a write to the module, to its classes or
-  to its objects; and an import of `typing` after the program changed the builtins.
+  `NotRequired`, `Required`, `TypeGuard`, `List`, `Dict`, `Set`, `Tuple`, `ForwardRef` and
+  `TypedDict`, ported from CPython's `typing.py`: subscription with its checks and messages, the
+  subscription caches of 128 entries, the aliases' `repr`, `==`, `hash`, `|`, attributes and calls,
+  and `isinstance` with a union. A class statement with the base `TypedDict` makes its class as
+  `_TypedDictMeta.__new__` does: the bases' check, the annotations checked and merged with the
+  bases', the required and optional keys and `__total__`; calling the class calls `dict`. Every
+  other name of `vars(typing)` stops with a gap, and so do: a subscription with an argument that is
+  not a known value (above, with `typing`'s objects added, and with classes whose metaclass is
+  `type`, `typing._AnyMeta` or `typing._TypedDictMeta` and whose `__module__` is a `str`); a `str`
+  argument of a subscription that is not a dotted name; a method of `typing`'s classes called on a
+  value of another class, with its receiver as a keyword, or (`__getitem__`) with keyword arguments;
+  a direct call of a special form's `_getitem` on values that are not known; an attribute hook
+  called with a name that is not a `str`; a `typing` check of `isinstance` on a value whose
+  `__class__` is not its class; `overload` of a function whose `__module__` is not a `str` or
+  `None`; the functional form `TypedDict("P", {...})`; a `TypedDict` class whose annotations are not
+  a dict, have a name that is not a `str` or a value that is not known, whose own `__module__` is
+  not a `str` while it has annotations, whose `total` is not a `bool`, or whose bases' keys are not
+  sets; `_TypedDictMeta.__new__` with keywords other than `total`; subclassing an alias or a special
+  form's class; subscribing an alias again; a write to the module, to its classes or to its objects
+  (its functions included); and an import of `typing` after the program changed the builtins.
 - CPython's recursion limit: nested comparisons, calls into Python and calls of built-in callables
   count toward it, at least as many levels as CPython counts, and a run stops with a gap when its
   count passes 9,000, 995 below CPython's limit, where CPython raises `RecursionError`. A call of a

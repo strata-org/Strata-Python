@@ -20,6 +20,13 @@ gap_new_read | gap | the attribute GenericAlias.__new__ is not modelled yet
 gap_object_new | gap | object.__new__ of the C type types.GenericAlias is not modelled yet
 gap_params_origin | gap | __parameters__ of a type alias with arguments that the model doesn't know
 gap_subclass_ga | gap | a subclass of types.GenericAlias is not modelled yet
+gap_typeddict_annotation_name | gap | a TypedDict annotation whose name is not a str is not modelled yet
+gap_typeddict_annotations | gap | TypedDict annotations that are not a dict are not modelled yet
+gap_typeddict_functional | gap | the functional form of TypedDict is not modelled yet
+gap_typeddict_keys_list | gap | TypedDict keys of a base that are not a set or frozenset are not modelled yet
+gap_typeddict_keywords | gap | _TypedDictMeta.__new__ with keywords other than total is not modelled yet
+gap_typeddict_module_descr | gap | a TypedDict class whose __module__ is not a str is not modelled yet
+gap_typeddict_unknown_annotation | gap | a TypedDict annotation that the model doesn't know
 gap_typing_alias_write | gap | a write to a typing alias is not modelled yet
 gap_typing_cache_c_depth | gap | a C recursion depth over 9000
 gap_typing_cache_deep_entry | gap | Python call depth over 900
@@ -29,6 +36,7 @@ gap_typing_float_arg | gap | a typing subscription with arguments that the model
 gap_typing_form_attr | gap | an AttributeError without name and obj from an attribute read is not modelled yet
 gap_typing_forward_code | gap | the attribute ForwardRef.__forward_code__ is not modelled yet
 gap_typing_forwardref_expr | gap | a ForwardRef of a string that is not a dotted name is not modelled yet
+gap_typing_function_writes | gap | an attribute write to the function cast is not modelled yet
 gap_typing_hash_any | gap | hash(x) depends on an address
 gap_typing_hash_c_depth | gap | a C recursion depth over 9000
 gap_typing_hash_user | gap | hash(x) depends on an address
@@ -46,6 +54,13 @@ gap_union_base | gap | the attribute UnionType.__new__ is not modelled yet
 gap_union_call | gap | the attribute UnionType.__new__ is not modelled yet
 gap_union_metaclass | gap | comparing unions with arguments that the model doesn't know
 gap_union_str_subclass_name | gap | an attribute name that is an instance of a subclass of str is not modelled yet
+typeddict_basics | agree
+typeddict_call | agree
+typeddict_class_annotations | agree
+typeddict_dunders | agree
+typeddict_meta_attrs | agree
+typeddict_module_descr | agree
+typeddict_setname_ns | agree
 typing_cache | agree
 typing_cache_deep_evicted | agree
 typing_cache_property | agree

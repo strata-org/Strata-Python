@@ -3253,10 +3253,10 @@ validity_ann_atom_str_holds | agree
 validity_ann_generic_dict_of_str_int | agree
 validity_ann_generic_list_of_int | agree
 validity_ann_literal_holds | gap | the attribute typing.Literal is not modelled yet
-validity_ann_notRequired_absent_key_raises | gap | the attribute typing.TypedDict is not modelled yet
-validity_ann_notRequired_present_key_reads | gap | the attribute typing.TypedDict is not modelled yet
-validity_ann_readOnly_reads | gap | the attribute typing.TypedDict is not modelled yet
-validity_ann_required_present | gap | the attribute typing.TypedDict is not modelled yet
+validity_ann_notRequired_absent_key_raises | agree
+validity_ann_notRequired_present_key_reads | agree
+validity_ann_readOnly_reads | gap | from typing import ReadOnly of a name that the module lacks is not modelled yet
+validity_ann_required_present | agree
 validity_ann_union_takes_int | agree
 validity_ann_union_takes_none | agree
 validity_bytes_capitalize_normal | gap | built-in method bytes.capitalize is not modelled yet

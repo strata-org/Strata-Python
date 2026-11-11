@@ -1,0 +1,10 @@
+--- stdout 29
+True {'name': <class 'str'>}
+
+--- outcome
+ok
+--- globals
+Movie = <class 'Movie'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,13 @@
+--- stdout 46
+True {'a': <class 'int'>, 'z': <class 'int'>}
+
+--- outcome
+ok
+--- globals
+D = <class 'D'>
+M = <class 'M'>
+N = <class 'N'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+d = {'x': <D object>, '__annotations__': {'z': <class 'int'>}}

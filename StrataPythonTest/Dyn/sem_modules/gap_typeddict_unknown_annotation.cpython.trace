@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+M = <class 'M'>
+TypedDict = <function object>
+U = <class 'U'>
+__doc__ = None
+__name__ = '__main__'

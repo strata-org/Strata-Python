@@ -118,6 +118,17 @@ def anyMetaSpec : ClassSpec :=
 def anySpec : ClassSpec :=
   typingSpec "Any" (instanceDict := true) #[.staticNative "__new__" (typingKey "Any" "__new__")]
 
+/-- `typing._TypedDictMeta`, the metaclass of the `TypedDict` classes: its `__call__` is `dict`, and
+its `__instancecheck__` is its `__subclasscheck__`. -/
+def typedDictMetaSpec : ClassSpec :=
+  typingSpec "_TypedDictMeta" (instanceDict := true)
+    #[.staticNative "__new__" (typingKey "_TypedDictMeta" "__new__"), .builtin "__call__" .dict,
+      .native "__subclasscheck__" (typingKey "_TypedDictMeta" "__subclasscheck__") .function,
+      .sameAs "__instancecheck__" "__subclasscheck__"]
+
+/-- `typing._TypedDict`, the class that `TypedDict.__mro_entries__` gives, named `TypedDict`. -/
+def typedDictSpec : ClassSpec := typingSpec "TypedDict" (instanceDict := true) #[]
+
 /-- The special forms of `typing` that the model has. -/
 def specialForms : List String := ["Optional", "Union", "NotRequired", "Required", "TypeGuard"]
 

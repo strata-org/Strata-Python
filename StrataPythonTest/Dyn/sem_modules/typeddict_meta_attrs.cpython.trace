@@ -1,0 +1,25 @@
+--- stdout 600
+True True
+__subclasscheck__ _TypedDictMeta.__subclasscheck__ _TypedDictMeta.__subclasscheck__
+__new__ _TypedDictMeta.__new__ staticmethod
+None None
+TypedDict TypedDict typing
+<lambda> <lambda> typing
+(<class 'typing.TypedDict'>,)
+True True
+TypeError: TypedDict does not support instance and class checks
+TypeError: _TypedDictMeta.__subclasscheck__() missing 1 required positional argument: 'other'
+TypeError: TypedDict does not support instance and class checks
+ok1
+TypeError: TypedDict does not support instance and class checks
+TypeError: <lambda>() missing 1 required positional argument: 'bases'
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+M = <class '_TypedDictMeta'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+typing = <module object>

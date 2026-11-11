@@ -274,15 +274,16 @@ def aliasArgs [PyReads m V] (self : V) : m V := do
 `GenericAlias`; none of them has a `__typing_subst__`. -/
 def aliasOrigins : List Builtin := [.list, .dict, .tuple, .set, .frozenset, .type]
 
-/-- Whether `x` is a class whose metaclass is exactly `type` or `typing`'s `_AnyMeta`, so that its
+/-- Whether `x` is a class whose metaclass is exactly `type` or one of `typing`'s `_AnyMeta` and
+`_TypedDictMeta`, so that its
 `==` and `hash` are `type`'s, by identity, and whose `__module__` is an exact `str`, which the
 `repr` of a `typing` alias compares with `'builtins'`. -/
 def plainClass [PyReads m V] (x : V) : m Bool := do
   if !(← isType x) then return false
   let mt ← PyReads.classOf x
   if (← PyPure.identical mt (PyPure.imm (m := m) (.builtin .type))) != .yes then
-    let some am ← modelClass? anyMetaSpec | return false
-    if (← PyPure.identical mt am) != .yes then return false
+    let metas ← [anyMetaSpec, typedDictMetaSpec].filterMapM modelClass?
+    if !(← metas.anyM fun c => return (← PyPure.identical mt c) == .yes) then return false
   match ← classData? x with
   | some cd => match ← dictFindStr cd.ns "__module__" with
     | some md => return ((← PyPure.immView md) matches some (.str _))

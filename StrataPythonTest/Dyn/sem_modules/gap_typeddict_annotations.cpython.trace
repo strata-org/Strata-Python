@@ -1,0 +1,9 @@
+--- stdout 53
+AttributeError 'int' object has no attribute 'items'
+
+--- outcome
+ok
+--- globals
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'

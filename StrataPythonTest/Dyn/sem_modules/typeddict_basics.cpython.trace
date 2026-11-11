@@ -1,0 +1,29 @@
+--- stdout 657
+True False _TypedDictMeta __main__
+True True
+True True
+{'name': <class 'str'>, 'year': typing.NotRequired[int], 'tags': typing.List[str], 'later': ForwardRef('Movie', module='__main__')} True True
+(<class '__main__.Movie'>, <class 'dict'>, <class 'object'>) 1 TypedDict (<class '__main__.Movie'>,)
+frozenset 1
+typing.Optional[__main__.Movie] typing.List[__main__.Child]
+True
+TypeError: TypedDict does not support instance and class checks
+TypeError: cannot inherit from both a TypedDict type and a non-TypedDict base class
+TypeError: TypedDict('Name', {f0: t0, f1: t1, ...}); each t must be a type Got (<class 'int'>, <class 'str'>).
+typing False True True
+
+--- outcome
+ok
+--- globals
+Child = <class 'Child'>
+List = <_SpecialGenericAlias object>
+Movie = <class 'Movie'>
+N = <class 'N'>
+NotRequired = <_SpecialForm object>
+Optional = <_SpecialForm object>
+Partial = <class 'Partial'>
+Required = <_SpecialForm object>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+d = {'__annotations__': {'z': <class 'int'>}}

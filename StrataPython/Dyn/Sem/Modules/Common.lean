@@ -98,10 +98,15 @@ inductive Entry where
   | strs (name : String) (items : Array String)
   /-- The member descriptor of the class's own slot `name`. -/
   | slot (name : String)
+  /-- A built-in constant, such as the class `dict`. -/
+  | builtin (name : String) (b : Builtin)
+  /-- The value of the entry `other`, made before this one: one object under two names. -/
+  | sameAs (name other : String)
 
 /-- The name that an entry binds. -/
 def Entry.name : Entry → String
-  | .native n _ _ | .cached n _ | .staticNative n _ | .str n _ | .none n | .strs n _ | .slot n => n
+  | .native n _ _ | .cached n _ | .staticNative n _ | .str n _ | .none n | .strs n _ | .slot n
+  | .builtin n _ | .sameAs n _ => n
 
 /-- How a model describes one of its classes: CPython's names, its flags, the native methods and
 values of its namespace, the names of its own slots in the order of their members, and the names
@@ -189,6 +194,11 @@ def modelClassWith [PyWrites m V] [PyNew m V] (spec : ClassSpec) (mcls : V) (bas
         | some i =>
           PyPure.allocObj (PyPure.imm (m := m) (.builtin .member_descriptor)) (.member c name (offset + i))
         | none => PyPure.modelInvariant s!"the model's class {spec.qualname} has no slot {name}"
+      | .builtin _ b => pure (PyPure.imm (m := m) (.builtin b))
+      | .sameAs _ other => do
+        let some v ← dictFindStr ns other |
+          PyPure.modelInvariant s!"the model's class {spec.qualname} has no {other} yet"
+        pure v
     PyNew.dictSetNew ns (strKey (m := m) e.name) v none fun _ => pure false
   let mod ← PyPure.allocObj (PyPure.imm (m := m) (.builtin .module))
     (.module key #[] true #[("class", c)])

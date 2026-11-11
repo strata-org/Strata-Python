@@ -29,11 +29,13 @@ open StrataPython.Dyn.Sem.Modules.TypesTest (namesAgree)
 /-- The model's classes, by CPython's `module.qualname`. -/
 def specs : List (String × ClassSpec) :=
   [("types.GenericAlias", gaSpec), ("types.UnionType", unionSpec), ("typing.Any", anySpec),
-    ("typing.ForwardRef", forwardRefSpec), ("typing._AnyMeta", anyMetaSpec),
+    ("typing.ForwardRef", forwardRefSpec), ("typing.TypedDict", typedDictSpec),
+    ("typing._AnyMeta", anyMetaSpec),
     ("typing._BaseGenericAlias", baseGenericAliasSpec), ("typing._Final", finalSpec),
     ("typing._GenericAlias", genericAliasSpec), ("typing._NotIterable", notIterableSpec),
     ("typing._SpecialForm", specialFormSpec), ("typing._SpecialGenericAlias", specialGenericAliasSpec),
-    ("typing._TupleType", tupleTypeSpec), ("typing._UnionGenericAlias", unionGenericAliasSpec)]
+    ("typing._TupleType", tupleTypeSpec), ("typing._TypedDictMeta", typedDictMetaSpec),
+    ("typing._UnionGenericAlias", unionGenericAliasSpec)]
 
 #guard specs.all fun (key, spec) => namesAgree spec key
 -- The models' objects reach no other class outside `builtins`.

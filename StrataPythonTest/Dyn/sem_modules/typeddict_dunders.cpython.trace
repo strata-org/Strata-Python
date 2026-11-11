@@ -1,0 +1,19 @@
+--- stdout 41
+get None M
+bool
+7
+True 1 True
+5 None 3.5
+
+--- outcome
+ok
+--- globals
+G = <class 'G'>
+M = <class 'M'>
+N = <class 'N'>
+P = <class 'P'>
+Q = <class 'Q'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+typing = <module object>

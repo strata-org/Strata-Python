@@ -1,0 +1,12 @@
+--- stdout 22
+other
+Other
+written 2
+
+--- outcome
+ok
+--- globals
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+typing = <module object>

@@ -1,0 +1,15 @@
+--- stdout 101
+get module 1
+get module 2
+{'a': ForwardRef('X', module='mod1'), 'b': ForwardRef('Y', module='mod2')}
+
+--- outcome
+ok
+--- globals
+D = <class 'D'>
+M = <class 'M'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+mods = ['mod1', 'mod2', 'mod3']
+n = 2

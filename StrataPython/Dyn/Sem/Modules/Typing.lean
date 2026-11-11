@@ -152,6 +152,14 @@ def anyMetaCls [PyWrites m V] [PyNew m V] : m V :=
 def anyCls [PyWrites m V] [PyNew m V] : m V := do
   modelClassWith anySpec (← anyMetaCls) #[PyPure.imm (m := m) (.builtin .object)]
 
+/-- `typing._TypedDictMeta`. -/
+def typedDictMetaCls [PyWrites m V] [PyNew m V] : m V :=
+  modelClassWith typedDictMetaSpec (typeV (m := m)) #[typeV (m := m)]
+
+/-- `typing._TypedDict`, made by `type.__new__(_TypedDictMeta, 'TypedDict', (), {})`. -/
+def typedDictCls [PyWrites m V] [PyNew m V] : m V := do
+  modelClassWith typedDictSpec (← typedDictMetaCls) #[PyPure.imm (m := m) (.builtin .object)]
+
 /-- Whether `v` is an instance of the model's class of `spec` or of a subclass of it, as
 `isinstance(v, cls)` is for a class whose metaclass is `type`. -/
 def isInstOf [PyReads m V] (v : V) (spec : ClassSpec) : m Bool := do
@@ -242,11 +250,11 @@ def dottedName? (x : String) : Option Bool :=
     | [] => false
   some (parts.all fun p => ident p && !keywords.contains p)
 
-/-- **`ForwardRef(arg)`**, with `module` `None` and `is_class` `False`, for a `str` that `compile`
+/-- **`ForwardRef(arg, module=module)`**, with `is_class` `False`, for a `str` that `compile`
 accepts as a dotted name; any other string stops with a gap, since CPython compiles it and may
 raise `SyntaxError`. The slot `__forward_code__` holds no value: CPython's code object is not
 modelled. -/
-def newForwardRef [PyWrites m V] [PyNew m V] (arg : V) (text : String) : m V := do
+def newForwardRef [PyWrites m V] [PyNew m V] (arg : V) (text : String) (module : V) : m V := do
   useBuiltin "isinstance"
   useBuiltin "compile"
   if dottedName? text != some true then
@@ -254,25 +262,25 @@ def newForwardRef [PyWrites m V] [PyNew m V] (arg : V) (text : String) : m V := 
   PyReads.withPyDepth 1 do
     PyReads.allocInstance (← forwardRefCls) .plain #[]
       #[some arg, none, some (PyPure.imm (m := m) (.bool false)), some (PyPure.imm (m := m) (.bool true)),
-        some (PyPure.imm (m := m) (.bool false)), some (PyPure.imm (m := m) .none),
-        some (PyPure.imm (m := m) .none)]
+        some (PyPure.imm (m := m) (.bool false)), some module, some (PyPure.imm (m := m) .none)]
 
 /-! ## The helpers of `typing.py` -/
 
 /-- **`_type_convert(arg)`**: `NoneType` for `None`, a `ForwardRef` for a `str`. -/
-def typeConvert [PyWrites m V] [PyNew m V] (arg : V) : m V := pyFrame do
+def typeConvert [PyWrites m V] [PyNew m V] (arg : V) (module : V) : m V := pyFrame do
   if (← PyPure.immView arg) matches some .none then
     useBuiltin "type"
     return PyPure.imm (m := m) (.builtin .NoneType)
   useBuiltin "isinstance"
   match ← str? arg with
-  | some t => newForwardRef arg t
+  | some t => newForwardRef arg t module
   | none => pure arg
 
 /-- **`_type_check(arg, msg)`** for a known `arg`, with `is_argument` true and no special forms
 allowed: `Any` passes, a special form and a tuple raise CPython's `TypeError`. -/
-def typeCheck [PyWrites m V] [PyNew m V] (arg : V) (msg : String) : m V := pyFrame do
-  let arg ← typeConvert arg
+def typeCheck [PyWrites m V] [PyNew m V] (arg : V) (msg : String)
+    (module : Option V := none) : m V := pyFrame do
+  let arg ← typeConvert arg (module.getD (PyPure.imm (m := m) .none))
   -- `isinstance(arg, _GenericAlias) and arg.__origin__ in (Generic, Protocol, ClassVar, Final)`:
   -- none of these is reachable, and the comparisons of known values run no user code.
   if (← PyPure.identical arg (← anyCls)) == .yes then return arg
@@ -671,6 +679,139 @@ def frozensetHashOf [PyCalls m V] (xs : Array V) : m V := do
   let hs ← (← distinctArgs xs).toList.mapM fun x => PyReads.withDepth 1 (Proto.hash x)
   PyPure.hashValue (frozensetHash hs)
 
+/-! ## `TypedDict` -/
+
+/-- **`get_origin(tp)`** for a known `tp`: the origin of an alias or a `GenericAlias`,
+`types.UnionType` for a union of it, and `None` otherwise. -/
+def getOrigin [PyCalls m V] (tp : V) : m V := pyFrame do
+  useBuiltin "isinstance"
+  if ← isInstOf tp baseGenericAliasSpec then return ← aliasField tp "__origin__"
+  if let some (o, _) ← gaParts? tp then return o
+  if (← unionArgs? tp).isSome then return ← PyReads.classOf tp
+  return PyPure.imm (m := m) .none
+
+/-- The `str` members of the set `s`, which a `TypedDict` class's keys are. -/
+def strMembers [PyReads m V] (s : V) : m (Array String) := do
+  if (← anySetLike? s).isNone then
+    PyPure.gap "TypedDict keys of a base that are not a set or frozenset are not modelled yet"
+  (← setMembers s).unordered.mapM fun (k, _) => do
+    let some t ← str? k | PyPure.gap "a TypedDict key that is not a str is not modelled yet"
+    pure t
+
+/-- **`frozenset(keys)`** of a new `set` of the `str`s `ks`: the set's copy as a closed frozenset.
+Their order depends on the hash seed, as CPython's does. -/
+def strFrozenset [PyCalls m V] [PyNew m V] (ks : Array String) : m V := do
+  useBuiltin "frozenset"
+  let keys ← PyPure.allocSet false true
+  for k in ks do
+    let kv := strValue (m := m) k
+    PyNew.setAddNew keys kv none (keyEq kv)
+  PyReads.setCopy keys true
+
+/-- The entry `name` of the namespace of the class `c`, as `c.__dict__.get(name)` reads it. -/
+def nsEntry [PyReads m V] (c : V) (name : String) : m (Option V) := do
+  let some cd ← classData? c | PyPure.modelInvariant "a TypedDict base that is no class"
+  dictFindStr cd.ns name
+
+/-- Whether `c.name` exists, as `hasattr` checks it. -/
+def hasAttr [PyCalls m V] (c : V) (name : String) : m Bool := do
+  useBuiltin "hasattr"
+  return (← lookupAttr? c name).isSome
+
+/-- **`_TypedDictMeta.__new__(cls, name, bases, ns, total)`**: the bases must be `TypedDict` classes;
+`type.__new__(_TypedDictMeta, name, (dict,), ns)`, with `__module__ = 'typing'` in a copy of `ns`
+that lacks it, as `type.__new__` takes it from typing's globals; then `__orig_bases__`, the
+annotations checked and merged with the bases', the required and optional keys, and `__total__`. -/
+def typedDictNew [PyWrites m V] [PyNew m V] (name bases ns total : V) : m V := do
+  let mcls ← typedDictMetaCls
+  let bs ← tupleItems bases
+  useBuiltin "type"
+  for b in bs do
+    if (← PyPure.identical (← PyReads.classOf b) mcls) != .yes then
+      raiseT "TypeError" "cannot inherit from both a TypedDict type and a non-TypedDict base class"
+  -- `any(issubclass(b, Generic) for b in bases)`: `Generic` is not reachable, and no base is one.
+  useBuiltin "any"
+  useBuiltin "issubclass"
+  useBuiltin "set"
+  if !(← isDict ns) then PyPure.gap "a TypedDict namespace that is not a dict is not modelled yet"
+  -- `type.__new__` gets a copy with `__module__` when `ns` lacks it; the port reads `ns` itself.
+  let nsNew ← if (← dictFindStr ns "__module__").isSome then pure ns else do
+    let c ← PyReads.dictCopy ns
+    PyWrites.dictSet c (strValue (m := m) "__module__") (strValue (m := m) "typing") none fun _ => pure false
+    pure c
+  let dictV := PyPure.imm (m := m) (.builtin .dict)
+  let tp ← typeNew (typeV (m := m))
+    (PyPure.imm (m := m) (.tuple #[mcls, name, PyPure.imm (m := m) (.tuple #[dictV]), nsNew]))
+    (← PyPure.allocDict)
+  if !(← hasAttr tp "__orig_bases__") then setAttr tp "__orig_bases__" (some bases)
+  let own ← match ← dictFindStr ns "__annotations__" with
+    | some a => pure a
+    | none => PyPure.allocDict
+  if !(← isDict own) then PyPure.gap "TypedDict annotations that are not a dict are not modelled yet"
+  -- `tp_dict.__module__`, read for each own annotation: the new class's own entry, which runs no
+  -- user code when it is an exact `str`.
+  let md ← do
+    if (← PyReads.dictLen own) == 0 then pure (PyPure.imm (m := m) .none) else
+    let some cd ← classData? tp | PyPure.modelInvariant "a TypedDict class that is no class"
+    match ← dictFindStr cd.ns "__module__" with
+    | some x =>
+      if (← PyPure.immView x) matches some (.str _) then pure x
+      else PyPure.gap "a TypedDict class whose __module__ is not a str is not modelled yet"
+    | none => PyPure.gap "a TypedDict class without __module__ is not modelled yet"
+  let msg := "TypedDict('Name', {f0: t0, f1: t1, ...}); each t must be a type"
+  let mut ownAnns : Array (String × V) := #[]
+  for (k, v, _) in ← PyReads.dictEntries own do
+    let some n ← str? k | PyPure.gap "a TypedDict annotation whose name is not a str is not modelled yet"
+    if !(← knownArgs compareDepth #[v]) then
+      PyPure.gap "a TypedDict annotation that the model doesn't know"
+    ownAnns := ownAnns.push (n, ← typeCheck v msg (some md))
+  let mut annotations : Array (String × V) := #[]
+  let mut required : Array String := #[]
+  let mut optional : Array String := #[]
+  let put (xs : Array (String × V)) (n : String) (v : V) : Array (String × V) :=
+    match xs.findIdx? (·.1 == n) with
+    | some i => xs.set! i (n, v)
+    | none => xs.push (n, v)
+  for b in bs do
+    if let some a ← nsEntry b "__annotations__" then
+      if !(← isDict a) then PyPure.gap "TypedDict base annotations that are not a dict"
+      for (k, v, _) in ← PyReads.dictEntries a do
+        let some n ← str? k | PyPure.gap "a TypedDict annotation whose name is not a str is not modelled yet"
+        annotations := put annotations n v
+    let breq ← match ← nsEntry b "__required_keys__" with
+      | some r => strMembers r
+      | none => pure #[]
+    required := required ++ breq.filter (!required.contains ·)
+    optional := optional.filter (!breq.contains ·)
+    let bopt ← match ← nsEntry b "__optional_keys__" with
+      | some o => strMembers o
+      | none => pure #[]
+    required := required.filter (!bopt.contains ·)
+    optional := optional ++ bopt.filter (!optional.contains ·)
+  for (n, v) in ownAnns do annotations := put annotations n v
+  let some (.bool totalB) ← PyPure.immView total |
+    PyPure.gap "a TypedDict total that is not a bool is not modelled yet"
+  for (n, v) in ownAnns do
+    let o ← getOrigin v
+    let isRequired ←
+      if (← PyPure.identical o (← modelGlobal "typing" "Required")) == .yes then pure true
+      else if (← PyPure.identical o (← modelGlobal "typing" "NotRequired")) == .yes then pure false
+      else pure totalB
+    if isRequired then
+      if !required.contains n then required := required.push n
+      optional := optional.filter (· != n)
+    else
+      if !optional.contains n then optional := optional.push n
+      required := required.filter (· != n)
+  let annV ← PyPure.allocDict
+  for (n, v) in annotations do
+    PyNew.dictSetNew annV (strValue (m := m) n) v none fun _ => pure false
+  setAttr tp "__annotations__" (some annV)
+  setAttr tp "__required_keys__" (some (← strFrozenset required))
+  setAttr tp "__optional_keys__" (some (← strFrozenset optional))
+  if !(← hasAttr tp "__total__") then setAttr tp "__total__" (some total)
+  pure tp
+
 /-- The bodies of the Python functions of the model of `typing`, by native key, over the native
 `fn` and its arguments. -/
 def typingBody [PyWrites m V] [PyNew m V] (key : String) (fn args kwargs : V) : m V := do
@@ -903,6 +1044,28 @@ def typingBody [PyWrites m V] [PyNew m V] (key : String) (fn args kwargs : V) : 
     if (← PyPure.identical cls (← anyCls)) == .yes then
       raiseT "TypeError" "Any cannot be instantiated"
     PyPure.gap "a subclass of typing.Any is not modelled yet"
+  -- `TypedDict`.
+  if key == k "_TypedDictMeta" "__new__" then
+    let xs ← tupleItems args
+    let kws ← PyReads.dictEntries kwargs
+    let totalKw ← kws.filterMapM fun (k, v, _) => do
+      if (← str? k) == some "total" then pure (some v) else pure none
+    if kws.size != totalKw.size then
+      PyPure.gap "_TypedDictMeta.__new__ with keywords other than total is not modelled yet"
+    match xs, totalKw with
+    | #[_, name, bases, ns], #[] => return ← typedDictNew name bases ns (boolV true)
+    | #[_, name, bases, ns], #[t] => return ← typedDictNew name bases ns t
+    | #[_, name, bases, ns, t], #[] => return ← typedDictNew name bases ns t
+    | _, _ => PyPure.gap "_TypedDictMeta.__new__ with these arguments is not modelled yet"
+  if key == k "_TypedDictMeta" "__subclasscheck__" then
+    let #[_, _] ← bound #["cls", "other"] | bad
+    raiseT "TypeError" "TypedDict does not support instance and class checks"
+  if key == "typing.TypedDict.<lambda>" then
+    let #[_] ← bindPy "<lambda>" #["bases"] args kwargs | bad
+    return PyPure.imm (m := m) (.tuple #[← modelGlobal "typing" "_TypedDict"])
+  if key == "typing.TypedDict" then
+    -- The functional form finds its module from the calling frame.
+    PyPure.gap "the functional form of TypedDict is not modelled yet"
   -- The module's functions.
   if key == "typing.cast" then
     let #[_, val] ← bindPy "cast" #["typ", "val"] args kwargs | bad
@@ -933,7 +1096,8 @@ def typingBody [PyWrites m V] [PyNew m V] (key : String) (fn args kwargs : V) : 
 def typingAttrNames : List String :=
   ["__name__", "TYPE_CHECKING", "cast", "overload", "_overload_dummy", "Any", "_AnyMeta",
     "ForwardRef", "_Final", "_NotIterable", "_SpecialForm", "_BaseGenericAlias", "_GenericAlias",
-    "_SpecialGenericAlias", "_TupleType", "_UnionGenericAlias", "List", "Dict", "Set", "Tuple"] ++
+    "_SpecialGenericAlias", "_TupleType", "_UnionGenericAlias", "List", "Dict", "Set", "Tuple",
+    "TypedDict", "_TypedDict", "_TypedDictMeta"] ++
     specialForms
 
 /-- **`import typing`**: the module, made at its first import after a check that the builtins are
@@ -957,6 +1121,12 @@ def importTyping [PyWrites m V] [PyNew m V] (_self _args _kwargs : V) : m V := d
   attrs := attrs.push ("Tuple", ← newSpecialAlias (← tupleTypeCls) "Tuple" .tuple (-1) (genText "typing.Tuple"))
   for f in specialForms do
     attrs := attrs.push (f, ← newSpecialForm f)
+  -- `TypedDict` is a function whose `__dict__` holds `__mro_entries__`.
+  let td ← typingFunction "TypedDict" "TypedDict" "typing.TypedDict"
+  let tdDict ← PyWrites.objEnsureDict td
+  PyWrites.dictSet tdDict (strValue (m := m) "__mro_entries__")
+    (← typingFunction "<lambda>" "<lambda>" "typing.TypedDict.<lambda>") none fun _ => pure false
+  attrs := attrs ++ #[("TypedDict", td), ("_TypedDict", ← typedDictCls), ("_TypedDictMeta", ← typedDictMetaCls)]
   let gapped := ((moduleNames.lookup "typing").getD []).toArray.filter (!typingAttrNames.contains ·)
   let mod ← PyPure.allocObj (PyPure.imm (m := m) (.builtin .module)) (.module "typing" gapped true attrs)
   PyReads.moduleAdd "typing" mod
