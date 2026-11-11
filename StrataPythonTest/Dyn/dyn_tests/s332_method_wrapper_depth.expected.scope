@@ -1,0 +1,11 @@
+module
+  x: local (assigned, referenced)
+  i: local (assigned)
+  range: global implicit (referenced)
+  C: local (assigned, referenced)
+  print: global implicit (referenced)
+  len: global implicit (referenced)
+  repr: global implicit (referenced)
+  class C
+    __repr__: local (assigned)
+    x: global implicit (referenced)

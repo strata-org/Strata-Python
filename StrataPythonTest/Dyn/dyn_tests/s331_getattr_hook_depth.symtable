@@ -1,0 +1,39 @@
+module top
+  Leaf: local (assigned, referenced)
+  M: local (assigned, referenced)
+  _: local (assigned)
+  cs: local (assigned, referenced)
+  i: local (assigned, referenced)
+  k1: local (assigned, referenced)
+  k2: local (assigned)
+  nest: local (assigned, referenced)
+  print: global implicit (referenced)
+  range: global implicit (referenced)
+  t: local (assigned, referenced)
+  table: local (assigned)
+  type: global implicit (referenced)
+  function nest
+    _: local (assigned)
+    d: local (parameter, referenced)
+    range: global implicit (referenced)
+    t: local (assigned, referenced)
+  class Leaf
+    __repr__: local (assigned)
+    function __repr__
+      k2: global implicit (referenced)
+      self: local (parameter)
+      table: global implicit (referenced)
+  class M
+    __getattr__: local (assigned)
+    p: local (assigned)
+    property: global implicit (referenced)
+    function __getattr__
+      cls: local (parameter)
+      name: local (parameter)
+    function p
+      cls: local (parameter, referenced)
+      cs: global implicit (referenced)
+      len: global implicit (referenced)
+      repr: global implicit (referenced)
+      t: global implicit (referenced)
+qualnames: Leaf, Leaf.__repr__, M, M.__getattr__, M.p, nest

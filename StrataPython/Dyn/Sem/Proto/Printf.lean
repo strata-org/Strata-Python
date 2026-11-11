@@ -153,7 +153,7 @@ def pfNumberLong [PyCalls m V] (v : V) : m Int := do
       | .error e => ofFailure e
     if let some (.descr _ _ _) ← PyPure.immView f then
       PyPure.gap "this built-in type's __int__ is not modelled yet"
-    let r ← callFound f v t #[] (← PyPure.allocDict)
+    let r ← callFound "__int__" f v t #[] (← PyPure.allocDict)
     match ← PyPure.immView r with
     | some (.int i) => return i
     | some (.bool _) => PyPure.gap "an __int__ that returns a bool, where CPython warns, is not modelled yet"
@@ -184,7 +184,7 @@ def pfFloat [PyCalls m V] (v : V) : m UInt64 := do
       | .error e => ofFailure e
     if let some (.descr _ _ _) ← PyPure.immView f then
       PyPure.gap "this built-in type's __float__ is not modelled yet"
-    let r ← callFound f v t #[] (← PyPure.allocDict)
+    let r ← callFound "__float__" f v t #[] (← PyPure.allocDict)
     match ← PyPure.immView r with
     | some (.float x) => return x
     | _ =>
@@ -235,7 +235,7 @@ def pfConvert [PyCalls m V] (isBytes : Bool) (a : PfArg) (v : V) (index : Nat) (
             let t ← PyReads.classOf v
             match ← lookupType t "__bytes__" with
             | some f =>
-              let r ← callFound f v t #[] (← PyPure.allocDict)
+              let r ← callFound "__bytes__" f v t #[] (← PyPure.allocDict)
               let some bs ← bytesPart? r |
                 raiseBuiltin "TypeError" s!"__bytes__ returned non-bytes (type {Format.cTypeName (← typeName r)})"
               pure bs

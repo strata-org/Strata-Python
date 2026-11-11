@@ -1,0 +1,11 @@
+--- stdout 6
+24003
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+_ = 7999
+__doc__ = None
+__name__ = '__main__'
+e = <E object>

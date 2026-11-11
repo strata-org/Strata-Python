@@ -426,7 +426,14 @@ s31_function_attrs | agree
 s320_bound_method_arity | gap | an argument error of the method BaseException.add_note bound to an instance of a subtype is not modelled yet
 s321_kwargs_not_str | gap | a call of a built-in with a keyword that is not a str is not modelled yet
 s322_dunder_arity_messages | agree
+s323_slot_wrapper_depth | gap | a C recursion depth over 9000
+s324_builtin_call_depth | gap | a C recursion depth over 9000
+s325_exception_repr_depth | agree
+s327_shared_slot_depth | gap | a C recursion depth over 9000
+s328_setattr_slot_depth | gap | a C recursion depth over 9000
 s32_number_dunders | agree
+s331_getattr_hook_depth | gap | a C recursion depth over 9000
+s332_method_wrapper_depth | gap | a C recursion depth over 9000
 s33_repeat_index | agree
 s34_container_dunders | agree
 s35_live_set_walks | agree

@@ -106,7 +106,7 @@ def getIter [PyCalls m V] (v : V) : m V := do
       -- Only `v`'s own type's `__iter__`: one bound from another type is `callFound`'s check.
       if !b.info.name.endsWith "iterator" && (← builtinBase? v) == some b then
         if let some it ← builtinIter? v then return it
-    let r ← callFound f v t #[] (← PyPure.allocDict)
+    let r ← callFound "__iter__" f v t #[] (← PyPure.allocDict)
     if (← lookupType (← PyReads.classOf r) "__next__").isNone then
       raiseBuiltin "TypeError" s!"iter() returned non-iterator of type '{← typeName r}'"
     pure r
@@ -142,7 +142,7 @@ operation: a gap. -/
 def classNext [PyWrites m V] (it : V) : m V := do
   let t ← PyReads.classOf it
   match ← lookupType t "__next__" with
-  | some f => callFound f it t #[] (← PyPure.allocDict)
+  | some f => callFound "__next__" f it t #[] (← PyPure.allocDict)
   | none => PyPure.gap "an iterator whose class lost __next__ while it is in use is not modelled yet"
 
 /-- **`tp_iternext` of the iterator `it`**: the next item, or `none` when a built-in iterator
@@ -239,7 +239,7 @@ def nextCall [PyCalls m V] (it : V) : m (Option V) := do
   let t ← PyReads.classOf it
   let some f ← lookupType t "__next__" |
     PyPure.gap "an iterator whose class lost __next__ while it is in use is not modelled yet"
-  tryCatch (some <$> callFound f it t #[] (← PyPure.allocDict)) fun x => do
+  tryCatch (some <$> callFound "__next__" f it t #[] (← PyPure.allocDict)) fun x => do
     if ← isStopIterationExc x then pure none else throw x
 
 /-- What a walk's body does after an item: go on, or stop the walk. -/
@@ -355,13 +355,13 @@ def pyLen [PyCalls m V] (v : V) : m Nat := do
   | some f =>
     if let some (.descr b "__len__" _) ← PyPure.immView f then
       if (← builtinBase? v) != some b then
-        return ← lenResult (← callFound f v t #[] (← PyPure.allocDict))
+        return ← lenResult (← callFound "__len__" f v t #[] (← PyPure.allocDict))
       match ← builtinLen? v with
       | some n => return n
       | none => PyPure.gap s!"len() of a {← typeName v} is not modelled yet"
     if (← PyPure.immView f) matches some .none then
       raiseBuiltin "TypeError" s!"'NoneType' object is not callable"
-    lenResult (← callFound f v t #[] (← PyPure.allocDict))
+    lenResult (← callFound "__len__" f v t #[] (← PyPure.allocDict))
 
 /-- **`PyObject_LengthHint(v, d)`**: `len(v)` when the type has `__len__`, a `TypeError` falling
 through; else the type's `__length_hint__`, where none, a `TypeError` or `NotImplemented` gives

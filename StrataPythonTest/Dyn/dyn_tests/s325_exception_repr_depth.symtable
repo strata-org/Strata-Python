@@ -1,0 +1,11 @@
+module top
+  E: local (assigned, referenced)
+  Exception: global implicit (referenced)
+  _: local (assigned)
+  e: local (assigned, referenced)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  range: global implicit (referenced)
+  repr: global implicit (referenced)
+  class E
+qualnames: E

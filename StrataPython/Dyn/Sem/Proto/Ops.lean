@@ -370,7 +370,7 @@ def callSpecial? [PyCalls m V] (self : V) (name : String) (args : Array V) : m (
   | none => pure none
   | some f =>
     let g ← descrGetN dispatchDepth f (some self) t
-    some <$> callN dispatchDepth g (PyPure.imm (m := m) (.tuple args)) (← PyPure.allocDict)
+    some <$> callSlotN dispatchDepth name f t g (PyPure.imm (m := m) (.tuple args)) (← PyPure.allocDict)
 
 /-- Whether `v` is `NotImplemented`. -/
 def isNotImpl [PyPure m V] (v : V) : m Bool :=
@@ -412,7 +412,7 @@ def trySlot [PyCalls m V] (self other : V) (name : String) (swallow : Bool := fa
   let g? ← if swallow then tryCatch (some <$> descrGetN dispatchDepth f (some self) t) fun _ => pure none
     else some <$> descrGetN dispatchDepth f (some self) t
   let some g := g? | return none
-  let r ← callN dispatchDepth g (PyPure.imm (m := m) (.tuple #[other])) (← PyPure.allocDict)
+  let r ← callSlotN dispatchDepth name f t g (PyPure.imm (m := m) (.tuple #[other])) (← PyPure.allocDict)
   if ← isNotImpl r then pure none else pure (some r)
 
 /-- Whether `tb` is a proper subclass of `ta` whose reflected dunder `rev` is its own: CPython's
@@ -490,7 +490,7 @@ def printfFirst? [PyCalls m V] (op : Arith.BinOp) (a b : V) : m (Option V) := do
   if ← isUserObject b then
     if ← overridesReflected ta (← PyReads.classOf b) "__rmod__" then
       if let some r ← trySlot b a "__rmod__" then return some r
-  return some (← callFound f a ta #[b] (← PyPure.allocDict))
+  return some (← callFound "__mod__" f a ta #[b] (← PyPure.allocDict))
 
 /-- `a op b`, CPython's `binary_op1`: the numbers, a user object's dunders in the order of CPython's
 slots, then `+` and `*`

@@ -808,7 +808,7 @@ def inplaceOp [PyWrites m V] [PyNew m V] (op : Arith.BinOp) (a b : V) : m V := d
     let t ← PyReads.classOf a
     if let some f ← lookupType t name then
       if !(← isSeqSlot f) then
-        let r ← callFound f a t #[b] (← PyPure.allocDict)
+        let r ← callFound name f a t #[b] (← PyPure.allocDict)
         if !(← isNotImpl r) then return r
   else if (← anySet? a) matches some false then
     -- `set_ior` and the others take an instance of a subclass of `set` or `frozenset` too.
@@ -862,7 +862,7 @@ def inplaceMatMult [PyCalls m V] (a b : V) : m V := do
   if ← isUserObject a then
     let t ← PyReads.classOf a
     if let some f ← lookupType t "__imatmul__" then
-      let r ← callFound f a t #[b] (← PyPure.allocDict)
+      let r ← callFound "__imatmul__" f a t #[b] (← PyPure.allocDict)
       if !(← isNotImpl r) then return r
   matMultOpAs "@=" a b
 

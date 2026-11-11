@@ -1,0 +1,12 @@
+module top
+  C: local (assigned, referenced)
+  i: local (assigned)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  range: global implicit (referenced)
+  repr: global implicit (referenced)
+  x: local (assigned, referenced)
+  class C
+    __repr__: local (assigned)
+    x: global implicit (referenced)
+qualnames: C

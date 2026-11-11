@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised RecursionError: maximum recursion depth exceeded while calling a Python object
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+i = 5999
+x = (<C object>,)

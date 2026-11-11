@@ -321,7 +321,7 @@ def typeNew [PyWrites m V] [PyNew m V] (_self args kwargs : V) : m V := do
   -- `__set_name__` on the namespace's values, in order; an exception gets CPython 3.12's note.
   for (k, v, _) in ← PyReads.dictEntries ns do
     if let some setName ← lookupType (← PyReads.classOf v) "__set_name__" then
-      tryCatch (discard <| callFound setName v (← PyReads.classOf v) #[cls, k] (← PyPure.allocDict))
+      tryCatch (discard <| callFound "__set_name__" setName v (← PyReads.classOf v) #[cls, k] (← PyPure.allocDict))
         fun x => do
           -- CPython's `%.100s` cuts the class name at 100 bytes of its UTF-8 text.
           let shown ← if name.utf8ByteSize ≤ 100 then pure name
@@ -793,7 +793,7 @@ def isinstanceN [PyCalls m V] : Nat → V → V → m Bool
     match ← lookupType mt "__instancecheck__" with
     | some ic => PyReads.withDepth 1 do
       if (← PyPure.immView ic) matches some (.descr .type _ _) then objectIsinstance obj cls
-      else truthy (← callFound ic cls mt #[obj] (← PyPure.allocDict))
+      else truthy (← callFound "__instancecheck__" ic cls mt #[obj] (← PyPure.allocDict))
     | none => objectIsinstance obj cls
 
 /-- The `isinstance` built-in. -/

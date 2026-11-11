@@ -1,0 +1,11 @@
+--- stdout 6
+26762
+
+--- outcome
+ok
+--- globals
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+nest = <function object>
+p = <P object>

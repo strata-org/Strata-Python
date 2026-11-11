@@ -587,6 +587,29 @@ handed to `callBuiltin` at once, which doesn't keep it: this call is the value's
 def callTpNew [PyCalls m V] (self : V) (t : Builtin) (args kwargs : V) : m V :=
   PyCalls.callBuiltin (PyPure.imm (m := m) (.bound self t "__new__" .tpNew)) args kwargs
 
+/-- The special methods that each have a slot of their own in CPython: a class whose method is a
+built-in type's slot wrapper runs that type's C slot. A slot that several methods share (`__eq__`
+and `__ne__`, `__setattr__` and `__delattr__`, `__add__` and `__radd__`) holds the C function only
+when all of them are a built-in type's, so it isn't listed. -/
+def loneSlots : List String :=
+  ["__repr__", "__str__", "__init__", "__hash__", "__iter__", "__next__", "__call__", "__len__",
+    "__contains__", "__int__", "__float__", "__index__", "__bool__", "__get__", "__iadd__",
+    "__isub__", "__imul__", "__imatmul__", "__itruediv__", "__ifloordiv__", "__imod__", "__ipow__",
+    "__ilshift__", "__irshift__", "__iand__", "__ixor__", "__ior__"]
+
+/-- Whether the attribute `f`, found as the special method `name` on the type `t`, is what CPython
+installs as `t`'s C slot: a built-in type's slot wrapper descriptor for `name`, of a type that `t`
+subclasses, where `name` has a slot of its own (`loneSlots`). A method-wrapper such as
+`x.__repr__` is not one, and neither is a wrapper of a method with a shared slot. -/
+def isOwnSlot [PyReads m V] (name : String) (f t : V) : m Bool := do
+  if !loneSlots.contains name then return false
+  match ← PyPure.immView f with
+  | some (.descr b fname .slotWrapper) =>
+    if fname != name then return false
+    let some mro ← mroOf t | return false
+    inMro (PyPure.imm (m := m) (.builtin b)) mro
+  | _ => return false
+
 mutual
 /-- **`f(*args, **kwargs)`**, CPython's `PyObject_Call`, at the dispatch depth `n`: a function
 object runs its closure; a built-in callable or a native function its body (`callBuiltin`); a bound
@@ -597,20 +620,25 @@ def callN [PyCalls m V] : Nat → V → V → V → m V
   | n + 1, f, args, kwargs => do
     kwargsKeysGap f kwargs
     match ← PyPure.immView f with
+    -- A call of a built-in callable counts one C level: CPython counts one for every built-in
+    -- but the FASTCALL ones (`setattr`, `iter`, `dict.get`), which the model overcounts by one.
+    -- A class-method descriptor, which CPython calls through `_PyObject_MakeTpCall`, counts two.
     | some (.builtin b) =>
       if b.info.kind == .type then typeCallN n true f args kwargs
-      else PyCalls.callBuiltin f args kwargs
+      else PyReads.withDepth 1 (PyCalls.callBuiltin f args kwargs)
     | some (.descr t name kind) =>
       if kind == .method || kind == .slotWrapper then
-        let (self, rest) ← descrSelf t name (kind == .slotWrapper) args
-        PyCalls.callBuiltin (PyPure.imm (m := m) (.bound self t name kind)) rest kwargs
+        PyReads.withDepth 1 do
+          let (self, rest) ← descrSelf t name (kind == .slotWrapper) args
+          PyCalls.callBuiltin (PyPure.imm (m := m) (.bound self t name kind)) rest kwargs
       else if kind == .classMethod then
-        let (cls, rest) ← classDescrSelf t name args
-        PyCalls.callBuiltin (PyPure.imm (m := m) (.bound cls t name kind)) rest kwargs
-      else PyCalls.callBuiltin f args kwargs
+        PyReads.withDepth 2 do
+          let (cls, rest) ← classDescrSelf t name args
+          PyCalls.callBuiltin (PyPure.imm (m := m) (.bound cls t name kind)) rest kwargs
+      else PyReads.withDepth 1 (PyCalls.callBuiltin f args kwargs)
     | some (.bound _ _ _ k) =>
       if k == .tpNew then PyPure.modelInvariant "a type's tp_new outside a class call"
-      else PyCalls.callBuiltin f args kwargs
+      else PyReads.withDepth 1 (PyCalls.callBuiltin f args kwargs)
     | some (.method func self) => callN n func (← prepend self args) kwargs
     | some _ => raiseBuiltin "TypeError" s!"'{← typeName f}' object is not callable"
     | none => match ← PyReads.objView f with
@@ -618,7 +646,7 @@ def callN [PyCalls m V] : Nat → V → V → V → m V
         checkKwargs kwargs
         -- A call into Python costs CPython about 2 C levels.
         PyReads.withDepth 2 (PyCalls.callFunc f args kwargs)
-      | some (.native _) => PyCalls.callBuiltin f args kwargs
+      | some (.native _) => PyReads.withDepth 1 (PyCalls.callBuiltin f args kwargs)
       | some (.cls _) => typeCallN n true f args kwargs
       | some .inst =>
         let t ← PyReads.classOf f
@@ -670,7 +698,10 @@ def typeCallN [PyCalls m V] : Nat → Bool → V → V → V → m V
       if !isInst then return obj
       let some init ← lookupType (← PyReads.classOf obj) "__init__" | return obj
       let initF ← descrGetN n init (some obj) (← PyReads.classOf obj)
-      let r ← callN n initF args kwargs
+      -- `type_call` runs a built-in type's own `tp_init` as the C slot, with no C level of its own.
+      let r ← if ← isOwnSlot "__init__" init (← PyReads.classOf obj) then
+          PyCalls.callBuiltin initF args kwargs
+        else callN n initF args kwargs
       if !((← PyPure.immView r) matches some .none) then
         raiseBuiltin "TypeError" s!"__init__() should return None, not '{← typeName r}'"
       return obj
@@ -749,12 +780,20 @@ def descrGetN [PyCalls m V] : Nat → V → Option V → V → m V
       | _ => pure d
 end
 
-/-- A dunder `f` found on the type `t` of `self`, called with `args`: bound by its `__get__` first
-(a function binds `self`, as CPython's `lookup_maybe_method` and `vectorcall_unbound` do; a value
-without `__get__` is called as it is). -/
-def callFound [PyCalls m V] (f self t : V) (args : Array V) (kwargs : V) : m V := do
+/-- **A call of `g`, the special method `name` that CPython's slot dispatch reaches**, bound from
+`f`, the attribute found on the type `t`: where `f` is `t`'s own C slot (`isOwnSlot`), it runs as
+CPython runs the C slot, with no C level of its own; anything else is called as `callN` calls it. -/
+def callSlotN [PyCalls m V] (n : Nat) (name : String) (f t g args kwargs : V) : m V := do
+  if ← isOwnSlot name f t then PyCalls.callBuiltin g args kwargs
+  else callN n g args kwargs
+
+/-- The dunder `name`, `f`, found on the type `t` of `self`, called with `args`: bound by its
+`__get__` first (a function binds `self`, as CPython's `lookup_maybe_method` and
+`vectorcall_unbound` do; a value without `__get__` is called as it is), then called as the slot
+dispatch calls it (`callSlotN`). -/
+def callFound [PyCalls m V] (name : String) (f self t : V) (args : Array V) (kwargs : V) : m V := do
   let g ← descrGetN dispatchDepth f (some self) t
-  callN dispatchDepth g (PyPure.imm (m := m) (.tuple args)) kwargs
+  callSlotN dispatchDepth name f t g (PyPure.imm (m := m) (.tuple args)) kwargs
 
 
 /-- The `str` key `name`. -/

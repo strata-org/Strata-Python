@@ -2409,6 +2409,9 @@ That claim trusts these assumptions about the CPython run:
 - the default limit of 4,300 digits for converting an `int` to and from a `str`: no
   `sys.set_int_max_str_digits`, no `PYTHONINTMAXSTRDIGITS` and no `-X int_max_str_digits`;
 - the default recursion limit of 1,000: no `sys.setrecursionlimit`;
+- that the model counts no fewer C levels than CPython, except for the comparisons of a dict's or
+  a set's keys, which the 995-level margin covers: corpus programs check the count for each kind
+  of call, but nothing proves it;
 - no `-O` (so `assert` statements run and `__debug__` is `True`);
 - enough memory, so that no `MemoryError` is raised;
 - the platform's `libm` for a float `**`, whose result the model takes from the host's `pow`.
@@ -2599,8 +2602,12 @@ with CPython 3.12, over 1422 generated cases.
   `MemoryError`), a dict whose keys change at the same size during its iteration, an iterator whose
   class loses `__next__`, or an object whose class loses `__getitem__`, while a loop runs it, and
   the comprehension operations (`py.listComp`, `py.compFor`, …).
-- CPython's recursion limit: nested comparisons and calls into Python count toward it, and a run
-  stops with a gap where CPython would raise `RecursionError`.
+- CPython's recursion limit: nested comparisons, calls into Python and calls of built-in callables
+  count toward it, at least as many levels as CPython counts, and a run stops with a gap when its
+  count passes 9,000, 995 below CPython's limit, where CPython raises `RecursionError`. A call of a
+  built-in callable counts one level (a class-method descriptor two), even where CPython counts
+  none, except a built-in type's own C slot, which CPython's slot dispatch runs directly: a slot
+  wrapper of a method that has a slot of its own.
 - Warnings: the semantics emits no warning. A warning records itself in the module's
   `__warningregistry__`, which a program can read, so where CPython 3.12 warns, the semantics
   stops with a gap: `~` on a `bool`, an `__index__` that returns a `bool` or an instance of a

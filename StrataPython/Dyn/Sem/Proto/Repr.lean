@@ -118,7 +118,7 @@ def reprCore [PyCalls m V] : Nat → V → m V
     if let some (.descr b "__repr__" _) ← PyPure.immView f then
       if ← builtinIn t b then
         if let some s ← builtinRepr n b v then return strValue (m := m) s
-    callFound f v t #[] (← PyPure.allocDict)
+    callFound "__repr__" f v t #[] (← PyPure.allocDict)
 
 /-- `repr` of an immediate. -/
 def immRepr [PyCalls m V] : Nat → Imm V → m String
@@ -315,11 +315,11 @@ def strOf [PyCalls m V] (v : V) : m V := do
     | some (.descr .object "__str__" _) => checkStrResult "__str__" (← reprCore n v)
     | some (.descr .str "__str__" _) =>
       if let some s ← strText? v then return strValue (m := m) s
-      checkStrResult "__str__" (← callFound f v t #[] (← PyPure.allocDict))
+      checkStrResult "__str__" (← callFound "__str__" f v t #[] (← PyPure.allocDict))
     | some (.descr .bytes "__str__" _) =>
       if let some x ← bytesPart? v then return strValue (m := m) (Format.bytesRepr x)
-      checkStrResult "__str__" (← callFound f v t #[] (← PyPure.allocDict))
-    | _ => checkStrResult "__str__" (← callFound f v t #[] (← PyPure.allocDict))
+      checkStrResult "__str__" (← callFound "__str__" f v t #[] (← PyPure.allocDict))
+    | _ => checkStrResult "__str__" (← callFound "__str__" f v t #[] (← PyPure.allocDict))
 
 /-- The text of `str(v)`. -/
 def strTextOf [PyCalls m V] (v : V) : m String := do textOf (← strOf v)
@@ -427,7 +427,7 @@ def formatOf [PyCalls m V] (v spec : V) : m V := do
   if let some (.descr b "__format__" _) ← PyPure.immView f then
     if ← builtinIn t b then
       if let some r ← builtinFormat b v t sp then return r
-  let r ← callFound f v t #[spec] (← PyPure.allocDict)
+  let r ← callFound "__format__" f v t #[spec] (← PyPure.allocDict)
   if (← strText? r).isNone then
     raiseBuiltin "TypeError" s!"__format__ must return a str, not {← typeName r}"
   pure r

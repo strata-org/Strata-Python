@@ -471,6 +471,13 @@ s319_length_hint_len_ends | yes |
 s320_bound_method_arity | yes |
 s321_kwargs_not_str | yes |
 s322_dunder_arity_messages | yes |
+s323_slot_wrapper_depth | yes |
+s324_builtin_call_depth | yes |
+s325_exception_repr_depth | yes |
+s327_shared_slot_depth | yes |
+s328_setattr_slot_depth | yes |
+s331_getattr_hook_depth | yes |
+s332_method_wrapper_depth | yes |
 s129_iter_builtins | yes |
 s130_iter_loops | yes |
 s131_dict_merge | yes |

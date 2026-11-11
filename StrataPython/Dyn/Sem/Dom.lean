@@ -303,8 +303,9 @@ def WalkKinds.mayRunUser (ks : List WalkKinds) : Bool :=
 
 /-- The count of nested C levels at which the model stops with a gap, 995 below CPython 3.12's
 C recursion limit, where it raises `RecursionError` (lists nested 9,995 deep compare, 9,996 deep
-raise).  As in CPython, each comparison counts 1 and each call into Python 2 more; the margin
-covers a dict or set key's own comparison levels, which the model doesn't count (`keyDepth`). -/
+raise).  As in CPython, each comparison counts 1, each call into Python 2 more and each call of a
+built-in callable 1 (`Proto.callN`, `Proto.callSlotN`); the margin covers a dict or set key's own
+comparison levels, which the model doesn't count (`keyDepth`). -/
 def cDepthLimit : Nat := 9000
 
 /-- `v` as an immediate; `none` for an object or an unassigned value.  An `int` whose number

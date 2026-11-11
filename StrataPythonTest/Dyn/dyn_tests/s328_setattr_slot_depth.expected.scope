@@ -1,0 +1,51 @@
+module
+  nest: local (assigned, referenced)
+  k1: local (assigned, referenced)
+  k2: local (assigned)
+  table: local (assigned)
+  Leaf: local (assigned, referenced)
+  t: local (assigned, referenced)
+  _: local (assigned)
+  range: global implicit (referenced)
+  P: local (assigned, referenced)
+  p: local (assigned, referenced)
+  function nest
+    params: d
+    d: local (parameter, referenced)
+    t: local (assigned, referenced)
+    _: local (assigned)
+    range: global implicit (referenced)
+  class Leaf
+    __repr__: local (assigned)
+    function Leaf.__repr__
+      params: self
+      self: local (parameter)
+      table: global implicit (referenced)
+      k2: global implicit (referenced)
+  class P
+    __init__: local (assigned)
+    __delattr__: local (assigned)
+    x: local (assigned, referenced)
+    property: global implicit (referenced)
+    function P.__init__
+      params: self, n
+      self: local (parameter, referenced)
+      n: local (parameter, referenced)
+      object: global implicit (referenced)
+    function P.__delattr__
+      params: self, name
+      self: local (parameter)
+      name: local (parameter)
+    function P.x
+      params: self
+      self: local (parameter)
+    function P.x
+      params: self, v
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+      print: global implicit (referenced)
+      len: global implicit (referenced)
+      repr: global implicit (referenced)
+      t: global implicit (referenced)
+      q: local (assigned, referenced)
+      P: global implicit (referenced)

@@ -1,0 +1,30 @@
+module top
+  P: local (assigned, referenced)
+  nest: local (assigned)
+  p: local (assigned, referenced)
+  function nest
+    _: local (assigned)
+    d: local (parameter, referenced)
+    range: global implicit (referenced)
+    t: local (assigned, referenced)
+  class P
+    __init__: local (assigned)
+    property: global implicit (referenced)
+    x: local (assigned, referenced)
+    function __init__
+      n: local (parameter, referenced)
+      object: global implicit (referenced)
+      self: local (parameter, referenced)
+    function x
+      self: local (parameter)
+    function x
+      P: global implicit (referenced)
+      len: global implicit (referenced)
+      nest: global implicit (referenced)
+      object: global implicit (referenced)
+      print: global implicit (referenced)
+      q: local (assigned, referenced)
+      repr: global implicit (referenced)
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+qualnames: P, P.__init__, P.x, P.x, nest

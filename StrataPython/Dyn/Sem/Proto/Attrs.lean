@@ -174,16 +174,22 @@ def getAttrRaw [PyCalls m V] (v : V) (name : String) : m V := do
     | some ga =>
       match ← PyPure.immView ga with
       | some (.descr b "__getattribute__" _) =>
-        if (← defaultGetattrOwner t) == some b then getAttrCore v name
+        if (← defaultGetattrOwner t) == some b then
+          -- With a `__getattr__` too, CPython's `slot_tp_getattr_hook` runs a built-in
+          -- `__getattribute__` other than the generic one (`type`'s, a module's) through its
+          -- wrapper, which counts a C level.
+          if hook?.isSome && b != .object && b != .BaseException then
+            PyReads.withDepth 1 (getAttrCore v name)
+          else getAttrCore v name
         else PyPure.gap s!"the __getattribute__ of the built-in {b.info.name} on another type is not \
           modelled yet"
-      | _ => callFound ga v t #[nameV] (← PyPure.allocDict)
+      | _ => callFound "__getattribute__" ga v t #[nameV] (← PyPure.allocDict)
     | none => getAttrCore v name
   match hook? with
   | none => attempt
   | some hook => tryCatch attempt fun x => do
     if ← isAttributeError x then
-      callFound hook v t #[nameV] (← PyPure.allocDict)
+      callFound "__getattr__" hook v t #[nameV] (← PyPure.allocDict)
     else throw x
 
 /-- **`getattr(v, name)`**, CPython's `PyObject_GetAttr`: `getAttrRaw`, and an `AttributeError`
@@ -305,7 +311,7 @@ def genericSetAttr [PyWrites m V] (v t : V) (name : String) (val : Option V) : m
             | none => ("__delete__", #[v])
           match ← lookupType dt hook with
           | some f =>
-            discard <| callFound f d dt args (← PyPure.allocDict)
+            discard <| callFound hook f d dt args (← PyPure.allocDict)
             return
           | none => return ← raiseAttrPlain s!"__{if val.isSome then "set" else "delete"}__"
         | _ => pure ()
@@ -370,24 +376,31 @@ def typeSetAttr [PyWrites m V] (cls : V) (name : String) (val : Option V) : m Un
 def setAttr [PyWrites m V] (v : V) (name : String) (val : Option V) : m Unit := do
   let t ← PyReads.classOf v
   let hookName := if val.isSome then "__setattr__" else "__delattr__"
-  if let some hook ← lookupType t hookName then
-    -- `object`'s and `type`'s own hooks are the generic writes below.
-    let builtinHook := match ← PyPure.immView hook with
-      | some (.descr b n _) => (b == .object || b == .type) && n == hookName
+  -- `object`'s and `type`'s own hooks are the generic writes below.
+  let builtinHook (n : String) : m Bool := do
+    let some hook ← lookupType t n | return true
+    return match ← PyPure.immView hook with
+      | some (.descr b n' _) => (b == .object || b == .type) && n' == n
       | _ => false
-    if !builtinHook then
+  if let some hook ← lookupType t hookName then
+    if !(← builtinHook hookName) then
       let nameV := strKey (m := m) name
       let args := match val with
         | some x => #[nameV, x]
         | none => #[nameV]
-      discard <| callFound hook v t args (← PyPure.allocDict)
+      discard <| callFound hookName hook v t args (← PyPure.allocDict)
       return
-  if ← isType v then return ← typeSetAttr v name val
-  match ← PyReads.objView v with
-  | some (.module mod _ writesGap) =>
-    if writesGap then PyPure.gap s!"an attribute write to the module {mod} is not modelled yet"
-    PyPure.gap "an attribute write to a module is not modelled yet"
-  | _ => genericSetAttr v t name val
+  let write : m Unit := do
+    if ← isType v then return ← typeSetAttr v name val
+    match ← PyReads.objView v with
+    | some (.module mod _ writesGap) =>
+      if writesGap then PyPure.gap s!"an attribute write to the module {mod} is not modelled yet"
+      PyPure.gap "an attribute write to a module is not modelled yet"
+    | _ => genericSetAttr v t name val
+  -- `__setattr__` and `__delattr__` share one slot: when the other one is the class's own, CPython
+  -- runs the built-in hook through its wrapper, which counts a C level.
+  if ← builtinHook (if val.isSome then "__delattr__" else "__setattr__") then write
+  else PyReads.withDepth 1 write
 
 end
 
