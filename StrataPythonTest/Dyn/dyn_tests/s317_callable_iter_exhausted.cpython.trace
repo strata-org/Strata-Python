@@ -1,0 +1,16 @@
+--- stdout 36
+StopIteration
+sentinel eq 2
+end
+end
+
+--- outcome
+ok
+--- globals
+S = <class 'S'>
+Sent = <class 'Sent'>
+T = <class 'T'>
+__doc__ = None
+__name__ = '__main__'
+eggs = <function object>
+spam = <function object>

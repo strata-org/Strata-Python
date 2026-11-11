@@ -201,7 +201,10 @@ def iterStep [PyWrites m V] (it : V) : m (Option V) := do
         if (← isIndexErrorExc x) || (← isStopIterationExc x) then pure none else throw x
       match r with
       | some v =>
-        PyWrites.iterSet it (.getItem target (i + 1))
+        -- `__getitem__` may have stepped or ended this iterator: `iter_iternext` increments the
+        -- index it holds now, and an ended iterator stays ended.
+        if let some (.iter (.getItem t j)) ← PyReads.objView it then
+          PyWrites.iterSet it (.getItem t (j + 1))
         return some v
       | none =>
         PyWrites.iterSet it (.done .iterator)
@@ -212,6 +215,9 @@ def iterStep [PyWrites m V] (it : V) : m (Option V) := do
         if ← isStopIterationExc x then pure none else throw x
       match r with
       | some v =>
+        -- A call that exhausted the iterator itself, re-entrantly, ends it: `calliter_iternext`
+        -- drops the result without comparing it with the sentinel, so no user `__eq__` runs.
+        if (← PyReads.objView it) matches some (.iter (.done _)) then return none
         if ← sameOrEq (richCompare .eq) sentinel v then
           PyWrites.iterSet it (.done .callable_iterator)
           return none

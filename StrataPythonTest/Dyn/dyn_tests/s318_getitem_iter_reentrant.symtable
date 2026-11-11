@@ -1,0 +1,40 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  C: local (assigned, referenced)
+  iter: global implicit (referenced)
+  next: global implicit (referenced)
+  print: global implicit (referenced)
+  x: local (assigned, referenced)
+  class A
+    __getitem__: local (assigned)
+    depth: local (assigned)
+    function __getitem__
+      A: global implicit (referenced)
+      IndexError: global implicit (referenced)
+      StopIteration: global implicit (referenced)
+      i: local (parameter, referenced)
+      next: global implicit (referenced)
+      self: local (parameter)
+  class B
+    __getitem__: local (assigned)
+    rec: local (assigned)
+    function __getitem__
+      B: global implicit (referenced)
+      IndexError: global implicit (referenced)
+      i: local (parameter, referenced)
+      next: global implicit (referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+  class C
+    __getitem__: local (assigned)
+    __len__: local (assigned)
+    function __getitem__
+      IndexError: global implicit (referenced)
+      i: local (parameter, referenced)
+      self: local (parameter)
+    function __len__
+      C: global implicit (referenced)
+      next: global implicit (referenced)
+      self: local (parameter)
+qualnames: A, A.__getitem__, B, B.__getitem__, C, C.__getitem__, C.__len__

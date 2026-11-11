@@ -1,0 +1,18 @@
+--- stdout 31
+outer
+end
+inner 0
+outer0
+2
+3
+4
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+x = 3

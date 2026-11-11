@@ -465,6 +465,9 @@ s312_meta_object_getattribute | yes |
 s313_type_getattribute_on_instance | yes |
 s314_new_init_same_keyword | yes |
 s315_init_subclass_metaclass_keyword | yes |
+s317_callable_iter_exhausted | yes |
+s318_getitem_iter_reentrant | yes |
+s319_length_hint_len_ends | yes |
 s129_iter_builtins | yes |
 s130_iter_loops | yes |
 s131_dict_merge | yes |

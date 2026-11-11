@@ -1,0 +1,27 @@
+module
+  S: local (assigned, referenced)
+  spam: local (assigned, referenced)
+  iter: global implicit (referenced)
+  print: global implicit (referenced)
+  next: global implicit (referenced)
+  StopIteration: global implicit (referenced)
+  Sent: local (assigned, referenced)
+  T: local (assigned, referenced)
+  eggs: local (assigned, referenced)
+  class S
+    rec: local (assigned)
+  function spam
+    S: global implicit (referenced)
+    _: local (assigned)
+  class Sent
+    __eq__: local (assigned)
+    function Sent.__eq__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter, referenced)
+      print: global implicit (referenced)
+  class T
+    rec: local (assigned)
+  function eggs
+    T: global implicit (referenced)
+    _: local (assigned)

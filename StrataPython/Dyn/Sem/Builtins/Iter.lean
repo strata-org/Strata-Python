@@ -65,10 +65,14 @@ def iterLengthHintBody [PyWrites m V] (qualname : String) (self args kwargs : V)
     | some (.iter (.range _ _ _ left)) => pure left
     | some (.iter (.set target _ size seen)) =>
       pure (if (← PyReads.setLen target) == size then (size : Int) - seen else 0)
-    | some (.iter (.getItem target i)) =>
+    | some (.iter (.getItem target _)) =>
       if (← lookupType (← PyReads.classOf target) "__len__").isNone then
         return PyPure.imm (m := m) .notImplemented
-      pure (max 0 ((← pyLen target : Int) - i))
+      let n ← pyLen target
+      -- `iter_len` reads the index after `__len__`, which may have stepped or ended the iterator.
+      match ← PyReads.objView self with
+      | some (.iter (.getItem _ j)) => pure (max 0 ((n : Int) - j))
+      | _ => PyPure.gap "a __len__ that ended the iterator it measures is not modelled yet"
     | some (.iter (.done _)) | some (.iter (.failed ..)) => pure 0
     | _ => PyPure.gap s!"{qualname} of this iterator is not modelled yet"
   pure (PyPure.imm (m := m) (.int n))

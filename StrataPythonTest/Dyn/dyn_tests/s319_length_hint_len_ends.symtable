@@ -1,0 +1,16 @@
+module top
+  D: local (assigned, referenced)
+  iter: global implicit (referenced)
+  print: global implicit (referenced)
+  class D
+    __getitem__: local (assigned)
+    __len__: local (assigned)
+    function __getitem__
+      IndexError: global implicit (referenced)
+      i: local (parameter)
+      self: local (parameter)
+    function __len__
+      D: global implicit (referenced)
+      next: global implicit (referenced)
+      self: local (parameter)
+qualnames: D, D.__getitem__, D.__len__
