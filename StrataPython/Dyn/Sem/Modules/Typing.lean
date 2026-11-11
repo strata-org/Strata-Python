@@ -5,6 +5,7 @@
 -/
 module
 public import StrataPython.Dyn.Sem.Modules.Types
+public import StrataPython.Dyn.Sem.Modules.Namedtuple
 
 set_option autoImplicit false
 
@@ -34,68 +35,6 @@ open Proto Builtins
 
 section
 variable {m : Type → Type 1} {V : Type}
-
-/-- `body` one Python frame deeper: the frame of a Python function of `typing.py` that the port
-runs without a native of its own. -/
-def pyFrame [PyReads m V] {α : Type} (body : m α) : m α := PyReads.withPyDepth 1 body
-
-/-- The body of a native that stands for a Python function: CPython's call into Python from C
-costs two C levels (`_PyEval_EvalFrame` and the call's vectorcall). P1's call of a native of kind
-`function` counts one more level, so a call through P1's `callN` counts three, and a deep run
-stops before CPython's `RecursionError`, never after it. -/
-def pyFunctionCall [PyReads m V] {α : Type} (body : m α) : m α := PyReads.withDepth 2 body
-
-/-- The value that the name `name` of `dir(builtins)` is bound to at the start of a run. -/
-def builtinOriginal? (name : String) : Option (Imm V) :=
-  match name with
-  | "None" => some .none
-  | "True" | "__debug__" => some (.bool true)
-  | "False" => some (.bool false)
-  | "Ellipsis" => some .ellipsis
-  | "NotImplemented" => some .notImplemented
-  | _ => match Builtin.ofName? name with
-    | some b => some (.builtin b)
-    | none => (Builtin.strNames.lookup name).map fun t => .str (.ofString t)
-
-/-- Whether the builtin `name` is still bound to its value at the start of the run. -/
-def builtinUnchanged [PyReads m V] (name : String) : m Bool := do
-  let some v ← PyReads.builtinGet name | return false
-  let some o := builtinOriginal? (V := V) name | return false
-  match o, ← PyPure.immView v with
-  | .str t, some (.str s) => return s == t
-  | .builtin b, some (.builtin b') => return b == b'
-  | .none, some .none | .ellipsis, some .ellipsis | .notImplemented, some .notImplemented =>
-    return true
-  | .bool b, some (.bool b') => return b == b'
-  | _, _ => return false
-
-/-- A gap unless the builtin `name` is unchanged: a port looks it up in `typing`'s globals, which
-fall back to the builtins, and would run the program's own binding. -/
-def useBuiltin [PyReads m V] (name : String) : m Unit := do
-  if !(← builtinUnchanged name) then
-    PyPure.gap s!"a use of builtins.{name} by typing after the program changed it"
-
-/-- `raise cls(msg)` of the builtin exception class `cls`, which a port looks up in its globals. -/
-def raiseT [PyReads m V] {α : Type} (cls msg : String) : m α := do
-  useBuiltin cls
-  raiseBuiltin cls msg
-
-/-- Whether the builtins dict holds exactly the names of `dir(builtins)`, each unchanged: the
-modules that `import typing` loads use them too. -/
-def builtinsUnchanged [PyReads m V] : m Bool := do
-  let some mod ← PyReads.moduleGet "builtins" | return false
-  let some d ← PyReads.objDict mod | return false
-  if (← PyReads.dictLen d) != Builtin.dictNames.size then return false
-  Builtin.dictNames.allM builtinUnchanged
-
-/-- The arguments of a call of the Python function `qualname` of the model, bound to its
-parameters `names` (none with a default), with `*args` (`varPos`) and `**kwargs` (`varKw`) after
-them, as CPython binds them, with its `TypeError`s. -/
-def bindPy [PyReads m V] [PyNew m V] (qualname : String) (names : Array String) (args kwargs : V)
-    (varPos varKw : Bool := false) : m (Array V) := do
-  let r ← bindArgs qualname args kwargs (PyPure.imm (m := m) (.tuple #[])) 0 names.size varPos varKw
-    names
-  tupleItems r
 
 /-- `self.name` of a `typing` object, read with the attribute protocol, as `typing.py` reads it. -/
 def attrOf [PyCalls m V] (self : V) (name : String) : m V := getAttr self name
@@ -159,6 +98,14 @@ def typedDictMetaCls [PyWrites m V] [PyNew m V] : m V :=
 /-- `typing._TypedDict`, made by `type.__new__(_TypedDictMeta, 'TypedDict', (), {})`. -/
 def typedDictCls [PyWrites m V] [PyNew m V] : m V := do
   modelClassWith typedDictSpec (← typedDictMetaCls) #[PyPure.imm (m := m) (.builtin .object)]
+
+/-- `typing.NamedTupleMeta`. -/
+def namedTupleMetaCls [PyWrites m V] [PyNew m V] : m V :=
+  modelClassWith namedTupleMetaSpec (typeV (m := m)) #[typeV (m := m)]
+
+/-- `typing._NamedTuple`, made by `type.__new__(NamedTupleMeta, 'NamedTuple', (), {})`. -/
+def namedTupleCls [PyWrites m V] [PyNew m V] : m V := do
+  modelClassWith namedTupleSpec (← namedTupleMetaCls) #[PyPure.imm (m := m) (.builtin .object)]
 
 /-- Whether `v` is an instance of the model's class of `spec` or of a subclass of it, as
 `isinstance(v, cls)` is for a class whose metaclass is `type`. -/
@@ -812,6 +759,93 @@ def typedDictNew [PyWrites m V] [PyNew m V] (name bases ns total : V) : m V := d
   if !(← hasAttr tp "__total__") then setAttr tp "__total__" (some total)
   pure tp
 
+/-! ## `NamedTuple` -/
+
+/-- **`target in xs`**, `PySequence_Contains`: each item by identity, then `==`. An item before the
+match whose `==` could run user code (anything but an immediate or a class whose metaclass is
+`type`) stops with a gap. -/
+def containsByIdentity [PyCalls m V] (xs : Array V) (target : V) : m Bool := do
+  for x in xs do
+    if (← PyPure.identical x target) == .yes then return true
+    let plain ← do
+      if (← PyPure.immView x).isSome then pure true
+      else if ← isType x then
+        pure ((← PyPure.identical (← PyReads.classOf x) (typeV (m := m))) == .yes)
+      else pure false
+    if !plain then PyPure.gap "a NamedTuple base check that could run user code is not modelled yet"
+  return false
+
+/-- The names that a `NamedTuple` class body may not bind. -/
+def namedTupleProhibited : List String :=
+  ["__new__", "__init__", "__slots__", "__getnewargs__", "_fields", "_field_defaults", "_make",
+    "_replace", "_asdict", "_source"]
+
+/-- **`NamedTupleMeta.__new__(cls, typename, bases, ns)`**: the bases must be `_NamedTuple`; the
+fields are the annotations, the ones with a value in `ns` defaults, which no field without one
+may follow; `_make_nmtuple` checks each annotation and makes a `collections.namedtuple` class;
+then the other names of `ns` are set on it, but no name of `namedTupleProhibited`. -/
+def namedTupleNew [PyWrites m V] [PyNew m V] (typename bases ns : V) : m V := do
+  let nt ← namedTupleCls
+  let bs ← tupleItems bases
+  if !(← containsByIdentity bs nt) then
+    PyPure.gap "NamedTupleMeta.__new__ without _NamedTuple among the bases is not modelled yet"
+  -- `Generic`, the other base allowed, is not reachable.
+  for b in bs do
+    if (← PyPure.identical b nt) != .yes then
+      raiseT "TypeError" "can only inherit from a NamedTuple type and Generic"
+  useBuiltin "tuple"
+  if !(← isDict ns) then PyPure.gap "a NamedTuple namespace that is not a dict is not modelled yet"
+  let some name ← str? typename | PyPure.gap "a NamedTuple name that is not a str is not modelled yet"
+  let types ← match ← dictFindStr ns "__annotations__" with
+    | some a => pure a
+    | none => PyPure.allocDict
+  if !(← isDict types) then PyPure.gap "NamedTuple annotations that are not a dict are not modelled yet"
+  let mut fields : Array (V × V) := #[]
+  let mut defaultNames : Array String := #[]
+  for (k, t, _) in ← PyReads.dictEntries types do
+    let some (.str fs) ← PyPure.immView k |
+      PyPure.gap "a NamedTuple field name that is not a str is not modelled yet"
+    if (← dictFindStr ns fs.s).isSome then defaultNames := defaultNames.push fs.s
+    else if !defaultNames.isEmpty then
+      raiseT "TypeError" (s!"Non-default namedtuple field {fs.s} cannot follow default field" ++
+        s!"{if defaultNames.size > 1 then "s" else ""} {", ".intercalate defaultNames.toList}")
+    fields := fields.push (k, t)
+  let mut defaults : Array V := #[]
+  for n in defaultNames do
+    let some v ← dictFindStr ns n | PyPure.modelInvariant "a NamedTuple default that went away"
+    defaults := defaults.push v
+  let some module ← dictFindStr ns "__module__" |
+    raiseBuiltin "KeyError" "__module__"
+  -- `_make_nmtuple(typename, types.items(), defaults=..., module=...)`.
+  let nm ← pyFrame do
+    let mut checked : Array (V × V) := #[]
+    for (n, t) in fields do
+      if !(← knownArgs compareDepth #[t]) then
+        PyPure.gap "a NamedTuple annotation that the model doesn't know"
+      let some nText ← str? n | PyPure.modelInvariant "a field name that is no str"
+      checked := checked.push (n, ← typeCheck t s!"field {nText} annotation must be a type")
+    let nm ← namedtuple name (fields.map (·.1)) defaults module
+    let anns ← PyPure.allocDict
+    for (n, t) in checked do PyNew.dictSetNew anns n t none fun _ => pure false
+    -- `nm_tpl.__new__.__annotations__ = types`: the model's functions have no `__annotations__` to
+    -- read, so only the class gets them.
+    setAttr nm "__annotations__" (some anns)
+    pure nm
+  -- `nm_tpl.__bases__ = bases`: `(tuple,)` already, unless `_NamedTuple` came more than once.
+  if bs.size > 1 then raiseBuiltin "TypeError" "duplicate base class tuple"
+  -- The field names' texts, read once, so that the walk below tests membership without a step.
+  let fieldNames ← (← tupleItems (← getAttr nm "_fields")).filterMapM str?
+  for (k, v, _) in ← PyReads.dictEntries ns do
+    let some (.str ks) ← PyPure.immView k |
+      PyPure.gap "a NamedTuple namespace name that is not a str is not modelled yet"
+    if namedTupleProhibited.contains ks.s then
+      raiseT "AttributeError" s!"Cannot overwrite NamedTuple attribute {ks.s}"
+    if !["__module__", "__name__", "__annotations__"].contains ks.s then
+      if !fieldNames.contains ks.s then
+        useBuiltin "setattr"
+        setOnClass nm ks.s v
+  pure nm
+
 /-- The bodies of the Python functions of the model of `typing`, by native key, over the native
 `fn` and its arguments. -/
 def typingBody [PyWrites m V] [PyNew m V] (key : String) (fn args kwargs : V) : m V := do
@@ -1044,6 +1078,23 @@ def typingBody [PyWrites m V] [PyNew m V] (key : String) (fn args kwargs : V) : 
     if (← PyPure.identical cls (← anyCls)) == .yes then
       raiseT "TypeError" "Any cannot be instantiated"
     PyPure.gap "a subclass of typing.Any is not modelled yet"
+  -- `NamedTuple`.
+  if key == k "NamedTupleMeta" "__new__" then
+    let #[_, typename, bases, ns] ← bound #["cls", "typename", "bases", "ns"] | bad
+    return ← namedTupleNew typename bases ns
+  if key == "typing._namedtuple_mro_entries" then
+    let #[bases] ← bindPy "_namedtuple_mro_entries" #["bases"] args kwargs | bad
+    -- `assert NamedTuple in bases`.
+    let nt ← modelGlobal "typing" "NamedTuple"
+    let bs ← match ← PyPure.immView bases with
+      | some (.tuple bs) => pure bs
+      | _ => PyPure.gap "_namedtuple_mro_entries of bases that are not a tuple is not modelled yet"
+    if !(← containsByIdentity bs nt) then
+      PyPure.gap "_namedtuple_mro_entries without NamedTuple among the bases is not modelled yet"
+    return PyPure.imm (m := m) (.tuple #[← modelGlobal "typing" "_NamedTuple"])
+  if key == "typing.NamedTuple" then
+    -- The functional form finds its module from the calling frame.
+    PyPure.gap "the functional form of NamedTuple is not modelled yet"
   -- `TypedDict`.
   if key == k "_TypedDictMeta" "__new__" then
     let xs ← tupleItems args
@@ -1097,7 +1148,8 @@ def typingAttrNames : List String :=
   ["__name__", "TYPE_CHECKING", "cast", "overload", "_overload_dummy", "Any", "_AnyMeta",
     "ForwardRef", "_Final", "_NotIterable", "_SpecialForm", "_BaseGenericAlias", "_GenericAlias",
     "_SpecialGenericAlias", "_TupleType", "_UnionGenericAlias", "List", "Dict", "Set", "Tuple",
-    "TypedDict", "_TypedDict", "_TypedDictMeta"] ++
+    "TypedDict", "_TypedDict", "_TypedDictMeta", "NamedTuple", "NamedTupleMeta", "_NamedTuple",
+    "_namedtuple_mro_entries"] ++
     specialForms
 
 /-- **`import typing`**: the module, made at its first import after a check that the builtins are
@@ -1127,6 +1179,13 @@ def importTyping [PyWrites m V] [PyNew m V] (_self _args _kwargs : V) : m V := d
   PyWrites.dictSet tdDict (strValue (m := m) "__mro_entries__")
     (← typingFunction "<lambda>" "<lambda>" "typing.TypedDict.<lambda>") none fun _ => pure false
   attrs := attrs ++ #[("TypedDict", td), ("_TypedDict", ← typedDictCls), ("_TypedDictMeta", ← typedDictMetaCls)]
+  -- `NamedTuple` is a function whose `__dict__` holds `__mro_entries__`, typing's
+  -- `_namedtuple_mro_entries`.
+  let ntf ← typingFunction "NamedTuple" "NamedTuple" "typing.NamedTuple"
+  let me ← typingFunction "_namedtuple_mro_entries" "_namedtuple_mro_entries" "typing._namedtuple_mro_entries"
+  PyWrites.dictSet (← PyWrites.objEnsureDict ntf) (strValue (m := m) "__mro_entries__") me none fun _ => pure false
+  attrs := attrs ++ #[("NamedTuple", ntf), ("NamedTupleMeta", ← namedTupleMetaCls),
+    ("_NamedTuple", ← namedTupleCls), ("_namedtuple_mro_entries", me)]
   let gapped := ((moduleNames.lookup "typing").getD []).toArray.filter (!typingAttrNames.contains ·)
   let mod ← PyPure.allocObj (PyPure.imm (m := m) (.builtin .module)) (.module "typing" gapped true attrs)
   PyReads.moduleAdd "typing" mod
@@ -1146,7 +1205,7 @@ def typingNative (key : String) : Option BuiltinImpl :=
   if key.startsWith "typing." then
     some fun {_} {_} [_] [_] fn args kwargs =>
       pyFunctionCall (PyReads.withDepth (slotExtraLevels key) (typingBody key fn args kwargs))
-  else none
+  else namedtupleNative key
 
 /-- **The rules of `typing`**: its import and the bodies of its Python functions. -/
 def typingImpls : Impls where

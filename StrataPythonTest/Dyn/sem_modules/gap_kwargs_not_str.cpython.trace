@@ -1,0 +1,8 @@
+--- stdout 36
+TypeError: keywords must be strings
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'

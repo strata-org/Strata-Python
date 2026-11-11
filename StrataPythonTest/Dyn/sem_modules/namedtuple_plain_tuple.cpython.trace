@@ -1,0 +1,15 @@
+--- stdout 64
+5
+3
+IndexError: tuple index out of range
+tuple(x=1, y=2)
+(1, 2)
+
+--- outcome
+ok
+--- globals
+NamedTuple = <function object>
+P = <class 'P'>
+Q = <class 'Q'>
+__doc__ = None
+__name__ = '__main__'

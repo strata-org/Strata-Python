@@ -1,0 +1,12 @@
+--- stdout 17
+eq called
+P(x=1)
+
+--- outcome
+ok
+--- globals
+NamedTuple = <function object>
+P = <class 'P'>
+U = <class 'U'>
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,30 @@
+--- stdout 133
+next 3
+next 1
+next 1
+next 2
+next 2
+next 0
+[1, 2]
+[2, 0]
+[3, 1]
+next 3
+next 1
+next 1
+next 2
+[3, 1]
+next 3
+next 1
+next 1
+next 2
+[1, 2]
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+NamedTuple = <function object>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+c = <C object>

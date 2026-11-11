@@ -1,0 +1,12 @@
+--- stdout 16
+own make
+Q(x=2)
+
+--- outcome
+ok
+--- globals
+NamedTuple = <function object>
+P = <class 'P'>
+Q = <class 'Q'>
+__doc__ = None
+__name__ = '__main__'

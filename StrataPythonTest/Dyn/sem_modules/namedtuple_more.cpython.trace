@@ -1,0 +1,32 @@
+--- stdout 1083
+P(x=1, y=[], z=None) _tuplegetter(0, 'Alias for field number 0') _tuplegetter collections Alias for field number 0 [] _tuplegetter(0, 'Alias for field number 0')
+A point. P __main__ P.__new__ namedtuple_P
+P._make _replace P.__repr__ collections
+P(x=5, y=6, z=7) P(x=2, y=[], z=3) (1, [], None) P(x=1, y=[], z=9) ('x', 'y', 'z')
+staticmethod classmethod ()
+{'x': <class 'int'>, 'y': ForwardRef('Node'), 'z': typing.Optional[int]} NamedTuple {'y': [], 'z': None}
+TypeError: P.__new__() takes from 2 to 4 positional arguments but 5 were given
+TypeError: P.__new__() got multiple values for argument 'x'
+TypeError: P.__new__() got an unexpected keyword argument 'w'
+TypeError: Expected 3 arguments, got 1
+ValueError: Got unexpected field names: ['w']
+TypeError: descriptor for index '0' for tuple subclasses doesn't apply to 'int' object
+AttributeError: can't set attribute
+AttributeError: can't delete attribute
+AttributeError: can't set attribute
+ValueError: Field names cannot start with an underscore: '_a'
+TypeError: can only inherit from a NamedTuple type and Generic
+5 s {'a': 4}
+
+--- outcome
+ok
+--- globals
+List = <_SpecialGenericAlias object>
+NamedTuple = <function object>
+Optional = <_SpecialForm object>
+P = <class 'P'>
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'
+bad = <function object>
+p = <P object>

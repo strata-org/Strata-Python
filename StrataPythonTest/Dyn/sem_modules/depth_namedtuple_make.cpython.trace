@@ -1,0 +1,11 @@
+--- stdout 15
+RecursionError
+
+--- outcome
+ok
+--- globals
+NamedTuple = <function object>
+P = <class 'P'>
+R = <class 'R'>
+__doc__ = None
+__name__ = '__main__'

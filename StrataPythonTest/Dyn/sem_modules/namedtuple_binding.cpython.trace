@@ -1,0 +1,44 @@
+--- stdout 1889
+TypeError: P.__new__() got multiple values for argument 'x'
+TypeError: P.__new__() got an unexpected keyword argument 'w'
+TypeError: P.__new__() takes from 2 to 3 positional arguments but 4 were given
+TypeError: P.__new__() missing 1 required positional argument: 'x'
+TypeError: P.__new__() missing 1 required positional argument: 'x'
+TypeError: P._make() missing 1 required positional argument: 'iterable'
+TypeError: P._replace() takes 1 positional argument but 2 were given
+TypeError: P._asdict() takes 1 positional argument but 2 were given
+TypeError: P.__repr__() takes 1 positional argument but 2 were given
+TypeError: P.__getnewargs__() takes 1 positional argument but 2 were given
+TypeError: P._make() got an unexpected keyword argument 'x'
+Z() Z() ()
+TypeError: Z.__new__() takes 1 positional argument but 2 were given
+O(a,) O(a=1) 
+TypeError: O.__new__() takes 2 positional arguments but 3 were given
+TypeError: P._make() got an unexpected keyword argument 'x'
+TypeError: P._replace() takes 1 positional argument but 2 were given
+TypeError: P._make() got multiple values for argument 'iterable'
+TypeError: P.__repr__() got an unexpected keyword argument 'a'
+TypeError: P.__new__() got an unexpected keyword argument 'z'
+P(x=1, y=2)
+TypeError: P.__new__() missing 2 required positional arguments: '_cls' and 'x'
+TypeError: P.__new__() missing 1 required positional argument: 'x'
+TypeError: tuple.__new__(X): X is not a type object (int)
+TypeError: tuple.__new__(int): int is not a subtype of tuple
+TypeError: tuple.__new__(collections._tuplegetter): collections._tuplegetter is not a subtype of tuple
+(1, 2) <class 'tuple'>
+P(x=1, y=0)
+TypeError: P.__new__() got multiple values for argument '_cls'
+TypeError: P.__new__() got multiple values for argument 'x'
+TypeError: P.__new__() got an unexpected keyword argument 'w'
+TypeError: P.__new__() got multiple values for argument 'y'
+
+--- outcome
+ok
+--- globals
+NamedTuple = <function object>
+O = <class 'O'>
+P = <class 'P'>
+Z = <class 'Z'>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>

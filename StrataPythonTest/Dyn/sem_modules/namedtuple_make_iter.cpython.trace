@@ -1,0 +1,33 @@
+--- stdout 315
+P(x=0, y=1)
+P(x=5, y=6)
+next 1
+next 2
+P(x=1, y=2)
+P(x='a', y='b')
+P(x=1, y=3)
+next 1
+next 2
+next 3
+TypeError: Expected 2 arguments, got 3
+next 1
+TypeError: Expected 2 arguments, got 1
+TypeError: Expected 2 arguments, got 0
+ValueError: boom
+TypeError: 'int' object is not iterable
+next 1
+next 2
+next 1
+next 2
+True 1
+
+--- outcome
+ok
+--- globals
+Bad = <class 'Bad'>
+Count = <class 'Count'>
+NamedTuple = <function object>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+it = range(0, 0)

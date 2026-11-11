@@ -1,0 +1,12 @@
+--- stdout 7
+('é',)
+
+--- outcome
+ok
+--- globals
+M = <class 'NamedTupleMeta'>
+NT = <class 'NamedTuple'>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+typing = <module object>

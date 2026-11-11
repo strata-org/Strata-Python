@@ -1,0 +1,15 @@
+--- stdout 19
+iter
+9
+iter
+P(x=2)
+
+--- outcome
+ok
+--- globals
+NamedTuple = <function object>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+a = 9
+p = <P object>

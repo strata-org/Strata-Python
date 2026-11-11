@@ -1918,6 +1918,7 @@ public def frameValues : PyLoopState Value → List Value
   | .library (.sortedCollect acc it kwargs) => [acc, it, kwargs]
   | .library (.fromKeys s) => [s.d, s.it, s.value]
   | .library (.setWalk s) => [s.self, s.target, s.so, s.it] ++ s.rest
+  | .modules (.make _) => []
 
 /-- A call of each container constructor over an iterator that gives one item per activation
 (`iter(li.__next__, 99)` over a list iterator `li`), resumed until it ends: for each, the number

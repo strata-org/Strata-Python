@@ -131,6 +131,122 @@ with a gap. -/
 def ClassSpec.names (spec : ClassSpec) : List String :=
   spec.entries.toList.map (·.name) ++ spec.gapped.toList
 
+/-- `body` one Python frame deeper: the frame of a Python function of the ported module that the
+port runs without a native of its own. -/
+def pyFrame [PyReads m V] {α : Type} (body : m α) : m α := PyReads.withPyDepth 1 body
+
+/-- The body of a native that stands for a Python function: CPython's call into Python from C
+costs two C levels (`_PyEval_EvalFrame` and the call's vectorcall). P1's call of a native of kind
+`function` counts one more level, so a call through P1's `callN` counts three, and a deep run
+stops before CPython's `RecursionError`, never after it. -/
+def pyFunctionCall [PyReads m V] {α : Type} (body : m α) : m α := PyReads.withDepth 2 body
+
+/-- The value that the name `name` of `dir(builtins)` is bound to at the start of a run. -/
+def builtinOriginal? (name : String) : Option (Imm V) :=
+  match name with
+  | "None" => some .none
+  | "True" | "__debug__" => some (.bool true)
+  | "False" => some (.bool false)
+  | "Ellipsis" => some .ellipsis
+  | "NotImplemented" => some .notImplemented
+  | _ => match Builtin.ofName? name with
+    | some b => some (.builtin b)
+    | none => (Builtin.strNames.lookup name).map fun t => .str (.ofString t)
+
+/-- Whether the builtin `name` is still bound to its value at the start of the run. -/
+def builtinUnchanged [PyReads m V] (name : String) : m Bool := do
+  let some v ← PyReads.builtinGet name | return false
+  let some o := builtinOriginal? (V := V) name | return false
+  match o, ← PyPure.immView v with
+  | .str t, some (.str s) => return s == t
+  | .builtin b, some (.builtin b') => return b == b'
+  | .none, some .none | .ellipsis, some .ellipsis | .notImplemented, some .notImplemented =>
+    return true
+  | .bool b, some (.bool b') => return b == b'
+  | _, _ => return false
+
+/-- A gap unless the builtin `name` is unchanged: a port looks it up in its module's globals,
+which fall back to the builtins, and would run the program's own binding. -/
+def useBuiltin [PyReads m V] (name : String) : m Unit := do
+  if !(← builtinUnchanged name) then
+    PyPure.gap s!"a use of builtins.{name} by a model after the program changed it"
+
+/-- `raise cls(msg)` of the builtin exception class `cls`, which a port looks up in its globals. -/
+def raiseT [PyReads m V] {α : Type} (cls msg : String) : m α := do
+  useBuiltin cls
+  raiseBuiltin cls msg
+
+/-- Whether the builtins dict holds exactly the names of `dir(builtins)`, each unchanged: the
+modules that an import loads use them too. -/
+def builtinsUnchanged [PyReads m V] : m Bool := do
+  let some mod ← PyReads.moduleGet "builtins" | return false
+  let some d ← PyReads.objDict mod | return false
+  if (← PyReads.dictLen d) != Builtin.dictNames.size then return false
+  Builtin.dictNames.allM builtinUnchanged
+
+/-- `_PyStack_UnpackDict`'s check of the keywords: one that is not a `str` raises CPython's
+`TypeError`, and one that is an object (a `str` subclass's instance, or another object) stops with
+a gap. -/
+def keywordsCheck [PyReads m V] (kwargs : V) : m Unit := do
+  for (k, _, _) in ← PyReads.dictEntries kwargs do
+    match ← PyPure.immView k with
+    | some (.str _) => pure ()
+    | some _ => raiseBuiltin "TypeError" "keywords must be strings"
+    | none => PyPure.gap "a keyword that is not an exact str"
+
+/-- The arguments of a call of the Python function `qualname` of the model, bound to its
+parameters `names` (none with a default), with `*args` (`varPos`) and `**kwargs` (`varKw`) after
+them, as CPython binds them, with its `TypeError`s. -/
+def bindPy [PyReads m V] [PyNew m V] (qualname : String) (names : Array String) (args kwargs : V)
+    (varPos varKw : Bool := false) : m (Array V) := do
+  keywordsCheck kwargs
+  let r ← bindArgs qualname args kwargs (PyPure.imm (m := m) (.tuple #[])) 0 names.size varPos varKw
+    names
+  tupleItems r
+
+/-- **The arguments of a call of the Python function `qualname`**, whose positional-or-keyword
+parameters are `names`, the last of them with the defaults `defaults`, as CPython's
+`initialize_locals` binds them, with its `TypeError`s in its order. -/
+def bindPyDefaults [PyReads m V] (qualname : String) (names defaults : Array V) (args kwargs : V) :
+    m (Array V) := do
+  let fail {α : Type} (msg : String) : m α := raiseBuiltin "TypeError" s!"{qualname}() {msg}"
+  keywordsCheck kwargs
+  let mut texts : Array String := #[]
+  for n in names do
+    let some t ← str? n | PyPure.modelInvariant "a parameter name that is not a str"
+    texts := texts.push t
+  let xs ← tupleItems args
+  let n := texts.size
+  let nreq := n - defaults.size
+  let given := min xs.size n
+  let mut slots : Array (Option V) := ((xs.extract 0 given).map some) ++ Array.replicate (n - given) none
+  -- The keywords come first, then the count of the positional arguments.
+  for (k, v, _) in ← PyReads.dictEntries kwargs do
+    let s ← match ← PyPure.immView k with
+      | some (.str s) => pure s.s
+      | some _ => fail "keywords must be strings"
+      | none => PyPure.gap "a keyword that is not an exact str"
+    match texts.idxOf? s with
+    | some i =>
+      if slots[i]!.isSome then fail s!"got multiple values for argument '{s}'"
+      slots := slots.set! i (some v)
+    | none => fail s!"got an unexpected keyword argument '{s}'"
+  if xs.size > n then
+    let sig := if defaults.isEmpty then s!"{n} positional argument{pluralS n}"
+      else s!"from {nreq} to {n} positional arguments"
+    fail s!"takes {sig} but {xs.size} {if xs.size == 1 then "was" else "were"} given"
+  let missing := (texts.zipIdx.filter fun (_, i) => i < nreq && slots[i]!.isNone).map (·.1)
+  if !missing.isEmpty then
+    fail s!"missing {missing.size} required positional argument{pluralS missing.size}: {missingList missing}"
+  let mut out : Array V := #[]
+  for (sl, i) in slots.zipIdx do
+    match sl with
+    | some v => out := out.push v
+    | none =>
+      let some d := defaults[i - nreq]? | PyPure.modelInvariant "a parameter without its default"
+      out := out.push d
+  return out
+
 /-- The name of the module of the module table that keeps the model's class `qualname` of the
 module `mod`, one object per run. No import statement can spell it, so no program reaches the
 module itself. A rule that reads the module table by a name that a program gives (a future

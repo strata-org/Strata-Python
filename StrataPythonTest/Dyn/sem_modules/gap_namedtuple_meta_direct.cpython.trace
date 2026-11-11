@@ -1,0 +1,10 @@
+--- stdout 14
+<class 'm.X'>
+
+--- outcome
+raised AttributeError: 'list' object has no attribute 'get'
+--- globals
+M = <class 'NamedTupleMeta'>
+__doc__ = None
+__name__ = '__main__'
+typing = <module object>

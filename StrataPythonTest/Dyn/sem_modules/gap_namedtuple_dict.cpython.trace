@@ -1,0 +1,11 @@
+--- stdout 55
+AttributeError: 'P' object has no attribute '__dict__'
+
+--- outcome
+ok
+--- globals
+NamedTuple = <function object>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+p = <P object>

@@ -1,0 +1,14 @@
+--- stdout 144
+TypeError: keywords must be strings
+TypeError: keywords must be strings
+TypeError: keywords must be strings
+TypeError: keywords must be strings
+
+--- outcome
+ok
+--- globals
+NamedTuple = <function object>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>

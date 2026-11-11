@@ -1,0 +1,14 @@
+--- stdout 71
+Zed(x=1)
+TypeError: unsupported operand type(s) for +: 'int' and 'str'
+
+--- outcome
+ok
+--- globals
+Fake = <class 'Fake'>
+NamedTuple = <function object>
+P = <class 'P'>
+Q = <class 'Q'>
+__doc__ = None
+__name__ = '__main__'
+f = <Fake object>

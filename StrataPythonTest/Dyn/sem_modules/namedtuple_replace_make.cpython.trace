@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: Expected 1 arguments, got 2
+--- globals
+NamedTuple = <function object>
+P = <class 'P'>
+Q = <class 'Q'>
+R = <class 'R'>
+__doc__ = None
+__name__ = '__main__'

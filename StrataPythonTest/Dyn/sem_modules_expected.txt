@@ -4,6 +4,8 @@ alias_repr_list | gap | a list argument that shrinks while its repr is written
 alias_repr_order | agree
 depth_ga_eq | gap | a C recursion depth over 9000
 depth_ga_repr | gap | a C recursion depth over 9000
+depth_namedtuple_make | gap | Python call depth over 900
+depth_namedtuple_replace | gap | Python call depth over 900
 depth_typing_alias_hash | gap | Python call depth over 900
 depth_typing_getitem | gap | Python call depth over 900
 depth_typing_repr | gap | Python call depth over 900
@@ -15,7 +17,19 @@ ga_basics | agree
 gap_alias_str_subclass_name | gap | an attribute name that is an instance of a subclass of str is not modelled yet
 gap_class_member | gap | the attribute GenericAlias.__origin__ is not modelled yet
 gap_instance_write | gap | an attribute write to an instance of GenericAlias is not modelled yet
+gap_kwargs_not_str | gap | a call of a built-in with a keyword that is not a str is not modelled yet
 gap_member_write | gap | an attribute write to an instance of GenericAlias is not modelled yet
+gap_namedtuple_asdict_fields | gap | _asdict with _fields that are not a tuple is not modelled yet
+gap_namedtuple_base_eq | gap | a NamedTuple base check that could run user code is not modelled yet
+gap_namedtuple_dict | gap | the __dict__ that a user class's namespace holds is not modelled yet
+gap_namedtuple_functional | gap | the functional form of NamedTuple is not modelled yet
+gap_namedtuple_kwargs_not_str | gap | a call of a built-in with a keyword that is not a str is not modelled yet
+gap_namedtuple_meta_direct | gap | a NamedTuple namespace that is not a dict is not modelled yet
+gap_namedtuple_nonascii | gap | a namedtuple name that is not ASCII is not modelled yet
+gap_namedtuple_own_make | gap | _replace with a _make that is not the named tuple's is not modelled yet
+gap_namedtuple_replace_iter | gap | iterating a named tuple whose class defines __iter__ is not modelled yet
+gap_namedtuple_repr_name | gap | the repr of a named tuple whose class name is not a str is not modelled yet
+gap_namedtuple_unknown_annotation | gap | a NamedTuple annotation that the model doesn't know
 gap_new_read | gap | the attribute GenericAlias.__new__ is not modelled yet
 gap_object_new | gap | object.__new__ of the C type types.GenericAlias is not modelled yet
 gap_params_origin | gap | __parameters__ of a type alias with arguments that the model doesn't know
@@ -54,6 +68,16 @@ gap_union_base | gap | the attribute UnionType.__new__ is not modelled yet
 gap_union_call | gap | the attribute UnionType.__new__ is not modelled yet
 gap_union_metaclass | gap | comparing unions with arguments that the model doesn't know
 gap_union_str_subclass_name | gap | an attribute name that is an instance of a subclass of str is not modelled yet
+namedtuple_accessors | agree
+namedtuple_basics | agree
+namedtuple_binding | agree
+namedtuple_dup_base | agree
+namedtuple_make_iter | agree
+namedtuple_make_key | agree
+namedtuple_many_defaults | agree
+namedtuple_more | agree
+namedtuple_plain_tuple | agree
+namedtuple_replace_make | agree
 typeddict_basics | agree
 typeddict_call | agree
 typeddict_class_annotations | agree

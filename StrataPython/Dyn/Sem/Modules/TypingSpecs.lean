@@ -129,6 +129,30 @@ def typedDictMetaSpec : ClassSpec :=
 /-- `typing._TypedDict`, the class that `TypedDict.__mro_entries__` gives, named `TypedDict`. -/
 def typedDictSpec : ClassSpec := typingSpec "TypedDict" (instanceDict := true) #[]
 
+/-- `typing.NamedTupleMeta`, the metaclass of `_NamedTuple`, whose `__new__` makes a
+`collections.namedtuple` class. -/
+def namedTupleMetaSpec : ClassSpec :=
+  typingSpec "NamedTupleMeta" (instanceDict := true)
+    #[.staticNative "__new__" (typingKey "NamedTupleMeta" "__new__")]
+
+/-- `typing._NamedTuple`, the class that `NamedTuple.__mro_entries__` gives, named `NamedTuple`. -/
+def namedTupleSpec : ClassSpec := typingSpec "NamedTuple" (instanceDict := true) #[]
+
+/-- The native key of the method `name` of `collections._tuplegetter`. -/
+def tupleGetterKey (name : String) : String := s!"collections._tuplegetter.{name}"
+
+/-- `collections._tuplegetter`, the C type of a named tuple's field accessors: a data descriptor
+whose instances keep their field's index and doc in two slots. -/
+def tupleGetterSpec : ClassSpec :=
+  let entries : Array Entry :=
+    (#["__get__", "__set__", "__delete__", "__repr__"].map fun n =>
+      Entry.native n (tupleGetterKey n) .wrapperDescriptor) ++
+    #[.slot "__doc__", .str "__module__" "collections"]
+  { name := "_tuplegetter", qualname := "_tuplegetter", «module» := "collections",
+    tpName := some "collections._tuplegetter", immutable := true, instanceWritesGap := true,
+    cType := true, asBase := .notAcceptable, slots := #["__doc__", "index"], entries,
+    gapped := gappedOf "collections._tuplegetter" entries }
+
 /-- The special forms of `typing` that the model has. -/
 def specialForms : List String := ["Optional", "Union", "NotRequired", "Required", "TypeGuard"]
 

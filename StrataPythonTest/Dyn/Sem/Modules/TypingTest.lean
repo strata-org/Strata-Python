@@ -28,8 +28,10 @@ open StrataPython.Dyn.Sem.Modules.TypesTest (namesAgree)
 
 /-- The model's classes, by CPython's `module.qualname`. -/
 def specs : List (String × ClassSpec) :=
-  [("types.GenericAlias", gaSpec), ("types.UnionType", unionSpec), ("typing.Any", anySpec),
-    ("typing.ForwardRef", forwardRefSpec), ("typing.TypedDict", typedDictSpec),
+  [("collections._tuplegetter", tupleGetterSpec), ("types.GenericAlias", gaSpec),
+    ("types.UnionType", unionSpec), ("typing.Any", anySpec),
+    ("typing.ForwardRef", forwardRefSpec), ("typing.NamedTuple", namedTupleSpec),
+    ("typing.NamedTupleMeta", namedTupleMetaSpec), ("typing.TypedDict", typedDictSpec),
     ("typing._AnyMeta", anyMetaSpec),
     ("typing._BaseGenericAlias", baseGenericAliasSpec), ("typing._Final", finalSpec),
     ("typing._GenericAlias", genericAliasSpec), ("typing._NotIterable", notIterableSpec),

@@ -1,0 +1,27 @@
+--- stdout 876
+TypeError:  expected at least 1 argument, got 0
+TypeError: __get__(None, None) is invalid
+TypeError:  expected at most 2 arguments, got 3
+TypeError:  expected 2 arguments, got 1
+TypeError: expected 1 argument, got 0
+TypeError: wrapper __get__() takes no keyword arguments
+TypeError: expected 0 arguments, got 1
+TypeError: descriptor '__get__' requires a 'collections._tuplegetter' object but received a 'int'
+IndexError: tuple index out of range
+IndexError: tuple index out of range
+TypeError: __get__(None, None) is invalid
+_tuplegetter(0, 'Alias for field number 0')
+TypeError: descriptor for index '0' for tuple subclasses doesn't apply to 'list' object
+TypeError: descriptor for index '0' for tuple subclasses doesn't apply to 'int' object
+_tuplegetter(0, 'Alias for field number 0') _tuplegetter(0, 'Alias for field number 0') _tuplegetter(1, 'Alias for field number 1')
+
+--- outcome
+ok
+--- globals
+NamedTuple = <function object>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+g = <_tuplegetter object>
+p = <P object>

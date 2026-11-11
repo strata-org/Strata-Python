@@ -1,0 +1,9 @@
+--- stdout 38
+TypeError: duplicate base class tuple
+
+--- outcome
+ok
+--- globals
+NamedTuple = <function object>
+__doc__ = None
+__name__ = '__main__'

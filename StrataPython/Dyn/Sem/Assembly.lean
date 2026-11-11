@@ -179,6 +179,7 @@ as a list of frames: one constructor per piece. -/
 inductive PyLoopState (V : Type) where
   | ops (s : Proto.OpsLoopState V)
   | library (s : Library.LoopState V)
+  | modules (s : Modules.LoopState V)
 
 instance {V : Type} : HasLoopPart (PyLoopState V) (Proto.OpsLoopState V) where
   inj := .ops
@@ -189,6 +190,12 @@ instance {V : Type} : HasLoopPart (PyLoopState V) (Proto.OpsLoopState V) where
 instance {V : Type} : HasLoopPart (PyLoopState V) (Library.LoopState V) where
   inj := .library
   proj | .library s => some s | _ => none
+  proj_inj _ := rfl
+  inj_of_proj s p h := by cases s <;> simp at h; cases h; rfl
+
+instance {V : Type} : HasLoopPart (PyLoopState V) (Modules.LoopState V) where
+  inj := .modules
+  proj | .modules s => some s | _ => none
   proj_inj _ := rfl
   inj_of_proj s p h := by cases s <;> simp at h; cases h; rfl
 
@@ -217,13 +224,21 @@ def startChecks {m : Type → Type 1} {V : Type} [PyReads m V] (f args : V) : m 
       discard <| Proto.classDescrSelf t name args
   | _ => pure ()
 
+/-- The first step of the step machine of the built-in callable `f`: `Library`'s machines, then
+`Modules`' (`_make`); `none` when `f` is neither's. -/
+def piecesStart {m : Type → Type 1} {V : Type} [PyWrites m V] [PyNew m V]
+    [PyMachines m V (PyLoopState V)] (f args kwargs : V) :
+    m (Option (CallStep (PyLoopState V) V)) := do
+  if let some r ← Library.machineStart f args kwargs then return some r
+  Modules.machineStart f args kwargs
+
 -- The compiler specializes every piece's machines into these two definitions, which takes more
 -- than the default budget.
 set_option maxHeartbeats 1000000 in
 mutual
 /-- **The first step of every piece's step machine of a built-in callable**, with the fuel `n` for
-the nested calls, after `startChecks`: `Library`'s machines, whose calls start and resume with
-one unit less. -/
+the nested calls, after `startChecks`: `Library`'s machines and `Modules`' (`piecesStart`), whose
+calls start and resume with one unit less. -/
 def machinesStart : Nat → Value → Value → Value →
     PyM σ .writes true (Option (CallStep (PyLoopState Value) Value))
   | 0, _, _, _ => PyM.gap "a call dispatch nested deeper than the model follows"
@@ -231,11 +246,11 @@ def machinesStart : Nat → Value → Value → Value →
     startChecks f args
     letI : PyMachines (PyM σ .writes true) Value (PyLoopState Value) :=
       { startStep := machinesStart n, resume := machinesResume n }
-    Library.machineStart f args kwargs
+    piecesStart f args kwargs
 
 /-- **The resume entry of every piece**, with the fuel `n` for the nested resumes: the frames of
-`Proto.OpsLoopState` resume through `Proto.opsResume` and `Library`'s through
-`Library.machineResume`, whose inner machines start and resume with one unit
+`Proto.OpsLoopState` resume through `Proto.opsResume`, `Library`'s through
+`Library.machineResume` and `Modules`' through `Modules.machineResume`, whose inner machines start and resume with one unit
 less. -/
 def machinesResume : Nat → PyLoopState Value → List (PyLoopState Value) →
     PyM σ .writes true (CallStep (PyLoopState Value) Value)
@@ -246,6 +261,7 @@ def machinesResume : Nat → PyLoopState Value → List (PyLoopState Value) →
     match s with
     | .ops f => Proto.opsResume f rest
     | .library f => Library.machineResume f rest
+    | .modules f => Modules.machineResume f rest
 end
 
 instance : PyMachines (PyM σ .writes true) Value (PyLoopState Value) :=

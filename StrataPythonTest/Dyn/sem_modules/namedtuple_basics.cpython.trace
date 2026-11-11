@@ -1,0 +1,25 @@
+--- stdout 583
+P(x=1, y=0) 1 1 1 2 True
+('x', 'y') {'y': 0} P(x, y) ('x', 'y') {'x': <class 'int'>, 'y': <class 'int'>}
+P(x=5, y=0) {'x': 1, 'y': 0} P(x=3, y=4)
+True (<class '__main__.P'>, <class 'tuple'>, <class 'object'>)
+AttributeError: 'P' object has no attribute 'foo'
+TypeError: Expected 2 arguments, got 3
+TypeError: P.__new__() missing 1 required positional argument: 'x'
+TypeError: Non-default namedtuple field y cannot follow default field x
+AttributeError: Cannot overwrite NamedTuple attribute _make
+1 2 3 1 2
+TypeError: not all arguments converted during string formatting
+P(x=1, y=2)
+
+--- outcome
+ok
+--- globals
+It = <class 'It'>
+L = <class 'L'>
+NamedTuple = <function object>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+p = <P object>
+q = <L object>

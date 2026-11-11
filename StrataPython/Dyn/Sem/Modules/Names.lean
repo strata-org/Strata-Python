@@ -27,6 +27,8 @@ def moduleNames : List (String × List String) := [
 /-- The names of `vars()` of each class that the models' objects reach, by its
 `module.qualname`. -/
 def classNames : List (String × List String) := [
+  ("collections._tuplegetter",
+    ["__delete__", "__doc__", "__get__", "__module__", "__new__", "__reduce__", "__repr__", "__set__"]),
   ("types.GenericAlias",
     ["__args__", "__call__", "__dir__", "__doc__", "__eq__", "__ge__", "__getattribute__", "__getitem__", "__gt__", "__hash__", "__instancecheck__", "__iter__", "__le__", "__lt__", "__mro_entries__", "__ne__", "__new__", "__or__", "__origin__", "__parameters__", "__reduce__", "__repr__", "__ror__", "__subclasscheck__", "__typing_unpacked_tuple_args__", "__unpacked__"]),
   ("types.UnionType",
@@ -35,6 +37,10 @@ def classNames : List (String × List String) := [
     ["__dict__", "__doc__", "__module__", "__new__", "__weakref__"]),
   ("typing.ForwardRef",
     ["__doc__", "__eq__", "__forward_arg__", "__forward_code__", "__forward_evaluated__", "__forward_is_argument__", "__forward_is_class__", "__forward_module__", "__forward_value__", "__hash__", "__init__", "__module__", "__or__", "__repr__", "__ror__", "__slots__", "_evaluate"]),
+  ("typing.NamedTuple",
+    ["__dict__", "__doc__", "__module__", "__weakref__"]),
+  ("typing.NamedTupleMeta",
+    ["__doc__", "__module__", "__new__"]),
   ("typing.TypedDict",
     ["__dict__", "__doc__", "__module__", "__weakref__"]),
   ("typing._AnyMeta",
@@ -62,6 +68,8 @@ def classNames : List (String × List String) := [
 /-- The `str` values of `vars()` of those classes, by `module.qualname.name`, and the
 docstrings of the modules' objects, by `module.name`. -/
 def texts : List (String × String) := [
+  ("collections._tuplegetter.__module__",
+    "collections"),
   ("types.GenericAlias.__doc__",
     "Represent a PEP 585 generic type\n\nE.g. for t = list[int], t.__origin__ is list and t.__args__ is (int,)."),
   ("types.UnionType.__doc__",
@@ -73,6 +81,10 @@ def texts : List (String × String) := [
   ("typing.ForwardRef.__doc__",
     "Internal wrapper to hold a forward reference."),
   ("typing.ForwardRef.__module__",
+    "typing"),
+  ("typing.NamedTuple.__module__",
+    "typing"),
+  ("typing.NamedTupleMeta.__module__",
     "typing"),
   ("typing.TypedDict.__module__",
     "typing"),
