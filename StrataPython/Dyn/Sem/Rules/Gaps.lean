@@ -28,38 +28,38 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
 @[dyn_sem Py.listComp] def listComp (_iterable : Value)
     (_each : Region ε [ListAcc, Value] (Except Value Unit)) (err : Target E [Value]) :
     Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.listComp")
+  runRuleFree err #[] (PyPure.gap (m := PyM σ .writes true) "not modelled yet: py.listComp")
 
 @[dyn_sem Py.setComp] def setComp (_iterable : Value)
     (_each : Region ε [SetAcc, Value] (Except Value Unit)) (err : Target E [Value]) :
     Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.setComp")
+  runRuleFree err #[] (PyPure.gap (m := PyM σ .writes true) "not modelled yet: py.setComp")
 
 @[dyn_sem Py.dictComp] def dictComp (_iterable : Value)
     (_each : Region ε [DictAcc, Value] (Except Value Unit)) (err : Target E [Value]) :
     Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.dictComp")
+  runRuleFree err #[] (PyPure.gap (m := PyM σ .writes true) "not modelled yet: py.dictComp")
 
 @[dyn_sem Py.compFor] def compFor (_iterable : Value)
     (_each : Region ε [Value] (Except Value Unit)) (err : Target E [Value]) : Sem ε E Unit :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.compFor")
+  runRuleFree err #[] (PyPure.gap (m := PyM σ .writes true) "not modelled yet: py.compFor")
 
 @[dyn_sem Py.compIf] def compIf (_cond : Region ε [] (Except Value Bool))
     (_then : Region ε [] (Except Value Unit)) (err : Target E [Value]) : Sem ε E Unit :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.compIf")
+  runRuleFree err #[] (PyPure.gap (m := PyM σ .writes true) "not modelled yet: py.compIf")
 
 @[dyn_sem Py.compAppend] def compAppend (_out : ListAcc)
     (_elt : Region ε [] (Except Value Value)) (err : Target E [Value]) : Sem ε E Unit :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.compAppend")
+  runRuleFree err #[] (PyPure.gap (m := PyM σ .writes true) "not modelled yet: py.compAppend")
 
 @[dyn_sem Py.compAdd] def compAdd (_out : SetAcc)
     (_elt : Region ε [] (Except Value Value)) (err : Target E [Value]) : Sem ε E Unit :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.compAdd")
+  runRuleFree err #[] (PyPure.gap (m := PyM σ .writes true) "not modelled yet: py.compAdd")
 
 @[dyn_sem Py.compStore] def compStore (_out : DictAcc)
     (_key : Region ε [] (Except Value Value)) (_value : Region ε [] (Except Value Value))
     (err : Target E [Value]) : Sem ε E Unit :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.compStore")
+  runRuleFree err #[] (PyPure.gap (m := PyM σ .writes true) "not modelled yet: py.compStore")
 
 end
 

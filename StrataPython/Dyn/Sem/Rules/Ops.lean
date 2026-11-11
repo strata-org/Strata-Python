@@ -138,7 +138,7 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
   runRuleFree err #[] (Proto.unaryOp (m := PyM σ .calls true) .invert operand)
 
 @[dyn_sem Py.not_] def not_ (operand : Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] ((Value.bool ·) <$> Proto.notOp (m := PyM σ .calls true) operand)
+  runRuleFree err #[] (Proto.notValue (m := PyM σ .calls true) operand)
 
 @[dyn_sem Py.truthy] def truthy (val : Value) (err : Target E [Value]) : Sem ε E Bool :=
   runRuleFree err #[] (Proto.truthy (m := PyM σ .calls true) val)

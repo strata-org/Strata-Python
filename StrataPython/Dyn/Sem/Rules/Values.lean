@@ -51,15 +51,8 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
 
 @[dyn_sem Py.mkSlice] def mkSlice (lo hi step : Value) : Value := .slice lo hi step
 
-/-- The octets of `s`, one per character, if every character is below 256. -/
-def octets (s : String) : Option (Array UInt8) :=
-  s.toList.foldl (fun acc c => acc.bind fun a =>
-    if c.val < 256 then some (a.push c.val.toUInt8) else none) (some #[])
-
 @[dyn_sem Py.bytesLit] def bytesLit (s : String) : Sem ε E Value :=
-  runTotalFree "py.bytesLit" #[] (e := .pure) (σ := σ) <| match octets s with
-    | some b => pure (.bytes b)
-    | none => PyM.failure "py.bytesLit: operand assumption failed"
+  runTotalFree "py.bytesLit" #[] (Proto.bytesLit (m := PyM σ .pure true) s)
 
 @[dyn_sem Py.requireDefined]
 def requireDefined (v : Value) (name excType msg : String) (err : Target E [Value]) :
@@ -67,15 +60,13 @@ def requireDefined (v : Value) (name excType msg : String) (err : Target E [Valu
   runRuleFree err #[] (Proto.requireDefined (m := PyM σ .reads true) v name excType msg)
 
 @[dyn_sem Py.is_] def is_ (a b : Value) : Sem ε E Value :=
-  runTotalFree "py.is" #[] ((Value.bool ·) <$> Proto.isOp (m := PyM σ .pure true) a b)
+  runTotalFree "py.is" #[] (Proto.isValue (m := PyM σ .pure true) false a b)
 
 @[dyn_sem Py.isNot] def isNot (a b : Value) : Sem ε E Value :=
-  runTotalFree "py.isNot" #[] ((Value.bool ∘ not) <$> Proto.isOp (m := PyM σ .pure true) a b)
+  runTotalFree "py.isNot" #[] (Proto.isValue (m := PyM σ .pure true) true a b)
 
 @[dyn_sem Py.unsupported] def unsupported (name : Value) : Sem ε E Value :=
-  runTotalFree "py.unsupported" #[] (e := .pure) (σ := σ) <| match name with
-    | .str s => PyM.gap s!"construct not translated: {s.s}"
-    | _ => PyM.failure "py.unsupported: operand assumption failed"
+  runTotalFree "py.unsupported" #[] (Proto.unsupported (m := PyM σ .pure true) name)
 
 @[dyn_sem Py.loadGlobal]
 def loadGlobal (module name : String) (err : Target E [Value]) : Sem ε E Value :=

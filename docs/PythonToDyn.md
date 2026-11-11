@@ -2442,6 +2442,21 @@ asks a language that uses call brackets to keep four rules on the bracket's mark
   - it isn't `opaque`, `partial`, `noncomputable`, `@[implemented_by]`, `@[extern]` or an axiom.
 
   `spec`'s field `inCall` reads the marker, so it is forbidden too.
+
+  Most rules can reach the marker only through the record's instances, and the types of the
+  definitions they run show this. `#py_rule_shapes` checks that every rule except
+  `globalCell` and `mkClosure` runs a definition that is generic in its monad, applied at `PyM`
+  with the record's instances only. Its type names neither the world nor the marker, and it
+  reaches the world only through those instances. Lean has no theorem for this: it rests on
+  the type checker and on the check, and is trusted.
+
+  The rest is the code below the rule monad: the record's instances at `PyM` and the primitives
+  they use, the monad's own operations, the runners, those two rules, and the propositions and
+  types they are stated with. Only the walk
+  checks the marker in that code. `#py_part_writers` lists these definitions, and a `#guard_msgs`
+  test pins the list, so that a new one fails the build and is named there. Two things are trusted
+  here, and no theorem proves them: that the walk finds every write and read of the marker in this
+  code, and that the walk's choice of which definitions are below the rule monad is right.
 - An edge changes nothing that `same` guards, and `callClosureT` lowers the marker for the call.
   `Prim.bracketed_restores` and `Prim.callClosureT_restores` prove that each edge sets only the
   depth, and that `callClosureT` lowers the marker for the call;

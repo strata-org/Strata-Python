@@ -5,6 +5,7 @@
 -/
 module
 public meta import Lean.Elab.Command
+public meta import Lean.Meta.Tactic.Delta
 public meta import StrataDyn.Exec.Table
 public import StrataPython.Dyn.Sem.RuleOKProps
 
@@ -167,6 +168,147 @@ partial def findForbidden (mk : Lean.Name) (forbidden : Array Lean.Name) (projs 
   | .mdata _ b => go b
   | _ => none
 
+/-- The wrappers that run a rule's `PyM` computation. -/
+def pyRunners : List Lean.Name :=
+  [``runRule, ``runTotal, ``runRuleFree, ``runTotalFree, ``runRuleIf, ``runLoop, ``runLoopFree]
+
+/-- The constants of the rule monad's level and of the world: code that names one of them, after
+its abbreviations are unfolded, works below the record. -/
+def pyMonadConsts : List Lean.Name :=
+  [``PyM, ``PyLang, ``StrataPython.Dyn.Sem.World, ``Strata.Dyn.Exec.Sem, ``Depth]
+
+/-- The record's classes: the only classes a generic definition that a rule runs may take. -/
+def pyRecordClasses : List Lean.Name :=
+  [``PyPure, ``PyNew, ``PyReads, ``PyCalls, ``PyWrites, ``PyMachines, ``HasLoopPart]
+
+/-- The record's instances at `PyM`: the only instances a rule may hand to a generic definition,
+with the projections from a record class to its parent. -/
+def pyRecordInstances : List Lean.Name :=
+  [`StrataPython.Dyn.Sem.instPyPurePyMValue, `StrataPython.Dyn.Sem.instPyReadsPyMValueOfAtLeastReads,
+    `StrataPython.Dyn.Sem.instPyCallsPyMCallsValue, `StrataPython.Dyn.Sem.instPyWritesPyMWritesValue,
+    `StrataPython.Dyn.Sem.instPyNewPyMFalseValue, `StrataPython.Dyn.Sem.instPyNewPyMWritesTrueValue,
+    `StrataPython.Dyn.Sem.instPyMachinesPyMWritesTrueValuePyLoopState,
+    `StrataPython.Dyn.Sem.instHasLoopPartPyLoopStateOpsLoopState]
+
+/-- `e` with every reducible definition unfolded, so that an abbreviation can't hide what it
+stands for. -/
+def pyUnfold (e : Expr) : MetaM Expr := do
+  let env ← getEnv
+  deltaExpand e fun n => getReducibilityStatusCore env n == .reducible
+
+/-- Whether `a` works at the rule monad's level: its type, or a constant that it names or that
+constant's type, names a constant of `pyMonadConsts`, abbreviations unfolded. -/
+def pyAtMonad (a : Expr) : MetaM Bool := do
+  let env ← getEnv
+  let names (e : Expr) : MetaM Bool :=
+    return (← pyUnfold e).getUsedConstants.any pyMonadConsts.contains
+  if ← names (← inferType a) then return true
+  for c in (← pyUnfold a).getUsedConstants do
+    if pyMonadConsts.contains c then return true
+    if let some ci := env.find? c then
+      if ← names ci.type then return true
+  return false
+
+/-- Why the instance argument `a` is not built from the record's instances alone: its head is an
+instance of `pyRecordInstances`, a projection from a record class to its parent, or an instance
+that the rule takes; each class-valued argument other than a proof is again such an instance; and
+every other argument is a proof, a type former, or doesn't work at the rule monad's level (`pyAtMonad`).  `none` when it
+is. -/
+partial def pyInstanceWhy (a : Expr) : MetaM (Option MessageData) := do
+  let a := a.consumeMData
+  -- An instance that the rule itself takes, such as its `[Store σ]`.
+  if a.isFVar then return none
+  let env ← getEnv
+  let ok : Bool := match a.getAppFn.constName? with
+    | some c => pyRecordInstances.contains c ||
+        (env.getProjectionFnInfo? c).any fun info =>
+          info.fromClass && pyRecordClasses.contains info.ctorName.getPrefix
+    | none => false
+  unless ok do
+    return some (← addMessageContext m!"an instance argument is not one of the record's: {a}")
+  for x in a.getAppArgs do
+    -- A proof, such as the instance's `Level.AtLeast`, computes nothing.
+    if ← isProof x then continue
+    if (← isClass? (← inferType x)).isSome then
+      if let some why ← pyInstanceWhy x then return some why
+    else unless ← isTypeFormer x do
+      if ← pyAtMonad x then
+        return some (← addMessageContext m!"an argument of the instance {a} works at the rule \
+          monad: {x}")
+  return none
+
+/-- Why the computation `c` of a rule is not an application of a definition that is generic in its
+monad, at `PyM`: the definition takes a monad `m`, its type names no constant of `pyMonadConsts`,
+`m` is `PyM`, each instance binder is of a record class (`pyRecordClasses`) and gets a record
+instance (`pyInstanceWhy`), no other binder's type mentions `m`, no other argument works at the
+rule monad's level (`pyAtMonad`), and its result is in `m`.  `none` when it is. -/
+def pyGenericWhy (c : Expr) : MetaM (Option MessageData) := do
+  let some g := c.getAppFn.constName? | return some m!"its computation is not a constant applied"
+  let some gi := (← getEnv).find? g | return some m!"{.ofConstName g} is unknown"
+  if (← pyUnfold gi.type).getUsedConstants.any pyMonadConsts.contains then
+    return some m!"{.ofConstName g}'s type names the rule monad"
+  let args := c.getAppArgs
+  forallBoundedTelescope gi.type args.size fun xs body => do
+    let mut mIdx : Option Nat := none
+    for i in [0:xs.size] do
+      let t ← inferType xs[i]!
+      if t.isArrow && t.bindingDomain!.isSort && t.bindingBody!.isSort then mIdx := some i; break
+    let some mi := mIdx | return some m!"{.ofConstName g} takes no monad"
+    unless args[mi]?.any (·.isAppOf ``PyM) do
+      return some m!"{.ofConstName g}'s monad is not PyM"
+    let mv := xs[mi]!.fvarId!
+    for i in [0:args.size] do
+      if i == mi then continue
+      let a := args[i]!
+      let t ← inferType xs[i]!
+      if (← xs[i]!.fvarId!.getBinderInfo).isInstImplicit then
+        unless t.getAppFn.constName?.any pyRecordClasses.contains do
+          return some (← addMessageContext m!"{.ofConstName g} takes an instance of a class outside \
+            the record: {t}")
+        if let some why ← pyInstanceWhy a then return some m!"{.ofConstName g}: {why}"
+      else if t.containsFVar mv then
+        return some (← addMessageContext m!"{.ofConstName g} takes an argument in its monad: {t}")
+      else if ← pyAtMonad a then
+        return some (← addMessageContext m!"an argument of {.ofConstName g} works at the rule \
+          monad: {a}")
+    -- The result is in `m`, after the arguments that the runner gives (a loop's state).
+    forallTelescopeReducing body fun ys res => do
+      for y in ys do
+        if (← inferType y).containsFVar mv then
+          return some m!"{.ofConstName g} takes an argument in its monad after those it is given"
+      unless (← whnf res).getAppFn.isFVarOf mv do
+        return some (← addMessageContext m!"{.ofConstName g}'s result is not in its monad: {res}")
+      return none
+
+/-- Why the rule `decl` is not a `pyRunners` wrapper whose computations are generic in their
+monad (`pyGenericWhy`), whose regions are `#[]` or the rule's own, and whose other arguments are the
+rule's own operands and targets, literals, or terms that don't work at the rule monad's level
+(`pyAtMonad`).  `none` when it is. -/
+def pyRuleShapeWhy (decl : Lean.Name) : MetaM (Option MessageData) := do
+  let some (.defnInfo d) := (← getEnv).find? decl | return some m!"it is not a definition"
+  lambdaTelescope d.value fun _ b => do
+    let b := b.consumeMData
+    let some h := b.getAppFn.constName? | return some m!"its body is not a constant applied"
+    unless pyRunners.contains h do return some m!"its body is {.ofConstName h}, not a runner"
+    let some hi := (← getEnv).find? h | return some m!"{.ofConstName h} is unknown"
+    let args := b.getAppArgs
+    forallBoundedTelescope hi.type args.size fun xs _ => do
+      for i in [0:args.size] do
+        let a := args[i]!.consumeMData
+        let t ← inferType xs[i]!
+        let empty := (a.isAppOf ``List.toArray && a.appArg!.isAppOf ``List.nil) ||
+          a.isAppOf ``Array.mkEmpty || a.isAppOf ``Array.empty
+        if t.getUsedConstants.contains ``PyM then
+          if let some why ← pyGenericWhy a then return some why
+        else if t.isAppOf ``Handles then
+          unless a.isFVar || empty do
+            return some (← addMessageContext m!"its regions are not the operation's own: {a}")
+        else unless a.isFVar || a.isLit || empty do
+          if ← pyAtMonad a then
+            return some (← addMessageContext m!"an argument of {.ofConstName h} works at the \
+              rule monad: {a}")
+      return none
+
 /-- The libraries of this package, whose definitions `#py_part_writers` walks. -/
 def partWritersRoots : List Lean.Name :=
   [`StrataDyn, `StrataDynTest, `StrataPython, `StrataPythonTest, `StrataPythonTestExtra, `Pylate,
@@ -183,12 +325,17 @@ private and auxiliary ones included, and never enters a trusted name.  It fails 
 this package whose code proofs don't see (an `opaque`, `partial` or `noncomputable` definition, or
 one with `@[implemented_by]` or `@[extern]`) and at an axiom of this package that isn't a proof, so that a write can't
 hide in one.  Theorems and the definitions of other packages are not walked: they can't name the
-world. -/
+world.  With `(below := [b₁, …])`, it also lists the definitions that it reaches outside the core
+(`StrataDyn`), the trusted names, the table's own wrappers and the rules that `#py_rule_shapes`
+accepts, that name one of the `bᵢ` or a constant whose type does, with abbreviations unfolded: the
+code below the rule monad, which this walk alone checks. -/
 syntax (name := pyPartWriters) "#py_part_writers " ident " (" &"lang" " := " ident ")"
-  " (" &"forbidden" " := " "[" ident,* "]" ")" " (" &"trusted" " := " "[" ident,* "]" ")" : command
+  " (" &"forbidden" " := " "[" ident,* "]" ")" " (" &"trusted" " := " "[" ident,* "]" ")"
+  (" (" &"below" " := " "[" ident,* "]" ")")? : command
 
 elab_rules : command
-  | `(#py_part_writers $tbl (lang := $lang) (forbidden := [$fs,*]) (trusted := [$ts,*])) => do
+  | `(#py_part_writers $tbl (lang := $lang) (forbidden := [$fs,*]) (trusted := [$ts,*])
+      $[(below := [$bs?,*])]?) => do
     let res (i : Ident) : CommandElabM Lean.Name := liftCoreM <| realizeGlobalConstNoOverload i
     let mk := (← res lang) ++ `mk
     let mut forbidden ← fs.getElems.mapM res
@@ -245,6 +392,69 @@ elab_rules : command
           throwError m!"#py_part_writers: {.ofConstName ops} reaches {.ofConstName n} ({pathTo parent n}), \
             an axiom of this package"
       | _ => pure ()
+    -- The definitions below the rule monad that the walk decides for, outside the core.
+    if let some bs := bs? then
+      let below ← bs.getElems.mapM res
+      let names := Lean.Name.anonymous :: below.toList
+      let core (n : Lean.Name) : Bool := match env.getModuleIdxFor? n with
+        | some i => [`StrataDyn, `StrataDynTest].contains (env.header.moduleNames[i.toNat]!).getRoot
+        | none => false
+      let emitted : Lean.NameSet := (tableExt.getState env).foldl (init := {}) fun acc t =>
+        if t.emitted.contains ops then t.emitted.foldl (·.insert ·) acc else acc
+      let mut found : Array Lean.Name := #[]
+      for n in seen.toList do
+        if trusted.contains n || core n || !ours n then continue
+        -- The table's own wrappers, which apply the rules: the declarations that its command emitted.
+        if n == ops || emitted.contains n then continue
+        let some (.defnInfo d) := env.find? n | continue
+        -- As `pyAtMonad` decides it, with the abbreviations unfolded.
+        let unfold (e : Expr) : CommandElabM (Array Lean.Name) :=
+          return (← liftTermElabM (pyUnfold e)).getUsedConstants
+        let cs := (← unfold d.value) ++ (← unfold d.type)
+        let mut isBelow := false
+        for c in cs do
+          if names.contains c then isBelow := true; break
+          if let some ci := env.find? c then
+            if (← unfold ci.type).any names.contains then isBelow := true; break
+        unless isBelow do continue
+        if (semExt.getState env).entries.toList.any (·.2.decl == n) then
+          if (← liftTermElabM (pyRuleShapeWhy n)).isNone then continue
+        found := found.push (privateToUserName n)
+      let sorted := found.qsort (·.toString < ·.toString)
+      logInfo m!"#py_part_writers: {privateToUserName ops} reaches {sorted.size} definitions below the rule monad, \
+        which name {", ".intercalate (below.toList.map toString)} or a constant whose type does:\n\
+        {"\n".intercalate (sorted.toList.map toString)}"
+
+
+syntax (name := pyRuleShapes) "#py_rule_shapes " ident " (" &"exceptions" " := " "[" ident,* "]" ")" :
+  command
+
+/-- `#py_rule_shapes E (exceptions := [op₁, …])` fails unless the rule of every instruction of the
+environment `E` outside a pure function, other than the named exceptions, runs through a wrapper of
+`pyRunners` a definition that is generic in its monad, applied at `PyM`, with the record's
+instances alone (`pyRuleShapeWhy`).  Lean has no theorem that such a definition reaches `PyM` only
+through those instances: that rests on the elaborator and on this check, and is trusted.  It also
+fails at an exception whose rule has that shape, so that the list names only the rules that
+don't. -/
+elab_rules : command
+  | `(#py_rule_shapes $envId (exceptions := [$xs,*])) => do
+    let entry ← resolveEnv envId
+    let env ← getEnv
+    let exc := xs.getElems.map (·.getId)
+    for x in exc do
+      unless entry.ops.any (·.envName == x) do
+        throwErrorAt envId m!"#py_rule_shapes: {x} is not an instruction of {envId.getId}"
+    for o in entry.ops do
+      unless o.kind matches .decl do continue
+      let some r := findSemRule? env o.fullName | continue
+      if r.pure then continue
+      let why ← liftTermElabM <| pyRuleShapeWhy r.decl
+      match why, exc.contains o.envName with
+      | some w, false => logErrorAt envId m!"#py_rule_shapes: the rule of {o.envName} \
+          ({.ofConstName r.decl}) is not a runner of a definition generic in its monad: {w}"
+      | none, true => logErrorAt envId m!"#py_rule_shapes: the rule of {o.envName} is listed as \
+          an exception, but it runs a definition generic in its monad"
+      | _, _ => pure ()
 
 end
 

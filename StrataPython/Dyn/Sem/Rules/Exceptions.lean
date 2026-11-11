@@ -33,32 +33,23 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
   runRuleFree err #[] (Proto.setCauseOf (m := PyM σ .writes true) exc cause)
 
 @[dyn_sem Py.pushExcInfo] def pushExcInfo (exc : Value) : Sem ε E Value :=
-  runTotalFree "py.pushExcInfo" #[] (do
-    let prev ← PyReads.handled
-    PyWrites.setHandled exc
-    pure prev : PyM σ .writes true Value)
+  runTotalFree "py.pushExcInfo" #[] (Proto.pushHandled (m := PyM σ .writes true) (some exc))
 
 @[dyn_sem Py.pushPending] def pushPending (pending : Py.Completion.Val) : Sem ε E Value :=
-  runTotalFree "py.pushPending" #[] (do
-    let prev ← PyReads.handled
-    if let .completionRaise exc := pending then PyWrites.setHandled exc
-    pure prev : PyM σ .writes true Value)
+  runTotalFree "py.pushPending" #[] (Proto.pushHandled (m := PyM σ .writes true)
+    (if let .completionRaise exc := pending then some exc else none))
 
 @[dyn_sem Py.popExcept] def popExcept (prev : Value) : Sem ε E Unit :=
   runTotalFree "py.popExcept" #[] (PyWrites.setHandled prev : PyM σ .writes true Unit)
 
 @[dyn_sem Py.handledExc] def handledExc (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (do
-    let h ← PyReads.handled
-    if h matches .none then Proto.raiseBuiltin "RuntimeError" "No active exception to reraise"
-    pure h : PyM σ .reads true Value)
+  runRuleFree err #[] (Proto.handledExc (m := PyM σ .reads true))
 
 @[dyn_sem Py.excMatch] def excMatch (exc type : Value) (err : Target E [Value]) : Sem ε E Bool :=
   runRuleFree err #[] (Proto.excMatches (m := PyM σ .reads true) exc type)
 
 @[dyn_sem Py.isStopIteration] def isStopIteration (exc : Value) : Sem ε E Bool :=
-  runTotalFree "py.isStopIteration" #[]
-    (do Proto.isSubclass (← PyReads.classOf exc) (.builtin .StopIteration) : PyM σ .reads true Bool)
+  runTotalFree "py.isStopIteration" #[] (Proto.isStopIteration (m := PyM σ .reads true) exc)
 
 @[dyn_sem Py.enterMethod] def enterMethod (mgr : Value) (err : Target E [Value]) : Sem ε E Value :=
   runRuleFree err #[] (Proto.enterOf (m := PyM σ .calls true) mgr)

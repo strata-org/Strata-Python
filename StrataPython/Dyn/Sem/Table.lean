@@ -401,7 +401,197 @@ through the primitives that keep the marker (`withDepth`, `withPyDepth`, `depthG
 at a bracket's edges (`bracketed`, `callClosureT`), the bracket itself, the effects' statement
 (`spec`, whose `inCall` field reads the marker but is itself forbidden, and the proposition
 `Within`), and the other parts' instances.  And no operation calls a closure
-other than through `callClosureT`, which lowers the marker for the callee. -/
+other than through `callClosureT`, which lowers the marker for the callee.  The definitions below
+the rule monad, listed here, are the ones whose code the walk alone checks; the rules generic in
+their monad (`#py_rule_shapes`) are not among them.  The walk, and its choice of which definitions
+are below the rule monad, are trusted: no theorem proves that it misses no write or read of the
+marker. -/
+/--
+info: #py_part_writers: StrataPython.Dyn.Sem.PySem.ops reaches 182 definitions below the rule monad, which name StrataPython.Dyn.Sem.PyLang, StrataPython.Dyn.Sem.World, Strata.Dyn.Exec.Sem, StrataPython.Dyn.Sem.Depth, StrataPython.Dyn.Sem.PyM or a constant whose type does:
+StrataPython.Dyn.Sem.BEff
+StrataPython.Dyn.Sem.BTree
+StrataPython.Dyn.Sem.ContOK
+StrataPython.Dyn.Sem.Depth.c
+StrataPython.Dyn.Sem.Depth.py
+StrataPython.Dyn.Sem.Handles
+StrataPython.Dyn.Sem.HandlesOK
+StrataPython.Dyn.Sem.Prim.addrHash
+StrataPython.Dyn.Sem.Prim.alloc
+StrataPython.Dyn.Sem.Prim.allocDict
+StrataPython.Dyn.Sem.Prim.allocDictFrom
+StrataPython.Dyn.Sem.Prim.allocDictOf
+StrataPython.Dyn.Sem.Prim.allocExc
+StrataPython.Dyn.Sem.Prim.allocInstance
+StrataPython.Dyn.Sem.Prim.allocList
+StrataPython.Dyn.Sem.Prim.allocObj
+StrataPython.Dyn.Sem.Prim.allocSet
+StrataPython.Dyn.Sem.Prim.allocSetOf
+StrataPython.Dyn.Sem.Prim.allocWith
+StrataPython.Dyn.Sem.Prim.builtinGet
+StrataPython.Dyn.Sem.Prim.callClosure
+StrataPython.Dyn.Sem.Prim.callFunc
+StrataPython.Dyn.Sem.Prim.choicesAt
+StrataPython.Dyn.Sem.Prim.choose
+StrataPython.Dyn.Sem.Prim.classOf
+StrataPython.Dyn.Sem.Prim.classSetMro
+StrataPython.Dyn.Sem.Prim.classSetMroNew
+StrataPython.Dyn.Sem.Prim.classSetName
+StrataPython.Dyn.Sem.Prim.dictClear
+StrataPython.Dyn.Sem.Prim.dictDelete
+StrataPython.Dyn.Sem.Prim.dictDeleteNew
+StrataPython.Dyn.Sem.Prim.dictDeleteWith
+StrataPython.Dyn.Sem.Prim.dictEntryAt
+StrataPython.Dyn.Sem.Prim.dictFind
+StrataPython.Dyn.Sem.Prim.dictLocate
+StrataPython.Dyn.Sem.Prim.dictOf
+StrataPython.Dyn.Sem.Prim.dictPopitem
+StrataPython.Dyn.Sem.Prim.dictPopitemNew
+StrataPython.Dyn.Sem.Prim.dictPopitemWith
+StrataPython.Dyn.Sem.Prim.dictSet
+StrataPython.Dyn.Sem.Prim.dictSetNew
+StrataPython.Dyn.Sem.Prim.dictSetWith
+StrataPython.Dyn.Sem.Prim.dictTable
+StrataPython.Dyn.Sem.Prim.excSet
+StrataPython.Dyn.Sem.Prim.funcSetAnnotations
+StrataPython.Dyn.Sem.Prim.funcSetName
+StrataPython.Dyn.Sem.Prim.globalGet
+StrataPython.Dyn.Sem.Prim.globalGetT
+StrataPython.Dyn.Sem.Prim.handledGet
+StrataPython.Dyn.Sem.Prim.hashValue
+StrataPython.Dyn.Sem.Prim.immHash
+StrataPython.Dyn.Sem.Prim.immView
+StrataPython.Dyn.Sem.Prim.iterSet
+StrataPython.Dyn.Sem.Prim.keyClassOf
+StrataPython.Dyn.Sem.Prim.layoutOf
+StrataPython.Dyn.Sem.Prim.listChange
+StrataPython.Dyn.Sem.Prim.listChangeNew
+StrataPython.Dyn.Sem.Prim.markWalk
+StrataPython.Dyn.Sem.Prim.modifyObj
+StrataPython.Dyn.Sem.Prim.modifyOwnPayload
+StrataPython.Dyn.Sem.Prim.modifyPayload
+StrataPython.Dyn.Sem.Prim.moduleAdd
+StrataPython.Dyn.Sem.Prim.modulesGet
+StrataPython.Dyn.Sem.Prim.mutSet
+StrataPython.Dyn.Sem.Prim.numBinary
+StrataPython.Dyn.Sem.Prim.numUnary
+StrataPython.Dyn.Sem.Prim.objClass
+StrataPython.Dyn.Sem.Prim.objDict
+StrataPython.Dyn.Sem.Prim.objEnsureDict
+StrataPython.Dyn.Sem.Prim.objGet
+StrataPython.Dyn.Sem.Prim.objView
+StrataPython.Dyn.Sem.Prim.ofArith
+StrataPython.Dyn.Sem.Prim.ownData
+StrataPython.Dyn.Sem.Prim.ownDict
+StrataPython.Dyn.Sem.Prim.ownSet
+StrataPython.Dyn.Sem.Prim.partView
+StrataPython.Dyn.Sem.Prim.probeOf
+StrataPython.Dyn.Sem.Prim.raiseFailure
+StrataPython.Dyn.Sem.Prim.raiseNew
+StrataPython.Dyn.Sem.Prim.reprCheck
+StrataPython.Dyn.Sem.Prim.setAdd
+StrataPython.Dyn.Sem.Prim.setAddNew
+StrataPython.Dyn.Sem.Prim.setAddWith
+StrataPython.Dyn.Sem.Prim.setClear
+StrataPython.Dyn.Sem.Prim.setClearNew
+StrataPython.Dyn.Sem.Prim.setCopy
+StrataPython.Dyn.Sem.Prim.setDiscard
+StrataPython.Dyn.Sem.Prim.setDiscardNew
+StrataPython.Dyn.Sem.Prim.setDiscardWith
+StrataPython.Dyn.Sem.Prim.setFreeze
+StrataPython.Dyn.Sem.Prim.setFreezeNew
+StrataPython.Dyn.Sem.Prim.setHandled
+StrataPython.Dyn.Sem.Prim.setId
+StrataPython.Dyn.Sem.Prim.setLocate
+StrataPython.Dyn.Sem.Prim.setMerge
+StrataPython.Dyn.Sem.Prim.setMergeNew
+StrataPython.Dyn.Sem.Prim.setMergeWith
+StrataPython.Dyn.Sem.Prim.setPop
+StrataPython.Dyn.Sem.Prim.setPopNew
+StrataPython.Dyn.Sem.Prim.setPopWith
+StrataPython.Dyn.Sem.Prim.setRead
+StrataPython.Dyn.Sem.Prim.setReadAt
+StrataPython.Dyn.Sem.Prim.setReplace
+StrataPython.Dyn.Sem.Prim.setReplaceNew
+StrataPython.Dyn.Sem.Prim.setReserve
+StrataPython.Dyn.Sem.Prim.setReserveNew
+StrataPython.Dyn.Sem.Prim.setSlotAt
+StrataPython.Dyn.Sem.Prim.setSubtract
+StrataPython.Dyn.Sem.Prim.setSubtractNew
+StrataPython.Dyn.Sem.Prim.setSubtractWith
+StrataPython.Dyn.Sem.Prim.setSymUpdate
+StrataPython.Dyn.Sem.Prim.setSymUpdateNew
+StrataPython.Dyn.Sem.Prim.setSymUpdateWith
+StrataPython.Dyn.Sem.Prim.setTrim
+StrataPython.Dyn.Sem.Prim.setTrimNew
+StrataPython.Dyn.Sem.Prim.setViewOf
+StrataPython.Dyn.Sem.Prim.slotCount
+StrataPython.Dyn.Sem.Prim.slotCount._f
+StrataPython.Dyn.Sem.Prim.slotGet
+StrataPython.Dyn.Sem.Prim.slotPut
+StrataPython.Dyn.Sem.Prim.stateSet
+StrataPython.Dyn.Sem.Prim.strIterNext
+StrataPython.Dyn.Sem.Prim.strTable
+StrataPython.Dyn.Sem.Prim.walkGuard
+StrataPython.Dyn.Sem.Prim.withRepr
+StrataPython.Dyn.Sem.Prim.writeOut
+StrataPython.Dyn.Sem.Proved
+StrataPython.Dyn.Sem.PyFn
+StrataPython.Dyn.Sem.PyLang.call
+StrataPython.Dyn.Sem.PyLang.guard
+StrataPython.Dyn.Sem.PyLang.handled
+StrataPython.Dyn.Sem.PyLang.heap
+StrataPython.Dyn.Sem.PyLang.modules
+StrataPython.Dyn.Sem.PyLang.out
+StrataPython.Dyn.Sem.PyLang.store
+StrataPython.Dyn.Sem.PyLang.tagExcept
+StrataPython.Dyn.Sem.PyLang.tagValue
+StrataPython.Dyn.Sem.PyM
+StrataPython.Dyn.Sem.PyM.bind'
+StrataPython.Dyn.Sem.PyM.failure
+StrataPython.Dyn.Sem.PyM.gap
+StrataPython.Dyn.Sem.PyM.instMonad
+StrataPython.Dyn.Sem.PyM.instMonadExceptValue
+StrataPython.Dyn.Sem.PyM.lift
+StrataPython.Dyn.Sem.PyM.pure'
+StrataPython.Dyn.Sem.PyM.region
+StrataPython.Dyn.Sem.PyM.relax
+StrataPython.Dyn.Sem.PyM.throw'
+StrataPython.Dyn.Sem.PyM.tryCatch'
+StrataPython.Dyn.Sem.Rules.globalCell
+StrataPython.Dyn.Sem.Rules.mkClosure
+StrataPython.Dyn.Sem.Rules.moduleName
+StrataPython.Dyn.Sem.StartFree
+StrataPython.Dyn.Sem.TreeOK
+StrataPython.Dyn.Sem.bInst
+StrataPython.Dyn.Sem.callBuiltinWith
+StrataPython.Dyn.Sem.callBuiltinWith._f
+StrataPython.Dyn.Sem.callsRecord
+StrataPython.Dyn.Sem.contOf
+StrataPython.Dyn.Sem.instPyCallsPyMCallsValue
+StrataPython.Dyn.Sem.instPyMachinesPyMWritesTrueValuePyLoopState
+StrataPython.Dyn.Sem.instPyNewPyMFalseValue
+StrataPython.Dyn.Sem.instPyNewPyMWritesTrueValue
+StrataPython.Dyn.Sem.instPyPurePyMValue
+StrataPython.Dyn.Sem.instPyReadsPyMValueOfAtLeastReads
+StrataPython.Dyn.Sem.instPyWritesPyMWritesValue
+StrataPython.Dyn.Sem.isNamedTypeError
+StrataPython.Dyn.Sem.loopCont
+StrataPython.Dyn.Sem.machinesResume
+StrataPython.Dyn.Sem.machinesResume._f
+StrataPython.Dyn.Sem.machinesStart
+StrataPython.Dyn.Sem.modelInvariant
+StrataPython.Dyn.Sem.resolveBuiltin
+StrataPython.Dyn.Sem.runLoop
+StrataPython.Dyn.Sem.runLoopFree
+StrataPython.Dyn.Sem.runRule
+StrataPython.Dyn.Sem.runRuleFree
+StrataPython.Dyn.Sem.runRuleIf
+StrataPython.Dyn.Sem.runTotal
+StrataPython.Dyn.Sem.runTotalFree
+StrataPython.Dyn.Sem.treeOf
+StrataPython.Dyn.Sem.writesRecord
+-/
+#guard_msgs in
 #py_part_writers PySem (lang := PyLang)
   (forbidden := [World.instHasPart_depth, PyLang.depth, World.mk, Depth.bracket,
     Strata.Dyn.Exec.HasInCall.inCall, Strata.Dyn.Exec.Effects.WorldSpec.inCall, Strata.Dyn.Exec.HasCall.callReq])
@@ -409,6 +599,7 @@ other than through `callClosureT`, which lowers the marker for the callee. -/
     instHasInCallWorld, Strata.Dyn.Exec.HasBracket.mreq, spec, Strata.Dyn.Exec.Effects.Within,
     World.instHasPart_depth, World.instHasPart_store, World.instHasPart_modules, World.instHasPart_handled,
     World.instHasPart_guard, World.instHasPart_out])
+  (below := [PyLang, World, Strata.Dyn.Exec.Sem, Depth, PyM])
 
 /-! No Python rule blocks or fails: a case the rules don't model stops with a gap, and a Python rule
 never stops with `Fault.blocked` (which `assume` gives) or `Fault.failure`, so that a verifier never
@@ -421,6 +612,11 @@ entry in the table, not the helper, so that no Python rule can call the helper. 
   (forbidden := [Strata.Dyn.Exec.Fault.failure, Strata.Dyn.Exec.Fault.blocked])
   (trusted := [StrataPython.Dyn.Sem.PySem.impl.base.unreachable])
 
+
+/-! Every rule but two runs a definition that is generic in its monad, at `PyM`, with the record's
+instances alone, which the walks above check.  `globalCell` and `mkClosure` work on the machine's
+cells and closures, which the record doesn't hand out. -/
+#py_rule_shapes Py (exceptions := [py.globalCell, py.mkClosure])
 
 #py_rule_theorems PySem for Py (effects := pyDeclaredEffect) (tags := pyTags)
   (accounts := pyAccounts)

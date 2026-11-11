@@ -28,10 +28,7 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
   runRuleFree err #[] (Proto.getIter (m := PyM σ .writes true) obj)
 
 @[dyn_sem Py.next] def next (iter : Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (do
-    match ← Proto.iterStep (m := PyM σ .writes true) iter with
-    | some v => pure v
-    | none => Proto.raiseStop : PyM σ .writes true Value)
+  runRuleFree err #[] (Proto.nextOrStop (m := PyM σ .writes true) iter)
 
 end
 

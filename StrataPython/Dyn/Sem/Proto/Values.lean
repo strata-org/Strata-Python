@@ -70,6 +70,35 @@ def isOp [PyPure m V] (a b : V) : m Bool := do
   | .no => pure false
   | .unknown => PyPure.gap "is on two equal immediates depends on CPython's caching"
 
+/-- `a is b` as a `bool`, or `a is not b` when `neg`. -/
+def isValue [PyPure m V] (neg : Bool) (a b : V) : m V :=
+  (fun r => PyPure.imm (m := m) (.bool (r != neg))) <$> isOp a b
+
+/-- The octets of `s`, one per character, if every character is below 256. -/
+def octets (s : String) : Option (Array UInt8) :=
+  s.toList.foldl (fun acc c => acc.bind fun a =>
+    if c.val < 256 then some (a.push c.val.toUInt8) else none) (some #[])
+
+/-- The `bytes` whose octets are the characters of `s`. -/
+def bytesLit [PyPure m V] (s : String) : m V :=
+  match octets s with
+  | some b => pure (PyPure.imm (m := m) (.bytes b))
+  | none => PyPure.modelInvariant "py.bytesLit: operand assumption failed"
+
+/-- The gap of a construct that the translator doesn't translate, named by the `str` `name`. -/
+def unsupported [PyPure m V] {α : Type} (name : V) : m α := do
+  match ← PyPure.immViewAll name with
+  | some (.str s) => PyPure.gap s!"construct not translated: {s.s}"
+  | _ => PyPure.modelInvariant "py.unsupported: operand assumption failed"
+
+/-- The item `i` of the tuple `tup`. -/
+def tupleGet [PyPure m V] (tup : V) (i : Int) : m V := do
+  match ← PyPure.immViewAll tup with
+  | some (.tuple xs) => match xs[i.toNat]? with
+    | some v => if i ≥ 0 then pure v else PyPure.modelInvariant "tupleGet: operand assumption failed"
+    | none => PyPure.modelInvariant "tupleGet: operand assumption failed"
+  | _ => PyPure.modelInvariant "tupleGet: operand assumption failed"
+
 /-- The global `name` of `module`, else the entry `name` of the `builtins` module's dict, else a
 raised `NameError`. -/
 def loadGlobal [PyReads m V] (module name : String) : m V := do

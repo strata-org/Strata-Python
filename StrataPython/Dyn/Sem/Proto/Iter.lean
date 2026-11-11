@@ -556,6 +556,17 @@ def inStep [PyCalls m V] (neg : Bool) (x s : V) (st : Option V) : m (LoopStep V 
   | .done b => return .done (PyPure.imm (m := m) (.bool (b != neg)))
   | .more i => return .more i
 
+
+/-- `next(iter)`, or a raised `StopIteration` when it ends. -/
+def nextOrStop [PyWrites m V] (iter : V) : m V := do
+  match ← iterStep iter with
+  | some v => pure v
+  | none => raiseStop
+
+/-- Whether the exception `exc` is a `StopIteration`, by its class. -/
+def isStopIteration [PyReads m V] (exc : V) : m Bool := do
+  isSubclass (← PyReads.classOf exc) (PyPure.imm (m := m) (.builtin .StopIteration))
+
 end
 
 end

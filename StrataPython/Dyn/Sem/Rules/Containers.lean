@@ -50,9 +50,7 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
 
 @[dyn_sem Py.dictSet] def dictSet (dict key value : Value) (err : Target E [Value]) :
     Sem ε E Unit :=
-  runRuleFree err #[] do
-    let h ← Proto.hash (m := PyM σ .writes true) key
-    PyWrites.dictSet dict key value (some h) (Proto.keyEq key)
+  runRuleFree err #[] (Proto.dictSetHashed (m := PyM σ .writes true) dict key value)
 
 @[dyn_sem Py.setItem] def setItem (obj key val : Value) (err : Target E [Value]) : Sem ε E Unit :=
   runRuleFree err #[] (Proto.setItem (m := PyM σ .writes true) obj key val)
@@ -71,16 +69,10 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
     (Proto.unpackExStep (m := PyM σ .writes true) val before.toNat after.toNat)
 
 @[dyn_sem Py.listToTuple] def listToTuple (list : Value) : Sem ε E Value :=
-  runTotalFree "py.listToTuple" #[] (e := .reads) (σ := σ) do
-    let some xs ← Proto.listOf? list | PyM.failure "listToTuple: operand assumption failed"
-    pure (.tuple xs)
+  runTotalFree "py.listToTuple" #[] (Proto.listToTuple (m := PyM σ .reads true) list)
 
 @[dyn_sem Py.tupleGet] def tupleGet (tup : Value) (i : Int) : Sem ε E Value :=
-  runTotalFree "py.tupleGet" #[] (e := .pure) (σ := σ) <| match tup with
-    | .tuple xs => match xs[i.toNat]? with
-      | some v => if i ≥ 0 then pure v else PyM.failure "tupleGet: operand assumption failed"
-      | none => PyM.failure "tupleGet: operand assumption failed"
-    | _ => PyM.failure "tupleGet: operand assumption failed"
+  runTotalFree "py.tupleGet" #[] (Proto.tupleGet (m := PyM σ .pure true) tup i)
 
 @[dyn_sem Py.mkSet] def mkSet (elems : Array Value) (err : Target E [Value]) : Sem ε E Value :=
   runRule err #[] (Proto.mkSet (m := PyM σ .calls false) elems)

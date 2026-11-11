@@ -913,6 +913,18 @@ def setUpdate [PyWrites m V] (s it : V) : m Unit := do
   if (← listOf? it).isSome then return ← setAddListLive s it walkFuel 0
   for x in ← (← iterSeq it fun t => s!"'{t}' object is not iterable").items do setAddItem s x
 
+
+/-- The tuple of the items of the list `list`. -/
+def listToTuple [PyReads m V] (list : V) : m V := do
+  let some xs ← listOf? list
+    | PyPure.modelInvariant "listToTuple: operand assumption failed"
+  pure (PyPure.imm (m := m) (.tuple xs))
+
+/-- `dict[key] = value` on a `dict` of a display, with `key`'s hash. -/
+def dictSetHashed [PyWrites m V] (dict key value : V) : m Unit := do
+  let h ← hash key
+  PyWrites.dictSet dict key value (some h) (keyEq key)
+
 end
 
 end

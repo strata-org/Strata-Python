@@ -810,6 +810,10 @@ result, an ordering of tuples or lists the members' result, else the comparison 
 def richCompareV [PyCalls m V] (op : Arith.CmpOp) (a b : V) : m V := do
   richCompareVN (cDepthLimit + 1 - (← PyReads.depthC)) op a b
 
+
+/-- `not v`, as a `bool`. -/
+def notValue [PyCalls m V] (v : V) : m V := (fun b => PyPure.imm (m := m) (.bool b)) <$> notOp v
+
 end
 
 end

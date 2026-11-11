@@ -182,6 +182,20 @@ def exitWithExc [PyCalls m V] (exit exc : V) : m V := do
   callN dispatchDepth exit (PyPure.imm (m := m) (.tuple #[← PyReads.classOf exc, exc, d.traceback]))
     (← PyPure.allocDict)
 
+
+/-- Make `exc`, if any, the exception being handled, and give back the one handled before. -/
+def pushHandled [PyWrites m V] (exc : Option V) : m V := do
+  let prev ← PyReads.handled
+  if let some e := exc then PyWrites.setHandled e
+  pure prev
+
+/-- The exception being handled, for a bare `raise`; a raised `RuntimeError` when there is none. -/
+def handledExc [PyReads m V] : m V := do
+  let h ← PyReads.handled
+  if (← PyPure.immViewAll h) matches some .none then
+    raiseBuiltin "RuntimeError" "No active exception to reraise"
+  pure h
+
 end
 
 end

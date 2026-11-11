@@ -30,7 +30,8 @@ projection; a language instance whose depth part is the rule's own, hidden in th
 forbidden operand; and an axiom named only in a type.  The axiom is the case under test: the check
 must reject a definition that nothing shows.  Then reads of the marker: through `depthGet` with its
 field, `Depth`'s derived equality or `sizeOf`, the bracket's own test, and the trusted statement of
-the effects; and a call of a closure that doesn't lower the marker for the callee.
+the effects; and a call of a closure that doesn't lower the marker for the callee.  Last, the list
+of the definitions below the rule monad that the check reaches.
 -/
 
 namespace StrataPython.Dyn.Sem.PartWritersTest
@@ -188,6 +189,23 @@ def viaUnreachable {ε : Strata.Dyn.Exec.Eff} {E : Type} (b : Bool) : Strata.Dyn
 def Unreachable.ops {ε : Strata.Dyn.Exec.Eff} {E : Type} : List (Strata.Dyn.Exec.Sem ε E Empty) :=
   [viaUnreachable true]
 
+/-- An output write in `Sem`: code below the rule monad. -/
+def writeBelow {ε : Strata.Dyn.Exec.Eff} {E : Type} {σ : Type} [Store σ] [Decode σ]
+    [PyLang σ ε] : Strata.Dyn.Exec.Sem ε E Unit :=
+  modifyThe Output fun o => ⟨o.pieces.push "x"⟩
+
+/-- A write through the trusted `Prim.writeOut`, run at the engine's level. -/
+def writeTrusted {ε : Strata.Dyn.Exec.Eff} {E : Type} {σ : Type} [Store σ] [Decode σ]
+    [PyLang σ ε] : Strata.Dyn.Exec.Sem ε E Unit :=
+  (Prim.writeOut (σ := σ) "y").1 #[] ⟨0⟩ pure fun _ => pure ()
+
+/-- `x`, a pure function on values: not below the rule monad. -/
+def plain (x : Value) : Value := x
+
+def Report.ops {ε : Strata.Dyn.Exec.Eff} {E : Type} {σ : Type} [Store σ] [Decode σ] [PyLang σ ε] :
+    List (Strata.Dyn.Exec.Sem ε E Value) :=
+  [writeBelow (σ := σ) *> pure (plain .none), writeTrusted (σ := σ) *> pure .none]
+
 end StrataPython.Dyn.Sem.PartWritersTest
 
 open StrataPython.Dyn.Sem StrataPython.Dyn.Sem.PartWritersTest
@@ -326,3 +344,33 @@ error: #py_part_writers: Fails.ops reaches Strata.Dyn.Exec.semanticFailure (_pri
 error: #py_part_writers: Unreachable.ops reaches Strata.Dyn.Exec.semanticFailure (_private.StrataPythonTest.Dyn.Sem.PartWritersTest.0.StrataPython.Dyn.Sem.PartWritersTest.Unreachable.ops → _private.StrataPythonTest.Dyn.Sem.PartWritersTest.0.StrataPython.Dyn.Sem.PartWritersTest.viaUnreachable → Strata.Dyn.Exec.BaseRules.unreachable → Strata.Dyn.Exec.semanticFailure), which names Strata.Dyn.Exec.Fault.failure outside the trusted primitives
 -/
 #guard_msgs in #check_faults Unreachable
+
+/-! The definitions below the rule monad that the check reaches: the two writes, and the rule
+monad's own definitions that `Prim.writeOut`'s type names; not the trusted primitive itself, and not
+the pure function on values. -/
+/--
+info: #py_part_writers: StrataPython.Dyn.Sem.PartWritersTest.Report.ops reaches 14 definitions below the rule monad, which name StrataPython.Dyn.Sem.PyLang, StrataPython.Dyn.Sem.World, Strata.Dyn.Exec.Sem or a constant whose type does:
+StrataPython.Dyn.Sem.BEff
+StrataPython.Dyn.Sem.BTree
+StrataPython.Dyn.Sem.ContOK
+StrataPython.Dyn.Sem.Handles
+StrataPython.Dyn.Sem.HandlesOK
+StrataPython.Dyn.Sem.PartWritersTest.writeBelow
+StrataPython.Dyn.Sem.PartWritersTest.writeTrusted
+StrataPython.Dyn.Sem.Proved
+StrataPython.Dyn.Sem.PyFn
+StrataPython.Dyn.Sem.PyLang.out
+StrataPython.Dyn.Sem.StartFree
+StrataPython.Dyn.Sem.TreeOK
+StrataPython.Dyn.Sem.bInst
+StrataPython.Dyn.Sem.treeOf
+-/
+#guard_msgs in
+#py_part_writers Report (lang := PyLang)
+  (forbidden := [World.instHasPart_depth, PyLang.depth, World.mk, Depth.bracket])
+  (trusted := [Prim.bracketed, Prim.callClosureT, Prim.withDepth, Prim.withPyDepth, Prim.depthGet,
+    Prim.writeOut, instHasInCallWorld, Strata.Dyn.Exec.HasBracket.mreq, spec,
+    Strata.Dyn.Exec.Effects.Within, World.instHasPart_depth, World.instHasPart_store,
+    World.instHasPart_modules, World.instHasPart_handled, World.instHasPart_guard,
+    World.instHasPart_out])
+  (below := [PyLang, World, Strata.Dyn.Exec.Sem])
