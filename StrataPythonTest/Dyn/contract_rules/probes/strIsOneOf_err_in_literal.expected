@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+H = <class 'H'>
+__doc__ = None
+__name__ = '__main__'
+--- result __main__.__probe__
+False

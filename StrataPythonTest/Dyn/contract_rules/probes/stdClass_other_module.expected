@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+--- result __main__.__probe__
+--- gap py.stdClass: the module collections.abc is not modelled

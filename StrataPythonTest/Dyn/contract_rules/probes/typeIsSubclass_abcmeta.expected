@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+ABCMeta = <class 'ABCMeta'>
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+x = 1
+--- result __main__.__probe__
+--- gap py.typeIsSubclass: a class whose metaclass is abc.ABCMeta is not modelled

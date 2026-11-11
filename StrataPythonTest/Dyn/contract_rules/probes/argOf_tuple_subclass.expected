@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+T = <class 'T'>
+__doc__ = None
+__name__ = '__main__'
+args = <T object>
+d = 0
+kwargs = {}
+--- result __main__.__probe__
+0

@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+T = (<class 'A'>, <class 'str'>)
+__doc__ = None
+__name__ = '__main__'
+a = <A object>
+--- result __main__.__probe__
+True

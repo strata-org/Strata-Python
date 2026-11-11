@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+M = <class 'M'>
+__doc__ = None
+__name__ = '__main__'
+x = <C object>
+--- result __main__.__probe__
+True

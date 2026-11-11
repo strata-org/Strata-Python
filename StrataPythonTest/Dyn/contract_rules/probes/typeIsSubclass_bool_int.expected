@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+I = <class 'int'>
+__doc__ = None
+__name__ = '__main__'
+x = True
+--- result __main__.__probe__
+True

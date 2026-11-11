@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+args = ()
+f = <function object>
+kwargs = {1: 2}
+--- result __main__.__probe__
+False

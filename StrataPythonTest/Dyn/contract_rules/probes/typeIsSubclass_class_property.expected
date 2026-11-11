@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+I = <class 'int'>
+__doc__ = None
+__name__ = '__main__'
+x = <A object>
+--- result __main__.__probe__
+False

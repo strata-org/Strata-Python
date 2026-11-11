@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+I = <class 'I'>
+__doc__ = None
+__name__ = '__main__'
+calls = []
+x = <A object>
+--- result __main__.__probe__
+10

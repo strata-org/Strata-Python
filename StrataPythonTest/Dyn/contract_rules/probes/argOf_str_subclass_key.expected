@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'
+args = ()
+d = 0
+kwargs = {<S object>: 3}
+--- result __main__.__probe__
+0

@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+args = (1,)
+d = 1
+f = <function object>
+kwargs = {'c': 5, 'z': 6}
+--- result __main__.__probe__
+5

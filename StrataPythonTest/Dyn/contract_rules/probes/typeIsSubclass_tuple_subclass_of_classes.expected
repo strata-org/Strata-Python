@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+T = <class 'T'>
+__doc__ = None
+__name__ = '__main__'
+cs = <T object>
+x = 1
+--- result __main__.__probe__
+--- gap py.typeIsSubclass: an instance of a subclass of tuple is not modelled

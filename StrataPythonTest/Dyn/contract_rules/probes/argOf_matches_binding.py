@@ -1,0 +1,8 @@
+args = (1,)
+kwargs = {"c": 5, "z": 6}
+d = 0
+def f(a, b=0, *, c=1, **kw):
+    return (a, b, c, kw)
+# probe: py.Value = py.argOf($args, $kwargs, 1, "b", $d)
+# python: f(*args, **kwargs)[1]
+# expect: agree

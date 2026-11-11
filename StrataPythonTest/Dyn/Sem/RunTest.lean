@@ -8,10 +8,12 @@ import StrataPython.Dyn.Sem.Table
 import StrataDyn.DDMRead
 import StrataDyn.Exec.Run
 import StrataPython.Dyn.Sem.Run
+import StrataPythonTest.Util.DynRun
 meta import StrataPython.Dyn.Sem.Table
 meta import StrataDyn.DDMRead
 meta import StrataDyn.Exec.Run
 meta import StrataPython.Dyn.Sem.Run
+meta import StrataPythonTest.Util.DynRun
 
 set_option autoImplicit false
 
@@ -27,43 +29,23 @@ namespace StrataPython.Dyn.Sem.RunTest
 
 open Strata.Dyn Strata.Dyn.Exec StrataPython.Dyn.Sem
 
-/-- A short text of a value, for the tests' output. -/
-def showV : Value → String
-  | .none => "None"
-  | .bool b => if b then "True" else "False"
-  | .int i => toString i
-  | .str s => Format.strRepr s.s
-  | .float bits => Format.floatRepr bits
-  | .range a b c => if c == 1 then s!"range({a}, {b})" else s!"range({a}, {b}, {c})"
-  | .builtin b => b.info.name
-  | .tuple xs => "(" ++ ", ".intercalate (xs.attach.toList.map fun ⟨x, _⟩ => showV x) ++
-      (if xs.size == 1 then ",)" else ")")
-  | .obj id => s!"<object {id}>"
-  | .traceback => "<traceback>"
-  | v => reprStr v
+open StrataPython.DynRun (showV runMain)
+
+/-- The text of an exception (its context, traceback and fields), a function (its module), a list
+(its resizes) or a dict, and `none` for any other object. -/
+def showObj : Obj Run → Option String
+  | { cls, payload := .exc e, .. } =>
+    some s!"exception {showV cls}{showV e.args}, context {showV e.context}, \
+      traceback {showV e.traceback}, fields {e.fields.toList.map fun (n, v) => (n, showV v)}"
+  | { cls, payload := .func f, .. } => some s!"{showV cls} {f.name} of {showV f.module}"
+  | { payload := .list xs n, .. } =>
+    some s!"list [{", ".intercalate (xs.toList.map showV)}], resizes {n}"
+  | { cls, payload := .dict t, .. } =>
+    some s!"{showV cls} {(t.live.map fun (e, v) => s!"{showV e.key}: {showV v}").toList}"
+  | _ => none
 
 /-- Run `@m.main` of the module `text`, and print its result or its fault. -/
-def run (text : String) : IO Unit := do
-  match ← Module.read Py.env text "t.dyn" with
-  | .error e => IO.println s!"read: {e}"
-  | .ok m =>
-    let o := runModule PySem.model m (.str (.str .base "m") "main") #[] 1000
-    match o.result with
-    | .ok _ => match o.read? Value with
-      | some (.obj id) => match o.snapshot.world.store.get? id with
-        | some { cls, payload := .exc e, .. } =>
-          IO.println s!"exception {showV cls}{showV e.args}, context {showV e.context}, \
-            traceback {showV e.traceback}, fields {e.fields.toList.map fun (n, v) => (n, showV v)}"
-        | some { cls, payload := .func f, .. } =>
-          IO.println s!"{showV cls} {f.name} of {showV f.module}"
-        | some { payload := .list xs n, .. } =>
-          IO.println s!"list [{", ".intercalate (xs.toList.map showV)}], resizes {n}"
-        | some { cls, payload := .dict t, .. } =>
-          IO.println s!"{showV cls} {(t.live.map fun (e, v) => s!"{showV e.key}: {showV v}").toList}"
-        | _ => IO.println s!"object {id}"
-      | some v => IO.println (showV v)
-      | none => IO.println "a result that is not a value"
-    | .fault f => IO.println s!"fault: {repr f}"
+def run : String → IO Unit := runMain showObj
 
 -- No built-in function or method gets a body from two pieces' parts: the first part would win
 -- silently.
