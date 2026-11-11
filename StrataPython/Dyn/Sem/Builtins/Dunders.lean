@@ -316,6 +316,25 @@ def dictCmpBody [PyWrites m V] (name : String) (op : Arith.CmpOp) (self args kwa
   let same ← dictEqual (richCompare .eq) self o
   pure (PyPure.imm (m := m) (.bool (if op == .eq then same else !same)))
 
+/-- A gap unless CPython reads the dict `o`'s entries directly, running no user code: an exact
+dict, or an instance of a subclass of `dict` whose class keeps dict's `__iter__`, which keeps
+`dict_merge` and `PyDict_Copy` on their fast path; for an operand that is `merged` into another
+dict, also dict's `keys` and `__getattribute__`, since `dict_update_arg` looks `keys` up on it. -/
+def dictFastGap [PyReads m V] (o : V) (merged : Bool) : m Unit := do
+  if ← classIs o .dict then return
+  let t ← PyReads.classOf o
+  let keeps (n : String) (b : Builtin) : m Bool := do
+    match ← lookupType t n with
+    | some f => match ← PyPure.immView f with
+      | some (.descr b' n' _) => pure (b' == b && n' == n)
+      | _ => pure false
+    | none => pure false
+  let fast ← if merged then
+      pure ((← keeps "__iter__" .dict) && (← keeps "keys" .dict) && (← keeps "__getattribute__" .dict))
+    else keeps "__iter__" .dict
+  if !fast then
+    PyPure.gap "a | of a dict whose class overrides how its entries are read is not modelled yet"
+
 /-- `dict.__or__(self, o)` (`reflected` for `__ror__`): a new dict, the left operand's entries
 updated with the right one's. -/
 def dictOrBody [PyWrites m V] [PyNew m V] (name : String) (reflected : Bool) (self args kwargs : V) :
@@ -323,6 +342,8 @@ def dictOrBody [PyWrites m V] [PyNew m V] (name : String) (reflected : Bool) (se
   let o ← oneArg name args kwargs
   if !(← isDictLike o) then return notImpl (m := m)
   let (l, r) := if reflected then (o, self) else (self, o)
+  dictFastGap l false
+  dictFastGap r true
   let c ← PyReads.dictCopy l
   guardDictWalk r c
   for (k, v, h) in ← PyReads.dictEntries r do PyNew.dictSetNew c k v (some h) (keyEq k)
@@ -332,6 +353,7 @@ def dictOrBody [PyWrites m V] [PyNew m V] (name : String) (reflected : Bool) (se
 def dictIorBody [PyWrites m V] (self args kwargs : V) : m V := do
   let o ← oneArg "__ior__" args kwargs
   if !(← isDictLike o) then PyPure.gap "updating a dict from a value that is not a dict is not modelled yet"
+  dictFastGap o true
   guardDictWalk o self
   for (k, v, h) in ← PyReads.dictEntries o do PyWrites.dictSet self k v (some h) (keyEq k)
   pure self

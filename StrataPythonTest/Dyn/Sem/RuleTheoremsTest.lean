@@ -66,6 +66,8 @@ public environment PyT extends Py where
   insn importGaps (k : base.Int) (^err (exc : Value)) : Value
   insn groupLenHint (^err (exc : Value)) : Value
   insn objPrims (^err (exc : Value)) : Value
+  insn dictWalkSub (k : base.Int) (^err (exc : Value)) : Value
+  insn dictOrSub (k : base.Int) (^err (exc : Value)) : Value
   insn bindCase (i : base.Int) (^err (exc : Value)) : Value
   insn subclassOps (^err (exc : Value)) : Value
   insn subclassContainers (^err (exc : Value)) : Value
@@ -259,6 +261,58 @@ and 8, then three pops; `setTrim` on a set with two dummies; and `setReserve` on
     let at31 ← PyReads.setSlotAt r 31
     pure (Value.tuple ((slots.map slotValue).toArray ++ #[p1.getD .none, p2.getD .none, p3.getD .none,
       slotValue before, slotValue after, slotValue at31]))
+    : PyM σ .reads false Value)
+
+/-- `|` and `|=` of dicts with an instance `d` of a subclass `D` of `dict` that holds one entry:
+`{} | d` (`0`) and `e |= d` (`1`) when `D` sets `__iter__`, which makes CPython's merge take its
+slow path; `d | {}` with that `D` (`2`); `{} | d` when `D` sets `keys` (`3`) or
+`__getattribute__` (`4`), which CPython's lookup of `keys` runs; `d | {}` when `D` sets
+`__getattribute__`, which `PyDict_Copy` doesn't look at (`5`); and `{} | d` when `D` keeps
+dict's reads (`6`). The cases that read the entries directly give the result's length. -/
+@[dyn_sem PyT.dictOrSub, expose] public def dictOrSub (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let ns ← PyPure.allocDict
+    let set? : Option String := match k with
+      | 0 | 1 | 2 => some "__iter__"
+      | 3 => some "keys"
+      | 4 | 5 => some "__getattribute__"
+      | _ => none
+    if let some n := set? then
+      PyNew.dictSetNew ns (Value.ofString n) (.builtin .tuple) none fun _ => pure false
+    let c ← PyPure.allocObj (.builtin .type) (.cls
+      { name := "D", qualname := "D", «module» := "m", bases := #[.builtin .dict],
+        mroTail := #[.builtin .dict, .builtin .object], ns, solidBase := .builtin .dict })
+    let d ← PyReads.allocInstance c .dict #[] #[]
+    PyWrites.dictSet d (.int 1) (.int 10) none fun _ => pure false
+    let e ← PyPure.allocDict
+    let r ← match k with
+      | 1 => Builtins.dictIorBody e (.tuple #[d]) (← PyPure.allocDict)
+      | 2 | 5 => Builtins.dictOrBody "__or__" false d (.tuple #[e]) (← PyPure.allocDict)
+      | _ => Builtins.dictOrBody "__or__" false e (.tuple #[d]) (← PyPure.allocDict)
+    pure (Value.int (← PyReads.dictLen r))
+    : PyM σ .writes true Value)
+
+/-- `guardDictWalk` of an empty dict into an instance of a subclass of `dict`, which it reads as a
+dict: `None` when the instance is empty (`0`), and the gap of a walk that may run user code when
+it holds a key of a user class with an exact hash (`1`). -/
+@[dyn_sem PyT.dictWalkSub, expose] public def dictWalkSub (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let ns ← PyPure.allocDict
+    let c ← PyPure.allocObj (.builtin .type) (.cls
+      { name := "D", qualname := "D", «module» := "m", bases := #[.builtin .dict],
+        mroTail := #[.builtin .dict, .builtin .object], ns, solidBase := .builtin .dict })
+    let d ← PyReads.allocInstance c .dict #[] #[]
+    if k == 1 then
+      let kns ← PyPure.allocDict
+      let kc ← PyPure.allocObj (.builtin .type) (.cls
+        { name := "K", qualname := "K", «module» := "m", bases := #[.builtin .object],
+          mroTail := #[.builtin .object], ns := kns, solidBase := .builtin .object })
+      let key ← PyReads.allocInstance kc .plain #[] #[]
+      PyNew.dictSetNew d key (.int 1) (some (.exact 7)) fun _ => pure false
+    Proto.guardDictWalk (← PyPure.allocDict) d
+    pure Value.none
     : PyM σ .reads false Value)
 
 /-- The object primitives that the operations of this piece don't reach, or reach only in part, on
@@ -926,7 +980,8 @@ end
 def ptEffect : String → Effects.Level
   | "pt.callNew" => .calls
   | "pt.raiseIn" => .writes
-  | "pt.classOfNew" => .reads
+  | "pt.classOfNew" | "pt.dictWalkSub" => .reads
+  | "pt.dictOrSub" => .writes
   | "pt.probeCase" => .reads
   | "pt.requireIn" => .writes
   | "pt.importGaps" => .writes
@@ -1172,6 +1227,43 @@ info: StrataPython.Dyn.Sem.Value.tuple
 -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.objPrims ^err.0()"
+
+-- A walk into a dict subclass instance reads its dict part.
+/-- info: StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictWalkSub(0) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a walk of a dict whose comparisons may run user code is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictWalkSub(1) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a | of a dict whose class overrides how its entries are read is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictOrSub(0) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a | of a dict whose class overrides how its entries are read is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictOrSub(1) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a | of a dict whose class overrides how its entries are read is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictOrSub(2) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a | of a dict whose class overrides how its entries are read is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictOrSub(3) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a | of a dict whose class overrides how its entries are read is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictOrSub(4) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.int 1 -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictOrSub(5) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.int 1 -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictOrSub(6) ^err.0()"
 
 /--
 info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple

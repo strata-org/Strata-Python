@@ -162,7 +162,7 @@ def setMembers [PyReads m V] (s : V) : m (SetView V) := do
 could run user code: CPython walks `src`'s live entries (and a dict update raises `RuntimeError`
 when they change), and the model walks them as they were. -/
 def guardDictWalk [PyReads m V] (src dst : V) : m Unit := do
-  let dk ← if ← isDict dst then PyReads.dictWalkKinds dst else PyReads.setWalkKinds dst
+  let dk ← if ← isDictLike dst then PyReads.dictWalkKinds dst else PyReads.setWalkKinds dst
   if WalkKinds.mayRunUser [← PyReads.dictWalkKinds src, dk] then
     PyPure.gap "a walk of a dict whose comparisons may run user code is not modelled yet"
 
