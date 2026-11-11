@@ -1,0 +1,11 @@
+--- stdout 172
+cannot set 'x' attribute of immutable type 'int'
+cannot set 'x' attribute of immutable type 'int'
+cannot set 'x' attribute of immutable type 'builtin_function_or_method'
+1
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'

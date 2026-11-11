@@ -50,6 +50,14 @@ def implicitDescrGap [PyReads m V] (name : String) (mro : Array V) : m Unit := d
     if ← mro.anyM fun c => return (← PyPure.immView c).isNone then
       PyPure.gap s!"the {name} that a user class's namespace holds is not modelled yet"
 
+/-- A gap where `v`'s instance dict decides an attribute, if `v` is a built-in constant whose type
+gives its instances a `__dict__` (`exit`, `help`, `builtins.__spec__`): the model holds no dict for
+it. -/
+def builtinDictGap [PyPure m V] (v : V) (name : String) : m Unit := do
+  if let some (.builtin b) ← PyPure.immView v then
+    if b.typeOf.info.instanceDict then
+      PyPure.gap s!"the attribute {name} of the built-in {b.info.name} is not modelled yet"
+
 /-- `_PyObject_GenericGetAttrWithDict(v, name)`: a data descriptor with a `__get__` on `v`'s
 type, then `v`'s `__dict__`, then any other descriptor or class attribute. -/
 def genericGetAttr [PyCalls m V] (v t : V) (name : String) : m V := do
@@ -64,6 +72,9 @@ def genericGetAttr [PyCalls m V] (v t : V) (name : String) : m V := do
     | .none => pure none
   if let some d := descr then
     if (← isDataDescr d) && (← hasGet d) then return ← descrGetN dispatchDepth d (some v) t
+  -- The dict of a built-in constant such as exit holds no name that its type has (`gen_types.py`
+  -- checks this), so it decides only the names that the type lacks.
+  if descr.isNone then builtinDictGap v name
   if let some dict ← PyReads.objDict v then
     -- A user class's `__dict__` descriptor, which `type.__new__` puts in its namespace.
     if name == "__dict__" && descr.isNone then return dict
@@ -264,6 +275,7 @@ def genericSetAttr [PyWrites m V] (v t : V) (name : String) (val : Option V) : m
     | .none => pure (false, none)
   -- With no `__dict__`, a name that the type has is read-only.
   let noDict : m Unit := do
+    builtinDictGap v name
     if plain || descr.isSome then
       raiseAttrPlain s!"'{← classNameOf t}' object attribute '{name}' is read-only"
     else noAttr
@@ -338,12 +350,15 @@ def genericSetAttr [PyWrites m V] (v t : V) (name : String) (val : Option V) : m
       PyPure.gap "an instance dict whose keys run user code is not modelled yet"
     if r.isNone then noAttr
 
-/-- An attribute write or deletion on the class `cls`, as `type.__setattr__` does it: a built-in
-or immutable type refuses; a name that the model doesn't follow there gaps; else the namespace. -/
+/-- An attribute write or deletion on the class `cls`, as `type.__setattr__` does it: an immutable
+type refuses, and a built-in type that isn't immutable gaps; a name that the model doesn't follow
+there gaps; else the namespace. -/
 def typeSetAttr [PyWrites m V] (cls : V) (name : String) (val : Option V) : m Unit := do
   match ← PyPure.immView cls with
   | some (.builtin b) =>
-    raiseBuiltin "TypeError" s!"cannot set '{name}' attribute of immutable type '{b.info.name}'"
+    if !b.info.immutable then
+      PyPure.gap s!"an attribute write to the mutable built-in type {b.info.name} is not modelled yet"
+    raiseBuiltin "TypeError" s!"cannot set '{name}' attribute of immutable type '{b.info.tpName}'"
   | _ => pure ()
   let some cd ← classData? cls | PyPure.gap "an attribute write to a class that is not a class"
   if cd.immutable then

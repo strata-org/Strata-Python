@@ -1,0 +1,129 @@
+module s326_mutable_builtin_write {
+  func @|s326_mutable_builtin_write.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s326_mutable_builtin_write")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s326_mutable_builtin_write", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s326_mutable_builtin_write", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "int") ^catch.0()
+      %x.0 : base.Unit = py.setAttr(%int.1, "x", %int.0) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s326_mutable_builtin_write", "e")
+      %set.2 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "print") ^clear.0()
+      %e.0 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "e") ^clear.0()
+      %tuple.0 : py.Value = py.mkTuple(%e.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.0) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s326_mutable_builtin_write", "e")
+      %set.3 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s326_mutable_builtin_write", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %int.2 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "int") ^catch.1()
+      %x.1 : base.Unit = py.delAttr(%int.2, "x") ^catch.1()
+      jump ^join.1()
+    catch.1(%exc.3 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+      %TypeError.1 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "TypeError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.3, %TypeError.1) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("s326_mutable_builtin_write", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.3)
+      %print.1 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "print") ^clear.1()
+      %e.3 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "e") ^clear.1()
+      %tuple.1 : py.Value = py.mkTuple(%e.3)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.1, %tuple.1, %kwargs.1) ^clear.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %e.4 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("s326_mutable_builtin_write", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.4)
+      jump ^join.1()
+    clear.1(%exc.4 : py.Value):
+      %e.5 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("s326_mutable_builtin_write", "e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
+      jump ^unwind.1(%exc.4)
+    next.1():
+      jump ^unwind.1(%exc.3)
+    unwind.1(%exc.5 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.5)
+    join.1():
+      %int.3 : py.Value = py.intLit(1)
+      %type.0 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "type") ^catch.2()
+      %len.0 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "len") ^catch.2()
+      %tuple.2 : py.Value = py.mkTuple(%len.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%type.0, %tuple.2, %kwargs.2) ^catch.2()
+      %x.2 : base.Unit = py.setAttr(%call.2, "x", %int.3) ^catch.2()
+      jump ^join.2()
+    catch.2(%exc.6 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.6)
+      %TypeError.2 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "TypeError") ^unwind.2()
+      %match.2 : base.Bool = py.excMatch(%exc.6, %TypeError.2) ^unwind.2()
+      branch(%match.2) ^except.2() ^next.2()
+    except.2():
+      %e.cell.6 : base.Ref(py.Value) = py.globalCell("s326_mutable_builtin_write", "e")
+      %set.8 : base.Unit = base.refSet[py.Value](%e.cell.6, %exc.6)
+      %print.2 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "print") ^clear.2()
+      %e.6 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "e") ^clear.2()
+      %tuple.3 : py.Value = py.mkTuple(%e.6)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.2, %tuple.3, %kwargs.3) ^clear.2()
+      %pop.4 : base.Unit = py.popExcept(%prev.2)
+      %e.7 : py.Value = py.undef("e")
+      %e.cell.7 : base.Ref(py.Value) = py.globalCell("s326_mutable_builtin_write", "e")
+      %set.9 : base.Unit = base.refSet[py.Value](%e.cell.7, %e.7)
+      jump ^join.2()
+    clear.2(%exc.7 : py.Value):
+      %e.8 : py.Value = py.undef("e")
+      %e.cell.8 : base.Ref(py.Value) = py.globalCell("s326_mutable_builtin_write", "e")
+      %set.10 : base.Unit = base.refSet[py.Value](%e.cell.8, %e.8)
+      jump ^unwind.2(%exc.7)
+    next.2():
+      jump ^unwind.2(%exc.6)
+    unwind.2(%exc.8 : py.Value):
+      %pop.5 : base.Unit = py.popExcept(%prev.2)
+      jump ^propagate.0(%exc.8)
+    join.2():
+      %int.4 : py.Value = py.intLit(1)
+      %ExceptionGroup.0 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "ExceptionGroup") ^propagate.0()
+      %x.3 : base.Unit = py.setAttr(%ExceptionGroup.0, "x", %int.4) ^propagate.0()
+      %print.3 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "print") ^propagate.0()
+      %ExceptionGroup.1 : py.Value = py.loadGlobal("s326_mutable_builtin_write", "ExceptionGroup") ^propagate.0()
+      %x.4 : py.Value = py.attr(%ExceptionGroup.1, "x") ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%x.4)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.3, %tuple.4, %kwargs.4) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.9 : py.Value):
+      %exc.10 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.9)
+      ret(%exc.10)
+  }
+}
+

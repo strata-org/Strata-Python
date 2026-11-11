@@ -1,0 +1,34 @@
+module s329_builtin_instance_attrs {
+  func @|s329_builtin_instance_attrs.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s329_builtin_instance_attrs")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s329_builtin_instance_attrs", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s329_builtin_instance_attrs", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %print.0 : py.Value = py.loadGlobal("s329_builtin_instance_attrs", "print") ^propagate.0()
+      %type.0 : py.Value = py.loadGlobal("s329_builtin_instance_attrs", "type") ^propagate.0()
+      %exit.0 : py.Value = py.loadGlobal("s329_builtin_instance_attrs", "exit") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%exit.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%type.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %__name__.0 : py.Value = py.attr(%call.0, "__name__") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%__name__.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("s329_builtin_instance_attrs", "print") ^propagate.0()
+      %exit.1 : py.Value = py.loadGlobal("s329_builtin_instance_attrs", "exit") ^propagate.0()
+      %name.0 : py.Value = py.attr(%exit.1, "name") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%name.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.1, %tuple.2, %kwargs.2) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

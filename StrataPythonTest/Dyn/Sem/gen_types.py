@@ -236,6 +236,8 @@ def main():
         "  basetype : Bool",
         "  /-- Whether the instances of a type have a `__dict__` (CPython's `tp_dictoffset != 0`). -/",
         "  instanceDict : Bool",
+        "  /-- Whether the type refuses a write of its attributes (CPython's `Py_TPFLAGS_IMMUTABLETYPE`). -/",
+        "  immutable : Bool",
         "  hash : BuiltinHash",
         "",
         "@[expose] public section",
@@ -245,6 +247,12 @@ def main():
     ]
     for k in order:
         kind, obj = entries[k]
+        # The model stops with a gap only at the names that such a constant's type lacks, which is
+        # right only if its instance dict shadows none of the type's names.
+        if kind != "type" and type(obj).__dictoffset__ != 0:
+            shadowed = [n for n in vars(obj) if any(n in c.__dict__ for c in type(obj).__mro__)]
+            if shadowed:
+                sys.exit(f"{k}: its instance dict shadows its type's {shadowed}")
         if kind == "type":
             name, qual, mod = obj.__name__, obj.__qualname__, obj.__module__
             tpn = tp_name(obj)
@@ -254,17 +262,20 @@ def main():
             itemsize = obj.__itemsize__
             basetype = bool(obj.__flags__ & (1 << 10))
             instdict = obj.__dictoffset__ != 0
+            immutable = bool(obj.__flags__ & (1 << 8))
         else:
             name = getattr(obj, "__name__", k) if kind == "function" else k
             qual = getattr(obj, "__qualname__", name) if kind == "function" else k
             mod = "builtins"
             tpn, bases, mro, solid, itemsize, basetype = "", [], [], k, 0, False
             instdict = False
+            immutable = False
         arr = lambda xs: "#[" + ", ".join(f".{lean_ident(x)}" for x in xs) + "]"
         lines.append(
             f"  | .{lean_ident(k)} => ⟨.{kind}, {lean_str(name)}, {lean_str(qual)}, "
             f"{lean_str(mod)}, {lean_str(tpn)}, {arr(bases)}, {arr(mro)}, .{lean_ident(solid)}, "
             f"{itemsize}, {'true' if basetype else 'false'}, {'true' if instdict else 'false'}, "
+            f"{'true' if immutable else 'false'}, "
             f".{hash_kind(obj)}⟩"
         )
     lines += [

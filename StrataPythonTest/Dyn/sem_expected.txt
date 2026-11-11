@@ -429,9 +429,12 @@ s322_dunder_arity_messages | agree
 s323_slot_wrapper_depth | gap | a C recursion depth over 9000
 s324_builtin_call_depth | gap | a C recursion depth over 9000
 s325_exception_repr_depth | agree
+s326_mutable_builtin_write | gap | an attribute write to the mutable built-in type ExceptionGroup is not modelled yet
 s327_shared_slot_depth | gap | a C recursion depth over 9000
 s328_setattr_slot_depth | gap | a C recursion depth over 9000
+s329_builtin_instance_attrs | gap | the attribute name of the built-in exit is not modelled yet
 s32_number_dunders | agree
+s330_builtin_instance_write | gap | the attribute x of the built-in exit is not modelled yet
 s331_getattr_hook_depth | gap | a C recursion depth over 9000
 s332_method_wrapper_depth | gap | a C recursion depth over 9000
 s33_repeat_index | agree

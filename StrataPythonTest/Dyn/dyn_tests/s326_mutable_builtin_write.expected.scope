@@ -1,0 +1,8 @@
+module
+  int: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  len: global implicit (referenced)
+  ExceptionGroup: global implicit (referenced)

@@ -1,0 +1,9 @@
+module top
+  ExceptionGroup: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  int: global implicit (referenced)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+qualnames: 

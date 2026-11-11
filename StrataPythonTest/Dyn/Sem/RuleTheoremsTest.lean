@@ -68,6 +68,7 @@ public environment PyT extends Py where
   insn objPrims (^err (exc : Value)) : Value
   insn dictWalkSub (k : base.Int) (^err (exc : Value)) : Value
   insn nativeWrite (k : base.Int) (^err (exc : Value)) : Value
+  insn immutableWrite (^err (exc : Value)) : Value
   insn dictOrSub (k : base.Int) (^err (exc : Value)) : Value
   insn kwargsStrSub (^err (exc : Value)) : Value
   insn bindCase (i : base.Int) (^err (exc : Value)) : Value
@@ -325,6 +326,15 @@ each stops with a gap. -/
     | 2 => Proto.setAttr f "foo" none
     | 3 => discard <| Builtins.objectSetattr f (.tuple #[Value.ofString "foo", .int 1]) (← PyPure.allocDict)
     | _ => discard <| Builtins.objectDelattr f (.tuple #[Value.ofString "foo"]) (← PyPure.allocDict)
+    pure Value.none
+    : PyM σ .writes true Value)
+
+/-- A write of a plain name to `types.GenericAlias`, an immutable built-in type whose C name differs
+from its name: CPython's `TypeError` names it by its C name. -/
+@[dyn_sem PyT.immutableWrite, expose] public def immutableWrite (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    Proto.setAttr (.builtin .«types.GenericAlias») "x" (some (.int 1))
     pure Value.none
     : PyM σ .writes true Value)
 
@@ -1016,7 +1026,7 @@ def ptEffect : String → Effects.Level
   | "pt.callNew" => .calls
   | "pt.raiseIn" => .writes
   | "pt.classOfNew" | "pt.dictWalkSub" => .reads
-  | "pt.nativeWrite" | "pt.dictOrSub" | "pt.kwargsStrSub" => .writes
+  | "pt.nativeWrite" | "pt.immutableWrite" | "pt.dictOrSub" | "pt.kwargsStrSub" => .writes
   | "pt.probeCase" => .reads
   | "pt.requireIn" => .writes
   | "pt.importGaps" => .writes
@@ -1291,6 +1301,14 @@ info: StrataPython.Dyn.Sem.Value.tuple
 /-- info: fault: Strata.Dyn.Exec.Fault.gap "an attribute write to the function cast is not modelled yet" -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.nativeWrite(4) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "cannot set 'x' attribute of immutable type 'types.GenericAlias'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.immutableWrite() ^err.0()"
 
 /-- info: fault: Strata.Dyn.Exec.Fault.gap "a | of a dict whose class overrides how its entries are read is not modelled yet" -/
 #guard_msgs in

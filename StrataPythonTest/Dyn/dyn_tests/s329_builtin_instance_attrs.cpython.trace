@@ -1,0 +1,9 @@
+--- stdout 13
+Quitter
+exit
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'

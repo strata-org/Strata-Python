@@ -1,0 +1,3 @@
+module
+  exit: global implicit (referenced)
+  print: global implicit (referenced)

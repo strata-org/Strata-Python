@@ -474,8 +474,11 @@ s322_dunder_arity_messages | yes |
 s323_slot_wrapper_depth | yes |
 s324_builtin_call_depth | yes |
 s325_exception_repr_depth | yes |
+s326_mutable_builtin_write | yes |
 s327_shared_slot_depth | yes |
 s328_setattr_slot_depth | yes |
+s329_builtin_instance_attrs | yes |
+s330_builtin_instance_write | yes |
 s331_getattr_hook_depth | yes |
 s332_method_wrapper_depth | yes |
 s129_iter_builtins | yes |
