@@ -1,4 +1,4 @@
---- stdout 694
+--- stdout 649
 1 2
 1 2
 0 1
@@ -22,10 +22,6 @@ hash 1
 get 2
 hash 2
 2
-hash 3
-get 3
-hash 3
-keywords must be strings
 meta call 1
 init 1
 A

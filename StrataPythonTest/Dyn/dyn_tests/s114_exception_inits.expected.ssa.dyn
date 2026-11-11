@@ -554,11 +554,14 @@ module s114_exception_inits {
       %pop.17 : base.Unit = py.popExcept(%prev.8)
       jump ^propagate.0(%exc.25)
     join.8():
-      %e.20 : py.Value = py.loadGlobal("s114_exception_inits", "e") ^catch.9()
-      %add_note.3 : py.Value = py.attr(%e.20, "add_note") ^catch.9()
+      %BaseException.0 : py.Value = py.loadGlobal("s114_exception_inits", "BaseException") ^catch.9()
       %tuple.48 : py.Value = py.mkTuple
       %kwargs.46 : py.Value = py.mkKwargs
-      %call.42 : py.Value = py.call(%add_note.3, %tuple.48, %kwargs.46) ^catch.9()
+      %call.42 : py.Value = py.call(%BaseException.0, %tuple.48, %kwargs.46) ^catch.9()
+      %add_note.3 : py.Value = py.attr(%call.42, "add_note") ^catch.9()
+      %tuple.49 : py.Value = py.mkTuple
+      %kwargs.47 : py.Value = py.mkKwargs
+      %call.43 : py.Value = py.call(%add_note.3, %tuple.49, %kwargs.47) ^catch.9()
       jump ^join.9()
     catch.9(%exc.26 : py.Value):
       %prev.9 : py.Value = py.pushExcInfo(%exc.26)
@@ -573,9 +576,9 @@ module s114_exception_inits {
       %args.11 : py.Value = py.attr(%t.18, "args") ^clear.8()
       %int.21 : py.Value = py.intLit(0)
       %item.11 : py.Value = py.getItem(%args.11, %int.21) ^clear.8()
-      %tuple.49 : py.Value = py.mkTuple(%item.11)
-      %kwargs.47 : py.Value = py.mkKwargs
-      %call.43 : py.Value = py.call(%print.15, %tuple.49, %kwargs.47) ^clear.8()
+      %tuple.50 : py.Value = py.mkTuple(%item.11)
+      %kwargs.48 : py.Value = py.mkKwargs
+      %call.44 : py.Value = py.call(%print.15, %tuple.50, %kwargs.48) ^clear.8()
       %pop.18 : base.Unit = py.popExcept(%prev.9)
       %t.19 : py.Value = py.undef("t")
       %t.cell.19 : base.Ref(py.Value) = py.globalCell("s114_exception_inits", "t")
@@ -596,9 +599,9 @@ module s114_exception_inits {
       %t.cell.21 : base.Ref(py.Value) = py.globalCell("s114_exception_inits", "t")
       %set.42 : base.Unit = base.refSet[py.Value](%t.cell.21, %clo.4)
       %t.21 : py.Value = py.loadGlobal("s114_exception_inits", "t") ^catch.10()
-      %tuple.50 : py.Value = py.mkTuple
-      %kwargs.48 : py.Value = py.mkKwargs
-      %call.44 : py.Value = py.call(%t.21, %tuple.50, %kwargs.48) ^catch.10()
+      %tuple.51 : py.Value = py.mkTuple
+      %kwargs.49 : py.Value = py.mkKwargs
+      %call.45 : py.Value = py.call(%t.21, %tuple.51, %kwargs.49) ^catch.10()
       jump ^join.10()
     catch.10(%exc.29 : py.Value):
       %prev.10 : py.Value = py.pushExcInfo(%exc.29)
@@ -609,22 +612,22 @@ module s114_exception_inits {
       %e.cell.9 : base.Ref(py.Value) = py.globalCell("s114_exception_inits", "e")
       %set.43 : base.Unit = base.refSet[py.Value](%e.cell.9, %exc.29)
       %print.16 : py.Value = py.loadGlobal("s114_exception_inits", "print") ^clear.9()
-      %e.21 : py.Value = py.loadGlobal("s114_exception_inits", "e") ^clear.9()
-      %args.12 : py.Value = py.attr(%e.21, "args") ^clear.9()
+      %e.20 : py.Value = py.loadGlobal("s114_exception_inits", "e") ^clear.9()
+      %args.12 : py.Value = py.attr(%e.20, "args") ^clear.9()
       %int.22 : py.Value = py.intLit(0)
       %item.12 : py.Value = py.getItem(%args.12, %int.22) ^clear.9()
-      %tuple.51 : py.Value = py.mkTuple(%item.12)
-      %kwargs.49 : py.Value = py.mkKwargs
-      %call.45 : py.Value = py.call(%print.16, %tuple.51, %kwargs.49) ^clear.9()
+      %tuple.52 : py.Value = py.mkTuple(%item.12)
+      %kwargs.50 : py.Value = py.mkKwargs
+      %call.46 : py.Value = py.call(%print.16, %tuple.52, %kwargs.50) ^clear.9()
       %pop.20 : base.Unit = py.popExcept(%prev.10)
-      %e.22 : py.Value = py.undef("e")
+      %e.21 : py.Value = py.undef("e")
       %e.cell.10 : base.Ref(py.Value) = py.globalCell("s114_exception_inits", "e")
-      %set.44 : base.Unit = base.refSet[py.Value](%e.cell.10, %e.22)
+      %set.44 : base.Unit = base.refSet[py.Value](%e.cell.10, %e.21)
       jump ^join.10()
     clear.9(%exc.30 : py.Value):
-      %e.23 : py.Value = py.undef("e")
+      %e.22 : py.Value = py.undef("e")
       %e.cell.11 : base.Ref(py.Value) = py.globalCell("s114_exception_inits", "e")
-      %set.45 : base.Unit = base.refSet[py.Value](%e.cell.11, %e.23)
+      %set.45 : base.Unit = base.refSet[py.Value](%e.cell.11, %e.22)
       jump ^unwind.10(%exc.30)
     next.10():
       jump ^unwind.10(%exc.29)

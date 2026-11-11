@@ -69,6 +69,7 @@ public environment PyT extends Py where
   insn dictWalkSub (k : base.Int) (^err (exc : Value)) : Value
   insn nativeWrite (k : base.Int) (^err (exc : Value)) : Value
   insn dictOrSub (k : base.Int) (^err (exc : Value)) : Value
+  insn kwargsStrSub (^err (exc : Value)) : Value
   insn bindCase (i : base.Int) (^err (exc : Value)) : Value
   insn subclassOps (^err (exc : Value)) : Value
   insn subclassContainers (^err (exc : Value)) : Value
@@ -263,6 +264,22 @@ and 8, then three pops; `setTrim` on a set with two dummies; and `setReserve` on
     pure (Value.tuple ((slots.map slotValue).toArray ++ #[p1.getD .none, p2.getD .none, p3.getD .none,
       slotValue before, slotValue after, slotValue at31]))
     : PyM σ .reads false Value)
+
+/-- `checkKwargs` of a kwargs dict whose key is an instance of a subclass of `str`, which CPython
+accepts: a gap. -/
+@[dyn_sem PyT.kwargsStrSub, expose] public def kwargsStrSub (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let ns ← PyPure.allocDict
+    let c ← PyPure.allocObj (.builtin .type) (.cls
+      { name := "S", qualname := "S", «module» := "m", bases := #[.builtin .str],
+        mroTail := #[.builtin .str, .builtin .object], ns, solidBase := .builtin .str })
+    let k ← PyReads.allocInstance c (.str (.ofString "a")) #[] #[]
+    let kw ← PyPure.allocDict
+    PyWrites.dictSet kw k (.int 1) (some (.exact 7)) fun _ => pure false
+    Proto.checkKwargs kw
+    pure Value.none
+    : PyM σ .writes true Value)
 
 /-- `|` and `|=` of dicts with an instance `d` of a subclass `D` of `dict` that holds one entry:
 `{} | d` (`0`) and `e |= d` (`1`) when `D` sets `__iter__`, which makes CPython's merge take its
@@ -999,7 +1016,7 @@ def ptEffect : String → Effects.Level
   | "pt.callNew" => .calls
   | "pt.raiseIn" => .writes
   | "pt.classOfNew" | "pt.dictWalkSub" => .reads
-  | "pt.nativeWrite" | "pt.dictOrSub" => .writes
+  | "pt.nativeWrite" | "pt.dictOrSub" | "pt.kwargsStrSub" => .writes
   | "pt.probeCase" => .reads
   | "pt.requireIn" => .writes
   | "pt.importGaps" => .writes
@@ -1302,6 +1319,10 @@ info: StrataPython.Dyn.Sem.Value.tuple
 /-- info: StrataPython.Dyn.Sem.Value.int 1 -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.dictOrSub(6) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a keyword that is an instance of a subclass of str is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.kwargsStrSub ^err.0()"
 
 /--
 info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple

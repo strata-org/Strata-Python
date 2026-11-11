@@ -1,0 +1,161 @@
+module s321_kwargs_not_str {
+  func @|s321_kwargs_not_str.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s321_kwargs_not_str")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s321_kwargs_not_str", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s321_kwargs_not_str", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@s321_kwargs_not_str.f, "f", "s321_kwargs_not_str")
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("s321_kwargs_not_str", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %f.0 : py.Value = py.loadGlobal("s321_kwargs_not_str", "f") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %str.1 : py.Value = py.strLit("q")
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(1)
+      %int.2 : py.Value = py.intLit(2)
+      %dict.0 : py.Value = py.mkDict(%str.1, %int.0, %int.1, %int.2) ^catch.0()
+      %merge.0 : py.Value = py.dictMerge(%f.0, %kwargs.0, %dict.0) ^catch.0()
+      %call.0 : py.Value = py.call(%f.0, %tuple.0, %merge.0) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("s321_kwargs_not_str", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s321_kwargs_not_str", "e")
+      %set.3 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("s321_kwargs_not_str", "print") ^clear.0()
+      %e.0 : py.Value = py.loadGlobal("s321_kwargs_not_str", "e") ^clear.0()
+      %tuple.1 : py.Value = py.mkTuple(%e.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s321_kwargs_not_str", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s321_kwargs_not_str", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|s321_kwargs_not_str.C.<body>|, "<body>", "s321_kwargs_not_str")
+      %str.2 : py.Value = py.strLit("C")
+      %tuple.2 : py.Value = py.mkTuple(%clo.1, %str.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %C.0 : py.Value = py.call(%__build_class__.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %C.cell.0 : base.Ref(py.Value) = py.globalCell("s321_kwargs_not_str", "C")
+      %set.6 : base.Unit = base.refSet[py.Value](%C.cell.0, %C.0)
+      %f.1 : py.Value = py.loadGlobal("s321_kwargs_not_str", "f") ^catch.1()
+      %tuple.3 : py.Value = py.mkTuple
+      %kwargs.3 : py.Value = py.mkKwargs
+      %C.1 : py.Value = py.loadGlobal("s321_kwargs_not_str", "C") ^catch.1()
+      %tuple.4 : py.Value = py.mkTuple
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%C.1, %tuple.4, %kwargs.4) ^catch.1()
+      %int.3 : py.Value = py.intLit(1)
+      %dict.1 : py.Value = py.mkDict(%call.2, %int.3) ^catch.1()
+      %merge.1 : py.Value = py.dictMerge(%f.1, %kwargs.3, %dict.1) ^catch.1()
+      %call.3 : py.Value = py.call(%f.1, %tuple.3, %merge.1) ^catch.1()
+      jump ^join.1()
+    catch.1(%exc.3 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+      %TypeError.1 : py.Value = py.loadGlobal("s321_kwargs_not_str", "TypeError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.3, %TypeError.1) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("s321_kwargs_not_str", "e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.3)
+      %print.1 : py.Value = py.loadGlobal("s321_kwargs_not_str", "print") ^clear.1()
+      %e.3 : py.Value = py.loadGlobal("s321_kwargs_not_str", "e") ^clear.1()
+      %tuple.5 : py.Value = py.mkTuple(%e.3)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.1, %tuple.5, %kwargs.5) ^clear.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %e.4 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("s321_kwargs_not_str", "e")
+      %set.8 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.4)
+      jump ^join.1()
+    clear.1(%exc.4 : py.Value):
+      %e.5 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("s321_kwargs_not_str", "e")
+      %set.9 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
+      jump ^unwind.1(%exc.4)
+    next.1():
+      jump ^unwind.1(%exc.3)
+    unwind.1(%exc.5 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.5)
+    join.1():
+      %len.0 : py.Value = py.loadGlobal("s321_kwargs_not_str", "len") ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple
+      %kwargs.6 : py.Value = py.mkKwargs
+      %str.3 : py.Value = py.strLit("q")
+      %int.4 : py.Value = py.intLit(1)
+      %int.5 : py.Value = py.intLit(1)
+      %int.6 : py.Value = py.intLit(2)
+      %dict.2 : py.Value = py.mkDict(%str.3, %int.4, %int.5, %int.6) ^propagate.0()
+      %merge.2 : py.Value = py.dictMerge(%len.0, %kwargs.6, %dict.2) ^propagate.0()
+      %call.5 : py.Value = py.call(%len.0, %tuple.6, %merge.2) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
+  }
+  func @s321_kwargs_not_str.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, true) ^propagate.0()
+      %k.1 : py.Value = py.tupleGet(%bound.0, 0)
+      %k.3 : py.Value = py.requireDefined(%k.1, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%k.3)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s321_kwargs_not_str.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s321_kwargs_not_str", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("C")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

@@ -1,0 +1,11 @@
+--- stdout 50
+keywords must be strings
+keywords must be strings
+
+--- outcome
+raised TypeError: keywords must be strings
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>

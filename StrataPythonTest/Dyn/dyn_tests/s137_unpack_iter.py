@@ -104,10 +104,6 @@ class M:
         return 0
 d = {**M([H(1), H(2)])}
 print(len(d))
-try:
-    print(**M([H(3)]))
-except TypeError as e:
-    print(e.args[0])
 class Meta(type):
     def __call__(cls, *a):
         print("meta call", len(a))

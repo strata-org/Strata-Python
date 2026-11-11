@@ -1738,6 +1738,14 @@ bracket. -/
   callBuiltin f a k := (Prim.bracketed "a built-in that runs user code changed the world outside its call"
     (cb f a k)).relax
 
+/-- Whether `x` is an exact `TypeError` whose message starts with `pre`: a built-in method's error
+about its arguments, which names the method by its type. -/
+def isNamedTypeError (x : Value) (pre : String) : PyM σ .reads true Bool := do
+  if (← Prim.classOf x) != Value.builtin .TypeError then return false
+  match ← Prim.objView x with
+  | some (ObjView.exc { args := .tuple #[.str msg], .. }) => pure (msg.s.startsWith pre)
+  | _ => pure false
+
 /-- **The calls of built-ins**, with the bodies `impls`: a call at fuel `n + 1` runs its body with a
 record whose own calls of built-ins have fuel `n`, so that the bodies, which are generic in the
 record, can call built-ins too.  Running out of fuel stops with a gap. -/
@@ -1748,8 +1756,21 @@ def callBuiltinWith (impls : Impls) : Nat → Value → Value → Value → PyM 
       PyM.gap "a call of this built-in callable is not modelled yet"
     match impls.find key with
     | some impl =>
-      let run := @impl (PyM σ .writes true) Value (writesRecord (callBuiltinWith impls n)) _ self args
-        kwargs
+      let body := @impl (PyM σ .writes true) Value (writesRecord (callBuiltinWith impls n)) _ self
+        args kwargs
+      -- CPython names a bound built-in method in its argument errors by the method's type when the
+      -- call is a method call (`x.m(…)`), and by the type of `self` when the bound method is called
+      -- later; the IR doesn't show which, so such an error on an instance of a subtype gaps.
+      let run : PyM σ .writes true Value := match f with
+        -- A type's `__new__` is a static method, which CPython always names by its type.
+        | .bound bself t name .method => do
+          if name == "__new__" || (← (Prim.classOf bself).relax.lift (by decide)) == Value.builtin t then
+            body else
+            tryCatch body fun x => do
+              if ← (isNamedTypeError x s!"{t.info.name}.{name}()").relax.lift (by decide) then
+                PyM.gap s!"an argument error of the method {t.info.name}.{name} bound to an instance of a subtype is not modelled yet"
+              throw x
+        | _ => body
       -- A native of kind `function` stands for a Python function: its call is one Python frame,
       -- as a call of a function object is.
       match ← (Prim.objView f).relax.lift (by decide) with

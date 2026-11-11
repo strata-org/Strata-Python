@@ -209,6 +209,7 @@ def callResumable : Nat → V → V → V → List S → m (CallStep S V)
   | _, _, _, _, s :: rest => PyMachines.resume s rest
   | 0, _, _, _, [] => PyPure.gap "a call dispatch nested deeper than the model follows"
   | n + 1, f, args, kwargs, [] => do
+    kwargsKeysGap f kwargs
     if let some r ← PyMachines.startStep f args kwargs then return r
     match ← PyPure.immView f with
     | some (.method fn self) => callResumable n fn (← prepend self args) kwargs []

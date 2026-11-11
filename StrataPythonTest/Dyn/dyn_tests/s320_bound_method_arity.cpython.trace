@@ -1,0 +1,11 @@
+--- stdout 112
+BaseException.add_note() takes exactly one argument (0 given)
+E.add_note() takes exactly one argument (0 given)
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+__doc__ = None
+__name__ = '__main__'
+g = <builtin_function_or_method object>

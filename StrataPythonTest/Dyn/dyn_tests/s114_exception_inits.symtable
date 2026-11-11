@@ -1,5 +1,6 @@
 module top
   AttributeError: global implicit (referenced)
+  BaseException: global implicit (referenced)
   BaseExceptionGroup: global implicit (referenced)
   E: local (assigned, referenced)
   Exception: global implicit (referenced)

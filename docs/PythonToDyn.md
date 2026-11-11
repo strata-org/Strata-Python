@@ -2519,6 +2519,12 @@ with CPython 3.12, over 1422 generated cases.
 - Global names, with the fallback to `builtins`, and closures with their cells.
 - Calls of function objects, with positional and keyword arguments and `*` and `**` arguments.
   `**` builds a new dict and leaves the operand unchanged.
+  These stop with a gap: a keyword that isn't a `str` given to anything but a Python function
+  or a bound method, since CPython's error depends on the built-in; a keyword that is an
+  instance of a subclass of `str`, which CPython accepts; and an argument error of a built-in
+  method bound to an instance of a subtype, which CPython names by the method's type in a
+  method call and by the type of `self` when the bound method is called later, which the IR
+  doesn't show.
 - `print`, with `sep` and `end`, and `repr`, `str`, `ascii` and `format` (`PyObject_Repr`,
   `PyObject_Str`, `PyObject_ASCII`, `PyObject_Format`) in f-strings and messages: the built-in
   values, the containers with CPython's `[...]` for a list met again inside its own `repr`, and a

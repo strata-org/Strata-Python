@@ -66,7 +66,7 @@ try:
 except TypeError as t:
     print(t.args[0])
 try:
-    e.add_note()
+    BaseException().add_note()
 except TypeError as t:
     print(t.args[0])
 def t():

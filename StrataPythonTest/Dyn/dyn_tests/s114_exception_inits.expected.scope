@@ -24,6 +24,7 @@ module
   a: local (assigned, referenced)
   E: local (assigned, referenced)
   Exception: global implicit (referenced)
+  BaseException: global implicit (referenced)
   class MyNE
   class MyIE
   class MyEG

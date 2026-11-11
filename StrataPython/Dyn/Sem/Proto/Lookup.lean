@@ -110,11 +110,34 @@ def argTypeName [PyReads m V] (v : V) : m String := do
   if (← PyPure.immView v) matches some .none then pure "None" else typeName v
 
 /-- `TypeError` if a key of the kwargs dict `kwargs` is not a `str`, as CPython's
-`_PyStack_UnpackDict` raises it. -/
+`_PyStack_UnpackDict` raises it; a key that is an instance of a subclass of `str`, which CPython
+accepts, stops with a gap. -/
 def checkKwargs [PyReads m V] (kwargs : V) : m Unit := do
   for (k, _, _) in ← PyReads.dictEntries kwargs do
-    if !((← PyPure.immView k) matches some (.str _)) then
+    match ← PyPure.immView k with
+    | some (.str _) => pure ()
+    | some _ => raiseBuiltin "TypeError" "keywords must be strings"
+    | none => do
+      let mro := (← mroOf (← PyReads.classOf k)).getD #[]
+      if ← mro.anyM fun c => return (← PyPure.immView c) matches some (.builtin .str) then
+        PyPure.gap "a keyword that is an instance of a subclass of str is not modelled yet"
       raiseBuiltin "TypeError" "keywords must be strings"
+
+/-- A gap when the kwargs dict `kwargs` has a key that isn't a `str` and the callee `f` is neither
+a Python function nor a bound method: CPython checks the keys where the callee's own call path
+unpacks them, so which error a built-in raises first depends on the built-in. -/
+def kwargsKeysGap [PyReads m V] (f kwargs : V) : m Unit := do
+  if (← PyReads.dictLen kwargs) == 0 then return
+  let mut allStr := true
+  for (k, _, _) in ← PyReads.dictEntries kwargs do
+    if !((← PyPure.immView k) matches some (.str _)) then allStr := false
+  if allStr then return
+  match ← PyPure.immView f with
+  | some (.method ..) => pure ()
+  | some _ => PyPure.gap "a call of a built-in with a keyword that is not a str is not modelled yet"
+  | none => match ← PyReads.objView f with
+    | some (.func ..) => pure ()
+    | _ => PyPure.gap "a call of a built-in with a keyword that is not a str is not modelled yet"
 
 /-- The descriptor kind of an entry of a built-in type's table, if the entry is a descriptor. -/
 def _root_.StrataPython.Dyn.Sem.AttrKind.descr? : AttrKind → Option DescrKind
@@ -572,6 +595,7 @@ method its function with its object in front; a class `type.__call__`; an instan
 def callN [PyCalls m V] : Nat → V → V → V → m V
   | 0, _, _, _ => PyPure.gap "a call dispatch nested deeper than the model follows"
   | n + 1, f, args, kwargs => do
+    kwargsKeysGap f kwargs
     match ← PyPure.immView f with
     | some (.builtin b) =>
       if b.info.kind == .type then typeCallN n true f args kwargs
