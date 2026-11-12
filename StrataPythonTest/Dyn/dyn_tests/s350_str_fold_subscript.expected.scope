@@ -1,0 +1,17 @@
+module
+  A: local (assigned)
+  f: local (assigned, referenced)
+  g: local (assigned, referenced)
+  print: global implicit (referenced)
+  class A
+    __str__: local (assigned)
+    function A.__str__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+  function f
+    print: global implicit (referenced)
+    A: global implicit (referenced)
+  function g
+    print: global implicit (referenced)
+    A: global implicit (referenced)

@@ -1,0 +1,26 @@
+module
+  x: local (assigned)
+  f: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  A: local (assigned)
+  g: local (assigned, referenced)
+  lambda <lambda>
+    x: global implicit (referenced)
+  lambda <lambda>
+    x: global implicit (referenced)
+  lambda <lambda>
+    x: global implicit (referenced)
+  class A
+    __bytes__: local (assigned)
+    function A.__bytes__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+  function f
+    print: global implicit (referenced)
+    A: global implicit (referenced)
+  function g
+    print: global implicit (referenced)
+    A: global implicit (referenced)

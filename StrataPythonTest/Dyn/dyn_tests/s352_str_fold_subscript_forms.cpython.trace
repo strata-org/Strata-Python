@@ -1,0 +1,14 @@
+--- stdout 12
+1
+1
+1
+1
+1
+1
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+x = 1

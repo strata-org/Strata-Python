@@ -1,0 +1,243 @@
+module s351_str_leaf_mod_tuple {
+  func @|s351_str_leaf_mod_tuple.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s351_str_leaf_mod_tuple")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s351_str_leaf_mod_tuple", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s351_str_leaf_mod_tuple", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %int.0 : py.Value = py.intLit(5)
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("s351_str_leaf_mod_tuple", "x")
+      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@|s351_str_leaf_mod_tuple.<lambda>|, "<lambda>", "s351_str_leaf_mod_tuple")
+      %clo.1 : py.Value = py.mkClosure[[]](@|s351_str_leaf_mod_tuple.<lambda>.1|, "<lambda>", "s351_str_leaf_mod_tuple")
+      %clo.2 : py.Value = py.mkClosure[[]](@|s351_str_leaf_mod_tuple.<lambda>.2|, "<lambda>", "s351_str_leaf_mod_tuple")
+      %list.0 : py.Value = py.mkList(%clo.0, %clo.1, %clo.2)
+      %iter.0 : py.Value = py.getIter(%list.0) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("s351_str_leaf_mod_tuple", "f")
+      %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %item.0)
+      %f.0 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "f") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%f.0, %tuple.0, %kwargs.0) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s351_str_leaf_mod_tuple", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "print") ^clear.0()
+      %str.1 : py.Value = py.strLit("TypeError")
+      %e.0 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "e") ^clear.0()
+      %tuple.1 : py.Value = py.mkTuple(%str.1, %e.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s351_str_leaf_mod_tuple", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s351_str_leaf_mod_tuple", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      jump ^head.0()
+    stop.0(%exc.3 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.3)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.3)
+    exit.0():
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.3 : py.Value = py.mkClosure[[]](@|s351_str_leaf_mod_tuple.A.<body>|, "<body>", "s351_str_leaf_mod_tuple")
+      %str.2 : py.Value = py.strLit("A")
+      %tuple.2 : py.Value = py.mkTuple(%clo.3, %str.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %A.0 : py.Value = py.call(%__build_class__.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %A.cell.0 : base.Ref(py.Value) = py.globalCell("s351_str_leaf_mod_tuple", "A")
+      %set.7 : base.Unit = base.refSet[py.Value](%A.cell.0, %A.0)
+      %clo.4 : py.Value = py.mkClosure[[]](@s351_str_leaf_mod_tuple.f, "f", "s351_str_leaf_mod_tuple")
+      %f.cell.1 : base.Ref(py.Value) = py.globalCell("s351_str_leaf_mod_tuple", "f")
+      %set.8 : base.Unit = base.refSet[py.Value](%f.cell.1, %clo.4)
+      %clo.5 : py.Value = py.mkClosure[[]](@s351_str_leaf_mod_tuple.g, "g", "s351_str_leaf_mod_tuple")
+      %g.cell.0 : base.Ref(py.Value) = py.globalCell("s351_str_leaf_mod_tuple", "g")
+      %set.9 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.5)
+      %print.1 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "print") ^propagate.0()
+      %bytes.0 : py.Value = py.bytesLit("%s %s")
+      %tuple.3 : py.Value = py.mkTuple(%bytes.0)
+      %int.1 : py.Value = py.intLit(0)
+      %item.1 : py.Value = py.getItem(%tuple.3, %int.1) ^propagate.0()
+      %f.1 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "f") ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%f.1, %tuple.4, %kwargs.3) ^propagate.0()
+      %g.0 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "g") ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%g.0, %tuple.5, %kwargs.4) ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple(%call.2, %call.3)
+      %mod.0 : py.Value = py.mod(%item.1, %tuple.6) ^propagate.0()
+      %tuple.7 : py.Value = py.mkTuple(%mod.0)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.1, %tuple.7, %kwargs.5) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
+  }
+  func @|s351_str_leaf_mod_tuple.<lambda>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %str.0 : py.Value = py.strLit("a")
+      %int.0 : py.Value = py.intLit(1)
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %int.0)
+      %int.1 : py.Value = py.intLit(1)
+      %item.0 : py.Value = py.getItem(%tuple.0, %int.1) ^propagate.0()
+      %x.0 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "x") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%x.0)
+      %mod.0 : py.Value = py.mod(%item.0, %tuple.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%mod.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s351_str_leaf_mod_tuple.<lambda>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %str.0 : py.Value = py.strLit("a")
+      %str.1 : py.Value = py.strLit("b")
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %str.1)
+      %x.0 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "x") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%x.0)
+      %mod.0 : py.Value = py.mod(%tuple.0, %tuple.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%mod.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s351_str_leaf_mod_tuple.<lambda>.2|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %str.0 : py.Value = py.strLit("%s")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %int.0 : py.Value = py.intLit(2)
+      %mult.0 : py.Value = py.mult(%tuple.0, %int.0) ^propagate.0()
+      %x.0 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "x") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%x.0)
+      %mod.0 : py.Value = py.mod(%mult.0, %tuple.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%mod.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s351_str_leaf_mod_tuple.A.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__bytes__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("A")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s351_str_leaf_mod_tuple.A.__bytes__, "__bytes__", "s351_str_leaf_mod_tuple")
+      %str.4 : py.Value = py.strLit("__bytes__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s351_str_leaf_mod_tuple.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("f")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %A.0 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "A") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%A.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s351_str_leaf_mod_tuple.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 0, false, false) ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("g")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %A.0 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "A") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%A.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s351_str_leaf_mod_tuple.A.__bytes__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.__bytes__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %print.0 : py.Value = py.loadGlobal("s351_str_leaf_mod_tuple", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("bytes A")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %bytes.0 : py.Value = py.bytesLit("a")
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%bytes.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

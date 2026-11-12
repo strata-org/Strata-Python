@@ -1,4 +1,4 @@
-promoted cells: 1873
+promoted cells: 1875
 functions with a removed read: 647
 candidates left as cells:
   m_shape_cases.expected.dyn: m_shape_cases.CompWalrus.__init__: self.cell.0

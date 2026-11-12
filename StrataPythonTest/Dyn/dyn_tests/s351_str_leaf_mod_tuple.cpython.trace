@@ -1,0 +1,19 @@
+--- stdout 220
+TypeError unsupported operand type(s) for %: 'int' and 'tuple'
+TypeError unsupported operand type(s) for %: 'tuple' and 'tuple'
+TypeError unsupported operand type(s) for %: 'tuple' and 'tuple'
+f
+g
+bytes A
+bytes A
+b'a a'
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+g = <function object>
+x = 5

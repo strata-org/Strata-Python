@@ -481,6 +481,11 @@ s329_builtin_instance_attrs | yes |
 s330_builtin_instance_write | yes |
 s331_getattr_hook_depth | yes |
 s332_method_wrapper_depth | yes |
+s336_int_mod_tuple | yes |
+s340_str_fold_format | yes | a % format that CPython may fold into a str constant
+s350_str_fold_subscript | yes | a % format that CPython may fold into a str constant
+s351_str_leaf_mod_tuple | yes |
+s352_str_fold_subscript_forms | yes | a % format that CPython may fold into a str constant
 s129_iter_builtins | yes |
 s130_iter_loops | yes |
 s131_dict_merge | yes |

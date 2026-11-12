@@ -1,0 +1,4 @@
+module
+  x: local (assigned, referenced)
+  print: global implicit (referenced)
+  __debug__: global implicit (referenced)

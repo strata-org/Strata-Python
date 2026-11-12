@@ -1,0 +1,15 @@
+--- stdout 20
+f
+str A
+g
+str A
+a a
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+g = <function object>

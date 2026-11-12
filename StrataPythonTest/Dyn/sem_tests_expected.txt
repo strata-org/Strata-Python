@@ -1169,7 +1169,7 @@ test_pyresid_gm_both_branches | gap | import of module os is not modelled yet
 test_pyresid_gm_class_soup | gap | the translator does not support async def
 test_pyresid_gm_lambda_holding_eval | agree
 test_pyresid_gm_nested_in_rejected | gap | built-in eval is not modelled yet
-test_pyresid_gp_binop_matrix | gap | the translator does not support a % format that CPython may fold into a str constant
+test_pyresid_gp_binop_matrix | agree
 test_pyresid_gp_builtin_calls | gap | built-in method list.__new__ is not modelled yet
 test_pyresid_gp_methods | agree
 test_pyresid_gp_threeway | agree

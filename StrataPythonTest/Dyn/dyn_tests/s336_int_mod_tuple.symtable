@@ -1,0 +1,13 @@
+module top
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  f: local (assigned, referenced)
+  print: global implicit (referenced)
+  x: local (assigned)
+  function lambda
+    x: global implicit (referenced)
+  function lambda
+    x: global implicit (referenced)
+  function lambda
+    x: global implicit (referenced)
+qualnames: <lambda>, <lambda>, <lambda>

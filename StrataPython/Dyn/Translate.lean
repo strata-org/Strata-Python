@@ -1036,6 +1036,45 @@ decreasing_by
     | (have := Array.sizeOf_lt_of_mem x.2; simp_all; omega)
     | (simp_all; omega)
 
+/-- Whether `e` has a `str` constant among its leaves: a value that CPython's AST optimizer folds
+from `e` can be a `str`, or hold one, only then. -/
+def hasStrLeaf (e : expr SourceRange) : Bool :=
+  match e with
+  | .Constant _ (.ConString ..) _ => true
+  | .UnaryOp _ _ x => hasStrLeaf x
+  | .BinOp _ l _ r => hasStrLeaf l || hasStrLeaf r
+  | .Subscript _ v k _ => hasStrLeaf v || hasStrLeaf k
+  | .Tuple _ ⟨_, vs⟩ _ => vs.attach.any fun (x : { v // v ∈ vs }) => hasStrLeaf x.1
+  | _ => false
+termination_by sizeOf e
+decreasing_by
+  all_goals first
+    | (have := Array.sizeOf_lt_of_mem x.2; simp_all; omega)
+    | (simp_all; omega)
+
+/-- Whether a value that CPython's AST optimizer folds from `e` may be a `str`: `false` only when
+it surely isn't one. A `str` constant is one, and a binary operator gives a `str` only from a `str`
+operand. A subscript of a tuple display at a non-negative int literal in range gives that element;
+any other subscript `v[k]` may give a `str` if `str` constants are among the leaves of `v`. A tuple
+display, a slice, a unary operator and any other constant are not `str`s. -/
+def mayFoldStr (e : expr SourceRange) : Bool :=
+  match e with
+  | .Constant _ (.ConString ..) _ => true
+  | .BinOp _ l _ r => mayFoldStr l || mayFoldStr r
+  | .Subscript _ v k _ =>
+    match v, k with
+    | .Tuple _ ⟨_, vs⟩ _, .Constant _ (.ConPos _ ⟨_, n⟩) _ =>
+      match vs.attach[n]? with
+      | some x => mayFoldStr x.1
+      | none => hasStrLeaf v
+    | _, _ => hasStrLeaf v
+  | _ => false
+termination_by sizeOf e
+decreasing_by
+  all_goals first
+    | (have := Array.sizeOf_lt_of_mem x.2; simp_all; omega)
+    | (simp_all; omega)
+
 /-- Whether the set display with the elements `vs` is lowered to `py.constSet`: `true` if every
 element is a constant (`isConst`); an error if CPython may fold the display into a constant
 (`folds`: in an operand of `for` or `in`, or as a value with more than two elements), every element
@@ -1130,7 +1169,7 @@ def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann do
           -- Another constant, a `bytes` one included, is never rewritten.
           | .Constant .. => pure ()
           | l =>
-            if mayFold l then
+            if mayFold l && mayFoldStr l then
               return ← unsupportedValue "a % format that CPython may fold into a str constant" sr
     let a ← transExpr l
     binOp op a (← transExpr r)

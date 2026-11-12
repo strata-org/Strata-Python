@@ -437,8 +437,13 @@ s32_number_dunders | agree
 s330_builtin_instance_write | gap | the attribute x of the built-in exit is not modelled yet
 s331_getattr_hook_depth | gap | a C recursion depth over 9000
 s332_method_wrapper_depth | gap | a C recursion depth over 9000
+s336_int_mod_tuple | agree
 s33_repeat_index | agree
+s340_str_fold_format | gap | the translator does not support a % format that CPython may fold into a str constant
 s34_container_dunders | agree
+s350_str_fold_subscript | gap | the translator does not support a % format that CPython may fold into a str constant
+s351_str_leaf_mod_tuple | agree
+s352_str_fold_subscript_forms | gap | the translator does not support a % format that CPython may fold into a str constant
 s35_live_set_walks | agree
 s36_rich_twice | agree
 s37_rich_once | agree

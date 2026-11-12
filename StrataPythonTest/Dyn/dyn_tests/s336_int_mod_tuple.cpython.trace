@@ -1,0 +1,12 @@
+--- stdout 189
+TypeError unsupported operand type(s) for %: 'int' and 'tuple'
+TypeError unsupported operand type(s) for %: 'int' and 'tuple'
+TypeError unsupported operand type(s) for %: 'int' and 'tuple'
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+x = 5

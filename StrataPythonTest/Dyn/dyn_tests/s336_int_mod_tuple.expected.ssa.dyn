@@ -1,0 +1,119 @@
+module s336_int_mod_tuple {
+  func @|s336_int_mod_tuple.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s336_int_mod_tuple")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s336_int_mod_tuple", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s336_int_mod_tuple", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %int.0 : py.Value = py.intLit(5)
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("s336_int_mod_tuple", "x")
+      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@|s336_int_mod_tuple.<lambda>|, "<lambda>", "s336_int_mod_tuple")
+      %clo.1 : py.Value = py.mkClosure[[]](@|s336_int_mod_tuple.<lambda>.1|, "<lambda>", "s336_int_mod_tuple")
+      %clo.2 : py.Value = py.mkClosure[[]](@|s336_int_mod_tuple.<lambda>.2|, "<lambda>", "s336_int_mod_tuple")
+      %list.0 : py.Value = py.mkList(%clo.0, %clo.1, %clo.2)
+      %iter.0 : py.Value = py.getIter(%list.0) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("s336_int_mod_tuple", "f")
+      %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %item.0)
+      %f.0 : py.Value = py.loadGlobal("s336_int_mod_tuple", "f") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%f.0, %tuple.0, %kwargs.0) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("s336_int_mod_tuple", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s336_int_mod_tuple", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("s336_int_mod_tuple", "print") ^clear.0()
+      %str.1 : py.Value = py.strLit("TypeError")
+      %e.0 : py.Value = py.loadGlobal("s336_int_mod_tuple", "e") ^clear.0()
+      %tuple.1 : py.Value = py.mkTuple(%str.1, %e.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s336_int_mod_tuple", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s336_int_mod_tuple", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      jump ^head.0()
+    stop.0(%exc.3 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.3)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.3)
+    exit.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
+  }
+  func @|s336_int_mod_tuple.<lambda>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %neg.0 : py.Value = py.uSub(%int.0) ^propagate.0()
+      %x.0 : py.Value = py.loadGlobal("s336_int_mod_tuple", "x") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%x.0)
+      %mod.0 : py.Value = py.mod(%neg.0, %tuple.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%mod.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s336_int_mod_tuple.<lambda>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %add.0 : py.Value = py.add(%int.0, %int.1) ^propagate.0()
+      %x.0 : py.Value = py.loadGlobal("s336_int_mod_tuple", "x") ^propagate.0()
+      %x.1 : py.Value = py.loadGlobal("s336_int_mod_tuple", "x") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%x.0, %x.1)
+      %mod.0 : py.Value = py.mod(%add.0, %tuple.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%mod.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s336_int_mod_tuple.<lambda>.2|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %int.0 : py.Value = py.intLit(2)
+      %int.1 : py.Value = py.intLit(8)
+      %pow.0 : py.Value = py.pow(%int.0, %int.1) ^propagate.0()
+      %x.0 : py.Value = py.loadGlobal("s336_int_mod_tuple", "x") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%x.0)
+      %mod.0 : py.Value = py.mod(%pow.0, %tuple.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%mod.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

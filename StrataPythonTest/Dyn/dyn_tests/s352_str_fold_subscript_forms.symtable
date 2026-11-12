@@ -1,0 +1,5 @@
+module top
+  __debug__: global implicit (referenced)
+  print: global implicit (referenced)
+  x: local (assigned, referenced)
+qualnames: 
