@@ -42,11 +42,12 @@ failure successor of an instruction, and the owner of a region that may propagat
 `base.old` runs its region in the state at the call, and two more predicates state its rules:
 
 * `Region.NoOld`: no instruction of the regions applies `base.old`, at any depth.  `Func.WF` asks
-  it of the body, the `requires` clauses and the frame regions, so that only an `ensures` clause
-  applies it;
-* `Region.OldScoped`: each outermost `old` region of a clause sees, from outside it, only the
-  function's parameters, the constants of the clause, and the parameters of the regions nested
-  in the clause that enclose it.
+  it of the `requires` clauses and the frame regions, and asks the same of the blocks of the body
+  outside its loop invariants (`Block.codeBlocksList`), so that only an `ensures` clause or a loop
+  invariant applies it;
+* `Region.OldScoped`: each outermost `old` region of a clause or a loop invariant sees, from
+  outside it, only the function's parameters, the constants of the clause or invariant, and the
+  parameters of the regions nested in the clause or invariant that enclose it.
 
 Each predicate is stated plainly.  `StrataDyn/ContractRegionProps.lean` proves the fast checks
 that decide them: `Region.failuresToB`, which looks the targets up in a map built once per
@@ -316,15 +317,16 @@ order never causes, it runs `Body.peel`. -/
     if !rest.isEmpty && Body.closedB rest then false
     else (Body.peel bs.length bs).isEmpty
 
-/-! ## `old` in `ensures` clauses
+/-! ## `old` in `ensures` clauses and loop invariants
 
-`base.old` runs its region in the state at the call.  So only an `ensures` clause may apply it,
-and its region sees from outside it only the function's parameters, the constants of the clause,
-and the parameters of the regions nested in the clause that enclose it, such as a quantifier's
-binder.  It never sees the clause's parameter, which is the result, nor another value that the
-clause defines outside the `old` region.  An `old` nested in an `old` runs in the state at the call
-too, so it may also see the values of the enclosing `old` region: only the outermost `old` regions
-are checked. -/
+`base.old` runs its region in the state at the call.  So only an `ensures` clause or a loop
+invariant may apply it, and its region sees from outside it only the function's parameters, the
+constants of the clause or invariant, and the parameters of the regions nested in the clause or
+invariant that enclose it, such as a quantifier's binder.  So it can name neither the clause's
+parameter, which is the result, nor another value that the clause or invariant defines outside the
+`old` region, nor a value of the body; a binder may still hold such a value.  An `old` nested in an
+`old` runs in the state at the call too, so it may also see the values of the enclosing `old`
+region: only the outermost `old` regions are checked. -/
 
 /-- Whether the instruction applies `base.old`. -/
 @[expose] def Instruction.isOld : Instruction env α → Bool
@@ -393,17 +395,17 @@ depth, define. -/
 
 /-- Whether an outermost `old` region sees `x` from outside it, with `ps` the parameters of the
 regions that enclose it: `x` is a parameter of the function, as `isParam` says, a value of `ps`,
-or a value that a constant of the clause defines, as `consts` has them. -/
+or a value that a constant of the clause or loop invariant defines, as `consts` has them. -/
 @[expose] def Region.oldSees (isParam : ValId → Bool) (consts : NatTrie Unit) (ps : List ValId)
     (x : ValId) : Bool :=
   isParam x || ps.contains x || (consts.find? x.id).isSome
 
-/-- Each outermost `old` region of the clause `r`, at any depth, is shaped and dominance-correct
-as a body entered where only what `Region.oldSees` gives is visible: the function's parameters,
-as `isParam` says, the values that the constants of `r` define, and the parameters of the
-regions nested in `r` that enclose it.  So it sees neither the parameter of `r`, which is the
-function's result, nor any other value that `r` defines outside it.  An `old` nested in it is
-part of it.  `Region.oldScoped_iff` states it with `Body.Shaped` and `Body.DomCorrect`. -/
+/-- Each outermost `old` region of `r`, an `ensures` clause or a loop invariant, at any depth, is
+shaped and dominance-correct as a body entered where only what `Region.oldSees` gives is visible:
+the function's parameters, as `isParam` says, the values that the constants of `r` define, and the
+parameters of the regions nested in `r` that enclose it.  So it names neither the parameter of `r`,
+a clause's result, nor any other value that `r` or the body defines outside it.  An `old` nested in
+it is part of it.  `Region.oldScoped_iff` states it with `Body.Shaped` and `Body.DomCorrect`. -/
 @[expose] def Region.OldScoped (isParam : ValId → Bool) (r : Region env α) : Prop :=
   ∀ p ∈ Block.oldRegionsList [] r.blocks.toList,
     p.1.domOK (Region.oldSees isParam (Region.constIds [r]) p.2) = true
@@ -437,6 +439,39 @@ instruction after the first one that is not an invariant is one. -/
 @[expose, reducible] def Region.NoLoopInvariant (rs : List (Region env α)) : Prop :=
   ∀ r ∈ Region.allList rs, ∀ b ∈ r.blocks.toList, ∀ i ∈ b.instrs.toList,
     i.isLoopInvariant = false
+
+mutual
+
+/-- The blocks of the regions of an instruction, at any depth, outside loop invariants: an
+application of `base.loopInvariant` gives none. -/
+@[expose] def Instruction.codeBlocks : Instruction env α → List (Block env α)
+  | .apply _ _ r _ _ _ ⟨regions⟩ =>
+    if r.name == bn "loopInvariant" then [] else Region.codeBlocksList regions
+  | .const .. => []
+
+/-- `Instruction.codeBlocks` of each. -/
+@[expose] def Instruction.codeBlocksList : List (Instruction env α) → List (Block env α)
+  | [] => []
+  | i :: is => i.codeBlocks ++ Instruction.codeBlocksList is
+
+/-- The blocks of a terminator's regions, at any depth, outside loop invariants. -/
+@[expose] def Terminator.codeBlocks : Terminator env α → List (Block env α)
+  | .apply _ _ _ _ _ ⟨regions⟩ => Region.codeBlocksList regions
+
+/-- Each block, followed by the blocks of the regions nested in it, at any depth, outside loop
+invariants: the blocks whose instructions run as code. -/
+@[expose] def Block.codeBlocksList : List (Block env α) → List (Block env α)
+  | [] => []
+  | ⟨l, ps, ⟨instrs⟩, t, i⟩ :: bs =>
+    ⟨l, ps, ⟨instrs⟩, t, i⟩ ::
+      (Instruction.codeBlocksList instrs ++ t.codeBlocks ++ Block.codeBlocksList bs)
+
+/-- The blocks of the regions `rs`, at any depth, outside loop invariants. -/
+@[expose] def Region.codeBlocksList : List (Region env α) → List (Block env α)
+  | [] => []
+  | ⟨⟨blocks⟩⟩ :: rs => Block.codeBlocksList blocks ++ Region.codeBlocksList rs
+
+end
 
 /-- The values that the blocks' instructions and terminators use: their operands, then the
 arguments of their successors. -/

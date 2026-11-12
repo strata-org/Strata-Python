@@ -287,9 +287,9 @@ A `requires` or `ensures` clause is a region that returns a `base.Bool` and sees
 parameters: a `requires` clause takes no arguments, and an `ensures` clause takes the function's
 result.  A `requires` clause is a condition that the caller establishes at each call, in the
 state at the call.  An `ensures` clause, in the state at return, is a promise that holds at every
-exit of a defined function; a `free` one is assumed after every call and never checked.  Only an
-`ensures` clause applies `base.old`, which reads the state at the call.  No clause changes the
-state.  The clauses are evaluated in order, the `requires` clauses at the call and the `ensures`
+exit of a defined function; a `free` one is assumed after every call and never checked.  Among
+clauses, only `ensures` applies `base.old`, which reads the state at the call.  No clause changes
+the state.  The clauses are evaluated in order, the `requires` clauses at the call and the `ensures`
 clauses at an exit, each only when every earlier clause returned true.  A failure in a clause
 gives `false`, or `true` in a `free` one, so a failure never makes a clause hold, nor a free
 clause assume anything.

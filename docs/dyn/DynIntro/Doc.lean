@@ -268,7 +268,7 @@ Every language extends the _base_. The base provides:
 * refs: `refNew` makes a cell and returns a ref to it, and `refGet` and `refSet` read and write the cell a ref points to;
 * the eliminators `Unit.case` and `Except.case`;
 * the terminators `jump`, `branch` and `unreachable`;
-* for contracts, `old`, which reads the state at the call in an `ensures` clause, `loopInvariant`, a loop invariant at the start of a block, and `cellLoc`, the location of a cell.
+* for contracts, `old`, which reads the state at the call in an `ensures` clause or a loop invariant, `loopInvariant`, a loop invariant at the start of a block, and `cellLoc`, the location of a cell.
 
 Here is the whole While environment, verbatim. It is a template for a small language: two datatypes, arithmetic, a raising division, instructions that reach the world, an abbreviation for refs to integer cells, and two region-owning instructions.
 
@@ -662,7 +662,7 @@ In `mean`, `while.div(%s.0, %d.1) ^catch.0(%n.1, %d.1, %s.0, %i.0)` binds four o
 * Its contract is well formed: each clause and frame region has its type and applies no `writes` operation, at any depth, and sees only the parameters and its own values. The cells that a frame names are parameters of type `base.Ref`, each named once.
 * Its `ensures` clauses are `free` exactly when it is extern, and no `requires` clause is ever `free`.
 * In a clause's or a frame region's own blocks, a failure goes to a _failure block_, whose instructions are only constants. In a `requires` clause it goes to a block that gives `false`, or that ends in `unreachable`; in an `ensures` clause, to one that gives `false`, or `true` if the clause is `free`, or that ends in `unreachable`; in a frame region, to one that ends in `unreachable`. A failure in a region nested in them goes to a block that ends in `unreachable`, or, if the region may propagate, to one that passes it on with `base.error`. Every block of them ends in control flow, and none has a cycle.
-* Only `ensures` clauses apply `base.old`, and an `old` region sees, from outside it, only the parameters, the clause's constants and the parameters of the regions that enclose it.
+* Only `ensures` clauses and loop invariants apply `base.old`, and an `old` region sees, from outside it, only the parameters, the constants of its clause or invariant and the parameters of the regions that enclose it inside its clause or invariant.
 * The body names no ghost: only the contract does.
 * A block's loop invariants come before its other instructions, nothing uses their results, and the rules for contract regions apply to their regions, with failure value `false`.
 
@@ -876,7 +876,7 @@ The builder monad is `BuildM env α := StateM (Build.State env α)`, where `α` 
 * The first block _finished_ is the entry.
 * Blocks that the entry cannot reach are dropped when the function is finished, so dead code needs no special case. A label that a kept block targets but that is never started makes the function ill formed.
 * Value-name stems must read back: no empty, all-digit or dotted segments. A name spelled like a keyword of the printed dialect, such as `ret` or `unit`, prints between pipes and reads back. A stem is a structured `Name`: `x.cell` is two segments.
-* A contract is emitted in the function's builder, with `Build.requires`, then `Build.ensures`, then the frames `Build.reads` and `Build.writes`; each makes its clause a region, and one out of this order is a misuse. In a clause's own blocks, a failure successor names the label that `Build.withFailureBlock` gives; in a region nested in a clause, the label that `Build.withPropagatingBlock` gives. `Build.old` emits `base.old` in an `ensures` clause, and `Build.emitGhost` emits a reference to a ghost's cell.
+* A contract is emitted in the function's builder, with `Build.requires`, then `Build.ensures`, then the frames `Build.reads` and `Build.writes`; each makes its clause a region, and one out of this order is a misuse. In a clause's own blocks, a failure successor names the label that `Build.withFailureBlock` gives; in a region nested in a clause, the label that `Build.withPropagatingBlock` gives. `Build.old` emits `base.old` in an `ensures` clause or a loop invariant, `Build.loopInvariant` emits a loop invariant, and `Build.emitGhost` emits a reference to a ghost's cell.
 * `Build.buildExtern` builds an extern function, which has only a contract, `Build.ghost` builds a ghost, and `Build.stub` gives a well-formed function whose entry ends in `unreachable`. `Build.ensures` makes a checked clause unless it is given `free := true`, but an extern's `ensures` clauses must be free, so an extern built with the default is not well formed.
 
 The _untyped builder_ is the functions `Build.emitApply` and `Build.terminate`, and the untyped layer `Build.Raw`: `Raw.freshLabel`, `Raw.startBlock`, `Raw.startBlockWith`, `Raw.startFreshBlock`, `Raw.goto`, `Raw.jump`, `Raw.branch` and `Raw.ret`. They take value ids, `o.ref`, bare labels and untyped targets, `Target.Raw`, for a front end whose types are known only when it runs. Type arguments are written as `(typeArgs := ta[…])`, or inferred from the operands' and the result's types when the builder runs, and a failure to infer them is recorded as a misuse. Nothing else is checked until `Build.run`. The typed operations are built on them. While's lowering uses the untyped builder inside a monad of its own. The monad reads the function signatures, and keeps the variables in scope, the handler in effect, and the handler labels that some edges use:
@@ -5870,8 +5870,8 @@ public environment Base where
   /-- `base.refSet`, which replaces the contents of `cell` with `value`. -/
   writes insn refSet [a] (cell : Ref a) (value : a) : Unit
   /-- `base.old`, which runs `body` in the state at the call of the function whose `ensures`
-  clause applies it: the value of an `ok`, or a transfer to `err` with the error of an
-  `error`.  Only an `ensures` clause may apply it. -/
+  clause or loop invariant applies it: the value of an `ok`, or a transfer to `err` with the
+  error of an `error`.  Only an `ensures` clause or a loop invariant may apply it. -/
   reads insn old [e a] (&body : Except e a) (^err (exc : e)) : a
   /-- `base.loopInvariant`, a loop invariant: each time control enters its block, `body` returns
   `true`.  It comes before every other instruction of its block, and a run skips it. -/

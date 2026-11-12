@@ -686,7 +686,7 @@ Each rejection breaks one rule, in the builder and in the reader. -/
   Build.writes #[.region (withFailureBlock #[intT] none fun fail => do
     finishBlock (.ret () (← Build.old (nm "o") intT locT fail fun _ => okLoc c)))]) == ["old"]
 
-/-- info: t.dyn:5:8: base.old is allowed only in an ensures clause, but @m.f uses it in a frame region -/
+/-- info: t.dyn:5:8: base.old is allowed only in an ensures clause or a loop invariant, but @m.f uses it in a frame region -/
 #guard_msgs in
 #eval readBack (withClauses "    writes({
       loc.0():

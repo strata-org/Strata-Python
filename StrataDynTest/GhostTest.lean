@@ -1160,7 +1160,7 @@ private def noArg : Option (Ghost E Unit) :=
     finishBlock (.ret () (← Build.old (nm "o") intT intT fail fun _ => do
       retOk (← emitConst (nm "zero") (.int 0)))))) none ()) == ["old"]
 
-/-- info: t.dyn:4:6: base.old is allowed only in an ensures clause, but ghost @m.g uses it in its initializer -/
+/-- info: t.dyn:4:6: base.old is allowed only in an ensures clause or a loop invariant, but ghost @m.g uses it in its initializer -/
 #guard_msgs in
 #eval readBack (withGhosts "  ghost @m.g : base.Int = {
     init.0():
@@ -1179,7 +1179,7 @@ private def noArg : Option (Ghost E Unit) :=
     withFailureBlock #[intT] none fun fail => do
       nonNeg (← Build.old (nm "o") intT intT fail fun _ => retOk v)) ()) == ["old"]
 
-/-- info: t.dyn:4:6: base.old is allowed only in an ensures clause, but ghost @m.g uses it in its invariant -/
+/-- info: t.dyn:4:6: base.old is allowed only in an ensures clause or a loop invariant, but ghost @m.g uses it in its invariant -/
 #guard_msgs in
 #eval readBack (withGhosts "  ghost @m.g : base.Int invariant {
     inv.0(%v.0 : base.Int):

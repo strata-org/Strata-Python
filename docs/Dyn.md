@@ -314,10 +314,12 @@ well defined. A value that the region uses from outside it keeps its value, so t
 object that the region allocates is new at the exit too: it is none of the objects of the state at
 the exit, and it holds there what the region gave it. The checker asks two things of `base.old`:
 
-* It appears only in an `ensures` clause, at any depth. The body, the `requires` clauses and the
-  frame regions never apply it.
-* Its region sees, from outside it, only the function's parameters, constants, and the parameters
-  of the regions that enclose it in the clause, such as a quantifier's binder. It never sees the
+* It appears only in an `ensures` clause or a loop invariant (**Loop invariants**, below), at any
+  depth. The body outside its loop invariants, the `requires` clauses and the frame regions never
+  apply it.
+* Its region sees, from outside it, only the function's parameters, the constants of its clause or
+  invariant, and the parameters of the regions that enclose it in its clause or invariant, such as
+  a quantifier's binder. It never sees the
   parameter of the clause's own region, which is the result, nor any other value that the clause
   defines outside the `old` region. An `old` nested in an `old` may also use the values of the
   enclosing `old` region, which that region computes in the state at the call. So only the
@@ -496,8 +498,8 @@ What invariants mean:
 * Each time control enters the block, its invariants are evaluated in order, in the state at that
   entry, each one only when the earlier ones returned true. The program satisfies them when each
   one returns true. This holds only in runs whose call of the enclosing function satisfied every
-  `requires` clause, and an invariant may rely on those clauses as facts about the state at the
-  call.
+  `requires` clause, and an invariant and its `old` regions may rely on those clauses as facts
+  about the state at the call.
 * The region sees what is in scope at the block's start: the block's parameters, bound as at that
   entry, and the values defined above the block in the dominator tree. It sees nothing that the
   block defines. No instruction uses an invariant's `()` result, so dropping an invariant leaves
@@ -505,6 +507,15 @@ What invariants mean:
 * The rules for contract regions apply to the region, with failure value `false`: the rules of
   **Failures in contracts**, and no operation declared `writes`. Like the rest of the body, it
   names no ghost. No contract region and no other invariant's region holds an invariant.
+* An invariant may apply `base.old`, which runs its region in the state at the call of the
+  enclosing function, as in an `ensures` clause. The `old` region sees, from outside it, only the
+  function's parameters, the invariant's constants and the parameters of the regions that enclose
+  it in the invariant. So it can't name the head's parameters or a cell that the body makes. A
+  parameter of an enclosing region, such as a quantifier's binder, may still hold a value of the
+  state at the block's entry, such as a cell that the body made, and an `old` that reads that
+  cell is not well defined. An object that the `old` region returns, read afterwards, is read in
+  the state at the block's entry, and an object that it allocates is none of the objects of that
+  state, and it holds there what the region gave it.
 * An invariant states nothing about termination: a loop that never ends satisfies every claim
   about what follows it.
 * A run skips the instruction and never runs its region (its rule in `StrataDyn/Exec/Base.lean`),

@@ -63,8 +63,8 @@ The operations:
   regions included;
 * `withFailureBlock`, `withFailureBlockWith`, `withPropagatingBlock`: run a body with the label
   of a block for its failure successors, and emit that block after the body's blocks;
-* `old`: emit an application of `base.old`, which an `ensures` clause applies to read the state
-  at the call;
+* `old`: emit an application of `base.old`, which an `ensures` clause or a loop invariant applies
+  to read the state at the call;
 * `loopInvariant`, `loopInvariantWith`: emit a loop invariant of the open block, with its failure
   block, `loopInvariantWith` from any monad `BuildM` lifts into;
 * `emitGhost`: emit the cell of a ghost of the module, which only a contract may name;
@@ -654,7 +654,7 @@ def withPropagatingBlock [base ≼ env] {β : Type} (e a : TypeExpr env)
 `old.n`, runs `body` in the state at the call.  `body` gets the label of a propagating block for
 the failure successors in the region, which is emitted, after its blocks, only if one of them
 transfers to it.  `body` finishes every block it opens, each returning a `base.Except(e, a)`.
-Only an `ensures` clause may apply `base.old`. -/
+Only an `ensures` clause or a loop invariant may apply `base.old`. -/
 def old [base ≼ env] (name : Name) (e a : TypeExpr env) (err : Label)
     (body : Label → BuildM env α Unit) (info : Option α := none) : BuildM env α ValId :=
   emitApply name a Base.old.ref #[] (succs := #[Raw.goto err])
@@ -1030,8 +1030,10 @@ private theorem stubFunc_wf [base ≼ env] (name : Name) (params : Array (Name �
       Region.EndsInControl, Region.Acyclic, Region.allList, Region.withNestedList,
       Contract.regions, Contract.frameRegions, FrameEntry.regionsOf, stubFunc]
   · simp [Func.OldWF, Func.OldPlaced, Func.OldScoped, Region.NoOld, Region.allList,
-      Region.withNestedList, Block.nestedRegionsList, Instruction.regionsWithNestedList,
-      Terminator.regionsWithNested, Terminator.unreachable, Contract.frameRegions,
+      Region.withNestedList, Block.codeBlocksList, Instruction.codeBlocksList,
+      Terminator.codeBlocks, Region.codeBlocksList, Func.invariantRegions,
+      Block.invariantRegionsList, Instruction.invariantRegionsList, Terminator.invariantRegions,
+      Region.invariantRegionsList, Terminator.unreachable, Contract.frameRegions,
       FrameEntry.regionsOf, stubFunc]
   · simp [Func.GhostsInContract, Block.withNestedList, Instruction.nestedBlocksList,
       Terminator.nestedBlocks, Terminator.unreachable, Region.blocksList, stubFunc]

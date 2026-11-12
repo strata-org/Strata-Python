@@ -20,8 +20,8 @@ set_option autoImplicit false
 
 A module in the IR's text that makes a location stops with that operation's gap when `PySem` runs
 it.  `LocationsProps.lean` and `StrataDyn/Exec/BaseProps.lean` prove the same of each rule, on
-every input.  `base.old` has no run here: only an `ensures` clause may apply it, and no run
-evaluates a clause; the theorem `old_eq` covers it.
+every input.  `base.old` has no run here: only an `ensures` clause or a loop invariant may
+apply it, and no run evaluates either; the theorem `old_eq` covers it.
 -/
 
 namespace StrataPython.Dyn.Sem.LocationsTest

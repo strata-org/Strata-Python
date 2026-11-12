@@ -27,8 +27,8 @@ set_option autoImplicit false
 `base.old` runs its region in the state at the call.  Two rules of `Func.OldWF` say where it may
 be and what its region may see:
 
-* `old`: it appears only in an `ensures` clause, at any depth, never in the body or in a
-  `requires` clause;
+* `old`: it appears only in an `ensures` clause or a loop invariant, at any depth, never
+  elsewhere in the body or in a `requires` clause;
 * `old scope`: an `old` region sees only the function's parameters, constants, the parameters of
   the regions that enclose it, and its own values.  An `old` nested in an `old` also sees the
   values of the enclosing `old` region, since both run in the state at the call.
@@ -523,14 +523,14 @@ private def freeOldText : String := "module m {
 
 Each rejection breaks one rule. -/
 
-/-! ### `base.old` appears only in an `ensures` clause -/
+/-! ### `base.old` appears only in an `ensures` clause or a loop invariant -/
 
 -- In a `requires` clause.
 #guard failing (withContract fun c _ => Build.requires do
   withFailureBlock #[intT] (some false) fun fail => do
     retGe (← oldGet fail c) (← emitConst (nm "zero") (.int 0))) == ["old"]
 
-/-- info: t.dyn:5:8: base.old is allowed only in an ensures clause, but @m.f uses it in a requires clause -/
+/-- info: t.dyn:5:8: base.old is allowed only in an ensures clause or a loop invariant, but @m.f uses it in a requires clause -/
 #guard_msgs in
 #eval readBack (withClauses "    requires {
       pre.0():
@@ -556,7 +556,7 @@ Each rejection breaks one rule. -/
   finishBlock (.ret () (← emitApply (nm "v") boolT Demo.«if».ref #[t] (regions := #[thn, els])))) ==
   ["old"]
 
-/-- info: t.dyn:7:12: base.old is allowed only in an ensures clause, but @m.f uses it in a requires clause -/
+/-- info: t.dyn:7:12: base.old is allowed only in an ensures clause or a loop invariant, but @m.f uses it in a requires clause -/
 #guard_msgs in
 #eval readBack (withClauses "    requires {
       pre.0():
@@ -586,7 +586,7 @@ Each rejection breaks one rule. -/
   withFailureBlock #[intT] none fun fail => do finishBlock (.ret () (← oldGet fail c.id))) ==
   ["old"]
 
-/-- info: t.dyn:4:6: base.old is allowed only in an ensures clause, but @m.f uses it in its body -/
+/-- info: t.dyn:4:6: base.old is allowed only in an ensures clause or a loop invariant, but @m.f uses it in its body -/
 #guard_msgs in
 #eval readBack "module m {
   func @m.f(%c.0 : base.Ref(base.Int)) -> base.Int {
@@ -616,7 +616,7 @@ Each rejection breaks one rule. -/
   let _ ← Build.Raw.startBlockWith done (nm "b") boolT
   finishBlock (.ret () (← emitConst (nm "z") (.int 0)))) == ["old"]
 
-/-- info: t.dyn:6:10: base.old is allowed only in an ensures clause, but @m.f uses it in its body -/
+/-- info: t.dyn:6:10: base.old is allowed only in an ensures clause or a loop invariant, but @m.f uses it in its body -/
 #guard_msgs in
 #eval readBack "module m {
   func @m.f(%c.0 : base.Ref(base.Int)) -> base.Int {

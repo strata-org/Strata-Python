@@ -25,8 +25,8 @@ The fast checks of `StrataDyn/ContractRegion.lean` give the answers of the plain
   the reference check, so compiled code runs it (`@[csimp]`);
 * `Region.failuresToB_iff`: the check through a set of labels decides `Region.FailuresTo`;
 * `Region.oldScoped_iff`: `Region.OldScoped` holds exactly when each outermost `old` region of the
-  clause is shaped and dominance-correct, entered where only what `Region.oldSees` gives is
-  available.
+  clause or loop invariant is shaped and dominance-correct, entered where only what
+  `Region.oldSees` gives is available.
 
 The `Decidable` instances of `Body.Acyclic` and `Region.FailuresTo` come after these theorems, so
 that compiled code runs the fast checks.
@@ -197,12 +197,12 @@ theorem Region.failuresToB_iff {ok : Block env α → Bool} {r : Region env α} 
 instance (ok : Block env α → Bool) (r : Region env α) : Decidable (r.FailuresTo ok) :=
   decidable_of_iff _ Region.failuresToB_iff
 
-/-- The clause `r` satisfies `Region.OldScoped` exactly when each of its outermost `old` regions is
-shaped and dominance-correct, entered where only what `Region.oldSees` gives is available: the
-function's parameters, as `isParam` says, the values that the constants of `r` define, and the
-parameters of the regions nested in `r` that enclose that `old` region.  So every value that such
-a region uses is one of these, or is defined in it at a point that every path to the use passes
-through. -/
+/-- The clause or loop invariant `r` satisfies `Region.OldScoped` exactly when each of its outermost
+`old` regions is shaped and dominance-correct, entered where only what `Region.oldSees` gives is
+available: the function's parameters, as `isParam` says, the values that the constants of `r`
+define, and the parameters of the regions nested in `r` that enclose that `old` region.  So every
+value that such a region uses is one of these, or is defined in it at a point that every path to the
+use passes through. -/
 theorem Region.oldScoped_iff {isParam : ValId → Bool} {r : Region env α} :
     r.OldScoped isParam ↔ ∀ p ∈ Block.oldRegionsList [] r.blocks.toList,
       Body.Shaped p.1.blocks.toList ∧

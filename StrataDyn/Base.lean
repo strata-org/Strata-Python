@@ -15,12 +15,12 @@ set_option autoImplicit false
 /-!
 # The base environment
 
-The declarations every language environment extends: `Unit`, the scalar types a constant can
-have, a sequence, a mutable cell, a typed code pointer and a call through it, `Except`, `old`,
-which an `ensures` clause applies to read the state at the call, `loopInvariant`, a loop
+The declarations every language environment extends: `Unit`, the scalar types a constant can have, a
+sequence, a mutable cell, a typed code pointer and a call through it, `Except`, `old`, which an
+`ensures` clause or a loop invariant applies to read the state at the call, `loopInvariant`, a loop
 invariant, `Loc`, a set of locations that a frame names, with `cellLoc`, the location of a cell's
-contents, and the terminal operations of control flow.  `Unit` and `Except` are datatypes; the
-rest of the types are primitive.
+contents, and the terminal operations of control flow.  `Unit` and `Except` are datatypes; the rest
+of the types are primitive.
 
 `Base` is an `environment` block, so a language environment declares it as its parent with
 `extends Base`.  In every `e` with `Base.env ≼ e`:
@@ -81,8 +81,8 @@ public environment Base where
   /-- `base.refSet`, which replaces the contents of `cell` with `value`. -/
   writes insn refSet [a] (cell : Ref a) (value : a) : Unit
   /-- `base.old`, which runs `body` in the state at the call of the function whose `ensures`
-  clause applies it: the value of an `ok`, or a transfer to `err` with the error of an
-  `error`.  Only an `ensures` clause may apply it. -/
+  clause or loop invariant applies it: the value of an `ok`, or a transfer to `err` with the
+  error of an `error`.  Only an `ensures` clause or a loop invariant may apply it. -/
   reads insn old [e a] (&body : Except e a) (^err (exc : e)) : a
   /-- `base.loopInvariant`, a loop invariant: each time control enters its block, `body` returns
   `true`.  It comes before every other instruction of its block, and a run skips it. -/

@@ -287,6 +287,40 @@ private def invariantText : String := "module m {
 #guard_msgs in
 #eval runMain invariantText
 
+/-- The same loop, whose invariant applies `base.old`, which stops with a gap if it runs; the
+invariant returns `false`.  The run still returns `7`. -/
+private def oldInvariantText : String := "module m {
+  func @m.main() -> base.Int {
+    entry.0():
+      %c.0 : base.Ref(base.Bool) = base.refNew[base.Bool](true)
+      jump ^head.0(0)
+    head.0(%i.0 : base.Int):
+      %inv.0 : base.Unit = base.loopInvariant {
+        inv.0():
+          %o.0 : base.Int = base.old[base.Int, base.Int] ^fail.0() {
+            old.0():
+              %w.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](0)
+              ret(%w.0)
+          }
+          ret(false)
+        fail.0(%e.0 : base.Int):
+          ret(false)
+      }
+      %b.0 : base.Bool = base.refGet[base.Bool](%c.0)
+      branch(%b.0) ^body.0() ^done.0()
+    body.0():
+      %u.0 : base.Unit = base.refSet[base.Bool](%c.0, false)
+      jump ^head.0(7)
+    done.0():
+      ret(%i.0)
+  }
+}
+"
+
+/-- info: some 7 -/
+#guard_msgs in
+#eval runMain oldInvariantText
+
 /-- info: invalid: m.e: an extern function does not run yet -/
 #guard_msgs in
 #eval runMain externText

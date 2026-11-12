@@ -57,13 +57,14 @@ what the thing it names demands:
   own blocks goes to a block that ends in `unreachable`; one of a region nested in a contract
   region goes to a block that ends in `unreachable` or, if the region may propagate, passes the
   failure on with `base.error`.  Every block of a contract region ends in control flow, and the
-  blocks of every contract region form an acyclic graph.  Only an `ensures` clause applies
-  `base.old`, at any depth, and each outermost `old` region, entered where only the parameters,
-  the clause's constants and the parameters of the regions that enclose it are visible, is shaped
-  and dominance-correct.  The body names no ghost, at any depth.  In every block of the body, at
-  any depth, the loop invariants (`base.loopInvariant`) come before every other instruction; no
-  contract region and no invariant's region holds one; nothing uses an invariant's result; and
-  each invariant's region follows the rules for a clause whose failure value is `false`;
+  blocks of every contract region form an acyclic graph.  Only an `ensures` clause or a loop
+  invariant applies `base.old`, at any depth, and each outermost `old` region, entered where only
+  the parameters, the constants of its clause or invariant and the parameters of the regions that
+  enclose it inside its clause or invariant are visible, is shaped and dominance-correct.  The body
+  names no ghost, at any depth.  In every block of the body, at any depth, the loop invariants
+  (`base.loopInvariant`) come before every other instruction; no contract region and no invariant's
+  region holds one; nothing uses an invariant's result; and each invariant's region follows the
+  rules for a clause whose failure value is `false`;
 * a `Ghost`'s initializer takes no arguments and returns the ghost's type, and its invariant takes
   the ghost's contents and returns a `base.Bool`.  Each is well formed in the ghost's context, is
   checked as a body entered where nothing is visible, and follows the rules for a frame region:
@@ -809,26 +810,34 @@ block of them ends in control flow, and none of them has a cycle. -/
 instance {env : Env Unit} {α : Type} (fn : Func env α) : Decidable fn.ContractRegionsWF :=
   inferInstanceAs (Decidable (_ ∧ _ ∧ _ ∧ _))
 
-/-! ### `old` in `ensures` clauses
+/-- The regions of the loop invariants in the function's body, at any depth. -/
+@[expose] def Func.invariantRegions {env : Env Unit} {α : Type} (fn : Func env α) :
+    List (Region env α) :=
+  Block.invariantRegionsList fn.blocks.toList
+
+/-! ### `old` in `ensures` clauses and loop invariants
 
 The predicates are stated in `StrataDyn/ContractRegion.lean`. -/
 
-/-- `base.old` appears only in an `ensures` clause: no instruction of the body, of a `requires`
-clause or of a frame region applies it, at any depth. -/
+/-- `base.old` appears only in an `ensures` clause or a loop invariant: no instruction of the body
+outside its loop invariants, of a `requires` clause or of a frame region applies it, at any
+depth. -/
 @[expose, reducible] def Func.OldPlaced {env : Env Unit} {α : Type} (fn : Func env α) : Prop :=
-  Region.NoOld (⟨fn.blocks⟩ :: fn.contract.requires.toList.map (·.region) ++
-    fn.contract.frameRegions)
+  (∀ b ∈ Block.codeBlocksList fn.blocks.toList, ∀ i ∈ b.instrs.toList, i.isOld = false) ∧
+    Region.NoOld (fn.contract.requires.toList.map (·.region) ++ fn.contract.frameRegions)
 
-/-- Each outermost `old` region of an `ensures` clause sees, from outside it, only the parameters,
-the clause's constants, and the parameters of the regions nested in the clause that enclose it,
-never the result or another value that the clause defines outside the `old` region
-(`Region.OldScoped`). -/
+/-- Each outermost `old` region of an `ensures` clause or of a loop invariant sees, from outside
+it, only the parameters, the constants of the clause or invariant, and the parameters of the
+regions nested in it that enclose the `old` region.  So it names neither the result, nor another
+value that the clause or invariant defines outside the `old` region, nor a value of the body
+(`Region.OldScoped`); a binder may still hold such a value. -/
 @[expose, reducible] def Func.OldScoped {env : Env Unit} {α : Type} (fn : Func env α) : Prop :=
-  ∀ c ∈ fn.contract.ensures.toList, c.region.OldScoped fn.isParam
+  (∀ c ∈ fn.contract.ensures.toList, c.region.OldScoped fn.isParam) ∧
+    ∀ r ∈ fn.invariantRegions, r.OldScoped fn.isParam
 
-/-- The rules for `base.old`: only an `ensures` clause applies it, and each `old` region sees, from
-outside it, only the parameters, the clause's constants and the parameters of the regions that
-enclose it. -/
+/-- The rules for `base.old`: only an `ensures` clause or a loop invariant applies it, and each
+`old` region sees, from outside it, only the parameters, the constants of the clause or invariant
+and the parameters of the regions that enclose it inside its clause or invariant. -/
 @[expose] def Func.OldWF {env : Env Unit} {α : Type} (fn : Func env α) : Prop :=
   fn.OldPlaced ∧ fn.OldScoped
 
@@ -838,11 +847,6 @@ instance {env : Env Unit} {α : Type} (fn : Func env α) : Decidable fn.OldWF :=
 /-! ### Loop invariants
 
 The predicates are stated in `StrataDyn/ContractRegion.lean`. -/
-
-/-- The regions of the loop invariants in the function's body, at any depth. -/
-@[expose] def Func.invariantRegions {env : Env Unit} {α : Type} (fn : Func env α) :
-    List (Region env α) :=
-  Block.invariantRegionsList fn.blocks.toList
 
 /-- The rules for a function's loop invariants:
 
@@ -911,9 +915,9 @@ structure Func.WF {env : Env Unit} {α : Type} [base ≼ env] (fn : Func env α)
   /-- Its contract regions send their failures where `Func.ContractRegionsWF` asks, and have no
   cycles. -/
   contractRegions : Func.ContractRegionsWF fn
-  /-- Only its `ensures` clauses apply `base.old`, and each `old` region sees, from outside it,
-  only the parameters, the clause's constants and the parameters of the regions that enclose
-  it. -/
+  /-- Only its `ensures` clauses and loop invariants apply `base.old`, and each `old` region
+  sees, from outside it, only the parameters, the constants of its clause or invariant and the
+  parameters of the regions that enclose it inside its clause or invariant. -/
   old : Func.OldWF fn
   /-- Its body names no ghost, at any depth: only its contract does. -/
   ghosts : Func.GhostsInContract fn

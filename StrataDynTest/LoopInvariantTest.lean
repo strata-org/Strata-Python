@@ -42,8 +42,9 @@ with failure value `false`.  The rules of `Func.LoopInvariantsWF`, by the names 
   failures of its own blocks to a failure block that gives `false` or ends in `unreachable`, its
   nested regions pass their failures on, its blocks end in control flow, and they are acyclic.
 
-The body names no ghost, invariants included (`ghosts`), and only an `ensures` clause applies
-`base.old` (`old`).  A ghost's regions hold no invariant (`Ghost.WF`).
+The body names no ghost, invariants included (`ghosts`), and applies `base.old` only in its
+invariants (`old`), whose `old` regions see only what `old scope` allows.  A ghost's regions hold
+no invariant (`Ghost.WF`).
 
 Each function accepted here reads back unchanged, and some stay well formed when their invariants
 are dropped.  For each function rejected here, the reader names the rule that it breaks.
@@ -74,6 +75,8 @@ public environment Demo extends Base where
   pure insn «try» (&body : Except Int Bool) : Except Int Bool
   /-- Runs `body` once, and returns its value. -/
   pure insn once (&body : Int) : Int
+  /-- Runs `body` on `v`, and returns its value. -/
+  pure insn bind [a b] (v : a) (&body (x : a) : b) : b
   /-- `a / b`, which ends its block: it continues at `ok` with the quotient, or at `err` when `b`
   is zero. -/
   pure terminal insn tryDiv (a b : Int) (^ok (q : Int)) (^err (e : Int))
@@ -310,12 +313,12 @@ private def geZero (k : Nat) : String := s!"      %inv.{k} : base.Unit = base.lo
       }
 "
 
-/-- `@m.f(n)`, whose entry block ends in `demo.run`, with `inv` as the first lines of the block of
-its region. -/
-private def runText (inv : String) : String := s!"module m \{
+/-- `@m.f(n)`, whose entry block runs `pre` and ends in `demo.run`, with `inv` as the first lines
+of the block of its region. -/
+private def runText (inv : String) (pre : String := "") : String := s!"module m \{
   func @m.f(%n.0 : base.Int) -> base.Int \{
     entry.0(%n.0 : base.Int):
-      demo.run ^k.0() \{
+{pre}      demo.run ^k.0() \{
         r.0():
 {inv}          ret(true)
       }
@@ -628,14 +631,101 @@ m.f: true, 1 invariants; without them: true, 0
       }
 ")
 
--- `old`: an invariant does not read the state at the call yet.
-/-- info: t.dyn:8:10: base.old is allowed only in an ensures clause, but @m.count uses it in its body -/
+/-! ## `old` in loop invariants
+
+An `old` region in an invariant reads the state at the call of the enclosing function.  It sees,
+from outside it, only the function's parameters, the invariant's constants and the parameters of
+the regions that enclose it in the invariant.  So it can't name a value of the body, such as the
+head's parameters, though a binder may hold one. -/
+
+/-- `@m.f(c, n)`, a loop over `i`, with `inv` as the first lines of its head.  `%c.0` is a cell
+that the caller passes. -/
+private def cellText (inv : String) : String := s!"module m \{
+  func @m.f(%c.0 : base.Ref(base.Int), %n.0 : base.Int) -> base.Int \{
+    entry.0(%c.0 : base.Ref(base.Int), %n.0 : base.Int):
+      %d.0 : base.Ref(base.Int) = base.refNew[base.Int](%n.0)
+      jump ^head.0(0)
+    head.0(%i.0 : base.Int):
+{inv}      %k.0 : base.Bool = demo.lt(%i.0, %n.0)
+      branch(%k.0) ^body.0() ^done.0()
+    body.0():
+      %u.0 : base.Unit = base.refSet[base.Int](%c.0, %i.0)
+      %j.0 : base.Int = demo.add(%i.0, 1)
+      jump ^head.0(%j.0)
+    done.0():
+      ret(%i.0)
+  }
+}
+"
+
+/-- An invariant `ge(old(…), bound)`, each line indented by `pad`, whose `old` region runs the
+instructions `read`, the last of which defines `%v.0`. -/
+private def oldInvariant (pad : String) (read : List String) (bound : String) : String :=
+  let line (t : String) : String := pad ++ t ++ "\n"
+  String.join <|
+    [line "%inv.0 : base.Unit = base.loopInvariant {",
+     line "  inv.0():",
+     line "    %o.0 : base.Int = base.old[base.Int, base.Int] ^fail.0() {",
+     line "      old.0():"] ++
+    read.map (fun t => line ("        " ++ t)) ++
+    [line "        %w.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%v.0)",
+     line "        ret(%w.0)",
+     line "    }",
+     line s!"    %ok.0 : base.Bool = demo.ge(%o.0, {bound})",
+     line "    ret(%ok.0)",
+     line "  fail.0(%e.0 : base.Int):",
+     line "    ret(false)",
+     line "}"]
+
+/-- `oldInvariant` at a head of `cellText`, compared with `%i.0`. -/
+private def oldInv (read : String) : String := oldInvariant "      " [read] "%i.0"
+
+-- The contents of the parameter cell `%c.0` at the call.
 #guard_msgs in
-#eval readErrors (countText "      %inv.0 : base.Unit = base.loopInvariant {
+#eval readBack (cellText (oldInv "%v.0 : base.Int = base.refGet[base.Int](%c.0)"))
+
+-- An `old` nested in an `old` may use what the outer one computes.
+#guard_msgs in
+#eval readBack (cellText "      %inv.0 : base.Unit = base.loopInvariant {
         inv.0():
           %o.0 : base.Int = base.old[base.Int, base.Int] ^fail.0() {
             old.0():
-              %w.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%n.0)
+              %v.0 : base.Int = base.refGet[base.Int](%c.0)
+              %o.1 : base.Int = base.old[base.Int, base.Int] ^propagate.0() {
+                old.1():
+                  %x.0 : base.Int = demo.add(%v.0, 1)
+                  %y.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%x.0)
+                  ret(%y.0)
+              }
+              %w.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%o.1)
+              ret(%w.0)
+            propagate.0(%exc.0 : base.Int):
+              %err.0 : base.Except(base.Int, base.Int) = base.error[base.Int, base.Int](%exc.0)
+              ret(%err.0)
+          }
+          %ok.0 : base.Bool = demo.ge(%o.0, %i.0)
+          ret(%ok.0)
+        fail.0(%e.0 : base.Int):
+          ret(false)
+      }
+")
+
+-- `old scope`: an `old` region that sees the head's parameter, a cell that the body makes, or a
+-- value that the invariant defines outside it.
+/-- info: t.dyn:11:14: the old region in @m.f uses %i.0, which the body defines -/
+#guard_msgs in
+#eval readErrors (cellText (oldInv "%v.0 : base.Int = demo.add(%i.0, 1)"))
+/-- info: t.dyn:11:14: the old region in @m.f uses %d.0, which the body defines -/
+#guard_msgs in
+#eval readErrors (cellText (oldInv "%v.0 : base.Int = base.refGet[base.Int](%d.0)"))
+/-- info: t.dyn:12:14: the old region in @m.f uses %p.0, which the loop invariant defines outside the old region -/
+#guard_msgs in
+#eval readErrors (cellText "      %inv.0 : base.Unit = base.loopInvariant {
+        inv.0():
+          %p.0 : base.Int = demo.add(%n.0, 1)
+          %o.0 : base.Int = base.old[base.Int, base.Int] ^fail.0() {
+            old.0():
+              %w.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%p.0)
               ret(%w.0)
           }
           %ok.0 : base.Bool = demo.ge(%o.0, %i.0)
@@ -644,6 +734,176 @@ m.f: true, 1 invariants; without them: true, 0
           ret(false)
       }
 ")
+
+-- `old`: the body outside its invariants still applies no `old`, even in a block that holds an
+-- invariant.
+/-- info: t.dyn:9:6: base.old is allowed only in an ensures clause or a loop invariant, but @m.f uses it in its body -/
+#guard_msgs in
+#eval readErrors "module m {
+  func @m.f(%x.0 : base.Int) -> base.Int {
+    entry.0(%x.0 : base.Int):
+      %inv.0 : base.Unit = base.loopInvariant {
+        inv.0():
+          %ok.0 : base.Bool = demo.ge(%x.0, 0)
+          ret(%ok.0)
+      }
+      %o.0 : base.Int = base.old[base.Int, base.Int] ^bad.0() {
+        old.0():
+          %w.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%x.0)
+          ret(%w.0)
+      }
+      ret(%o.0)
+    bad.0(%e.0 : base.Int):
+      ret(%e.0)
+  }
+}
+"
+
+-- An `old` may use the parameter of a region that encloses it in the invariant, even when that
+-- parameter holds a value of the body, such as the cell `%d.0` here.  The checker accepts this on
+-- purpose, as for an `ensures` clause.  This `old` reads `%d.0`, a cell that the body made after
+-- the call, so the invariant is not well defined: a check of it fails, and a consumer assumes
+-- nothing from it.
+#guard_msgs in
+#eval readBack (cellText "      %inv.0 : base.Unit = base.loopInvariant {
+        inv.0():
+          %b.0 : base.Bool = demo.bind[base.Ref(base.Int), base.Bool](%d.0) {
+            bb.0(%x.0 : base.Ref(base.Int)):
+              %o.0 : base.Int = base.old[base.Int, base.Int] ^no.0() {
+                old.0():
+                  %v.0 : base.Int = base.refGet[base.Int](%x.0)
+                  %w.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%v.0)
+                  ret(%w.0)
+              }
+              %ok.0 : base.Bool = demo.ge(%o.0, %i.0)
+              ret(%ok.0)
+            no.0(%e.0 : base.Int):
+              unreachable
+          }
+          ret(%b.0)
+      }
+")
+
+-- `old`: a region of code in the body, here of `demo.once`, applies no `old` either.
+/-- info: t.dyn:14:10: base.old is allowed only in an ensures clause or a loop invariant, but @m.f uses it in its body -/
+#guard_msgs in
+#eval readErrors (cellText "      %inv.0 : base.Unit = base.loopInvariant {
+        inv.0():
+          %ok.0 : base.Bool = demo.ge(%i.0, 0)
+          ret(%ok.0)
+      }
+      %q.0 : base.Int = demo.once {
+        on.0():
+          %o.0 : base.Int = base.old[base.Int, base.Int] ^no.0() {
+            old.0():
+              %w.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%n.0)
+              ret(%w.0)
+          }
+          ret(%o.0)
+        no.0(%e.0 : base.Int):
+          ret(%e.0)
+      }
+")
+
+/-- `@m.g(c, n)`, with a loop inside the region of `demo.bind`, whose parameter is `%m.0`, and
+with `inv` as the first lines of the loop's head. -/
+private def nestedLoop (inv : String) : String := s!"module m \{
+  func @m.g(%c.0 : base.Ref(base.Int), %n.0 : base.Int) -> base.Int \{
+    entry.0(%c.0 : base.Ref(base.Int), %n.0 : base.Int):
+      %r.0 : base.Int = demo.bind[base.Int, base.Int](%n.0) \{
+        rb.0(%m.0 : base.Int):
+          jump ^head.0(0)
+        head.0(%i.0 : base.Int):
+{inv}          %k.0 : base.Bool = demo.lt(%i.0, %m.0)
+          branch(%k.0) ^body.0() ^done.0()
+        body.0():
+          %j.0 : base.Int = demo.add(%i.0, 1)
+          jump ^head.0(%j.0)
+        done.0():
+          ret(%i.0)
+      }
+      ret(%r.0)
+  }
+}
+"
+
+/-- An invariant whose `old` region adds `v` to the contents of the parameter cell `%c.0` at the
+call. -/
+private def oldUses (v : String) : String :=
+  oldInvariant "          " ["%u.0 : base.Int = base.refGet[base.Int](%c.0)",
+    s!"%v.0 : base.Int = demo.add(%u.0, {v})"] "%i.0"
+
+-- A loop inside a region of the body, whose invariant's `old` reads a parameter cell.
+#guard_msgs in
+#eval readBack (nestedLoop (oldUses "%n.0"))
+
+-- `old scope`: the same `old` may not use the parameter of the region of code around the loop.
+/-- info: t.dyn:13:18: the old region in @m.g uses %m.0, which the body defines -/
+#guard_msgs in
+#eval readErrors (nestedLoop (oldUses "%m.0"))
+
+/-- An invariant in the region of `demo.run`, whose `old` region reads `read` into `%v.0`. -/
+private def runOld (read : String) : String := oldInvariant "          " [read] "0"
+
+-- An invariant in a terminator's region: its `old` may read the function's parameter, but not a
+-- cell that the body makes.
+#guard_msgs in
+#eval readBack (runText (runOld "%v.0 : base.Int = demo.add(%n.0, 1)"))
+/-- info: t.dyn:11:18: the old region in @m.f uses %d.0, which the body defines -/
+#guard_msgs in
+#eval readErrors (runText (runOld "%v.0 : base.Int = base.refGet[base.Int](%d.0)")
+  (pre := "      %d.0 : base.Ref(base.Int) = base.refNew[base.Int](%n.0)
+"))
+
+/-- `old(x + 1) ≥ i`, where `1` is a constant that the invariant defines outside its `old`
+region: a constant is the same in every state.  The reader puts a constant where the text uses it,
+so only the builder can emit this. -/
+private def oldPlusOne (x : ValId) (i : ValId) : BuildM E Unit Unit :=
+  loopInvariant #[intT] fun fail => do
+    let one ← emitConst (nm "one") (.int 1)
+    let o ← Build.old (nm "o") intT intT fail fun _ => do
+      let s ← emitApply (nm "s") intT Demo.add.ref #[x, one]
+      finishBlock (.ret () (← emitApply (nm "w") (Base.Except intT intT) Base.Except.ok.ref #[s]))
+    finishBlock (.ret () (← emitApply (nm "ok") boolT Demo.ge.ref #[o, i]))
+
+-- `old(n + 1) ≥ i`: the `old` region uses the parameter `n` and the invariant's constant, which
+-- the printer writes as the literal `1` inside the `old` region.
+/-- info: module m {
+  func @m.count(%n.0 : base.Int) -> base.Int {
+    entry.0(%n.0 : base.Int):
+      jump ^head.0(0)
+    head.0(%i.0 : base.Int):
+      %inv.0 : base.Unit = base.loopInvariant {
+        inv.0():
+          %o.0 : base.Int = base.old[base.Int, base.Int] ^fail.0() {
+            old.0():
+              %s.0 : base.Int = demo.add(%n.0, 1)
+              %w.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%s.0)
+              ret(%w.0)
+          }
+          %ok.0 : base.Bool = demo.ge(%o.0, %i.0)
+          ret(%ok.0)
+        fail.0(%e.0 : base.Int):
+          ret(false)
+      }
+      %c.0 : base.Bool = demo.lt(%i.0, %n.0)
+      branch(%c.0) ^body.0() ^done.0()
+    body.0():
+      %j.0 : base.Int = demo.add(%i.0, 1)
+      jump ^head.0(%j.0)
+    done.0():
+      ret(%i.0)
+  }
+} -/
+#guard_msgs in
+#eval printBuilt (counting (oldPlusOne ⟨0⟩))
+
+#guard failing (counting (oldPlusOne ⟨0⟩)) == []
+
+-- `old scope`: `old(i + 1) ≥ i`, whose `old` region uses the head's parameter.
+#guard failing (counting fun i => oldPlusOne i i) == ["old scope"]
+
+/-! ## Ghosts -/
 
 -- `ghosts`: an invariant does not name a ghost; and a ghost's invariant holds no loop invariant.
 /-- info: t.dyn:10:50: @m.f uses ghost @m.g outside its contract -/

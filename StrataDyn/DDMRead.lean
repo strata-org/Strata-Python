@@ -62,9 +62,10 @@ both printed forms.  `Module.ofDDM` does the same from a DDM term.
   the region may propagate, passes the failure on with `base.error`.  Every block of a contract
   region ends in control flow, and the blocks of a contract region have no cycle.  The reader
   names the first failure successor, block or cycle that breaks these rules.
-* Only an `ensures` clause applies `base.old`, and an `old` region uses, from outside it, only
-  the function's parameters, the clause's constants and the parameters of the regions that
-  enclose it.  The reader names the first `base.old`, or the first use, that breaks these rules.
+* Only an `ensures` clause or a loop invariant applies `base.old`, and an `old` region uses, from
+  outside it, only the function's parameters, the constants of its clause or invariant and the
+  parameters of the regions that enclose it inside its clause or invariant.  The reader names the
+  first `base.old`, or the first use, that breaks these rules.
 * A block's loop invariants, `base.loopInvariant`, come before every other instruction of it, and
   no contract region, no ghost's region and no invariant's region holds one.  An invariant's
   region applies no operation declared `writes`, and follows the rules for a clause whose failure
@@ -1013,7 +1014,7 @@ def clauseScopeDiagnostics (fn : Func env Info) : Array String :=
     if r.domOK fn.isParam then out
     else out ++ (r.scopeDiagnostics fn.names params).map (s!"in {what}, " ++ ·)
 
-/-! ## `old` in `ensures` clauses
+/-! ## `old` in `ensures` clauses and loop invariants
 
 The diagnostics of `Func.OldWF`: they only explain why it fails. -/
 
@@ -1024,13 +1025,15 @@ def firstOld? (rs : List (Region env Info)) : Option (Instruction env Info) :=
 
 /-- The diagnostic of an application `i` of `base.old` in `place` of `owner`. -/
 def oldFound (owner place : String) (i : Instruction env Info) : ReadDiagnostic :=
-  ⟨instrRange i, s!"base.old is allowed only in an ensures clause, but {owner} uses it in {place}"⟩
+  ⟨instrRange i, s!"base.old is allowed only in an ensures clause or a loop invariant, but \
+    {owner} uses it in {place}"⟩
 
-/-- Why `fn` breaks `Func.OldPlaced`, if it does: the first application of `base.old` in its body,
-or else in a `requires` clause, or else in a frame region. -/
+/-- Why `fn` breaks `Func.OldPlaced`, if it does: the first application of `base.old` in its body
+outside its loop invariants, or else in a `requires` clause, or else in a frame region. -/
 def oldPlacedDiagnostic? (fn : Func env Info) (fnName : String) : Option ReadDiagnostic :=
   let found := oldFound s!"@{fnName}"
-  ((firstOld? [⟨fn.blocks⟩]).map (found "its body")) <|>
+  (((Block.codeBlocksList fn.blocks.toList).findSome? fun b => b.instrs.toList.find? (·.isOld)).map
+    (found "its body")) <|>
     (fn.contract.requires.toList.findSome? fun c =>
       (firstOld? [c.region]).map (found "a requires clause")) <|>
     fn.contract.frameRegions.findSome? fun r => (firstOld? [r]).map (found "a frame region")
@@ -1040,15 +1043,15 @@ of its successors `succs`. -/
 def usedValues (args : Array ValId) (succs : Array Target.Raw) : List ValId :=
   args.toList ++ succs.toList.flatMap (·.args.toList)
 
-/-- Why an `ensures` clause of `fn` breaks `Region.OldScoped`, if one does: the first use, in an
-outermost `old` region at any depth, of a value that the region neither sees from outside it nor
-defines.  Such a value is the result, or another value that the clause defines outside the `old`
-region. -/
+/-- Why the outermost `old` regions of `fn` break `Func.OldScoped`, if they do: the first use,
+in an `old` region of an `ensures` clause or of a loop invariant, of a value that the region does
+not see from outside it, as `Region.oldSees` says. -/
 def oldScopedDiagnostic? (fn : Func env Info) (fnName : String) : Option ReadDiagnostic :=
-  fn.contract.ensures.toList.findSome? fun c =>
-    let consts := Region.constIds [c.region]
-    let result := Body.entryParams c.region.blocks.toList
-    (Block.oldRegionsList [] c.region.blocks.toList).findSome? fun (o, ps) =>
+  let check (what : String) (r : Region env Info) : Option ReadDiagnostic :=
+    let consts := Region.constIds [r]
+    let result := Body.entryParams r.blocks.toList
+    let defs : Std.HashSet Nat := (Region.defsList [r]).foldl (fun s d => s.insert d.id.id) {}
+    (Block.oldRegionsList [] r.blocks.toList).findSome? fun (o, ps) =>
       let own : Std.HashSet Nat := (Region.defsList [o]).foldl (fun s d => s.insert d.id.id) {}
       let bad (vs : List ValId) : Option ValId :=
         vs.find? fun x => !(Region.oldSees fn.isParam consts ps x || own.contains x.id)
@@ -1056,9 +1059,12 @@ def oldScopedDiagnostic? (fn : Func env Info) (fnName : String) : Option ReadDia
         (b.instrs.toList.findSome? fun i => (bad (usedValues i.args i.succs)).map (instrRange i, ·))
           <|> (bad (usedValues b.term.args b.term.succs)).map ((termSite b.term).1, ·)
       ((Region.allList [o]).findSome? fun r => r.blocks.toList.findSome? use?).map fun (range, x) =>
-        let what := if result.contains x then "is the result"
-          else "the clause defines outside the old region"
-        ⟨range, s!"the old region in @{fnName} uses {valText fn.names x}, which {what}"⟩
+        let why := if result.contains x then "is the result"
+          else if defs.contains x.id then s!"{what} defines outside the old region"
+          else "the body defines"
+        ⟨range, s!"the old region in @{fnName} uses {valText fn.names x}, which {why}"⟩
+  (fn.contract.ensures.toList.findSome? fun c => check "the clause" c.region) <|>
+    fn.invariantRegions.findSome? (check "the loop invariant")
 
 /-- The name of the folded constant chosen `k`-th: `c.k`. -/
 def constName (k : Nat) : Name := .num (.str .base "c") k
