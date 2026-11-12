@@ -2674,6 +2674,14 @@ abort, and it gives no result:
   object, a `str` or a tuple (a tuple of numbers hashes within the stack). A loop inside a rule over one value's members takes native stack for each member until
   the rule ends. `StrataPythonTestExtra/SemScaleTest.lean` runs these reprs at 100,000 members.
 
+Memory grows with the number of objects that a run makes, not with its live data: every object
+stays in the store until the run ends. A dict or a set of one entry takes about 1.2 to 1.5 KB, an
+instance with one attribute (`self.x = 1`) about 1.9 KB and one without attributes about 0.35 KB,
+a list of one item about 0.15 KB, and a tuple of numbers nothing. So 1,000,000 iterations of
+`A()`, whose `__init__` sets one attribute, need about 2 GB, where CPython's memory stays flat. When
+the host runs out of memory, `pydyn` is killed and gives no result, as when its native stack runs
+out.
+
 The rules' meaning is defined for every size; only the compiled runner aborts, so no verdict
-depends on this limit.
+depends on these limits.
 

@@ -16,8 +16,10 @@ non-ASCII `str`, a loop after many iterators of a non-ASCII `str` that stopped e
 a tuple of a million members, an empty `str` repeated `2 ** 40` times, indexing and growing a
 non-ASCII `str`, the hash of a tuple of a million members, and the reprs of a tuple, a list and a
 dict of 100,000 members, and `<` of two tuples nested 800 deep (sizes that run within the native
-stack today, docs/PythonToDyn.md §13.6).  Each run takes a few seconds, and the test fails if one takes more
-than 30 seconds; a store or a container that copied itself on each write would take minutes.
+stack today, docs/PythonToDyn.md §13.6).  Each run takes a few seconds of CPU time, and the test fails if one
+takes more than 30 seconds of it; a store or a container that copied itself on each write would
+take about a minute.  It measures the CPU time of `pydyn`, not the time on the clock, so that a
+busy build host doesn't make it fail.
 -/
 
 namespace StrataPython.SemScaleTest
@@ -51,19 +53,35 @@ private meta def programs : List (String × String × String) := [
   ("deep tuple comparison", "a = 0\nb = 0\ni = 0\nwhile i < 800:\n    a = (a,)\n    b = (b, 1)\n    \
     i = i + 1\nr = a < b\ndel a, b\n", "r = True")]
 
+/-- A Python program that runs `pydyn run FILE`, then prints its exit code and its CPU time in ms
+(user and system) on a first line, and its output after it. -/
+private meta def cpuTime : String :=
+  "import resource, subprocess, sys\n\
+   r = subprocess.run(sys.argv[1:], capture_output=True)\n\
+   u = resource.getrusage(resource.RUSAGE_CHILDREN)\n\
+   sys.stdout.write(f'{r.returncode} {int((u.ru_utime + u.ru_stime) * 1000)}\\n')\n\
+   sys.stdout.flush()\n\
+   sys.stdout.buffer.write(r.stdout)\n\
+   sys.stderr.buffer.write(r.stderr)\n"
+
 -- `pydyn run` parses the program with Python, so the test needs it, as the other tests do.
-#eval StrataPython.withPython fun _ => do
+#eval StrataPython.withPython fun python => do
   IO.FS.withTempDir fun dir => do
     for (name, program, expected) in programs do
       let file := dir / s!"{name.replace " " "_"}.py"
       IO.FS.writeFile file program
-      let start ← IO.monoMsNow
-      let r ← IO.Process.output { cmd := SemDiff.pydynPath.toString, args := #["run", file.toString] }
-      let ms := (← IO.monoMsNow) - start
-      unless r.exitCode == 0 && ((r.stdout.splitOn "\n").contains expected) do
+      let r ← IO.Process.output
+        { cmd := python.toString, args := #["-c", cpuTime, SemDiff.pydynPath.toString, "run", file.toString] }
+      let lines := r.stdout.splitOn "\n"
+      let (code, ms) ← match (lines.headD "").splitOn " " with
+        | [c, t] => match c.toInt?, t.toNat? with
+          | some code, some ms => pure (code, ms)
+          | _, _ => throw <| .userError s!"SemScaleTest: no CPU time for the {name} run:\n{r.stdout}{r.stderr}"
+        | _ => throw <| .userError s!"SemScaleTest: no CPU time for the {name} run:\n{r.stdout}{r.stderr}"
+      unless code == 0 && (lines.drop 1).contains expected do
         throw <| .userError s!"SemScaleTest: the {name} run failed:\n{r.stderr}"
-      IO.println s!"SemScaleTest: {name} {ms} ms"
+      IO.println s!"SemScaleTest: {name} {ms} ms of CPU time"
       if ms > 30000 then
-        throw <| .userError s!"SemScaleTest: the {name} run took {ms} ms, more than 30000"
+        throw <| .userError s!"SemScaleTest: the {name} run took {ms} ms of CPU time, more than 30000"
 
 end StrataPython.SemScaleTest
