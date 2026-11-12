@@ -2539,7 +2539,8 @@ with CPython 3.12, over 1422 generated cases.
   keys at the first other key after a deletion, and any change in a dict whose layout may differ
   from CPython's (a copy that dropped holes, after `popitem`, an object's `__dict__`). `==` of an
   object's `__dict__` with more than one attribute stops with a gap, since CPython walks its class's
-  shared keys.
+  shared keys. An operator or comparison of a plain user object with a built-in value whose type's
+  own slot may accept it (a `mappingproxy`, a `ModuleSpec`, a dict view) stops with a gap.
 - Global names, with the fallback to `builtins`, and closures with their cells.
 - Calls of function objects, with positional and keyword arguments and `*` and `**` arguments.
   `**` builds a new dict and leaves the operand unchanged.

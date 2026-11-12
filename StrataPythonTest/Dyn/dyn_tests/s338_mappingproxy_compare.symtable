@@ -1,0 +1,13 @@
+module top
+  C: local (assigned, referenced)
+  E: local (assigned, referenced)
+  print: global implicit (referenced)
+  class C
+  class E
+    __eq__: local (assigned)
+    function __eq__
+      dict: global implicit (referenced)
+      o: local (parameter, referenced)
+      self: local (parameter)
+      type: global implicit (referenced)
+qualnames: C, E, E.__eq__

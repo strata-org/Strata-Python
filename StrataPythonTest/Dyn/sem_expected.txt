@@ -439,12 +439,15 @@ s331_getattr_hook_depth | gap | a C recursion depth over 9000
 s332_method_wrapper_depth | gap | a C recursion depth over 9000
 s336_int_mod_tuple | agree
 s337_dict_eq_compaction | gap | a dict whose entries may move during its comparison is not modelled yet
+s338_mappingproxy_compare | gap | the __eq__ of a mappingproxy with a user object is not modelled yet
+s339_modulespec_compare | gap | the attribute ModuleSpec.__eq__ is not modelled yet
 s33_repeat_index | agree
 s340_str_fold_format | gap | the translator does not support a % format that CPython may fold into a str constant
 s341_dict_eq_copy | gap | a dict whose entries may move during its comparison is not modelled yet
 s342_instance_dict_eq | gap | == of an instance's __dict__ with more than one attribute is not modelled yet
 s343_dict_copy_repr | gap | a dict whose entries may move during its repr is not modelled yet
 s344_dict_str_table_convert | gap | a dict whose entries may move during its comparison is not modelled yet
+s345_modulespec_ne | gap | the attribute ModuleSpec.__eq__ is not modelled yet
 s346_dict_failed_write | gap | a dict whose entries may move during its comparison is not modelled yet
 s347_dict_iter_convert | gap | a dict whose keys changed at the same size during its iteration is not modelled yet
 s348_dict_int_keys_update | agree

@@ -1,0 +1,31 @@
+module top
+  Exception: global implicit (referenced)
+  N: local (assigned)
+  X: local (assigned, referenced)
+  builtins: local (imported, referenced)
+  f: local (assigned, referenced)
+  print: global implicit (referenced)
+  s: local (assigned, referenced)
+  type: global implicit (referenced)
+  class N
+    builtins: global implicit (referenced)
+    cached: local (assigned)
+    has_location: local (assigned)
+    loader: local (assigned)
+    name: local (assigned)
+    origin: local (assigned)
+    submodule_search_locations: local (assigned)
+  function lambda
+    N: global implicit (referenced)
+    s: global implicit (referenced)
+  function lambda
+    N: global implicit (referenced)
+    s: global implicit (referenced)
+  function lambda
+    N: global implicit (referenced)
+    s: global implicit (referenced)
+  function lambda
+    N: global implicit (referenced)
+    s: global implicit (referenced)
+  class X
+qualnames: <lambda>, <lambda>, <lambda>, <lambda>, N, X

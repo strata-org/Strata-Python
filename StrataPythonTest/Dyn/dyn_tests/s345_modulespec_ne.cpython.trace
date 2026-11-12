@@ -1,0 +1,12 @@
+--- stdout 12
+False
+False
+
+--- outcome
+ok
+--- globals
+N = <class 'N'>
+__doc__ = None
+__name__ = '__main__'
+builtins = <module object>
+s = <ModuleSpec object>

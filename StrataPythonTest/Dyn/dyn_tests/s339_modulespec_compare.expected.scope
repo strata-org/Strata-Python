@@ -1,0 +1,31 @@
+module
+  import builtins: module builtins
+  builtins: local (imported, referenced)
+  N: local (assigned)
+  s: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  f: local (assigned, referenced)
+  X: local (assigned, referenced)
+  Exception: global implicit (referenced)
+  class N
+    name: local (assigned)
+    loader: local (assigned)
+    builtins: global implicit (referenced)
+    origin: local (assigned)
+    submodule_search_locations: local (assigned)
+    cached: local (assigned)
+    has_location: local (assigned)
+  lambda <lambda>
+    s: global implicit (referenced)
+    N: global implicit (referenced)
+  lambda <lambda>
+    N: global implicit (referenced)
+    s: global implicit (referenced)
+  lambda <lambda>
+    s: global implicit (referenced)
+    N: global implicit (referenced)
+  lambda <lambda>
+    N: global implicit (referenced)
+    s: global implicit (referenced)
+  class X

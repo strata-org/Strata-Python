@@ -1,0 +1,18 @@
+--- stdout 39
+ModuleSpec
+True
+True
+False
+False
+False
+
+--- outcome
+ok
+--- globals
+N = <class 'N'>
+X = <class 'X'>
+__doc__ = None
+__name__ = '__main__'
+builtins = <module object>
+f = <function object>
+s = <ModuleSpec object>

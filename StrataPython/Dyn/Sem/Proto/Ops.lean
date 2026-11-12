@@ -395,6 +395,20 @@ def isSeqSlot [PyPure m V] (f : V) : m Bool := do
       ["__add__", "__mul__", "__rmul__", "__iadd__", "__imul__"].contains n
   | _ => return false
 
+/-- The built-in types whose binary and comparison slots give `NotImplemented` for an operand that
+is a plain user object: the exceptions, the iterators, and the types listed here. The sequences'
+`+` and `*`, the `%` of `str` and `bytes`, and the in-place slots of `list` and `dict` take other
+operands, but other rules handle them before (`isSeqSlot`, `printfFirst?`, `inplaceOp`). -/
+def givesNotImpl (b : Builtin) : Bool :=
+  b.info.mro.contains .BaseException || b.info.name.endsWith "iterator" ||
+  [Builtin.NoneType, .NotImplementedType, .ellipsis, .bool, .int, .float, .complex, .str, .bytes,
+    .tuple, .range, .slice, .list, .dict, .set, .frozenset, .type, .object, .function,
+    .builtin_function_or_method, .method, .«method-wrapper», .wrapper_descriptor,
+    .method_descriptor, .classmethod_descriptor, .getset_descriptor, .member_descriptor, .module,
+    .cell, .property, .classmethod, .staticmethod, .super, .zip, .enumerate, .reversed, .filter,
+    .map, .dict_values, .traceback, .«_sitebuiltins.Quitter», .«_sitebuiltins._Helper»,
+    .«_sitebuiltins._Printer»].contains b
+
 /-- One side of CPython's `binary_op1` and `do_richcompare`: the dunder `name` of `self`'s type,
 a user function or a built-in type's slot, called with `other`; `none` when the type has no such
 dunder (a sequence's `+` and `*`, which CPython tries after the numbers, count as none) or it gave
@@ -403,8 +417,20 @@ dunder is bound to `self` counts as none too. -/
 def trySlot [PyCalls m V] (self other : V) (name : String) (swallow : Bool := false) :
     m (Option V) := do
   -- A built-in value's own slot can take only another built-in value or an instance of a
-  -- subclass of a built-in type: against a plain user object it gives `NotImplemented`.
+  -- subclass of a built-in type: against a plain user object it gives `NotImplemented`, for the
+  -- types of `givesNotImpl`. Another type's own slot may not (a `mappingproxy`'s forward to its
+  -- dict, a `ModuleSpec`'s `__eq__` reads the other operand's attributes, a dict view's set
+  -- operators take any iterable), so it stops with a gap.
   if !(← isUserObject self) && ((← isPlainUser other) || !(← isUserObject other)) then
+    if let some (.builtin b) ← PyPure.immView (← PyReads.classOf self) then
+      if !givesNotImpl b then
+        let cls := PyPure.imm (m := m) (.builtin b)
+        let ownSlot (n : String) : m Bool := do
+          let some f ← lookupType cls n | return false
+          return !((← PyPure.immView f) matches some (.descr .object _ _))
+        -- `object.__ne__` calls the type's own `__eq__`.
+        if (← ownSlot name) || (name == "__ne__" && (← ownSlot "__eq__")) then
+          PyPure.gap s!"the {name} of a {b.info.name} with a user object is not modelled yet"
     return none
   let t ← PyReads.classOf self
   let some f ← lookupType t name | return none

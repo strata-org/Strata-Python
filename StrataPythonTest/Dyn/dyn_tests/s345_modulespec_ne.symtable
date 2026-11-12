@@ -1,0 +1,14 @@
+module top
+  N: local (assigned, referenced)
+  builtins: local (imported, referenced)
+  print: global implicit (referenced)
+  s: local (assigned, referenced)
+  class N
+    builtins: global implicit (referenced)
+    cached: local (assigned)
+    has_location: local (assigned)
+    loader: local (assigned)
+    name: local (assigned)
+    origin: local (assigned)
+    submodule_search_locations: local (assigned)
+qualnames: N
