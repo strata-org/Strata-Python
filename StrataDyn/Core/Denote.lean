@@ -45,7 +45,7 @@ abbrev Constructors := String → List Type → Type
 def app (custom : Constructors) : String → List Type → Type
   | "bool", [] => Bool
   | "int", [] => Int
-  | "real", [] => Rat
+  | "real", [] => Strata.Util.Real
   | "string", [] => String
   | "arrow", [a, b] => a → b
   | name, args => custom name args
