@@ -498,6 +498,10 @@ s352_str_fold_subscript_forms | yes | a % format that CPython may fold into a st
 s338_mappingproxy_compare | yes |
 s339_modulespec_compare | yes |
 s345_modulespec_ne | yes |
+s354_iter_property | yes |
+s355_iter_property_getitem | yes |
+s356_method_descriptor_dunders | yes |
+s357_repr_property_raises | yes |
 s129_iter_builtins | yes |
 s130_iter_loops | yes |
 s131_dict_merge | yes |

@@ -1,0 +1,28 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  D: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  c: local (assigned, referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  x: local (assigned, referenced)
+  class A
+    __iter__: local (assigned)
+    property: global implicit (referenced)
+    function lambda
+      self: local (parameter)
+  class B
+    __iter__: local (assigned)
+    property: global implicit (referenced)
+    function __iter__
+      KeyError: global implicit (referenced)
+      self: local (parameter)
+  class D
+    __iter__: local (assigned)
+    property: global implicit (referenced)
+    function lambda
+      self: local (parameter)
+      function lambda
+        iter: global implicit (referenced)
+qualnames: A, A.<lambda>, B, B.__iter__, D, D.<lambda>, D.<lambda>.<locals>.<lambda>

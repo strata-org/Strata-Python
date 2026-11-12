@@ -1,0 +1,16 @@
+--- stdout 78
+TypeError 'A' object is not iterable
+TypeError 'B' object is not iterable
+7
+8
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+D = <class 'D'>
+__doc__ = None
+__name__ = '__main__'
+c = <class 'B'>
+x = 8

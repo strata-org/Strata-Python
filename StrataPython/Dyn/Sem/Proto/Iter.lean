@@ -92,9 +92,11 @@ when a built-in iterator ends. -/
 def raiseStop [PyReads m V] {α : Type} : m α :=
   PyReads.raiseNew (PyPure.imm (m := m) (.builtin .StopIteration)) #[] #[]
 
-/-- **`PyObject_GetIter(v)`**: the type's `__iter__`, called, and its result checked; `__iter__ =
-None` raises `TypeError`; with no `__iter__`, an object with `__getitem__` (other than a dict)
-gives an `iterator` over it. -/
+/-- **`PyObject_GetIter(v)`**: the type's `__iter__`, bound as `lookup_maybe_method` binds it
+(`bindMaybe`), called, and its result checked; `__iter__ = None`, or an `__iter__` that binds to
+`None` or raises while it binds, raises `TypeError` (the last stops with a gap on a class with
+`__getitem__`); with no `__iter__`, an object with `__getitem__` (other than a dict) gives an
+`iterator` over it. -/
 def getIter [PyCalls m V] (v : V) : m V := do
   let t ← PyReads.classOf v
   let notIterable : m V := do raiseBuiltin "TypeError" s!"'{← typeName v}' object is not iterable"
@@ -106,7 +108,14 @@ def getIter [PyCalls m V] (v : V) : m V := do
       -- Only `v`'s own type's `__iter__`: one bound from another type is `callFound`'s check.
       if !b.info.name.endsWith "iterator" && (← builtinBase? v) == some b then
         if let some it ← builtinIter? v then return it
-    let r ← callFound "__iter__" f v t #[] (← PyPure.allocDict)
+    -- `slot_tp_iter`: a `None` that the binding gives makes `v` not iterable; an exception while
+    -- it binds is cleared, and CPython then looks up `__getitem__`.
+    let some g ← bindMaybe f v t | do
+      if (← lookupType t "__getitem__").isSome then
+        PyPure.gap "an __iter__ whose __get__ raises, on a class with __getitem__, is not modelled yet"
+      notIterable
+    if (← PyPure.immView g) matches some .none then return ← notIterable
+    let r ← callSlotN dispatchDepth "__iter__" f t g (PyPure.imm (m := m) (.tuple #[])) (← PyPure.allocDict)
     if (← lookupType (← PyReads.classOf r) "__next__").isNone then
       raiseBuiltin "TypeError" s!"iter() returned non-iterator of type '{← typeName r}'"
     pure r

@@ -1,0 +1,14 @@
+--- stdout 246
+TypeError descriptor 'bit_length' for 'int' objects doesn't apply to a 'A' object
+TypeError descriptor 'bit_length' for 'int' objects doesn't apply to a 'B' object
+TypeError descriptor 'bit_length' for 'int' objects doesn't apply to a 'C' object
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>

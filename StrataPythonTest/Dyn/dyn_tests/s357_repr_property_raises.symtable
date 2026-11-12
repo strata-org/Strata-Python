@@ -1,0 +1,11 @@
+module top
+  A: local (assigned, referenced)
+  print: global implicit (referenced)
+  repr: global implicit (referenced)
+  class A
+    __repr__: local (assigned)
+    property: global implicit (referenced)
+    function __repr__
+      KeyError: global implicit (referenced)
+      self: local (parameter)
+qualnames: A, A.__repr__

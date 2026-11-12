@@ -1,0 +1,11 @@
+module
+  A: local (assigned, referenced)
+  print: global implicit (referenced)
+  repr: global implicit (referenced)
+  class A
+    __repr__: local (assigned)
+    property: global implicit (referenced)
+    function A.__repr__
+      params: self
+      self: local (parameter)
+      KeyError: global implicit (referenced)

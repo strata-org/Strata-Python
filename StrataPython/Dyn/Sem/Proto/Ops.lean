@@ -435,7 +435,7 @@ def trySlot [PyCalls m V] (self other : V) (name : String) (swallow : Bool := fa
   let t ← PyReads.classOf self
   let some f ← lookupType t name | return none
   if ← isSeqSlot f then return none
-  let g? ← if swallow then tryCatch (some <$> descrGetN dispatchDepth f (some self) t) fun _ => pure none
+  let g? ← if swallow then bindMaybe f self t
     else some <$> descrGetN dispatchDepth f (some self) t
   let some g := g? | return none
   let r ← callSlotN dispatchDepth name f t g (PyPure.imm (m := m) (.tuple #[other])) (← PyPure.allocDict)

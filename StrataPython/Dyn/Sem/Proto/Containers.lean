@@ -282,9 +282,8 @@ def hashN [PyCalls m V] : Nat → V → m Hash
           -- `slot_tp_hash`: an exception raised while the dunder is bound makes the value
           -- unhashable (`PyObject_HashNotImplemented`).
           let t ← PyReads.classOf v
-          let g ← tryCatch (descrGetN dispatchDepth f (some v) t) fun _ => do
-            raiseBuiltin "TypeError" s!"unhashable type: '{← typeName v}'"
-          -- `lookup_maybe_method` binds first: a `__get__` that gives `None` makes it unhashable.
+          let some g ← bindMaybe f v t | raiseBuiltin "TypeError" s!"unhashable type: '{← typeName v}'"
+          -- A `__get__` that gives `None` makes it unhashable too.
           if (← PyPure.immView g) matches some .none then
             raiseBuiltin "TypeError" s!"unhashable type: '{← typeName v}'"
           let r ← callN dispatchDepth g (PyPure.imm (m := m) (.tuple #[])) (← PyPure.allocDict)

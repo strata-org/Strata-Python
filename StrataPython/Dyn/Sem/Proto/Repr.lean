@@ -118,7 +118,11 @@ def reprCore [PyCalls m V] : Nat → V → m V
     if let some (.descr b "__repr__" _) ← PyPure.immView f then
       if ← builtinIn t b then
         if let some s ← builtinRepr n b v then return strValue (m := m) s
-    callFound "__repr__" f v t #[] (← PyPure.allocDict)
+    -- `slot_tp_repr`: an exception while the dunder binds is cleared, and CPython gives the
+    -- default `repr`, which shows the address.
+    let some g ← bindMaybe f v t |
+      PyPure.gap "the default repr of an object whose __repr__ raises while it binds, which shows its address"
+    callSlotN dispatchDepth "__repr__" f t g (PyPure.imm (m := m) (.tuple #[])) (← PyPure.allocDict)
 
 /-- `repr` of an immediate. -/
 def immRepr [PyCalls m V] : Nat → Imm V → m String

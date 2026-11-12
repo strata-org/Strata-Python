@@ -1,0 +1,16 @@
+module top
+  B: local (assigned, referenced)
+  print: global implicit (referenced)
+  x: local (assigned, referenced)
+  class B
+    __getitem__: local (assigned)
+    __iter__: local (assigned)
+    property: global implicit (referenced)
+    function __iter__
+      KeyError: global implicit (referenced)
+      self: local (parameter)
+    function __getitem__
+      IndexError: global implicit (referenced)
+      i: local (parameter, referenced)
+      self: local (parameter)
+qualnames: B, B.__getitem__, B.__iter__

@@ -797,6 +797,26 @@ def callSlotN [PyCalls m V] (n : Nat) (name : String) (f t g args kwargs : V) : 
   if ← isOwnSlot name f t then PyCalls.callBuiltin g args kwargs
   else callN n g args kwargs
 
+/-- Whether `f`, an attribute found on a type, is one that CPython's `lookup_maybe_method` calls
+unbound, since its type has `Py_TPFLAGS_METHOD_DESCRIPTOR`: a Python function, a method
+descriptor or a slot wrapper, built in or native. -/
+def isMethodDescriptor [PyReads m V] (f : V) : m Bool := do
+  match ← PyPure.immView f with
+  | some (.descr _ _ .method) | some (.descr _ _ .slotWrapper) => pure true
+  | some _ => pure false
+  | none => match ← PyReads.objView f with
+    | some (.func ..) => pure true
+    | some (.native nf) => pure (nf.kind matches .function | .methodDescriptor | .wrapperDescriptor)
+    | _ => pure false
+
+/-- The special method `f`, found on the type `t` of `self`, bound as `lookup_maybe_method` binds
+it: a method descriptor (`isMethodDescriptor`) as `descrGetN` binds it, whose errors CPython
+raises when it calls it; anything else by its `__get__`, where an exception gives `none`, the
+`NULL` that each caller handles as CPython does. -/
+def bindMaybe [PyCalls m V] (f self t : V) : m (Option V) := do
+  if ← isMethodDescriptor f then return some (← descrGetN dispatchDepth f (some self) t)
+  tryCatch (some <$> descrGetN dispatchDepth f (some self) t) fun _ => pure none
+
 /-- The dunder `name`, `f`, found on the type `t` of `self`, called with `args`: bound by its
 `__get__` first (a function binds `self`, as CPython's `lookup_maybe_method` and
 `vectorcall_unbound` do; a value without `__get__` is called as it is), then called as the slot
