@@ -83,7 +83,7 @@ private def mkModeBoolFunc (name : String) (mode : MatchMode) :
       output := mty[bool],
       attr := #[.evalIfValue 0],
       concreteEval := some
-        (fun _ args => match args with
+        (fun _ _ args => match args with
           | [LExpr.strConst () pattern, sExpr] =>
             let (regexExpr, maybe_err) := pythonRegexToCore pattern mode
             match maybe_err with
@@ -117,7 +117,7 @@ private def mkRePatternFunc (name : String) (output : LMonoTy)
       output := output,
       attr := #[.evalIfValue 0],
       concreteEval := some
-        (fun _ args => match args with
+        (fun _ _ args => match args with
           | [LExpr.strConst () s] => .some (eval (rePatternErrorMsg? s))
           | _ => .none)
       }
@@ -146,7 +146,7 @@ def intPowFunc : LFunc Core.CoreLParams :=
       inputs := [("base", mty[int]), ("exp", mty[int])],
       output := mty[int],
       concreteEval := some
-        (fun md args => match args with
+        (fun md _ args => match args with
           | [b, e] => match LExpr.denoteInt b, LExpr.denoteInt e with
             | some bv, some ev =>
               if 0 ≤ ev ∧ ev ≤ maxPowExponent then
@@ -175,7 +175,7 @@ def intRshiftFunc : LFunc Core.CoreLParams :=
       inputs := [("x", mty[int]), ("n", mty[int])],
       output := mty[int],
       concreteEval := some
-        (fun md args => match args with
+        (fun md _ args => match args with
           | [x, n] => match LExpr.denoteInt x, LExpr.denoteInt n with
             | some xv, some nv =>
               if 0 ≤ nv ∧ nv ≤ maxPowExponent then
@@ -213,7 +213,7 @@ def intBandFunc : LFunc Core.CoreLParams :=
       typeArgs := [],
       inputs := [("x", mty[int]), ("y", mty[int])],
       output := mty[int],
-      concreteEval := some (fun md args => foldNonNegBinop md args Nat.land)
+      concreteEval := some (fun md _ args => foldNonNegBinop md args Nat.land)
       }
 
 def intBorFunc : LFunc Core.CoreLParams :=
@@ -221,7 +221,7 @@ def intBorFunc : LFunc Core.CoreLParams :=
       typeArgs := [],
       inputs := [("x", mty[int]), ("y", mty[int])],
       output := mty[int],
-      concreteEval := some (fun md args => foldNonNegBinop md args Nat.lor)
+      concreteEval := some (fun md _ args => foldNonNegBinop md args Nat.lor)
       }
 
 def intBxorFunc : LFunc Core.CoreLParams :=
@@ -229,7 +229,7 @@ def intBxorFunc : LFunc Core.CoreLParams :=
       typeArgs := [],
       inputs := [("x", mty[int]), ("y", mty[int])],
       output := mty[int],
-      concreteEval := some (fun md args => foldNonNegBinop md args Nat.xor)
+      concreteEval := some (fun md _ args => foldNonNegBinop md args Nat.xor)
       }
 
 def RuntimeFactory : Factory Core.CoreLParams := .ofArray
