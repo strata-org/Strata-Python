@@ -1,0 +1,171 @@
+-- unsupported: a % format that CPython may fold into a str constant is not supported at 6:18-6:38
+-- unsupported: a % format that CPython may fold into a str constant is not supported at 6:48-6:67
+-- unsupported: a % format that CPython may fold into a str constant is not supported at 6:77-6:98
+-- unsupported: a % format that CPython may fold into a str constant is not supported at 7:18-7:40
+-- unsupported: a % format that CPython may fold into a str constant is not supported at 7:50-7:67
+-- unsupported: a % format that CPython may fold into a str constant is not supported at 7:77-7:93
+-- unsupported: a % format that CPython may fold into a str constant is not supported at 8:18-8:41
+module s353_str_fold_overreject {
+  func @|s353_str_fold_overreject.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s353_str_fold_overreject")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s353_str_fold_overreject", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s353_str_fold_overreject", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %int.0 : py.Value = py.intLit(3)
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("s353_str_fold_overreject", "x")
+      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@|s353_str_fold_overreject.<lambda>|, "<lambda>", "s353_str_fold_overreject")
+      %clo.1 : py.Value = py.mkClosure[[]](@|s353_str_fold_overreject.<lambda>.1|, "<lambda>", "s353_str_fold_overreject")
+      %clo.2 : py.Value = py.mkClosure[[]](@|s353_str_fold_overreject.<lambda>.2|, "<lambda>", "s353_str_fold_overreject")
+      %clo.3 : py.Value = py.mkClosure[[]](@|s353_str_fold_overreject.<lambda>.3|, "<lambda>", "s353_str_fold_overreject")
+      %clo.4 : py.Value = py.mkClosure[[]](@|s353_str_fold_overreject.<lambda>.4|, "<lambda>", "s353_str_fold_overreject")
+      %clo.5 : py.Value = py.mkClosure[[]](@|s353_str_fold_overreject.<lambda>.5|, "<lambda>", "s353_str_fold_overreject")
+      %clo.6 : py.Value = py.mkClosure[[]](@|s353_str_fold_overreject.<lambda>.6|, "<lambda>", "s353_str_fold_overreject")
+      %list.0 : py.Value = py.mkList(%clo.0, %clo.1, %clo.2, %clo.3, %clo.4, %clo.5, %clo.6)
+      %iter.0 : py.Value = py.getIter(%list.0) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("s353_str_fold_overreject", "f")
+      %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %item.0)
+      %f.0 : py.Value = py.loadGlobal("s353_str_fold_overreject", "f") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%f.0, %tuple.0, %kwargs.0) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %Exception.0 : py.Value = py.loadGlobal("s353_str_fold_overreject", "Exception") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %Exception.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s353_str_fold_overreject", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("s353_str_fold_overreject", "print") ^clear.0()
+      %type.0 : py.Value = py.loadGlobal("s353_str_fold_overreject", "type") ^clear.0()
+      %e.0 : py.Value = py.loadGlobal("s353_str_fold_overreject", "e") ^clear.0()
+      %tuple.1 : py.Value = py.mkTuple(%e.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%type.0, %tuple.1, %kwargs.1) ^clear.0()
+      %__name__.0 : py.Value = py.attr(%call.1, "__name__") ^clear.0()
+      %e.1 : py.Value = py.loadGlobal("s353_str_fold_overreject", "e") ^clear.0()
+      %tuple.2 : py.Value = py.mkTuple(%__name__.0, %e.1)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.2, %kwargs.2) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s353_str_fold_overreject", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.2)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.3 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s353_str_fold_overreject", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.3)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      jump ^head.0()
+    stop.0(%exc.3 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.3)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.3)
+    exit.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
+  }
+  func @|s353_str_fold_overreject.<lambda>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %str.0 : py.Value = py.strLit("a % format that CPython may fold into a str constant")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s353_str_fold_overreject.<lambda>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %str.0 : py.Value = py.strLit("a % format that CPython may fold into a str constant")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s353_str_fold_overreject.<lambda>.2|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %str.0 : py.Value = py.strLit("a % format that CPython may fold into a str constant")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s353_str_fold_overreject.<lambda>.3|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %str.0 : py.Value = py.strLit("a % format that CPython may fold into a str constant")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s353_str_fold_overreject.<lambda>.4|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %str.0 : py.Value = py.strLit("a % format that CPython may fold into a str constant")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s353_str_fold_overreject.<lambda>.5|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %str.0 : py.Value = py.strLit("a % format that CPython may fold into a str constant")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s353_str_fold_overreject.<lambda>.6|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %str.0 : py.Value = py.strLit("a % format that CPython may fold into a str constant")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

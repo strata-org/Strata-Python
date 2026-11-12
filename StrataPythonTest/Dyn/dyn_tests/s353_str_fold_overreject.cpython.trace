@@ -1,0 +1,16 @@
+--- stdout 379
+TypeError unsupported operand type(s) for %: 'tuple' and 'tuple'
+TypeError unsupported operand type(s) for %: 'int' and 'tuple'
+TypeError unsupported operand type(s) for %: 'int' and 'tuple'
+TypeError unsupported operand type(s) for %: 'int' and 'tuple'
+IndexError tuple index out of range
+TypeError can only concatenate str (not "int") to str
+ZeroDivisionError division by zero
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+x = 3

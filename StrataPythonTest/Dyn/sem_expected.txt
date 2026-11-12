@@ -456,6 +456,7 @@ s34_container_dunders | agree
 s350_str_fold_subscript | gap | the translator does not support a % format that CPython may fold into a str constant
 s351_str_leaf_mod_tuple | agree
 s352_str_fold_subscript_forms | gap | the translator does not support a % format that CPython may fold into a str constant
+s353_str_fold_overreject | gap | the translator does not support a % format that CPython may fold into a str constant
 s354_iter_property | agree
 s355_iter_property_getitem | gap | an __iter__ whose __get__ raises, on a class with __getitem__, is not modelled yet
 s356_method_descriptor_dunders | agree

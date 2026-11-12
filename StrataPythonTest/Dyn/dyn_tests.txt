@@ -495,6 +495,7 @@ s349_property_dict_eq | yes |
 s350_str_fold_subscript | yes | a % format that CPython may fold into a str constant
 s351_str_leaf_mod_tuple | yes |
 s352_str_fold_subscript_forms | yes | a % format that CPython may fold into a str constant
+s353_str_fold_overreject | yes | a % format that CPython may fold into a str constant
 s338_mappingproxy_compare | yes |
 s339_modulespec_compare | yes |
 s345_modulespec_ne | yes |
