@@ -109,6 +109,24 @@ def typeName [PyReads m V] (v : V) : m String := do
 def argTypeName [PyReads m V] (v : V) : m String := do
   if (← PyPure.immView v) matches some .none then pure "None" else typeName v
 
+/-- `v` as a Lean `str`, if it is one. -/
+def str? [PyPure m V] (v : V) : m (Option String) := do
+  match ← PyPure.immView v with
+  | some (.str s) => pure (some s.s)
+  | _ => pure none
+
+/-- `v` as a Lean `str` if it is a `str`, and `none` if it is neither a `str` nor an instance of a
+subclass of `str`.  An instance of a subclass of `str`, which CPython accepts where it asks for a
+`str`, stops with a gap that names `what`: the class's MRO holds `str`, or `v` holds a built-in
+`str` part. -/
+def strArg? [PyReads m V] (what : String) (v : V) : m (Option String) := do
+  if let some s ← str? v then return some s
+  let mro := (← mroOf (← PyReads.classOf v)).getD #[]
+  if (← PyReads.strView v).isSome ||
+      (← mro.anyM fun c => return (← PyPure.immView c) matches some (.builtin .str)) then
+    PyPure.gap s!"{what} that is an instance of a subclass of str is not modelled yet"
+  return none
+
 /-- `TypeError` if a key of the kwargs dict `kwargs` is not a `str`, as CPython's
 `_PyStack_UnpackDict` raises it; a key that is an instance of a subclass of `str`, which CPython
 accepts, stops with a gap. -/
@@ -118,9 +136,7 @@ def checkKwargs [PyReads m V] (kwargs : V) : m Unit := do
     | some (.str _) => pure ()
     | some _ => raiseBuiltin "TypeError" "keywords must be strings"
     | none => do
-      let mro := (← mroOf (← PyReads.classOf k)).getD #[]
-      if ← mro.anyM fun c => return (← PyPure.immView c) matches some (.builtin .str) then
-        PyPure.gap "a keyword that is an instance of a subclass of str is not modelled yet"
+      discard <| strArg? "a keyword" k
       raiseBuiltin "TypeError" "keywords must be strings"
 
 /-- A gap when the kwargs dict `kwargs` has a key that isn't a `str` and the callee `f` is neither
@@ -346,12 +362,6 @@ def isAttributeError [PyReads m V] (x : V) : m Bool := do
 def tupleItems [PyPure m V] (v : V) : m (Array V) := do
   let some (.tuple xs) ← PyPure.immView v | PyPure.gap "a value that is not a tuple"
   pure xs
-
-/-- `v` as a Lean `str`, if it is one. -/
-def str? [PyPure m V] (v : V) : m (Option String) := do
-  match ← PyPure.immView v with
-  | some (.str s) => pure (some s.s)
-  | _ => pure none
 
 /-- The `self` of a call of the method `name` of the built-in type `t` through its descriptor
 (`list.append(l, x)`) or its slot wrapper (`int.__add__(a, b)`, when `wrapper`): the first

@@ -69,6 +69,8 @@ public environment PyT extends Py where
   insn dictWalkSub (k : base.Int) (^err (exc : Value)) : Value
   insn nativeWrite (k : base.Int) (^err (exc : Value)) : Value
   insn immutableWrite (^err (exc : Value)) : Value
+  insn strSubArg (k : base.Int) (^err (exc : Value)) : Value
+  insn buildClassName (f : Value) (k : base.Int) (^err (exc : Value)) : Value
   insn dictOrSub (k : base.Int) (^err (exc : Value)) : Value
   insn kwargsStrSub (^err (exc : Value)) : Value
   insn bindCase (i : base.Int) (^err (exc : Value)) : Value
@@ -588,6 +590,65 @@ returns the list's elements after the write. -/
     discard <| machinesStart 0 .none (.tuple #[]) (← PyPure.allocDict)
     pure .none)
 
+/-- An instance of a subclass of `str` where CPython asks for a `str` and accepts the instance, for
+a class `S(str)` and `q = S("C")`: `type("C", (), ns)` with `q` as the `__qualname__` in `ns`
+(`0`), with an instance of a class `M(Quitter, str)` instead, whose MRO starts with another
+built-in type (`1`), with `q` as the name (`3`), as an item of `__slots__` (`4`) or as the
+`__module__` (`5`); `object.__setattr__` (`6`), `object.__delattr__` (`7`) and
+`object.__getattribute__` (`8`) with `q` as the name; the `repr` of a class whose `__module__` is
+`q` (`9`); and a keyword `q` of a built-in's call (`10`). The other side of the check: an
+instance of a class `B(bytes)` as the `__qualname__` (`2`), which CPython rejects. -/
+@[dyn_sem PyT.strSubArg, expose] public def strSubArg (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let q ← PyReads.allocInstance (← subclassOf "S" .str) (.str (.ofString "C")) #[] #[]
+    let arg ← match k with
+      | 1 => do
+        let mixin ← PyPure.allocObj (.builtin .type) (.cls
+          { name := "M", qualname := "M", «module» := "m",
+            bases := #[.builtin .«_sitebuiltins.Quitter», .builtin .str],
+            mroTail := #[.builtin .«_sitebuiltins.Quitter», .builtin .str, .builtin .object],
+            ns := ← PyPure.allocDict, solidBase := .builtin .str })
+        PyReads.allocInstance mixin (.str (.ofString "C")) #[] #[]
+      | 2 => PyReads.allocInstance (← subclassOf "B" .bytes) (.bytes #[67]) #[] #[]
+      | _ => pure q
+    let ns ← PyPure.allocDict
+    let setNs (n : String) (v : Value) : PyM σ .writes false Unit :=
+      PyWrites.dictSet ns (.ofString n) v none fun _ => pure false
+    let newClass (name : Value) : PyM σ .writes false Value := do
+      Builtins.typeNew (.builtin .type) (.tuple #[.builtin .type, name, .tuple #[], ns])
+        (← PyPure.allocDict)
+    match k with
+    | 0 | 1 | 2 => setNs "__module__" (.ofString "m"); setNs "__qualname__" arg; newClass (.ofString "C")
+    | 3 => setNs "__module__" (.ofString "m"); newClass q
+    | 4 => setNs "__module__" (.ofString "m"); setNs "__slots__" (.tuple #[q]); newClass (.ofString "C")
+    | 5 => setNs "__module__" q; newClass (.ofString "C")
+    | 6 => Builtins.objectSetattr q (.tuple #[q, .int 1]) (← PyPure.allocDict)
+    | 7 => Builtins.objectDelattr q (.tuple #[q]) (← PyPure.allocDict)
+    | 8 => Builtins.objectGetattribute q (.tuple #[q]) (← PyPure.allocDict)
+    | 9 => do
+      setNs "__module__" q
+      let c ← PyPure.allocObj (.builtin .type) (.cls
+        { name := "C", qualname := "C", «module» := "m", bases := #[.builtin .object],
+          mroTail := #[.builtin .object], ns, solidBase := .builtin .object })
+      pure (Value.ofString (← Proto.typeRepr c))
+    | _ => do
+      let kw ← PyPure.allocDict
+      PyWrites.dictSet kw q (.int 1) (some (.exact 7)) fun _ => pure false
+      pure (Value.int (← Builtins.kwPairs kw).size)
+    : PyM σ .writes false Value)
+
+/-- `__build_class__(f, name)` for a class body `f`, with an instance of a class `S(str)` as the
+name (`0`), which CPython accepts, and with `3` (`1`), which it rejects. -/
+@[dyn_sem PyT.buildClassName, expose] public def buildClassName (f : Value) (k : Int)
+    (err : Target E [Value]) : Sem ε E Value :=
+  runRule err #[] (do
+    let name ← if k == 0 then
+        PyReads.allocInstance (← subclassOf "S" .str) (.str (.ofString "C")) #[] #[]
+      else pure (Value.int 3)
+    Builtins.buildClass .none (.tuple #[f, name]) (← PyPure.allocDict)
+    : PyM σ .writes false Value)
+
 /-- The operators on instances of classes `L(list)`, `T(tuple)` and `D(dict)` with no dunders of
 their own, which run the built-in type's slots on the built-in part: for `l = L([1, 2])`,
 `t = T((1, 2))` and `d = D({1: 'a'})`, the results of `(l + [3])[2]`, `l == [1, 2]`, `bool(l)`,
@@ -1026,7 +1087,7 @@ def ptEffect : String → Effects.Level
   | "pt.callNew" => .calls
   | "pt.raiseIn" => .writes
   | "pt.classOfNew" | "pt.dictWalkSub" => .reads
-  | "pt.nativeWrite" | "pt.immutableWrite" | "pt.dictOrSub" | "pt.kwargsStrSub" => .writes
+  | "pt.nativeWrite" | "pt.immutableWrite" | "pt.strSubArg" | "pt.buildClassName" | "pt.dictOrSub" | "pt.kwargsStrSub" => .writes
   | "pt.probeCase" => .reads
   | "pt.requireIn" => .writes
   | "pt.importGaps" => .writes
@@ -1309,6 +1370,78 @@ info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin
 -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.immutableWrite() ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a class __qualname__ that is an instance of a subclass of str is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSubArg(0) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a class __qualname__ that is an instance of a subclass of str is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSubArg(1) ^err.0()"
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "type __qualname__ must be a str, not B", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSubArg(2) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a class name that is an instance of a subclass of str is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSubArg(3) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a __slots__ item that is an instance of a subclass of str is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSubArg(4) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a class __module__ that is an instance of a subclass of str is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSubArg(5) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "an attribute name that is an instance of a subclass of str is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSubArg(6) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "an attribute name that is an instance of a subclass of str is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSubArg(7) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "an attribute name that is an instance of a subclass of str is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSubArg(8) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a class __module__ that is an instance of a subclass of str is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSubArg(9) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a keyword that is an instance of a subclass of str is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSubArg(10) ^err.0()"
+
+/-- A module whose `main` runs `pt.buildClassName` with a class body and the case `k`. -/
+def buildClassModule (k : Nat) : String := s!"module m \{
+  func @m.body(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) \{
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %n.0 : py.Value = py.intLit(0)
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%n.0)
+      ret(%r.0)
+  }
+  func @m.main() -> py.Value \{
+    entry.0():
+      %f.0 : py.Value = py.mkClosure[[]](@m.body, \"<body>\", \"m\")
+      %v.0 : py.Value = pt.buildClassName(%f.0, {k}) ^err.0()
+      ret(%v.0)
+    err.0(%e.0 : py.Value):
+      ret(%e.0)
+  }
+}"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a class name that is an instance of a subclass of str is not modelled yet" -/
+#guard_msgs in
+#eval runModule' (buildClassModule 0)
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "__build_class__: name is not a string", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval runText (buildClassModule 1) true
 
 /-- info: fault: Strata.Dyn.Exec.Fault.gap "a | of a dict whose class overrides how its entries are read is not modelled yet" -/
 #guard_msgs in

@@ -80,10 +80,10 @@ section
 variable {m : Type → Type 1} {V : Type}
 
 /-- The `str` keys of the kwargs dict `kw` with their values, in order; a key that is not a `str`
-raises CPython's `TypeError`. -/
+raises CPython's `TypeError`, and an instance of a subclass of `str` stops with a gap. -/
 def kwPairs [PyReads m V] (kw : V) : m (Array (String × V)) := do
   (← PyReads.dictEntries kw).mapM fun (k, v, _) => do
-    let some s ← str? k | raiseBuiltin "TypeError" "keywords must be strings"
+    let some s ← strArg? "a keyword" k | raiseBuiltin "TypeError" "keywords must be strings"
     pure (s, v)
 
 /-- `_PyArg_UnpackKeywords`: positional arguments `xs` and keyword arguments `kws` bound to the

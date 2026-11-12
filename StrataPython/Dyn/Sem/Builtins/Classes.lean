@@ -198,7 +198,7 @@ def typeNew [PyWrites m V] [PyNew m V] (_self args kwargs : V) : m V := do
   let #[mcls, nameV, basesV, ns0] := xs |
     if xs.size == 2 then PyPure.gap "type.__new__ with one argument is not modelled yet"
     else raiseBuiltin "TypeError" s!"type.__new__() takes exactly 3 arguments ({xs.size - 1} given)"
-  let some name ← str? nameV |
+  let some name ← strArg? "a class name" nameV |
     raiseBuiltin "TypeError" s!"type.__new__() argument 1 must be str, not {← argTypeName nameV}"
   let some (.tuple bases0) ← PyPure.immView basesV |
     raiseBuiltin "TypeError" s!"type.__new__() argument 2 must be tuple, not {← argTypeName basesV}"
@@ -261,7 +261,7 @@ def typeNew [PyWrites m V] [PyNew m V] (_self args kwargs : V) : m V := do
       let mut names : Array String := #[]
       let mut addDict := false
       for x in items do
-        let some n ← str? x |
+        let some n ← strArg? "a __slots__ item" x |
           raiseBuiltin "TypeError" s!"__slots__ items must be strings, not '{← typeName x}'"
         match asciiIdentifier? n with
         | some true => pure ()
@@ -292,7 +292,7 @@ def typeNew [PyWrites m V] [PyNew m V] (_self args kwargs : V) : m V := do
           (if wrap then .staticmethod (some f) else .classmethod (some f))
         PyWrites.dictSet ns (strKey (m := m) n) w none fun _ => pure false
   let qualname ← match ← dictFindStr ns "__qualname__" with
-    | some q => match ← str? q with
+    | some q => match ← strArg? "a class __qualname__" q with
       | some s => pure s
       | none => raiseBuiltin "TypeError" s!"type __qualname__ must be a str, not {← typeName q}"
     | none => pure name
@@ -301,7 +301,7 @@ def typeNew [PyWrites m V] [PyNew m V] (_self args kwargs : V) : m V := do
   let tail ← c3Tail bases
   let solid ← if slots.isEmpty then solidBaseOf best else pure (PyPure.imm (m := m) .none)
   let modName ← match ← dictFindStr ns "__module__" with
-    | some mv => pure ((← str? mv).getD "")
+    | some mv => pure ((← strArg? "a class __module__" mv).getD "")
     | none => pure ""
   let cls ← PyPure.allocObj mcls <| .cls
     { name, qualname, «module» := modName, bases, mroTail := tail, ns, solidBase := solid,
@@ -360,7 +360,7 @@ def buildClass [PyWrites m V] [PyNew m V] (_self args kwargs : V) : m V := do
     -- takes it as its argument instead, and any other function stops with a gap.
     if !body then PyPure.gap "__build_class__ of a function that is not a class body is not modelled yet"
   | _ => raiseBuiltin "TypeError" "__build_class__: func must be a function"
-  if (← str? nameV).isNone then raiseBuiltin "TypeError" "__build_class__: name is not a string"
+  if (← strArg? "a class name" nameV).isNone then raiseBuiltin "TypeError" "__build_class__: name is not a string"
   let origBases := xs.extract 2 xs.size
   -- `__mro_entries__` of the bases that are not classes.
   let mut bases := #[]
@@ -493,7 +493,7 @@ def objectSetattr [PyWrites m V] (self args kwargs : V) : m V := do
   -- to write.
   if ← isType self then
     raiseBuiltin "TypeError" s!"can't apply this __setattr__ to {← classTpName (← PyReads.classOf self)} object"
-  let some name ← str? nameV |
+  let some name ← strArg? "an attribute name" nameV |
     raiseBuiltin "TypeError" s!"attribute name must be string, not '{← typeName nameV}'"
   genericSetAttr self (← PyReads.classOf self) name (some val)
   pure (PyPure.imm (m := m) .none)
@@ -507,7 +507,7 @@ def objectDelattr [PyWrites m V] (self args kwargs : V) : m V := do
   -- CPython's `hackcheck`, before the name is checked.
   if ← isType self then
     raiseBuiltin "TypeError" s!"can't apply this __delattr__ to {← classTpName (← PyReads.classOf self)} object"
-  let some name ← str? nameV |
+  let some name ← strArg? "an attribute name" nameV |
     raiseBuiltin "TypeError" s!"attribute name must be string, not '{← typeName nameV}'"
   genericSetAttr self (← PyReads.classOf self) name none
   pure (PyPure.imm (m := m) .none)
@@ -518,7 +518,7 @@ def objectGetattribute [PyWrites m V] (self args kwargs : V) : m V := do
     raiseBuiltin "TypeError" "wrapper __getattribute__() takes no keyword arguments"
   let xs ← tupleItems args
   let #[nameV] := xs | raiseBuiltin "TypeError" s!"expected 1 argument, got {xs.size}"
-  let some name ← str? nameV |
+  let some name ← strArg? "an attribute name" nameV |
     raiseBuiltin "TypeError" s!"attribute name must be string, not '{← typeName nameV}'"
   -- On a class, `PyObject_GenericGetAttr` reads the class's own namespace as an instance dict,
   -- without its MRO, which the model doesn't follow.

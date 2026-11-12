@@ -61,7 +61,7 @@ def typeRepr [PyReads m V] (c : V) : m String := do
     | some cd =>
       let tpName := cd.tpName.getD cd.name
       let some mv ← dictFindStr cd.ns "__module__" | return s!"<class '{tpName}'>"
-      match ← str? mv with
+      match ← strArg? "a class __module__" mv with
       | some mo => return if mo == "builtins" then s!"<class '{tpName}'>" else s!"<class '{mo}.{cd.qualname}'>"
       | none => return s!"<class '{tpName}'>"
     | none => PyPure.gap "the repr of a value that is not a class"
