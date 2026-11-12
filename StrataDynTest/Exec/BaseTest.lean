@@ -26,8 +26,8 @@ set_option autoImplicit false
 rules.  The base's own table, `BaseSem`, runs programs that use nothing but the base: its
 control flow through `Terminator.ret`, `.jump`, `.branch` and `.unreachable`, `Except` and
 `Unit` and their case instructions, cells, and calls through typed code pointers.  `base.cellLoc`
-stops with a gap.  A run ignores a function's contract and the module's ghosts, and rejects a
-module with an extern function.
+stops with a gap.  A run ignores a function's contract and the module's ghosts, skips its loop
+invariants without running their regions, and rejects a module with an extern function.
 -/
 
 namespace Strata.Dyn.ExecTest.BaseTest
@@ -259,6 +259,33 @@ private def runMain (text : String) : IO Unit := do
 /-- info: some 7 -/
 #guard_msgs in
 #eval runMain contractText
+
+/-- A loop that runs once, whose invariant would stop with `Fault.failure` if it ran.  Control
+enters the head twice, and `@m.main` returns `7`. -/
+private def invariantText : String := "module m {
+  func @m.main() -> base.Int {
+    entry.0():
+      %c.0 : base.Ref(base.Bool) = base.refNew[base.Bool](true)
+      jump ^head.0(0)
+    head.0(%i.0 : base.Int):
+      %inv.0 : base.Unit = base.loopInvariant {
+        inv.0():
+          unreachable
+      }
+      %b.0 : base.Bool = base.refGet[base.Bool](%c.0)
+      branch(%b.0) ^body.0() ^done.0()
+    body.0():
+      %u.0 : base.Unit = base.refSet[base.Bool](%c.0, false)
+      jump ^head.0(7)
+    done.0():
+      ret(%i.0)
+  }
+}
+"
+
+/-- info: some 7 -/
+#guard_msgs in
+#eval runMain invariantText
 
 /-- info: invalid: m.e: an extern function does not run yet -/
 #guard_msgs in

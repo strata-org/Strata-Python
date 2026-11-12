@@ -36,7 +36,8 @@ share its function's slots, and so does every region body.
 Operation and type names are looked up in the model's `NameMap`s, 2-3 trees on `Name.key`
 that the table generator builds, so a link computes the keys of the names its module uses and
 compares `Nat`s.  An operation the model lacks is a missing rule; linking reports all of them
-at once.
+at once.  A loop invariant (`base.loopInvariant`) links as the `()` that its rule returns, and
+its region is not linked: a run never runs it, so the operations in it need no rule.
 
 Linking also records each block's **scope**: the values defined outside the block that are
 bound, with their tags, whenever it is entered.  A block's scope is what is in scope at its
@@ -568,9 +569,11 @@ def linkInsns (labels : LabelMap Nat) (Γ : Ctx) :
 def linkInsn (labels : LabelMap Nat) (Γ : Ctx) :
     Instruction env α → LinkM M (LInsn M.at)
   | .const _ d c => linkConst d.id.id d.type c
-  | .apply _ d r typeArgs args succs ⟨regions⟩ => do
+  | ins@(.apply _ d r typeArgs args succs ⟨regions⟩) => do
     let args := args.toList.map (·.id)
     let succs ← succs.toList.mapM (linkSite labels)
+    -- A loop invariant links as `()`, without its region (see the module doc).
+    if ins.isLoopInvariant then return .const d.id.id ⟨M.unit, M.unitVal Run⟩
     match M.index.find? r.name with
     | none => do
       addMissing r.name

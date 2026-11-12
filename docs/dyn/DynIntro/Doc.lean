@@ -268,7 +268,7 @@ Every language extends the _base_. The base provides:
 * refs: `refNew` makes a cell and returns a ref to it, and `refGet` and `refSet` read and write the cell a ref points to;
 * the eliminators `Unit.case` and `Except.case`;
 * the terminators `jump`, `branch` and `unreachable`;
-* for contracts, `old`, which reads the state at the call in an `ensures` clause, and `cellLoc`, the location of a cell.
+* for contracts, `old`, which reads the state at the call in an `ensures` clause, `loopInvariant`, a loop invariant at the start of a block, and `cellLoc`, the location of a cell.
 
 Here is the whole While environment, verbatim. It is a template for a small language: two datatypes, arithmetic, a raising division, instructions that reach the world, an abbreviation for refs to integer cells, and two region-owning instructions.
 
@@ -533,7 +533,7 @@ A rule reaches state through _capabilities_, instance arguments that the generat
 variable {σ : Type} [Store σ] [Decode σ] [Lang σ ε]
 ```
 
-Constructors, case instructions, `base.refNew`, `refGet`, `refSet` and `callCode` take no rules: the table derives the first two, and the machine implements the rest. The base's terminators have rules in `StrataDyn/Exec/Base.lean`, which every language inherits. So do `base.old` and `base.cellLoc`, whose rules report a gap, since a run ignores contracts. One command checks coverage, and another generates the table that modules run against:
+Constructors, case instructions, `base.refNew`, `refGet`, `refSet` and `callCode` take no rules: the table derives the first two, and the machine implements the rest. The base's terminators have rules in `StrataDyn/Exec/Base.lean`, which every language inherits. So do `base.old` and `base.cellLoc`, whose rules report a gap, and `base.loopInvariant`, whose rule does nothing, since a run ignores contracts. One command checks coverage, and another generates the table that modules run against:
 
 ```leantext "Coverage and the table (StrataDyn/Examples/While/Env.lean)"
 #dyn_coverage While (complete)
@@ -664,6 +664,7 @@ In `mean`, `while.div(%s.0, %d.1) ^catch.0(%n.1, %d.1, %s.0, %i.0)` binds four o
 * In a clause's or a frame region's own blocks, a failure goes to a _failure block_, whose instructions are only constants. In a `requires` clause it goes to a block that gives `false`, or that ends in `unreachable`; in an `ensures` clause, to one that gives `false`, or `true` if the clause is `free`, or that ends in `unreachable`; in a frame region, to one that ends in `unreachable`. A failure in a region nested in them goes to a block that ends in `unreachable`, or, if the region may propagate, to one that passes it on with `base.error`. Every block of them ends in control flow, and none has a cycle.
 * Only `ensures` clauses apply `base.old`, and an `old` region sees, from outside it, only the parameters, the clause's constants and the parameters of the regions that enclose it.
 * The body names no ghost: only the contract does.
+* A block's loop invariants come before its other instructions, nothing uses their results, and the rules for contract regions apply to their regions, with failure value `false`.
 
 The checker stores no dominator tree. It states scoping with trees that it does not keep. A _tree_ of a body gives each block but the entry a parent, which is a point inside another block. A tree is _legal_ when every chain of parents reaches the entry and every transfer into a block leaves from its parent or below it. A function is well scoped when some legal tree of each body puts every use below its definition. With every block reachable, this condition is exactly dominance (`Func.reachable_scopable_iff`). The checker decides it by computing the immediate-dominator tree and testing each use against it. `Func.checkDom_iff` states that this check, `Func.checkDom`, succeeds exactly when every body has distinct labels, its entry reaches each of its blocks, and every use is dominated by its definition. `Func.scopeDiagnostics` explains a function that fails these checks: it names each unreachable block, and each use out of scope with a path from the entry that avoids its definition. `Build.run` does not call it ({ref "tr-ann"}[Translator 7: Annotations]).
 
@@ -1849,9 +1850,10 @@ _Linking_ turns a checked module into a linked module, an `LModule`, over the mo
 * each instruction to its wrapper at its type arguments' tags, and a step then looks nothing up and compares no strings;
 * `base.refNew`, `refGet` and `refSet` to the machine's heap instructions, and `base.callCode` to the machine's call;
 * each type to its tag, each label to its block's index in its body or to the body's exit, and each function reference to a closure that binds nothing;
-* each region to a body of the module.
+* each region to a body of the module;
+* a loop invariant (`base.loopInvariant`) to the `()` that its rule returns, without its region, since a run never runs it.
 
-It looks names up in the model's `NameMap`s, 2-3 trees that the table generator builds, and reports every instruction without a rule at once, as `Fault.missingRules`. It records each function's _slots_: one more than the largest value id the function or any of its regions defines. A frame keeps its values in an array of that many slots, indexed by id.
+It looks names up in the model's `NameMap`s, 2-3 trees that the table generator builds, and reports every instruction without a rule at once, as `Fault.missingRules`; an instruction inside a loop invariant needs no rule. It records each function's _slots_: one more than the largest value id the function or any of its regions defines. A frame keeps its values in an array of that many slots, indexed by id.
 
 Linking also records each block's _scope_: the values defined in other blocks that the block reads, with their tags. A block's scope is what is in scope at its entry under the body's dominator tree and live there, where a value is live at a block's entry if some path from the entry reads it:
 
@@ -5871,6 +5873,9 @@ public environment Base where
   clause applies it: the value of an `ok`, or a transfer to `err` with the error of an
   `error`.  Only an `ensures` clause may apply it. -/
   reads insn old [e a] (&body : Except e a) (^err (exc : e)) : a
+  /-- `base.loopInvariant`, a loop invariant: each time control enters its block, `body` returns
+  `true`.  It comes before every other instruction of its block, and a run skips it. -/
+  pure insn loopInvariant (&body : Bool) : Unit
 
   /-- `base.Loc`, a set of mutable locations of the program state, which a frame names.  A
   language adds operations that give its own locations. -/
@@ -5884,8 +5889,8 @@ public environment Base where
   /-- `base.branch`: continue at `t` if `cond` holds. -/
   pure terminal insn branch (cond : Bool) (^t ^f)
   /-- `base.unreachable`: control never gets here. In a contract region, such as a clause, a
-  frame region, an initializer or an invariant, reaching it means that the region is not well
-  defined, so a consumer must not read it as `assume(false)`. -/
+  frame region, an initializer, a ghost's invariant or a loop invariant, reaching it means that
+  the region is not well defined, so a consumer must not read it as `assume(false)`. -/
   pure terminal insn unreachable
 
   /-- `base.Fn as r`, a typed code pointer: to a function that takes arguments of the types

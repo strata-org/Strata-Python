@@ -66,8 +66,9 @@ def loop (cond : Region ε [] Bool) (body : Region ε [] Unit) (_st : Option Uni
   world, their laws, and that writing one part leaves another as it is.
 * **The table** (`Exec/Table.lean`): `#dyn_coverage` and `#dyn_sem_table`, which
   generates the decoding of tags and one wrapper per instruction.
-* **The base's rules** (`Exec/Base.lean`): its types' Lean types, its terminators' rules, and
-  the rules of the contracts' `old` and `cellLoc`, which stop with a gap.  Every environment that
+* **The base's rules** (`Exec/Base.lean`): its types' Lean types, its terminators' rules, the
+  rules of the contracts' `old` and `cellLoc`, which stop with a gap, and the rule of
+  `loopInvariant`, which does nothing.  Every environment that
   extends `Base` inherits them: the module that generates its table imports
   `StrataDyn.Exec.Base`.
 * **Linking** (`Exec/Link.lean`) resolves every name through 2-3 trees once; **validation**

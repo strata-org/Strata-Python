@@ -50,7 +50,8 @@ guarantees the function is well formed.
   end's builder over it.  The emitters run in any of them.
 * `func`: emit a function, whose body is given its parameters and its exit.
 * `freshLabel`, `startBlock`, `startBlock₁`, `param`, `int`, `bool`, `str`, `float`, `unit`,
-  `code`, `jump`, `branch`, `ret`, `withFailureBlock`: the builder's operations at typed values.
+  `code`, `jump`, `branch`, `ret`, `withFailureBlock`, `loopInvariant`: the builder's operations
+  at typed values.
 * `Build.named` and `let%`: a value or a block named after the Lean binder it is bound to.
 * `Build.withInfo`: run an action with a default annotation, for what it emits without one.
 
@@ -343,6 +344,13 @@ failure's payload `ps`. -/
 def withFailureBlock [base ≼ env] {β : Type} (ps : List (TypeExpr env)) (value : Option Bool)
     (body : Target env ps → BuildM env α β) (info : Option α := none) : BuildM env α β :=
   Build.withFailureBlock ps.toArray value (fun l => body (BlockRef.goto ⟨l⟩)) info
+
+/-- `Build.loopInvariantWith`, with the invariant's failure block given to `body` as a target that
+takes the failure's payload `ps`. -/
+def loopInvariant [base ≼ env] (ps : List (TypeExpr env)) (body : Target env ps → m Unit)
+    (info : Option α := none) : m Unit :=
+  have := Build.liftOf env α m
+  Build.loopInvariantWith ps.toArray (fun l => body (BlockRef.goto ⟨l⟩)) info
 
 /-- Fresh values named and typed after `ps`, their declarations appended to `acc`. -/
 private def freshParams (acc : Array (ValDecl env)) : (ps : List (Name × TypeExpr env)) →

@@ -25,9 +25,10 @@ It registers:
 * rules for the terminators of control flow: `base.jump` takes its one successor,
   `base.branch` the first if its condition holds and the second otherwise, and
   `base.unreachable` stops with `Fault.failure`;
-* rules for the contracts' instructions, which stop with `Fault.gap`: `base.old`, because a run
-  does not keep the state at the call, and `base.cellLoc`, because frames have no meaning at run
-  time.
+* rules for the contracts' instructions: `base.old` and `base.cellLoc` stop with `Fault.gap`,
+  `base.old` because a run does not keep the state at the call, and `base.cellLoc` because frames
+  have no meaning at run time; `base.loopInvariant` does nothing, since a run does not check
+  contracts, and never runs its region.
 
 The rest of the base needs no rule.  The engine interprets `base.Ref` and `base.Fn`; the
 machine implements `base.refNew`, `refGet`, `refSet` and `callCode`; and the constructors and
@@ -69,6 +70,11 @@ variable {ε : Eff} {E : Type}
 @[dyn_sem Base.old] def old {e a : Type} (_body : Region ε [] (Except e a)) (_err : Target E [e]) :
     Sem ε E a :=
   semanticGap "base.old: the state at the call is not kept at run time"
+
+-- Linking takes `base.loopInvariant` as this same `()` without looking the rule up
+-- (`StrataDyn/Exec/Link.lean`), so a change here would not reach a run.
+@[dyn_sem Base.loopInvariant] def loopInvariant (_body : Region ε [] Bool) : Sem ε E Unit :=
+  pure ()
 
 @[dyn_sem Base.cellLoc] def cellLoc {σ : Type} [Store σ] {a : Type} (_cell : Ref σ a) :
     Sem ε E NoLoc :=

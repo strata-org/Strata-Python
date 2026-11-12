@@ -42,11 +42,14 @@ quantifies over lists.  The reader adds the type of each folded constant to its 
 and it collects the instructions and the blocks it reads, and its diagnostics, in lists.  The
 checks of contract regions look the targets of failure successors up in a map built once per
 region (`Region.failuresToB`), and compiled code checks that a region has no cycle by Kahn's
-algorithm (`Body.acyclicFast`, through `@[csimp]`).  Timed, these tests fail if the check of a
-function's blocks, of a module's functions, ghosts and references, or of a contract's regions
-becomes quadratic, or if the reader copies an array for each folded constant, instruction, block
-or diagnostic.  Timed, the tests of the last section fail if the dominance check takes quadratic
-time when many blocks jump to one block: in a chain of blocks, in a contract clause and in a loop.
+algorithm (`Body.acyclicFast`, through `@[csimp]`).  The check that nothing uses a loop
+invariant's result looks each use up in a set of the invariants' results, built once
+(`Body.invariantResults`).  Timed, these tests fail if the check of a function's blocks, of a
+module's functions, ghosts and references, of a contract's regions, or of a function's loop
+invariants becomes quadratic, or if the reader copies an array for each folded constant,
+instruction, block or diagnostic.  Timed, the tests of the last section fail if the dominance check
+takes quadratic time when many blocks jump to one block: in a chain of blocks, in a contract clause
+and in a loop.
 
 Heartbeats count small allocations.  The quadratic versions do their extra work without them, by
 copying arrays and calling closures, so a heartbeat limit cannot see it.  So the timed tests
@@ -183,8 +186,8 @@ private def ghostFan (n : Nat) : Array {g : Ghost base Unit // g.WF} :=
   match first, rest with
   | .ok f, .ok r => #[f] ++ (Array.range (n - 1)).map fun i =>
     ⟨{ r.val with name := .num (nm "g") (i + 1) }, by
-      obtain ⟨a, b, c, d, e, f, h, i⟩ := r.property
-      exact ⟨a, b, c, d, e, f, h, i⟩⟩
+      obtain ⟨a, b, c, d, e, f, h, i, j⟩ := r.property
+      exact ⟨a, b, c, d, e, f, h, i, j⟩⟩
   | _, _ => #[]
 
 -- A module of checked ghosts, each initializer naming a ghost before it, so that the order of
@@ -439,6 +442,25 @@ private def chainFn (n : Nat) : Func Ops.env Unit :=
 #guard_msgs in
 #eval scalesLinearly "the checks of contract regions" 1000 (fourfold chainFn) fun fn =>
   decide fn.ContractRegionsWF
+
+/-- A function with one block: `n` loop invariants, each `ret(true)`, then `n` constants, so that
+the check that the invariants come first walks `2 * n` instructions. -/
+private def invariantsFn (n : Nat) : Func base Unit :=
+  let inv (i : Nat) : Instruction base Unit :=
+    .apply () ⟨⟨i⟩, Base.Unit⟩ Base.loopInvariant.ref ⟨#[], rfl⟩ #[] #[]
+      #[⟨#[{ label := ⟨.num (nm "inv") i⟩, params := #[],
+              instrs := #[.const () ⟨⟨n + i⟩, Base.Bool⟩ (.bool true)],
+              term := .ret () ⟨n + i⟩, info := () }]⟩]
+  let instrs := (Array.range n).map inv ++
+    (Array.range n).map (fun i => .const () ⟨⟨2 * n + i⟩, Base.Int⟩ (.int i))
+  let b : Block base Unit :=
+    { label := ⟨.num (nm "b") 0⟩, params := #[], instrs, term := .unreachable (), info := () }
+  { name := nm "f", params := #[], retType := Base.Int, names := #[], info := (), blocks := #[b] }
+
+-- The checks of loop invariants, `Func.LoopInvariantsWF`, on a block with many of them.
+#guard_msgs in
+#eval scalesLinearly "the checks of loop invariants" 2000 (fourfold invariantsFn) fun fn =>
+  decide fn.LoopInvariantsWF
 
 /-! ## Dominance where many blocks jump to one block -/
 

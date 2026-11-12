@@ -17,9 +17,10 @@ set_option autoImplicit false
 
 The declarations every language environment extends: `Unit`, the scalar types a constant can
 have, a sequence, a mutable cell, a typed code pointer and a call through it, `Except`, `old`,
-which an `ensures` clause applies to read the state at the call, `Loc`, a set of locations that a
-frame names, with `cellLoc`, the location of a cell's contents, and the terminal operations of
-control flow.  `Unit` and `Except` are datatypes; the rest of the types are primitive.
+which an `ensures` clause applies to read the state at the call, `loopInvariant`, a loop
+invariant, `Loc`, a set of locations that a frame names, with `cellLoc`, the location of a cell's
+contents, and the terminal operations of control flow.  `Unit` and `Except` are datatypes; the
+rest of the types are primitive.
 
 `Base` is an `environment` block, so a language environment declares it as its parent with
 `extends Base`.  In every `e` with `Base.env ≼ e`:
@@ -27,7 +28,7 @@ control flow.  `Unit` and `Except` are datatypes; the rest of the types are prim
 * `Base.T.ref : TypeRef e n`, and the handle `Base.T`, its type expression, applied to its
   arguments if it has parameters;
 * `Base.o.sig : InsnSig e` and `Base.o : InsnRef e Base.o.sig`, for `refNew`, `refGet`,
-  `refSet`, `old`, `cellLoc` and `callCode`;
+  `refSet`, `old`, `loopInvariant`, `cellLoc` and `callCode`;
 * `Base.Except.ok` and `Base.Except.error`, `Except`'s constructors, as instructions in the
   same way: `Base.Except.ok.sig` is `[e a] (value : a) : Except e a`;
 * `Base.Except.case`, the terminal operation that eliminates an `Except`:
@@ -37,9 +38,9 @@ control flow.  `Unit` and `Except` are datatypes; the rest of the types are prim
 * `Base.jump`, `Base.branch` and `Base.unreachable`, the terminal operations of control flow.
   `Terminator.jump`, `.branch`, `.unreachable` and `.ret` apply them.
 
-Each instruction declares its effect.  `refNew`, which allocates, `cellLoc`, and `jump`, `branch`
-and `unreachable` are `pure`; `refGet` and `old` are `reads`; `refSet` and `callCode` are
-`writes`.
+Each instruction declares its effect.  `refNew`, which allocates, `loopInvariant`, `cellLoc`, and
+`jump`, `branch` and `unreachable` are `pure`; `refGet` and `old` are `reads`; `refSet` and
+`callCode` are `writes`.
 `Unit`'s and `Except`'s constructors and case instructions are `pure`, as every datatype's are.
 
 `base` and `bn` name `Base.env` and its namespace.
@@ -83,6 +84,9 @@ public environment Base where
   clause applies it: the value of an `ok`, or a transfer to `err` with the error of an
   `error`.  Only an `ensures` clause may apply it. -/
   reads insn old [e a] (&body : Except e a) (^err (exc : e)) : a
+  /-- `base.loopInvariant`, a loop invariant: each time control enters its block, `body` returns
+  `true`.  It comes before every other instruction of its block, and a run skips it. -/
+  pure insn loopInvariant (&body : Bool) : Unit
 
   /-- `base.Loc`, a set of mutable locations of the program state, which a frame names.  A
   language adds operations that give its own locations. -/
@@ -96,8 +100,8 @@ public environment Base where
   /-- `base.branch`: continue at `t` if `cond` holds. -/
   pure terminal insn branch (cond : Bool) (^t ^f)
   /-- `base.unreachable`: control never gets here. In a contract region, such as a clause, a
-  frame region, an initializer or an invariant, reaching it means that the region is not well
-  defined, so a consumer must not read it as `assume(false)`. -/
+  frame region, an initializer, a ghost's invariant or a loop invariant, reaching it means that
+  the region is not well defined, so a consumer must not read it as `assume(false)`. -/
   pure terminal insn unreachable
 
   /-- `base.Fn as r`, a typed code pointer: to a function that takes arguments of the types

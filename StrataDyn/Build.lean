@@ -61,10 +61,12 @@ The operations:
   `BuildM` lifts into;
 * `requires`, `ensures`, `reads`, `writes`: emit a clause of the function's contract, a frame's
   regions included;
-* `withFailureBlock`, `withPropagatingBlock`: run a body with the label of a block for its
-  failure successors, and emit that block after the body's blocks;
+* `withFailureBlock`, `withFailureBlockWith`, `withPropagatingBlock`: run a body with the label
+  of a block for its failure successors, and emit that block after the body's blocks;
 * `old`: emit an application of `base.old`, which an `ensures` clause applies to read the state
   at the call;
+* `loopInvariant`, `loopInvariantWith`: emit a loop invariant of the open block, with its failure
+  block, `loopInvariantWith` from any monad `BuildM` lifts into;
 * `emitGhost`: emit the cell of a ghost of the module, which only a contract may name;
 * `ghost`: emit a ghost of the module, its initializer and its invariant, and check it;
 * `run`, `build`: run a builder and check the function it emitted;
@@ -607,19 +609,28 @@ blocks `body` finished, if one of them transfers to it.  The block takes one par
 type of `payload`, so that a failure successor whose payload is `payload` can name it.  It
 returns the constant `c` when `value` is `some c`, and is `unreachable` when `value` is `none`.
 A failure in a `requires` clause or a checked `ensures` clause gives `false`, and one in a `free
-ensures` clause gives `true`.  `body` must finish every block it opens. -/
+ensures` clause gives `true`.  `body` runs in any monad `BuildM` lifts into, such as a front
+end's builder, and must finish every block it opens.  A caller passes `info`, the block's
+annotation, even `none`, since `m` does not determine its type. -/
+def withFailureBlockWith {m : Type → Type} [Monad m] [MonadLiftT (BuildM env α) m] [base ≼ env]
+    {β : Type} (payload : Array (TypeExpr env)) (value : Option Bool) (body : Label → m β)
+    (info : Option α) : m β := do
+  let l ← (Raw.freshLabel "fail" : BuildM env α Label)
+  let i ← (resolveInfo info : BuildM env α α)
+  let r ← body l
+  (do
+    if ← targeted l then
+      Raw.startBlock l (← payload.mapM (freshVal (.str .base "e")))
+      match value with
+      | some c => Raw.ret (← emitConst (.str .base "value") (.bool c) (some i)) (some i)
+      | none => unreachable (some i) : BuildM env α Unit)
+  return r
+
+/-- `withFailureBlockWith`, in `BuildM`. -/
 def withFailureBlock [base ≼ env] {β : Type} (payload : Array (TypeExpr env))
     (value : Option Bool) (body : Label → BuildM env α β) (info : Option α := none) :
-    BuildM env α β := do
-  let l ← Raw.freshLabel "fail"
-  let i ← resolveInfo info
-  let r ← body l
-  if ← targeted l then
-    Raw.startBlock l (← payload.mapM (freshVal (.str .base "e")))
-    match value with
-    | some c => Raw.ret (← emitConst (.str .base "value") (.bool c) (some i)) (some i)
-    | none => unreachable (some i)
-  return r
+    BuildM env α β :=
+  withFailureBlockWith payload value body info
 
 /-- Run `body` with the label of a *propagating block*, `propagate.n`, and then emit the block
 after the blocks `body` finished, if one of them transfers to it.  The block takes the failure
@@ -649,6 +660,33 @@ def old [base ≼ env] (name : Name) (e a : TypeExpr env) (err : Label)
   emitApply name a Base.old.ref #[] (succs := #[Raw.goto err])
     (regions := #[region #[] (withPropagatingBlock e a body info) "old"]) (info := info)
     (typeArgs := ta[e, a])
+
+/-! ## Loop invariants -/
+
+/-- Emit `base.loopInvariant` in the open block: its region, labelled `inv.n`, runs `body`, and
+returns a `base.Bool`.  `body` gets the label of a failure block that gives `false`, with one
+parameter per type of `payload`, for the failure successors of the region's own blocks; the block
+is emitted, after the region's other blocks, only if one of them transfers to it.  `body` runs in
+any monad `BuildM` lifts into, such as a front end's builder, and finishes every block it opens.
+A caller passes `info`, the annotation of the instruction and of the failure block, even `none`,
+since `m` does not determine its type.  The loop invariants of a block come before
+every other instruction of it, so one after another instruction is a misuse. -/
+def loopInvariantWith {m : Type → Type} [Monad m] [MonadLiftT (BuildM env α) m] [base ≼ env]
+    (payload : Array (TypeExpr env)) (body : Label → m Unit) (info : Option α) :
+    m Unit := do
+  (do
+    if (← get).body.instrs.any (!·.isLoopInvariant) then
+      error "a loop invariant after another instruction of its block" : BuildM env α Unit)
+  discard <| emitApplyWith (env := env) (α := α) (.str .base "inv") Base.Unit
+    Base.loopInvariant.ref #[]
+    (regions := #[(·.1) <$>
+      regionWith #[] (withFailureBlockWith payload (some false) body info) "inv"])
+    (info := info)
+
+/-- `loopInvariantWith`, in `BuildM`. -/
+def loopInvariant [base ≼ env] (payload : Array (TypeExpr env)) (body : Label → BuildM env α Unit)
+    (info : Option α := none) : BuildM env α Unit :=
+  loopInvariantWith payload body info
 
 /-! ## Finishing -/
 
@@ -976,7 +1014,7 @@ private theorem stubFunc_wf [base ≼ env] (name : Name) (params : Array (Name �
     scopable_single _ rfl rfl rfl rfl,
     ⟨ctx, hctx', by
       simp [Func.ContractWFIn, Func.FrameWF, FrameEntry.cellsOf, FrameEntry.regionsOf, stubFunc]⟩,
-    by simp [Func.ClauseModesWF, stubFunc], ?_, ?_, ?_⟩
+    by simp [Func.ClauseModesWF, stubFunc], ?_, ?_, ?_, ?_⟩
   · show Label.Distinct [Label.exit, ⟨.num (.str .base "entry") 0⟩]
     decide
   · refine nodup_of_map_eq_range _ numSuffix (List.ext_getElem (by simp [stubFunc]) ?_)
@@ -997,6 +1035,15 @@ private theorem stubFunc_wf [base ≼ env] (name : Name) (params : Array (Name �
       FrameEntry.regionsOf, stubFunc]
   · simp [Func.GhostsInContract, Block.withNestedList, Instruction.nestedBlocksList,
       Terminator.nestedBlocks, Terminator.unreachable, Region.blocksList, stubFunc]
+  · simp [Func.LoopInvariantsWF, Func.invariantRegions, Body.invariantResultsUnused,
+      Body.invariantResults, Body.usedValues, Terminator.args, Terminator.succs,
+      Block.invariantRegionsList,
+      Instruction.invariantRegionsList, Terminator.invariantRegions, Region.invariantRegionsList,
+      Terminator.unreachable, Block.withNestedList, Instruction.nestedBlocksList,
+      Terminator.nestedBlocks, Block.invariantsLead, Region.NoLoopInvariant, Region.NoWrites,
+      Region.Propagates, Region.nestedList, Region.EndsInControl, Region.Acyclic, Region.allList,
+      Region.withNestedList, Region.blocksList, Contract.regions, Contract.frameRegions,
+      FrameEntry.regionsOf, stubFunc]
 
 /-- The stub of the function `name`, which takes `params` and returns `retType`: one block,
 `entry.0`, taking the parameters and ending in `unreachable`.  Parameter `i` is value `i`,

@@ -26,7 +26,7 @@ private def names (s : Env Unit) : List Name := (s.entries.map (·.name)).toList
 #guard names base == [bn "Unit", bn "unit", (bn "Unit").caseName,
   bn "Bool", bn "Int", bn "Float64", bn "String", bn "Sequence", bn "Ref",
   bn "Except", bn "ok", bn "error", (bn "Except").caseName,
-  bn "refNew", bn "refGet", bn "refSet", bn "old", bn "Loc", bn "cellLoc",
+  bn "refNew", bn "refGet", bn "refSet", bn "old", bn "loopInvariant", bn "Loc", bn "cellLoc",
   bn "jump", bn "branch", bn "unreachable",
   bn "Fn", bn "callCode"]
 

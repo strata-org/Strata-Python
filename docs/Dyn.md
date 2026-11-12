@@ -159,7 +159,8 @@ A clause may carry a message, which names it in diagnostics:
 `requires "x is non-negative" {`. For a `free` clause, the message also says where the trust
 comes from, such as "admitted postcondition of 'f'". A clause must not change state. The
 checker rejects every instruction or terminator in a contract region (a clause, a frame region,
-or a region nested in one at any depth) that applies an operation declared `writes`. So a clause
+or a region nested in one at any depth) that applies an operation declared `writes`, and does the
+same in a loop invariant (**Loop invariants**, below). So a clause
 cannot call a function: `base.callCode` is `writes`. A `reads` or `writes` clause is a frame: a
 set of locations that the function may read or change (**Frames**, below). A function without a
 contract has no clauses, and its body's brace stays on the signature's line.
@@ -430,8 +431,8 @@ The checker asks these things of ghosts:
 * No two ghosts share a name, and no ghost has the name of a function of the module.
 * Each `const ghost @m.g` names a ghost of the module, and the value it defines has type
   `base.Ref(T)`, with `T` that ghost's type.
-* Only contract regions name ghosts: a function's body never does, at any depth. The regions of
-  a ghost are contract regions.
+* Only contract regions name ghosts: a function's body never does, at any depth, its loop
+  invariants included. The regions of a ghost are contract regions.
 * An initializer takes no arguments and returns the ghost's type. An invariant takes one argument
   of the ghost's type and returns a `base.Bool`. Each sees only its own values.
 * An initializer names only the ghosts declared before its own. An invariant names no ghost: it
@@ -471,6 +472,70 @@ module m {
 }
 ```
 
+**Loop invariants.** A loop invariant is a fact about the state at a loop's head. It is an
+instruction of the base, `pure insn loopInvariant (&body : Bool) : Unit`, whose region returns a
+`base.Bool`. The invariants of a block are its leading `base.loopInvariant` instructions: the
+checker rejects one that comes after another instruction of its block, a constant included. A front
+end puts them at the start of the head of the loop they describe, and a later stage finds them
+through `Body.loopRoles` (**Canonical form**, below). Here, `i ≥ 0` holds each time control enters
+`head.0`:
+
+```
+    head.0(%i.0 : base.Int):
+      %inv.0 : base.Unit = base.loopInvariant {
+        inv.0():
+          %ok.0 : base.Bool = demo.ge(%i.0, 0)
+          ret(%ok.0)
+      }
+      %c.0 : base.Bool = demo.lt(%i.0, %n.0)
+      branch(%c.0) ^body.0() ^done.0()
+```
+
+What invariants mean:
+
+* Each time control enters the block, its invariants are evaluated in order, in the state at that
+  entry, each one only when the earlier ones returned true. The program satisfies them when each
+  one returns true. This holds only in runs whose call of the enclosing function satisfied every
+  `requires` clause, and an invariant may rely on those clauses as facts about the state at the
+  call.
+* The region sees what is in scope at the block's start: the block's parameters, bound as at that
+  entry, and the values defined above the block in the dominator tree. It sees nothing that the
+  block defines. No instruction uses an invariant's `()` result, so dropping an invariant leaves
+  the function well formed.
+* The rules for contract regions apply to the region, with failure value `false`: the rules of
+  **Failures in contracts**, and no operation declared `writes`. Like the rest of the body, it
+  names no ghost. No contract region and no other invariant's region holds an invariant.
+* An invariant states nothing about termination: a loop that never ends satisfies every claim
+  about what follows it.
+* A run skips the instruction and never runs its region (its rule in `StrataDyn/Exec/Base.lean`),
+  so the region's effects and allocations never reach the program's state. Linking takes the
+  instruction as the `()` that its rule returns, so the operations in its region need no rule.
+
+An invariant is a proof aid, not a claim of its own. A verifier reports a failed check of it, but
+never reports an invariant as a proved property of the program. So a pass may change an invariant,
+as ref-to-reg does when it rewrites a read of a promoted cell, without changing what a proof shows.
+A consumer that uses invariants follows these rules:
+
+* At a loop's head, it checks the invariants on every edge into the head, and may assume them at
+  the head only if it checks them on each of those edges. In canonical form, those edges leave the
+  end of the preheader (the base case) and the end of the latch (the step case). At the head, the
+  instruction's place is where the invariants are assumed, never where they are checked: a check
+  at the start of the head, after the havoc and the assumption, checks nothing.
+* In a block that is not a loop's head, the invariants are an assertion at each entry, and may be
+  assumed after it. A consumer that handles invariants only at the heads of `Body.loopRoles`
+  rejects a function with an invariant in any other block, so that no invariant is left unchecked.
+* Without an analysis, the havoc at the preheader covers every location, and the head's parameters
+  are unknown at the head. A consumer may leave a location out of it only if an analysis shows
+  that nothing in the loop writes it, code that the loop calls included. The function's `writes`
+  frame can't be used for this: it holds only at exits, so a loop may change a location outside it
+  that the function restores later.
+* Nothing is assumed at a loop's exit: a `break` may leave where an invariant does not hold.
+* A consumer assumes nothing from an invariant that it cannot show well defined (**What clauses
+  mean**). A `calls` operation in it must run no code that changes state.
+* A pass that doesn't handle the instruction keeps it: `pure` doesn't make an unused result
+  removable (**Effects**). A pass that moves or drops it anyway loses only proofs, never
+  soundness, since every invariant is checked where it is.
+
 **Canonical form.** A contract obligation must sit where every path that should meet it
 passes. A function is in canonical form when each class of obligation has one such block:
 
@@ -491,11 +556,12 @@ a plain `jump`. `Func.CanonicalCFG` states the form, and `Func.checkCanonicalCFG
 The form does not state P5, that each block of a loop statement either comes around to the latch
 or lies after an exit, because the way a loop is found makes it hold: a block that cannot come
 around to the latch is not in the loop, and a transfer to it leaves the loop through a dedicated
-exit. So the writes to havoc for a loop are those of its blocks, the part that repeats. Nor does
-it state F3, that every path reaches the return block or runs forever. Only the return block
-leaves the body, so every other path runs forever or stops with a fault, such as `unreachable`
-(`Fault.failure`). A fault is a failure, not an assumption, so it never makes a postcondition
-hold for free.
+exit. So one iteration of a loop runs its blocks, the part that repeats, and what they may write,
+code that they call included, is what the havoc at the preheader covers (**Loop invariants**,
+above). Nor does it state F3, that every path reaches the return block or runs forever. Only the
+return block leaves the body, so every other path runs forever or stops with a fault, such as
+`unreachable` (`Fault.failure`). A fault is a failure, not an assumption, so it never makes a
+postcondition hold for free.
 
 `Canonicalize.canonicalize` puts a function in canonical form, as LLVM's LoopSimplify does. It adds
 only forwarding blocks, which take a block's parameters and jump to it with them, and sends

@@ -531,6 +531,8 @@ private theorem linkInsn_inv (labels : LabelMap Nat) (Γ : Ctx) :
     rw [linkInsn]
     refine LinkM.Ok.bind_true (LinkM.Ok.mapM_true (linkSite_ok labels) _) fun sl => ?_
     split
+    · exact LinkM.Ok.pure (P.native (.unit _))
+    split
     · exact LinkM.Ok.bind_true LinkM.Ok.addMissing fun _ => LinkM.Ok.pure (P.native (.unit _))
     · split
       · exact LinkM.Ok.linkError

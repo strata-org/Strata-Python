@@ -27,6 +27,7 @@ py.anyIn | a contract operation: no Python source reaches it. A Python loop inva
 base.callCode | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.cellLoc | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.old | the translator doesn't emit it for Python source (no golden of the corpus has it)
+base.loopInvariant | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.Except.case | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.Unit.case | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.unreachable | the operation's translation has it, but it stops the run with a failure, so no run that agrees with CPython executes it

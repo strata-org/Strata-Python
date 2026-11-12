@@ -414,6 +414,80 @@ instance (isParam : ValId → Bool) (r : Region env α) : Decidable (r.OldScoped
   decidable_of_iff ((Block.oldRegionsList [] r.blocks.toList).all fun p =>
     p.1.domOK (Region.oldSees isParam consts p.2)) List.all_eq_true
 
+/-! ## Loop invariants
+
+A loop invariant is an application of `base.loopInvariant`, whose region returns a `base.Bool`.
+Each time control enters its block, the region returns `true`.  The invariants of a block come
+before every other instruction of it, so that each sees only what is in scope at the block's
+start.  The rules for contract regions apply to their regions, with failure value `false`;
+`Block.invariantRegionsList` finds them in the body. -/
+
+/-- Whether the instruction applies `base.loopInvariant`. -/
+@[expose] def Instruction.isLoopInvariant : Instruction env α → Bool
+  | .apply _ _ r .. => r.name == bn "loopInvariant"
+  | .const .. => false
+
+/-- Whether the block's loop invariants come before every other instruction of it: no
+instruction after the first one that is not an invariant is one. -/
+@[expose] def Block.invariantsLead (b : Block env α) : Bool :=
+  (b.instrs.toList.dropWhile (·.isLoopInvariant)).all (!·.isLoopInvariant)
+
+/-- No instruction of the regions `rs`, or of a region nested in them at any depth, applies
+`base.loopInvariant`. -/
+@[expose, reducible] def Region.NoLoopInvariant (rs : List (Region env α)) : Prop :=
+  ∀ r ∈ Region.allList rs, ∀ b ∈ r.blocks.toList, ∀ i ∈ b.instrs.toList,
+    i.isLoopInvariant = false
+
+/-- The values that the blocks' instructions and terminators use: their operands, then the
+arguments of their successors. -/
+@[expose] def Body.usedValues (bs : List (Block env α)) : List ValId :=
+  bs.flatMap fun b =>
+    b.instrs.toList.flatMap (fun i => i.args.toList ++ i.succs.toList.flatMap (·.args.toList)) ++
+      b.term.args.toList ++ b.term.succs.toList.flatMap (·.args.toList)
+
+/-- The results of the loop invariants of the blocks, as a set of ids. -/
+@[expose] def Body.invariantResults (bs : List (Block env α)) : NatTrie Unit :=
+  bs.foldl (init := .leaf) fun m b => b.instrs.foldl (init := m) fun m i =>
+    if i.isLoopInvariant then m.insert i.result.id.id () else m
+
+/-- No instruction or terminator of the blocks `bs` uses the result of a loop invariant of
+`bs`.  `bs` lists every block of a body, at any depth, so dropping an invariant leaves no use
+behind. -/
+@[expose] def Body.invariantResultsUnused (bs : List (Block env α)) : Bool :=
+  let rs := Body.invariantResults bs
+  (Body.usedValues bs).all fun v => (rs.find? v.id).isNone
+
+mutual
+
+/-- The regions of the loop invariants in an instruction, at any depth.  An application of
+`base.loopInvariant` gives its own regions, and nothing nested in them. -/
+@[expose] def Instruction.invariantRegions : Instruction env α → List (Region env α)
+  | .apply _ _ r _ _ _ ⟨regions⟩ =>
+    if r.name == bn "loopInvariant" then regions else Region.invariantRegionsList regions
+  | .const .. => []
+
+/-- `Instruction.invariantRegions` of each. -/
+@[expose] def Instruction.invariantRegionsList : List (Instruction env α) → List (Region env α)
+  | [] => []
+  | i :: is => i.invariantRegions ++ Instruction.invariantRegionsList is
+
+/-- The regions of the loop invariants in a terminator's regions, at any depth. -/
+@[expose] def Terminator.invariantRegions : Terminator env α → List (Region env α)
+  | .apply _ _ _ _ _ ⟨regions⟩ => Region.invariantRegionsList regions
+
+/-- The regions of the loop invariants in the blocks, at any depth. -/
+@[expose] def Block.invariantRegionsList : List (Block env α) → List (Region env α)
+  | [] => []
+  | ⟨_, _, ⟨instrs⟩, t, _⟩ :: bs =>
+    Instruction.invariantRegionsList instrs ++ t.invariantRegions ++ Block.invariantRegionsList bs
+
+/-- The regions of the loop invariants in the regions `rs`, at any depth. -/
+@[expose] def Region.invariantRegionsList : List (Region env α) → List (Region env α)
+  | [] => []
+  | ⟨⟨blocks⟩⟩ :: rs => Block.invariantRegionsList blocks ++ Region.invariantRegionsList rs
+
+end
+
 end
 
 end Strata.Dyn

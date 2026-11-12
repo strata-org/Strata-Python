@@ -60,12 +60,16 @@ what the thing it names demands:
   blocks of every contract region form an acyclic graph.  Only an `ensures` clause applies
   `base.old`, at any depth, and each outermost `old` region, entered where only the parameters,
   the clause's constants and the parameters of the regions that enclose it are visible, is shaped
-  and dominance-correct.  The body names no ghost, at any depth;
+  and dominance-correct.  The body names no ghost, at any depth.  In every block of the body, at
+  any depth, the loop invariants (`base.loopInvariant`) come before every other instruction; no
+  contract region and no invariant's region holds one; nothing uses an invariant's result; and
+  each invariant's region follows the rules for a clause whose failure value is `false`;
 * a `Ghost`'s initializer takes no arguments and returns the ghost's type, and its invariant takes
   the ghost's contents and returns a `base.Bool`.  Each is well formed in the ghost's context, is
   checked as a body entered where nothing is visible, and follows the rules for a frame region:
   no operation declared `writes`, failures that go to blocks that end in `unreachable`, blocks
-  that end in control flow and form an acyclic graph, and no `base.old`.  The invariant names no
+  that end in control flow and form an acyclic graph, and no `base.old` or `base.loopInvariant`.
+  The invariant names no
   ghost, and neither region refers to a function, at any depth.  The ghost's labels and value
   names are distinct, and every value is named;
 * a `Module.Raw` names no function twice, nor a ghost twice or like a function, its functions and
@@ -831,6 +835,36 @@ enclose it. -/
 instance {env : Env Unit} {α : Type} (fn : Func env α) : Decidable fn.OldWF :=
   inferInstanceAs (Decidable (_ ∧ _))
 
+/-! ### Loop invariants
+
+The predicates are stated in `StrataDyn/ContractRegion.lean`. -/
+
+/-- The regions of the loop invariants in the function's body, at any depth. -/
+@[expose] def Func.invariantRegions {env : Env Unit} {α : Type} (fn : Func env α) :
+    List (Region env α) :=
+  Block.invariantRegionsList fn.blocks.toList
+
+/-- The rules for a function's loop invariants:
+
+* in every block of the body, at any depth, the invariants come before every other instruction;
+* no instruction or terminator of the body uses an invariant's result;
+* no contract region and no invariant's region applies `base.loopInvariant`, at any depth;
+* the rules for contract regions apply to each invariant's region, with failure value `false`: it
+  applies no operation declared `writes`, a failure successor of its own blocks goes to a failure
+  block that gives `false` or ends in `unreachable`, the regions nested in it pass their failures
+  on, every block of it ends in control flow, and none of its regions has a cycle. -/
+@[expose] def Func.LoopInvariantsWF {env : Env Unit} {α : Type} (fn : Func env α) : Prop :=
+  (∀ b ∈ Block.withNestedList fn.blocks.toList, b.invariantsLead = true) ∧
+    Body.invariantResultsUnused (Block.withNestedList fn.blocks.toList) = true ∧
+    Region.NoLoopInvariant (fn.contract.regions ++ fn.invariantRegions) ∧
+    Region.NoWrites fn.invariantRegions ∧
+    (∀ r ∈ fn.invariantRegions, r.FailsWith (some false)) ∧
+    Region.Propagates fn.invariantRegions ∧ Region.EndsInControl fn.invariantRegions ∧
+    Region.Acyclic fn.invariantRegions
+
+instance {env : Env Unit} {α : Type} (fn : Func env α) : Decidable fn.LoopInvariantsWF :=
+  inferInstanceAs (Decidable (_ ∧ _ ∧ _ ∧ _ ∧ _ ∧ _ ∧ _ ∧ _))
+
 /-! ### Ghosts -/
 
 /-- The ghost that the instruction names, if it is a ghost constant. -/
@@ -883,6 +917,10 @@ structure Func.WF {env : Env Unit} {α : Type} [base ≼ env] (fn : Func env α)
   old : Func.OldWF fn
   /-- Its body names no ghost, at any depth: only its contract does. -/
   ghosts : Func.GhostsInContract fn
+  /-- Its loop invariants come first in their blocks, nothing uses their results, they appear
+  nowhere in its contract or in another invariant, and the rules for contract regions apply to
+  their regions, with failure value `false`. -/
+  loopInvariants : Func.LoopInvariantsWF fn
 
 /-- Decide `Func.WF`, its reachability and scoping together, as `Func.checkDom` decides them
 (`StrataDyn/DomDecide.lean`). -/
@@ -893,17 +931,19 @@ instance {env : Env Unit} {α : Type} [base ≼ env] (fn : Func env α) : Decida
       Label.Distinct (Label.exit :: fn.labels) ∧ fn.names.toList.Nodup ∧
       ValDecl.idBound fn.defs ≤ fn.names.size ∧ Func.BodyWF fn ∧ (fn.Reachable ∧ fn.Scopable) ∧
       Func.ContractWF fn ∧ Func.ClauseModesWF fn ∧ Func.ContractRegionsWF fn ∧ Func.OldWF fn ∧
-      Func.GhostsInContract fn)
-    ⟨fun ⟨a, b, c, d, e, f, ⟨g, h⟩, i, j, k, l, m⟩ => ⟨a, b, c, d, e, f, g, h, i, j, k, l, m⟩,
-      fun ⟨a, b, c, d, e, f, g, h, i, j, k, l, m⟩ => ⟨a, b, c, d, e, f, ⟨g, h⟩, i, j, k, l, m⟩⟩
+      Func.GhostsInContract fn ∧ Func.LoopInvariantsWF fn)
+    ⟨fun ⟨a, b, c, d, e, f, ⟨g, h⟩, i, j, k, l, m, n⟩ =>
+        ⟨a, b, c, d, e, f, g, h, i, j, k, l, m, n⟩,
+      fun ⟨a, b, c, d, e, f, g, h, i, j, k, l, m, n⟩ =>
+        ⟨a, b, c, d, e, f, ⟨g, h⟩, i, j, k, l, m, n⟩⟩
 
 /-- `fn` annotated with `info`, still well formed: well-formedness does not mention
 annotations. -/
 def Func.setInfo {env : Env Unit} {α : Type} [base ≼ env] (fn : {fn : Func env α // fn.WF})
     (info : α) : {fn : Func env α // fn.WF} :=
   ⟨{ fn.val with info }, by
-    obtain ⟨a, b, c, d, e, f, g, h, i, j, k, l, m⟩ := fn.property
-    exact ⟨a, b, c, d, e, f, g, h, i, j, k, l, m⟩⟩
+    obtain ⟨a, b, c, d, e, f, g, h, i, j, k, l, m, n⟩ := fn.property
+    exact ⟨a, b, c, d, e, f, g, h, i, j, k, l, m, n⟩⟩
 
 /-- Every value a well-formed function defines has a name. -/
 theorem Func.WF.mem_names {env : Env Unit} {α : Type} [base ≼ env] {fn : Func env α}
@@ -1169,14 +1209,17 @@ structure Ghost.WF [base ≼ env] (g : Ghost env α) : Prop where
   invariantNamesNoGhost : g.InvariantNamesNoGhost
   /-- Its regions refer to no function, at any depth (G9). -/
   noFuncRefs : g.NoFuncRefs
+  /-- Its regions do not apply `base.loopInvariant`, at any depth. -/
+  loopInvariants : Region.NoLoopInvariant g.regions
 
 instance [base ≼ env] (g : Ghost env α) : Decidable g.WF :=
   have := Name.decNodup g.names
   decidable_of_iff (Label.Distinct (Label.exit :: g.labels) ∧ g.names.toList.Nodup ∧
       ValDecl.idBound g.defs ≤ g.names.size ∧ g.RegionsWF ∧ g.ContractRegionsWF ∧
-      Region.NoOld g.regions ∧ g.InvariantNamesNoGhost ∧ g.NoFuncRefs)
-    ⟨fun ⟨a, b, c, d, e, f, h, i⟩ => ⟨a, b, c, d, e, f, h, i⟩,
-      fun ⟨a, b, c, d, e, f, h, i⟩ => ⟨a, b, c, d, e, f, h, i⟩⟩
+      Region.NoOld g.regions ∧ g.InvariantNamesNoGhost ∧ g.NoFuncRefs ∧
+      Region.NoLoopInvariant g.regions)
+    ⟨fun ⟨a, b, c, d, e, f, h, i, j⟩ => ⟨a, b, c, d, e, f, h, i, j⟩,
+      fun ⟨a, b, c, d, e, f, h, i, j⟩ => ⟨a, b, c, d, e, f, h, i, j⟩⟩
 
 /-- The ghost references of the constants of the ghost's initializer. -/
 @[expose] def Ghost.initRefs (g : Ghost env α) : Array (GhostUse env) :=

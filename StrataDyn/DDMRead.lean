@@ -65,15 +65,20 @@ both printed forms.  `Module.ofDDM` does the same from a DDM term.
 * Only an `ensures` clause applies `base.old`, and an `old` region uses, from outside it, only
   the function's parameters, the clause's constants and the parameters of the regions that
   enclose it.  The reader names the first `base.old`, or the first use, that breaks these rules.
+* A block's loop invariants, `base.loopInvariant`, come before every other instruction of it, and
+  no contract region, no ghost's region and no invariant's region holds one.  An invariant's
+  region applies no operation declared `writes`, and follows the rules for a clause whose failure
+  value is `false`.  The reader names the first block, invariant or instruction that breaks these
+  rules, or the first failure successor, block or cycle, as for a clause.
 * A module's ghosts come before its functions.  No two ghosts share a name, and no ghost has the
   name of a function.  A ghost's initializer takes no arguments and returns the ghost's type, and
   its invariant takes the ghost's contents and returns a `base.Bool`.  Each uses only its own
   values, and follows the rules for a frame region.  A ghost's values get ids from `0`, the
   initializer's first, in the order of `Ghost.defs`.
 * A ghost constant `ghost @m.g` names a ghost of the module, at the type of its cell, a
-  `base.Ref` of the ghost's type.  Only a contract region names one, an initializer names only
-  the ghosts declared before its own, and an invariant names none.  A ghost's regions refer to no
-  function.  An attribute may name a ghost of the module too.
+  `base.Ref` of the ghost's type.  Only a contract region names one, never a loop invariant.  An
+  initializer names only the ghosts declared before its own, and an invariant names none.  A
+  ghost's regions refer to no function.  An attribute may name a ghost of the module too.
 
 A name reads back as printed unless one of its string segments contains `.` or is a nonempty
 run of digits, it is the one segment `_`, which is how the root prints, or it is printed inside
@@ -945,6 +950,53 @@ def contractRegionsDiagnostic? (fn : Func env Info) (fnName : String) :
       fn.contract.frameRegions.map (("a frame region", none, ·)))
     fn.contract.regions
 
+/-! ## Loop invariants
+
+The diagnostics of `Func.LoopInvariantsWF`: they only explain why it fails. -/
+
+/-- The name of the operation that an instruction applies, as printed, or `const`. -/
+def instrOpText : Instruction env Info → String
+  | .apply _ _ r .. => ToDDM.nameText r.name
+  | .const .. => "const"
+
+/-- The first loop invariant in the regions `rs`, at any depth. -/
+def firstLoopInvariant? (rs : List (Region env Info)) : Option (Instruction env Info) :=
+  (Region.allList rs).findSome? fun r => r.blocks.toList.findSome? fun b =>
+    b.instrs.toList.find? (·.isLoopInvariant)
+
+/-- Why the loop invariants of `fn` break `Func.LoopInvariantsWF`, if they do: the first block
+of the body with an invariant after another instruction, then the first use of an invariant's
+result, then the first invariant in a contract region or in another invariant's region, then the
+first instruction of an invariant's region that applies an operation declared `writes`, then the
+rules for contract regions, as `regionsDiagnostic?` explains them. -/
+def loopInvariantsDiagnostic? (fn : Func env Info) (fnName : String) : Option ReadDiagnostic :=
+  let owner := s!"@{fnName}"
+  let invs := fn.invariantRegions
+  ((Block.withNestedList fn.blocks.toList).find? (!·.invariantsLead)).map (fun b =>
+    ⟨b.info.range, s!"base.loopInvariant must come before every other instruction of its \
+      block, but {ToDDM.nameText b.label.name} of {owner} has one after another instruction"⟩) <|>
+  (let bs := Block.withNestedList fn.blocks.toList
+   let rs := Body.invariantResults bs
+   let hit (vs : List ValId) := vs.find? fun v => (rs.find? v.id).isSome
+   let found (range : SourceRange) (v : ValId) : ReadDiagnostic :=
+     ⟨range, s!"{owner} uses {valText fn.names v}, the result of a loop invariant"⟩
+   bs.findSome? fun b =>
+     (b.instrs.toList.findSome? fun i =>
+        (hit (i.args.toList ++ i.succs.toList.flatMap (·.args.toList))).map
+          (found (instrRange i))) <|>
+       (hit (b.term.args.toList ++ b.term.succs.toList.flatMap (·.args.toList))).map
+         (found (termSite b.term).1)) <|>
+  ((firstLoopInvariant? fn.contract.regions).map fun i =>
+    ⟨instrRange i, s!"base.loopInvariant is allowed only in a body, but {owner} uses it in its \
+      contract"⟩) <|>
+  ((firstLoopInvariant? invs).map fun i =>
+    ⟨instrRange i, s!"a loop invariant of {owner} holds another loop invariant"⟩) <|>
+  (((Region.allList invs).findSome? fun r => r.blocks.toList.findSome? fun b =>
+      b.instrs.toList.find? (·.effect == .writes)).map fun i =>
+    ⟨instrRange i, s!"a loop invariant of {owner} applies {instrOpText i}, which is declared \
+      writes"⟩) <|>
+  regionsDiagnostic? fn.names owner (invs.map (("a loop invariant", some false, ·))) invs
+
 /-! ## Scoping in contract regions -/
 
 /-- Why the clauses and frame regions of `fn` break the scoping part of `Func.ClauseWF`, which
@@ -1141,16 +1193,17 @@ def func (funcs : Funcs env) (ghosts : Ghosts env) (f : MFunc SourceRange) :
         (fn.extern = false → ∀ b ∈ fn.blocks[0]?, b.params = fn.params) ∧
         Label.Distinct (Label.exit :: fn.labels) ∧ ValDecl.idBound fn.defs ≤ fn.names.size ∧
         fn.BodyWF ∧ (fn.Reachable ∧ fn.Scopable) ∧ fn.ContractWF ∧ fn.ClauseModesWF ∧
-        fn.ContractRegionsWF ∧ fn.OldWF ∧ fn.GhostsInContract then
+        fn.ContractRegionsWF ∧ fn.OldWF ∧ fn.GhostsInContract ∧ fn.LoopInvariantsWF then
       return ⟨fn, by simp [headerName, hf, fn], by
-        obtain ⟨a, b, c, d, e, ⟨g, i⟩, j, k, l, m, o⟩ := h
-        exact ⟨a, b, c, hnames, d, e, g, i, j, k, l, m, o⟩⟩
+        obtain ⟨a, b, c, d, e, ⟨g, i⟩, j, k, l, m, o, p⟩ := h
+        exact ⟨a, b, c, hnames, d, e, g, i, j, k, l, m, o, p⟩⟩
     else
       let why := (if fn.Reachable ∧ fn.Scopable then #[] else fn.scopeDiagnostics) ++
         clauseScopeDiagnostics fn
       if why.isEmpty then
         if let some d := contractRegionsDiagnostic? fn (identText n) <|>
-            oldPlacedDiagnostic? fn (identText n) <|> oldScopedDiagnostic? fn (identText n) then
+            oldPlacedDiagnostic? fn (identText n) <|> oldScopedDiagnostic? fn (identText n) <|>
+            loopInvariantsDiagnostic? fn (identText n) then
           throw d
       throw ⟨ann, s!"@{identText n} is not well formed" ++
         String.join (why.toList.map ("\n  " ++ ·))⟩
@@ -1223,14 +1276,17 @@ def ghostRegion (fx : FnCtx env) (g place : String) (sig : RegionType env)
 
 /-- Why the ghost `g` breaks `Ghost.WF`, if one of these explains it: the first problem with the
 failures, the blocks or the transfers of its regions, as `regionsDiagnostic?` finds it, then the
-first application of `base.old`, then each block that a region's entry does not reach and each
-use out of scope.  `owner` names the ghost in messages: `ghost @m.g`. -/
+first application of `base.old`, then the first loop invariant, then each block that a
+region's entry does not reach and each use out of scope.  `owner` names the ghost in messages:
+`ghost @m.g`. -/
 def ghostDiagnostic? (g : Ghost env Info) (owner : String) : Option ReadDiagnostic :=
   let named := g.init.toList.map ("the initializer", none, ·) ++
     g.invariant.toList.map ("the invariant", none, ·)
   regionsDiagnostic? g.names owner named g.regions <|>
     (g.init.bind fun r => (firstOld? [r]).map (oldFound owner "its initializer")) <|>
     (g.invariant.bind fun r => (firstOld? [r]).map (oldFound owner "its invariant")) <|>
+    ((firstLoopInvariant? g.regions).map fun i =>
+      ⟨instrRange i, s!"base.loopInvariant is allowed only in a body, but {owner} uses it"⟩) <|>
     let why := g.regions.foldl (fun out r => out ++ r.scopeDiagnostics g.names) #[]
     if why.isEmpty then none
     else some ⟨g.info.range, s!"{owner} is not well formed" ++
@@ -1275,9 +1331,9 @@ def ghost (funcs : Funcs env) (ghosts : Ghosts env) (idx : Nat) (g : MGhost Sour
   -- The value names' table proves the names distinct; the rest of `Ghost.WF` is decided.
   if hw : Label.Distinct (Label.exit :: gh.labels) ∧ ValDecl.idBound gh.defs ≤ gh.names.size ∧
       gh.RegionsWF ∧ gh.ContractRegionsWF ∧ Region.NoOld gh.regions ∧ gh.InvariantNamesNoGhost ∧
-      gh.NoFuncRefs then
-    let ⟨a, b, c, d, e, f, k⟩ := hw
-    return ⟨gh, ⟨a, hnames, b, c, d, e, f, k⟩⟩
+      gh.NoFuncRefs ∧ Region.NoLoopInvariant gh.regions then
+    let ⟨a, b, c, d, e, f, k, l⟩ := hw
+    return ⟨gh, ⟨a, hnames, b, c, d, e, f, k, l⟩⟩
   else
     throw ((ghostDiagnostic? gh s!"ghost @{gn}").getD
       ⟨h.ann, s!"ghost @{gn} is not well formed"⟩)

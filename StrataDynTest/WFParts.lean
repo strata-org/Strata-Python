@@ -37,7 +37,10 @@ four parts of `Func.ContractRegionsWF` and the two of `Func.OldWF` each have the
 * `failures`, `propagates`, `terminators`, `acyclic`: `Func.ClauseFailuresWF`,
   `Region.Propagates`, `Region.EndsInControl` and `Region.Acyclic` of the contract's regions;
 * `old`, `old scope`: `Func.OldPlaced` and `Func.OldScoped`;
-* `ghosts`: `Func.GhostsInContract`. -/
+* `ghosts`: `Func.GhostsInContract`;
+* `invariants first`, `invariant results`, `invariant place`, `invariant writes`,
+  `invariant failures`, `invariant propagates`, `invariant terminators`, `invariant acyclic`:
+  the eight parts of `Func.LoopInvariantsWF`, in order. -/
 def broken (f : Func env α) : List String :=
   (if decide (f.extern = f.blocks.isEmpty) then [] else ["extern"]) ++
   (if decide (f.extern = false → ∀ b ∈ f.blocks[0]?, b.params = f.params) then []
@@ -55,7 +58,19 @@ def broken (f : Func env α) : List String :=
   (if decide (Region.Acyclic f.contract.regions) then [] else ["acyclic"]) ++
   (if decide f.OldPlaced then [] else ["old"]) ++
   (if decide f.OldScoped then [] else ["old scope"]) ++
-  (if decide f.GhostsInContract then [] else ["ghosts"])
+  (if decide f.GhostsInContract then [] else ["ghosts"]) ++
+  (if decide (∀ b ∈ Block.withNestedList f.blocks.toList, b.invariantsLead = true) then []
+    else ["invariants first"]) ++
+  (if Body.invariantResultsUnused (Block.withNestedList f.blocks.toList) then []
+    else ["invariant results"]) ++
+  (if decide (Region.NoLoopInvariant (f.contract.regions ++ f.invariantRegions)) then []
+    else ["invariant place"]) ++
+  (if decide (Region.NoWrites f.invariantRegions) then [] else ["invariant writes"]) ++
+  (if decide (∀ r ∈ f.invariantRegions, r.FailsWith (some false)) then []
+    else ["invariant failures"]) ++
+  (if decide (Region.Propagates f.invariantRegions) then [] else ["invariant propagates"]) ++
+  (if decide (Region.EndsInControl f.invariantRegions) then [] else ["invariant terminators"]) ++
+  (if decide (Region.Acyclic f.invariantRegions) then [] else ["invariant acyclic"])
 
 /-- The rules that the function of a failed build breaks, as `broken` names them, or `misuse` if
 the build failed by a misuse.  Empty for a build that gave a checked function. -/
