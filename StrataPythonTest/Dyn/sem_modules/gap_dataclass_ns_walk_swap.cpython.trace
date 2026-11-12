@@ -1,0 +1,11 @@
+--- stdout 55
+TypeError 'newf' is a field but has no type annotation
+
+--- outcome
+ok
+--- globals
+Evil = <class 'Evil'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+field = <function object>

@@ -1,0 +1,29 @@
+--- stdout 284
+FrozenInstanceError True cannot assign to field 'a'
+cannot delete field 'a'
+True 1
+True True True True
+TypeError: '<' not supported between instances of 'V' and 'int'
+False True
+True 2
+0 I()
+K(a=1, b=0)
+TypeError: K.__init__() takes 1 positional argument but 2 were given
+C(a=1) True
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+E = <class 'E'>
+F = <class 'F'>
+FrozenInstanceError = <class 'FrozenInstanceError'>
+I = <class 'I'>
+K = <class 'K'>
+U = <class 'U'>
+V = <class 'V'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+f = <F object>
+field = <function object>

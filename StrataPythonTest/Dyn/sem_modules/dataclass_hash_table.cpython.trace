@@ -1,0 +1,32 @@
+--- stdout 674
+False False False False absent
+False False False True explicit
+False False True False absent
+False False True True explicit
+False True False False none
+False True False True explicit
+False True True False fields
+False True True True explicit
+True False False False fields
+True False False True TypeError: Cannot overwrite attribute __hash__ in class C
+True False True False fields
+True False True True TypeError: Cannot overwrite attribute __hash__ in class C
+True True False False fields
+True True False True TypeError: Cannot overwrite attribute __hash__ in class C
+True True True False fields
+True True True True TypeError: Cannot overwrite attribute __hash__ in class C
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+eq = True
+explicit = True
+frozen = True
+h = <function object>
+kind = 'fields'
+ns = {'__module__': '__main__', '__annotations__': {'a': <class 'int'>}, '__hash__': <function object>}
+unsafe_hash = True

@@ -1,0 +1,9 @@
+--- stdout 39
+SyntaxError cannot assign to __debug__
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>

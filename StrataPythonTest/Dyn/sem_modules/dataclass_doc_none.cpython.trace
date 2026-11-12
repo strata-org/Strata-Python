@@ -1,0 +1,10 @@
+--- stdout 15
+C(x: str = '')
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>

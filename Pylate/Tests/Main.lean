@@ -24,6 +24,7 @@ import Pylate.Tests.SyntaxPlans
 import Pylate.Tests.Validate
 import Pylate.Tests.StructuralExpressions
 import Pylate.Tests.ShapePolicy
+import Pylate.Tests.ModelParents
 
 def main : IO Unit := do
   Pylate.Tests.Emptiness.runAll

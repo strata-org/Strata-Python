@@ -1,0 +1,13 @@
+--- stdout 22
+A(y=3)
+('y',) 1 Field
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+f = <Field object>
+field = <function object>

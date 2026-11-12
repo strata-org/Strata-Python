@@ -1,0 +1,15 @@
+--- stdout 14
+ok 20
+rec 166
+
+--- outcome
+ok
+--- globals
+D = <class 'D'>
+LIMIT = 170
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+mk = <function object>
+n = 166
+run = <function object>

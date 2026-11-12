@@ -1,0 +1,10 @@
+--- stdout 12
+E(x: int) 1
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>

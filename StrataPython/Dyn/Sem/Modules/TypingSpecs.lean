@@ -37,17 +37,22 @@ def gappedOf (key : String) (entries : Array Entry) : Array String :=
 def typingMethods (cls : String) (names : Array String) : Array Entry :=
   names.map fun n => Entry.native n (typingKey cls n) .function
 
-/-- A class of `typing`: its spec, with `__module__` and the texts of its `vars()`, and every other
-name of CPython's `vars()` of the class that `entries` doesn't bind as a gap. -/
-def typingSpec (qualname : String) (entries : Array Entry) (instanceDict : Bool := false)
+/-- A class of the module `mod`: its spec, with `__module__` and the texts of its `vars()`, and
+every other name of CPython's `vars()` of the class that `entries` doesn't bind as a gap. -/
+def moduleSpec (mod qualname : String) (entries : Array Entry) (instanceDict : Bool := false)
     (slots : Array String := #[]) (instanceWritesGap : Bool := false) : ClassSpec :=
-  let key := s!"typing.{qualname}"
+  let key := s!"{mod}.{qualname}"
   let doc := match texts.lookup s!"{key}.__doc__" with
     | some t => #[Entry.str "__doc__" t]
     | none => if entries.any (·.name == "__doc__") then #[] else #[Entry.none "__doc__"]
-  let all := entries ++ #[Entry.str "__module__" "typing"] ++ doc
-  { name := qualname, qualname, «module» := "typing", writesGap := true, instanceWritesGap,
+  let all := entries ++ #[Entry.str "__module__" mod] ++ doc
+  { name := qualname, qualname, «module» := mod, writesGap := true, instanceWritesGap,
     instanceDict, asBase := .gap, slots, entries := all, gapped := gappedOf key all }
+
+/-- A class of `typing` (`moduleSpec`). -/
+def typingSpec (qualname : String) (entries : Array Entry) (instanceDict : Bool := false)
+    (slots : Array String := #[]) (instanceWritesGap : Bool := false) : ClassSpec :=
+  moduleSpec "typing" qualname entries instanceDict slots instanceWritesGap
 
 /-- `typing._Final`, the base of the classes that a program may not subclass. -/
 def finalSpec : ClassSpec := typingSpec "_Final" #[.strs "__slots__" #["__weakref__"]]

@@ -1,0 +1,10 @@
+--- stdout 51
+<class 'dataclasses.Field'>
+dataclasses.Field[int]
+
+--- outcome
+ok
+--- globals
+Field = <class 'Field'>
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,19 @@
+--- stdout 70
+bool init
+bool kw
+bool init
+bool kw
+bool init
+bool init
+bool cmp
+done
+
+--- outcome
+ok
+--- globals
+B = <class 'B'>
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+field = <function object>

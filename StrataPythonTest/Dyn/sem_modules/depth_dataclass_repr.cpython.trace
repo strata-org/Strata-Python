@@ -1,0 +1,13 @@
+--- stdout 9
+513
+2503
+
+--- outcome
+ok
+--- globals
+D = 498
+N = <class 'N'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+mk = <function object>

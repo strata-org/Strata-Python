@@ -1,0 +1,31 @@
+--- stdout 656
+ValueError: mutable default <class 'list'> for field a is not allowed: use default_factory
+TypeError: non-default argument 'b' follows default argument
+ValueError: eq must be true if order is true
+ValueError: cannot specify both default and default_factory
+TypeError: 'a' is a field but has no type annotation
+TypeError: cannot inherit frozen dataclass from a non-frozen one
+TypeError: cannot inherit non-frozen dataclass from a frozen one
+TypeError: Cannot overwrite attribute __lt__ in class A. Consider using functools.total_ordering
+TypeError: Cannot overwrite attribute __setattr__ in class A
+TypeError: Cannot overwrite attribute __hash__ in class A
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+attempt = <function object>
+both = <function object>
+dataclass = <function object>
+eq_order = <function object>
+field = <function object>
+frozen_from_plain = <function object>
+make = <function object>
+mutable = <function object>
+no_annotation = <function object>
+order = <function object>
+overwrite_hash = <function object>
+overwrite_lt = <function object>
+overwrite_setattr = <function object>
+plain_from_frozen = <function object>

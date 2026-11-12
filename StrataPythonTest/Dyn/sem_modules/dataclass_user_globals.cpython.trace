@@ -1,0 +1,18 @@
+--- stdout 70
+user hash (1,)
+42
+user NI
+user type F(a=1)
+cannot assign to field 'a'
+
+--- outcome
+ok
+--- globals
+F = <class 'F'>
+NotImplemented = 'user NI'
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+f = <F object>
+hash = <function object>
+type = <function object>

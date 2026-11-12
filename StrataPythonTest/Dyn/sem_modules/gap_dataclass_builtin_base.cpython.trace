@@ -1,0 +1,12 @@
+--- stdout 20
+E
+L(iterable=(), /)
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+L = <class 'L'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>

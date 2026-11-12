@@ -1,0 +1,8 @@
+--- stdout 12
+ImportError
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'

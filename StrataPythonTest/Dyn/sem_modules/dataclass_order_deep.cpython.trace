@@ -1,0 +1,13 @@
+--- stdout 28
+True True False False False
+
+--- outcome
+ok
+--- globals
+A = <D object>
+B = <D object>
+D = <class 'D'>
+_ = 149
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>

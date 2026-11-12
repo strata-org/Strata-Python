@@ -1,0 +1,17 @@
+--- stdout 34
+inner 1
+small True
+RecursionError
+
+--- outcome
+ok
+--- globals
+A = <D object>
+B = <D object>
+D = <class 'D'>
+E = <class 'E'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+mk = <function object>
+nest = <function object>

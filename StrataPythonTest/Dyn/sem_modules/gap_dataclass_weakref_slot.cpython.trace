@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: weakref_slot is True but slots is False
+--- globals
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>

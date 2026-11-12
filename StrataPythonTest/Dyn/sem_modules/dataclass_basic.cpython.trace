@@ -1,0 +1,29 @@
+--- stdout 641
+P(x=1, y=[], z=None, w=3) True False False None
+P(x: int, y: List[int] = <factory>, z: Optional[__main__.Foo] = None, w: 'Foo' = 3) ('x', 'y', 'z', 'w')
+P.__init__ __main__ __init__
+False
+TypeError: P.__init__() missing 1 required positional argument: 'x'
+TypeError: P.__init__() takes from 2 to 5 positional arguments but 6 were given
+TypeError: P.__init__() got an unexpected keyword argument 'q'
+TypeError: P.__init__() got multiple values for argument 'x'
+Q(x=1, y=[], z=None, w=3, v=7) ('x', 'y', 'z', 'w', 'v')
+Doc.
+P.__init__ {'x': <class 'int'>, 'y': typing.List[int], 'z': typing.Optional[__main__.Foo], 'w': 'Foo', 'return': None}
+
+--- outcome
+ok
+--- globals
+Foo = <class 'Foo'>
+List = <_SpecialGenericAlias object>
+N = <class 'N'>
+Optional = <_SpecialForm object>
+P = <class 'P'>
+Q = <class 'Q'>
+__doc__ = None
+__name__ = '__main__'
+bad = <function object>
+dataclass = <function object>
+field = <function object>
+new_list = <function object>
+p = <P object>

@@ -1,0 +1,10 @@
+--- stdout 54
+RuntimeError dictionary changed size during iteration
+
+--- outcome
+ok
+--- globals
+Evil = <class 'Evil'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>

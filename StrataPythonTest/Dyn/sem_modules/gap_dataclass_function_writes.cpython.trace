@@ -1,0 +1,14 @@
+--- stdout 26
+other
+written 1
+written 1
+
+--- outcome
+ok
+--- globals
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+dataclasses = <module object>
+f = <function object>

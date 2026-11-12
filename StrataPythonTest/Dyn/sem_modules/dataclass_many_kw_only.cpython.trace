@@ -1,0 +1,11 @@
+--- stdout 8
+0 7 999
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+c = <C object>
+dataclass = <function object>

@@ -2754,6 +2754,26 @@ is recorded as caught.
   than `total`; subclassing an alias or a special form's class; subscribing an alias again; a write
   to the module, to its classes or to its objects (its functions included); and an import of
   `typing` after the program changed the builtins.
+- `import dataclasses` and its names `dataclass`, `field`, `Field`, `FrozenInstanceError`, `replace`
+  and `MISSING`, ported from CPython's `dataclasses.py`: `_process_class` in CPython's order with
+  its checks and messages, the generated `__init__`, `__repr__` (with its guard against re-entry),
+  `__eq__`, the orderings, `__hash__` by the `_hash_action` table, the frozen `__setattr__` and
+  `__delattr__`, the docstring and `__match_args__`. The generated methods read `hash`, `type`,
+  `super` and `NotImplemented` from the class's module at each call, as the source that CPython
+  generates does. Every other name of `vars(dataclasses)` stops with a gap, and so do: the options
+  `slots` and `weakref_slot`, an option that is not a `bool`, `field(metadata=...)`, the `repr` of a
+  `Field`, a dataclass whose metaclass is not `type` or whose `__module__` is not a loaded module, a
+  `str` annotation that names `ClassVar`, `InitVar` or `KW_ONLY` through a module, a field option
+  that is not a `bool` (`hash` may be `None`), a field name that the generated source can't take
+  (not an identifier, a keyword, `__debug__`, or a name that starts with `__dataclass_`), a
+  docstring whose signature is not the generated `__init__`'s or `object`'s or whose class has a
+  built-in base other than `object` before its first own `__init__`, an annotation whose class
+  defines `__class__` or that is an instance of a `str` subclass, an `__annotations__` that is an
+  instance of a `dict` subclass, a docstring annotation whose `__module__` is not a `str` or `None`, a change
+  of the keys of the class's namespace or of `__dataclass_fields__` at the same size while the port
+  walks them, `Field[T]`, a dataclass with `__abstractmethods__`, and the annotations of a generated
+  method. A write to an attribute of its functions, or of the methods that `dataclass`
+  generates, stops with a gap too.
 - CPython's recursion limit: nested comparisons, calls into Python and calls of built-in callables
   count toward it, at least as many levels as CPython counts, and a run stops with a gap when its
   count passes 9,000, 995 below CPython's limit, where CPython raises `RecursionError`. A call of a

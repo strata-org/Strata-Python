@@ -1,0 +1,15 @@
+--- stdout 11
+C()
+K(b=2)
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+K = <class 'K'>
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+dataclasses = <module object>
+typing = <module object>

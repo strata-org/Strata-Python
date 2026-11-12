@@ -21,7 +21,8 @@ namespace StrataPython.Dyn.Sem.Modules
 
 /-- The names of `vars()` of each modelled module, by its name. -/
 def moduleNames : List (String × List String) := [
-  ("typing", ["ABCMeta", "AbstractSet", "Annotated", "Any", "AnyStr", "AsyncContextManager", "AsyncGenerator", "AsyncIterable", "AsyncIterator", "Awaitable", "BinaryIO", "ByteString", "CT_co", "Callable", "ChainMap", "ClassVar", "Collection", "Concatenate", "Container", "ContextManager", "Coroutine", "Counter", "DefaultDict", "Deque", "Dict", "EXCLUDED_ATTRIBUTES", "Final", "ForwardRef", "FrozenSet", "Generator", "Generic", "GenericAlias", "Hashable", "IO", "ItemsView", "Iterable", "Iterator", "KT", "KeysView", "List", "Literal", "LiteralString", "Mapping", "MappingView", "Match", "MethodDescriptorType", "MethodWrapperType", "MutableMapping", "MutableSequence", "MutableSet", "NamedTuple", "NamedTupleMeta", "Never", "NewType", "NoReturn", "NotRequired", "Optional", "OrderedDict", "ParamSpec", "ParamSpecArgs", "ParamSpecKwargs", "Pattern", "Protocol", "Required", "Reversible", "Self", "Sequence", "Set", "Sized", "SupportsAbs", "SupportsBytes", "SupportsComplex", "SupportsFloat", "SupportsIndex", "SupportsInt", "SupportsRound", "T", "TYPE_CHECKING", "T_co", "T_contra", "Text", "TextIO", "Tuple", "Type", "TypeAlias", "TypeAliasType", "TypeGuard", "TypeVar", "TypeVarTuple", "TypedDict", "Union", "Unpack", "VT", "VT_co", "V_co", "ValuesView", "WrapperDescriptorType", "_ASSERT_NEVER_REPR_MAX_LENGTH", "_AnnotatedAlias", "_AnyMeta", "_BaseGenericAlias", "_CallableGenericAlias", "_CallableType", "_ConcatenateGenericAlias", "_DeprecatedGenericAlias", "_DeprecatedType", "_Final", "_Func", "_GenericAlias", "_IdentityCallable", "_LiteralGenericAlias", "_LiteralSpecialForm", "_NamedTuple", "_NotIterable", "_PROTO_ALLOWLIST", "_PickleUsingNameMixin", "_ProtocolMeta", "_SPECIAL_NAMES", "_SpecialForm", "_SpecialGenericAlias", "_TYPING_INTERNALS", "_TupleType", "_TypedDict", "_TypedDictMeta", "_TypingEllipsis", "_UnionGenericAlias", "_UnpackGenericAlias", "__all__", "__builtins__", "__cached__", "__doc__", "__file__", "__loader__", "__name__", "__package__", "__spec__", "_alias", "_allow_reckless_class_checks", "_allowed_types", "_caches", "_caller", "_check_generic", "_cleanups", "_collect_parameters", "_compare_args_orderless", "_deduplicate", "_deduplicate_unhashable", "_eval_type", "_flatten_literal_params", "_generic_class_getitem", "_generic_init_subclass", "_get_protocol_attrs", "_idfunc", "_is_dunder", "_is_param_expr", "_is_typevar_like", "_is_unpacked_typevartuple", "_lazy_load_getattr_static", "_make_nmtuple", "_make_union", "_namedtuple_mro_entries", "_no_init_or_replace_init", "_overload_dummy", "_overload_registry", "_paramspec_prepare_subst", "_paramspec_subst", "_prohibited", "_proto_hook", "_remove_dups_flatten", "_should_unflatten_callable_args", "_special", "_strip_annotations", "_tp_cache", "_type_check", "_type_convert", "_type_repr", "_typevar_subst", "_typevartuple_prepare_subst", "_unpack_args", "_value_and_type_iter", "abstractmethod", "assert_never", "assert_type", "cast", "clear_overloads", "collections", "contextlib", "copyreg", "dataclass_transform", "defaultdict", "final", "functools", "get_args", "get_origin", "get_overloads", "get_type_hints", "io", "is_typeddict", "no_type_check", "no_type_check_decorator", "operator", "overload", "override", "re", "reveal_type", "runtime_checkable", "stdlib_re", "sys", "types", "warnings"])
+  ("typing", ["ABCMeta", "AbstractSet", "Annotated", "Any", "AnyStr", "AsyncContextManager", "AsyncGenerator", "AsyncIterable", "AsyncIterator", "Awaitable", "BinaryIO", "ByteString", "CT_co", "Callable", "ChainMap", "ClassVar", "Collection", "Concatenate", "Container", "ContextManager", "Coroutine", "Counter", "DefaultDict", "Deque", "Dict", "EXCLUDED_ATTRIBUTES", "Final", "ForwardRef", "FrozenSet", "Generator", "Generic", "GenericAlias", "Hashable", "IO", "ItemsView", "Iterable", "Iterator", "KT", "KeysView", "List", "Literal", "LiteralString", "Mapping", "MappingView", "Match", "MethodDescriptorType", "MethodWrapperType", "MutableMapping", "MutableSequence", "MutableSet", "NamedTuple", "NamedTupleMeta", "Never", "NewType", "NoReturn", "NotRequired", "Optional", "OrderedDict", "ParamSpec", "ParamSpecArgs", "ParamSpecKwargs", "Pattern", "Protocol", "Required", "Reversible", "Self", "Sequence", "Set", "Sized", "SupportsAbs", "SupportsBytes", "SupportsComplex", "SupportsFloat", "SupportsIndex", "SupportsInt", "SupportsRound", "T", "TYPE_CHECKING", "T_co", "T_contra", "Text", "TextIO", "Tuple", "Type", "TypeAlias", "TypeAliasType", "TypeGuard", "TypeVar", "TypeVarTuple", "TypedDict", "Union", "Unpack", "VT", "VT_co", "V_co", "ValuesView", "WrapperDescriptorType", "_ASSERT_NEVER_REPR_MAX_LENGTH", "_AnnotatedAlias", "_AnyMeta", "_BaseGenericAlias", "_CallableGenericAlias", "_CallableType", "_ConcatenateGenericAlias", "_DeprecatedGenericAlias", "_DeprecatedType", "_Final", "_Func", "_GenericAlias", "_IdentityCallable", "_LiteralGenericAlias", "_LiteralSpecialForm", "_NamedTuple", "_NotIterable", "_PROTO_ALLOWLIST", "_PickleUsingNameMixin", "_ProtocolMeta", "_SPECIAL_NAMES", "_SpecialForm", "_SpecialGenericAlias", "_TYPING_INTERNALS", "_TupleType", "_TypedDict", "_TypedDictMeta", "_TypingEllipsis", "_UnionGenericAlias", "_UnpackGenericAlias", "__all__", "__builtins__", "__cached__", "__doc__", "__file__", "__loader__", "__name__", "__package__", "__spec__", "_alias", "_allow_reckless_class_checks", "_allowed_types", "_caches", "_caller", "_check_generic", "_cleanups", "_collect_parameters", "_compare_args_orderless", "_deduplicate", "_deduplicate_unhashable", "_eval_type", "_flatten_literal_params", "_generic_class_getitem", "_generic_init_subclass", "_get_protocol_attrs", "_idfunc", "_is_dunder", "_is_param_expr", "_is_typevar_like", "_is_unpacked_typevartuple", "_lazy_load_getattr_static", "_make_nmtuple", "_make_union", "_namedtuple_mro_entries", "_no_init_or_replace_init", "_overload_dummy", "_overload_registry", "_paramspec_prepare_subst", "_paramspec_subst", "_prohibited", "_proto_hook", "_remove_dups_flatten", "_should_unflatten_callable_args", "_special", "_strip_annotations", "_tp_cache", "_type_check", "_type_convert", "_type_repr", "_typevar_subst", "_typevartuple_prepare_subst", "_unpack_args", "_value_and_type_iter", "abstractmethod", "assert_never", "assert_type", "cast", "clear_overloads", "collections", "contextlib", "copyreg", "dataclass_transform", "defaultdict", "final", "functools", "get_args", "get_origin", "get_overloads", "get_type_hints", "io", "is_typeddict", "no_type_check", "no_type_check_decorator", "operator", "overload", "override", "re", "reveal_type", "runtime_checkable", "stdlib_re", "sys", "types", "warnings"]),
+  ("dataclasses", ["Field", "FrozenInstanceError", "FunctionType", "GenericAlias", "InitVar", "KW_ONLY", "MISSING", "_ATOMIC_TYPES", "_DataclassParams", "_EMPTY_METADATA", "_FIELD", "_FIELDS", "_FIELD_BASE", "_FIELD_CLASSVAR", "_FIELD_INITVAR", "_HAS_DEFAULT_FACTORY", "_HAS_DEFAULT_FACTORY_CLASS", "_KW_ONLY_TYPE", "_MISSING_TYPE", "_MODULE_IDENTIFIER_RE", "_PARAMS", "_POST_INIT_NAME", "__all__", "__builtins__", "__cached__", "__doc__", "__file__", "__loader__", "__name__", "__package__", "__spec__", "_add_slots", "_asdict_inner", "_astuple_inner", "_cmp_fn", "_create_fn", "_dataclass_getstate", "_dataclass_setstate", "_field_assign", "_field_init", "_fields_in_init_order", "_frozen_get_del_attr", "_get_field", "_get_slots", "_hash_action", "_hash_add", "_hash_exception", "_hash_fn", "_hash_set_none", "_init_fn", "_init_param", "_is_classvar", "_is_dataclass_instance", "_is_initvar", "_is_kw_only", "_is_type", "_process_class", "_recursive_repr", "_repr_fn", "_set_new_attribute", "_set_qualname", "_thread", "_tuple_str", "abc", "asdict", "astuple", "copy", "dataclass", "field", "fields", "functools", "inspect", "is_dataclass", "itertools", "keyword", "make_dataclass", "re", "replace", "sys", "types"])
 ]
 
 /-- The names of `vars()` of each class that the models' objects reach, by its
@@ -29,6 +30,18 @@ def moduleNames : List (String × List String) := [
 def classNames : List (String × List String) := [
   ("collections._tuplegetter",
     ["__delete__", "__doc__", "__get__", "__module__", "__new__", "__reduce__", "__repr__", "__set__"]),
+  ("dataclasses.Field",
+    ["__class_getitem__", "__doc__", "__init__", "__module__", "__repr__", "__set_name__", "__slots__", "_field_type", "compare", "default", "default_factory", "hash", "init", "kw_only", "metadata", "name", "repr", "type"]),
+  ("dataclasses.FrozenInstanceError",
+    ["__doc__", "__module__", "__weakref__"]),
+  ("dataclasses._DataclassParams",
+    ["__doc__", "__init__", "__module__", "__repr__", "__slots__", "eq", "frozen", "init", "kw_only", "match_args", "order", "repr", "slots", "unsafe_hash", "weakref_slot"]),
+  ("dataclasses._FIELD_BASE",
+    ["__dict__", "__doc__", "__init__", "__module__", "__repr__", "__weakref__"]),
+  ("dataclasses._HAS_DEFAULT_FACTORY_CLASS",
+    ["__dict__", "__doc__", "__module__", "__repr__", "__weakref__"]),
+  ("dataclasses._MISSING_TYPE",
+    ["__dict__", "__doc__", "__module__", "__weakref__"]),
   ("types.GenericAlias",
     ["__args__", "__call__", "__dir__", "__doc__", "__eq__", "__ge__", "__getattribute__", "__getitem__", "__gt__", "__hash__", "__instancecheck__", "__iter__", "__le__", "__lt__", "__mro_entries__", "__ne__", "__new__", "__or__", "__origin__", "__parameters__", "__reduce__", "__repr__", "__ror__", "__subclasscheck__", "__typing_unpacked_tuple_args__", "__unpacked__"]),
   ("types.UnionType",
@@ -70,6 +83,18 @@ docstrings of the modules' objects, by `module.name`. -/
 def texts : List (String × String) := [
   ("collections._tuplegetter.__module__",
     "collections"),
+  ("dataclasses.Field.__module__",
+    "dataclasses"),
+  ("dataclasses.FrozenInstanceError.__module__",
+    "dataclasses"),
+  ("dataclasses._DataclassParams.__module__",
+    "dataclasses"),
+  ("dataclasses._FIELD_BASE.__module__",
+    "dataclasses"),
+  ("dataclasses._HAS_DEFAULT_FACTORY_CLASS.__module__",
+    "dataclasses"),
+  ("dataclasses._MISSING_TYPE.__module__",
+    "dataclasses"),
   ("types.GenericAlias.__doc__",
     "Represent a PEP 585 generic type\n\nE.g. for t = list[int], t.__origin__ is list and t.__args__ is (int,)."),
   ("types.UnionType.__doc__",
@@ -133,7 +158,8 @@ def texts : List (String × String) := [
 def functionNames : List (String × List String) := [
   ("typing._SpecialForm.__getitem__", ["__wrapped__"]),
   ("typing._SpecialGenericAlias.__getitem__", ["__wrapped__"]),
-  ("typing._TupleType.__getitem__", ["__wrapped__"])
+  ("typing._TupleType.__getitem__", ["__wrapped__"]),
+  ("dataclasses.__repr__", ["__wrapped__"])
 ]
 
 end

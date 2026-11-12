@@ -186,7 +186,7 @@ m_set_constants_rejected | gap | the translator does not support a set display t
 m_shape_bindings | gap | the translator does not support match
 m_shape_cases | gap | the translator does not support generator function
 m_shape_class | gap | the translator does not support generator function
-m_shape_dataclass | gap | import of module dataclasses is not modelled yet
+m_shape_dataclass | gap | the attribute dataclasses.InitVar is not modelled yet
 m_shape_rigid | gap | import of module random is not modelled yet
 m_shape_typeddict | gap | the attribute typing.Callable is not modelled yet
 m_subscripts | agree

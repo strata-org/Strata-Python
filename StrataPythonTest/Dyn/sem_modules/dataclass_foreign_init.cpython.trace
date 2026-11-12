@@ -1,0 +1,11 @@
+--- stdout 10
+C(q: int)
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+O = <class 'O'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>

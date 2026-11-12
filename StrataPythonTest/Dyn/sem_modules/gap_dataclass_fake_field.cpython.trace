@@ -1,0 +1,13 @@
+--- stdout 9
+C(x=5) 5
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+Fake = <class 'Fake'>
+Field = <class 'Field'>
+MISSING = <_MISSING_TYPE object>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>

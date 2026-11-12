@@ -1,0 +1,14 @@
+--- stdout 299
+dataclass() got some positional-only arguments passed as keyword arguments: 'cls'
+dataclass() got some positional-only arguments passed as keyword arguments: 'cls'
+dataclass() got an unexpected keyword argument 'foo'
+dataclass() got some positional-only arguments passed as keyword arguments: 'cls'
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+call = <function object>
+dataclass = <function object>

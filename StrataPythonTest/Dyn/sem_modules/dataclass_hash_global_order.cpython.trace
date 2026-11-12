@@ -1,0 +1,12 @@
+--- stdout 5
+True
+
+--- outcome
+ok
+--- globals
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+hash = <function object>
+myhash = <function object>

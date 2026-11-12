@@ -1,0 +1,11 @@
+--- stdout 19
+C(x=1, y=0) MyDict
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+MyDict = <class 'MyDict'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>

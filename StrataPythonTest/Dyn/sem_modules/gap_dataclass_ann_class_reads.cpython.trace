@@ -1,0 +1,15 @@
+--- stdout 58
+class read
+class read
+class read
+class read
+C(x: A() = 1)
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>

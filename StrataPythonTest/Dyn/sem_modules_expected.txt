@@ -2,6 +2,27 @@ alias_descriptors | gap | built-in method wrapper_descriptor.__get__ is not mode
 alias_receiver_order | agree
 alias_repr_list | gap | a list argument that shrinks while its repr is written
 alias_repr_order | agree
+dataclass_basic | gap | the __annotations__ of a function that has none set is not modelled yet
+dataclass_doc_base_init | agree
+dataclass_doc_none | agree
+dataclass_errors | agree
+dataclass_exception | agree
+dataclass_foreign_init | agree
+dataclass_hash_global_order | agree
+dataclass_hash_table | agree
+dataclass_many_kw_only | agree
+dataclass_module_name | agree
+dataclass_ns_walk_last | agree
+dataclass_options | agree
+dataclass_order_deep | agree
+dataclass_posonly_keyword | agree
+dataclass_post_init_replace | agree
+dataclass_replace_live | agree
+dataclass_shared_field | agree
+dataclass_user_globals | agree
+depth_dataclass_default_get | gap | Python call depth over 900
+depth_dataclass_doc_repr | gap | Python call depth over 900
+depth_dataclass_repr | gap | Python call depth over 900
 depth_ga_eq | gap | a C recursion depth over 9000
 depth_ga_repr | gap | a C recursion depth over 9000
 depth_namedtuple_make | gap | Python call depth over 900
@@ -16,6 +37,39 @@ depth_union_repr | gap | a C recursion depth over 9000
 ga_basics | agree
 gap_alias_str_subclass_name | gap | an attribute name that is an instance of a subclass of str is not modelled yet
 gap_class_member | gap | the attribute GenericAlias.__origin__ is not modelled yet
+gap_dataclass_abstract | gap | a dataclass with __abstractmethods__ is not modelled yet
+gap_dataclass_ann_class_reads | gap | a dataclass annotation whose class defines __class__ is not modelled yet
+gap_dataclass_ann_dict_subclass | gap | a dataclass __annotations__ that is an instance of a dict subclass is not modelled yet
+gap_dataclass_ann_module | gap | a dataclass docstring annotation whose __module__ is not a str is not modelled yet
+gap_dataclass_builtin_base | gap | the docstring of a dataclass with a built-in base is not modelled yet
+gap_dataclass_classvar | gap | a str annotation typing.ClassVar of a dataclass field is not modelled yet
+gap_dataclass_classvar_ws | gap | a str annotation typing.ClassVar of a dataclass field is not modelled yet
+gap_dataclass_debug_name | gap | a dataclass field name that the generated source can't take is not modelled yet
+gap_dataclass_eq_c_depth | gap | a C recursion depth over 9000
+gap_dataclass_fake_field | gap | a dataclass default that passes for a Field through __class__ is not modelled yet
+gap_dataclass_field_class_write | gap | an attribute write to the class Field is not modelled yet
+gap_dataclass_field_local | gap | a dataclass field name that the generated source can't take is not modelled yet
+gap_dataclass_field_name | gap | a dataclass field name that the generated source can't take is not modelled yet
+gap_dataclass_field_option | gap | a field option init that is not a bool is not modelled yet
+gap_dataclass_field_repr | gap | the attribute Field.__repr__ is not modelled yet
+gap_dataclass_field_subscript | gap | the attribute Field.__class_getitem__ is not modelled yet
+gap_dataclass_field_write | gap | an attribute write to an instance of Field is not modelled yet
+gap_dataclass_function_writes | gap | an attribute write to the function P.__init__ is not modelled yet
+gap_dataclass_hash_c_depth | gap | a C recursion depth over 9000
+gap_dataclass_import_missing | gap | from dataclasses import nothing of a name that the module lacks is not modelled yet
+gap_dataclass_initvar | gap | the attribute dataclasses.InitVar is not modelled yet
+gap_dataclass_metaclass | gap | a dataclass whose metaclass is not type is not modelled yet
+gap_dataclass_metadata | gap | field(metadata=...) is not modelled yet
+gap_dataclass_module_write | gap | an attribute write to the module dataclasses is not modelled yet
+gap_dataclass_ns_walk_swap | gap | a walk over a dict whose keys change at the same size is not modelled yet
+gap_dataclass_option_type | gap | a dataclass option eq that is not a bool is not modelled yet
+gap_dataclass_replace_swap | gap | a walk over a dict whose keys change at the same size is not modelled yet
+gap_dataclass_repr_wrapped | gap | the attribute __wrapped__ of the built-in P.__repr__ is not modelled yet
+gap_dataclass_signature | gap | the docstring of a dataclass whose MRO defines __signature__ is not modelled yet
+gap_dataclass_slots | gap | dataclass(slots=True) and dataclass(weakref_slot=True) are not modelled yet
+gap_dataclass_str_subclass_ann | gap | a dataclass annotation that is an instance of a str subclass is not modelled yet
+gap_dataclass_unloaded_module | gap | a dataclass whose __module__ is not a loaded module is not modelled yet
+gap_dataclass_weakref_slot | gap | dataclass(slots=True) and dataclass(weakref_slot=True) are not modelled yet
 gap_instance_write | gap | an attribute write to an instance of GenericAlias is not modelled yet
 gap_kwargs_not_str | gap | a call of a built-in with a keyword that is not a str is not modelled yet
 gap_member_write | gap | an attribute write to an instance of GenericAlias is not modelled yet

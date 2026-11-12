@@ -1,0 +1,15 @@
+--- stdout 14
+ok 10
+rec 123
+
+--- outcome
+ok
+--- globals
+LIMIT = 150
+R = <class 'R'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+mk = <function object>
+n = 123
+run = <function object>

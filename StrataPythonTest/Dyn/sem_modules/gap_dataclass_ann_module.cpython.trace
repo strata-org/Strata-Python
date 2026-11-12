@@ -1,0 +1,14 @@
+--- stdout 14
+C(x: A = 1)
+D
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+C = <class 'C'>
+D = <class 'D'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>

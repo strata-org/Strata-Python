@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+M = <class 'M'>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>

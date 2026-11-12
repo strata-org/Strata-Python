@@ -1,0 +1,10 @@
+--- stdout 39
+TypeError  expected 2 arguments, got 3
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>

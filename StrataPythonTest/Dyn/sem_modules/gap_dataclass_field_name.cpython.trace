@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised SyntaxError: invalid syntax (<string>, line 1)
+--- globals
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>

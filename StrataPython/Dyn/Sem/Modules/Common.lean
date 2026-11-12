@@ -7,6 +7,7 @@ module
 public import StrataPython.Dyn.Sem.Builtins.Dunders
 public import StrataPython.Dyn.Sem.Proto.Attrs
 public import StrataPython.Dyn.Sem.Builtins.Classes
+public import StrataPython.Dyn.Sem.Proto.Repr
 public import StrataPython.Dyn.Sem.Modules.Names
 
 set_option autoImplicit false
@@ -204,48 +205,102 @@ def bindPy [PyReads m V] [PyNew m V] (qualname : String) (names : Array String) 
     names
   tupleItems r
 
-/-- **The arguments of a call of the Python function `qualname`**, whose positional-or-keyword
-parameters are `names`, the last of them with the defaults `defaults`, as CPython's
-`initialize_locals` binds them, with its `TypeError`s in its order. -/
-def bindPyDefaults [PyReads m V] (qualname : String) (names defaults : Array V) (args kwargs : V) :
-    m (Array V) := do
+/-- **The arguments of a call of the Python function `qualname`** bound to its parameters
+`names`, as CPython 3.12's `initialize_locals` binds them, with its `TypeError`s in its order:
+the first `nPosOnly` names are positional-only, the first `nPos` positional, the others
+keyword-only; `defaults` gives each name's default or `none`. The result holds one value per name,
+then the extra positional arguments if `varPos`, then a new dict of the other keywords if `varKw`.
+Keywords are `keywordsCheck`ed first. -/
+def bindPyFull [PyReads m V] [PyNew m V] (qualname : String) (names : Array String)
+    (defaults : Array (Option V)) (nPosOnly nPos : Nat) (args kwargs : V)
+    (varPos varKw : Bool := false) : m (Array V) := do
   let fail {α : Type} (msg : String) : m α := raiseBuiltin "TypeError" s!"{qualname}() {msg}"
   keywordsCheck kwargs
-  let mut texts : Array String := #[]
-  for n in names do
-    let some t ← str? n | PyPure.modelInvariant "a parameter name that is not a str"
-    texts := texts.push t
   let xs ← tupleItems args
-  let n := texts.size
-  let nreq := n - defaults.size
-  let given := min xs.size n
-  let mut slots : Array (Option V) := ((xs.extract 0 given).map some) ++ Array.replicate (n - given) none
-  -- The keywords come first, then the count of the positional arguments.
+  let mut slots : Array (Option V) := Array.replicate names.size none
+  let n := min xs.size nPos
+  for i in [:n] do
+    slots := slots.set! i xs[i]?
+  let mut rest : Array (String × V) := #[]
   for (k, v, _) in ← PyReads.dictEntries kwargs do
-    let s ← match ← PyPure.immView k with
-      | some (.str s) => pure s.s
-      | some _ => fail "keywords must be strings"
-      | none => PyPure.gap "a keyword that is not an exact str"
-    match texts.idxOf? s with
-    | some i =>
-      if slots[i]!.isSome then fail s!"got multiple values for argument '{s}'"
-      slots := slots.set! i (some v)
-    | none => fail s!"got an unexpected keyword argument '{s}'"
-  if xs.size > n then
-    let sig := if defaults.isEmpty then s!"{n} positional argument{pluralS n}"
-      else s!"from {nreq} to {n} positional arguments"
-    fail s!"takes {sig} but {xs.size} {if xs.size == 1 then "was" else "were"} given"
-  let missing := (texts.zipIdx.filter fun (_, i) => i < nreq && slots[i]!.isNone).map (·.1)
-  if !missing.isEmpty then
-    fail s!"missing {missing.size} required positional argument{pluralS missing.size}: {missingList missing}"
-  let mut out : Array V := #[]
-  for (sl, i) in slots.zipIdx do
-    match sl with
-    | some v => out := out.push v
+    let some (.str ks) ← PyPure.immView k | PyPure.modelInvariant "a keyword that keywordsCheck let pass"
+    let s := ks.s
+    match (names.extract nPosOnly names.size).findIdx? (· == s) with
+    | some j =>
+      if slots[nPosOnly + j]!.isSome then fail s!"got multiple values for argument '{s}'"
+      slots := slots.set! (nPosOnly + j) (some v)
     | none =>
-      let some d := defaults[i - nreq]? | PyPure.modelInvariant "a parameter without its default"
-      out := out.push d
+      if !varKw then
+        -- `positional_only_passed_as_keyword`: the positional-only parameters, in their order,
+        -- that any keyword names.
+        let mut given : Array String := #[]
+        for (k', _, _) in ← PyReads.dictEntries kwargs do
+          if let some (.str ks') ← PyPure.immView k' then given := given.push ks'.s
+        let posOnly := (names.extract 0 nPosOnly).filter given.contains
+        if !posOnly.isEmpty then
+          fail s!"got some positional-only arguments passed as keyword arguments: '{", ".intercalate posOnly.toList}'"
+        fail s!"got an unexpected keyword argument '{s}'"
+      rest := rest.push (s, v)
+  let defcount := ((defaults.extract 0 nPos).filter (·.isSome)).size
+  let isKwonly (i : Nat) := nPos ≤ i
+  if xs.size > nPos && !varPos then
+    let kwonlyGiven := (slots.zipIdx.filter fun (x, i) => isKwonly i && x.isSome).size
+    let given := xs.size
+    let (sig, pl) := if defcount > 0 then (s!"from {nPos - defcount} to {nPos}", true)
+      else (s!"{nPos}", nPos != 1)
+    let kwSig := if kwonlyGiven > 0 then
+        s!" positional argument{pluralS given} (and {kwonlyGiven} keyword-only argument{pluralS kwonlyGiven})"
+      else ""
+    fail s!"takes {sig} positional argument{if pl then "s" else ""} but {given}{kwSig} {if given == 1 && kwonlyGiven == 0 then "was" else "were"} given"
+  let mRequired := nPos - defcount
+  let missingPos := (names.zipIdx.filter fun (_, i) => i < mRequired && slots[i]!.isNone).map (·.1)
+  if !missingPos.isEmpty then
+    fail s!"missing {missingPos.size} required positional argument{pluralS missingPos.size}: {missingList missingPos}"
+  let mut missingKw : Array String := #[]
+  for (nm, i) in names.zipIdx do
+    if slots[i]!.isNone then
+      match defaults[i]?.join with
+      | some d => slots := slots.set! i (some d)
+      | none => if isKwonly i then missingKw := missingKw.push nm
+  if !missingKw.isEmpty then
+    fail s!"missing {missingKw.size} required keyword-only argument{pluralS missingKw.size}: {missingList missingKw}"
+  let mut out : Array V := #[]
+  for x in slots do
+    let some v := x | PyPure.modelInvariant "a parameter without a value"
+    out := out.push v
+  if varPos then out := out.push (PyPure.imm (m := m) (.tuple (xs.extract nPos xs.size)))
+  if varKw then
+    let d ← PyPure.allocDict
+    for (k, v) in rest do
+      PyNew.dictSetNew d (PyPure.imm (m := m) (.str (.ofString k))) v none fun _ => pure false
+    out := out.push d
   return out
+
+/-- The arguments of a call of the Python function `qualname`, whose positional-or-keyword
+parameters are `names`, the last of them with the defaults `defaults` (`bindPyFull`). -/
+def bindPyDefaults [PyReads m V] [PyNew m V] (qualname : String) (names defaults : Array V)
+    (args kwargs : V) : m (Array V) := do
+  let mut texts : Array String := #[]
+  for nm in names do
+    let some t ← str? nm | PyPure.modelInvariant "a parameter name that is not a str"
+    texts := texts.push t
+  let dfl := Array.replicate (texts.size - defaults.size) none ++ defaults.map some
+  bindPyFull qualname texts dfl 0 texts.size args kwargs
+
+/-- **`setattr(cls, name, v)`** on a class `cls` of `type` that a port made, for the names whose
+setter is one of `type`'s getsets: `__module__` and `__doc__` write the class's namespace, and
+`__qualname__` sets the class's qualified name, as `type_set_module`, `type_set_doc` and
+`type_set_qualname` do; any other name is the generic write. -/
+def setOnClass [PyWrites m V] (cls : V) (name : String) (v : V) : m Unit := do
+  let some cd ← classData? cls | PyPure.modelInvariant "a port's class that is no class"
+  match name with
+  | "__module__" | "__doc__" =>
+    PyWrites.dictSet cd.ns (strValue (m := m) name) v none fun _ => pure false
+  | "__qualname__" =>
+    let some q ← str? v |
+      raiseBuiltin "TypeError" s!"can only assign string to {cd.name}.__qualname__, not '{← typeName v}'"
+    PyWrites.classSetName cls cd.name q
+  | _ => setAttr cls name (some v)
 
 /-- The name of the module of the module table that keeps the model's class `qualname` of the
 module `mod`, one object per run. No import statement can spell it, so no program reaches the

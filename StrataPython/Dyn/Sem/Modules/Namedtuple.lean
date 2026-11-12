@@ -130,21 +130,6 @@ def makeItems [PyReads m V] (it : V) : m (Array V) := do
     return xs
   PyPure.gap "_make of an iterable other than a tuple or a list inside another built-in's step is not modelled yet"
 
-/-- **`setattr(cls, name, v)`** on a class `cls` of `type` that a port made, for the names whose
-setter is one of `type`'s getsets: `__module__` and `__doc__` write the class's namespace, and
-`__qualname__` sets the class's qualified name, as `type_set_module`, `type_set_doc` and
-`type_set_qualname` do; any other name is the generic write. -/
-def setOnClass [PyWrites m V] (cls : V) (name : String) (v : V) : m Unit := do
-  let some cd ← classData? cls | PyPure.modelInvariant "a port's class that is no class"
-  match name with
-  | "__module__" | "__doc__" =>
-    PyWrites.dictSet cd.ns (strValue (m := m) name) v none fun _ => pure false
-  | "__qualname__" =>
-    let some q ← str? v |
-      raiseBuiltin "TypeError" s!"can only assign string to {cd.name}.__qualname__, not '{← typeName v}'"
-    PyWrites.classSetName cls cd.name q
-  | _ => setAttr cls name (some v)
-
 /-- What the methods of a named tuple class keep: its field names, its name, and the format of its
 `repr`. -/
 structure NamedtupleInfo (V : Type) where

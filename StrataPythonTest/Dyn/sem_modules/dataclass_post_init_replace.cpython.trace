@@ -1,0 +1,21 @@
+--- stdout 264
+3
+Key(value=1) Key(value=2) True False
+TypeError: Key.__init__() got an unexpected keyword argument 'z'
+TypeError: replace() should be called on dataclass instances
+ValueError: field b is declared with init=False, it cannot be specified with replace()
+N(a=1, b=5)
+
+--- outcome
+ok
+--- globals
+Key = <class 'Key'>
+N = <class 'N'>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+field = <function object>
+k = <Key object>
+r = <Key object>
+replace = <function object>

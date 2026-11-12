@@ -1,0 +1,10 @@
+--- stdout 12
+foo foo foo
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = 'foo'
+dataclass = <function object>

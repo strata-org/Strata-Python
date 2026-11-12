@@ -16,8 +16,7 @@ set_option autoImplicit false
 # The model of `typing`
 
 Each model's class holds every name of CPython's `vars()` of its class or stops with a gap on it,
-the classes are all the classes outside `builtins` that the models' objects reach, and the module
-binds only names that CPython's `vars(typing)` has. The builtins check knows the starting value of
+and the module binds only names that CPython's `vars(typing)` has. The builtins check knows the starting value of
 every name of the builtins dict, and `ForwardRef`'s check accepts exactly the dotted names.
 -/
 
@@ -26,8 +25,8 @@ namespace StrataPython.Dyn.Sem.Modules.TypingTest
 open StrataPython.Dyn.Sem
 open StrataPython.Dyn.Sem.Modules.TypesTest (namesAgree)
 
-/-- The model's classes, by CPython's `module.qualname`. -/
-def specs : List (String × ClassSpec) :=
+/-- The model's classes of `types`, `typing` and `collections`, by CPython's `module.qualname`. -/
+public def specs : List (String × ClassSpec) :=
   [("collections._tuplegetter", tupleGetterSpec), ("types.GenericAlias", gaSpec),
     ("types.UnionType", unionSpec), ("typing.Any", anySpec),
     ("typing.ForwardRef", forwardRefSpec), ("typing.NamedTuple", namedTupleSpec),
@@ -40,8 +39,6 @@ def specs : List (String × ClassSpec) :=
     ("typing._UnionGenericAlias", unionGenericAliasSpec)]
 
 #guard specs.all fun (key, spec) => namesAgree spec key
--- The models' objects reach no other class outside `builtins`.
-#guard classNames.map (·.1) == specs.map (·.1)
 #guard typingAttrNames.all ((moduleNames.lookup "typing").get!.contains ·)
 
 -- Every name of the builtins dict has a known starting value, so `import typing` can pass its check.

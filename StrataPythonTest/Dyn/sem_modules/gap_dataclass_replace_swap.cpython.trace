@@ -1,0 +1,11 @@
+--- stdout 54
+RuntimeError dictionary keys changed during iteration
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+replace = <function object>

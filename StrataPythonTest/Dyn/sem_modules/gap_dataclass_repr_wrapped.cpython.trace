@@ -1,0 +1,10 @@
+--- stdout 16
+has __wrapped__
+
+--- outcome
+ok
+--- globals
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
