@@ -47,8 +47,8 @@ regression corpus is V2-only, marked by a `.desired` sidecar in
 For one front end, the presence of `<expected_dir>/<stem>.expected` says the case
 is expected to fail (non-zero exit) with output matching the regex that file holds;
 its absence says the case is expected to pass (exit 0); a `<stem>.skip` sidecar
-skips the case. A parse failure (the Python front end cannot lower the file to Ion)
-is a silent skip rather than a failure.
+skips the case. A case the Python front end cannot lower to Ion fails, so a lowering
+regression cannot turn a case green; a case that is not meant to run needs `.skip`.
 
 Requires Python with `strata_python.gen` (the build exports `PYTHON`) and the
 `pyInterpret` binary, which `StrataPythonFrontEndTestMain` lists in its `needs` so
@@ -61,10 +61,11 @@ namespace StrataPython.InterpretGolden
 
 meta section
 
-/-- Run one front end (`v2` selects V2 over V1) on one corpus case and throw on any
-    failure, so the child `lean` process exits non-zero and `testMain` reports it.
-    A `.skip` sidecar or a parse failure returns quietly (the case passes). -/
-private def runOnePass (pythonCmd root : System.FilePath) (stem : String) (v2 : Bool)
+/-- Run one front end (`v2` selects V2 over V1) on one corpus case under `root` and
+    throw on any failure, so the child `lean` process exits non-zero and `testMain`
+    reports it. A `.skip` sidecar returns quietly (the case passes); a lowering
+    failure throws. -/
+public def runOnePass (pythonCmd root : System.FilePath) (stem : String) (v2 : Bool)
     : IO Unit := do
   let feName := if v2 then "V2" else "V1"
   let expectedDir := root / "StrataPythonTest" /
@@ -72,8 +73,11 @@ private def runOnePass (pythonCmd root : System.FilePath) (stem : String) (v2 : 
   -- `.skip` → skip (the file's contents are the human-facing reason).
   if ← (expectedDir / (stem ++ ".skip")).pathExists then
     return
-  let some (exitCode, output) ← compileAndRun pythonCmd.toString root stem v2
-    | return  -- the Python front end could not lower the file to Ion: a silent skip
+  let compiled ← compileAndRun pythonCmd.toString root stem v2
+  let (exitCode, output) ← IO.ofExcept <| compiled.mapError fun out =>
+    s!"{stem} [{feName}]: py_to_strata failed to lower the case to Ion; fix the \
+       front end, or add {stem}.skip with the reason if the case is not meant to \
+       run\n{out}"
   let expectedFile := expectedDir / (stem ++ ".expected")
   if ← expectedFile.pathExists then
     let pattern := rstripNewlines (← IO.FS.readFile expectedFile)

@@ -226,6 +226,10 @@ from the analyze goldens:
 | `<case>.expected` | the case must fail, and its output must match this regex |
 | `<case>.skip` | do not run the case; the file holds the reason |
 
+A case the Python front end cannot lower to Ion fails under both front ends, so a
+lowering regression shows up as a failure; a case that is not meant to run needs a
+`.skip` in each set that runs it.
+
 So a case that fails under one front end and passes under the other has a file in
 only one of the two sets. `lake exe pyInterpretUpdate --v2` ends with a
 `V1/V2 divergence: N of M case(s) differ` line that compares whole cases, not just

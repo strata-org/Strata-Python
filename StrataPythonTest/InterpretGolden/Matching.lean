@@ -81,10 +81,12 @@ public def matchesPattern (pattern output : String) : IO Bool := do
   grepE pattern (collapseWs output)
 
 /-- Compile `tests/<stem>.py` to Ion in a private temp dir and run `pyInterpret` on
-    it; return its combined output and exit code, or `none` when the Python front end
-    cannot lower a present file to Ion (a parse failure, a silent skip). A corpus
-    `.py` that is absent entirely throws instead — that is a stale committed child,
-    not a skip. Each case compiles into its own temp dir, so callers
+    it; return its exit code and combined output. When the Python front end cannot
+    lower the file to Ion, return the compiler's combined output as the error instead,
+    so the caller fails the case: a lowering regression must not pass silently, and a
+    case that is meant not to run carries a `.skip` sidecar, which callers check before
+    calling this. A corpus `.py` that is absent entirely throws (a stale committed
+    child). Each case compiles into its own temp dir, so callers
     share no scratch and stay parallel. `INTERPRET_TIMEOUT` (default 60s) bounds the
     run with `timeout`; a timeout (exit 124) yields a stable one-line output. `--fuel`
     bounds execution steps but not translation, so the wall-clock bound is what keeps a
@@ -92,13 +94,12 @@ public def matchesPattern (pattern output : String) : IO Bool := do
     handed, so the output is rewritten back to the canonical corpus path the `.expected`
     patterns embed. -/
 public def compileAndRun (python : String) (root : System.FilePath) (stem : String)
-    (v2 : Bool) : IO (Option (UInt32 × String)) := do
+    (v2 : Bool) : IO (Except String (UInt32 × String)) := do
   let canonical := s!"StrataPythonTest/tests/{stem}.python.st.ion"
   let timeoutStr := ((← IO.getEnv "INTERPRET_TIMEOUT").getD "60")
   let pyPath := root / "StrataPythonTest" / "tests" / (stem ++ ".py")
-  -- A missing corpus file is not a parse failure: it means a committed child names a
-  -- `.py` that no longer exists, so fail loudly instead of returning `none` (a skip).
-  -- Only a real `py_to_strata` failure on a present file is the silent skip below.
+  -- A missing corpus file means a committed child names a `.py` that no longer
+  -- exists; that calls for regenerating the children, not for a lowering diagnosis.
   unless ← pyPath.pathExists do
     throw <| IO.userError
       s!"interpret golden corpus file missing: {pyPath}; the child module for \"{stem}\" \
@@ -118,7 +119,7 @@ public def compileAndRun (python : String) (root : System.FilePath) (stem : Stri
       inheritEnv := true
     }
     if compile.exitCode != 0 then
-      return none
+      return .error (compile.stdout ++ compile.stderr)
     let runOut ← IO.Process.output {
       cmd := "timeout"
       args := #[timeoutStr, (root / ".lake" / "build" / "bin" / "pyInterpret").toString]
@@ -129,6 +130,6 @@ public def compileAndRun (python : String) (root : System.FilePath) (stem : Stri
     let output :=
       if runOut.exitCode == 124 then s!"pyInterpret timed out after {timeoutStr}s"
       else (runOut.stdout ++ runOut.stderr).replace ionAbs.toString canonical
-    return some (runOut.exitCode, output)
+    return .ok (runOut.exitCode, output)
 
 end StrataPython.InterpretGolden

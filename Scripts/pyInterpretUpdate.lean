@@ -98,11 +98,15 @@ private def writeDerived (expectedFile : System.FilePath) (output : String) :
   IO.FS.writeFile expectedFile pat
   return some trimmed
 
-/-- Rewrite one front end's `.expected` files from the actual interpreter output. -/
+/-- Rewrite one front end's `.expected` files from the actual interpreter output.
+    Returns the number of cases the Python front end could not lower to Ion: those
+    have no expectation to derive, and the suite fails them unless they carry a
+    `.skip`, so `main` reports them through a non-zero exit. -/
 private def update (python : String) (root : System.FilePath) (v2 : Bool)
-    (filter : Option String) : IO Unit := do
+    (filter : Option String) : IO Nat := do
   let expectedDir := root / "StrataPythonTest" /
     (if v2 then "expected_interpret" else "expected_interpret_v1")
+  let mut lowerFailures := 0
   for stem in ← corpusStems root filter do
     -- The imported regression corpus is V2-only (marked by a `.desired` sidecar).
     if !v2 && (← (root / "StrataPythonTest" / "expected_interpret"
@@ -111,8 +115,12 @@ private def update (python : String) (root : System.FilePath) (v2 : Bool)
     if ← (expectedDir / (stem ++ ".skip")).pathExists then
       IO.println s!"SKIP: {stem}"
       continue
-    let some (exitCode, output) ← compileAndRun python root stem v2
-      | IO.println s!"SKIP (parse): {stem}"; continue
+    let r ← compileAndRun python root stem v2
+    if let .error out := r then
+      IO.println s!"ERROR: {stem} — py_to_strata failed to lower the case to Ion\n{out}"
+      lowerFailures := lowerFailures + 1
+      continue
+    let .ok (exitCode, output) := r | continue
     let expectedFile := expectedDir / (stem ++ ".expected")
     if ← expectedFile.pathExists then
       if exitCode == 0 then
@@ -133,6 +141,7 @@ private def update (python : String) (root : System.FilePath) (v2 : Bool)
           wrote no .expected (fix by hand)"
     else
       IO.println s!"OK:   {stem}"
+  return lowerFailures
 
 /-- The V1/V2 divergence count, printed after a `--v2` update. A case's state is
     `skip`, the stored `.expected` pattern, or `pass` (no sidecar). Cases V1 does
@@ -177,7 +186,11 @@ public def main (args : List String) : IO UInt32 := do
     IO.eprintln s!"pyInterpret not built at {interp}; run `lake build pyInterpret`"
     return 1
   IO.println s!"Updating the {if v2 then "V2" else "V1"} front end ..."
-  update python root v2 filter
+  let lowerFailures ← update python root v2 filter
   if v2 then
     reportDivergence root
+  if lowerFailures > 0 then
+    IO.eprintln s!"{lowerFailures} case(s) failed to lower to Ion; fix the front end, or \
+                   add a .skip sidecar with the reason"
+    return 1
   return 0
