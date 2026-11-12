@@ -48,6 +48,8 @@ def app (custom : Constructors) : String → List Type → Type
   | "real", [] => Strata.Util.Real
   | "string", [] => String
   | "arrow", [a, b] => a → b
+  | "Map", [k, v] => k → v
+  | "Sequence", [a] => List a
   | name, args => custom name args
 
 /-- A compositional Core interpretation, with arbitrary carriers for free type variables. -/
