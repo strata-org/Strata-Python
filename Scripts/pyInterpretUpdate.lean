@@ -99,9 +99,9 @@ private def writeDerived (expectedFile : System.FilePath) (output : String) :
   return some trimmed
 
 /-- Rewrite one front end's `.expected` files from the actual interpreter output.
-    Returns the number of cases the Python front end could not lower to Ion: those
-    have no expectation to derive, and the suite fails them unless they carry a
-    `.skip`, so `main` reports them through a non-zero exit. -/
+    Returns the number of cases the Python front end could not lower to Ion. Such a
+    case has no expectation to derive and fails the suite unless it carries a
+    `.skip`, so the count must surface as a failure of the update run. -/
 private def update (python : String) (root : System.FilePath) (v2 : Bool)
     (filter : Option String) : IO Nat := do
   let expectedDir := root / "StrataPythonTest" /

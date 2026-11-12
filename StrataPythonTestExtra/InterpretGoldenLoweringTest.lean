@@ -34,6 +34,8 @@ private meta def withUnlowerableCase (stem : String) (skip : Bool)
       IO.FS.createDirAll expectedDir
       if skip then
         IO.FS.writeFile (expectedDir / (stem ++ ".skip")) "not meant to run\n"
+    -- `withTempDir`'s cleanup (`removeDirAll`) does not follow symlinks, so it removes
+    -- this link and leaves the real `Python/` alone. Recheck on a toolchain upgrade.
     let ln ← IO.Process.output {
       cmd := "ln", args := #["-s", (realRoot / "Python").toString, (root / "Python").toString]
     }

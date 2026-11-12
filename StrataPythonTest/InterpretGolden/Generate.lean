@@ -64,7 +64,8 @@ meta section
 /-- Run one front end (`v2` selects V2 over V1) on one corpus case under `root` and
     throw on any failure, so the child `lean` process exits non-zero and `testMain`
     reports it. A `.skip` sidecar returns quietly (the case passes); a lowering
-    failure throws. -/
+    failure throws. Public only so `InterpretGoldenLoweringTest` can run it on a
+    scratch root; it is test support, not an API. -/
 public def runOnePass (pythonCmd root : System.FilePath) (stem : String) (v2 : Bool)
     : IO Unit := do
   let feName := if v2 then "V2" else "V1"
@@ -75,9 +76,15 @@ public def runOnePass (pythonCmd root : System.FilePath) (stem : String) (v2 : B
     return
   let compiled ← compileAndRun pythonCmd.toString root stem v2
   let (exitCode, output) ← IO.ofExcept <| compiled.mapError fun out =>
-    s!"{stem} [{feName}]: py_to_strata failed to lower the case to Ion; fix the \
-       front end, or add {stem}.skip with the reason if the case is not meant to \
-       run\n{out}"
+    -- A Python without `strata_python` fails every case the same way; name that
+    -- instead of pointing at the front end.
+    if hasSub out "ModuleNotFoundError" then
+      s!"{stem} [{feName}]: py_to_strata could not start: the Python environment \
+         lacks a module it needs (not a front-end regression)\n{out}"
+    else
+      s!"{stem} [{feName}]: py_to_strata failed to lower the case to Ion; fix the \
+         front end, or add {stem}.skip with the reason if the case is not meant to \
+         run\n{out}"
   let expectedFile := expectedDir / (stem ++ ".expected")
   if ← expectedFile.pathExists then
     let pattern := rstripNewlines (← IO.FS.readFile expectedFile)
