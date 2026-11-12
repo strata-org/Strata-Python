@@ -1,0 +1,11 @@
+--- stdout 31
+{1: A1, 3: A3, 200: 0, 201: 0}
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+__doc__ = None
+__name__ = '__main__'
+a = {1: <A object>, 2: <A object>, 3: <A object>}
+c = {1: <A object>, 2: <A object>, 3: <A object>, 200: 0, 201: 0}

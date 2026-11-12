@@ -1,0 +1,15 @@
+--- stdout 15
+eq b
+eq a
+True
+
+--- outcome
+ok
+--- globals
+P = <class 'P'>
+V = <class 'V'>
+__doc__ = None
+__name__ = '__main__'
+e1 = <P object>
+e2 = <P object>
+e3 = <P object>

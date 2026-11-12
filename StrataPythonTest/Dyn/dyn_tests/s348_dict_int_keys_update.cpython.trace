@@ -1,0 +1,10 @@
+--- stdout 13
+{2: 1, 3: 1}
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+d = {2: 1, 3: 1}
+k = 3

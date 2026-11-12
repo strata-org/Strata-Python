@@ -1,0 +1,20 @@
+module top
+  P: local (assigned, referenced)
+  V: local (assigned, referenced)
+  e1: local (assigned, referenced)
+  e2: local (assigned, referenced)
+  e3: local (assigned, referenced)
+  print: global implicit (referenced)
+  property: global implicit (referenced)
+  class V
+    __eq__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __eq__
+      o: local (parameter)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+  class P
+qualnames: P, V, V.__eq__, V.__init__

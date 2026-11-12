@@ -1,0 +1,14 @@
+--- stdout 16
+eq 1
+eq 3
+False
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+__doc__ = None
+__name__ = '__main__'
+a = {1: <A object>, 2: <A object>, 3: <A object>}
+b = {1: <A object>, 2: <A object>, 3: <A object>}
+c = {1: <A object>, 2: <A object>, 3: <A object>, 200: 0, 201: 0}

@@ -1,0 +1,157 @@
+module s347_dict_iter_convert {
+  func @|s347_dict_iter_convert.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s347_dict_iter_convert")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s347_dict_iter_convert", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s347_dict_iter_convert", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s347_dict_iter_convert.K.<body>|, "<body>", "s347_dict_iter_convert")
+      %str.1 : py.Value = py.strLit("K")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %K.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %K.cell.0 : base.Ref(py.Value) = py.globalCell("s347_dict_iter_convert", "K")
+      %set.2 : base.Unit = base.refSet[py.Value](%K.cell.0, %K.0)
+      %str.2 : py.Value = py.strLit("x")
+      %int.0 : py.Value = py.intLit(0)
+      %str.3 : py.Value = py.strLit("p")
+      %int.1 : py.Value = py.intLit(1)
+      %str.4 : py.Value = py.strLit("q")
+      %int.2 : py.Value = py.intLit(2)
+      %str.5 : py.Value = py.strLit("r")
+      %int.3 : py.Value = py.intLit(3)
+      %dict.0 : py.Value = py.mkDict(%str.2, %int.0, %str.3, %int.1, %str.4, %int.2, %str.5, %int.3) ^propagate.0()
+      %a.cell.0 : base.Ref(py.Value) = py.globalCell("s347_dict_iter_convert", "a")
+      %set.3 : base.Unit = base.refSet[py.Value](%a.cell.0, %dict.0)
+      %a.0 : py.Value = py.loadGlobal("s347_dict_iter_convert", "a") ^propagate.0()
+      %str.6 : py.Value = py.strLit("x")
+      %del.0 : base.Unit = py.delItem(%a.0, %str.6) ^propagate.0()
+      %a.1 : py.Value = py.loadGlobal("s347_dict_iter_convert", "a") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%a.1) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %k.cell.0 : base.Ref(py.Value) = py.globalCell("s347_dict_iter_convert", "k")
+      %set.4 : base.Unit = base.refSet[py.Value](%k.cell.0, %item.0)
+      %print.0 : py.Value = py.loadGlobal("s347_dict_iter_convert", "print") ^propagate.0()
+      %k.0 : py.Value = py.loadGlobal("s347_dict_iter_convert", "k") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%k.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %k.1 : py.Value = py.loadGlobal("s347_dict_iter_convert", "k") ^propagate.0()
+      %str.7 : py.Value = py.strLit("p")
+      %eq.0 : py.Value = py.eq(%k.1, %str.7) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%eq.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %int.4 : py.Value = py.intLit(5)
+      %a.2 : py.Value = py.loadGlobal("s347_dict_iter_convert", "a") ^propagate.0()
+      %K.1 : py.Value = py.loadGlobal("s347_dict_iter_convert", "K") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%K.1, %tuple.2, %kwargs.2) ^propagate.0()
+      %store.0 : base.Unit = py.setItem(%a.2, %call.1, %int.4) ^propagate.0()
+      jump ^join.0()
+    else.0():
+      jump ^join.0()
+    join.0():
+      jump ^head.0()
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+    exit.0():
+      %print.1 : py.Value = py.loadGlobal("s347_dict_iter_convert", "print") ^propagate.0()
+      %a.3 : py.Value = py.loadGlobal("s347_dict_iter_convert", "a") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%a.3)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.1, %tuple.3, %kwargs.3) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @|s347_dict_iter_convert.K.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__hash__", binding = "def"}, {name = "__eq__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s347_dict_iter_convert", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("K")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s347_dict_iter_convert.K.__hash__, "__hash__", "s347_dict_iter_convert")
+      %str.4 : py.Value = py.strLit("__hash__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s347_dict_iter_convert.K.__eq__, "__eq__", "s347_dict_iter_convert")
+      %str.5 : py.Value = py.strLit("__eq__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s347_dict_iter_convert.K.__hash__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.__hash__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %str.0 : py.Value = py.strLit("q")
+      %__hash__.0 : py.Value = py.attr(%str.0, "__hash__") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%__hash__.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s347_dict_iter_convert.K.__eq__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %o.0 : py.Value = py.undef("o")
+      %o.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%o.0)
+      %self.1 : py.Value = py.undef("self")
+      %o.1 : py.Value = py.undef("o")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %o.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.__eq__", 0, 2, false, false, "self", "o") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%o.cell.0, %o.2)
+      %o.3 : py.Value = base.refGet[py.Value](%o.cell.0)
+      %o.4 : py.Value = py.requireDefined(%o.3, "o", "UnboundLocalError", "cannot access local variable 'o' where it is not associated with a value") ^propagate.0()
+      %str.0 : py.Value = py.strLit("q")
+      %eq.0 : py.Value = py.eq(%o.4, %str.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%eq.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

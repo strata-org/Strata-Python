@@ -114,11 +114,20 @@ structure DictTable where
   byUserImm : Index (Option DictEntry) Value DictEntry.userImmKey entries
   groups : Groups (Option DictEntry) (HashKind × KeyClass) Hash DictEntry.groupKey entries
   kindGroups : Groups (Option DictEntry) HashKind Hash DictEntry.kindKey entries
+  /-- Whether the entry array may differ from CPython's: a copy that dropped holes, a `popitem`,
+  or an instance's dict. A walk by position can then lose its place at any change of the keys. -/
+  inexact : Bool
+  /-- Whether the dict is an object's own `__dict__`, which CPython may keep as a split table, whose
+  `dict_equal` walks the class's shared keys, in their order, not this dict's order. -/
+  split : Bool
+  /-- Whether every key written since the dict was made or cleared is an exact `str`: while it
+  holds, CPython may keep a table of `str` keys, which it converts at the first other key. -/
+  strKeys : Bool
 
 namespace DictTable
 
 /-- The empty dict. -/
-def empty : DictTable := ⟨#[], #[], 0, false, 0, .empty, .empty, .empty, .empty, .empty⟩
+def empty : DictTable := ⟨#[], #[], 0, false, 0, .empty, .empty, .empty, .empty, .empty, false, false, true⟩
 
 instance : Inhabited DictTable := ⟨empty⟩
 
@@ -156,14 +165,24 @@ def value (t : DictTable) (i : Nat) : Value := t.values.getD i (.undef "")
 def insertNew (t : DictTable) (e : DictEntry) (v : Value) : DictTable :=
   -- Taking `t` apart first leaves each array and map with one reference, so that it is updated in
   -- place.
-  let ⟨entries, values, used, deleted, keysVersion, byHash, byObj, byUserImm, groups, kindGroups⟩ := t
+  let ⟨entries, values, used, deleted, keysVersion, byHash, byObj, byUserImm, groups, kindGroups, inexact, split, strKeys⟩ := t
   let byHash := byHash.push (some e)
   let byObj := byObj.push (some e)
   let byUserImm := byUserImm.push (some e)
   let groups := groups.push (some e)
   let kindGroups := kindGroups.push (some e)
   { entries := entries.push (some e), values := values.push v, used := used + 1, deleted,
-    keysVersion := keysVersion + 1, byHash, byObj, byUserImm, groups, kindGroups }
+    keysVersion := keysVersion + 1, byHash, byObj, byUserImm, groups, kindGroups, inexact, split,
+    strKeys := strKeys && e.key matches .str _ }
+
+/-- `t` as a write with the key `k` (a new key or an existing one) leaves it before its lookup:
+at a key that isn't an exact `str`, CPython converts a table of `str` keys to a general one, which
+compacts its entries if it has a deletion, so `t` is then inexact and its keys' version changes. -/
+def noteKey (t : DictTable) (k : Value) : DictTable :=
+  if t.strKeys && !(k matches .str _) then
+    if t.deleted then { t with inexact := true, keysVersion := t.keysVersion + 1, strKeys := false }
+    else { t with strKeys := false }
+  else t
 
 /-- `t` with the value at position `i` replaced; the keys don't change. -/
 def setValue (t : DictTable) (i : Nat) (v : Value) : DictTable :=
@@ -171,7 +190,7 @@ def setValue (t : DictTable) (i : Nat) (v : Value) : DictTable :=
 
 /-- `t` with the live entry at position `i` deleted: a hole, and the deletion flag set. -/
 def deleteAt (t : DictTable) (i : Nat) : DictTable :=
-  let ⟨entries, values, used, deleted, keysVersion, byHash, byObj, byUserImm, groups, kindGroups⟩ := t
+  let ⟨entries, values, used, deleted, keysVersion, byHash, byObj, byUserImm, groups, kindGroups, inexact, split, strKeys⟩ := t
   if hi : i < entries.size then
     match entries[i] with
     | some _ =>
@@ -181,21 +200,22 @@ def deleteAt (t : DictTable) (i : Nat) : DictTable :=
       let groups := groups.set i hi none
       let kindGroups := kindGroups.set i hi none
       { entries := entries.set i none hi, values := values.setIfInBounds i (.undef ""),
-        used := used - 1, deleted := true, keysVersion := keysVersion + 1, byHash, byObj, byUserImm, groups, kindGroups }
-    | none => ⟨entries, values, used, deleted, keysVersion, byHash, byObj, byUserImm, groups, kindGroups⟩
-  else ⟨entries, values, used, deleted, keysVersion, byHash, byObj, byUserImm, groups, kindGroups⟩
+        used := used - 1, deleted := true, keysVersion := keysVersion + 1, byHash, byObj, byUserImm, groups, kindGroups,
+        inexact, split, strKeys }
+    | none => ⟨entries, values, used, deleted, keysVersion, byHash, byObj, byUserImm, groups, kindGroups, inexact, split, strKeys⟩
+  else ⟨entries, values, used, deleted, keysVersion, byHash, byObj, byUserImm, groups, kindGroups, inexact, split, strKeys⟩
 
 /-- `t` without its last slot, a hole. -/
 def popHole (t : DictTable) (hb : t.entries.back? = some none) : DictTable :=
   match t, hb with
-  | ⟨entries, values, used, deleted, keysVersion, byHash, byObj, byUserImm, groups, kindGroups⟩, hb =>
+  | ⟨entries, values, used, deleted, keysVersion, byHash, byObj, byUserImm, groups, kindGroups, inexact, split, strKeys⟩, hb =>
     let byHash := byHash.pop (by simp [hb, DictEntry.hashKey])
     let byObj := byObj.pop (by simp [hb, DictEntry.objKey])
     let byUserImm := byUserImm.pop (by simp [hb, DictEntry.userImmKey])
     let groups := groups.pop (by simp [hb, DictEntry.groupKey])
     let kindGroups := kindGroups.pop (by simp [hb, DictEntry.kindKey])
     { entries := entries.pop, values := values.pop, used, deleted, keysVersion, byHash, byObj,
-      byUserImm, groups, kindGroups }
+      byUserImm, groups, kindGroups, inexact, split, strKeys }
 
 /-- `popHole` drops the last slot. -/
 private theorem entries_popHole (t : DictTable) (hb : t.entries.back? = some none) :
@@ -239,7 +259,7 @@ position go, so that the next `popitem` doesn't pass them again, and the holes b
 which a reverse iterator sees. -/
 def popitem (t : DictTable) : Option ((DictEntry × Value) × DictTable) := do
   let (i, e, v) ← t.popitemAt?
-  return ((e, v), t.removePopped i)
+  return ((e, v), { t.removePopped i with inexact := true })
 
 /-- `dict.clear`: no entries, the deletion flag cleared, and a new version of the keys. -/
 def clear (t : DictTable) : DictTable := { empty with keysVersion := t.keysVersion + 1 }
@@ -249,10 +269,12 @@ def live (t : DictTable) : Array (DictEntry × Value) :=
   (t.entries.zipIdx).filterMap fun (e?, i) => e?.map (·, t.value i)
 
 /-- A dict with the live entries of `t`, in the same order, and no holes.  It keeps the deletion
-flag of `t`. -/
+flag of `t` and whether it is split; it is inexact if `t` is, or had holes, which CPython's copy
+may keep. -/
 def compact (t : DictTable) : DictTable :=
   let fresh := t.live.foldl (fun acc (e, v) => acc.insertNew e v) empty
-  { fresh with deleted := t.deleted, keysVersion := t.keysVersion }
+  let inexact := t.inexact || t.used != t.entries.size
+  { fresh with deleted := t.deleted, keysVersion := t.keysVersion, inexact, split := t.split }
 
 end DictTable
 

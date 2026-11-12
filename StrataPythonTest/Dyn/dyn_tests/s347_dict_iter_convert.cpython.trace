@@ -1,0 +1,13 @@
+--- stdout 29
+p
+r
+{'p': 1, 'q': 5, 'r': 3}
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+a = {'p': 1, 'q': 5, 'r': 3}
+k = 'r'

@@ -367,6 +367,10 @@ class PyReads (m : Type → Type 1) (V : outParam Type) extends PyPure m V where
   /-- Whether a key of the dict `d` was deleted since it was made or cleared, and the version of
   its keys, which changes whenever a key is added or removed. -/
   dictFlags : V → m (Bool × Nat)
+  /-- Whether the entry array of the dict `d` may differ from CPython's, and whether `d` is an
+  object's own `__dict__`, which CPython may keep as a split table (`DictTable.inexact`,
+  `DictTable.split`). -/
+  dictLayout : V → m (Bool × Bool)
   /-- A new dict with the entries of `d`, in order, and its deletion flag. -/
   dictCopy : V → m V
   /-- A new dict with the entries of `d` at the positions `i` of `dictEntries` for which `keep i`

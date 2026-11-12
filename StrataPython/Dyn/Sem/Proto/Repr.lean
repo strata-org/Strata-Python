@@ -237,10 +237,8 @@ def dictRepr [PyCalls m V] : Nat → V → m String
       let mut len := 1
       let mut pos := 0
       for _ in [0:reprWalkFuel] do
-        -- A resize compacts the entries and moves the walk's position when the table has holes.
-        let (deleted, version') ← PyReads.dictFlags v
-        if deleted && version' != version then
-          PyPure.gap "a dict whose keys change during its repr, after a deletion, is not modelled yet"
+        compactGap v version
+          "a dict whose entries may move during its repr is not modelled yet"
         let some (j, k, x) ← dictEntryFrom v pos | return "{" ++ ", ".intercalate parts.reverse ++ "}"
         let ks ← textOf (← reprN n k)
         let xs ← textOf (← reprN n x)

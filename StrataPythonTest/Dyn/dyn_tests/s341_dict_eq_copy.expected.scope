@@ -1,0 +1,19 @@
+module
+  A: local (assigned, referenced)
+  a: local (assigned, referenced)
+  c: local (assigned, referenced)
+  b: local (assigned, referenced)
+  print: global implicit (referenced)
+  class A
+    __init__: local (assigned)
+    __eq__: local (assigned)
+    function A.__init__
+      params: self, v
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function A.__eq__
+      params: self, other
+      self: local (parameter, referenced)
+      other: local (parameter)
+      print: global implicit (referenced)
+      c: global implicit (referenced)

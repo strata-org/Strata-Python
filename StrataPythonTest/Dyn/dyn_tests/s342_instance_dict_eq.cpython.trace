@@ -1,0 +1,14 @@
+--- stdout 15
+eq 4
+eq 3
+True
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+x = <C object>
+y = <C object>

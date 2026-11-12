@@ -1,0 +1,29 @@
+module top
+  A: local (assigned, referenced)
+  K: local (assigned)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  print: global implicit (referenced)
+  class K
+    __eq__: local (assigned)
+    __hash__: local (assigned)
+    function __hash__
+      self: local (parameter)
+    function __eq__
+      ValueError: global implicit (referenced)
+      o: local (parameter)
+      self: local (parameter)
+  class A
+    __eq__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __eq__
+      K: global implicit (referenced)
+      ValueError: global implicit (referenced)
+      a: global implicit (referenced)
+      o: local (parameter)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+qualnames: A, A.__eq__, A.__init__, K, K.__eq__, K.__hash__

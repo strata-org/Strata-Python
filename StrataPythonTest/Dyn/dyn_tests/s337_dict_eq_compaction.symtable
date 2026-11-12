@@ -1,0 +1,22 @@
+module top
+  A: local (assigned, referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  print: global implicit (referenced)
+  class A
+    __eq__: local (assigned)
+    __hash__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __eq__
+      a: global implicit (referenced)
+      i: local (assigned, referenced)
+      other: local (parameter)
+      print: global implicit (referenced)
+      range: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __hash__
+      self: local (parameter)
+qualnames: A, A.__eq__, A.__hash__, A.__init__

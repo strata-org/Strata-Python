@@ -1,0 +1,18 @@
+module top
+  C: local (assigned, referenced)
+  P: local (assigned, referenced)
+  print: global implicit (referenced)
+  x: local (assigned, referenced)
+  y: local (assigned, referenced)
+  class P
+    __eq__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __eq__
+      o: local (parameter)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+  class C
+qualnames: C, P, P.__eq__, P.__init__

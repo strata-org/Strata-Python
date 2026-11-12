@@ -1,0 +1,32 @@
+module
+  K: local (assigned)
+  A: local (assigned, referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  print: global implicit (referenced)
+  class K
+    __hash__: local (assigned)
+    __eq__: local (assigned)
+    function K.__hash__
+      params: self
+      self: local (parameter)
+    function K.__eq__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter)
+      ValueError: global implicit (referenced)
+  class A
+    __init__: local (assigned)
+    __eq__: local (assigned)
+    function A.__init__
+      params: self, v
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function A.__eq__
+      params: self, o
+      self: local (parameter, referenced)
+      o: local (parameter)
+      print: global implicit (referenced)
+      a: global implicit (referenced)
+      K: global implicit (referenced)
+      ValueError: global implicit (referenced)

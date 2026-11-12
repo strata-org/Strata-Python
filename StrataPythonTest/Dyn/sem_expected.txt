@@ -408,7 +408,7 @@ s302_printf_literal_order | agree
 s303_printf_int_returns_bool | gap | an __int__ that returns a bool, where CPython warns, is not modelled yet
 s304_percent_order_with_raises | agree
 s305_repr_tuple_met_again | gap | the repr of a tuple met again, or of an equal tuple, is not modelled yet
-s306_repr_dict_resized | gap | a dict whose keys change during its repr, after a deletion, is not modelled yet
+s306_repr_dict_resized | gap | a dict whose entries may move during its repr is not modelled yet
 s307_format_borrowed | agree
 s308_printf_bytes_high_byte | agree
 s309_printf_bytes_literal | agree
@@ -438,8 +438,17 @@ s330_builtin_instance_write | gap | the attribute x of the built-in exit is not 
 s331_getattr_hook_depth | gap | a C recursion depth over 9000
 s332_method_wrapper_depth | gap | a C recursion depth over 9000
 s336_int_mod_tuple | agree
+s337_dict_eq_compaction | gap | a dict whose entries may move during its comparison is not modelled yet
 s33_repeat_index | agree
 s340_str_fold_format | gap | the translator does not support a % format that CPython may fold into a str constant
+s341_dict_eq_copy | gap | a dict whose entries may move during its comparison is not modelled yet
+s342_instance_dict_eq | gap | == of an instance's __dict__ with more than one attribute is not modelled yet
+s343_dict_copy_repr | gap | a dict whose entries may move during its repr is not modelled yet
+s344_dict_str_table_convert | gap | a dict whose entries may move during its comparison is not modelled yet
+s346_dict_failed_write | gap | a dict whose entries may move during its comparison is not modelled yet
+s347_dict_iter_convert | gap | a dict whose keys changed at the same size during its iteration is not modelled yet
+s348_dict_int_keys_update | agree
+s349_property_dict_eq | gap | == of an instance's __dict__ with more than one attribute is not modelled yet
 s34_container_dunders | agree
 s350_str_fold_subscript | gap | the translator does not support a % format that CPython may fold into a str constant
 s351_str_leaf_mod_tuple | agree

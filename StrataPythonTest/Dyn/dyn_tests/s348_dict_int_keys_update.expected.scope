@@ -1,0 +1,4 @@
+module
+  d: local (assigned, referenced)
+  k: local (assigned, referenced)
+  print: global implicit (referenced)

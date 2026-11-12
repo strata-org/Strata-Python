@@ -667,28 +667,47 @@ def seqCompare [PyPure m V] (cmp : Arith.CmpOp → V → V → m Bool) (op : Ari
     | .ne => return true
     | _ => cmp op x y
 
-/-- CPython's `dict_equal` from position `i` of `a`'s entry array on: each live entry's key is
-looked up in `b` and the two values compared, and the entry array is read again at each step, as
-CPython reads it, since a comparison may change it. -/
-def dictEqualFrom [PyReads m V] (eqv : V → V → m Bool) (a b : V) : Nat → Nat → m Bool
+/-- A gap, with the message `msg`, where a walk of the dict `d` by position, which started at the
+keys version `version`, may have lost its place: `d`'s keys changed since, and either its entry
+array may differ from CPython's (`dictLayout`), or it has a deleted entry and may have been resized.
+CPython's resize compacts the entry array and moves the entries that the walk hasn't reached; the
+model's table doesn't compact. While the array is CPython's (`DictTable.noteKey` marks a table
+that CPython may have converted from `str` keys, which compacts it too), the smallest table holds 5
+entries, holes included, before an insertion resizes it, so an array of at most 5 entries hasn't
+been resized. -/
+def compactGap [PyReads m V] (d : V) (version : Nat) (msg : String) : m Unit := do
+  let (deleted, version') ← PyReads.dictFlags d
+  if version' == version then return
+  let (inexact, _) ← PyReads.dictLayout d
+  if inexact || (deleted && (← PyReads.dictEntriesSize d) > 5) then PyPure.gap msg
+
+/-- CPython's `dict_equal` from position `i` of `a`'s entry array on, for a walk that started at
+`a`'s keys version `ver`: each live entry's key is looked up in `b` and the two values compared,
+and the entry array is read again at each step, as CPython reads it, since a comparison may change
+it (`compactGap`). -/
+def dictEqualFrom [PyReads m V] (eqv : V → V → m Bool) (a b : V) (ver : Nat) : Nat → Nat → m Bool
   | 0, _ => PyPure.gap "a walk of a dict whose entry array keeps growing"
   | fuel + 1, i => do
+    compactGap a ver "a dict whose entries may move during its comparison is not modelled yet"
     match ← PyReads.dictEntryAt a i with
     | .past => return true
-    | .hole => dictEqualFrom eqv a b fuel (i + 1)
+    | .hole => dictEqualFrom eqv a b ver fuel (i + 1)
     | .entry k v h =>
       match ← PyReads.dictFind b k (some h) fun stored => eqv stored k with
       | none => return false
       | some w =>
         if !(← sameOrEq eqv v w) then return false
-        dictEqualFrom eqv a b fuel (i + 1)
+        dictEqualFrom eqv a b ver fuel (i + 1)
 
 /-- `a == b` for two dicts, with `eqv` comparing keys and values: the same number of entries, and
 each entry of `a`, in order, found in `b` by its stored hash with a value that is equal (`is`
 first). -/
 def dictEqual [PyReads m V] (eqv : V → V → m Bool) (a b : V) : m Bool := do
   if (← PyReads.dictLen a) != (← PyReads.dictLen b) then return false
-  dictEqualFrom eqv a b walkFuel 0
+  -- CPython walks an instance's `__dict__` in its class's order of shared keys.
+  if (← PyReads.dictLayout a).2 && (← PyReads.dictLen a) > 1 then
+    PyPure.gap "== of an instance's __dict__ with more than one attribute is not modelled yet"
+  dictEqualFrom eqv a b (← PyReads.dictFlags a).2 walkFuel 0
 
 /-- The dunder of a comparison. -/
 def cmpDunder : Arith.CmpOp → String

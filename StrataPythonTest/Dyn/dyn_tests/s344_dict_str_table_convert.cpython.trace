@@ -1,0 +1,14 @@
+--- stdout 15
+eq 1
+eq 3
+True
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+a = {'p': <A object>, 'q': <A object>, 'r': <A object>}
+b = {'p': 0, 'q': 0, 'r': 0}

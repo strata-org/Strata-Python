@@ -97,6 +97,7 @@ instance : PyReads TM Toy where
   dictEntriesSize _ := pure 0
   dictLen _ := pure 0
   dictFlags _ := pure (false, 0)
+  dictLayout _ := pure (false, false)
   dictCopy _ := pure (.obj 2)
   allocDictFrom _ _ := pure (.obj 2)
   setFind _ _ _ _ := pure false

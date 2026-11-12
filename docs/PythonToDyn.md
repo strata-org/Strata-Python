@@ -2533,7 +2533,13 @@ with CPython 3.12, over 1422 generated cases.
   slices, unpacking, `in`, and the operators on them. The built-ins `list()`, `dict()`, `set()` and
   `frozenset()` are not modelled yet and stop with a gap. A walk over a set whose order may differ
   from CPython's (a set display of constants, or a set built from one) stops with a gap: iteration,
-  `pop`, `repr`, and a comparison that may run user code.
+  `pop`, `repr`, and a comparison that may run user code. A walk of a dict by position (`==`,
+  `repr`, an iterator) stops with a gap at a change of its keys where CPython may move its entries:
+  a resize of a dict with a deletion and more than 5 entries, the conversion of a table of `str`
+  keys at the first other key after a deletion, and any change in a dict whose layout may differ
+  from CPython's (a copy that dropped holes, after `popitem`, an object's `__dict__`). `==` of an
+  object's `__dict__` with more than one attribute stops with a gap, since CPython walks its class's
+  shared keys.
 - Global names, with the fallback to `builtins`, and closures with their cells.
 - Calls of function objects, with positional and keyword arguments and `*` and `**` arguments.
   `**` builds a new dict and leaves the operand unchanged.
@@ -2549,8 +2555,8 @@ with CPython 3.12, over 1422 generated cases.
   user `__repr__`, `__str__` and `__format__`; and the format spec language of `int`, `float` and
   `str`. These stop with a gap: a `repr` that shows an address (`object.__repr__`, functions,
   modules, methods); a tuple met inside the `repr` of a tuple with the same items, which the
-  semantics can't tell from the same tuple; and a dict whose keys change during its `repr` after a
-  deletion, since CPython's resize then moves the walk.
+  semantics can't tell from the same tuple; and a dict whose entries may move during its `repr`, as
+  for the dict walks above.
 - printf-style `%` for `str` and `bytes` (`PyUnicode_Format`, `_PyBytes_FormatEx`): every
   conversion, flag, width and precision, `*`, and `%(key)`, with CPython's errors. Where CPython
   3.12 warns (an `__int__` or `__index__` that returns an instance of a strict subclass of `int`, a

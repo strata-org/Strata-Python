@@ -614,6 +614,8 @@ lookup, whose comparisons may change the values. -/
 def dictSetWith (read : PyM σ e fr DictTable) (modify : (DictTable → DictTable) → PyM σ e fr Unit)
     (choose? : Option (Nat → PyM σ e fr Nat)) (k v : Value) (h? : Option Hash)
     (eq : Value → PyM σ e fr Bool) : PyM σ e fr Unit := do
+  -- CPython converts a table of `str` keys before the lookup, whose comparisons may raise.
+  modify (·.noteKey k)
   match (← dictLocate read choose? k h? eq) with
   | (some i, _, _) => modify (·.setValue i v)
   | (none, kc, h) => modify (·.insertNew ⟨h, k, kc⟩ v)
@@ -1263,7 +1265,8 @@ def allocInstance (cls : Value) (p : BuiltinPart Value) (dict : Array (String ×
   if (dict.map (·.1)).toList.eraseDups.length != dict.size then
     PyM.failure "an instance dict that repeats a name"
   let d ← if hasDict then
-      some <$> ((do allocDictOf (← strTable dict)) : PyM σ .pure true Value).lift (by decide)
+      some <$> ((do allocDictOf { ← strTable dict with inexact := true, split := true }) :
+        PyM σ .pure true Value).lift (by decide)
     else pure none
   let dictId := match d with | some (.obj i) => some i | _ => none
   (alloc ⟨cls, dictId, slots.map (·.getD (.undef "")), partPayload p⟩).lift (by decide)
@@ -1501,11 +1504,13 @@ def modulesGet : PyM σ .reads true (Modules σ) :=
     exact ContOK.getThe (fun _ => hk _) (fun h => absurd h (Level.ne_pure_up he (by decide))),
     by intro _; unfold StartFree; intros; rfl⟩
 
-/-- The `__dict__` of the object `v`, made empty first if it has none yet. -/
+/-- The `__dict__` of the object `v`, made empty first if it has none yet: an object's own dict,
+which CPython may keep as a split table (`DictTable.split`). -/
 def objEnsureDict (v : Value) : PyM σ .writes true Value := do
   if let some d ← (objDict v).relax.lift (by decide) then return d
   let .obj id := v | PyM.failure "a dict for a value that is not an object"
-  let d ← (allocDict.lift (by decide) : PyM σ .writes true Value)
+  let d ← ((allocDictOf { DictTable.empty with inexact := true, split := true }).lift (by decide) :
+    PyM σ .writes true Value)
   let .obj did := d | PyM.failure "a new dict that is not an object"
   modifyObj id (fun o => { o with dict := some did }) fun _ _ h => h
   pure d
@@ -1631,6 +1636,7 @@ instance {e : Level} {fr : Bool} [Level.AtLeast .reads e] : PyReads (PyM σ e fr
   dictEntriesSize d := (·.entries.size) <$> (Prim.dictTable d).relax.lift Level.AtLeast.le
   dictLen d := (·.used) <$> (Prim.dictTable d).relax.lift Level.AtLeast.le
   dictFlags d := (fun t => (t.deleted, t.keysVersion)) <$> (Prim.dictTable d).relax.lift Level.AtLeast.le
+  dictLayout d := (fun t => (t.inexact, t.split)) <$> (Prim.dictTable d).relax.lift Level.AtLeast.le
   dictCopy d := (do Prim.allocDictOf (← Prim.dictTable d).compact |>.lift (by decide)).relax.lift
     Level.AtLeast.le
   allocDictFrom d keep := (Prim.allocDictFrom d keep).relax.lift Level.AtLeast.le
