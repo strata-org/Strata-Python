@@ -6,7 +6,7 @@
     "type" : "git",
     "subDir" : null,
     "scope" : "",
-    "rev" : "48b1a605237334f2fe27888592062039be33d71a",
+    "rev" : "9087baf1a8d2373ade65aa5f413eaee8b9ff1114",
     "name" : "Strata",
     "manifestFile" : "lake-manifest.json",
     "inputRev" : "main",
