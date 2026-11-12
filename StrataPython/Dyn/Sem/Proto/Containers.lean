@@ -287,19 +287,26 @@ def hashN [PyCalls m V] : Nat → V → m Hash
           if (← PyPure.immView g) matches some .none then
             raiseBuiltin "TypeError" s!"unhashable type: '{← typeName v}'"
           let r ← callN dispatchDepth g (PyPure.imm (m := m) (.tuple #[])) (← PyPure.allocDict)
-          match ← PyPure.immViewAll r with
-          | some (.int i) =>
-            -- CPython keeps a C `Py_ssize_t` as it is, -1 made -2, and hashes a larger `int`.
+          -- CPython keeps a C `Py_ssize_t` as it is, -1 made -2, and hashes a larger `int`.
+          let intHash : Int → m Hash := fun i => do
             if -(2 ^ 63 : Int) ≤ i && i < 2 ^ 63 then
               return .exact (if i == -1 then -2 else i)
-            let some h ← PyPure.immHash r | PyPure.gap "the hash of a large int"
+            let some h ← PyPure.immHash (PyPure.imm (m := m) (.int i)) | PyPure.gap "the hash of a large int"
             return h
+          match ← PyPure.immViewAll r with
+          | some (.int i) => intHash i
           | some (.bool b) => return .exact (if b then 1 else 0)
           -- A hash that depends on the seed is another value's hash: a `Py_ssize_t` other than
           -- `-1`, which `slot_tp_hash` keeps as it is, so that `hash(x) == hash(y)` when
           -- `x.__hash__()` returns `hash(y)`.
           | some (.symHash n) => return .symbolic n.1
-          | _ => raiseBuiltin "TypeError" "__hash__ method should return an integer"
+          | some _ => raiseBuiltin "TypeError" "__hash__ method should return an integer"
+          | none =>
+            -- `PyLong_Check` holds for an instance of a subclass of `int`, whose `int` value
+            -- `PyLong_AsSsize_t` reads.
+            match ← PyReads.numView r with
+            | some (.int i) => intHash i
+            | _ => raiseBuiltin "TypeError" "__hash__ method should return an integer"
 
 /-- `hash(v)`'s hash. -/
 def hash [PyCalls m V] (v : V) : m Hash := hashN compareDepth v
@@ -438,11 +445,20 @@ def containsCore [PyCalls m V] (x s : V) : m Bool := do
     if ← isDictLike s then return (← dictFindKey s x).isSome
     if (← anySetLike? s).isSome then
       -- A set is looked up as a frozenset copy of it, as `set_contains` retries it: the members'
-      -- `__eq__` compare with the copy.
-      if (← anySet? x) matches some false then
+      -- `__eq__` compare with the copy (an exact set's hash always raises `TypeError`).
+      let retry : m Bool := do
         let fz ← PyReads.setCopy x true
         let h := frozensetHash ((← setMembers x).unordered.toList.map (·.2))
-        return ← PyReads.setFind s fz (some h) (keyEq fz)
+        PyReads.setFind s fz (some h) (keyEq fz)
+      if (← anySet? x) matches some false then return ← retry
+      -- An instance of a subclass of `set` is hashed and looked up first; a `TypeError` from
+      -- either retries with the frozenset copy.
+      if (← anySetLike? x) matches some false then
+        let r? ← tryCatch (some <$> do PyReads.setFind s x (some (← hash x)) (keyEq x)) fun e => do
+          let some mro ← mroOf (← PyReads.classOf e) | throw e
+          if ← inMro (PyPure.imm (m := m) (.builtin .TypeError)) mro then pure none else throw e
+        if let some r := r? then return r
+        return ← retry
       return ← PyReads.setFind s x (some (← hash x)) (keyEq x)
     if (← PyPure.immView s).isSome then
       raiseBuiltin "TypeError" s!"argument of type '{← typeName s}' is not iterable"

@@ -70,6 +70,9 @@ public environment PyT extends Py where
   insn nativeWrite (k : base.Int) (^err (exc : Value)) : Value
   insn immutableWrite (^err (exc : Value)) : Value
   insn strSubArg (k : base.Int) (^err (exc : Value)) : Value
+  insn mkSubInst (j : base.Int) (^err (exc : Value)) : Value
+  insn mkExc (j : base.Int) (^err (exc : Value)) : Value
+  insn subclassCases (f : Value) (g : Value) (k : base.Int) (^err (exc : Value)) : Value
   insn buildClassName (f : Value) (k : base.Int) (^err (exc : Value)) : Value
   insn dictOrSub (k : base.Int) (^err (exc : Value)) : Value
   insn kwargsStrSub (^err (exc : Value)) : Value
@@ -638,6 +641,84 @@ instance of a class `B(bytes)` as the `__qualname__` (`2`), which CPython reject
       pure (Value.int (← Builtins.kwPairs kw).size)
     : PyM σ .writes false Value)
 
+/-- A value for a function of the tests to give: an instance of a class `I(int)` that holds `9`
+(`0`), an instance of a class `E(str)` that holds `""` (`1`), the `str` `"x"` (`2`), or an instance
+of a class `F(float)` that holds `1.5` (`3`). -/
+@[dyn_sem PyT.mkSubInst, expose] public def mkSubInst (j : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    match j with
+    | 0 => PyReads.allocInstance (← subclassOf "I" .int) (.int 9) #[] #[]
+    | 1 => PyReads.allocInstance (← subclassOf "E" .str) (.str (.ofString "")) #[] #[]
+    | 2 => pure (Value.ofString "x")
+    | _ => PyReads.allocInstance (← subclassOf "F" .float) (.float 0x3FF8000000000000) #[] #[]
+    : PyM σ .writes false Value)
+
+/-- A new `TypeError("t")` (`0`) or `ValueError("v")` (`1`), not raised. -/
+@[dyn_sem PyT.mkExc, expose] public def mkExc (j : Int) (err : Target E [Value]) : Sem ε E Value :=
+  runRule err #[] (do
+    tryCatch (Proto.raiseBuiltin (if j == 0 then "TypeError" else "ValueError") (if j == 0 then "t" else "v"))
+      pure
+    : PyM σ .writes false Value)
+
+/-- Instances of subclasses of built-in types where CPython accepts them, with `f` a function of
+no arguments that gives `pt.mkSubInst`'s value and `g` one that raises `pt.mkExc`'s exception:
+`hash(o)` for an `o` whose class's `__hash__` is `f`, with `f` giving an instance of a class
+`I(int)` holding `9` (`0`, CPython's `9`), the `str` `"x"` (`8`) or an instance of a class
+`F(float)` (`9`), both CPython's `TypeError`; `S({5}) in {frozenset({5})}` for a class `S(set)` (`1`,
+CPython's `True`, through its frozenset copy), the same with `S.__hash__ = f` (`2`, CPython's
+`False`, since the hash `9` finds nothing), with an `S.__hash__` that raises `ValueError` (`6`,
+which CPython lets out), and `S({5}) in {9, frozenset({5})}` with `S.__hash__ = f` and an
+`S.__eq__` that raises `TypeError`, which the comparison with `9` reaches (`7`, CPython's `True`,
+through the copy); for a class `T(str)` and `x = T("abc")`, `format(x, "s")` (`3`) and `x % ()`
+(`4`), each of which CPython gives as `x` itself; and `format(i, "")` for an instance `i` of a class
+`J(int)` whose `__str__` is `f`, giving an instance of a class `E(str)` holding `""` (`5`,
+CPython's exact `''`). -/
+@[dyn_sem PyT.subclassCases, expose] public def subclassCases (f g : Value) (k : Int)
+    (err : Target E [Value]) : Sem ε E Value :=
+  runRule err #[] (do
+    match k with
+    | 0 | 8 | 9 => do
+      let ns ← PyPure.allocDict
+      PyWrites.dictSet ns (.ofString "__hash__") f none fun _ => pure false
+      let c ← PyPure.allocObj (.builtin .type) (.cls
+        { name := "C", qualname := "C", «module» := "m", bases := #[.builtin .object],
+          mroTail := #[.builtin .object], ns, solidBase := .builtin .object })
+      let o ← PyReads.allocInstance c .plain #[] #[]
+      match ← Proto.hash o with
+      | .exact h => pure (Value.int h)
+      | _ => pure (Value.ofString "not an exact hash")
+    | 1 | 2 | 6 | 7 => do
+      let ns ← PyPure.allocDict
+      if k == 2 || k == 7 then PyWrites.dictSet ns (.ofString "__hash__") f none fun _ => pure false
+      if k == 6 then PyWrites.dictSet ns (.ofString "__hash__") g none fun _ => pure false
+      if k == 7 then PyWrites.dictSet ns (.ofString "__eq__") g none fun _ => pure false
+      let c ← PyPure.allocObj (.builtin .type) (.cls
+        { name := "S", qualname := "S", «module» := "m", bases := #[.builtin .set],
+          mroTail := #[.builtin .set, .builtin .object], ns, solidBase := .builtin .set })
+      let x ← PyReads.allocInstance c .set #[] #[]
+      PyWrites.setAdd x (Value.int 5) none fun _ => pure false
+      let fz ← PyPure.allocSet true false
+      PyNew.setAddNew fz (Value.int 5) none fun _ => pure false
+      PyNew.setFreezeNew fz
+      let t ← PyPure.allocSet false false
+      if k == 7 then PyNew.setAddNew t (Value.int 9) none fun _ => pure false
+      PyNew.setAddNew t fz (some (← Proto.hash fz)) fun _ => pure false
+      pure (Value.bool (← Proto.containsCore x t))
+    | 5 => do
+      let ns ← PyPure.allocDict
+      PyWrites.dictSet ns (.ofString "__str__") f none fun _ => pure false
+      let c ← PyPure.allocObj (.builtin .type) (.cls
+        { name := "J", qualname := "J", «module» := "m", bases := #[.builtin .int],
+          mroTail := #[.builtin .int, .builtin .object], ns, solidBase := .builtin .int })
+      Proto.formatOf (← PyReads.allocInstance c (.int 9) #[] #[]) (.ofString "")
+    | _ => do
+      let x ← PyReads.allocInstance (← subclassOf "T" .str) (.str (.ofString "abc")) #[] #[]
+      let r ← if k == 3 then Proto.formatOf x (.ofString "s")
+        else Builtins.strModBody "__mod__" false x (.tuple #[.tuple #[]]) (← PyPure.allocDict)
+      pure (Value.tuple #[r, Value.bool (r == x)])
+    : PyM σ .writes false Value)
+
 /-- `__build_class__(f, name)` for a class body `f`, with an instance of a class `S(str)` as the
 name (`0`), which CPython accepts, and with `3` (`1`), which it rejects. -/
 @[dyn_sem PyT.buildClassName, expose] public def buildClassName (f : Value) (k : Int)
@@ -1087,7 +1168,7 @@ def ptEffect : String → Effects.Level
   | "pt.callNew" => .calls
   | "pt.raiseIn" => .writes
   | "pt.classOfNew" | "pt.dictWalkSub" => .reads
-  | "pt.nativeWrite" | "pt.immutableWrite" | "pt.strSubArg" | "pt.buildClassName" | "pt.dictOrSub" | "pt.kwargsStrSub" => .writes
+  | "pt.nativeWrite" | "pt.immutableWrite" | "pt.strSubArg" | "pt.mkSubInst" | "pt.mkExc" | "pt.subclassCases" | "pt.buildClassName" | "pt.dictOrSub" | "pt.kwargsStrSub" => .writes
   | "pt.probeCase" => .reads
   | "pt.requireIn" => .writes
   | "pt.importGaps" => .writes
@@ -1442,6 +1523,79 @@ def buildClassModule (k : Nat) : String := s!"module m \{
   #[StrataPython.Dyn.Sem.Value.str { s := "__build_class__: name is not a string", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
 #guard_msgs in
 #eval runText (buildClassModule 1) true
+
+/-- A module whose `main` runs `pt.subclassCases` with the case `k`, a function of no arguments
+that gives `pt.mkSubInst j`'s value, and one that raises `pt.mkExc e`'s exception, each captured in
+a cell. -/
+def subclassModule (k : Nat) (j e : Nat := 0) : String := s!"module m \{
+  func @m.f(%c.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) \{
+    entry.0(%c.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = base.refGet[py.Value](%c.0)
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.0)
+      ret(%r.0)
+  }
+  func @m.g(%c.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) \{
+    entry.0(%c.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = base.refGet[py.Value](%c.0)
+      %r.0 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%x.0)
+      ret(%r.0)
+  }
+  func @m.main() -> py.Value \{
+    entry.0():
+      %i.0 : py.Value = pt.mkSubInst({j}) ^err.0()
+      %c.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %f.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m.f, \"f\", \"m\", %c.0)
+      %x.0 : py.Value = pt.mkExc({e}) ^err.0()
+      %d.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %g.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m.g, \"g\", \"m\", %d.0)
+      %v.0 : py.Value = pt.subclassCases(%f.0, %g.0, {k}) ^err.0()
+      ret(%v.0)
+    err.0(%e.0 : py.Value):
+      ret(%e.0)
+  }
+}"
+
+/-- info: StrataPython.Dyn.Sem.Value.int 9 -/
+#guard_msgs in
+#eval runText (subclassModule 0) true
+
+/-- info: StrataPython.Dyn.Sem.Value.bool true -/
+#guard_msgs in
+#eval runText (subclassModule 1) true
+
+/-- info: StrataPython.Dyn.Sem.Value.bool false -/
+#guard_msgs in
+#eval runText (subclassModule 2) true
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "str.__format__ of an instance of a subclass of str is not modelled yet" -/
+#guard_msgs in
+#eval runText (subclassModule 3) true
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a % format that is an instance of a subclass of str is not modelled yet" -/
+#guard_msgs in
+#eval runText (subclassModule 4) true
+
+/-- info: StrataPython.Dyn.Sem.Value.str { s := "", ascii := true, ascii_eq := _ } -/
+#guard_msgs in
+#eval runText (subclassModule 5 1 0) true
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.ValueError) StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.str { s := "v", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval runText (subclassModule 6 0 1) true
+
+/-- info: StrataPython.Dyn.Sem.Value.bool true -/
+#guard_msgs in
+#eval runText (subclassModule 7 0 0) true
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "__hash__ method should return an integer", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval runText (subclassModule 8 2 0) true
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "__hash__ method should return an integer", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval runText (subclassModule 9 3 0) true
 
 /-- info: fault: Strata.Dyn.Exec.Fault.gap "a | of a dict whose class overrides how its entries are read is not modelled yet" -/
 #guard_msgs in

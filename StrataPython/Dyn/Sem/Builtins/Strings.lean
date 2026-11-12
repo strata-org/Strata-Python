@@ -73,6 +73,9 @@ def strModBody [PyWrites m V] (name : String) (reflected : Bool) (self args kwar
   let o ← oneArg name args kwargs
   let (fmt, xs) := if reflected then (o, self) else (self, o)
   let some f ← strText? fmt | return PyPure.imm (m := m) .notImplemented
+  -- CPython gives a format that is an instance of a subclass of `str` itself when it has no units.
+  if (← PyPure.immView fmt).isNone then
+    PyPure.gap "a % format that is an instance of a subclass of str is not modelled yet"
   printfStr f xs
 
 /-- **`bytes.__mod__(self, args)`**, and `bytes.__rmod__` when `reflected`, as `bytes_mod` runs it. -/

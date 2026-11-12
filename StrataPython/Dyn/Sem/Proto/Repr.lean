@@ -25,7 +25,8 @@ Generic over the record of primitives, CPython 3.12's `PyObject_Repr`, `PyObject
 * `asciiOf v`: `repr`, with its non-ASCII characters escaped.
 * `formatOf v spec`: an exact `str`, or the `str` of an exact `int`, for an empty spec; else the
   type's `__format__`, whose result must be a `str`: `int`'s, `float`'s and `str`'s run the format
-  spec language of `Format` on the built-in part, and `object`'s takes only an empty spec.
+  spec language of `Format` on the built-in part (`str`'s stops with a gap on an instance of a
+  subclass of `str`), and `object`'s takes only an empty spec.
 
 A `repr` that shows an address (`object.__repr__`, functions, modules, methods) stops with a gap.
 -/
@@ -342,7 +343,8 @@ def formatResult [PyCalls m V] (r : Except Format.Failure String) : m V :=
 
 /-- The `__format__` of the built-in type `b` on the value `v` of the class `t` with the spec
 `sp`, or `none` when the tables give that `__format__`'s body.  An empty spec gives `str(v)` (the
-`format_obj` of `int`, `float` and `str`, and `object.__format__`). -/
+`format_obj` of `int`, `float` and `str`, and `object.__format__`); `str`'s with another spec, on
+an instance of a subclass of `str`, stops with a gap, since CPython may give that instance. -/
 def builtinFormat [PyCalls m V] (b : Builtin) (v t : V) (sp : String) : m (Option V) := do
   match b with
   | .object =>
@@ -350,10 +352,19 @@ def builtinFormat [PyCalls m V] (b : Builtin) (v t : V) (sp : String) : m (Optio
       raiseBuiltin "TypeError" s!"unsupported format string passed to {Format.cTypeName (← tpNameOf t)}.__format__"
     return some (← strOf v)
   | .int | .float | .str =>
-    if sp.isEmpty then return some (← strOf v)
+    if sp.isEmpty then
+      -- `format_obj` writes `str(v)` through the unicode writer, which gives an empty instance of
+      -- a subclass of `str` as the exact `''`, and any other one as it is.
+      let r ← strOf v
+      if (← PyPure.immView r).isNone && (← strText? r) == some "" then
+        return some (strValue (m := m) "")
+      return some r
     let tn ← tpNameOf t
     match b with
     | .str =>
+      -- CPython gives an instance of a subclass of `str` itself when the spec changes nothing.
+      if (← PyPure.immView v).isNone then
+        PyPure.gap "str.__format__ of an instance of a subclass of str is not modelled yet"
       let some x ← strText? v | PyPure.modelInvariant "str.__format__ of a value that is not a str"
       return some (← formatResult (Format.formatStr x sp tn))
     | _ =>
