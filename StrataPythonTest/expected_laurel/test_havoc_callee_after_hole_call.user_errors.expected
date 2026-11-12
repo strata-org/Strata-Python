@@ -1,0 +1,4 @@
+(set-info :file "tests/test_havoc_callee_after_hole_call.py")
+(set-info :start 2547)
+(set-info :stop 2548)
+(set-info :error-message "expected 'Any', got 'int'")

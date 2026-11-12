@@ -1,13 +1,6 @@
-test_variable_reassign.py(4, 4): ✅ pass - assert(…)
-test_variable_reassign.py(6, 4): ✅ pass - assert(…)
-test_variable_reassign.py(7, 4): ✅ pass - Check PAdd exception
-test_variable_reassign.py(8, 4): ✅ pass - assert(…)
-test_variable_reassign.py(13, 10): ✅ pass - Check PLt exception
-test_variable_reassign.py(14, 8): ✅ pass - Check PAdd exception
-test_variable_reassign.py(15, 8): ✅ pass - Check PAdd exception
-test_variable_reassign.py(13, 4): ✅ pass - Check PLt exception
-test_variable_reassign.py(16, 4): ❓ unknown - assert(…)
-test_variable_reassign.py(25, 4): ✅ pass - assert(…)
-test_variable_reassign.py(32, 4): ✅ pass - assert(…)
-DETAIL: 10 passed, 0 failed, 1 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_variable_reassign.py")
+(set-info :start 66)
+(set-info :stop 67)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 4, col 11
+RESULT: User error

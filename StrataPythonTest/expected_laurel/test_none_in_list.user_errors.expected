@@ -1,0 +1,4 @@
+(set-info :file "tests/test_none_in_list.py")
+(set-info :start 22)
+(set-info :stop 23)
+(set-info :error-message "expected 'Any', got 'int'")

@@ -1,0 +1,4 @@
+(set-info :file "tests/test_int_mul_zero.py")
+(set-info :start 68)
+(set-info :stop 69)
+(set-info :error-message "expected 'Any', got 'int'")

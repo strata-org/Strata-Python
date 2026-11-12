@@ -1,3 +1,6 @@
-test_str_truthy.py(6, 4): ✅ pass - assert(…)
-DETAIL: 1 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_str_truthy.py")
+(set-info :start 91)
+(set-info :stop 92)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 6, col 11
+RESULT: User error

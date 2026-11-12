@@ -1,7 +1,6 @@
-test_truthiness_not_eq.py(25, 0): ✅ pass - precondition
-test_truthiness_not_eq.py(26, 0): ✅ pass - precondition
-test_truthiness_not_eq.py(27, 0): ✅ pass - precondition
-test_truthiness_not_eq.py(28, 0): ✅ pass - precondition
-test_truthiness_not_eq.py(29, 0): ✅ pass - precondition
-DETAIL: 5 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_truthiness_not_eq.py")
+(set-info :start 214)
+(set-info :stop 215)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 6, col 16
+RESULT: User error

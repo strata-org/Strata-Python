@@ -1,4 +1,6 @@
-test_any_arithmetic.py(6, 4): ✅ pass - Check PAdd exception
-test_any_arithmetic.py(7, 4): ✅ pass - assert(…)
-DETAIL: 2 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_any_arithmetic.py")
+(set-info :start 64)
+(set-info :stop 66)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 4, col 13
+RESULT: User error

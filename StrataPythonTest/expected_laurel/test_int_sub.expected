@@ -1,4 +1,6 @@
-test_int_sub.py(4, 4): ✅ pass - Check PSub exception
-test_int_sub.py(5, 4): ✅ pass - assert(…)
-DETAIL: 2 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_int_sub.py")
+(set-info :start 64)
+(set-info :stop 65)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 4, col 13
+RESULT: User error

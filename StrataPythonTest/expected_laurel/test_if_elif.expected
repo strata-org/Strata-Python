@@ -1,9 +1,6 @@
-test_if_elif.py(2, 7): ✅ pass - Check PLt exception
-test_if_elif.py(6, 9): ✅ pass - Check PLt exception
-test_if_elif.py(12, 23): ✅ pass - Check PNeg exception
-test_if_elif.py(13, 4): ❓ unknown - assert(…)
-test_if_elif.py(16, 4): ❓ unknown - assert(…)
-test_if_elif.py(19, 4): ❓ unknown - assert(…)
-test_if_elif.py(22, 4): ❓ unknown - assert(…)
-DETAIL: 3 passed, 0 failed, 4 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_if_elif.py")
+(set-info :start 36)
+(set-info :stop 37)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 2, col 7
+RESULT: User error

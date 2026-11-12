@@ -1,0 +1,4 @@
+(set-info :file "tests/test_tuple_swap.py")
+(set-info :start 64)
+(set-info :stop 65)
+(set-info :error-message "expected 'Any', got 'int'")

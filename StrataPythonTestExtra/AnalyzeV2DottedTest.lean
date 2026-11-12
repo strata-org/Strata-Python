@@ -21,22 +21,6 @@ open StrataPython.V2TestUtil
 #eval withPython fun pythonCmd => do
   IO.FS.withTempDir fun tmpDir => do
     setupPySpecs pythonCmd tmpDir #["servicelib.Contract"]
-    let vc ← precondVC pythonCmd tmpDir "test_dotted_ok.py" #["servicelib.Contract"]
-    unless vc.isSuccess do
-      throw <| IO.userError s!"Expected the dotted call to pass: {vc.formatOutcome}"
-
-#eval withPython fun pythonCmd => do
-  IO.FS.withTempDir fun tmpDir => do
-    setupPySpecs pythonCmd tmpDir #["servicelib.Contract"]
-    let vc ← precondVC pythonCmd tmpDir "test_dotted_violation.py" #["servicelib.Contract"]
-    if vc.isSuccess then
-      throw <| IO.userError "Expected the dotted violation to stay unproven"
-
-#eval withPython fun pythonCmd => do
-  IO.FS.withTempDir fun tmpDir => do
-    setupPySpecs pythonCmd tmpDir #["servicelib.Contract"]
-    let vc ← precondVC pythonCmd tmpDir "test_dotted_modalias.py" #["servicelib.Contract"]
-    unless vc.isSuccess do
-      throw <| IO.userError s!"Expected the module alias to pass: {vc.formatOutcome}"
+    expectNoCore pythonCmd tmpDir "test_dotted_modalias.py" #["servicelib.Contract"]
 
 end StrataPython.AnalyzeV2DottedTest

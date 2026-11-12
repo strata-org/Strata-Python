@@ -1,0 +1,4 @@
+(set-info :file "tests/test_mixed_types_list.py")
+(set-info :start 39)
+(set-info :stop 40)
+(set-info :error-message "expected 'Any', got 'int'")

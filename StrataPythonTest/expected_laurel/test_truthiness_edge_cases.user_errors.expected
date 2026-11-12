@@ -1,0 +1,4 @@
+(set-info :file "tests/test_truthiness_edge_cases.py")
+(set-info :start 567)
+(set-info :stop 571)
+(set-info :error-message "expected 'Any', got 'bool'")

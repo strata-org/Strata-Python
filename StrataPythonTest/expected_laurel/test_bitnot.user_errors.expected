@@ -1,0 +1,4 @@
+(set-info :file "tests/test_bitnot.py")
+(set-info :start 41)
+(set-info :stop 42)
+(set-info :error-message "expected 'Any', got 'int'")

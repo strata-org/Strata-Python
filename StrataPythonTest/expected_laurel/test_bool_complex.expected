@@ -1,8 +1,6 @@
-test_bool_complex.py(4, 12): ✅ pass - Check PGt exception
-test_bool_complex.py(4, 22): ✅ pass - Check PGt exception
-test_bool_complex.py(4, 12): ✅ pass - Check PAnd exception
-test_bool_complex.py(4, 33): ✅ pass - Check PGt exception
-test_bool_complex.py(4, 11): ✅ pass - Check POr exception
-test_bool_complex.py(4, 4): ✅ pass - assert(…)
-DETAIL: 6 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_bool_complex.py")
+(set-info :start 69)
+(set-info :stop 70)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 4, col 12
+RESULT: User error

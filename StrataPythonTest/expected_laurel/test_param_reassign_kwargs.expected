@@ -1,5 +1,6 @@
-test_param_reassign_kwargs.py(2, 11): ✅ pass - Check PAdd exception
-test_param_reassign_kwargs.py(2, 4): ✅ pass - Check PAdd exception
-test_param_reassign_kwargs.py(7, 4): ❓ unknown - assert(…)
-DETAIL: 2 passed, 0 failed, 1 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_param_reassign_kwargs.py")
+(set-info :start 75)
+(set-info :stop 83)
+(set-info :error-message "expected 'Any', got 'string'")
+DETAIL: expected 'Any', got 'string' at line 2, col 11
+RESULT: User error

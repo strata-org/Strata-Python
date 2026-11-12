@@ -1,0 +1,4 @@
+(set-info :file "tests/test_method_call_with_kwargs.py")
+(set-info :start 213)
+(set-info :stop 214)
+(set-info :error-message "expected 'Any', got 'MyClass'")

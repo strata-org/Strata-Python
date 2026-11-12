@@ -1,4 +1,6 @@
-test_class_mixed_init.py(19, 0): ❓ unknown - $__inline1_assert(…)
-test_class_mixed_init.py(19, 0): ❓ unknown - $__inline1_assert(…)
-DETAIL: 0 passed, 0 failed, 2 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_class_mixed_init.py")
+(set-info :start 185)
+(set-info :stop 186)
+(set-info :error-message "expected 'Any', got 'WithInit'")
+DETAIL: expected 'Any', got 'WithInit' at line 12, col 4
+RESULT: User error

@@ -1,0 +1,4 @@
+(set-info :file "tests/test_multi_function.py")
+(set-info :start 147)
+(set-info :stop 151)
+(set-info :error-message "expected 'Any', got 'string'")

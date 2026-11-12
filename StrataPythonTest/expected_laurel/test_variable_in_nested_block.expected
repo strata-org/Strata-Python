@@ -1,5 +1,6 @@
-test_variable_in_nested_block.py(2, 3): ✅ pass - Check PGt exception
-test_variable_in_nested_block.py(3, 7): ✅ pass - Check PGt exception
-test_variable_in_nested_block.py(8, 0): ✅ pass - assert(…)
-DETAIL: 3 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_variable_in_nested_block.py")
+(set-info :start 4)
+(set-info :stop 6)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 1, col 4
+RESULT: User error

@@ -1,5 +1,6 @@
-test_dict_add_key.py(3, 4): ✅ pass - Check Any_sets! exception
-test_dict_add_key.py(4, 11): ✅ pass - precondition
-test_dict_add_key.py(4, 4): ✅ pass - assert(…)
-DETAIL: 3 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_dict_add_key.py")
+(set-info :start 29)
+(set-info :stop 30)
+(set-info :error-message "expected 'Any', got 'DictStrAny'")
+DETAIL: expected 'Any', got 'DictStrAny' at line 2, col 4
+RESULT: User error

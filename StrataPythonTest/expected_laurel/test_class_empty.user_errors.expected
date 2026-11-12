@@ -1,0 +1,4 @@
+(set-info :file "tests/test_class_empty.py")
+(set-info :start 39)
+(set-info :stop 40)
+(set-info :error-message "expected 'Any', got 'Empty'")

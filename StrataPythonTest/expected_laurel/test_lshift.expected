@@ -1,4 +1,6 @@
-test_lshift.py(3, 4): ✅ pass - Check PLShift exception
-test_lshift.py(4, 4): ✅ pass - assert(…)
-DETAIL: 2 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_lshift.py")
+(set-info :start 40)
+(set-info :stop 41)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 3, col 13
+RESULT: User error

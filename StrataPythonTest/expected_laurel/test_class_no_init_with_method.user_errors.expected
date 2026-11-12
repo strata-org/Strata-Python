@@ -1,0 +1,4 @@
+(set-info :file "tests/test_class_no_init_with_method.py")
+(set-info :start 102)
+(set-info :stop 103)
+(set-info :error-message "expected 'Any', got 'WithMethod'")

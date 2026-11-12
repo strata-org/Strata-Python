@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[test_str_empty\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'string', test_str_empty\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'string'\]

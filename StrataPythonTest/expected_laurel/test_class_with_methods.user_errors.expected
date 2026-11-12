@@ -1,0 +1,4 @@
+(set-info :file "tests/test_class_with_methods.py")
+(set-info :start 250)
+(set-info :stop 260)
+(set-info :error-message "expected 'Any', got 'int'")

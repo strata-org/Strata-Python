@@ -1,0 +1,4 @@
+(set-info :file "tests/test_ternary_false.py")
+(set-info :start 60)
+(set-info :stop 61)
+(set-info :error-message "expected 'Any', got 'int'")

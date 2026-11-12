@@ -1,6 +1,6 @@
-test_with_statement.py(20, 4): ✔️ always true if reached - assert(…)
-test_with_statement.py(26, 8): ✔️ always true if reached - assert(…)
-test_with_statement.py(32, 8): ✔️ always true if reached - Check PAdd exception
-test_with_statement.py(33, 8): ✔️ always true if reached - assert(…)
-DETAIL: 4 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_with_statement.py")
+(set-info :start 396)
+(set-info :stop 399)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 18, col 16
+RESULT: User error

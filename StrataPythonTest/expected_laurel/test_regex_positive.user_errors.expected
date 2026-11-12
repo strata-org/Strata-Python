@@ -1,0 +1,4 @@
+(set-info :file "tests/test_regex_positive.py")
+(set-info :start 15899)
+(set-info :stop 15909)
+(set-info :error-message "expected 'Any', got 'string'")

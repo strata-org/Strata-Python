@@ -1,4 +1,6 @@
-test_coerce_any_str_concat.py(6, 4): ✅ pass - Check PAdd exception
-test_coerce_any_str_concat.py(7, 4): ✅ pass - assert(…)
-DETAIL: 2 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_coerce_any_str_concat.py")
+(set-info :start 71)
+(set-info :stop 78)
+(set-info :error-message "expected 'Any', got 'string'")
+DETAIL: expected 'Any', got 'string' at line 4, col 13
+RESULT: User error

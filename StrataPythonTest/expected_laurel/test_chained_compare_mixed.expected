@@ -1,12 +1,6 @@
-test_chained_compare_mixed.py(5, 11): ✅ pass - Check PLe exception
-test_chained_compare_mixed.py(5, 11): ✅ pass - Check PLt exception
-test_chained_compare_mixed.py(5, 11): ✅ pass - Check PAnd exception
-test_chained_compare_mixed.py(5, 4): ✅ pass - assert(…)
-test_chained_compare_mixed.py(6, 11): ✅ pass - Check PLe exception
-test_chained_compare_mixed.py(6, 11): ✅ pass - Check PLt exception
-test_chained_compare_mixed.py(6, 11): ✅ pass - Check PAnd exception
-test_chained_compare_mixed.py(6, 4): ❓ unknown - assert(…)
-test_chained_compare_mixed.py(7, 11): ✅ pass - Check PGt exception
-test_chained_compare_mixed.py(7, 4): ❓ unknown - assert(…)
-DETAIL: 8 passed, 0 failed, 2 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_chained_compare_mixed.py")
+(set-info :start 90)
+(set-info :stop 91)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 5, col 11
+RESULT: User error

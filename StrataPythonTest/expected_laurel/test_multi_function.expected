@@ -1,7 +1,6 @@
-test_multi_function.py(9, 7): ✅ pass - precondition
-test_multi_function.py(11, 7): ✅ pass - precondition
-test_multi_function.py(18, 7): ✅ pass - Check PNot exception
-test_multi_function.py(20, 4): ❓ unknown - precondition
-test_multi_function.py(24, 4): ❓ unknown - assert(…)
-DETAIL: 3 passed, 0 failed, 2 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_multi_function.py")
+(set-info :start 147)
+(set-info :stop 151)
+(set-info :error-message "expected 'Any', got 'string'")
+DETAIL: expected 'Any', got 'string' at line 5, col 38
+RESULT: User error

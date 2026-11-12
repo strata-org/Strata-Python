@@ -1,3 +1,6 @@
-test_str_eq.py(4, 4): ✅ pass - assert(…)
-DETAIL: 1 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_str_eq.py")
+(set-info :start 72)
+(set-info :stop 73)
+(set-info :error-message "expected 'Any', got 'string'")
+DETAIL: expected 'Any', got 'string' at line 4, col 11
+RESULT: User error

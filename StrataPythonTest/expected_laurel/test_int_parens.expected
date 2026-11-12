@@ -1,5 +1,6 @@
-test_int_parens.py(5, 14): ✅ pass - Check PAdd exception
-test_int_parens.py(5, 4): ✅ pass - Check PMul exception
-test_int_parens.py(6, 4): ✅ pass - assert(…)
-DETAIL: 3 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_int_parens.py")
+(set-info :start 82)
+(set-info :stop 83)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 5, col 14
+RESULT: User error

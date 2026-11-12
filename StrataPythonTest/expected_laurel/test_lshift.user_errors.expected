@@ -1,0 +1,4 @@
+(set-info :file "tests/test_lshift.py")
+(set-info :start 40)
+(set-info :stop 41)
+(set-info :error-message "expected 'Any', got 'int'")

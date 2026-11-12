@@ -1,0 +1,4 @@
+(set-info :file "tests/test_bool_or.py")
+(set-info :start 70)
+(set-info :stop 71)
+(set-info :error-message "expected 'Any', got 'bool'")

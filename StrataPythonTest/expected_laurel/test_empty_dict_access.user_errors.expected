@@ -1,0 +1,4 @@
+(set-info :file "tests/test_empty_dict_access.py")
+(set-info :start 26)
+(set-info :stop 27)
+(set-info :error-message "expected 'Any', got 'int'")

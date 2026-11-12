@@ -1,0 +1,4 @@
+(set-info :file "tests/test_precondition_verification.py")
+(set-info :start 346)
+(set-info :stop 356)
+(set-info :error-message "expected 'Any', got 'string'")

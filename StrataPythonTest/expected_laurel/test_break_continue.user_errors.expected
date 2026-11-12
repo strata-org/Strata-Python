@@ -1,0 +1,4 @@
+(set-info :file "tests/test_break_continue.py")
+(set-info :start 69)
+(set-info :stop 73)
+(set-info :error-message "expected 'Any', got 'bool'")

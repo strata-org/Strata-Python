@@ -1,4 +1,6 @@
-test_int_as_bool.py(3, 4): ✅ pass - Check PNot exception
-test_int_as_bool.py(4, 4): ✅ pass - assert(…)
-DETAIL: 2 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_int_as_bool.py")
+(set-info :start 45)
+(set-info :stop 46)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 3, col 18
+RESULT: User error

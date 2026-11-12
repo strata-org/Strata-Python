@@ -1,1 +1,1 @@
-Core type checking failed: Procedure '__main__': \[call f\(out LaurelResult\$1, out maybe_except\$2\);\]: Ill-formed call: the call to f passes 0 input arguments, but f has 1 input parameter \(py\$in_args\)
+V2 pipeline produced no Core: \[test_pyresid_gr_st_def_star\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'int'\]

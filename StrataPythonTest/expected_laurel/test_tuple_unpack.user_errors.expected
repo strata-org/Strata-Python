@@ -1,0 +1,4 @@
+(set-info :file "tests/test_tuple_unpack.py")
+(set-info :start 34)
+(set-info :stop 36)
+(set-info :error-message "expected 'Any', got 'int'")

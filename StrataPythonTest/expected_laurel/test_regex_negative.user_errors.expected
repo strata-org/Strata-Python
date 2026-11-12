@@ -1,0 +1,4 @@
+(set-info :file "tests/test_regex_negative.py")
+(set-info :start 1391)
+(set-info :stop 1396)
+(set-info :error-message "expected 'Any', got 'bool'")

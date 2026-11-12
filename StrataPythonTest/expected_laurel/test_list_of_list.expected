@@ -1,5 +1,6 @@
-test_list_of_list.py(5, 11): ✅ pass - precondition
-test_list_of_list.py(5, 11): ✅ pass - precondition
-test_list_of_list.py(5, 4): ✅ pass - assert(…)
-DETAIL: 3 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_list_of_list.py")
+(set-info :start 65)
+(set-info :stop 66)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 4, col 28
+RESULT: User error

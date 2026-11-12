@@ -1,4 +1,6 @@
-test_pin_any.py(4, 15): ❓ unknown - precondition
-test_pin_any.py(4, 8): ❓ unknown - assert(…)
-DETAIL: 0 passed, 0 failed, 2 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_pin_any.py")
+(set-info :start 131)
+(set-info :stop 136)
+(set-info :error-message "expected 'Any', got 'string'")
+DETAIL: expected 'Any', got 'string' at line 4, col 15
+RESULT: User error

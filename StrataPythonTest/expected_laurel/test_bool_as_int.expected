@@ -1,4 +1,6 @@
-test_bool_as_int.py(2, 4): ✅ pass - Check PAdd exception
-test_bool_as_int.py(3, 4): ✅ pass - assert(…)
-DETAIL: 2 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_bool_as_int.py")
+(set-info :start 25)
+(set-info :stop 29)
+(set-info :error-message "expected 'Any', got 'bool'")
+DETAIL: expected 'Any', got 'bool' at line 2, col 13
+RESULT: User error

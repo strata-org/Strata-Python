@@ -1,12 +1,6 @@
-test_comparisons.py(5, 4): ✅ pass - assert(…)
-test_comparisons.py(9, 4): ✅ pass - assert(…)
-test_comparisons.py(14, 11): ✅ pass - Check PGt exception
-test_comparisons.py(14, 4): ✅ pass - assert(…)
-test_comparisons.py(15, 11): ✅ pass - Check PLt exception
-test_comparisons.py(15, 4): ✅ pass - assert(…)
-test_comparisons.py(16, 11): ✅ pass - Check PGe exception
-test_comparisons.py(16, 4): ✅ pass - assert(…)
-test_comparisons.py(17, 11): ✅ pass - Check PLe exception
-test_comparisons.py(17, 4): ✅ pass - assert(…)
-DETAIL: 10 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_comparisons.py")
+(set-info :start 96)
+(set-info :stop 97)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 5, col 11
+RESULT: User error

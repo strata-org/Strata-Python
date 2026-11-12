@@ -539,30 +539,6 @@ public def pythonAndSpecToLaurel
   return combined
 
 
-/-- Python gradual types: names consistent with everything (the dynamic top type).
-    `Any` is Python's dynamic type. `re_Match` types the `from_Composite`/
-    `Any..as_Composite!` bridge stubs (the prelude cannot name the synthesized
-    `Composite`, so it borrows a named composite that flattens to it); making it
-    gradual lets a class instance of ANY class flow into the bridge at the
-    pre-flatten resolves; post-flatten both sides are `Composite`. -/
-private def pythonGradualTypes : Std.HashSet String :=
-  -- `datetime` is half-modeled: the prelude has an abstract `Datetime`, but the runtime ops
-  -- (`datetime_now`/etc.) return `Any` and a bare `: datetime` annotation lowers to
-  -- `.UserDefined "datetime"` (→ Composite fallback). Making it gradual lets a datetime value
-  -- (Any) and a `datetime`-annotated slot (Composite/UserDefined) reconcile — `end_time: datetime
-  -- = datetime.now(...)` — instead of "expected 'datetime', got 'Composite'". Same bridging role
-  -- as `re_Match`. (Sound: an unmodeled-library type is uninterpreted either way.)
-  -- Core primitive type names Laurel does not resolve natively (e.g. `regex`, used by the
-  -- runtime prelude Str.InRegEx) are sourced DYNAMICALLY from Core.KnownTypes (any arity-0
-  -- Core known type whose name is not one of Laurel's own primitive keywords. `Any`/`re_Match`
-  -- are the Python coercion-bridge names (no Core source) and stay explicit.
-  let laurelPrims : Std.HashSet String :=
-    (["bool", "int", "string", "real", "void", "float64"] : List String).foldl (fun acc n => acc.insert n) {}
-  let corePrims : List String :=
-    Core.KnownTypes.toList.filterMap fun kt =>
-      if kt.arity == 0 && !laurelPrims.contains kt.name then some kt.name else none
-  ((["Any", "re_Match"] : List String) ++ corePrims).foldl (fun s n => s.insert n) {}
-
 /-- Wrap `e` in a unary static `Call` to the named prelude function. -/
 private def pyCoerceCall (name : String) (e : Laurel.StmtExprMd) : Laurel.StmtExprMd :=
   { val := .Call none { text := name, uniqueId := none } [e] [], source := e.source }
@@ -580,46 +556,14 @@ private def pyTypeKey : Laurel.HighType → String
     | _ => "Composite"   -- every user class boxes/unboxes as Composite
   | _ => "Any"
 
-/-- Python REALIZER for the abstract `Coercion` verdict. Transcribes the gradual
-    (inject/project) rows of the elaborator's `subtype` table (Elaborate.lean:483-521)
-    into concrete prelude calls. `inject` boxes a concrete value into `Any` by the
-    SOURCE type; `project` unboxes/casts out of `Any` by the TARGET type (a `project`
-    to `bool` is Python truthiness, realized by `Any_to_bool`). `upcast` (nominal) and
-    `refl` are identity. -/
+/-- Python REALIZER for the abstract `Coercion` verdict. `widen` inserts `int_to_real`;
+    `upcast` (nominal) and `refl` are identity. -/
 private def pythonRealizeCoercion : Laurel.Coercion → Laurel.StmtExprMd → Laurel.StmtExprMd
   | .refl, e => e
   | .upcast, e => e
   -- Numeric widening int -> real/float64: insert the runtime `int_to_real` call. Both
   -- `real` and `float64` share the real domain in this pipeline (pyTypeKey folds float->real).
   | .widen _, e => pyCoerceCall "int_to_real" e
-  | .inject source, e =>
-    match pyTypeKey source with
-    | "int" => pyCoerceCall "from_int" e
-    | "bool" => pyCoerceCall "from_bool" e
-    | "str" => pyCoerceCall "from_str" e
-    | "float" => pyCoerceCall "from_float" e
-    | "ListAny" => pyCoerceCall "from_ListAny" e
-    | "DictStrAny" => pyCoerceCall "from_DictStrAny" e
-    | "Composite" => pyCoerceCall "from_Composite" e
-    -- `Error` is the `Any.exception (get_error : Error)` constructor: box an exception
-    -- value into `Any` (used when an `Error`-typed value flows into an `Any` slot).
-    | "Error" => pyCoerceCall "exception" e
-    | "void" => { val := .Call none { text := "from_None", uniqueId := none } [] [], source := e.source }
-    | _ => e   -- already Any or a type with no boxing witness: pass through
-  | .project target, e =>
-    match pyTypeKey target with
-    | "int" => pyCoerceCall "Any..as_int!" e
-    | "bool" => pyCoerceCall "Any_to_bool" e
-    | "str" => pyCoerceCall "Any..as_string!" e
-    | "float" => pyCoerceCall "Any..as_float!" e
-    | "ListAny" => pyCoerceCall "Any..as_ListAny!" e
-    | "DictStrAny" => pyCoerceCall "Any..as_Dict!" e
-    | "Composite" => pyCoerceCall "Any..as_Composite!" e
-    -- Unbox `Any` to `Error` via the `get_error` accessor of `Any.exception`. This is
-    -- the witness for `raise e` (`maybe_except : Error := e : Any`): the resolver decides
-    -- `.project (.TCore "Error")` and this realizes the projection into the exception value.
-    | "Error" => pyCoerceCall "Any..get_error!" e
-    | _ => e
 
 /-- Python TRUTHINESS realizer for the `toBool` caller hook. Maps an operand's `HighType` (by
     `pyTypeKey`) to a bool-typed term, mapping each operand type to its truthiness witness:
@@ -641,10 +585,10 @@ private def pythonToBool : Laurel.HighType → Laurel.StmtExprMd → Laurel.Stmt
   -- without this arm a Composite value falls through to identity, is stamped `bool`, and the
   -- Core checker rejects it ("Impossible to unify bool with Composite").
   | "Composite" => litBool true
+  | "Any" => pyCoerceCall "Any_to_bool" e
   -- Unknown/Heap/Box/TypeTag and any other unrecognized type: IDENTITY. Only the container
   -- types above carry a truthiness witness; everything else passes the raw value through into
-  -- the bool slot. `Any` never reaches here: it is `.project bool`, realized by `coerceTo` as
-  -- `Any_to_bool` rather than routed through `toBool`.
+  -- the bool slot.
   | _ => e
 
 /-- Names RESERVED by the coercion machinery: every bridge procedure / datatype
@@ -666,26 +610,14 @@ private def pythonReservedNames : Std.HashSet String :=
     -- truthiness coercions (pythonToBool)
     "int_to_bool", "str_to_bool", "float_to_bool", "list_to_bool", "dict_to_bool" ]
 
-/-- Translate a combined Laurel program to Core, pre-registering Python's unmodeled
-    external names so the Laurel resolver emits no "not defined" diagnostics for them.
-    `extraExternalNames` adds program-specific unmodeled names (e.g. names imported from
-    unmodeled modules like `botocore.config.Config`, `pyspark.SparkContext`). -/
+/-- Translate a combined Laurel program to Core. -/
 private def translateCombinedLaurelV2 (combined : Laurel.LaurelProgram)
-    (extraExternalNames : Std.HashSet String := {})
     (analysisMode : Laurel.AnalysisMode := .Verify)
     (keepAllFilesPrefix : Option String := none)
     : IO (Option Core.Program × List Message) := do
-  -- Names imported from unmodeled modules (e.g. `from botocore.model import OperationModel`) are
-  -- dynamically unknown. As TYPE ANNOTATIONS they must be gradual, else `x: OperationModel` lowers
-  -- to an unresolvable `UserDefined` composite and the schema pass hard-errors; the bodiless type
-  -- aliases emitted in `pyAnalyzeV2ToCore` get them PAST the resolver, and gradual membership makes
-  -- `translateType` lower them to Core `Any`. These names come from the program imports, not a
-  -- hardcoded list. Union them into gradualTypes, same handling as datetime/re_Match.
-  let allGradual := extraExternalNames.fold (fun s n => s.insert n) pythonGradualTypes
   let (coreOption, errors, _, _) ←
     Laurel.translateWithLaurel
       { inlineFunctionsWhenPossible := true
-        gradualTypes := allGradual
         realizeCoercion := some pythonRealizeCoercion
         toBool := some pythonToBool
         reservedNames := pythonReservedNames
@@ -693,32 +625,6 @@ private def translateCombinedLaurelV2 (combined : Laurel.LaurelProgram)
         analysisMode }
       combined
   return (coreOption.map appendCorePartOfRuntime, errors)
-
-/-- Collect names bound by `import`/`from … import …` at the top level of a Python program.
-    These are external (their defining modules are unmodeled), so the Laurel resolver must
-    treat them as `.unresolved` rather than emitting "'Config' is not defined". This makes
-    unmodeled-library usage (boto3 `Config`/`Session`, pyspark `SparkContext`, etc.) sound-
-    but-uninterpreted instead of a hard pipeline failure. -/
-private def collectImportedNames (stmts : Array (StrataPython.stmt SourceRange)) : Std.HashSet String := Id.run do
-  let mut names : Std.HashSet String := {}
-  for s in stmts do
-    match s with
-    | .Import _ aliases =>
-      for a in aliases.val do
-        match a with
-        | .mk_alias _ modName asName =>
-          match asName.val with
-          | some aliasName => names := names.insert aliasName.val
-          | none => names := names.insert modName.val
-    | .ImportFrom _ _ imports _ =>
-      for a in imports.val do
-        match a with
-        | .mk_alias _ impName asName =>
-          match asName.val with
-          | some aliasName => names := names.insert aliasName.val
-          | none => names := names.insert impName.val
-    | _ => pure ()
-  return names
 
 /-- Assemble the Laurel program to elaborate: merge user code, demanded imported
     stubs, and the Composite type declarations for demanded imported classes
@@ -968,12 +874,8 @@ public def pyAnalyzeV2ToCore (pythonIonPath : String) (sourcePath : Option Strin
     if let some parent := (System.FilePath.mk pfx).parent then
       IO.FS.createDirAll parent
     IO.FS.writeFile s!"{pfx}.v2.elaborated.laurel.st" ((Std.format combined).pretty ++ "\n")
-  -- Names imported from unmodeled modules (e.g. `from botocore.config import Config`) are
-  -- external: register them so the Laurel resolver treats their uses as sound-but-
-  -- uninterpreted instead of "'Config' is not defined".
-  let importedNames := collectImportedNames stmts
   let (coreOpt, errs) ←
-    translateCombinedLaurelV2 combined importedNames analysisMode keepAllFilesPrefix
+    translateCombinedLaurelV2 combined analysisMode keepAllFilesPrefix
   return .ok (coreOpt, modelDiags ++ importedTranslationDiags ++ elabFailureDiags ++ errs)
 
 end StrataPython

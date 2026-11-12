@@ -1,5 +1,6 @@
-test_augmod.py(3, 4): ✅ pass - precondition
-test_augmod.py(3, 4): ✅ pass - Check PMod exception
-test_augmod.py(4, 4): ✅ pass - assert(…)
-DETAIL: 3 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_augmod.py")
+(set-info :start 39)
+(set-info :stop 40)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 3, col 4
+RESULT: User error

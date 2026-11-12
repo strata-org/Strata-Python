@@ -1,0 +1,4 @@
+(set-info :file "tests/test_class_mixed_init.py")
+(set-info :start 185)
+(set-info :stop 186)
+(set-info :error-message "expected 'Any', got 'WithInit'")

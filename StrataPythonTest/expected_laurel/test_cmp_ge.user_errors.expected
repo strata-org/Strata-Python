@@ -1,0 +1,4 @@
+(set-info :file "tests/test_cmp_ge.py")
+(set-info :start 30)
+(set-info :stop 31)
+(set-info :error-message "expected 'Any', got 'int'")

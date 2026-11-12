@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[test_none_in_list\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'int', test_none_in_list\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'int', test_none_in_list\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'ListAny', test_none_in_list\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'int'\]

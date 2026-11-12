@@ -1,3 +1,6 @@
-test_any_bool.py(5, 4): ✅ pass - assert(…)
-DETAIL: 1 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_any_bool.py")
+(set-info :start 58)
+(set-info :stop 62)
+(set-info :error-message "expected 'Any', got 'bool'")
+DETAIL: expected 'Any', got 'bool' at line 4, col 13
+RESULT: User error

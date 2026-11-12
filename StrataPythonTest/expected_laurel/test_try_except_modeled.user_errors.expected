@@ -1,0 +1,4 @@
+(set-info :file "tests/test_try_except_modeled.py")
+(set-info :start 324)
+(set-info :stop 331)
+(set-info :error-message "expected 'Any', got 'string'")

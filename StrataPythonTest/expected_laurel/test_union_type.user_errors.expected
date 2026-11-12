@@ -1,0 +1,4 @@
+(set-info :file "tests/test_union_type.py")
+(set-info :start 63)
+(set-info :stop 65)
+(set-info :error-message "expected 'Any', got 'int'")

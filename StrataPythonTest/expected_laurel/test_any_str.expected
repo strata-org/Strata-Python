@@ -1,3 +1,6 @@
-test_any_str.py(5, 4): ✅ pass - assert(…)
-DETAIL: 1 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_any_str.py")
+(set-info :start 57)
+(set-info :stop 64)
+(set-info :error-message "expected 'Any', got 'string'")
+DETAIL: expected 'Any', got 'string' at line 4, col 13
+RESULT: User error

@@ -1,3 +1,6 @@
-test_var_reassign.py(5, 4): ✅ pass - assert(…)
-DETAIL: 1 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_var_reassign.py")
+(set-info :start 71)
+(set-info :stop 72)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 5, col 11
+RESULT: User error

@@ -1,5 +1,6 @@
-test_method_kwargs_no_hierarchy.py(6, 15): ✅ pass - Check PAdd exception
-test_method_kwargs_no_hierarchy.py(6, 8): ✅ pass - Check PAdd exception
-test_method_kwargs_no_hierarchy.py(12, 4): ❓ unknown - assert(…)
-DETAIL: 2 passed, 0 failed, 1 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_method_kwargs_no_hierarchy.py")
+(set-info :start 153)
+(set-info :stop 162)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 6, col 15
+RESULT: User error

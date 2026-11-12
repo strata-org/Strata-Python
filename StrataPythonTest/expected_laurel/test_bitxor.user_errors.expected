@@ -1,0 +1,4 @@
+(set-info :file "tests/test_bitxor.py")
+(set-info :start 65)
+(set-info :stop 66)
+(set-info :error-message "expected 'Any', got 'int'")

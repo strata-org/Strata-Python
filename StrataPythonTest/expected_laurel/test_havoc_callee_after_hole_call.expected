@@ -1,17 +1,6 @@
-test_havoc_callee_after_hole_call.py(8, 0): ✔️ always true if reached - assert(…)
-test_havoc_callee_after_hole_call.py(12, 0): ✔️ always true if reached - assert(…)
-test_havoc_callee_after_hole_call.py(16, 0): ✔️ always true if reached - assert(…)
-test_havoc_callee_after_hole_call.py(20, 0): ✔️ always true if reached - assert(…)
-test_havoc_callee_after_hole_call.py(25, 0): ✔️ always true if reached - assert(…)
-test_havoc_callee_after_hole_call.py(30, 0): ✔️ always true if reached - assert(…)
-test_havoc_callee_after_hole_call.py(36, 0): ❓ unknown - precondition
-test_havoc_callee_after_hole_call.py(37, 4): ✔️ always true if reached - assert(…)
-test_havoc_callee_after_hole_call.py(43, 0): ✔️ always true if reached - assert(…)
-test_havoc_callee_after_hole_call.py(47, 0): ✔️ always true if reached - assert(…)
-test_havoc_callee_after_hole_call.py(51, 0): ✔️ always true if reached - assert(…)
-test_havoc_callee_after_hole_call.py(55, 0): ✔️ always true if reached - assert(…)
-test_havoc_callee_after_hole_call.py(59, 0): ✔️ always true if reached - assert(…)
-test_havoc_callee_after_hole_call.py(63, 0): ✔️ always true if reached - assert(…)
-test_havoc_callee_after_hole_call.py(71, 0): ✔️ always true if reached - $__inline29_assert(…)
-DETAIL: 14 passed, 0 failed, 1 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_havoc_callee_after_hole_call.py")
+(set-info :start 2547)
+(set-info :stop 2548)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 68, col 32
+RESULT: User error

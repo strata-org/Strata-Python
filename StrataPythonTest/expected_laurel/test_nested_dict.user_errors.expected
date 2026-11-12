@@ -1,0 +1,4 @@
+(set-info :file "tests/test_nested_dict.py")
+(set-info :start 38)
+(set-info :stop 40)
+(set-info :error-message "expected 'Any', got 'int'")

@@ -1,0 +1,4 @@
+(set-info :file "tests/test_chained_compare_eval_once.py")
+(set-info :start 95)
+(set-info :stop 96)
+(set-info :error-message "expected 'Any', got 'int'")

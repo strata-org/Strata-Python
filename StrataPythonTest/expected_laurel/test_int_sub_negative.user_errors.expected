@@ -1,0 +1,4 @@
+(set-info :file "tests/test_int_sub_negative.py")
+(set-info :start 73)
+(set-info :stop 74)
+(set-info :error-message "expected 'Any', got 'int'")

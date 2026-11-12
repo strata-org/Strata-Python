@@ -1,3 +1,6 @@
-test_class_field_any.py(6, 0): ❓ unknown - assert(…)
-DETAIL: 0 passed, 0 failed, 1 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_class_field_any.py")
+(set-info :start 94)
+(set-info :stop 95)
+(set-info :error-message "expected 'Any', got 'MyClass'")
+DETAIL: expected 'Any', got 'MyClass' at line 5, col 0
+RESULT: User error

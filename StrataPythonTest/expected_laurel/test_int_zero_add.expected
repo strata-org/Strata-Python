@@ -1,4 +1,6 @@
-test_int_zero_add.py(4, 11): ✅ pass - Check PAdd exception
-test_int_zero_add.py(4, 4): ✅ pass - assert(…)
-DETAIL: 2 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_int_zero_add.py")
+(set-info :start 67)
+(set-info :stop 68)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 4, col 11
+RESULT: User error

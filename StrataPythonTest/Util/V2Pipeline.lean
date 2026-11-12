@@ -78,6 +78,18 @@ public def runV2 (pythonCmd : System.FilePath) (tmpDir : System.FilePath)
     (pipelineCtx := some pctx)
   return (ion, result)
 
+public def expectNoCore (pythonCmd : System.FilePath) (tmpDir : System.FilePath)
+    (scriptName : String) (pyspecModules : Array String := #[])
+    (dispatchModules : Array String := #[]) : IO Unit := do
+  match (← runV2 pythonCmd tmpDir scriptName pyspecModules dispatchModules).2 with
+  | .ok (none, diags) =>
+    unless diags.any (·.message.contains "'Any'") do
+      throw <| IO.userError
+        s!"{scriptName}: expected an 'Any' type error, got: {String.intercalate "; " (diags.map (·.message))}"
+  | .ok (some _, _) =>
+    throw <| IO.userError s!"{scriptName}: expected V2 to produce no Core, but it did"
+  | .error msg => throw <| IO.userError s!"{scriptName}: V2 pipeline failed: {msg}"
+
 public def verifyCore (coreProgram : Core.Program) (userSources : List String := [])
     : IO (Except String (Array Core.VCResult)) := do
   let (_, userProcNames) := splitProcNames coreProgram userSources

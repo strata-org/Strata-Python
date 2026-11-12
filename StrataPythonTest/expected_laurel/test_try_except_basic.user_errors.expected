@@ -1,0 +1,4 @@
+(set-info :file "tests/test_try_except_basic.py")
+(set-info :start 114)
+(set-info :stop 115)
+(set-info :error-message "expected 'Any', got 'int'")

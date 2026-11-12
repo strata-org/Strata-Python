@@ -1,1 +1,1 @@
-\[ERROR\] procedure '__main__' not found
+V2 pipeline produced no Core: \[test_pyhard_01_correlated_dispatch_annotated\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'A', test_pyhard_01_correlated_dispatch_annotated\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'B'\]

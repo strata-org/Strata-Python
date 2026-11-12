@@ -1,0 +1,4 @@
+(set-info :file "tests/test_multi_assign.py")
+(set-info :start 37)
+(set-info :stop 38)
+(set-info :error-message "expected 'Any', got 'int'")

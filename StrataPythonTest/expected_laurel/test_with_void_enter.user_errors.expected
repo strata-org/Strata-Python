@@ -1,0 +1,4 @@
+(set-info :file "tests/test_with_void_enter.py")
+(set-info :start 294)
+(set-info :stop 295)
+(set-info :error-message "expected 'Any', got 'int'")

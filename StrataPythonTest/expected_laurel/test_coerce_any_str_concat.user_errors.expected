@@ -1,0 +1,4 @@
+(set-info :file "tests/test_coerce_any_str_concat.py")
+(set-info :start 71)
+(set-info :stop 78)
+(set-info :error-message "expected 'Any', got 'string'")

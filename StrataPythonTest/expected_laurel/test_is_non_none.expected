@@ -1,2 +1,6 @@
-DETAIL: 0 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_is_non_none.py")
+(set-info :start 61)
+(set-info :stop 62)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 4, col 7
+RESULT: User error

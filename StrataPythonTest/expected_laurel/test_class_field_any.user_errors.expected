@@ -1,0 +1,4 @@
+(set-info :file "tests/test_class_field_any.py")
+(set-info :start 94)
+(set-info :stop 95)
+(set-info :error-message "expected 'Any', got 'MyClass'")

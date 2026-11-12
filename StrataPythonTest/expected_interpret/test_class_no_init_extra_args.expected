@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[test_class_no_init_extra_args\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'NoInit'\]

@@ -1,0 +1,4 @@
+(set-info :file "tests/test_int_bool_conversion.py")
+(set-info :start 116)
+(set-info :stop 117)
+(set-info :error-message "expected 'Any', got 'int'")

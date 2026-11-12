@@ -1,6 +1,6 @@
-test_func_input_type_constraints.py(4, 4): ❓ unknown - Check PMul exception
-test_func_input_type_constraints.py(9, 4): ❓ unknown - Check PAdd exception
-test_func_input_type_constraints.py(12, 11): ❓ unknown - precondition
-test_func_input_type_constraints.py(12, 4): ❓ unknown - precondition
-DETAIL: 0 passed, 0 failed, 4 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_func_input_type_constraints.py")
+(set-info :start 83)
+(set-info :stop 95)
+(set-info :error-message "expected 'int', got 'Any'")
+DETAIL: expected 'int', got 'Any' at line 4, col 4
+RESULT: User error

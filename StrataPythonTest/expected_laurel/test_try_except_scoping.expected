@@ -1,5 +1,6 @@
-test_try_except_scoping.py(35, 4): ❓ unknown (pass on 2 paths, unknown on 1 path) - assert(…)
-test_try_except_scoping.py(24, 4): ❓ unknown (pass on 1 path, unknown on 1 path) - assert(…)
-test_try_except_scoping.py(15, 4): ❓ unknown (pass on 9 paths, unknown on 1 path) - assert(…)
-DETAIL: 0 passed, 0 failed, 3 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_try_except_scoping.py")
+(set-info :start 124)
+(set-info :stop 125)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 3, col 18
+RESULT: User error

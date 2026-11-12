@@ -1,0 +1,4 @@
+(set-info :file "tests/test_try_except_scoping.py")
+(set-info :start 124)
+(set-info :stop 125)
+(set-info :error-message "expected 'Any', got 'int'")

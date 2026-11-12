@@ -1,4 +1,6 @@
-test_if_else.py(4, 7): ✅ pass - Check PGt exception
-test_if_else.py(8, 4): ✅ pass - assert(…)
-DETAIL: 2 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_if_else.py")
+(set-info :start 57)
+(set-info :stop 58)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 4, col 7
+RESULT: User error

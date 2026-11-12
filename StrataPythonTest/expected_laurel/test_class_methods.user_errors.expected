@@ -1,0 +1,4 @@
+(set-info :file "tests/test_class_methods.py")
+(set-info :start 510)
+(set-info :stop 514)
+(set-info :error-message "expected 'Any', got 'string'")

@@ -1,5 +1,6 @@
-test_lshift_negative.py(3, 18): ✅ pass - Check PNeg exception
-test_lshift_negative.py(3, 4): ❓ unknown - Check PLShift exception
-test_lshift_negative.py(4, 4): ❓ unknown - assert(…)
-DETAIL: 1 passed, 0 failed, 2 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_lshift_negative.py")
+(set-info :start 40)
+(set-info :stop 41)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 3, col 13
+RESULT: User error

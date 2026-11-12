@@ -1,0 +1,4 @@
+(set-info :file "tests/test_multi_assign_triple.py")
+(set-info :start 28)
+(set-info :stop 29)
+(set-info :error-message "expected 'Any', got 'int'")

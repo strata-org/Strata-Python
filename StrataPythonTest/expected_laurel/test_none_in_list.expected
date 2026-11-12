@@ -1,4 +1,6 @@
-test_none_in_list.py(3, 11): ✅ pass - precondition
-test_none_in_list.py(3, 4): ✅ pass - assert(…)
-DETAIL: 2 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_none_in_list.py")
+(set-info :start 22)
+(set-info :stop 23)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 2, col 10
+RESULT: User error

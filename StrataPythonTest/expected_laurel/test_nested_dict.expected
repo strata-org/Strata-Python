@@ -1,6 +1,6 @@
-test_nested_dict.py(3, 11): ✅ pass - precondition
-test_nested_dict.py(3, 11): ✅ pass - precondition
-test_nested_dict.py(3, 11): ✅ pass - precondition
-test_nested_dict.py(3, 4): ✅ pass - assert(…)
-DETAIL: 4 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_nested_dict.py")
+(set-info :start 38)
+(set-info :stop 40)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 2, col 26
+RESULT: User error

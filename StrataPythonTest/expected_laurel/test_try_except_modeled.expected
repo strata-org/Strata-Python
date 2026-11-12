@@ -1,9 +1,6 @@
-test_try_except_modeled.py(38, 4): ❓ unknown (pass on 1 path, unknown on 1 path) - assert(…)
-test_try_except_modeled.py(24, 4): ❓ unknown (pass on 1 path, unknown on 1 path) - assert(…)
-test_try_except_modeled.py(13, 4): ❓ unknown (pass on 1 path, unknown on 1 path) - assert(…)
-test_try_except_modeled.py(10, 8): ✅ pass - precondition
-test_try_except_modeled.py(21, 8): ✅ pass - Check PAdd exception
-test_try_except_modeled.py(23, 8): ✅ pass - Check PNeg exception
-test_try_except_modeled.py(35, 12): ✅ pass - precondition
-DETAIL: 4 passed, 0 failed, 3 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_try_except_modeled.py")
+(set-info :start 324)
+(set-info :stop 331)
+(set-info :error-message "expected 'Any', got 'string'")
+DETAIL: expected 'Any', got 'string' at line 7, col 22
+RESULT: User error

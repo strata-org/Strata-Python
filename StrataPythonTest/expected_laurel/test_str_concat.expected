@@ -1,4 +1,6 @@
-test_str_concat.py(4, 4): ✅ pass - Check PAdd exception
-test_str_concat.py(5, 4): ✅ pass - assert(…)
-DETAIL: 2 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_str_concat.py")
+(set-info :start 79)
+(set-info :stop 80)
+(set-info :error-message "expected 'Any', got 'string'")
+DETAIL: expected 'Any', got 'string' at line 4, col 13
+RESULT: User error

@@ -1,3 +1,6 @@
-test_cmp_gt.py(5, 0): ✅ pass - precondition
-DETAIL: 1 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_cmp_gt.py")
+(set-info :start 30)
+(set-info :stop 31)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 2, col 11
+RESULT: User error

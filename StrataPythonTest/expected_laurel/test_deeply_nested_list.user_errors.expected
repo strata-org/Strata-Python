@@ -1,0 +1,4 @@
+(set-info :file "tests/test_deeply_nested_list.py")
+(set-info :start 24)
+(set-info :stop 25)
+(set-info :error-message "expected 'Any', got 'int'")

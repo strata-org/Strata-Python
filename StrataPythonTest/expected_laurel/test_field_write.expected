@@ -1,3 +1,6 @@
-DETAIL: test_field_write.py(140-142) ❌ Type checking error.
-Procedure 'test_oop_field_write': Impossible to unify Any with int.
-RESULT: Internal error
+(set-info :file "tests/test_field_write.py")
+(set-info :start 116)
+(set-info :stop 117)
+(set-info :error-message "expected 'Any', got 'Cell'")
+DETAIL: expected 'Any', got 'Cell' at line 8, col 4
+RESULT: User error

@@ -1,5 +1,6 @@
-test_int_neg.py(3, 4): ✅ pass - Check PNeg exception
-test_int_neg.py(4, 16): ✅ pass - Check PNeg exception
-test_int_neg.py(4, 4): ✅ pass - assert(…)
-DETAIL: 3 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_int_neg.py")
+(set-info :start 49)
+(set-info :stop 50)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 3, col 14
+RESULT: User error

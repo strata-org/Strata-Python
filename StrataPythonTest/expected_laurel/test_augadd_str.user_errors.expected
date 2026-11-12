@@ -1,0 +1,4 @@
+(set-info :file "tests/test_augadd_str.py")
+(set-info :start 48)
+(set-info :stop 49)
+(set-info :error-message "expected 'Any', got 'string'")

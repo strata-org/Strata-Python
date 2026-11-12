@@ -1,3 +1,6 @@
-test_class_no_init_with_method.py(9, 4): ✅ pass - assert(…)
-DETAIL: 1 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_class_no_init_with_method.py")
+(set-info :start 102)
+(set-info :stop 103)
+(set-info :error-message "expected 'Any', got 'WithMethod'")
+DETAIL: expected 'Any', got 'WithMethod' at line 8, col 4
+RESULT: User error

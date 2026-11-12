@@ -1,0 +1,4 @@
+(set-info :file "tests/test_chained_compare_triple.py")
+(set-info :start 76)
+(set-info :stop 77)
+(set-info :error-message "expected 'Any', got 'int'")

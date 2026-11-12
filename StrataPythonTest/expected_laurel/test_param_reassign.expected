@@ -1,15 +1,6 @@
-test_param_reassign.py(2, 4): ✅ pass - Check PAdd exception
-test_param_reassign.py(6, 4): ✅ pass - Check PAdd exception
-test_param_reassign.py(7, 4): ✅ pass - Check PMul exception
-test_param_reassign.py(8, 4): ✅ pass - Check PAdd exception
-test_param_reassign.py(11, 4): ✅ pass - Check PAdd exception
-test_param_reassign.py(14, 4): ✅ pass - Check PAdd exception
-test_param_reassign.py(18, 4): ✅ pass - Check PAdd exception
-test_param_reassign.py(19, 4): ✅ pass - Check PMul exception
-test_param_reassign.py(24, 4): ❓ unknown - assert(…)
-test_param_reassign.py(27, 4): ❓ unknown - assert(…)
-test_param_reassign.py(30, 4): ❓ unknown - assert(…)
-test_param_reassign.py(33, 4): ❓ unknown - assert(…)
-test_param_reassign.py(36, 4): ❓ unknown - assert(…)
-DETAIL: 8 passed, 0 failed, 5 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_param_reassign.py")
+(set-info :start 50)
+(set-info :stop 51)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 2, col 8
+RESULT: User error

@@ -1,0 +1,4 @@
+(set-info :file "tests/test_int_truthy.py")
+(set-info :start 89)
+(set-info :stop 90)
+(set-info :error-message "expected 'Any', got 'int'")

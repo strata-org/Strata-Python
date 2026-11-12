@@ -1,2 +1,6 @@
-DETAIL: 0 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_method_call_with_kwargs.py")
+(set-info :start 213)
+(set-info :stop 214)
+(set-info :error-message "expected 'Any', got 'MyClass'")
+DETAIL: expected 'Any', got 'MyClass' at line 8, col 0
+RESULT: User error

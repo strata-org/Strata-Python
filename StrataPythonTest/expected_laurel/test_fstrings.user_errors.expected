@@ -1,0 +1,4 @@
+(set-info :file "tests/test_fstrings.py")
+(set-info :start 160)
+(set-info :stop 191)
+(set-info :error-message "expected 'Any', got 'string'")

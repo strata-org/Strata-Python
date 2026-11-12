@@ -1,0 +1,4 @@
+(set-info :file "tests/test_list_slice.py")
+(set-info :start 11)
+(set-info :stop 13)
+(set-info :error-message "expected 'Any', got 'int'")

@@ -1,0 +1,4 @@
+(set-info :file "tests/test_str_empty.py")
+(set-info :start 49)
+(set-info :stop 50)
+(set-info :error-message "expected 'Any', got 'string'")

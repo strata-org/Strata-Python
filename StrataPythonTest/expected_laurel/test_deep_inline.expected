@@ -1,7 +1,6 @@
-test_deep_inline.py(6, 4): ✔️ always true if reached - Check PAdd exception
-test_deep_inline.py(10, 4): ✔️ always true if reached - Check PMul exception
-test_deep_inline.py(11, 4): ✔️ always true if reached - Check PAdd exception
-test_deep_inline.py(21, 4): ✔️ always true if reached - $__inline2_assert(…)
-test_deep_inline.py(21, 4): ✖️ always false if reached - $__inline2_assert(…)
-DETAIL: 4 passed, 1 failed, 0 inconclusive
-RESULT: Failures found
+(set-info :file "tests/test_deep_inline.py")
+(set-info :start 93)
+(set-info :stop 94)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 3, col 11
+RESULT: User error

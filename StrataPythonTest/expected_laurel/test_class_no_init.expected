@@ -1,3 +1,6 @@
-test_class_no_init.py(6, 4): ❓ unknown - assert(…)
-DETAIL: 0 passed, 0 failed, 1 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_class_no_init.py")
+(set-info :start 46)
+(set-info :stop 47)
+(set-info :error-message "expected 'Any', got 'NoInit'")
+DETAIL: expected 'Any', got 'NoInit' at line 5, col 4
+RESULT: User error

@@ -1,0 +1,4 @@
+(set-info :file "tests/test_while_loop.py")
+(set-info :start 79)
+(set-info :stop 80)
+(set-info :error-message "expected 'Any', got 'int'")

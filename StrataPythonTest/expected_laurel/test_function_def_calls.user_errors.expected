@@ -1,0 +1,4 @@
+(set-info :file "tests/test_function_def_calls.py")
+(set-info :start 134)
+(set-info :stop 144)
+(set-info :error-message "expected 'Any', got 'string'")

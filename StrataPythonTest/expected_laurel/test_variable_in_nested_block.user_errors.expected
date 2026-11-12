@@ -1,0 +1,4 @@
+(set-info :file "tests/test_variable_in_nested_block.py")
+(set-info :start 4)
+(set-info :stop 6)
+(set-info :error-message "expected 'Any', got 'int'")

@@ -1,12 +1,6 @@
-test_default_params.py(2, 18): ✅ pass - Check PAdd exception
-test_default_params.py(2, 4): ✅ pass - Check PAdd exception
-test_default_params.py(8, 10): ✅ pass - Check PLt exception
-test_default_params.py(9, 8): ✅ pass - Check PMul exception
-test_default_params.py(10, 8): ✅ pass - Check PAdd exception
-test_default_params.py(8, 4): ✅ pass - Check PLt exception
-test_default_params.py(15, 4): ❓ unknown - assert(…)
-test_default_params.py(18, 4): ❓ unknown - assert(…)
-test_default_params.py(21, 4): ❓ unknown - assert(…)
-test_default_params.py(24, 4): ❓ unknown - assert(…)
-DETAIL: 6 passed, 0 failed, 4 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_default_params.py")
+(set-info :start 72)
+(set-info :stop 80)
+(set-info :error-message "expected 'Any', got 'string'")
+DETAIL: expected 'Any', got 'string' at line 2, col 18
+RESULT: User error

@@ -1,3 +1,6 @@
-test_int_negative_mod.py(4, 0): ✅ pass - precondition
-DETAIL: 1 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_int_negative_mod.py")
+(set-info :start 42)
+(set-info :stop 43)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 2, col 13
+RESULT: User error

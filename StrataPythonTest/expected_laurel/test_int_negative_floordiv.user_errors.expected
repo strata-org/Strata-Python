@@ -1,0 +1,4 @@
+(set-info :file "tests/test_int_negative_floordiv.py")
+(set-info :start 47)
+(set-info :stop 48)
+(set-info :error-message "expected 'Any', got 'int'")

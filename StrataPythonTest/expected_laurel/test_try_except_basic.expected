@@ -1,3 +1,6 @@
-test_try_except_basic.py(7, 4): ❓ unknown (pass on 1 path, unknown on 1 path) - assert(…)
-DETAIL: 0 passed, 0 failed, 1 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_try_except_basic.py")
+(set-info :start 114)
+(set-info :stop 115)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 7, col 11
+RESULT: User error

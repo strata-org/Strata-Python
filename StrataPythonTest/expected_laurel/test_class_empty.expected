@@ -1,3 +1,6 @@
-test_class_empty.py(6, 4): ✅ pass - assert(…)
-DETAIL: 1 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_class_empty.py")
+(set-info :start 39)
+(set-info :stop 40)
+(set-info :error-message "expected 'Any', got 'Empty'")
+DETAIL: expected 'Any', got 'Empty' at line 5, col 4
+RESULT: User error

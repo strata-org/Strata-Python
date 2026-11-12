@@ -1,0 +1,4 @@
+(set-info :file "tests/test_coerce_any_to_bool_truthy.py")
+(set-info :start 75)
+(set-info :stop 76)
+(set-info :error-message "expected 'Any', got 'int'")

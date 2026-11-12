@@ -1,0 +1,4 @@
+(set-info :file "tests/test_func_input_type_constraints.py")
+(set-info :start 83)
+(set-info :stop 95)
+(set-info :error-message "expected 'int', got 'Any'")

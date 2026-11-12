@@ -1,3 +1,6 @@
-test_none_check.py(3, 4): ✅ pass - assert(…)
-DETAIL: 1 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_none_check.py")
+(set-info :start 49)
+(set-info :stop 50)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 3, col 11
+RESULT: User error

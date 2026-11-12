@@ -1,1 +1,1 @@
-\[ASSERT ERROR\] Assertion assert\([0-9]+\) failed!
+V2 pipeline produced no Core: \[test_pyresid_gr_un_slice_func\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'int', test_pyresid_gr_un_slice_func\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'int', test_pyresid_gr_un_slice_func\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'int', test_pyresid_gr_un_slice_func\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'ListAny', test_pyresid_gr_un_slice_func\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'int'\]

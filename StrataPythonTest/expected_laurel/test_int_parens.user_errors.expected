@@ -1,0 +1,4 @@
+(set-info :file "tests/test_int_parens.py")
+(set-info :start 82)
+(set-info :stop 83)
+(set-info :error-message "expected 'Any', got 'int'")

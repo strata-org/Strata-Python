@@ -1,0 +1,4 @@
+(set-info :file "tests/test_return_types.py")
+(set-info :start 237)
+(set-info :stop 238)
+(set-info :error-message "expected 'Any', got 'int'")

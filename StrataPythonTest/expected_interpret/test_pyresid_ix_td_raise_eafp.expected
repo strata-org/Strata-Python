@@ -1,1 +1,1 @@
-\[ERROR\] assert \(assert\([0-9]+\)\) condition did not reduce to bool
+V2 pipeline produced no Core: \[test_pyresid_ix_td_raise_eafp\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'Movie', test_pyresid_ix_td_raise_eafp\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Any', got 'string'\]

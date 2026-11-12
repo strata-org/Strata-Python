@@ -1,0 +1,4 @@
+(set-info :file "tests/test_method_kwargs_no_hierarchy.py")
+(set-info :start 153)
+(set-info :stop 162)
+(set-info :error-message "expected 'Any', got 'int'")

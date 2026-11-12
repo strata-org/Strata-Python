@@ -1,0 +1,4 @@
+(set-info :file "tests/test_variable_reassign.py")
+(set-info :start 66)
+(set-info :stop 67)
+(set-info :error-message "expected 'Any', got 'int'")

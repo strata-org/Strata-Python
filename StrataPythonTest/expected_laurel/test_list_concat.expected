@@ -1,7 +1,6 @@
-test_list_concat.py(4, 4): ✅ pass - Check PAdd exception
-test_list_concat.py(5, 11): ✅ pass - precondition
-test_list_concat.py(5, 4): ✅ pass - assert(…)
-test_list_concat.py(6, 11): ✅ pass - precondition
-test_list_concat.py(6, 4): ✅ pass - assert(…)
-DETAIL: 5 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_list_concat.py")
+(set-info :start 33)
+(set-info :stop 34)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 2, col 9
+RESULT: User error

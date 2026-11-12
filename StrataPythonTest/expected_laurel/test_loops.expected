@@ -1,24 +1,6 @@
-test_loops.py(4, 4): ✅ pass - precondition
-test_loops.py(5, 8): ✅ pass - Check PAdd exception
-test_loops.py(6, 11): ✅ pass - Check PGt exception
-test_loops.py(6, 4): ✅ pass - assert(…)
-test_loops.py(10, 8): ❓ unknown - precondition
-test_loops.py(10, 11): ❓ unknown - precondition
-test_loops.py(10, 4): ✅ pass - precondition
-test_loops.py(11, 8): ✅ pass - Check PSub exception
-test_loops.py(12, 11): ✅ pass - Check PLt exception
-test_loops.py(12, 4): ✅ pass - assert(…)
-test_loops.py(16, 8): ❓ unknown - precondition
-test_loops.py(16, 4): ❓ unknown (pass on 1 path, unknown on 1 path) - precondition
-test_loops.py(16, 12): ❓ unknown - precondition
-test_loops.py(16, 15): ❓ unknown - precondition
-test_loops.py(17, 8): ✅ pass - Check PAdd exception
-test_loops.py(18, 11): ✅ pass - Check PGt exception
-test_loops.py(18, 4): ✅ pass - assert(…)
-test_loops.py(22, 10): ✅ pass - Check PGt exception
-test_loops.py(23, 8): ✅ pass - Check PSub exception
-test_loops.py(22, 4): ✅ pass - Check PGt exception
-test_loops.py(24, 11): ✅ pass - Check PLe exception
-test_loops.py(24, 4): ❓ unknown - assert(…)
-DETAIL: 15 passed, 0 failed, 7 inconclusive
-RESULT: Inconclusive
+(set-info :file "tests/test_loops.py")
+(set-info :start 63)
+(set-info :stop 64)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 4, col 14
+RESULT: User error

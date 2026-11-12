@@ -22,44 +22,27 @@ open StrataPython.V2TestUtil
 #eval withPython fun pythonCmd => do
   IO.FS.withTempDir fun tmpDir => do
     setupPySpecs pythonCmd tmpDir #["servicelib.Storage"]
-    let results ← runAndVerify pythonCmd tmpDir "test_pyspec_method_ok.py" #["servicelib.Storage"]
-    let bucket ← vcBySummary results "Bucket must not be empty"
-    let key ← vcBySummary results "Key must not be empty"
-    unless bucket.isSuccess && key.isSuccess do
-      throw <| IO.userError "Expected both method preconditions to pass"
+    expectNoCore pythonCmd tmpDir "test_pyspec_method_ok.py" #["servicelib.Storage"]
 
 #eval withPython fun pythonCmd => do
   IO.FS.withTempDir fun tmpDir => do
     setupPySpecs pythonCmd tmpDir #["servicelib.Storage"]
-    let results ← runAndVerify pythonCmd tmpDir "test_pyspec_method_violation.py" #["servicelib.Storage"]
-    let bucket ← vcBySummary results "Bucket must not be empty"
-    let key ← vcBySummary results "Key must not be empty"
-    if bucket.isSuccess || !key.isSuccess then
-      throw <| IO.userError "Keyword method preconditions had unexpected outcomes"
+    expectNoCore pythonCmd tmpDir "test_pyspec_method_violation.py" #["servicelib.Storage"]
 
 #eval withPython fun pythonCmd => do
   IO.FS.withTempDir fun tmpDir => do
     setupPySpecs pythonCmd tmpDir #["servicelib.Storage"]
-    let caller ← dumpProcChunk pythonCmd tmpDir "test_pyspec_method_dotted.py"
-      #["servicelib.Storage"] "check_delete"
-    unless caller.contains "servicelib_Storage_Storage@delete_item(" do
-      throw <| IO.userError "Dotted class annotation did not bind the modeled method"
+    expectNoCore pythonCmd tmpDir "test_pyspec_method_dotted.py" #["servicelib.Storage"]
 
 #eval withPython fun pythonCmd => do
   IO.FS.withTempDir fun tmpDir => do
     setupPySpecs pythonCmd tmpDir #["servicelib.Messaging"]
-    let caller ← dumpProcChunk pythonCmd tmpDir "test_pyspec_method_positional.py"
-      #["servicelib.Messaging"] "check_receive"
-    unless caller.contains "servicelib_Messaging_Messaging@receive(" do
-      throw <| IO.userError "Positional method call did not bind"
+    expectNoCore pythonCmd tmpDir "test_pyspec_method_positional.py" #["servicelib.Messaging"]
 
 #eval withPython fun pythonCmd => do
   IO.FS.withTempDir fun tmpDir => do
     setupPySpecs pythonCmd tmpDir #["servicelib.Messaging"]
-    let caller ← dumpProcChunk pythonCmd tmpDir "test_pyspec_method_kwargs.py"
-      #["servicelib.Messaging"] "check_send"
-    unless caller.contains "servicelib_Messaging_Messaging@send(" do
-      throw <| IO.userError "Kwargs method call did not bind"
+    expectNoCore pythonCmd tmpDir "test_pyspec_method_kwargs.py" #["servicelib.Messaging"]
 
 #guard checkExternalSigSplit [] [] [] [] == none
 #guard checkExternalSigSplit [("a", none), ("b", none)] ["a", "b"] [] [] == none
@@ -73,27 +56,17 @@ open StrataPython.V2TestUtil
 #guard checkExternalSigSplit [("a", none), ("b", nonConstDefaultArg)] ["a"] ["b"] [] == none
 #guard checkExternalKwargs == none
 
--- A modeled class with NO methods still binds: a parameter annotated with it
--- resolves to the modeled Composite, so its field access is a real read (no havoc).
+-- A modeled class with NO methods cannot be lowered by V2 while `Any` is not gradual.
 #eval withPython fun pythonCmd => do
   IO.FS.withTempDir fun tmpDir => do
     setupPySpecs pythonCmd tmpDir #["servicelib.Bare"]
-    let caller ← dumpProcChunk pythonCmd tmpDir "test_methodless_class.py"
-      #["servicelib.Bare"] "use_it"
-    unless caller.contains "m: Marker" && caller.contains "m#kind" do
-      throw <| IO.userError s!"Methodless modeled class did not bind:\n{caller}"
+    expectNoCore pythonCmd tmpDir "test_methodless_class.py" #["servicelib.Bare"]
 
--- Wrong today: `K("").m()` breaks the assert `len(region) >= 1` of `K.__init__`, but
--- V2 checks the contract of a model's `__init__` at no call yet (card "Laurel front
--- ends: Check model constructor contracts"), so the analysis succeeds.
-/-- info: obligations: 0 -/
-#guard_msgs in
+-- A model constructor called before a method cannot be lowered by V2 while `Any` is not gradual.
 #eval withPython fun pythonCmd => do
   IO.FS.withTempDir fun tmpDir => do
     setupPySpecs pythonCmd tmpDir #["servicelib.Ctor"]
-    let results ← runAndVerify pythonCmd tmpDir "test_ctor_contract_method.py"
-      #["servicelib.Ctor"]
-    IO.println s!"obligations: {results.size}"
+    expectNoCore pythonCmd tmpDir "test_ctor_contract_method.py" #["servicelib.Ctor"]
 
 -- The `@overload` stubs of `__init__` get no procedure, so the model loads, and a
 -- program that does not construct the class verifies.
@@ -106,20 +79,10 @@ open StrataPython.V2TestUtil
       #["servicelib.Overloaded"]
     IO.println s!"obligations: {results.size}"
 
--- A call of an overloaded method with no contract creates no obligation, and it
--- assumes nothing about its result, so the assert after it is not proved.
-/--
-info: obligations: 1
-❓ unknown
--/
-#guard_msgs in
+-- A call of an overloaded method cannot be lowered by V2 while `Any` is not gradual.
 #eval withPython fun pythonCmd => do
   IO.FS.withTempDir fun tmpDir => do
     setupPySpecs pythonCmd tmpDir #["servicelib.Overloaded"]
-    let results ← runAndVerify pythonCmd tmpDir "test_overloaded_method_call.py"
-      #["servicelib.Overloaded"]
-    IO.println s!"obligations: {results.size}"
-    for r in results do
-      IO.println r.formatOutcome
+    expectNoCore pythonCmd tmpDir "test_overloaded_method_call.py" #["servicelib.Overloaded"]
 
 end StrataPython.AnalyzeV2PySpecClassTest

@@ -1,5 +1,6 @@
-test_chained_compare_verify.py(3, 11): ✅ pass - Check PLt exception
-test_chained_compare_verify.py(3, 11): ✅ pass - Check PAnd exception
-test_chained_compare_verify.py(3, 4): ✅ pass - assert(…)
-DETAIL: 3 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+(set-info :file "tests/test_chained_compare_verify.py")
+(set-info :start 61)
+(set-info :stop 62)
+(set-info :error-message "expected 'Any', got 'int'")
+DETAIL: expected 'Any', got 'int' at line 3, col 11
+RESULT: User error
