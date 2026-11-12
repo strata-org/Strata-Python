@@ -2397,7 +2397,7 @@ list, and the rejections with their messages with a golden there.
 
 ## 13. Semantics
 
-`StrataPython/Dyn/Sem/` gives each `py.*` operation except the contract operations a rule that
+`StrataPython/Dyn/Sem/` gives each `py.*` operation a rule that
 does what CPython 3.12 does
 (`Rules/`, over the generic protocols of `Proto/`), as `docs/Dyn.md` §4 describes. A rule that
 reaches a case the semantics doesn't model yet stops the run with a gap, whose message names the
@@ -2727,10 +2727,12 @@ is recorded as caught.
   `py.typeIsSubclass` stops with a gap on a class whose metaclass is `abc.ABCMeta` or a subclass of
   it, and `py.intIsOneOf` on an `int` whose value depends on the hash seed. `py.reSearch` searches
   with a matcher of a subset of `re`'s syntax, and stops with a gap on a pattern outside it, an
-  invalid one included. The operations that make the locations of a frame (`py.attrLoc`,
-  `py.itemLoc`, `py.objLoc`, `py.reachLoc`, `py.instanceState` and `base.cellLoc`) stop with a gap,
-  since frames have no meaning at run time, and so does `base.old`, since a run doesn't keep the
-  state at the call.
+  invalid one included. The quantifiers (`py.allIn`, `py.anyIn`, `py.allItems`, `py.anyItems`) read
+  the members of a container from its own storage, run their body on every member in the container's
+  order, and raise the first error; on a set whose order the model doesn't
+  know they stop with a gap. The operations that make the locations of a frame (`py.attrLoc`, `py.itemLoc`, `py.objLoc`,
+  `py.reachLoc`, `py.instanceState` and `base.cellLoc`) stop with a gap, since frames have no
+  meaning at run time, and so does `base.old`, since a run doesn't keep the state at the call.
 
 ### 13.4 Known differences
 

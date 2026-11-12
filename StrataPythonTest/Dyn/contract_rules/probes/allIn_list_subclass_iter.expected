@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+L = <class 'L'>
+__doc__ = None
+__name__ = '__main__'
+pred = <function object>
+xs = <L object>
+--- result __main__.__probe__
+True

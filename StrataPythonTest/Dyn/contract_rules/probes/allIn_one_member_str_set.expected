@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+pred = <function object>
+xs = {'a'}
+--- result __main__.__probe__
+True

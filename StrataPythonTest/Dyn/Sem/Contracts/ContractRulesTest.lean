@@ -342,6 +342,116 @@ def callValues : String := "      %one.0 : py.Value = py.intLit(1)
       %b.0 : base.Bool = py.reSearch(\"(\", %u.0) ^err.0()
       %v.0 : py.Value = py.boolLit(true)")
 
+/-! ## The quantifiers -/
+
+/-- A region with the parameters `params` whose instructions `body` end with `%r.0 : base.Bool`,
+and which gives the exception that `^bad.0` receives as its `error`. -/
+def region (params body : String) : String := s!"\{
+        body.0({params}):
+{body}
+          %ok.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%r.0)
+          ret(%ok.0)
+        bad.0(%be.0 : py.Value):
+          %bx.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%be.0)
+          ret(%bx.0)
+      }"
+
+/-- A body on a member `%x.0`: whether `len(x)` is true, so a member with no `len` raises. -/
+def lenBody : String := region "%x.0 : py.Value" "          %n.0 : py.Value = py.len(%x.0) ^bad.0()
+          %r.0 : base.Bool = py.truthy(%n.0) ^bad.0()"
+
+/-- The values `em = []`, `one = [1]`, `five = 5`, `ks = "k"`. -/
+def members : String := "      %em.0 : py.Value = py.mkList()
+      %i1.0 : py.Value = py.intLit(1)
+      %one.0 : py.Value = py.mkList(%i1.0)
+      %five.0 : py.Value = py.intLit(5)
+      %ks.0 : py.Value = py.strLit(\"k\")
+"
+
+-- `allIn` is the conjunction, `anyIn` the disjunction, of the body's results on each member.
+/-- info: True -/
+#guard_msgs in
+#eval run (mainBool (members ++ "      %c.0 : py.Value = py.mkList(%one.0, %one.0)
+      %b.0 : base.Bool = py.allIn(%c.0) ^err.0() " ++ lenBody))
+/-- info: False -/
+#guard_msgs in
+#eval run (mainBool (members ++ "      %c.0 : py.Value = py.mkTuple(%one.0, %em.0)
+      %b.0 : base.Bool = py.allIn(%c.0) ^err.0() " ++ lenBody))
+/-- info: True -/
+#guard_msgs in
+#eval run (mainBool (members ++ "      %c.0 : py.Value = py.mkTuple(%em.0, %one.0)
+      %b.0 : base.Bool = py.anyIn(%c.0) ^err.0() " ++ lenBody))
+-- An empty container: `allIn` holds and `anyIn` doesn't.
+/-- info: True -/
+#guard_msgs in
+#eval run (mainBool (members ++ "      %b.0 : base.Bool = py.allIn(%em.0) ^err.0() " ++ lenBody))
+/-- info: False -/
+#guard_msgs in
+#eval run (mainBool (members ++ "      %b.0 : base.Bool = py.anyIn(%em.0) ^err.0() " ++ lenBody))
+-- A later member's error wins over an earlier `False` (and an earlier `True` for `anyIn`).
+/-- info: raises TypeError("object of type 'int' has no len()",) -/
+#guard_msgs in
+#eval run (main (members ++ "      %c.0 : py.Value = py.mkList(%em.0, %five.0)
+      %b.0 : base.Bool = py.allIn(%c.0) ^err.0() " ++ lenBody ++ "
+      %v.0 : py.Value = py.boolLit(true)"))
+/-- info: raises TypeError("object of type 'int' has no len()",) -/
+#guard_msgs in
+#eval run (main (members ++ "      %c.0 : py.Value = py.mkList(%one.0, %five.0)
+      %b.0 : base.Bool = py.anyIn(%c.0) ^err.0() " ++ lenBody ++ "
+      %v.0 : py.Value = py.boolLit(true)"))
+-- The members of a dict are its keys, and a set's members are walked too.
+/-- info: True -/
+#guard_msgs in
+#eval run (mainBool (members ++ "      %d.0 : py.Value = py.mkDict(%ks.0, %five.0) ^err.0()
+      %b.0 : base.Bool = py.allIn(%d.0) ^err.0() " ++ lenBody))
+/-- info: raises TypeError("object of type 'int' has no len()",) -/
+#guard_msgs in
+#eval run (main (members ++ "      %c.0 : py.Value = py.mkSet(%i1.0, %five.0) ^err.0()
+      %b.0 : base.Bool = py.anyIn(%c.0) ^err.0() " ++ lenBody ++ "
+      %v.0 : py.Value = py.boolLit(true)"))
+-- A set whose order depends on the hash seed stops with a gap.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "py.allIn: a set whose order the model doesn't know" -/
+#guard_msgs in
+#eval run (main (members ++ "      %kt.0 : py.Value = py.strLit(\"t\")
+      %c.0 : py.Value = py.mkSet(%ks.0, %kt.0) ^err.0()
+      %b.0 : base.Bool = py.allIn(%c.0) ^err.0() " ++ lenBody ++ "
+      %v.0 : py.Value = py.boolLit(true)"))
+-- Any other container raises `TypeError`; an undefined one stops with a gap.
+/-- info: raises TypeError("allIn() argument must be a list, tuple, set, frozenset or dict, not 'str'",) -/
+#guard_msgs in
+#eval run (main (members ++ "      %b.0 : base.Bool = py.allIn(%ks.0) ^err.0() " ++ lenBody ++ "
+      %v.0 : py.Value = py.boolLit(true)"))
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "py.anyIn: an operand is undefined" -/
+#guard_msgs in
+#eval run (main (members ++ "      %u.0 : py.Value = py.undef(\"u\")
+      %b.0 : base.Bool = py.anyIn(%u.0) ^err.0() " ++ lenBody ++ "
+      %v.0 : py.Value = py.boolLit(true)"))
+
+/-- A body on an entry `%k.0`, `%x.0`: whether `len(x)` is true. -/
+def lenItemBody : String := region "%k.0 : py.Value, %x.0 : py.Value"
+  "          %n.0 : py.Value = py.len(%x.0) ^bad.0()
+          %r.0 : base.Bool = py.truthy(%n.0) ^bad.0()"
+
+-- `allItems` and `anyItems` run the body on each entry of a dict; anything else raises.
+/-- info: False -/
+#guard_msgs in
+#eval run (mainBool (members ++ "      %d.0 : py.Value = py.mkDict(%ks.0, %em.0) ^err.0()
+      %b.0 : base.Bool = py.allItems(%d.0) ^err.0() " ++ lenItemBody))
+/-- info: True -/
+#guard_msgs in
+#eval run (mainBool (members ++ "      %kt.0 : py.Value = py.strLit(\"t\")
+      %d.0 : py.Value = py.mkDict(%ks.0, %em.0, %kt.0, %one.0) ^err.0()
+      %b.0 : base.Bool = py.anyItems(%d.0) ^err.0() " ++ lenItemBody))
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "py.allItems: an operand is undefined" -/
+#guard_msgs in
+#eval run (main (members ++ "      %u.0 : py.Value = py.undef(\"u\")
+      %b.0 : base.Bool = py.allItems(%u.0) ^err.0() " ++ lenItemBody ++ "
+      %v.0 : py.Value = py.boolLit(true)"))
+/-- info: raises TypeError("allItems() argument must be a dict, not 'list'",) -/
+#guard_msgs in
+#eval run (main (members ++ "      %b.0 : base.Bool = py.allItems(%one.0) ^err.0() " ++ lenItemBody ++ "
+      %v.0 : py.Value = py.boolLit(true)"))
+
 /-! ## An `int` whose value depends on the hash seed -/
 
 /-- The instructions that make `%h.0 = "a".__hash__()`, whose value depends on the hash seed. -/

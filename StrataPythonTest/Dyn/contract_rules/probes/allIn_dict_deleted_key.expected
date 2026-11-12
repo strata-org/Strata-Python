@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+d = {'b': 2, 'c': 3, 'a': 4}
+pred = <function object>
+seen = []
+--- result __main__.__probe__
+raised ValueError: ['b', 'c', 'a']

@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+d = [1]
+pred = <function object>
+--- result __main__.__probe__
+raised TypeError: allItems() argument must be a dict, not 'list'

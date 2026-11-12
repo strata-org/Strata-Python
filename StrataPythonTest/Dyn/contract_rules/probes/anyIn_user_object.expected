@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Foo = <class 'Foo'>
+__doc__ = None
+__name__ = '__main__'
+pred = <function object>
+xs = <Foo object>
+--- result __main__.__probe__
+raised TypeError: anyIn() argument must be a list, tuple, set, frozenset or dict, not 'Foo'

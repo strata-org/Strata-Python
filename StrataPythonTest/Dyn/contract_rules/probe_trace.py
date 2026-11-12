@@ -7,7 +7,8 @@ section that `StrataPython.Dyn.Sem.runModuleThen` prints for the probe's functio
     --- result __main__.__probe__
     <render of the value>        (or: raised <ExcType>: <str(exc)>, with its chain's lines)
 
-The `# python:` line is an expression.  It sees the program's globals, and the module
+The `# python:` line is an expression.  With a line `# handling: NAME`, it is evaluated inside
+`except` of the exception in the global `NAME`.  It sees the program's globals, and the module
 `contract_rules_ref`, whose functions follow the docstrings of the operations that differ from
 the Python they stand for.  The module is not a global of the program, so the trace's globals are
 the program's own.
@@ -36,6 +37,12 @@ def load_trace():
 trace = load_trace()
 
 
+def handling_name(source):
+    """The global of the `# handling:` line of `source`, if it has one."""
+    lines = [l for l in source.splitlines() if l.startswith("# handling: ")]
+    return lines[0][len("# handling: "):].strip() if lines else None
+
+
 def probe_expr(source):
     """The expression of the `# python:` line of `source`."""
     lines = [l for l in source.splitlines() if l.startswith("# python: ")]
@@ -52,6 +59,7 @@ def main(path):
     with open(path, "rb") as f:
         source = importlib.util.decode_source(f.read())
     expr = probe_expr(source)
+    handling = handling_name(source)
     code = compile(source, path, "exec")
     probe = compile(expr, "<probe>", "eval")
     os.chdir("/")
@@ -76,10 +84,25 @@ def main(path):
                 name not in ("__name__", "__doc__", "__annotations__"):
             continue
         lines.append(f"{name} = {trace.render_or_note(globs[name])}")
+    if handling is not None and not isinstance(globs.get(handling), BaseException):
+        sys.stdout = real
+        sys.modules["__main__"] = real_main
+        sys.exit(f"the '# handling:' global {handling} is not an exception")
     lines.append("--- result __main__.__probe__")
     sys.stdout = io.StringIO()
+    def run_probe():
+        return eval(probe, globs, {"contract_rules_ref": contract_rules_ref})
+
     try:
-        result = [trace.render_or_note(eval(probe, globs, {"contract_rules_ref": contract_rules_ref}))]
+        if handling is None:
+            value = run_probe()
+        else:
+            # The operation runs while the global's exception is being handled.
+            try:
+                raise globs[handling]
+            except BaseException:  # the probe's own exception, of any class
+                value = run_probe()
+        result = [trace.render_or_note(value)]
     except BaseException as e:  # the operation's exception, of any class
         result = trace.exc_lines(e)
     finally:

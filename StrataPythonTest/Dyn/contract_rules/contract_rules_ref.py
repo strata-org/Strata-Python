@@ -94,3 +94,47 @@ def reSearch_ref(pattern, s):
     """Whether `re.search(pattern, s)` finds a match, with the standard library's `re`."""
     import re
     return re.search(pattern, s) is not None
+
+
+def type_name(v):
+    """The `__name__` of `type(v)`, read without a metaclass's `__name__` property."""
+    return type.__dict__["__name__"].__get__(type(v))
+
+
+def members_ref(c, op):
+    """The members that the quantifier `op` reads: the stored elements of a list or tuple, the
+    members of a set or frozenset, or the keys of a dict, read with the base class's own methods,
+    so that an overridden `__iter__` is not used.  A `TypeError` for any other `c`."""
+    for base in (list, tuple, set, frozenset, dict):
+        if issubclass(type(c), base):
+            return tuple(base.__iter__(c))
+    raise TypeError(f"{op}() argument must be a list, tuple, set, frozenset or dict, "
+                    f"not '{type_name(c)}'")
+
+
+def allIn_ref(c, pred):
+    """Whether `pred` is true for every member of `c`: every member runs, in order, and the first
+    exception propagates with its own context."""
+    results = [bool(pred(x)) for x in members_ref(c, "allIn")]
+    return all(results)
+
+
+def anyIn_ref(c, pred):
+    results = [bool(pred(x)) for x in members_ref(c, "anyIn")]
+    return any(results)
+
+
+def items_ref(d, op):
+    if not issubclass(type(d), dict):
+        raise TypeError(f"{op}() argument must be a dict, not '{type_name(d)}'")
+    return tuple(dict.items(d))
+
+
+def allItems_ref(d, pred):
+    results = [bool(pred(k, v)) for k, v in items_ref(d, "allItems")]
+    return all(results)
+
+
+def anyItems_ref(d, pred):
+    results = [bool(pred(k, v)) for k, v in items_ref(d, "anyItems")]
+    return any(results)

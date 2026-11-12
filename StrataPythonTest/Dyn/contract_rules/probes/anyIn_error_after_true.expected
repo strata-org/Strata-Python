@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+pred = <function object>
+xs = [1, 'boom']
+--- result __main__.__probe__
+raised ValueError: boom

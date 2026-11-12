@@ -68,6 +68,26 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
     Sem ε E Bool :=
   runTotalFree "py.dictKeysWithin" #[] (dictKeysWithin (m := PyM σ .reads true) d keys)
 
+@[dyn_sem Py.allIn] def allInRule (c : Value) (body : Region ε [Value] (Except Value Bool))
+    (err : Target E [Value]) : Sem ε E Bool :=
+  runRuleFree err #[regionHandle body oneValue .bool]
+    (quantIn (m := PyM σ .reads true) false c)
+
+@[dyn_sem Py.anyIn] def anyInRule (c : Value) (body : Region ε [Value] (Except Value Bool))
+    (err : Target E [Value]) : Sem ε E Bool :=
+  runRuleFree err #[regionHandle body oneValue .bool]
+    (quantIn (m := PyM σ .reads true) true c)
+
+@[dyn_sem Py.allItems] def allItemsRule (d : Value)
+    (body : Region ε [Value, Value] (Except Value Bool)) (err : Target E [Value]) : Sem ε E Bool :=
+  runRuleFree err #[regionHandle body twoValues .bool]
+    (quantItems (m := PyM σ .reads true) false d)
+
+@[dyn_sem Py.anyItems] def anyItemsRule (d : Value)
+    (body : Region ε [Value, Value] (Except Value Bool)) (err : Target E [Value]) : Sem ε E Bool :=
+  runRuleFree err #[regionHandle body twoValues .bool]
+    (quantItems (m := PyM σ .reads true) true d)
+
 end
 
 end StrataPython.Dyn.Sem.Contracts

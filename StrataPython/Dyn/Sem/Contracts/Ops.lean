@@ -20,14 +20,17 @@ its operation's docstring in `StrataPython/Dyn/Env.lean`:
 * the arguments of a call: `argOf`, `extraKwargs`, `bindsTo`;
 * the tests: `stdClass`, `typeIsSubclass`, `reSearch`, `strIsOneOf`, `intIsOneOf`,
   `isImmutableScalar`, `dictKeysWithin`; `isInstance` and `len` are the combinators of `isinstance`
-  and `len`.
+  and `len`;
+* the quantifiers: `quantIn` (`allIn`, `anyIn`) and `quantItems` (`allItems`, `anyItems`), which
+  run the operation's region once per member.
 
 A key or a value counts as a `str` here only if it is exactly a `str`, which the model keeps as an
 immediate; an instance of a subclass of `str` is an object, and never counts, except for the subject
-of `reSearch`, as its docstring says. So only `isInstance` and `len` run user code, as `isinstance`
-and `len` do. An operand that is unassigned (`undef`) is no `str`, `int`, tuple or dict, so the
-operations whose docstrings are total in their operand's kind treat it as one of the other kinds,
-and the operations that would raise stop with a gap on it, since CPython has no unassigned values.
+of `reSearch`, as its docstring says. So, apart from the quantifiers' bodies, only `isInstance` and
+`len` run user code, as `isinstance` and `len` do. An operand that is unassigned (`undef`) is no
+`str`, `int`, tuple or dict, so the operations whose docstrings are total in their operand's kind
+treat it as one of the other kinds, and the operations that would raise stop with a gap on it, since
+CPython has no unassigned values.
 -/
 
 namespace StrataPython.Dyn.Sem.Contracts
@@ -229,6 +232,68 @@ def dictKeysWithin [PyReads m V] (d : V) (keys : Array String) : m Bool := do
   return es.all fun (k, _) => match k with
     | some s => keys.contains s
     | none => false
+
+/-- The members of the container `c` for the quantifier `op`, read from its own storage: the
+elements of a `list` or `tuple`, the members of a `set` or `frozenset` in CPython's order, or the
+keys of a `dict`, instances of their subclasses included; `none` for any other value.  A set whose
+order the model doesn't know stops with a gap, and so does an undefined `c`. -/
+def members? [PyReads m V] (op : String) (c : V) : m (Option (Array V)) := do
+  if ← PyPure.isUndef c then PyPure.gap s!"{op}: an operand is undefined"
+  match ← PyPure.immViewAll c with
+  | some (.tuple xs) => return some xs
+  | some _ => return none
+  | none =>
+    match ← Proto.builtinBase? c with
+    | some .tuple => match ← PyReads.tupleView c with
+      | some xs => return some xs
+      | none => PyPure.modelInvariant s!"{op}: a tuple without its elements"
+    | some .list => match ← PyReads.listView c with
+      | some (xs, _) => return some xs
+      | none => PyPure.modelInvariant s!"{op}: a list without its elements"
+    | some .set | some .frozenset => match ← PyReads.setView c with
+      | some vw =>
+        -- A set of at most one member has one order.
+        let ms? := if vw.unordered.size ≤ 1 then some vw.unordered else vw.inOrder?
+        match ms? with
+        | some ms => return some (ms.map (·.1))
+        | none => PyPure.gap s!"{op}: a set whose order the model doesn't know"
+      | none => PyPure.modelInvariant s!"{op}: a set without its members"
+    | some .dict => return some ((← PyReads.dictEntries c).map (·.1))
+    | _ => return none
+
+/-- The result of the quantifier `op`'s body on `args`: its `base.Bool`; its `error` is raised. -/
+def bodyBool [PyPure m V] (op : String) (args : Array V) : m Bool := do
+  match ← PyPure.immView (← PyPure.region 0 args) with
+  | some (.bool b) => return b
+  | _ => PyPure.modelInvariant s!"{op}: a body that gives no base.Bool"
+
+/-- Run the body of `op` on each of `argss` in order, and combine the results with `all` or, if
+`any`, with `any`.  It doesn't stop at a decisive result, since a later body's error wins over
+it; it stops at the first error, which it raises. -/
+def quantify [PyPure m V] (op : String) (any : Bool) (argss : Array (Array V)) : m Bool := do
+  let mut r := !any
+  for args in argss do
+    let b ← bodyBool op args
+    r := if any then r || b else r && b
+  return r
+
+/-- `py.allIn c` (`any` false) and `py.anyIn c` (`any` true). -/
+def quantIn [PyReads m V] (any : Bool) (c : V) : m Bool := do
+  let op := if any then "anyIn" else "allIn"
+  let some xs ← members? s!"py.{op}" c |
+    Proto.raiseBuiltin "TypeError" s!"{op}() argument must be a list, tuple, set, frozenset or \
+      dict, not '{← Proto.typeName c}'"
+  quantify s!"py.{op}" any (xs.map fun x => #[x])
+
+/-- `py.allItems d` (`any` false) and `py.anyItems d` (`any` true): over the entries of the dict
+`d`, an instance of a subclass included. -/
+def quantItems [PyReads m V] (any : Bool) (d : V) : m Bool := do
+  let op := if any then "anyItems" else "allItems"
+  if ← PyPure.isUndef d then PyPure.gap s!"py.{op}: an operand is undefined"
+  let isDict := (← PyPure.immViewAll d).isNone && (← Proto.builtinBase? d) matches some .dict
+  unless isDict do
+    Proto.raiseBuiltin "TypeError" s!"{op}() argument must be a dict, not '{← Proto.typeName d}'"
+  quantify s!"py.{op}" any ((← PyReads.dictEntries d).map fun (k, v, _) => #[k, v])
 
 end
 
