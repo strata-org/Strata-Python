@@ -2508,7 +2508,8 @@ their verdicts in `StrataPythonTest/Dyn/sem_tests_expected.txt`. Each program ge
 <name> | syntax                 (the translator and CPython both report a syntax error)
 ```
 
-A run that stops with a gap must agree with CPython up to the gap. A gap right after the output
+A run that stops with a gap must agree with CPython up to the gap, with both of CPython's traces
+when its two runs differ. A gap right after the output
 needs only a beginning of CPython's output. A later gap needs the whole output, and the sections
 before the gap, to be CPython's. The test fails on any other difference, on a run out of fuel, on
 a fault, on a model-invariant gap, on an internal error of the translator, and on any change of

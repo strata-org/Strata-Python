@@ -18,8 +18,8 @@ CPython runs each program twice, with `PYTHONHASHSEED` 0 and 1 (`cpythonTrace`).
 traces differ, CPython's text holds both, each after a line `--- PYTHONHASHSEED=N`, with every
 address `0x…` replaced by `0x?`, and the semantics must stop with a gap on the program.
 
-A run that stops with a gap must agree with CPython up to the gap: its output is the beginning of
-CPython's, and if the gap comes after the output, the output and the sections before the gap are
+A run that stops with a gap must agree with CPython up to the gap, with both of CPython's traces
+when there are two: its output is the beginning of CPython's, and if the gap comes after the output, the output and the sections before the gap are
 CPython's.  So a gap can't hide a wrong output or a wrong exception before it.  A trace's header
 `--- stdout <n>` gives the length of the output, so a line that the program prints is never taken
 for a section's header.
@@ -214,11 +214,12 @@ def judge (name : String) (ours : Ours) (theirs : String) (known : Option Diff.K
     else if outOfFuel then
       .error s!"{name}: the run is out of fuel"
     else if let some (out, before, msg) := splitGap ours then
-      -- Up to the gap, our trace is CPython's.  With two different runs, it is either run's.
+      -- Up to the gap, our trace is CPython's.  With two different runs, it is the trace of each
+      -- run, so the gap comes before the first point where the runs differ.
       let runs := if twoRuns then
           ((theirs.drop twoRunsHeader.length).toString.splitOn "--- PYTHONHASHSEED=1\n")
         else [theirs]
-      if runs.any (agreesBefore out before) then .ok (.gap msg)
+      if runs.all (agreesBefore out before) then .ok (.gap msg)
       else .error s!"{name}: the run differs from CPython's before its gap\n--- ours\n{ours}\
         --- CPython\n{theirs}"
     else if twoRuns then

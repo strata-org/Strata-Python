@@ -135,7 +135,7 @@ meta def known2 : String := tr "a\nb\n" "--- outcome\nok\n--- globals\nx = 2\n"
 /-- info: fails: p: the run is out of fuel -/
 #guard_msgs in #eval IO.println (verdictText (judge "p" (.trace (tr "a\n" "--- out of fuel\n")) cpy none))
 
--- CPython's two runs differ: the run must stop with a gap, and agree with either run before it.
+-- CPython's two runs differ: the run must stop with a gap, and agree with both runs before it.
 meta def two : String :=
   s!"--- PYTHONHASHSEED=0\n{tr "<0x?>\n" ""}--- PYTHONHASHSEED=1\n{tr "<0x?>\n" ""}"
 
@@ -148,6 +148,34 @@ meta def two : String :=
 -- A gap after an output that neither run printed fails.
 /-- info: fails: p: the run differs from CPython's before its gap -/
 #guard_msgs in #eval IO.println (verdictText (judge "p" (.trace (tr "z\n" "--- gap g\n")) two none))
+
+-- Two runs whose outputs differ in order, as a set of `str`s does under two hash seeds: a gap after
+-- the order of one run fails, and a gap before the point where the two outputs differ is a gap.
+meta def twoOrders : String :=
+  s!"--- PYTHONHASHSEED=0\n{tr "['a', 'b']\n" ""}--- PYTHONHASHSEED=1\n{tr "['b', 'a']\n" ""}"
+
+/-- info: fails: p: the run differs from CPython's before its gap -/
+#guard_msgs in
+#eval IO.println (verdictText (judge "p" (.trace (tr "['a', 'b']\n" "--- gap g\n")) twoOrders none))
+
+/-- info: p | gap | g -/
+#guard_msgs in #eval IO.println (verdictText (judge "p" (.trace (tr "['" "--- gap g\n")) twoOrders none))
+
+-- Two runs with the same output and a global that differs by seed: a gap after the global of one
+-- run fails, and a gap before the global is a gap.
+meta def twoGlobals : String :=
+  s!"--- PYTHONHASHSEED=0\n{tr "a\n" "--- outcome\nok\n--- globals\nh = 1\n"}--- PYTHONHASHSEED=1\n\
+    {tr "a\n" "--- outcome\nok\n--- globals\nh = 2\n"}"
+
+/-- info: fails: p: the run differs from CPython's before its gap -/
+#guard_msgs in
+#eval IO.println (verdictText
+  (judge "p" (.trace (tr "a\n" "--- outcome\nok\n--- globals\nh = 1\n--- gap g\n")) twoGlobals none))
+
+/-- info: p | gap | g -/
+#guard_msgs in
+#eval IO.println (verdictText
+  (judge "p" (.trace (tr "a\n" "--- outcome\nok\n--- globals\n--- gap g\n")) twoGlobals none))
 
 -- A gap in the globals section, after the globals before it: they must be CPython's.
 /-- info: p | gap | g -/
