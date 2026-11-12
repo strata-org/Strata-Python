@@ -1,0 +1,9 @@
+module top
+  S: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  frozenset: global implicit (referenced)
+  print: global implicit (referenced)
+  set: global implicit (referenced)
+  class S
+qualnames: S

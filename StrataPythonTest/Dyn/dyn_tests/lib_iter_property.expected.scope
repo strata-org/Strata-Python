@@ -1,0 +1,12 @@
+module
+  A: local (assigned, referenced)
+  list: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  class A
+    __iter__: local (assigned)
+    property: global implicit (referenced)
+    lambda A.<lambda>
+      params: self
+      self: local (parameter)

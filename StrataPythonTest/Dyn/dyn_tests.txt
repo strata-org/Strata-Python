@@ -679,3 +679,7 @@ lib_gap_fromkeys_inexact | yes |
 lib_gap_difference_dict_user | yes |
 lib_gap_items_xor_resize | yes |
 lib_dict_copy_subclass | yes |
+lib_hash_int_subclass | yes |
+lib_iter_property | yes |
+lib_set_subclass_in_set | yes |
+lib_gap_str_subclass_format | yes |

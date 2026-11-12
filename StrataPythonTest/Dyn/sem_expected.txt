@@ -95,6 +95,7 @@ lib_gap_self_extend_iter | gap | a list subclass extended by itself through a us
 lib_gap_setdefault_collision | gap | a dict lookup after a false __eq__ depends on CPython's table layout
 lib_gap_sorted_residual | gap | a looping built-in was reached inside an operation
 lib_gap_str_buffer | gap | decoding an object with __buffer__ is not modelled yet
+lib_gap_str_subclass_format | gap | str.__format__ of an instance of a subclass of str is not modelled yet
 lib_gap_translate_surrogate | gap | a lone surrogate is not modelled
 lib_gap_type_zip_sub | gap | a subclass of zip is not modelled
 lib_gap_udecode_buffer | gap | a UnicodeDecodeError of an object with __buffer__ is not modelled yet
@@ -107,7 +108,9 @@ lib_gap_wrong_call_bool | gap | the message of a wrong call of int.__trunc__ dep
 lib_gap_zfill_large | gap | a padding too large to model, where CPython may raise MemoryError
 lib_gap_zip_new_sub | gap | a subclass of zip is not modelled
 lib_gap_zip_sub | gap | a subclass of zip is not modelled
+lib_hash_int_subclass | agree
 lib_iter_mutate | gap | a slot of a set whose layout is inexact
+lib_iter_property | agree
 lib_iter_reentrant | agree
 lib_list_methods | agree
 lib_max_min | agree
@@ -119,6 +122,7 @@ lib_reversed | agree
 lib_scalars | agree
 lib_set_methods | agree
 lib_set_order | agree
+lib_set_subclass_in_set | agree
 lib_signatures | agree
 lib_sizes | agree
 lib_sort | agree

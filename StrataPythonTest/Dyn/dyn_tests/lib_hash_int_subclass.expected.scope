@@ -1,0 +1,15 @@
+module
+  I: local (assigned)
+  int: global implicit (referenced)
+  A: local (assigned, referenced)
+  print: global implicit (referenced)
+  hash: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  class I
+  class A
+    __hash__: local (assigned)
+    function A.__hash__
+      params: self
+      self: local (parameter)
+      I: global implicit (referenced)

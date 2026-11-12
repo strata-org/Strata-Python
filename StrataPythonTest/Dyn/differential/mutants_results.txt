@@ -1,0 +1,10 @@
+max_last_of_equal | max keeps the last of equal items | lib_max_min (SemDiffTest) | d857eb45efc2 f13df73e9105
+update_ignores_keys | dict.update ignores the keys() protocol | lib_collections (SemDiffTest) | 683c7fce5ee3 5c516c0f1b44
+sum_no_compensation | sum adds floats without the compensation | lib_sum (SemDiffTest) | c02cc67f3616 baa843fae305
+hasattr_catches_all | hasattr catches every exception | lib_functions (SemDiffTest) | be5d75abab5c 69175589e30c
+sort_no_key_scan | the sort skips the key scan | lib_sort (SemDiffTest) | 70ad55e22594 3129ec9aa325
+pop_ignores_finger | set.pop ignores the finger | lib_set_order (SemDiffTest) | 0604e050d8ff a11393b6b3c5
+lower_no_final_sigma | str.lower without the final-sigma rule | lib_str_methods (SemDiffTest) | 6d0d117ace8e 6b4bc5314503
+binary_no_subclass_rule | the binary protocol drops the subclass rule | test_dispatch_binary_protocol_case_08_subclass_reflected_priority (SemDiffTest) | 4ee4a8b64df3 900c10ba628a
+translate_no_cache | translate looks every ASCII character up | lib_str_translate (SemDiffTest) | 3f65715f4eaf a2c9c531611b
+setdefault_hashes_twice | dict.setdefault hashes its key twice | lib_dict_methods (SemDiffTest) | 0eb9f113c848 ea412d997182

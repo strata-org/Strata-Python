@@ -1,0 +1,9 @@
+--- stdout 27
+'A' object is not iterable
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+__doc__ = None
+__name__ = '__main__'

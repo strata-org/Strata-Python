@@ -1,0 +1,10 @@
+--- stdout 6
+STR S
+
+--- outcome
+ok
+--- globals
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'
+x = <S object>

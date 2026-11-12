@@ -2401,7 +2401,7 @@ list, and the rejections with their messages with a golden there.
 does what CPython 3.12 does
 (`Rules/`, over the generic protocols of `Proto/`), as `docs/Dyn.md` §4 describes. A rule that
 reaches a case the semantics doesn't model yet stops the run with a gap, whose message names the
-case, e.g. `built-in sorted is not modelled yet` or `import of module sys is not modelled yet`. A gap is
+case, e.g. `built-in chr is not modelled yet` or `import of module sys is not modelled yet`. A gap is
 never a wrong result: the run stops there. Outside the known differences of §13.4 and the bugs of
 §13.5, a run that doesn't stop with a gap gives CPython's result.
 
@@ -2429,7 +2429,11 @@ That claim trusts these assumptions about the CPython run:
   of call, but nothing proves it;
 - no `-O` (so `assert` statements run and `__debug__` is `True`);
 - enough memory, so that no `MemoryError` is raised;
-- the platform's `libm` for a float `**`, whose result the model takes from the host's `pow`.
+- the platform's `libm` for a float `**`, whose result the model takes from the host's `pow`;
+- a 64-bit CPython on a little-endian machine whose C `long` has 64 bits (Linux or macOS, not
+  Windows): the widths of `Py_ssize_t`, C `int` and C `long` (e.g. where `sum` leaves its `int`
+  phase, and the bounds of an `OverflowError`), the hash modulus 2^61 − 1, and the byte order of
+  `utf-16` and `utf-32` without a byte order mark.
 
 It also trusts one contract that the semantics follows, which a run checks only in part. The
 semantics's primitives (`StrataPython/Dyn/Sem/Dom.lean`) have writes that may only target objects
@@ -2549,13 +2553,25 @@ gives the verdict of one program, for other differential tests with their own pr
 `StrataPythonTestExtra/HasattrUserTest.lean` compares `hasattr` on built-in and user-made values
 with CPython 3.12, over 1422 generated cases.
 
+Three more sources of programs use the same verdicts. `StrataPythonTestExtra/PylateDiffTest.lean`
+runs PyLate's scenarios, as programs that `StrataPythonTest/Dyn/differential/pylate_programs.py`
+writes; `StrataPythonTestExtra/GeneratedDiffTest.lean` runs 500 programs that
+`differential/gen_programs.py` generates from a fixed seed, each of which calls the built-in
+library; and `StrataPythonTestExtra/CpythonOracleDynTest.lean` runs the test methods of CPython's
+own regression suite that `StrataPythonTest/cpython_oracle/` selects, with its verdicts in
+`cpython_oracle/verdicts_dyn.txt`. `differential/mutants.py --run` checks the tests themselves:
+it makes one small wrong change to a rule at a time (for example, `max` keeping the last of equal
+items), and records in `differential/mutants_results.txt` the first program whose trace or
+verdict changes. It takes about ten minutes per mutant, so it is a manual command;
+`StrataPythonTestExtra/MutantsTest.lean` checks in the build that each mutant still applies and
+is recorded as caught.
+
 ### 13.3 What is modelled
 
 - The values `None`, `bool`, `int`, `float`, `str`, `bytes`, `tuple`, `range`, `slice`,
   `Ellipsis` and `NotImplemented`, with their hashes, their arithmetic and their comparisons.
 - Lists, dicts, sets and frozensets: the displays and the operations that make them, item access,
-  slices, unpacking, `in`, and the operators on them. The built-ins `list()`, `dict()`, `set()` and
-  `frozenset()` are not modelled yet and stop with a gap. A walk over a set whose order may differ
+  slices, unpacking, `in`, and the operators on them. A walk over a set whose order may differ
   from CPython's (a set display of constants, or a set built from one) stops with a gap: iteration,
   `pop`, `repr`, and a comparison that may run user code. A walk of a dict by position (`==`,
   `repr`, an iterator) stops with a gap at a change of its keys where CPython may move its entries:
@@ -2625,7 +2641,9 @@ with CPython 3.12, over 1422 generated cases.
   classes, made by calling them, with their `args`, their fields (e.g. `OSError`'s `errno` and
   the subclass that its `errno` selects), `str` and `repr`, `add_note` and the construction of
   `ExceptionGroup`. The `__context__` chain with CPython's cut of a cycle, and `__cause__` and
-  `__suppress_context__`. These stop with a gap: the unicode errors and the `SyntaxError` family,
+  `__suppress_context__`. These stop with a gap: the `SyntaxError` family,
+  `UnicodeTranslateError`, a write to an attribute of `UnicodeEncodeError` or
+  `UnicodeDecodeError` (their five fields read as CPython's members do),
   `ExceptionGroup`'s methods, a cause that is a class or neither an exception nor `None`, an
   exception class whose call gives an exception of another class, a raise of an exception whose
   class's metaclass defines `__subclasscheck__`, a class whose `__new__` comes from another
@@ -2634,7 +2652,7 @@ with CPython 3.12, over 1422 generated cases.
   and the `str()` of an uncaught exception whose class defines `__str__`. A traceback is opaque:
   its attributes and `with_traceback` stop with a gap.
 - Iteration: `for` loops, `iter` (with a sentinel too), `next` (with a default), `len` and `range`
-  (with slicing and `range.__reversed__`; the built-in `reversed` stops with a gap), over the
+  (with slicing and `range.__reversed__`), over the
   built-in containers and their iterators, user iterators and objects with `__getitem__`; and
   `[*x]`, `{*x}`, `a, b = x`, `a, *b = x`, `f(*x)`, `f(**m)`, `{**m}` and `x in y` over them, with
   CPython's order of calls, length hints and errors. An operation that loops over a user iterator
@@ -2649,6 +2667,49 @@ with CPython 3.12, over 1422 generated cases.
   each element added as `LIST_APPEND`, `SET_ADD` and `MAP_ADD` add it (a dict's key is hashed
   after its value is computed). Like a `for` loop, a comprehension over a user iterator runs one
   `__next__` per activation.
+- The built-in library (`StrataPython/Dyn/Sem/Library/`): the constructors `int`, `float`,
+  `bool`, `str`, `bytes`, `list`, `tuple`, `dict`, `set` and `frozenset`; the functions
+  `getattr`, `hasattr`, `setattr`, `callable`, `issubclass`, `hash`, `abs`, `divmod`, `hex`,
+  `any`, `all`, `sum`, `max`, `min`, `sorted`, `zip`, `enumerate` and `reversed`, with the objects
+  that the last three make; all 47 methods of `str`, the methods of `list`, `tuple`,
+  `range`, `dict`, `set` and `frozenset`; the dict views, with their `len`, `in`, comparisons,
+  set operators and `mapping`; and `UnicodeEncodeError` and
+  `UnicodeDecodeError`, which the codecs raise. Each rule follows its CPython 3.12 C function: the
+  order in which it converts its arguments (the signatures come from CPython's own argument
+  errors, `Library/Signatures.lean`), its fast paths for exact types, the user code that it runs
+  and how often, its errors, and the order of the sets and dicts that it builds. A loop over a user
+  iterator is a step machine, as for the operations. `list.sort` and `sorted` port CPython's sort
+  (`StrataDyn/Util/Sort.lean`, which `StrataDyn/Util/SortProps.lean` proves returns a permutation
+  of its input), with CPython's choice of comparison; keys that are all numbers or all `str`s take
+  a stable merge sort that gives the same order. These stop with a gap, each pinned by a corpus
+  program, or for the codecs by `StrataPythonTest/Dyn/Sem/Library/CodecsTest.lean`:
+  - a wrong call whose message depends on how the method is called: on an instance of a subclass
+    (`f = S('a').upper; f(1)` names the subclass), a keyword to a method that takes its arguments
+    as one tuple (`'a'.find('a', x=1)`), and a wrong call of `enumerate`;
+  - a looping built-in reached inside another operation, whose walk needs more than that
+    operation's step, e.g. `sum([C()], u)` for a class `C` whose `__radd__` is `any` and a user
+    iterator `u`: the addition inside `sum` calls `any`, which walks `u`;
+  - a codec that CPython finds through the `encodings` package (only `utf-8`, `utf-16`, `utf-32`,
+    `ascii` and `latin-1` are built in), the `namereplace` error handler, a decoding that gives a
+    lone surrogate or meets an error after its handler gave one, and a `translate` table that
+    maps to a lone surrogate;
+  - `int()`, `float()`, `bytes()`, decoding with `str()` and a `UnicodeDecodeError` of an object
+    with `__buffer__`, an attribute name that is an instance of a subclass of `str`, a key of
+    `str.maketrans` that is an instance of a subclass of `int`, `issubclass()` of an object that
+    has `__bases__` but is not a class, and `issubclass()` over tuples nested deeper than 100;
+  - a padding (`ljust`, `rjust`, `center`, `zfill`, `expandtabs`) or a `replace` whose result is
+    longer than the model holds, where CPython may raise `MemoryError`;
+  - `float()` of a hash whose number the model doesn't know, and an instance of a subclass of
+    `int` made from such a hash;
+  - a set difference with a dict whose comparisons may run user code, a list subclass extended
+    by itself through a user iterator, and `^` of two items views while the second dict's keys
+    change and it has deleted entries;
+  - a subclass of `zip`, `enumerate` or `reversed`;
+  - where CPython 3.12 warns: an `__int__` or `__index__` that gives a `bool` or an instance of a
+    subclass of `int`, a `__float__` that gives an instance of a subclass of `float`, and
+    `int()` of an object with `__trunc__`;
+  - a dict built in the order of a set whose order may differ from CPython's (`dict.fromkeys(s)`),
+    and the length hint of a forward dict iterator.
 - CPython's recursion limit: nested comparisons, calls into Python and calls of built-in callables
   count toward it, at least as many levels as CPython counts, and a run stops with a gap when its
   count passes 9,000, 995 below CPython's limit, where CPython raises `RecursionError`. A call of a
@@ -2697,9 +2758,14 @@ for each class, about 10 µs a class.
 `StrataPythonTestExtra/SemLoopsTest.lean` runs eight loops (`print`, a `try` whose `except`
 catches, `l += [i]`, `d[i] = i`, `del d[i]`, `o.x = i`, a call of a Python function and a list
 comprehension) at 100,000
-and at 1,000,000 iterations. It fails if a run doesn't end with the outcome `ok`, or if a run of
-1,000,000 takes more than 12 times the run of 100,000, as a quadratic cost would; each takes about
-9 times as long. Its runs take a few minutes, so it runs only when `SEM_LOOPS` is set.
+and at 1,000,000 iterations, three times at each size. It fails if a run doesn't end with the
+outcome `ok`, or if the fastest of the three runs of 1,000,000 takes more than 12 times the fastest
+of the three runs of 100,000, as a quadratic cost would; each takes about 9 times as long. Its
+runs take about 10 minutes, so it runs only when `SEM_LOOPS` is set.
+`StrataPythonTestExtra/LibraryLoopsTest.lean` checks five loops of the built-in library in the
+same way: `sum` and `list` over a user iterator, `reversed` of a dict then `popitem` until it is
+empty, `enumerate` of a list, and `set.update` with one member at a time. Each takes about 10
+times as long at 1,000,000 iterations as at 100,000, and its runs take about 20 minutes.
 
 A non-ASCII `str` also keeps its characters in an array (`PyStr.chars`, 8 bytes a character),
 computed the first time it is indexed, sliced or measured with `len`, so that later indexing and
@@ -2727,8 +2793,16 @@ abort, and it gives no result:
   once.
 - One operation over a value of about a million members, such as the `repr` of a list, a tuple or
   a dict of 1,000,000 members, or a dict or set key that is a tuple of 1,000,000 members holding an
-  object, a `str` or a tuple (a tuple of numbers hashes within the stack). A loop inside a rule over one value's members takes native stack for each member until
-  the rule ends. `StrataPythonTestExtra/SemScaleTest.lean` runs these reprs at 100,000 members.
+  object, a `str` or a tuple (a tuple of numbers hashes within the stack); or a library rule's
+  loop over one long value inside one step, such as `list(range(1000000))`, or a sort through
+  CPython's port of about 70,000 built-in values such as tuples, or a `max` or `list.index` over a
+  few hundred thousand of them, whose comparisons run no Python code (a sort of user objects, whose `__lt__` is Python code, doesn't build up native stack). A
+  loop inside a rule over one value's members takes native stack for each member until the rule
+  ends.
+  `StrataPythonTestExtra/SemScaleTest.lean` runs these reprs at 100,000 members, and the corpus
+  program `lib_sizes` runs library rules over values of up to 400,000 members, with sorts through
+  the port of up to 20,000 tuples. The library's loop
+  test builds its values of 1,000,000 members one member per step.
 
 Two equal tuples that share sub-tuples compare in time proportional to their unfolded size, even
 where CPython's identity shortcut answers at once: with `t = (t, t)` repeated 18 times,
