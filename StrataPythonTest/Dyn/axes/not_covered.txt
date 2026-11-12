@@ -2,33 +2,33 @@
 # with CPython (and, for a name, gives a result) reaches, each with the reason. `AxisGridTest.lean` fails on a name it can't cover that isn't
 # here, and on an entry here that it covers. A reason that starts with "every case that reaches
 # it gaps" names one such case and its gap message.
-py.allItems | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.anyItems | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.attrLoc | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.itemLoc | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.objLoc | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.reachLoc | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.instanceState | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
+py.allItems | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.anyItems | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.attrLoc | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.itemLoc | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.objLoc | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.reachLoc | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.instanceState | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
 py.unsupported | emitted only for a construct that the translator rejects, and a rejected program doesn't run
-py.isMarker | the guard's test of a loop-invariant marker statement, and no grid case imports pyhard
-py.argOf | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.extraKwargs | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.bindsTo | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.stdClass | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.isInstance | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.typeIsSubclass | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.len | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.reSearch | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.strIsOneOf | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.intIsOneOf | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.isImmutableScalar | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.dictKeysWithin | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.allIn | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.anyIn | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
+py.isMarker | the guard before each loop-invariant marker statement applies it, and no grid case states a loop invariant
+py.argOf | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.extraKwargs | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.bindsTo | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.stdClass | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.isInstance | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.typeIsSubclass | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.len | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.reSearch | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.strIsOneOf | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.intIsOneOf | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.isImmutableScalar | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.dictKeysWithin | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.allIn | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
+py.anyIn | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
 base.callCode | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.cellLoc | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.old | the translator doesn't emit it for Python source (no golden of the corpus has it)
-base.loopInvariant | the translator doesn't emit it for Python source (no golden of the corpus has it)
+base.loopInvariant | the machine skips it without running its region, and no grid case states a loop invariant
 base.Except.case | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.Unit.case | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.unreachable | the operation's translation has it, but it stops the run with a failure, so no run that agrees with CPython executes it

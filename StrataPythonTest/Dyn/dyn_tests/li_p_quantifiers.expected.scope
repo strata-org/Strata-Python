@@ -1,0 +1,52 @@
+module
+  import loop_invariant: member loop_invariant of pyhard
+  import OLD: member OLD of pyhard
+  loop_invariant: local (imported)
+  OLD: local (imported)
+  f: local (assigned, referenced)
+  print: global implicit (referenced)
+  function f
+    params: xs, d
+    xs: cell (parameter, referenced)
+    d: cell (parameter)
+    i: local (assigned, referenced)
+    loop_invariant: global implicit (referenced)
+    len: global implicit (referenced)
+    lambda f.<locals>.<lambda>
+      all: global implicit (referenced)
+      xs: free (referenced)
+      any: global implicit (referenced)
+      generator expression f.<locals>.<lambda>.<locals>.<genexpr>
+        params: .0
+        .0: local (parameter)
+        x: local (assigned, referenced, comp_iter)
+      generator expression f.<locals>.<lambda>.<locals>.<genexpr>
+        params: .0
+        .0: local (parameter)
+        x: local (assigned, referenced, comp_iter)
+    lambda f.<locals>.<lambda>
+      all: global implicit (referenced)
+      d: free (referenced)
+      any: global implicit (referenced)
+      generator expression f.<locals>.<lambda>.<locals>.<genexpr>
+        params: .0
+        .0: local (parameter)
+        k: local (assigned, comp_iter)
+        v: local (assigned, referenced, comp_iter)
+      generator expression f.<locals>.<lambda>.<locals>.<genexpr>
+        params: .0
+        .0: local (parameter)
+        k: local (assigned, referenced, comp_iter)
+        v: local (assigned, comp_iter)
+    lambda f.<locals>.<lambda>
+      all: global implicit (referenced)
+      d: free (referenced)
+      generator expression f.<locals>.<lambda>.<locals>.<genexpr>
+        params: .0
+        .0: local (parameter)
+        k: local (assigned, referenced, comp_iter)
+        len: global implicit (referenced)
+      generator expression f.<locals>.<lambda>.<locals>.<genexpr>
+        params: .0
+        .0: local (parameter)
+        v: local (assigned, referenced, comp_iter)

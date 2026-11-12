@@ -1,0 +1,20 @@
+module
+  import loop_invariant: member loop_invariant of pyhard
+  loop_invariant: local (imported)
+  C: local (assigned, referenced)
+  print: global implicit (referenced)
+  class C
+    m: local (assigned)
+    function C.m
+      params: self, d
+      self: local (parameter)
+      d: cell (parameter)
+      i: local (assigned, referenced)
+      loop_invariant: global implicit (referenced)
+      lambda C.m.<locals>.<lambda>
+        all: global implicit (referenced)
+        d: free (referenced)
+        generator expression C.m.<locals>.<lambda>.<locals>.<genexpr>
+          params: .0
+          .0: local (parameter)
+          _C__k: local (assigned, referenced, comp_iter)

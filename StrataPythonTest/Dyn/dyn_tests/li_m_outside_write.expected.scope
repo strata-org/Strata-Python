@@ -1,0 +1,8 @@
+module
+  import m: module li_m_outside_target
+  m: local (imported, referenced)
+  print: global implicit (referenced)
+  lambda <lambda>
+    params: p
+    p: local (parameter)
+    print: global implicit (referenced)

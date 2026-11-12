@@ -1,0 +1,24 @@
+module top
+  Ctx: local (assigned)
+  OLD: local (imported)
+  f: local (assigned, referenced)
+  loop_invariant: local (imported)
+  print: global implicit (referenced)
+  class Ctx
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    function __enter__
+      self: local (parameter, referenced)
+    function __exit__
+      a: local (parameter)
+      print: global implicit (referenced)
+      self: local (parameter)
+  function f
+    Ctx: global implicit (referenced)
+    i: cell (assigned, referenced)
+    loop_invariant: global implicit (referenced)
+    n: cell (parameter, referenced)
+    function lambda
+      i: free (referenced)
+      n: free (referenced)
+qualnames: Ctx, Ctx.__enter__, Ctx.__exit__, f, f.<locals>.<lambda>

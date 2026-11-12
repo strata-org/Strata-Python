@@ -13,8 +13,9 @@ set_option autoImplicit false
 /-!
 # The rules of the contract operations
 
-A contract of a Python function uses these operations; the translator of Python code doesn't
-emit them.  Each rule runs its combinator of `Ops.lean` at its operation's declared effect.
+A contract of a Python function uses these operations; the translator of Python code emits them
+only in a loop invariant's region.  Each rule runs its combinator of `Ops.lean` at its operation's
+declared effect.
 -/
 
 namespace StrataPython.Dyn.Sem.Contracts

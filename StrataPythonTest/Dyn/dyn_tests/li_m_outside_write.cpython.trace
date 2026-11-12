@@ -1,0 +1,11 @@
+--- stdout 11
+2
+called
+3
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+m = <module object>

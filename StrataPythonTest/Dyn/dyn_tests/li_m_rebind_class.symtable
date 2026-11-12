@@ -1,0 +1,5 @@
+module top
+  OLD: local (imported)
+  loop_invariant: local (assigned, imported)
+  class loop_invariant
+qualnames: loop_invariant

@@ -1,0 +1,12 @@
+--- stdout 2
+6
+
+--- outcome
+ok
+--- globals
+OLD = <marker OLD>
+__doc__ = None
+__name__ = '__main__'
+i = 3
+loop_invariant = <marker loop_invariant>
+total = 6

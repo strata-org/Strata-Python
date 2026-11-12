@@ -1,0 +1,13 @@
+module top
+  f: local (assigned, referenced)
+  loop_invariant: local (imported)
+  print: global implicit (referenced)
+  function f
+    loop_invariant: global implicit (referenced)
+    n: local (assigned, referenced)
+    x: cell (assigned)
+    xs: cell (parameter, referenced)
+    function lambda
+      x: free (referenced)
+      xs: free (referenced)
+qualnames: f, f.<locals>.<lambda>

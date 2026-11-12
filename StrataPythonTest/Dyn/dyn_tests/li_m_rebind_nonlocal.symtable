@@ -1,0 +1,10 @@
+module top
+  OLD: local (imported)
+  f: local (assigned)
+  loop_invariant: local (imported)
+  function f
+    g: local (assigned, referenced)
+    loop_invariant: cell (assigned)
+    function g
+      loop_invariant: free (assigned, nonlocal)
+qualnames: f, f.<locals>.g

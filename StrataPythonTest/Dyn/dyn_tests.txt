@@ -694,3 +694,135 @@ m_loop_dead_after | yes |
 m_loop_in_except | yes |
 m_finally_returns | yes |
 m_loop_exits_run | yes |
+
+# Loop-invariant markers (§6.11): rejections.
+li_m_import_late | yes | importing pyhard other than at the top of the module
+li_m_import_in_if | yes | importing pyhard other than at the top of the module
+li_m_import_module | yes | importing pyhard other than at the top of the module
+li_m_import_module_as | yes | importing pyhard other than at the top of the module
+li_m_import_submodule | yes | importing pyhard other than at the top of the module
+li_m_import_twice | yes | importing pyhard other than at the top of the module, rebinding the marker loop_invariant
+li_m_import_in_func | yes | importing pyhard other than at the top of the module, rebinding the marker OLD
+li_m_import_as | yes | renaming a pyhard marker
+li_m_import_other | yes | importing names from pyhard other than loop_invariant and OLD
+li_m_rebind_assign | yes | rebinding the marker loop_invariant
+li_m_rebind_augassign | yes | rebinding the marker loop_invariant, a use of loop_invariant other than a statement right before a loop
+li_m_rebind_param | yes | rebinding the marker loop_invariant
+li_m_rebind_annotation | yes | rebinding the marker loop_invariant
+li_m_rebind_walrus | yes | rebinding the marker loop_invariant
+li_m_rebind_for | yes | rebinding the marker loop_invariant
+li_m_rebind_with | yes | rebinding the marker loop_invariant
+li_m_rebind_except | yes | rebinding the marker loop_invariant
+li_m_rebind_def | yes | rebinding the marker loop_invariant
+li_m_rebind_class | yes | rebinding the marker loop_invariant
+li_m_rebind_import | yes | rebinding the marker loop_invariant
+li_m_rebind_global | yes | rebinding the marker loop_invariant
+li_m_rebind_nonlocal | yes | rebinding the marker loop_invariant
+li_m_rebind_del | yes | rebinding the marker loop_invariant
+li_m_rebind_comprehension | yes | rebinding the marker loop_invariant
+li_m_rebind_class_attr | yes | rebinding the marker loop_invariant
+li_m_rebind_old | yes | rebinding the marker OLD
+li_m_after_loop | yes | a loop invariant that is not right before its loop
+li_m_between | yes | a loop invariant that is not right before its loop
+li_m_end_of_block | yes | a loop invariant that is not right before its loop
+li_m_in_expression | yes | a use of loop_invariant other than a statement right before a loop
+li_m_bare_read | yes | a use of loop_invariant other than a statement right before a loop
+li_m_in_lambda | yes | a use of loop_invariant other than a statement right before a loop
+li_m_old_outside | yes | a use of OLD outside a loop invariant's OLD(e)
+li_m_last_statement | yes | a loop invariant that is not right before its loop
+li_m_shape_not_lambda | yes | a loop invariant other than loop_invariant(lambda: P)
+li_m_shape_param | yes | a loop invariant other than loop_invariant(lambda: P)
+li_m_shape_default | yes | a loop invariant other than loop_invariant(lambda: P)
+li_m_shape_varargs | yes | a loop invariant other than loop_invariant(lambda: P)
+li_m_shape_two_args | yes | a loop invariant other than loop_invariant(lambda: P)
+li_m_shape_keyword | yes | a loop invariant other than loop_invariant(lambda: P)
+li_m_shape_starred | yes | a loop invariant other than loop_invariant(lambda: P)
+li_m_shape_no_arg | yes | a loop invariant other than loop_invariant(lambda: P)
+li_m_class_body | yes | a loop invariant in a class body
+
+# Loop-invariant markers (§6.11): invariants.
+li_m_globals_write | yes |
+li_m_outside_target | yes |
+li_m_outside_write | yes |
+li_while | yes |
+li_while_else | yes |
+li_while_true_break | yes |
+li_while_guard_raises | yes |
+li_for_list | yes |
+li_for_range | yes |
+li_for_dict | yes |
+li_for_items | yes |
+li_for_str | yes |
+li_for_iter | yes |
+li_for_custom_iter | yes |
+li_for_attr_target | yes |
+li_for_target_before | yes |
+li_for_target_unbound | yes |
+li_for_target_current | yes |
+li_nested_both | yes |
+li_nested_outer | yes |
+li_inner_first | yes |
+li_break_continue | yes |
+li_return_in_loop | yes |
+li_raise_out | yes |
+li_except_in_body | yes |
+li_finally_continue | yes |
+li_with_break | yes |
+li_several_exits | yes |
+li_module_level | yes |
+li_method | yes |
+li_nested_function | yes |
+li_closure_cell | yes |
+li_in_if_try_with | yes |
+li_docstring_future | yes |
+li_only_loop_invariant | yes |
+li_no_import | yes |
+li_user_function | yes |
+li_other_module | yes |
+li_other_module_helper | yes |
+li_p_names | yes |
+li_p_unbound | yes |
+li_p_operators | yes |
+li_p_comparisons | yes |
+li_p_bool_values | yes |
+li_p_attr_item_slice | yes |
+li_p_isinstance | yes |
+li_p_quantifiers | yes |
+li_p_shadow | yes |
+li_p_iterable_scope | yes |
+li_q_kinds | yes |
+li_r_call | yes | a call in a loop invariant
+li_r_method_call | yes | a call in a loop invariant
+li_r_lambda | yes | a lambda in a loop invariant
+li_r_walrus | yes | an assignment expression in a loop invariant
+li_r_yield | yes | yield in a loop invariant
+li_r_starred | yes | a starred expression in a loop invariant
+li_r_display | yes | a display in a loop invariant
+li_r_comprehension | yes | a comprehension in a loop invariant
+li_r_generator | yes | a call in a loop invariant
+li_r_fstring | yes | an f-string in a loop invariant
+li_r_keyword | yes | a keyword argument in a loop invariant
+li_r_two_fors | yes | a quantifier with several for clauses in a loop invariant
+li_r_tuple_target | yes | a quantifier whose target is not a name in a loop invariant
+li_r_marker_inside | yes | a use of loop_invariant other than a statement right before a loop
+li_r_len_rebound | yes | len in a loop invariant of a module that binds len
+li_r_old_not_imported | yes | OLD without importing it from pyhard
+li_r_dunder | yes | module attribute __file__
+li_r_comp_binds_name | yes | a name that the lambda reads as a global but the loop binds in a loop invariant
+li_r_items_same_name | yes | a quantifier over items() whose target is not two different names
+li_r_items_not_pair | yes | a quantifier over items() whose target is not two different names
+li_r_items_mangled_same | yes | a quantifier over items() whose target is not two different names
+li_r_complex | yes | complex literal
+li_r_old | yes | OLD in a loop invariant
+li_m_import_dup | yes | importing a pyhard marker twice, rebinding the marker loop_invariant
+li_r_len_two | yes | a call in a loop invariant
+li_r_isinstance_one | yes | a call in a loop invariant
+li_r_all_not_generator | yes | a call in a loop invariant
+li_r_view_argument | yes | a call in a loop invariant
+li_r_iterable_call | yes | a call in a loop invariant
+li_p_mangled_binder | yes |
+li_p_items_mangled_pair | yes |
+li_r_async_quantifier | yes | an async quantifier in a loop invariant
+li_module_comprehension | yes |
+li_r_comp_nested | yes | a name that the lambda reads as a global but the loop binds in a loop invariant
+li_p_mangled_mixed | yes |

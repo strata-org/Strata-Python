@@ -118,6 +118,7 @@ The package is the repository root:
 ├── StrataDynTest/                 # Dyn core tests
 ├── Scripts/                       # Executable entry points (pyInterpret, pyAnalyzeLaurel, etc.)
 ├── Python/
+│   ├── pyhard/                    # pyhard.py: the loop-invariant markers that programs import
 │   └── strata-python/             # Python tooling package (Ion reader, dialect generator)
 ├── StrataPythonTest/              # Compile-time tests (built with lake build)
 ├── StrataPythonTestExtra/         # Runtime tests (run with lake test, require Python)

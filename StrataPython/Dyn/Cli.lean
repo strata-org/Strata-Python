@@ -176,6 +176,8 @@ private def fuelFlag : Flag :=
 /-- Translate `path` as module `__main__`, run it with the Python semantics, and print its
 trace, returning the exit status. -/
 private def runRun (path : String) (fuel : Nat) : IO UInt32 := do
+  if let some msg := PyMarkers.mainFileProblem? path then
+    IO.eprintln s!"pydyn run: {msg}"; return 1
   let (stmts, src) ← match ← load path with
     | .ok r => pure r
     | .error m => IO.eprintln s!"pydyn run: {m}"; return 2

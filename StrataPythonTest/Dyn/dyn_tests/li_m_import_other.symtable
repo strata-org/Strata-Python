@@ -1,0 +1,4 @@
+module top
+  check: local (imported)
+  i: local (assigned, referenced)
+qualnames: 

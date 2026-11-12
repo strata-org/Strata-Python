@@ -1,0 +1,20 @@
+module top
+  C: local (assigned, referenced)
+  OLD: local (imported)
+  loop_invariant: local (imported)
+  print: global implicit (referenced)
+  class C
+    f: local (assigned)
+    function f
+      i: local (assigned, referenced)
+      len: global implicit (referenced)
+      loop_invariant: global implicit (referenced)
+      self: local (parameter)
+      xs: cell (parameter, referenced)
+      function lambda
+        all: global implicit (referenced)
+        xs: free (referenced)
+        function genexpr
+          .0: local (parameter)
+          _C__x: local (assigned, referenced, comp_iter)
+qualnames: C, C.f, C.f.<locals>.<lambda>, C.f.<locals>.<lambda>.<locals>.<genexpr>

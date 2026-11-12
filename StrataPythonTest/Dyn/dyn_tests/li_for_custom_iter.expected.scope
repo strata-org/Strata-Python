@@ -1,0 +1,28 @@
+module
+  import loop_invariant: member loop_invariant of pyhard
+  import OLD: member OLD of pyhard
+  loop_invariant: local (imported)
+  OLD: local (imported)
+  Count: local (assigned, referenced)
+  f: local (assigned, referenced)
+  print: global implicit (referenced)
+  class Count
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    function Count.__init__
+      params: self, n
+      self: local (parameter, referenced)
+      n: local (parameter, referenced)
+    function Count.__iter__
+      params: self
+      self: local (parameter, referenced)
+      iter: global implicit (referenced)
+      range: global implicit (referenced)
+  function f
+    params: c
+    c: local (parameter, referenced)
+    s: cell (assigned, referenced)
+    loop_invariant: global implicit (referenced)
+    x: local (assigned, referenced)
+    lambda f.<locals>.<lambda>
+      s: free (referenced)

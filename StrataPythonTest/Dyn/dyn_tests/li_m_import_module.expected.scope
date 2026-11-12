@@ -1,0 +1,4 @@
+module
+  import pyhard: module pyhard
+  pyhard: local (imported)
+  i: local (assigned, referenced)

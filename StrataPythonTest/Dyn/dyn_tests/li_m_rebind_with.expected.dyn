@@ -1,0 +1,74 @@
+-- unsupported: rebinding the marker loop_invariant is not supported at 2:0-4:12
+module li_m_rebind_with {
+  func @|li_m_rebind_with.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      jump ^start.0()
+    start.0():
+      %str.0 : py.Value = py.strLit("li_m_rebind_with")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("li_m_rebind_with", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("li_m_rebind_with", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %loop_invariant.0 : py.Value = py.importFrom("pyhard", "loop_invariant") ^propagate.0()
+      %loop_invariant.cell.0 : base.Ref(py.Value) = py.globalCell("li_m_rebind_with", "loop_invariant")
+      %set.2 : base.Unit = base.refSet[py.Value](%loop_invariant.cell.0, %loop_invariant.0)
+      %OLD.0 : py.Value = py.importFrom("pyhard", "OLD") ^propagate.0()
+      %OLD.cell.0 : base.Ref(py.Value) = py.globalCell("li_m_rebind_with", "OLD")
+      %set.3 : base.Unit = base.refSet[py.Value](%OLD.cell.0, %OLD.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@li_m_rebind_with.f, "f", "li_m_rebind_with")
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("li_m_rebind_with", "f")
+      %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @li_m_rebind_with.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %c.0 : py.Value = py.undef("c")
+      %c.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%c.0)
+      %loop_invariant.0 : py.Value = py.undef("loop_invariant")
+      %loop_invariant.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%loop_invariant.0)
+      %c.1 : py.Value = py.undef("c")
+      %defaults.0 : py.Value = py.mkTuple(%c.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "c") ^propagate.0()
+      %c.9 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%c.cell.0, %c.9)
+      jump ^start.0()
+    start.0():
+      %c.10 : py.Value = base.refGet[py.Value](%c.cell.0)
+      %c.11 : py.Value = py.requireDefined(%c.10, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %enter.0 : py.Value = py.enterMethod(%c.11) ^propagate.0()
+      %exit.0 : py.Value = py.exitMethod(%c.11) ^propagate.0()
+      %args.1 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %entered.0 : py.Value = py.call(%enter.0, %args.1, %kwargs.1) ^propagate.0()
+      %set.1 : base.Unit = base.refSet[py.Value](%loop_invariant.cell.0, %entered.0)
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^fin.0(%comp.0)
+    fin.0(%pending.0 : py.Completion):
+      %none.0 : py.Value = py.noneLit
+      %args.2 : py.Value = py.mkTuple(%none.0, %none.0, %none.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %exited.1 : py.Value = py.call(%exit.0, %args.2, %kwargs.2) ^propagate.0()
+      py.Completion.case(%pending.0) ^join.0() ^ret.0() ^propagate.0() ^unreachable.0() ^unreachable.1()
+    ret.0(%val.0 : py.Value):
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%val.0)
+      ret(%ret.0)
+    unreachable.0():
+      unreachable
+    unreachable.1():
+      unreachable
+    join.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.1)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+}
+

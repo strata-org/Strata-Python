@@ -1,0 +1,11 @@
+--- stdout 9
+called
+2
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+loop_invariant = <function object>

@@ -1,0 +1,15 @@
+module top
+  OLD: local (imported)
+  f: local (assigned)
+  loop_invariant: local (imported)
+  x: local (assigned)
+  function f
+    i: local (assigned, referenced)
+    len: global implicit (referenced)
+    loop_invariant: global implicit (referenced)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    ys: local (assigned, referenced)
+    function lambda
+      x: global implicit (referenced)
+qualnames: f, f.<locals>.<lambda>

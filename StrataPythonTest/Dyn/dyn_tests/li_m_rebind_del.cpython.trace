@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+OLD = <marker OLD>
+__doc__ = None
+__name__ = '__main__'

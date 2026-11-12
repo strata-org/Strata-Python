@@ -1,0 +1,12 @@
+--- stdout 2
+1
+
+--- outcome
+ok
+--- globals
+OLD = <marker OLD>
+__doc__ = 'A module with a docstring.'
+__name__ = '__main__'
+division = <_Feature object>
+f = <function object>
+loop_invariant = <marker loop_invariant>

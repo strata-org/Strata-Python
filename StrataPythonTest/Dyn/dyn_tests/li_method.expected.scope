@@ -1,0 +1,21 @@
+module
+  import loop_invariant: member loop_invariant of pyhard
+  import OLD: member OLD of pyhard
+  loop_invariant: local (imported)
+  OLD: local (imported)
+  Acc: local (assigned, referenced)
+  print: global implicit (referenced)
+  class Acc
+    __init__: local (assigned)
+    add_all: local (assigned)
+    function Acc.__init__
+      params: self
+      self: local (parameter, referenced)
+    function Acc.add_all
+      params: self, xs
+      self: cell (parameter, referenced)
+      xs: local (parameter, referenced)
+      loop_invariant: global implicit (referenced)
+      x: local (assigned, referenced)
+      lambda Acc.add_all.<locals>.<lambda>
+        self: free (referenced)

@@ -1,0 +1,16 @@
+module top
+  OLD: local (imported)
+  loop_invariant: local (imported)
+  outer: local (assigned, referenced)
+  print: global implicit (referenced)
+  function outer
+    inner: local (assigned, referenced)
+    n: cell (parameter)
+    function inner
+      i: cell (assigned, referenced)
+      loop_invariant: global implicit (referenced)
+      n: free (referenced)
+      function lambda
+        i: free (referenced)
+        n: free (referenced)
+qualnames: outer, outer.<locals>.inner, outer.<locals>.inner.<locals>.<lambda>

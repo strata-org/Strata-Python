@@ -1,0 +1,7 @@
+module top
+  C: local (assigned)
+  OLD: local (imported)
+  loop_invariant: local (imported)
+  class C
+    loop_invariant: local (assigned)
+qualnames: C

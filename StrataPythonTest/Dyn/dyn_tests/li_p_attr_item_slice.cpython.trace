@@ -1,0 +1,12 @@
+--- stdout 2
+3
+
+--- outcome
+ok
+--- globals
+OLD = <marker OLD>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+loop_invariant = <marker loop_invariant>

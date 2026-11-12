@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for +=: 'function' and 'int'
+--- globals
+OLD = <marker OLD>
+__doc__ = None
+__name__ = '__main__'
+loop_invariant = <marker loop_invariant>

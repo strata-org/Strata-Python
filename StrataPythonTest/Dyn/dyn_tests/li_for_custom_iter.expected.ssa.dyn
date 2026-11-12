@@ -1,0 +1,207 @@
+module li_for_custom_iter {
+  func @|li_for_custom_iter.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      jump ^start.0()
+    start.0():
+      %str.0 : py.Value = py.strLit("li_for_custom_iter")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("li_for_custom_iter", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("li_for_custom_iter", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %loop_invariant.0 : py.Value = py.importFrom("pyhard", "loop_invariant") ^propagate.0()
+      %loop_invariant.cell.0 : base.Ref(py.Value) = py.globalCell("li_for_custom_iter", "loop_invariant")
+      %set.2 : base.Unit = base.refSet[py.Value](%loop_invariant.cell.0, %loop_invariant.0)
+      %OLD.0 : py.Value = py.importFrom("pyhard", "OLD") ^propagate.0()
+      %OLD.cell.0 : base.Ref(py.Value) = py.globalCell("li_for_custom_iter", "OLD")
+      %set.3 : base.Unit = base.refSet[py.Value](%OLD.cell.0, %OLD.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|li_for_custom_iter.Count.<body>|, "<body>", "li_for_custom_iter")
+      %str.1 : py.Value = py.strLit("Count")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %Count.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %Count.cell.0 : base.Ref(py.Value) = py.globalCell("li_for_custom_iter", "Count")
+      %set.4 : base.Unit = base.refSet[py.Value](%Count.cell.0, %Count.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@li_for_custom_iter.f, "f", "li_for_custom_iter")
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("li_for_custom_iter", "f")
+      %set.5 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.1)
+      %print.0 : py.Value = py.loadGlobal("li_for_custom_iter", "print") ^propagate.0()
+      %f.0 : py.Value = py.loadGlobal("li_for_custom_iter", "f") ^propagate.0()
+      %Count.1 : py.Value = py.loadGlobal("li_for_custom_iter", "Count") ^propagate.0()
+      %int.0 : py.Value = py.intLit(3)
+      %tuple.1 : py.Value = py.mkTuple(%int.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%Count.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%call.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%f.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%call.1)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.3, %kwargs.3) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|li_for_custom_iter.Count.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("li_for_custom_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Count")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@li_for_custom_iter.Count.__init__, "__init__", "li_for_custom_iter")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@li_for_custom_iter.Count.__iter__, "__iter__", "li_for_custom_iter")
+      %str.5 : py.Value = py.strLit("__iter__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @li_for_custom_iter.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %c.0 : py.Value = py.undef("c")
+      %c.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%c.0)
+      %s.0 : py.Value = py.undef("s")
+      %s.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%s.0)
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %c.1 : py.Value = py.undef("c")
+      %defaults.0 : py.Value = py.mkTuple(%c.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "c") ^propagate.0()
+      %c.9 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
+      %int.0 : py.Value = py.intLit(0)
+      %loop_invariant.0 : py.Value = py.loadGlobal("li_for_custom_iter", "loop_invariant") ^propagate.0()
+      %isMarker.0 : base.Bool = py.isMarker(%loop_invariant.0)
+      branch(%isMarker.0) ^guarded.0() ^notMarker.0()
+    notMarker.0():
+      unreachable
+    guarded.0():
+      %c.12 : py.Value = py.requireDefined(%c.9, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%c.12) ^propagate.0()
+      jump ^head.0(%int.0)
+    head.0(%s.7 : py.Value):
+      %inv.0 : base.Unit = base.loopInvariant {
+        inv.0():
+          %s.2 : py.Value = py.requireDefined(%s.7, "s", "UnboundLocalError", "cannot access local variable 's' where it is not associated with a value") ^fail.0()
+          %int.1 : py.Value = py.intLit(0)
+          %gtE.0 : py.Value = py.gtE(%s.2, %int.1) ^fail.0()
+          %cond.0 : base.Bool = py.truthy(%gtE.0) ^fail.0()
+          branch(%cond.0) ^holds.0() ^fails.0()
+        holds.0():
+          ret(true)
+        fails.0():
+          ret(false)
+        fail.0(%e.2 : py.Value):
+          ret(false)
+      }
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %s.4 : py.Value = py.requireDefined(%s.7, "s", "UnboundLocalError", "cannot access local variable 's' where it is not associated with a value") ^raised.0()
+      %x.2 : py.Value = py.requireDefined(%item.0, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^raised.0()
+      %iAdd.0 : py.Value = py.iAdd(%s.4, %x.2) ^raised.0()
+      jump ^head.0(%iAdd.0)
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
+    exit.0():
+      %s.6 : py.Value = py.requireDefined(%s.7, "s", "UnboundLocalError", "cannot access local variable 's' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%s.6)
+      ret(%ret.0)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+  func @li_for_custom_iter.Count.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %n.2 : py.Value = py.undef("n")
+      %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.2)
+      %self.1 : py.Value = py.undef("self")
+      %n.5 : py.Value = py.undef("n")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %n.5)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Count.__init__", 0, 2, false, false, "self", "n") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %n.6 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
+      %n.8 : py.Value = py.requireDefined(%n.6, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %n.9 : base.Unit = py.setAttr(%self.4, "n", %n.8) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @li_for_custom_iter.Count.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Count.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
+      %iter.0 : py.Value = py.loadGlobal("li_for_custom_iter", "iter") ^propagate.0()
+      %range.0 : py.Value = py.loadGlobal("li_for_custom_iter", "range") ^propagate.0()
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %n.4 : py.Value = py.attr(%self.4, "n") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%n.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%range.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%call.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%iter.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

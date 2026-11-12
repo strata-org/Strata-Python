@@ -1,0 +1,47 @@
+-- unsupported: rebinding the marker loop_invariant is not supported at 2:0-4:12
+module li_m_rebind_import {
+  func @|li_m_rebind_import.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      jump ^start.0()
+    start.0():
+      %str.0 : py.Value = py.strLit("li_m_rebind_import")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("li_m_rebind_import", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("li_m_rebind_import", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %loop_invariant.0 : py.Value = py.importFrom("pyhard", "loop_invariant") ^propagate.0()
+      %loop_invariant.cell.0 : base.Ref(py.Value) = py.globalCell("li_m_rebind_import", "loop_invariant")
+      %set.2 : base.Unit = base.refSet[py.Value](%loop_invariant.cell.0, %loop_invariant.0)
+      %OLD.0 : py.Value = py.importFrom("pyhard", "OLD") ^propagate.0()
+      %OLD.cell.0 : base.Ref(py.Value) = py.globalCell("li_m_rebind_import", "OLD")
+      %set.3 : base.Unit = base.refSet[py.Value](%OLD.cell.0, %OLD.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@li_m_rebind_import.f, "f", "li_m_rebind_import")
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("li_m_rebind_import", "f")
+      %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @li_m_rebind_import.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %loop_invariant.0 : py.Value = py.undef("loop_invariant")
+      %loop_invariant.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%loop_invariant.0)
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
+      %mod.0 : py.Value = py.importModule("os") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%loop_invariant.cell.0, %mod.0)
+      %int.0 : py.Value = py.intLit(1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

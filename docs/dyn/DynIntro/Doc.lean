@@ -1019,6 +1019,7 @@ tag := "tr-cf"
   let ex ← loopLabels
   jump head.goto
   build (startBlock head (info := some { range := sr }))
+  loopInvariants invs
   withHandler ex.raised (transCond test bodyL.goto ex.normal.goto)
   build (startBlock bodyL)
   withHandler ex.raised (withExit (.loop ex.brk head ex.done) (transStmts body))
@@ -1032,7 +1033,7 @@ tag := "tr-cf"
   if ← targeted exit then build (startBlock exit)
 ```
 
-In Python's translator, each block is a typed `BlockRef`, and here each takes no values. A transfer to a block is a `Target` made from it, such as `head.goto`, so Lean checks what a jump passes against what its block takes. `isOpen` says whether a block is still open: a body that ends in `break`, `return` or `raise` has closed its last block. `targeted exit` says whether a transfer names the exit block, which is opened only then. Every way out of the loop meets at its `done` block (`loopLabels`, `loopDone`), with a completion that says why the loop ended, and the head block carries the loop statement's source range.
+In Python's translator, each block is a typed `BlockRef`, and here each takes no values. A transfer to a block is a `Target` made from it, such as `head.goto`, so Lean checks what a jump passes against what its block takes. `isOpen` says whether a block is still open: a body that ends in `break`, `return` or `raise` has closed its last block. `targeted exit` says whether a transfer names the exit block, which is opened only then. Every way out of the loop meets at its `done` block (`loopLabels`, `loopDone`), with a completion that says why the loop ended, and the head block carries the loop statement's source range. `loopInvariants` puts the loop's invariants, if the program states any, at the start of the head block.
 
 ## 5. Exceptions
 %%%

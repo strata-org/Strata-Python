@@ -95,6 +95,7 @@ def renderN (st : ObjStore Run) : Nat → List ObjId → Value → RenderM Strin
     | .bound _ _ _ k => pure s!"<{k.boundType.info.name} object>"
     | .method .. => pure "<method object>"
     | .ellipsis => pure "Ellipsis"
+    | .marker n => pure s!"<marker {n}>"
     | .notImplemented => pure "NotImplemented"
     | .range a b c => do
       if c == 1 then pure s!"range({← intText a}, {← intText b})"

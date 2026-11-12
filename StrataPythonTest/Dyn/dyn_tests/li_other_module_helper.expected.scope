@@ -1,0 +1,6 @@
+module
+  loop_invariant: local (assigned)
+  function loop_invariant
+    params: p
+    p: local (parameter)
+    print: global implicit (referenced)

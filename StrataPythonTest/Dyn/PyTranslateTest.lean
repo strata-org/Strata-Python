@@ -517,4 +517,26 @@ module m.g {
 #guard printfPlan "%." 1 == none
 #guard printfPlan "%1." 1 == none
 
+/-! ### A program module named `pyhard` (§6.11)
+
+The translator rejects it, whatever it contains, as a defensive check: if PyHard's `pyhard`
+weren't loaded first, CPython could import it in its place. A main script, translated as
+`__main__`, is rejected by its file name. -/
+
+/-- The diagnostics' messages of translating `x = 1` as the module `name`. -/
+private def namedMessages (name : String) : Array String :=
+  (translate name #[assign "x" (int 1)]).diagnostics.map (·.message)
+
+#guard namedMessages "pyhard" == #["a program module named pyhard is not supported"]
+#guard namedMessages "pyhard.sub" == #["a program module named pyhard is not supported"]
+#guard namedMessages "pkg.pyhard" == #["a program module named pyhard is not supported"]
+#guard namedMessages "pyhardly" == #[]
+#guard namedMessages "m" == #[]
+#guard StrataPython.Dyn.PyMarkers.mainFileProblem? "pyhard.py" == some
+  "a main script named pyhard.py is not supported: without PyHard's pyhard loaded first, CPython would import the script in its place"
+#guard (StrataPython.Dyn.PyMarkers.mainFileProblem? "dir/pyhard.py").isSome
+#guard (StrataPython.Dyn.PyMarkers.mainFileProblem? "pyhard.py.ion").isSome
+#guard (StrataPython.Dyn.PyMarkers.mainFileProblem? "main.py").isNone
+#guard (StrataPython.Dyn.PyMarkers.mainFileProblem? "pyhardly.py").isNone
+
 end StrataPython.Dyn.PyTranslateTest

@@ -1,0 +1,13 @@
+--- stdout 12
+[1, 2] True
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+i = 1
+loop_invariant = <marker loop_invariant>
+x = 7
+xs = [1, 2]
+ys = [1, 2]

@@ -1,0 +1,11 @@
+--- stdout 30
+not pyhard's loop_invariant
+2
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+loop_invariant = <function object>

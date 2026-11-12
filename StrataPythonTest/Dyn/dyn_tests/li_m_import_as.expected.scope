@@ -1,0 +1,4 @@
+module
+  import li: member loop_invariant of pyhard
+  li: local (imported)
+  i: local (assigned, referenced)

@@ -7,6 +7,7 @@ module
 public import StrataPython.Dyn.Build
 import StrataPython.Dyn.CompShape
 public import StrataPython.Dyn.Scope
+public import StrataPython.Dyn.Markers
 public import StrataDyn.WF
 public import StrataDyn.Attr
 public import StrataPython.Dyn.Shape
@@ -173,6 +174,17 @@ structure Ctx where
   classAnnotations : Bool := false
   /-- In an `except` body, the exception it handles: what a bare `raise` raises again. -/
   handled : Option ValId := none
+  /-- The loop-invariant markers that the module imports (§6.11), if it imports them. -/
+  markers : Option PyMarkers.Markers := none
+  /-- The invariants of the loop statement being lowered: the range of the lambda and its body
+  `P`, of each `loop_invariant(lambda: P)` right before it, in order (§6.11). -/
+  invariants : Array (SourceRange × expr SourceRange) := #[]
+  /-- Lowering a loop invariant's `P` into its contract region (§6.11): `len`, `isinstance`,
+  `all` and `any` are their operations, not calls. -/
+  contract : Bool := false
+  /-- In a quantifier's body region, its binders: each name, and the region's parameter that
+  holds it. -/
+  binders : Array (String × ValId) := #[]
 
 /-- What translation accumulates.  The first three fields are module-wide; `exits`,
 `targeted`, `inits`, `loops`, `returnsTo` and `loopExitsTo` belong to the function being
@@ -229,8 +241,52 @@ def reject (what : String) (range : SourceRange) : TransM Unit :=
   let d : Diagnostic := { kind := .unsupported, message := s!"{what} is not supported", range }
   modify fun s => { s with diagnostics := s.diagnostics.push d }
 
+/-- What a marker statement that is not right before a `while` or `for` statement of its statement
+list is rejected as (§6.11). -/
+def misplacedMarker : String := "a loop invariant that is not right before its loop"
+
+/-- What a use of the marker name `name` other than a marker statement or an `OLD(e)` in an
+invariant is rejected as (§6.11). -/
+def markerUse (name : String) : String :=
+  if name == "OLD" then "a use of OLD outside a loop invariant's OLD(e)"
+  else s!"a use of {name} other than a statement right before a loop"
+
+/-- What a marker statement is: `loop_invariant(lambda: P)` gives the lambda's range and `P`;
+any other call of
+`loop_invariant` as a statement is malformed. -/
+inductive MarkerStmt where
+  | invariant (lambda : SourceRange) (body : expr SourceRange)
+  | malformed
+
+/-- Whether `args` declares nothing: no parameters, no defaults. -/
+def noParams (args : arguments SourceRange) : Bool :=
+  let .mk_arguments _ posOnly pos varPos kwOnly kwDefaults varKw defaults := args
+  posOnly.val.isEmpty && pos.val.isEmpty && varPos.val.isNone && kwOnly.val.isEmpty &&
+    kwDefaults.val.isEmpty && varKw.val.isNone && defaults.val.isEmpty
+
+/-- `s` as a marker statement of a module that imports the markers `ms`: an expression statement
+that calls `loop_invariant`.  `PyMarkers.analyze` makes sure that no scope of the module rebinds
+the name; the guard before the loop (`markerGuard`) checks at run time that it is still the
+marker. -/
+def markerStmt? (ms : Option PyMarkers.Markers) : stmt SourceRange → Option MarkerStmt
+  | .Expr _ (.Call _ (.Name _ ⟨_, "loop_invariant"⟩ _) args kws) =>
+    if !(ms.map (·.has "loop_invariant")).getD false then none
+    else match args.val, kws.val.isEmpty with
+      | #[.Lambda lsr largs body], true =>
+        if noParams largs then some (.invariant lsr body) else some .malformed
+      | _, _ => some .malformed
+  | _ => none
+
+/-- What a malformed marker statement is rejected as (§6.11). -/
+def malformedMarker : String := "a loop invariant other than loop_invariant(lambda: P)"
+
 /-- `py.unsupported "what"`: the value of an expression already rejected. -/
 def standIn (what : String) : TransM ValId := do
+  -- In a loop invariant's contract region, an operation that may write is not allowed; the
+  -- invariant is rejected anyway.
+  if (← read).contract then
+    return ← build (emitTotal (.str .base "unsupported") Py.undef.ref
+      #[← build (emitConst (.str .base "n") (.str what))])
   let n ← build (strLit what)
   build (emitTotal (.str .base "unsupported") Py.unsupported.ref #[n])
 
@@ -419,9 +475,10 @@ def readNs (ns : ValId) (name : String) (fallback : TransM ValId) : TransM ValId
   jump (join.goto.bind (value (← fallback)))
   Val.id <$> build (startBlockWith join (stem name))
 
-/-- Read the name `name` at `range`. -/
-def readName (name : String) (range : SourceRange) : TransM ValId := do
+/-- Read the name `name` at `range`, as the code at `range` reads it, marker names included. -/
+def readPlace (name : String) (range : SourceRange) : TransM ValId := do
   let name ← mangled name
+  if let some (_, v) := (← read).binders.find? (·.1 == name) then return v
   match ← place name with
   | .cell c => readLocal c name
   | .global => globalRead name
@@ -434,6 +491,13 @@ where
   globalRead (x : String) : TransM ValId := do
     if ← unmodelled x then unsupportedValue s!"module attribute {x}" range
     else build (loadGlobal (← read).module x)
+
+/-- Read the name `name` at `range`; a marker name is rejected, since the only use of one is a
+marker statement (§6.11). -/
+def readName (name : String) (range : SourceRange) : TransM ValId := do
+  if let some m := (← read).markers then
+    if m.has name then return ← unsupportedValue (markerUse name) range
+  readPlace name range
 
 /-- Write `v` to the name `name` at `range`. -/
 def writeName (name : String) (v : ValId) (range : SourceRange) : TransM Unit := do
@@ -1157,6 +1221,47 @@ def printfPlan (fmt : String) (n : Nat) : Option (Array String × Array (Char ×
   | some (.lit, lit, lits, units) => if units.size == n then some (lits.push lit, units) else none
   | _ => none
 
+/-- The parameters of a quantifier's body region and the names they bind, for the target
+`target` over the dict view `view` (`items`, `keys` or `values`) or over a collection's members
+(`none`): the element, or the key and the value. -/
+def quantifierBinders (view : Option String) (target : expr SourceRange) :
+    TransM (Array (ValDecl Py.env) × Array (String × ValId)) := do
+  let pre ← (·.cur.privateName) <$> read
+  -- The binders' names, mangled as `readName` looks them up.
+  let name (t : expr SourceRange) : String := match t with
+    | .Name _ ⟨_, x⟩ _ => PyScope.mangle pre x
+    | _ => "_"
+  let fresh (x : String) : TransM (ValDecl Py.env) :=
+    build (monadLift (Build.freshVal (env := Py.env) (α := Info) (.str .base x) Py.Value))
+  let pair : Option (String × String) := match target with
+    | .Tuple _ ⟨_, ts⟩ _ => match ts.toList with
+      | [k, v] => some (name k, name v)
+      | _ => none
+    | _ => none
+  match view, pair with
+  | some "items", some (k, v) =>
+    let kd ← fresh k
+    let vd ← fresh v
+    return (#[kd, vd], #[(k, kd.id), (v, vd.id)])
+  | some "keys", _ =>
+    let kd ← fresh (name target)
+    let vd ← fresh "value"
+    return (#[kd, vd], #[(name target, kd.id)])
+  | some "values", _ =>
+    let kd ← fresh "key"
+    let vd ← fresh (name target)
+    return (#[kd, vd], #[(name target, vd.id)])
+  | some _, _ =>
+    -- `PyMarkers.checkInvariant` rules out any other view and an `items()` target that isn't a
+    -- pair of names.
+    internalError "a quantifier target that the check should have rejected" target.ann
+    let kd ← fresh "key"
+    let vd ← fresh "value"
+    return (#[kd, vd], #[])
+  | none, _ =>
+    let xd ← fresh (name target)
+    return (#[xd], #[(name target, xd.id)])
+
 mutual
 
 /-- Lower an expression to the value it produces. -/
@@ -1396,8 +1501,105 @@ def transCond (e : expr SourceRange) (t f : PyTarget []) : TransM Unit := withRa
     have hzip := sizeOf_zip_le ops.val rs.val
     let last ← chainLinks (← transExpr l) (ops.val.zip rs.val) fun _ => f
     branch (← build (truthy last)) t f
+  | c@(.Call _ (.Name _ ⟨_, n⟩ _) args _) =>
+    if (← read).contract && (n == "isinstance" || n == "all" || n == "any") then
+      branch (← contractTest n args.val) t f
+    else branch (← build (truthy (← transExpr c))) t f
   | other => branch (← build (truthy (← transExpr other))) t f
 termination_by sizeOf e + 1
+
+/-- In an invariant (§6.11), `isinstance(x, T)`, `all(…)` or `any(…)` as its operation, which
+gives a base `Bool`.  `PyMarkers.checkInvariant` has checked the shape. -/
+def contractTest (n : String) (args : Array (expr SourceRange)) : TransM ValId := do
+  match hargs : args.size with
+  | 2 =>
+    if n != "isinstance" then return ← contractBad
+    have h0 : sizeOf args[0] < sizeOf args := Array.sizeOf_getElem args 0 (by omega)
+    have h1 : sizeOf args[1] < sizeOf args := Array.sizeOf_getElem args 1 (by omega)
+    let x ← transExpr args[0]
+    let cls ← transExpr args[1]
+    build (do
+      let h ← checkedHandler
+      monadLift (Build.emitApply (env := Py.env) (α := Info) (.str .base "inst") Base.Bool
+        Py.isInstance.ref #[x, cls] #[h]))
+  | 1 =>
+    if n != "all" && n != "any" then return ← contractBad
+    have h0 : sizeOf args[0] < sizeOf args := Array.sizeOf_getElem args 0 (by omega)
+    match hg : args[0] with
+    | .GeneratorExp _ elt ⟨_, gens⟩ =>
+      have hge : sizeOf elt + sizeOf gens < sizeOf args := by
+        rw [hg] at h0
+        simp only [expr.GeneratorExp.sizeOf_spec, StrataDDM.Ann.mk.sizeOf_spec] at h0
+        omega
+      quantifier (n == "all") elt gens
+    | _ => contractBad
+  | _ => contractBad
+termination_by sizeOf args + 1
+
+/-- A shape that `PyMarkers.checkInvariant` rules out. -/
+def contractBad : TransM ValId := do
+  internalError "a loop invariant that the check should have rejected" .none
+  build (emitConst (.str .base "b") (.bool false))
+
+/-- `all(elt for x in c if g…)` (`isAll`) or `any(…)` over `gens`, its one clause: `py.allIn` or
+`py.anyIn` over the iterable, or `py.allItems` or `py.anyItems` over the dict of `d.items()`,
+`d.keys()` or `d.values()`.  The iterable is lowered in the invariant's scope, as CPython
+evaluates a generator's outermost iterable in the enclosing scope.  The body region takes the
+element, or the key and the value, as its parameters, and reads the target's names as those
+parameters; a guard that fails gives `true` under `all` and `false` under `any`. -/
+def quantifier (isAll : Bool) (elt : expr SourceRange) (gens : Array (comprehension SourceRange)) :
+    TransM ValId := do
+  match hg : (gens[0]? : Option (comprehension SourceRange)) with
+  | none => internalError "a quantifier without a clause" .none; build (emitConst (.str .base "b") (.bool false))
+  | some (.mk_comprehension _ target iter ⟨_, ifs⟩ _) =>
+  have hmem := Array.sizeOf_lt_of_mem (Array.mem_of_getElem? hg)
+  let view := PyMarkers.dictView? iter
+  have hiter : sizeOf iter < sizeOf gens := by
+    simp only [comprehension.mk_comprehension.sizeOf_spec, StrataDDM.Ann.mk.sizeOf_spec] at hmem; omega
+  let coll ← match hi : iter with
+    | .Call _ (.Attribute _ d _ _) _ _ =>
+      have : sizeOf d < sizeOf gens := by
+        rw [hi] at hiter; simp only [expr.Call.sizeOf_spec, expr.Attribute.sizeOf_spec] at hiter; omega
+      if view.isSome then transExpr d else transExpr iter
+    | _ => transExpr iter
+  let (params, binders) ← quantifierBinders ((view.map (·.1))) target
+  let body : TransM ValId := do
+    let yes ← build (freshLabel [] "yes")
+    let no ← build (freshLabel [] "no")
+    let join ← build (freshLabel [Base.Bool] "cond")
+    for g in ifs do
+      let next ← build (freshLabel [] "if")
+      transCond g next.goto (if isAll then yes.goto else no.goto)
+      build (startBlock next)
+    transCond elt yes.goto no.goto
+    for (l, b) in [(yes, true), (no, false)] do
+      if ← targeted l then
+        build (startBlock l)
+        let c ← build (emitConst (.str .base "b") (.bool b))
+        jump (join.goto.bind (Val.ofId Base.Bool c))
+    Val.id <$> build (startBlockWith join (.str .base "cond"))
+  let region : TransM (Region Py.env Info) := Prod.fst <$> Build.regionWith params (base := "body") do
+    let propagate ← build (freshLabel [Py.Value] "propagate")
+    let v ← withHandler propagate (withReader (fun c => { c with binders := binders ++ c.binders }) body)
+    build do
+      let ok ← Build.emitApply (env := Py.env) (α := Info) (.str .base "res") (Py.raising Base.Bool)
+        Base.Except.ok.ref #[v]
+      Build.Raw.ret (env := Py.env) (α := Info) ok
+      let exc ← startBlockWith propagate (.str .base "exc")
+      let e ← Build.emitApply (env := Py.env) (α := Info) (.str .base "err") (Py.raising Base.Bool)
+        Base.Except.error.ref #[exc.id]
+      Build.Raw.ret (env := Py.env) (α := Info) e
+  let h ← build (checkedHandler (α := Info))
+  let nm := if isAll then "all" else "any"
+  match view with
+  | some _ =>
+    let r ← if isAll then Build.emitApplyWith (.str .base nm) Base.Bool Py.allItems.ref #[coll] #[h] #[region]
+      else Build.emitApplyWith (.str .base nm) Base.Bool Py.anyItems.ref #[coll] #[h] #[region]
+    pure r
+  | none =>
+    if isAll then Build.emitApplyWith (.str .base nm) Base.Bool Py.allIn.ref #[coll] #[h] #[region]
+    else Build.emitApplyWith (.str .base nm) Base.Bool Py.anyIn.ref #[coll] #[h] #[region]
+termination_by sizeOf elt + sizeOf gens
 
 /-- `[a, *x, b]`: `BUILD_LIST` of the elements before the first `*x`, then `LIST_EXTEND` for
 each `*x` and `LIST_APPEND` for each later element, as CPython does.  The values `pre`, already
@@ -1516,6 +1718,15 @@ arguments, then the keyword arguments, as CPython does.  `args` is a tuple displ
 for each `**m`. -/
 def call (f : expr SourceRange) (args : Array (expr SourceRange))
     (kws : Array (keyword SourceRange)) : TransM ValId := do
+  if (← read).contract then
+    if let .Name _ ⟨_, n⟩ _ := f then
+      if n == "len" then
+        if h : args.size = 1 then
+          have : sizeOf args[0] < sizeOf args := Array.sizeOf_getElem args 0 (by omega)
+          return ← build (emitFailing (.str .base "len") Py.len.ref #[← transExpr args[0]])
+      else
+        let b ← contractTest n args
+        return ← build (emitTotal (.str .base "bool") Py.boolLit.ref #[b])
   if let some sr ← zeroArgSuper? f args kws then return ← superCall sr false
   let fv ← transExpr f
   let lone ← if h : args.size = 1 then
@@ -1884,10 +2095,10 @@ def importAlias (a : alias SourceRange) : TransM Unit := do
   let some imp := (ctx.table.importsIn ctx.scope).find? (·.range == a.ann)
     | reject "import" a.ann
   let v ← match imp.target with
+    | .member mod n => build (importFrom mod n)
     | .module path => do
       let m ← build (importModule imp.loads)
       if path == imp.loads then pure m else build (importModule path)
-    | .member m n => build (importFrom m n)
   writeName imp.name v a.ann
 
 /-- Unbind `name`, bound at `range`, as leaving `except … as name` does with `name = None`,
@@ -2020,13 +2231,102 @@ def loopDone (sr : SourceRange) (head : BlockRef Py.env []) (ex : LoopLabels)
     «break» := if broke then .to exit.goto else .unreachable
     «continue» := .unreachable }
 
+/-- The names that the lambda of scope `lam`, or a scope nested in it, reads as a global, but that
+scope `cur` binds: a name that `cur` binds only in a list, set or dict comprehension, which
+CPython 3.12 inlines into `cur` (PEP 709), while the lambda still reads the global.  `P` is lowered
+in `cur`, so such a name would read the wrong binding. -/
+def readDifferently (t : PyScope.Table) (cur lam : PyScope.ScopeId) : Array String := Id.run do
+  let mut out : Array String := #[]
+  -- At module level, a name that the module binds is a global for the lambda too.
+  if (t.scopes[cur]?.map (·.kind == .module)).getD true then return out
+  let some l := t.scopes[lam]? | return out
+  -- The lambda and the scopes nested in it, whose defining nodes lie inside the lambda's.  The
+  -- table is in preorder, so they come first from `lam` on.
+  let inside (sc : PyScope.Scope) : Bool :=
+    l.range.start.byteIdx ≤ sc.range.start.byteIdx && sc.range.stop.byteIdx ≤ l.range.stop.byteIdx
+  for sc in t.scopes[lam:] do
+    if !inside sc then break
+    for sym in sc.symbols do
+      if sym.scope matches .globalImplicit | .globalExplicit then
+        match t.symbol? cur sym.name with
+        | some c => if c.scope matches .local | .cell | .free then out := out.push sym.name
+        | none => pure ()
+  return out
+
+/-- The loop invariants `invs`, at the start of a loop's head block (§6.11): a
+`base.loopInvariant` each, whose region is `P` as a condition, with every failure going to the
+region's failure block, which returns `false`.  `P` is lowered in the loop's scope, in contract
+mode, after `PyMarkers.checkInvariant` has admitted it. -/
+def loopInvariants (invs : Array (SourceRange × expr SourceRange)) : TransM Unit := do
+  let some ms := (← read).markers | return
+  let ctx ← read
+  for (lsr, p) in invs do
+    let some lam ← childScope? lsr
+      | internalError "a loop invariant's lambda without a scope" lsr
+    let differ := readDifferently ctx.table ctx.scope lam
+    let nameProblem (n : String) : Option String :=
+      if ms.has n then some (markerUse n)
+      else if moduleDunders.contains n then some s!"module attribute {n}"
+      else if differ.contains (PyScope.mangle ctx.cur.privateName n) then
+        some "a name that the lambda reads as a global but the loop binds in a loop invariant"
+      else none
+    match PyMarkers.checkInvariant ms nameProblem (PyScope.mangle ctx.cur.privateName) p with
+    | .error (what, r) => reject what r
+    | .ok () =>
+      withRange p.ann <| withReader ({ · with contract := true }) do
+        Emit.loopInvariant [Py.Value] fun fail => withHandlerTo fail do
+          let yes ← build (freshLabel [] "holds")
+          let no ← build (freshLabel [] "fails")
+          transCond p yes.goto no.goto
+          for (l, b) in [(yes, true), (no, false)] do
+            if ← targeted l then
+              build (startBlock l)
+              let c ← build (emitConst (.str .base "b") (.bool b))
+              build (Build.Raw.ret (env := Py.env) (α := Info) c)
+
+/-- The guard of the marker statement at `range`, before its loop (§6.11). The translator drops the
+marker calls, which is faithful only when CPython calls PyHard's `loop_invariant`, whose call does
+nothing. So the guard reads `loop_invariant` as the call's callee reads it; the read raises
+`NameError` as the call would. Then it tests the value with `py.isMarker`, and its false branch ends
+in `unreachable`. On the machine, the test stops with a gap instead of returning false. Each marker
+statement has its own guard, since its call reads the name again. -/
+def markerGuard (range : SourceRange) : TransM Unit := withRange range do
+  let callee ← readPlace "loop_invariant" range
+  let ok ← build (emitTest (.str .base "isMarker") Py.isMarker.ref #[callee])
+  let guarded ← build (freshLabel [] "guarded")
+  let notMarker ← build (freshLabel [] "notMarker")
+  branch ok guarded.goto notMarker.goto
+  build (startBlock notMarker)
+  build unreachable
+  build (startBlock guarded)
+
 mutual
 
 /-- Lower a statement list, skipping what follows a statement that ends every path. -/
 def transStmts (ss : Array (stmt SourceRange)) : TransM Unit := do
+  -- The marker statements since the last other statement: each one's `P`, or `none` if it is
+  -- malformed (and already rejected), with its range.
+  let mut run : Array (Option (SourceRange × expr SourceRange) × SourceRange) := #[]
   for s in ss do
     if !(← isOpen) then return
-    transStmt s
+    match markerStmt? (← read).markers s with
+    | some (.invariant lsr p) => run := run.push (some (lsr, p), s.ann)
+    | some .malformed =>
+      reject malformedMarker s.ann
+      run := run.push (none, s.ann)
+    | none =>
+      let isLoop := s matches .While .. | .For ..
+      if isLoop && !run.isEmpty && (← curScope).kind matches .classBody then
+        for (_, r) in run do reject "a loop invariant in a class body" r
+        transStmt s
+      else if isLoop then
+        for (_, r) in run do markerGuard r
+        withReader ({ · with invariants := run.filterMap (·.1) }) (transStmt s)
+      else
+        for (p, r) in run do if p.isSome then reject misplacedMarker r
+        transStmt s
+      run := #[]
+  for (p, r) in run do if p.isSome then reject misplacedMarker r
 termination_by sizeOf ss
 
 /-- Lower a statement. -/
@@ -2063,8 +2363,12 @@ def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
     let rhs ← transExpr v
     writeLhs l (← inPlaceOp op cur rhs) sr
   | .If _ test body orelse => ifStmt test body.val orelse.val
-  | .While sr test body orelse => whileStmt sr test body.val orelse.val
-  | .For sr target iter body orelse _ => forStmt sr target iter body.val orelse.val
+  | .While sr test body orelse => do
+    let invs := (← read).invariants
+    withReader ({ · with invariants := #[] }) (whileStmt invs sr test body.val orelse.val)
+  | .For sr target iter body orelse _ => do
+    let invs := (← read).invariants
+    withReader ({ · with invariants := #[] }) (forStmt invs sr target iter body.val orelse.val)
   | .Break sr => exitWalk true none sr
   | .Continue sr => exitWalk false none sr
   | .Return sr ⟨_, v⟩ =>
@@ -2127,7 +2431,7 @@ termination_by sizeOf test + sizeOf body + sizeOf orelse + 1
 /-- `while test: body else: orelse` at `sr` (§6.4).  The guard and the body raise to the loop's
 own `raised` block, and every way out of the loop meets at `done`.  The head block carries `sr`,
 through which a later stage finds the loop's record. -/
-def whileStmt (sr : SourceRange) (test : expr SourceRange)
+def whileStmt (invs : Array (SourceRange × expr SourceRange)) (sr : SourceRange) (test : expr SourceRange)
     (body orelse : Array (stmt SourceRange)) : TransM Unit := do
   let outer ← build handler
   let head ← build (freshLabel [] "head")
@@ -2137,6 +2441,7 @@ def whileStmt (sr : SourceRange) (test : expr SourceRange)
   let ex ← loopLabels
   jump head.goto
   build (startBlock head (info := some { range := sr }))
+  loopInvariants invs
   withHandler ex.raised (transCond test bodyL.goto ex.normal.goto)
   build (startBlock bodyL)
   withHandler ex.raised (withExit (.loop ex.brk head ex.done) (transStmts body))
@@ -2318,7 +2623,7 @@ termination_by sizeOf body + 1
 which ends the loop on `StopIteration` and sends any other exception to the loop's `raised`
 block, as the target's assignment and the body do.  Every way out of the loop meets at
 `done`.  The head block carries `sr`. -/
-def forStmt (sr : SourceRange) (target iter : expr SourceRange)
+def forStmt (invs : Array (SourceRange × expr SourceRange)) (sr : SourceRange) (target iter : expr SourceRange)
     (body orelse : Array (stmt SourceRange)) : TransM Unit := do
   match assigner sr target with
   | .error t => badTarget t
@@ -2332,6 +2637,7 @@ def forStmt (sr : SourceRange) (target iter : expr SourceRange)
     let ex ← loopLabels
     jump head.goto
     build (startBlock head (info := some { range := sr }))
+    loopInvariants invs
     withHandler ex.raised do
       assign (← build (withHandler stop (emitFailing (.str .base "item") Py.next.ref #[it])))
       withExit (.loop ex.brk head ex.done) (transStmts body)
@@ -2554,9 +2860,13 @@ def translate (moduleName : String) (stmts : Array (stmt SourceRange)) : Result 
     | some a, some b => ⟨a.ann.start, b.ann.stop⟩
     | _, _ => .none
   let cur := table.module
+  let (markers, markerDiags) := PyMarkers.analyze stmts table
+  let markerDiags := if PyMarkers.namedLikeMarkerModule moduleName then
+      markerDiags.push (PyMarkers.unsupported "a program module named pyhard" range)
+    else markerDiags
   let ctx : Ctx :=
     { table, module := moduleName, moduleName := mname, scope := 0, cur,
-      moduleAnnotations := findAnn stmts }
+      moduleAnnotations := findAnn stmts, markers }
   let bodyName := mname.str "<module>"
   let st : TState := { funcNames := ({} : Std.HashSet Name).insert bodyName }
   let (body, st) := builtFunc bodyName #[] range fun _ =>
@@ -2578,7 +2888,7 @@ def translate (moduleName : String) (stmts : Array (stmt SourceRange)) : Result 
   let (module, ds) := assemble mname funcs range
   -- The scope pass's internal errors are bugs, reported like the translator's.
   let internal := table.diagnostics.filter (·.kind == .internal)
-  let diagnostics := (table.syntaxErrors ++ internal ++ st.diagnostics ++ ds).insertionSort
+  let diagnostics := (table.syntaxErrors ++ internal ++ markerDiags ++ st.diagnostics ++ ds).insertionSort
     fun a b => a.range.start.byteIdx < b.range.start.byteIdx
   return { module, diagnostics }
 

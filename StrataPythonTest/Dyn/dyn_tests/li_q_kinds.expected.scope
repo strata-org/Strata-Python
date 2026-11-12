@@ -1,0 +1,94 @@
+module
+  import loop_invariant: member loop_invariant of pyhard
+  import OLD: member OLD of pyhard
+  loop_invariant: local (imported)
+  OLD: local (imported)
+  L: local (assigned, referenced)
+  list: global implicit (referenced)
+  D: local (assigned, referenced)
+  dict: global implicit (referenced)
+  f: local (assigned, referenced)
+  print: global implicit (referenced)
+  range: global implicit (referenced)
+  iter: global implicit (referenced)
+  frozenset: global implicit (referenced)
+  class L
+    __iter__: local (assigned)
+    function L.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)
+  class D
+    items: local (assigned)
+    function D.items
+      params: self
+      self: local (parameter)
+  function f
+    params: t, r, g, ls, d, fs, z, n
+    t: cell (parameter)
+    r: cell (parameter)
+    g: cell (parameter)
+    ls: cell (parameter)
+    d: cell (parameter)
+    fs: cell (parameter)
+    z: cell (parameter)
+    n: local (parameter, referenced)
+    i: local (assigned, referenced)
+    loop_invariant: global implicit (referenced)
+    lambda f.<locals>.<lambda>
+      all: global implicit (referenced)
+      t: free (referenced)
+      generator expression f.<locals>.<lambda>.<locals>.<genexpr>
+        params: .0
+        .0: local (parameter)
+        c: local (assigned, referenced, comp_iter)
+    lambda f.<locals>.<lambda>
+      all: global implicit (referenced)
+      r: free (referenced)
+      generator expression f.<locals>.<lambda>.<locals>.<genexpr>
+        params: .0
+        .0: local (parameter)
+        k: local (assigned, referenced, comp_iter)
+    lambda f.<locals>.<lambda>
+      all: global implicit (referenced)
+      g: free (referenced)
+      generator expression f.<locals>.<lambda>.<locals>.<genexpr>
+        params: .0
+        .0: local (parameter)
+        x: local (assigned, referenced, comp_iter)
+    lambda f.<locals>.<lambda>
+      all: global implicit (referenced)
+      ls: free (referenced)
+      generator expression f.<locals>.<lambda>.<locals>.<genexpr>
+        params: .0
+        .0: local (parameter)
+        x: local (assigned, referenced, comp_iter)
+    lambda f.<locals>.<lambda>
+      all: global implicit (referenced)
+      d: free (referenced)
+      generator expression f.<locals>.<lambda>.<locals>.<genexpr>
+        params: .0
+        .0: local (parameter)
+        k: local (assigned, comp_iter)
+        v: local (assigned, referenced, comp_iter)
+    lambda f.<locals>.<lambda>
+      all: global implicit (referenced)
+      fs: free (referenced)
+      generator expression f.<locals>.<lambda>.<locals>.<genexpr>
+        params: .0
+        .0: local (parameter)
+        x: local (assigned, referenced, comp_iter)
+    lambda f.<locals>.<lambda>
+      all: global implicit (referenced)
+      z: free (referenced)
+      generator expression f.<locals>.<lambda>.<locals>.<genexpr>
+        params: .0
+        .0: local (parameter)
+        x: local (assigned, referenced, comp_iter)
+    lambda f.<locals>.<lambda>
+      any: global implicit (referenced)
+      z: free (referenced)
+      generator expression f.<locals>.<lambda>.<locals>.<genexpr>
+        params: .0
+        .0: local (parameter)
+        x: local (assigned, referenced, comp_iter)

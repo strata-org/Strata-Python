@@ -61,6 +61,134 @@ i08_binding_errors | agree
 i09_assigned_defaults | gap | a write to the attribute function.__defaults__ is not modelled yet
 i10_keyword_subclass | gap | a walk of a dict whose comparisons may run user code is not modelled yet
 i11_constant_default | gap | is on two equal immediates depends on CPython's caching
+li_break_continue | agree
+li_closure_cell | agree
+li_docstring_future | gap | import of module __future__ is not modelled yet
+li_except_in_body | agree
+li_finally_continue | agree
+li_for_attr_target | agree
+li_for_custom_iter | agree
+li_for_dict | agree
+li_for_items | agree
+li_for_iter | agree
+li_for_list | agree
+li_for_range | agree
+li_for_str | agree
+li_for_target_before | agree
+li_for_target_current | agree
+li_for_target_unbound | agree
+li_in_if_try_with | agree
+li_inner_first | agree
+li_m_after_loop | gap | the translator does not support a loop invariant that is not right before its loop
+li_m_bare_read | gap | the translator does not support a use of loop_invariant other than a statement right before a loop
+li_m_between | gap | the translator does not support a loop invariant that is not right before its loop
+li_m_class_body | gap | the translator does not support a loop invariant in a class body
+li_m_end_of_block | gap | the translator does not support a loop invariant that is not right before its loop
+li_m_globals_write | gap | built-in globals is not modelled yet
+li_m_import_as | gap | the translator does not support renaming a pyhard marker
+li_m_import_dup | gap | the translator does not support rebinding the marker loop_invariant, importing a pyhard marker twice
+li_m_import_in_func | gap | the translator does not support rebinding the marker OLD, importing pyhard other than at the top of the module
+li_m_import_in_if | gap | the translator does not support importing pyhard other than at the top of the module
+li_m_import_late | gap | the translator does not support importing pyhard other than at the top of the module
+li_m_import_module | gap | the translator does not support importing pyhard other than at the top of the module
+li_m_import_module_as | gap | the translator does not support importing pyhard other than at the top of the module
+li_m_import_other | gap | the translator does not support importing names from pyhard other than loop_invariant and OLD
+li_m_import_submodule | gap | the translator does not support importing pyhard other than at the top of the module
+li_m_import_twice | gap | the translator does not support rebinding the marker loop_invariant, importing pyhard other than at the top of the module
+li_m_in_expression | gap | the translator does not support a use of loop_invariant other than a statement right before a loop
+li_m_in_lambda | gap | the translator does not support a use of loop_invariant other than a statement right before a loop
+li_m_last_statement | gap | the translator does not support a loop invariant that is not right before its loop
+li_m_old_outside | gap | the translator does not support a use of OLD outside a loop invariant's OLD(e)
+li_m_outside_target | agree
+li_m_outside_write | gap | import of module li_m_outside_target is not modelled yet
+li_m_rebind_annotation | gap | the translator does not support rebinding the marker loop_invariant
+li_m_rebind_assign | gap | the translator does not support rebinding the marker loop_invariant
+li_m_rebind_augassign | gap | the translator does not support rebinding the marker loop_invariant, a use of loop_invariant other than a statement right before a loop
+li_m_rebind_class | gap | the translator does not support rebinding the marker loop_invariant
+li_m_rebind_class_attr | gap | the translator does not support rebinding the marker loop_invariant
+li_m_rebind_comprehension | gap | the translator does not support rebinding the marker loop_invariant
+li_m_rebind_def | gap | the translator does not support rebinding the marker loop_invariant
+li_m_rebind_del | gap | the translator does not support rebinding the marker loop_invariant
+li_m_rebind_except | gap | the translator does not support rebinding the marker loop_invariant
+li_m_rebind_for | gap | the translator does not support rebinding the marker loop_invariant
+li_m_rebind_global | gap | the translator does not support rebinding the marker loop_invariant
+li_m_rebind_import | gap | the translator does not support rebinding the marker loop_invariant
+li_m_rebind_nonlocal | gap | the translator does not support rebinding the marker loop_invariant
+li_m_rebind_old | gap | the translator does not support rebinding the marker OLD
+li_m_rebind_param | gap | the translator does not support rebinding the marker loop_invariant
+li_m_rebind_walrus | gap | the translator does not support rebinding the marker loop_invariant
+li_m_rebind_with | gap | the translator does not support rebinding the marker loop_invariant
+li_m_shape_default | gap | the translator does not support a loop invariant other than loop_invariant(lambda: P)
+li_m_shape_keyword | gap | the translator does not support a loop invariant other than loop_invariant(lambda: P)
+li_m_shape_no_arg | gap | the translator does not support a loop invariant other than loop_invariant(lambda: P)
+li_m_shape_not_lambda | gap | the translator does not support a loop invariant other than loop_invariant(lambda: P)
+li_m_shape_param | gap | the translator does not support a loop invariant other than loop_invariant(lambda: P)
+li_m_shape_starred | gap | the translator does not support a loop invariant other than loop_invariant(lambda: P)
+li_m_shape_two_args | gap | the translator does not support a loop invariant other than loop_invariant(lambda: P)
+li_m_shape_varargs | gap | the translator does not support a loop invariant other than loop_invariant(lambda: P)
+li_method | agree
+li_module_comprehension | agree
+li_module_level | agree
+li_nested_both | agree
+li_nested_function | agree
+li_nested_outer | agree
+li_no_import | agree
+li_only_loop_invariant | agree
+li_other_module | gap | import of module li_other_module_helper is not modelled yet
+li_other_module_helper | agree
+li_p_attr_item_slice | agree
+li_p_bool_values | agree
+li_p_comparisons | agree
+li_p_isinstance | agree
+li_p_items_mangled_pair | agree
+li_p_iterable_scope | agree
+li_p_mangled_binder | agree
+li_p_mangled_mixed | agree
+li_p_names | agree
+li_p_operators | agree
+li_p_quantifiers | agree
+li_p_shadow | agree
+li_p_unbound | agree
+li_q_kinds | agree
+li_r_all_not_generator | gap | the translator does not support a call in a loop invariant
+li_r_async_quantifier | gap | the translator does not support an async quantifier in a loop invariant
+li_r_call | gap | the translator does not support a call in a loop invariant
+li_r_comp_binds_name | gap | the translator does not support a name that the lambda reads as a global but the loop binds in a loop invariant
+li_r_comp_nested | gap | the translator does not support a name that the lambda reads as a global but the loop binds in a loop invariant
+li_r_complex | gap | the translator does not support complex literal
+li_r_comprehension | gap | the translator does not support a comprehension in a loop invariant
+li_r_display | gap | the translator does not support a display in a loop invariant
+li_r_dunder | gap | the translator does not support module attribute __file__
+li_r_fstring | gap | the translator does not support an f-string in a loop invariant
+li_r_generator | gap | the translator does not support a call in a loop invariant
+li_r_isinstance_one | gap | the translator does not support a call in a loop invariant
+li_r_items_mangled_same | gap | the translator does not support a quantifier over items() whose target is not two different names
+li_r_items_not_pair | gap | the translator does not support a quantifier over items() whose target is not two different names
+li_r_items_same_name | gap | the translator does not support a quantifier over items() whose target is not two different names
+li_r_iterable_call | gap | the translator does not support a call in a loop invariant
+li_r_keyword | gap | the translator does not support a keyword argument in a loop invariant
+li_r_lambda | gap | the translator does not support a lambda in a loop invariant
+li_r_len_rebound | gap | the translator does not support len in a loop invariant of a module that binds len
+li_r_len_two | gap | the translator does not support a call in a loop invariant
+li_r_marker_inside | gap | the translator does not support a use of loop_invariant other than a statement right before a loop
+li_r_method_call | gap | the translator does not support a call in a loop invariant
+li_r_old | gap | the translator does not support OLD in a loop invariant
+li_r_old_not_imported | gap | the translator does not support OLD without importing it from pyhard
+li_r_starred | gap | the translator does not support a starred expression in a loop invariant
+li_r_tuple_target | gap | the translator does not support a quantifier whose target is not a name in a loop invariant
+li_r_two_fors | gap | the translator does not support a quantifier with several for clauses in a loop invariant
+li_r_view_argument | gap | the translator does not support a call in a loop invariant
+li_r_walrus | gap | the translator does not support an assignment expression in a loop invariant
+li_r_yield | gap | the translator does not support yield in a loop invariant
+li_raise_out | agree
+li_return_in_loop | agree
+li_several_exits | agree
+li_user_function | agree
+li_while | agree
+li_while_else | agree
+li_while_guard_raises | agree
+li_while_true_break | agree
+li_with_break | agree
 lib_any_all | agree
 lib_bytes | agree
 lib_collections | agree

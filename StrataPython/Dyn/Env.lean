@@ -125,8 +125,8 @@ An exception that comes out of Python code the operation runs, such as a callee 
 
 ## Contracts
 
-A contract of a Python function uses these operations; the translator of Python code does not
-emit them.
+A contract of a Python function uses these operations; the translator of Python code emits them
+only in a loop invariant's region (`docs/PythonToDyn.md` §6.11).
 
 * The arguments of a call, as a function's parameters `args` and `kwargs` receive them:
   `argOf`, `extraKwargs` and `bindsTo`.

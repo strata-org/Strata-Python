@@ -1,0 +1,17 @@
+module top
+  OLD: local (imported)
+  double: local (assigned, referenced)
+  loop_invariant: local (imported)
+  print: global implicit (referenced)
+  function double
+    i: cell (assigned, referenced)
+    loop_invariant: global implicit (referenced)
+    n: cell (parameter, referenced)
+    total: cell (assigned, referenced)
+    function lambda
+      i: free (referenced)
+      n: free (referenced)
+    function lambda
+      i: free (referenced)
+      total: free (referenced)
+qualnames: double, double.<locals>.<lambda>, double.<locals>.<lambda>

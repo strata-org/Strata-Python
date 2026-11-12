@@ -1,0 +1,58 @@
+-- unsupported: importing names from pyhard other than loop_invariant and OLD is not supported at 1:19-1:24
+module li_m_import_other {
+  func @|li_m_import_other.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
+    entry.0():
+      jump ^start.0()
+    start.0():
+      %str.0 : py.Value = py.strLit("li_m_import_other")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("li_m_import_other", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("li_m_import_other", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %check.0 : py.Value = py.importFrom("pyhard", "check") ^propagate.0()
+      %check.cell.0 : base.Ref(py.Value) = py.globalCell("li_m_import_other", "check")
+      %set.2 : base.Unit = base.refSet[py.Value](%check.cell.0, %check.0)
+      %int.0 : py.Value = py.intLit(0)
+      %i.cell.0 : base.Ref(py.Value) = py.globalCell("li_m_import_other", "i")
+      %set.3 : base.Unit = base.refSet[py.Value](%i.cell.0, %int.0)
+      jump ^head.0()
+    head.0():
+      %i.0 : py.Value = py.loadGlobal("li_m_import_other", "i") ^raised.0()
+      %int.1 : py.Value = py.intLit(3)
+      %lt.0 : py.Value = py.lt(%i.0, %int.1) ^raised.0()
+      %cond.0 : base.Bool = py.truthy(%lt.0) ^raised.0()
+      branch(%cond.0) ^body.0() ^normal.0()
+    body.0():
+      %i.1 : py.Value = py.loadGlobal("li_m_import_other", "i") ^raised.0()
+      %int.2 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%i.1, %int.2) ^raised.0()
+      %i.cell.1 : base.Ref(py.Value) = py.globalCell("li_m_import_other", "i")
+      %set.4 : base.Unit = base.refSet[py.Value](%i.cell.1, %iAdd.0)
+      jump ^head.0()
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.0 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.0)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
+    exit.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+}
+

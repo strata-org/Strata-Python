@@ -1,0 +1,7 @@
+module top
+  m: local (imported, referenced)
+  print: global implicit (referenced)
+  function lambda
+    p: local (parameter)
+    print: global implicit (referenced)
+qualnames: <lambda>

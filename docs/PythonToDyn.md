@@ -164,8 +164,8 @@ are in `StrataPython/Dyn/Build.lean`.
   `py.typeIsSubclass` neither reads nor fills them; and `py.reSearch` does not use the cache of
   compiled patterns of `re`.
 - **Operations for contracts.** A contract of a Python function, such as one of a PySpec model,
-  uses operations that the translator does not emit. Their docstrings in `Env.lean` state what
-  each one means.
+  uses operations that the translator emits only in a loop invariant's region (§6.11). Their
+  docstrings in `Env.lean` state what each one means.
   - *Arguments.* A function receives `args` and `kwargs`. `py.argOf(args, kwargs, pos, name,
     default)` is the value that the call binds to a parameter, with `pos` being -1 for a
     keyword-only one. `py.extraKwargs(kwargs, names…)` is the dict that a `**kw` parameter
@@ -1108,6 +1108,139 @@ function evaluates, which the scope pass records in `Scope.generator`) are **rej
 `async def`, `await`, `async for`, `async with`, `match`, `try`/`except*`, `type` aliases
 and PEP 695 type parameters, `yield` and `yield from`, relative imports, and `import *`.
 Each is rejected as §3 describes.
+
+### 6.11 Loop invariants
+
+A program states a loop invariant with a marker call right before the loop:
+
+```python
+from pyhard import loop_invariant
+
+def double(n):
+    total = 0
+    i = 0
+    loop_invariant(lambda: 0 <= i <= n)
+    loop_invariant(lambda: total == 2 * i)
+    while i < n:
+        total += 2
+        i += 1
+    return total
+```
+
+Each `loop_invariant(lambda: P)` statement becomes a `base.loopInvariant` at the start of the
+loop's head block ([Dyn](./Dyn.md)), whose region is `P` as a condition. Several statements give
+several instructions, in order. CPython calls `loop_invariant` once each time it reaches the loop
+statement, and the call does nothing. So the translator emits no call: it emits a guard for each
+marker statement, before the loop (see "The markers"). CPython never evaluates `P`, so the loop
+runs at its normal speed.
+
+**What an invariant means.** `P` holds each time control enters the head: for a `while` loop,
+before each test of its condition; for a `for` loop, after the iterable is evaluated and before
+each next element is taken. So at the head of a `for` loop the target holds the previous
+element, or its value before the loop: with `k = -1` before `for k in range(3):`, the head sees
+`k` equal to -1, 0, 1 and 2. An invariant holds only in runs whose call satisfied the function's
+`requires` clauses. It is a proof aid: a verdict never reports an invariant as proved, and it
+says nothing about whether the loop ends (partial correctness). A verifier forgets what the loop
+may change, so an invariant must restate what the loop keeps, such as `len(xs) == n` for a list
+that the loop doesn't resize; an invariant that is too weak for this is the most common reason a
+proof fails.
+
+**The markers.** `pyhard` (`Python/pyhard/pyhard.py`) defines `loop_invariant` and `OLD`.
+Dropping the marker calls is faithful only when each call is a call of PyHard's `loop_invariant`.
+The translator rejects each way to break this that it can see:
+
+* a `pyhard` import other than one `from pyhard import …` of marker names, without `as`, at the
+  module's top level, after nothing but a docstring and `from __future__` imports: so the names
+  are bound before any marker call can run;
+* any binding of a marker name in any scope, by any form that the scope pass knows (§5.1), and a
+  `global` or `nonlocal` declaration of one;
+* a marker call that isn't `loop_invariant(lambda: P)` with no other argument and a lambda with
+  no parameters, a marker statement that isn't right before a `while` or `for` statement of the
+  same statement list, a marker statement before a loop in a class body (CPython's lambda there
+  skips the class namespace), and any other use of a marker name;
+* a program module whose dotted name has a component `pyhard`, such as `pyhard`, `pkg.pyhard` or
+  `pyhard.x`, whatever it contains, and a main script named `pyhard.py`, which `pydyn run`
+  translates as `__main__`: defensive checks, since without the preload of §12.9 CPython could
+  import such a module in place of PyHard's.
+
+A marker name that the module doesn't import from `pyhard` is an ordinary name, and its calls are
+ordinary calls. The import is an ordinary `py.importFrom("pyhard", name)`, and the Python
+semantics has a model of `pyhard` (`StrataPython/Dyn/Sem/Modules/Pyhard.lean`) whose
+`loop_invariant` and `OLD` are marker values: a fixed object per name, whose identity only is
+defined; a verifier must show that no other operation on one is reached.
+
+Other code can still change what `loop_invariant` holds where the translator can't see it: another
+module can write `m.loop_invariant = print`, a write can go through `globals()`, an import of a
+submodule `pkg.loop_invariant` binds the submodule in `pkg` over the marker that `pkg` imported,
+and `sys.modules` can hold another `pyhard`. So for each marker statement, before the loop, the
+translation reads `loop_invariant` as that statement's call reads it, and tests it with
+`py.isMarker`:
+
+```
+      %loop_invariant.0 : py.Value = py.loadGlobal("m", "loop_invariant") ^propagate.0()
+      %isMarker.0 : base.Bool = py.isMarker(%loop_invariant.0)
+      branch(%isMarker.0) ^guarded.0() ^notMarker.0()
+    notMarker.0():
+      unreachable
+    guarded.0():
+      …                                       -- the next guard, then the loop
+```
+
+The read raises `NameError` where the call would. `py.isMarker` is the identity test, and every
+stage after the translator, a pass included, reads it so: for any other value, the false branch
+reaches `unreachable`, a fault, which a verifier must show is never reached; a fault is a failure,
+not an assumption ([Dyn](./Dyn.md)). On the machine, the test stops the run with a gap instead of
+returning false, since the false branch stands for CPython's call of that other value, which the
+semantics doesn't model. So such a run ends in a gap, as at any construct that the semantics leaves
+out. No stage removes or redirects a guard's false branch, changes its `unreachable`, or merges two
+guards' reads or tests, for any reason: neither the machine's rule, which never takes the false
+branch, nor trace refinement, which lets a pass replace a run that reaches `unreachable`
+([Dyn](./Dyn.md)), justifies it. A verifier relies on `unreachable` being a failure: one that
+lowered it as `assume(false)` would drop exactly the runs in which CPython calls something else.
+The false branch can't go on to the loop instead: CPython passes the lambda to the other callee,
+which can write the cells of the locals that `P` reads, at once or later. Each marker statement
+has its own guard, since each call reads the name again.
+
+**What `P` may contain.** `P` is lowered with the translator's own expression lowering, into a
+contract region, which applies no operation that writes. So it may contain only names,
+literals, the arithmetic, unary and comparison operators (`is` and `in` included), `and`, `or`,
+`not`, `a if c else b`, attributes, subscripts and slices, and calls of the builtins `len`,
+`isinstance`, `all` and `any`. Each keeps CPython's meaning, and `P` holds when `if P:` at the
+head would take its true branch, so a `__bool__` runs once for each operand that `and`, `or` or
+`not` tests. A name is read as the loop's code reads it. An exception inside `P` makes the
+invariant `false`. Anything else is rejected, among them other calls, displays, comprehensions,
+lambdas, assignment expressions and f-strings, and, for now, `OLD`. `len`, `isinstance`, `all`
+and `any` can't be used in a module where some scope binds that name. A name that the lambda reads
+as a global is rejected when the loop's function binds it, which happens when the function binds
+it only in a list, set or dict comprehension: CPython 3.12 makes it a local of the function, while
+the lambda reads the global. Another module can still rebind one of the four builtins' names in
+this module, such as with `m.len = f`; then `P`'s `len` is still the builtin, where `if P:` would
+call `f`. That changes only what a verifier checks, not what CPython runs: CPython never calls the
+lambda, and an invariant is a proof aid that a verifier checks before it assumes it
+([Dyn](./Dyn.md)).
+
+`all(B for x in C if G)` and `any(…)` with one `for` clause are `py.allIn` and `py.anyIn`, and
+`for k, v in d.items()`, `for k in d.keys()` and `for v in d.values()` are `py.allItems` and
+`py.anyItems`, as in PySpec models (§12.4). They quantify over a container's storage, which
+differs from CPython's `all` and `any` in three ways:
+
+* over a `str`, a `range`, an iterator or any value that isn't a `list`, `tuple`, `set`,
+  `frozenset` or `dict` (or a subclass), they raise `TypeError`, so the invariant is `false`;
+* over a subclass that overrides `__iter__`, or a dict subclass that overrides `items`, `keys` or
+  `values`, they read the storage, so the invariant means the storage reading;
+* when `B` raises for some element, they raise, so the invariant is `false`, where CPython's `all`
+  may stop earlier at a `False` and its `any` at a `True`: `any(1 // x > 0 for x in [1, 0])` is
+  `True` in CPython.
+
+PySpec models read some of these constructs differently from `P` (§12.4), because PySpec reads a
+model's clauses its own way:
+
+* `x == None` is `py.is` in a model and `py.eq` in `P`;
+* `isinstance(x, T)` resolves `T` to a class when a model is translated, and reads `T` inside the
+  region in `P`;
+* `x == "A" or x == "B"` and `x != "A"` have special forms in a model, and are CPython's `py.eq`
+  chain and `py.notEq` in `P`;
+* a model's clause reads a parameter with `py.argOf`, and `P` reads the cell of a local.
 
 ## 7. Exceptions, `finally` and `with`
 
@@ -2154,6 +2287,21 @@ container subclass. No stage checks them yet. §12.11 lists the admission rules 
 some of them.
 
 * The model module stands for the library: its body, its classes and their facts (§12.1).
+* Outside code imports the `pyhard` module that PyHard ships, `Python/pyhard/pyhard.py` (§6.11,
+  "Loop invariants"), before the program starts, as the tests' tracers do. So the program's import
+  finds it in `sys.modules` and runs no Python frame, wherever it runs, and no other file named
+  `pyhard` is loaded in its place. The build doesn't install `pyhard` yet; the tests load it from
+  `Python/pyhard`. Importing it binds the marker names that the import lists, and has no other effect that
+  the program can observe. The model of `pyhard` in the Python semantics stands for this module
+  (§6.11); what the program does to the import system (`sys.modules`, `__import__`) the semantics
+  runs, or stops with a gap. Each call of `loop_invariant(f)` is one call of a Python function that
+  pyhard defines. The call takes one frame and no C recursion level, returns `None` without calling
+  `f`, and no profile, trace or monitoring hook sees it (today `import sys` stops the semantics with
+  a gap, so no program sets one). That frame never makes CPython raise where the semantics gives a
+  result: the semantics stops with a gap past 900 of the program's Python frames, the module's
+  included (`pyDepthLimit` in `StrataPython/Dyn/Sem/Concrete.lean`), and the assumptions of §13
+  keep CPython's limit at 1,000 and leave at most 97 Python frames below the program, so the
+  marker's frame is one of the 3 that remain within that limit.
 * A model class's stub, with the stubs of its model bases, lists every method and class attribute
   that the library's class has, including those that it inherits from library bases that the
   model leaves out, such as the `__getattribute__` of such a base. So a model base answers for a
@@ -2543,6 +2691,8 @@ That claim trusts these assumptions about the CPython run:
   own raising depth with 100 frames below, for the natives and callback paths that they cover, but
   nothing proves it;
 - no `-O` (so `assert` statements run and `__debug__` is `True`);
+- that the `pyhard` module is the one that PyHard ships, imported before the program starts, as
+  §12.9 says: the model of `pyhard` (`Modules/Pyhard.lean`) stands for it;
 - enough memory, so that no `MemoryError` is raised;
 - the platform's `libm` for a float `**`, whose result the model takes from the host's `pow`;
 - a 64-bit CPython on a little-endian machine whose C `long` has 64 bits (Linux or macOS, not

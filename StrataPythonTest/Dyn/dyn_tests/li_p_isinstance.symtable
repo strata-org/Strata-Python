@@ -1,0 +1,23 @@
+module top
+  K: local (assigned, referenced)
+  OLD: local (imported)
+  f: local (assigned, referenced)
+  loop_invariant: local (imported)
+  print: global implicit (referenced)
+  class K
+  function f
+    i: cell (assigned, referenced)
+    k: cell (parameter)
+    loop_invariant: global implicit (referenced)
+    n: local (parameter, referenced)
+    function lambda
+      K: global implicit (referenced)
+      i: free (referenced)
+      int: global implicit (referenced)
+      isinstance: global implicit (referenced)
+      k: free (referenced)
+    function lambda
+      i: free (referenced)
+      int: global implicit (referenced)
+      isinstance: global implicit (referenced)
+qualnames: K, f, f.<locals>.<lambda>, f.<locals>.<lambda>

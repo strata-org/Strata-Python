@@ -1,0 +1,5 @@
+module top
+  Exception: global implicit (referenced)
+  OLD: local (imported)
+  loop_invariant: local (assigned, imported)
+qualnames: 

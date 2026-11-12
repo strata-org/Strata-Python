@@ -89,6 +89,10 @@ The scope pass and the translator share their tests. To add one, put `NAME.py` i
 The translator test fails on any `.py` that is not listed, the scope test on any `.py`
 without both scope files, and the ref-to-reg test on any translator golden without its
 `.expected.ssa.dyn` golden.
+A test whose name starts with `li_` and that expects no rejection is a loop-invariant program
+(`docs/PythonToDyn.md` §6.11): also write its run golden `NAME.expected.out` by running
+`StrataPythonTestExtra/DynInvariantRunTest.lean` with `DYN_UPDATE=1`, which runs it on CPython
+with the marker module `Python/pyhard/pyhard.py`.
 `lake exe pydyn dyn FILE.py` prints the diagnostics and the module for one file, and
 `lake exe pydyn canonical FILE.py` prints it with every function in canonical form.
 

@@ -1,0 +1,4 @@
+module
+  import check: member check of pyhard
+  check: local (imported)
+  i: local (assigned, referenced)

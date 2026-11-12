@@ -1,0 +1,18 @@
+module top
+  Acc: local (assigned, referenced)
+  OLD: local (imported)
+  loop_invariant: local (imported)
+  print: global implicit (referenced)
+  class Acc
+    __init__: local (assigned)
+    add_all: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+    function add_all
+      loop_invariant: global implicit (referenced)
+      self: cell (parameter, referenced)
+      x: local (assigned, referenced)
+      xs: local (parameter, referenced)
+      function lambda
+        self: free (referenced)
+qualnames: Acc, Acc.__init__, Acc.add_all, Acc.add_all.<locals>.<lambda>

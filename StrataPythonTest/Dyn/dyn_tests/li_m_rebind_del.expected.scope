@@ -1,0 +1,5 @@
+module
+  import loop_invariant: member loop_invariant of pyhard
+  import OLD: member OLD of pyhard
+  loop_invariant: local (assigned, imported)
+  OLD: local (imported)

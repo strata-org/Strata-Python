@@ -1,0 +1,4 @@
+module top
+  i: local (assigned, referenced)
+  pyhard: local (imported)
+qualnames: 

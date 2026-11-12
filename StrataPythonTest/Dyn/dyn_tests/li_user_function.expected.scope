@@ -1,0 +1,16 @@
+module
+  loop_invariant: local (assigned)
+  f: local (assigned, referenced)
+  print: global implicit (referenced)
+  function loop_invariant
+    params: p
+    p: local (parameter)
+    print: global implicit (referenced)
+  function f
+    params: n
+    n: cell (parameter, referenced)
+    i: cell (assigned, referenced)
+    loop_invariant: global implicit (referenced)
+    lambda f.<locals>.<lambda>
+      i: free (referenced)
+      n: free (referenced)

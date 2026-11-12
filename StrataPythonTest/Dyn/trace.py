@@ -14,9 +14,11 @@ names left out but `__name__`, `__doc__` and `__annotations__` (unless the progr
 annotations and it is still the module's first, empty dict).  `render` is the model's
 (`Run.lean`): `repr` for `None`, `bool`, `int`, `float`, `str`, `bytes`, `range`, `slice`,
 `Ellipsis` and `NotImplemented`; containers in full, a set's members sorted by their render;
-`<class 'Q'>` for a class; `<T object>` for any other object, `T` its type's `__qualname__`; and
-`...` for an object inside itself.  A file that CPython does not compile prints `--- syntax error`
-alone.
+`<class 'Q'>` for a class; `<T object>` for any other object, `T` its type's `__qualname__`;
+`<marker NAME>` for the loop-invariant marker `NAME` of the `pyhard` module, which this script
+imports from `Python/pyhard/` before the program runs, found by identity among the two markers that
+it held then; and `...` for an object inside itself.  A file that CPython does not compile prints
+`--- syntax error` alone.
 
 Run it twice, with `PYTHONHASHSEED` 0 and 1, to see whether the trace depends on the seed.
 
@@ -153,8 +155,36 @@ suppress_context = BaseException.__dict__["__suppress_context__"].__get__
 # The types that render as their `repr`, by identity, so that no metaclass's `__eq__` runs.
 PLAIN = frozenset(map(id, (bool, int, float, str, bytes, range)))
 
+# The `pyhard` module, which the programs that state loop invariants import, loaded
+# before the program runs, and its two markers, recorded then, so that the program can't change
+# what counts as a marker.  Python writes no bytecode next to it.  Its directory leaves the module
+# path again, so that the program sees `python FILE.py`'s path, and its imports of `pyhard` find
+# the module already loaded.
+sys.dont_write_bytecode = True
+PYHARD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
+    __file__)))), "Python", "pyhard")
+sys.path.insert(0, PYHARD_DIR)
+import pyhard  # noqa: E402
+sys.path.remove(PYHARD_DIR)
+
+if os.path.dirname(os.path.realpath(pyhard.__file__)) != os.path.realpath(PYHARD_DIR):
+    sys.exit(f"trace.py: pyhard comes from {pyhard.__file__}, not from {PYHARD_DIR}")
+
+MARKERS = ((pyhard.loop_invariant, "loop_invariant"), (pyhard.OLD, "OLD"))
+
+
+def marker_name(v):
+    """The name of the `pyhard` marker that `v` is, or `None`: `v` must be that very object."""
+    for m, name in MARKERS:
+        if v is m:
+            return name
+    return None
+
 
 def render(v, seen):
+    name = marker_name(v)
+    if name is not None:
+        return f"<marker {name}>"
     if v is None or id(type(v)) in PLAIN:
         return repr(v)
     if type(v) is slice:
@@ -185,10 +215,14 @@ def render(v, seen):
 
 
 def exc_lines(e):
+    # The absolute path of `pyhard`, which an `ImportError` from it names, is written relative to
+    # the package, so that the trace is the same in every checkout.
     try:
         text = str(e)
     except BaseException:  # CPython's traceback printer shows the same note
         text = "<exception str() failed>"
+    for d in sorted({PYHARD_DIR, os.path.realpath(PYHARD_DIR)}, key=len, reverse=True):
+        text = text.replace(d, os.path.join("Python", "pyhard"))
     lines = [f"raised {qualname(type(e))}: {text}"]
     seen = {id(e)}
     while True:

@@ -1,0 +1,13 @@
+--- stdout 7
+exit
+1
+
+--- outcome
+ok
+--- globals
+Ctx = <class 'Ctx'>
+OLD = <marker OLD>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+loop_invariant = <marker loop_invariant>

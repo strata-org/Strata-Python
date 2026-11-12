@@ -1,0 +1,16 @@
+module
+  import loop_invariant: member loop_invariant of pyhard
+  loop_invariant: local (imported, referenced)
+  x: local (assigned)
+  xs: local (assigned, referenced)
+  ys: local (assigned, referenced)
+  i: local (assigned, referenced)
+  print: global implicit (referenced)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    x: local (assigned, referenced, comp_iter)
+  lambda <lambda>
+    x: global implicit (referenced)
+  lambda <lambda>
+    x: global implicit (referenced)

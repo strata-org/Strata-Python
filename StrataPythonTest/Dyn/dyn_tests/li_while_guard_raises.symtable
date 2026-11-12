@@ -1,0 +1,13 @@
+module top
+  IndexError: global implicit (referenced)
+  OLD: local (imported)
+  f: local (assigned, referenced)
+  loop_invariant: local (imported)
+  print: global implicit (referenced)
+  function f
+    i: cell (assigned, referenced)
+    loop_invariant: global implicit (referenced)
+    xs: local (parameter, referenced)
+    function lambda
+      i: free (referenced)
+qualnames: f, f.<locals>.<lambda>

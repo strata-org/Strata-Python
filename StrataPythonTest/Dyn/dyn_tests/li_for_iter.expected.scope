@@ -1,0 +1,17 @@
+module
+  import loop_invariant: member loop_invariant of pyhard
+  import OLD: member OLD of pyhard
+  loop_invariant: local (imported)
+  OLD: local (imported)
+  f: local (assigned, referenced)
+  print: global implicit (referenced)
+  function f
+    params: xs
+    xs: local (parameter, referenced)
+    it: local (assigned, referenced)
+    iter: global implicit (referenced)
+    n: cell (assigned, referenced)
+    loop_invariant: global implicit (referenced)
+    x: local (assigned)
+    lambda f.<locals>.<lambda>
+      n: free (referenced)

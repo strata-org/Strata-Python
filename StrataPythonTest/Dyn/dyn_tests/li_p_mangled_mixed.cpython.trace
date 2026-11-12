@@ -1,0 +1,11 @@
+--- stdout 2
+1
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+_C__x = -5
+__doc__ = None
+__name__ = '__main__'
+loop_invariant = <marker loop_invariant>

@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+OLD = <marker OLD>
+__doc__ = None
+__name__ = '__main__'
+f = <marker loop_invariant>
+loop_invariant = <marker loop_invariant>

@@ -1,0 +1,24 @@
+module top
+  Count: local (assigned, referenced)
+  OLD: local (imported)
+  f: local (assigned, referenced)
+  loop_invariant: local (imported)
+  print: global implicit (referenced)
+  class Count
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __iter__
+      iter: global implicit (referenced)
+      range: global implicit (referenced)
+      self: local (parameter, referenced)
+  function f
+    c: local (parameter, referenced)
+    loop_invariant: global implicit (referenced)
+    s: cell (assigned, referenced)
+    x: local (assigned, referenced)
+    function lambda
+      s: free (referenced)
+qualnames: Count, Count.__init__, Count.__iter__, f, f.<locals>.<lambda>

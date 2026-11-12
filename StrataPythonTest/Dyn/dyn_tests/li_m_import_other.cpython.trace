@@ -1,0 +1,7 @@
+--- stdout 0
+
+--- outcome
+raised ImportError: cannot import name 'check' from 'pyhard' (Python/pyhard/pyhard.py)
+--- globals
+__doc__ = None
+__name__ = '__main__'

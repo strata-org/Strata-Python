@@ -1,0 +1,8 @@
+module top
+  OLD: local (imported)
+  f: local (assigned)
+  loop_invariant: global explicit (imported, declared_global)
+  function f
+    loop_invariant: global explicit (assigned, declared_global)
+    print: global implicit (referenced)
+qualnames: f

@@ -1,0 +1,7 @@
+module top
+  OLD: local (imported)
+  f: local (assigned)
+  loop_invariant: local (imported)
+  function f
+    loop_invariant: local (imported)
+qualnames: f

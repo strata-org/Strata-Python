@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: loop_invariant() got some positional-only arguments passed as keyword arguments: 'p'
+--- globals
+OLD = <marker OLD>
+__doc__ = None
+__name__ = '__main__'
+i = 0
+loop_invariant = <marker loop_invariant>
