@@ -161,6 +161,78 @@ meta def twoOrders : String :=
 /-- info: p | gap | g -/
 #guard_msgs in #eval IO.println (verdictText (judge "p" (.trace (tr "['" "--- gap g\n")) twoOrders none))
 
+/-- info: fails: p: the run differs from CPython's before its gap -/
+#guard_msgs in #eval IO.println (verdictText (judge "p" (.trace (tr "['b'" "--- gap g\n")) twoOrders none))
+
+-- Two runs whose globals differ by seed. An output that holds the line that separates the runs is
+-- found within the first run's output, so a gap after it is a gap. A wrong output fails, and so
+-- does an output with a hex number before the gap, even a right one: CPython's two traces are
+-- masked, which loses the digits, and ours is compared unmasked, so it fails rather than pass.
+meta def twoWith (out : String) : String :=
+  joinRuns (tr out "--- outcome\nok\n--- globals\ns = {1, 2}\n")
+    (tr out "--- outcome\nok\n--- globals\ns = {2, 1}\n")
+
+/-- info: p | gap | g -/
+#guard_msgs in
+#eval IO.println (verdictText
+  (judge "p" (.trace (tr "--- PYTHONHASHSEED=1\n" "--- gap g\n")) (twoWith "--- PYTHONHASHSEED=1\n") none))
+
+/-- info: fails: p: the run differs from CPython's before its gap -/
+#guard_msgs in
+#eval IO.println (verdictText (judge "p" (.trace (tr "hj\n" "--- gap g\n")) (twoWith "hi\n") none))
+
+/-- info: fails: p: the run differs from CPython's before its gap -/
+#guard_msgs in
+#eval IO.println (verdictText (judge "p" (.trace (tr "0x20\n" "--- gap g\n")) (twoWith "0x1f\n") none))
+
+/-- info: fails: p: the run differs from CPython's before its gap -/
+#guard_msgs in
+#eval IO.println (verdictText (judge "p" (.trace (tr "0x1f\n" "--- gap g\n")) (twoWith "0x1f\n") none))
+
+-- A text with a separator after the first run but no trace after it, and one whose first run has
+-- no stdout header, have no runs to check, so every gap fails.
+/-- info: fails: p: the run differs from CPython's before its gap -/
+#guard_msgs in
+#eval IO.println (verdictText (judge "p" (.trace (tr "a\n" "--- gap g\n"))
+  "--- PYTHONHASHSEED=0\n--- stdout 2\na\n\n--- outcome\nok\n--- PYTHONHASHSEED=1\nb\n" none))
+
+/-- info: fails: p: the run differs from CPython's before its gap -/
+#guard_msgs in
+#eval IO.println (verdictText (judge "p" (.trace (tr "" "--- gap g\n"))
+  "--- PYTHONHASHSEED=0\n--- outcome\nok\n--- PYTHONHASHSEED=1\n--- stdout 2\nb\n\n--- outcome\nok\n" none))
+
+-- A first run whose globals hold the separator line is cut there, and a gap whose sections match
+-- the part before that line is a gap: `agreesBefore` tests only prefixes, so a cut run accepts no
+-- more than the whole one.
+/-- info: p | gap | g -/
+#guard_msgs in
+#eval IO.println (verdictText (judge "p" (.trace (tr "a\n" "--- outcome\nok\n--- globals\ng = 1\n--- gap g\n"))
+  (joinRuns (tr "a\n" "--- outcome\nok\n--- globals\ng = 1\n--- PYTHONHASHSEED=1\nz = 2\n")
+    (tr "a\n" "--- outcome\nok\n--- globals\ng = 1\nz = 3\n")) none))
+
+-- The first run's exception message, or a global's name, may hold the separator and a made-up
+-- second run that prints `a`; the real second run prints `b`, so a gap after `a` fails. A text
+-- whose first header is longer than its output has no first run, so every gap fails.
+meta def fakeRun : String := "x\n--- PYTHONHASHSEED=1\n--- stdout 2\na\n\n--- outcome\nok\n--- globals"
+
+/-- info: fails: p: the run differs from CPython's before its gap -/
+#guard_msgs in
+#eval IO.println (verdictText (judge "p" (.trace (tr "a\n" "--- gap g\n"))
+  (joinRuns (tr "a\n" s!"--- outcome\nraised ValueError: {fakeRun}\n--- globals\n")
+    (tr "b\n" s!"--- outcome\nraised ValueError: {fakeRun}\n--- globals\n")) none))
+
+/-- info: fails: p: the run differs from CPython's before its gap -/
+#guard_msgs in
+#eval IO.println (verdictText (judge "p" (.trace (tr "a\n" "--- gap g\n"))
+  (joinRuns (tr "a\n" s!"--- outcome\nok\n--- globals\n{fakeRun}\ny = 1\n")
+    (tr "b\n" s!"--- outcome\nok\n--- globals\n{fakeRun}\ny = 1\n")) none))
+
+/-- info: fails: p: the run differs from CPython's before its gap -/
+#guard_msgs in
+#eval IO.println (verdictText (judge "p" (.trace (tr "a\n" "--- gap g\n"))
+  ("--- PYTHONHASHSEED=0\n--- stdout 60\na\n\n--- outcome\nok\n--- globals\n--- PYTHONHASHSEED=1\n" ++
+    "--- stdout 2\nb\n\n--- outcome\nok\n--- globals\n") none))
+
 -- Two runs with the same output and a global that differs by seed: a gap after the global of one
 -- run fails, and a gap before the global is a gap.
 meta def twoGlobals : String :=

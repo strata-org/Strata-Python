@@ -84,6 +84,27 @@ def joinRuns (t0 t1 : String) : String :=
   if t0 == t1 then t0
   else s!"{twoRunsHeader}{maskTrace t0}--- PYTHONHASHSEED=1\n{maskTrace t1}"
 
+/-- CPython's two traces in the text that `joinRuns` gives when its runs differ, for `judge` to
+check each one: the first run, up to the first separator line after its output (whose header
+`--- stdout <n>` gives its length, so its printed text is never taken for that line), then every
+text after a later separator line that reads as a trace. The program can print the separator in
+an exception's message or a global's name, so the real second run is one of those, and checking
+all of them never passes a run that the real one fails. A text that doesn't have this shape gives
+`[""]`, which no run agrees with. -/
+def splitRuns (theirs : String) : List String :=
+  let body := (theirs.drop twoRunsHeader.length).toString
+  let sep := "--- PYTHONHASHSEED=1\n"
+  match splitOutput body with
+  | some (out, rest) =>
+    match rest.splitOn sep with
+    | r0 :: more@(_ :: _) =>
+      let seconds := (List.range more.length).filterMap fun k =>
+        let t := sep.intercalate (more.drop k)
+        if (splitOutput t).isSome then some t else none
+      if seconds.isEmpty then [""] else traceOf out r0 :: seconds
+    | _ => [""]
+  | none => [""]
+
 /-- The seconds that CPython's run of a program may take. -/
 def cpythonSeconds : Nat := 60
 
@@ -128,7 +149,9 @@ def faultOf (trace : String) : Option String := do
 /-- Whether a run that stops with a gap agrees with CPython's trace `theirs` up to the gap: a gap
 right after the output needs only a prefix of CPython's output, and a later gap the whole output
 and the sections before it.  A gap in the outcome after the line `raised <ExcType>` needs CPython's
-outcome to raise that type. -/
+outcome to raise that type. Every check on CPython's sections is a prefix test, which a longer
+text also passes: `splitRuns` may cut a run's sections early, and that is sound only while this
+holds. -/
 def agreesBefore (out before theirs : String) : Bool :=
   match splitOutput theirs with
   | none => false
@@ -215,10 +238,10 @@ def judge (name : String) (ours : Ours) (theirs : String) (known : Option Diff.K
       .error s!"{name}: the run is out of fuel"
     else if let some (out, before, msg) := splitGap ours then
       -- Up to the gap, our trace is CPython's.  With two different runs, it is the trace of each
-      -- run, so the gap comes before the first point where the runs differ.
-      let runs := if twoRuns then
-          ((theirs.drop twoRunsHeader.length).toString.splitOn "--- PYTHONHASHSEED=1\n")
-        else [theirs]
+      -- run, so the gap comes before the first point where the runs differ.  Our trace stays
+      -- unmasked: CPython's masked `0x?` can't tell `0x1f` from `0x20`, so a printed hex number
+      -- before such a gap fails, visibly, rather than pass unchecked.
+      let runs := if twoRuns then splitRuns theirs else [theirs]
       if runs.all (agreesBefore out before) then .ok (.gap msg)
       else .error s!"{name}: the run differs from CPython's before its gap\n--- ours\n{ours}\
         --- CPython\n{theirs}"
