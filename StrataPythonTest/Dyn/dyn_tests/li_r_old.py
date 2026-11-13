@@ -1,6 +1,6 @@
 from pyhard import loop_invariant, OLD
 
-def f(xs, d):
+def f(xs):
     i = 0
     loop_invariant(lambda: OLD(i) == 0)
     while i < len(xs):

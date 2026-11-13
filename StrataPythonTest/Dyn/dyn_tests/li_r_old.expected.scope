@@ -5,9 +5,8 @@ module
   OLD: local (imported)
   f: local (assigned)
   function f
-    params: xs, d
+    params: xs
     xs: local (parameter, referenced)
-    d: local (parameter)
     i: cell (assigned, referenced)
     loop_invariant: global implicit (referenced)
     len: global implicit (referenced)

@@ -156,6 +156,12 @@ structure FuncJob where
   /-- For a class body, what its declared shape needs besides the body. -/
   classParts : Option ClassParts := none
 
+/-- A parameter, with its default. -/
+structure ParamWithDefault where
+  name : String
+  kind : ParamKind
+  default : Option (expr SourceRange)
+
 /-- What is fixed while one function is translated. -/
 structure Ctx where
   table : Table
@@ -185,6 +191,14 @@ structure Ctx where
   /-- In a quantifier's body region, its binders: each name, and the region's parameter that
   holds it. -/
   binders : Array (String × ValId) := #[]
+  /-- Inside an `OLD`'s old region: names are read in the state at the function's entry. -/
+  inOld : Bool := false
+  /-- In a function's body: its parameters, its default cells and its `args` and `kwargs`
+  parameters, from which an old region binds the arguments again (§6.11). -/
+  binding : Option (Array ParamWithDefault × Array (String × ValId) × ValId × ValId) := none
+  /-- Inside an old region: the arguments bound again once at its start, and the parameters'
+  names in the order of that tuple. -/
+  oldBound : Option (ValId × Array String) := none
 
 /-- What translation accumulates.  The first three fields are module-wide; `exits`,
 `targeted`, `inits`, `loops`, `returnsTo` and `loopExitsTo` belong to the function being
@@ -657,6 +671,70 @@ def literal (c : constant SourceRange) (range : SourceRange) : TransM ValId :=
   | .ConEllipsis _ => build ellipsisLit
   | .ConComplex .. => unsupportedValue "complex literal" range
 
+/-- A default that `isConstantDefault` admits, evaluated in place. -/
+def constantDefault (d : expr SourceRange) : TransM ValId := withRange d.ann do
+  match d with
+  | .Constant sr c _ => literal c sr
+  | .UnaryOp _ (.USub _) (.Constant sr c _) =>
+    let v ← withRange sr (literal c sr)
+    build (emitFailing (.str .base "neg") Py.uSub.ref #[v])
+  | other => unsupportedValue "a default that is not a constant" other.ann
+
+/-- CPython's binding of a call's arguments to the parameters `ps` (§5.4): `py.bindArgs` on
+`args`, `kwargs` and the defaults, those of `defaults` read from their cells, the constant ones
+evaluated in place.  It gives the tuple of the bound values and the parameters' mangled names,
+in the tuple's order: the positional and keyword-only ones, then `*args`, then `**kwargs`. -/
+def bindArguments (ps : Array ParamWithDefault) (defaults : Array (String × ValId))
+    (args kwargs : ValId) : TransM (ValId × Array String) := do
+  -- As in CPython, a private name is mangled everywhere, its keyword included.
+  let ps ← ps.mapM fun p => return { p with name := ← mangled p.name }
+  let defaults ← defaults.mapM fun (n, c) => return (← mangled n, c)
+  let isPos (p : ParamWithDefault) := p.kind == .posOnly || p.kind == .positional
+  let named := ps.filter fun p => isPos p || p.kind == .kwOnly
+  let varPos := ps.find? (·.kind == .varPositional)
+  let varKw := ps.find? (·.kind == .varKeyword)
+  let fillSlot (p : ParamWithDefault) : TransM ValId := do
+    match p.default, defaults.find? (·.1 == p.name) with
+    | some _, some (_, c) => build (readCell c (defaultStem p.name))
+    | some d, none => constantDefault d
+    | none, _ => build (emitTotal (stem p.name) Py.undef.ref
+        #[← build (emitConst (.str .base "n") (.str p.name))])
+  let fill ← build (emitTotal (.str .base "defaults") Py.mkTuple.ref (← named.mapM fillSlot))
+  let const (c : Const) : TransM ValId := build (emitConst (.str .base "c") c)
+  let qualname ← const (.str (← curScope).qualname)
+  let nPosOnly ← const (.int (ps.filter (·.kind == .posOnly)).size)
+  let nPos ← const (.int (ps.filter isPos).size)
+  let hasVarPos ← const (.bool varPos.isSome)
+  let hasVarKw ← const (.bool varKw.isSome)
+  let names ← named.mapM fun p => const (.str p.name)
+  let bound ← build (emitFailing (.str .base "bound") Py.bindArgs.ref
+    (#[args, kwargs, fill, qualname, nPosOnly, nPos, hasVarPos, hasVarKw] ++ names))
+  let slots := named.map (·.name) ++ (varPos.map (·.name)).toArray ++ (varKw.map (·.name)).toArray
+  return (bound, slots)
+
+/-- The name `name` at `range`, read inside an `OLD`'s old region (§6.11): in the state at the
+function's entry.  A parameter is the value that the call bound to it, taken from the tuple of
+the arguments that the old region bound again at its start; a free variable is the content of
+its captured cell, a parameter of the function; a global is read as anywhere.  A local that is not a parameter is rejected: it has no value at entry. -/
+def oldName (name : String) (range : SourceRange) : TransM ValId := do
+  let ctx ← read
+  if let some m := ctx.markers then
+    if m.has name then return ← unsupportedValue (markerUse name) range
+  let mname ← mangled name
+  if ctx.binders.any (·.1 == mname) then return ← readName name range
+  match ← place mname with
+  | .cell _ =>
+    let notParam := "a local that is not a parameter inside OLD in a loop invariant"
+    let some (bound, slots) := ctx.oldBound
+      | unsupportedValue (if ctx.binding.isSome then notParam
+          else "OLD at module level in a loop invariant") range
+    match slots.idxOf? mname with
+    | some i =>
+      build (emitTotal (stem mname) Py.tupleGet.ref
+        #[bound, ← build (emitConst (.str .base "c") (.int i))])
+    | none => unsupportedValue notParam range
+  | _ => readName name range
+
 /-! ## Rejected constructs -/
 
 /-- The name of a statement `transStmt` rejects. -/
@@ -726,12 +804,6 @@ end
 
 A `def` is bound where it runs, and its function is emitted after the current one, from a
 `FuncJob`. -/
-
-/-- A parameter, with its default. -/
-structure ParamWithDefault where
-  name : String
-  kind : ParamKind
-  default : Option (expr SourceRange)
 
 /-- The parameters of `args`, in signature order. -/
 def params (args : arguments SourceRange) : Array ParamWithDefault :=
@@ -1268,7 +1340,7 @@ mutual
 def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann do
   match e with
   | .Constant sr c _ => literal c sr
-  | .Name sr ⟨_, n⟩ _ => readName n sr
+  | .Name sr ⟨_, n⟩ _ => if (← read).inOld then oldName n sr else readName n sr
   | .BinOp sr l op r => do
     -- CPython 3.12's AST optimizer rewrites `'lit' % (a, b)` into an f-string (`optimize_format`).
     if op matches .Mod _ then
@@ -1508,6 +1580,47 @@ def transCond (e : expr SourceRange) (t f : PyTarget []) : TransM Unit := withRa
   | other => branch (← build (truthy (← transExpr other))) t f
 termination_by sizeOf e + 1
 
+/-- `OLD(e)` in an invariant (§6.11): `base.old` of a region that computes `e` in the state at
+the function's entry, after binding the call's arguments again if `e` reads a parameter.  The region returns `ok` of the value if it is an immutable scalar, and
+`error` otherwise, so that `base.old` fails and the invariant is `false`, as for an `OLD` in a
+PySpec model (§12.4). -/
+def oldPart (e : expr SourceRange) : TransM ValId := do
+  let h ← build (checkedHandler (α := Info))
+  let region : TransM (Region Py.env Info) := Prod.fst <$> Build.regionWith #[] (base := "old") do
+    let propagate ← build (freshLabel [Py.Value] "propagate")
+    let v ← withHandler propagate do
+      -- The arguments are bound once per region, so that every read of a parameter in it is the
+      -- same object, as in CPython: `OLD(rest is rest)` holds.
+      -- Only a region that reads a parameter binds them: `py.bindArgs` may run user code.
+      let bound ← match (← read).binding with
+        | some (ps, defaults, args, kwargs) =>
+          let params ← ps.mapM fun p => mangled p.name
+          let reads ← (PyMarkers.namesIn e).mapM mangled
+          if reads.any params.contains then some <$> bindArguments ps defaults args kwargs
+          else pure none
+        | none => pure none
+      withReader ({ · with inOld := true, oldBound := bound }) (transExpr e)
+    build do
+      let scalar ← emitTest (.str .base "scalar") Py.isImmutableScalar.ref #[v]
+      let s ← freshLabel [] "scalar"
+      let mutable ← freshLabel [] "mutable"
+      PyBuild.branch scalar s.goto mutable.goto
+      startBlock s
+      let ok ← Build.emitApply (env := Py.env) (α := Info) (.str .base "res")
+        (Py.raising Py.Value) Base.Except.ok.ref #[v]
+      Build.Raw.ret (env := Py.env) (α := Info) ok
+      startBlock mutable
+      let err ← Build.emitApply (env := Py.env) (α := Info) (.str .base "res")
+        (Py.raising Py.Value) Base.Except.error.ref #[v]
+      Build.Raw.ret (env := Py.env) (α := Info) err
+      let exc ← startBlockWith propagate (.str .base "exc")
+      let e ← Build.emitApply (env := Py.env) (α := Info) (.str .base "err")
+        (Py.raising Py.Value) Base.Except.error.ref #[exc.id]
+      Build.Raw.ret (env := Py.env) (α := Info) e
+  Build.emitApplyWith (.str .base "old") Py.Value Base.old.ref #[] #[h] #[region]
+    (typeArgs := ta[Py.Value, Py.Value])
+termination_by sizeOf e + 1
+
 /-- In an invariant (§6.11), `isinstance(x, T)`, `all(…)` or `any(…)` as its operation, which
 gives a base `Bool`.  `PyMarkers.checkInvariant` has checked the shape. -/
 def contractTest (n : String) (args : Array (expr SourceRange)) : TransM ValId := do
@@ -1720,6 +1833,10 @@ def call (f : expr SourceRange) (args : Array (expr SourceRange))
     (kws : Array (keyword SourceRange)) : TransM ValId := do
   if (← read).contract then
     if let .Name _ ⟨_, n⟩ _ := f then
+      if n == "OLD" then
+        if h : args.size = 1 then
+          have : sizeOf args[0] < sizeOf args := Array.sizeOf_getElem args 0 (by omega)
+          return ← oldPart args[0]
       if n == "len" then
         if h : args.size = 1 then
           have : sizeOf args[0] < sizeOf args := Array.sizeOf_getElem args 0 (by omega)
@@ -2008,42 +2125,15 @@ def deleter (t : expr SourceRange) : Except (expr SourceRange) (TransM Unit) :=
     | none => throw t
 termination_by sizeOf t
 
-/-- Emit the argument-binding prologue (§5.4), writing each parameter's cell.  The defaults are a
-tuple with one entry per named parameter: a constant default is evaluated in place, another is
-read from its cell in `defaults`, and a parameter without one gets `undef`.  `bindArgs` binds
-`args` and `kwargs` to the parameters as CPython does, and each parameter, `*args` and `**kw`
-is taken from its result with `tupleGet`. -/
+/-- Emit the argument-binding prologue (§5.4): bind the arguments with `bindArguments`, then
+write each parameter's cell from the tuple with `tupleGet`. -/
 def prologue (ps : Array ParamWithDefault) (defaults : Array (String × ValId))
     (args kwargs : ValId) : TransM Unit := do
-  -- As in CPython, a private name is mangled everywhere, its keyword included.
-  let ps ← ps.mapM fun p => return { p with name := ← mangled p.name }
-  let defaults ← defaults.mapM fun (n, c) => return (← mangled n, c)
-  let isPos (p : ParamWithDefault) := p.kind == .posOnly || p.kind == .positional
-  let named := ps.filter fun p => isPos p || p.kind == .kwOnly
-  let varPos := ps.find? (·.kind == .varPositional)
-  let varKw := ps.find? (·.kind == .varKeyword)
-  let fillSlot (p : ParamWithDefault) : TransM ValId := do
-    match p.default, defaults.find? (·.1 == p.name) with
-    | some _, some (_, c) => build (readCell c (defaultStem p.name))
-    | some d, none => transExpr d
-    | none, _ => build (emitTotal (stem p.name) Py.undef.ref
-        #[← build (emitConst (.str .base "n") (.str p.name))])
-  let fill ← build (emitTotal (.str .base "defaults") Py.mkTuple.ref (← named.mapM fillSlot))
-  let const (c : Const) : TransM ValId := build (emitConst (.str .base "c") c)
-  let qualname ← const (.str (← curScope).qualname)
-  let nPosOnly ← const (.int (ps.filter (·.kind == .posOnly)).size)
-  let nPos ← const (.int (ps.filter isPos).size)
-  let hasVarPos ← const (.bool varPos.isSome)
-  let hasVarKw ← const (.bool varKw.isSome)
-  let names ← named.mapM fun p => const (.str p.name)
-  let bound ← build (emitFailing (.str .base "bound") Py.bindArgs.ref
-    (#[args, kwargs, fill, qualname, nPosOnly, nPos, hasVarPos, hasVarKw] ++ names))
-  let take (i : Nat) (name : String) : TransM Unit := do
-    let v ← build (emitTotal (stem name) Py.tupleGet.ref #[bound, ← const (.int i)])
-    writeName name v .none
-  for h : i in [:named.size] do take i named[i].name
-  if let some p := varPos then take named.size p.name
-  if let some p := varKw then take (named.size + if varPos.isSome then 1 else 0) p.name
+  let (bound, slots) ← bindArguments ps defaults args kwargs
+  for h : i in [:slots.size] do
+    let v ← build (emitTotal (stem slots[i]) Py.tupleGet.ref
+      #[bound, ← build (emitConst (.str .base "c") (.int i))])
+    writeName slots[i] v .none
 
 /-- `def name(args): body` at `sr`: bind `name` to the function's closure. -/
 def defStmt (sr : SourceRange) (name : String) (args : arguments SourceRange)
@@ -2270,9 +2360,16 @@ def loopInvariants (invs : Array (SourceRange × expr SourceRange)) : TransM Uni
       else if differ.contains (PyScope.mangle ctx.cur.privateName n) then
         some "a name that the lambda reads as a global but the loop binds in a loop invariant"
       else none
-    match PyMarkers.checkInvariant ms nameProblem (PyScope.mangle ctx.cur.privateName) p with
+    let ictx : PyMarkers.InvCtx :=
+      { markers := ms, nameProblem, atModule := ctx.cur.kind == .module,
+        mangle := PyScope.mangle ctx.cur.privateName }
+    match PyMarkers.checkInvariant ictx p with
     | .error (what, r) => reject what r
     | .ok () =>
+      let p := PyMarkers.splitOld p
+      -- Splitting keeps an invariant within what `checkInvariant` admits.
+      if let .error (what, r) := PyMarkers.checkInvariant ictx p then
+        internalError s!"splitting OLD gave an invariant that the check rejects: {what}" r
       withRange p.ann <| withReader ({ · with contract := true }) do
         Emit.loopInvariant [Py.Value] fun fail => withHandlerTo fail do
           let yes ← build (freshLabel [] "holds")
@@ -2764,7 +2861,8 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) :
               discard <| build (declareLocal sym.name)
           prologue (params a) defaultCells args kwargs
           startBody
-          transStmts job.body
+          withReader ({ · with binding := some (params a, defaultCells, args, kwargs) })
+            (transStmts job.body)
   let attrs := match job.classParts with
     | some c =>
       Shape.classAttrs ctx.table c.outerPrivate job.scope c.bases c.keywords c.decorators job.body

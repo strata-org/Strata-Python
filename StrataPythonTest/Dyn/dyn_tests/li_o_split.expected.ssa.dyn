@@ -1,0 +1,361 @@
+module li_o_split {
+  func @|li_o_split.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      jump ^start.0()
+    start.0():
+      %str.0 : py.Value = py.strLit("li_o_split")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("li_o_split", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("li_o_split", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %loop_invariant.0 : py.Value = py.importFrom("pyhard", "loop_invariant") ^propagate.0()
+      %loop_invariant.cell.0 : base.Ref(py.Value) = py.globalCell("li_o_split", "loop_invariant")
+      %set.2 : base.Unit = base.refSet[py.Value](%loop_invariant.cell.0, %loop_invariant.0)
+      %OLD.0 : py.Value = py.importFrom("pyhard", "OLD") ^propagate.0()
+      %OLD.cell.0 : base.Ref(py.Value) = py.globalCell("li_o_split", "OLD")
+      %set.3 : base.Unit = base.refSet[py.Value](%OLD.cell.0, %OLD.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@li_o_split.f, "f", "li_o_split")
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("li_o_split", "f")
+      %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %print.0 : py.Value = py.loadGlobal("li_o_split", "print") ^propagate.0()
+      %f.0 : py.Value = py.loadGlobal("li_o_split", "f") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %bool.0 : py.Value = py.boolLit(true)
+      %int.1 : py.Value = py.intLit(2)
+      %int.2 : py.Value = py.intLit(1)
+      %int.3 : py.Value = py.intLit(2)
+      %int.4 : py.Value = py.intLit(3)
+      %list.0 : py.Value = py.mkList(%int.2, %int.3, %int.4)
+      %tuple.0 : py.Value = py.mkTuple(%int.0, %bool.0, %int.1, %list.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%f.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%call.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @li_o_split.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %b.0 : py.Value = py.undef("b")
+      %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
+      %n.3 : py.Value = py.undef("n")
+      %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.3)
+      %xs.0 : py.Value = py.undef("xs")
+      %xs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%xs.0)
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %a.1 : py.Value = py.undef("a")
+      %b.1 : py.Value = py.undef("b")
+      %n.9 : py.Value = py.undef("n")
+      %xs.1 : py.Value = py.undef("xs")
+      %defaults.0 : py.Value = py.mkTuple(%a.1, %b.1, %n.9, %xs.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 4, false, false, "a", "b", "n", "xs") ^propagate.0()
+      %a.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %b.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %n.11 : py.Value = py.tupleGet(%bound.0, 2)
+      %xs.2 : py.Value = py.tupleGet(%bound.0, 3)
+      jump ^start.0()
+    start.0():
+      %int.0 : py.Value = py.intLit(0)
+      %n.13 : py.Value = py.requireDefined(%n.11, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %add.0 : py.Value = py.add(%n.13, %int.1) ^propagate.0()
+      %loop_invariant.0 : py.Value = py.loadGlobal("li_o_split", "loop_invariant") ^propagate.0()
+      %isMarker.0 : base.Bool = py.isMarker(%loop_invariant.0)
+      branch(%isMarker.0) ^guarded.0() ^notMarker.0()
+    notMarker.0():
+      unreachable
+    guarded.0():
+      %loop_invariant.1 : py.Value = py.loadGlobal("li_o_split", "loop_invariant") ^propagate.0()
+      %isMarker.1 : base.Bool = py.isMarker(%loop_invariant.1)
+      branch(%isMarker.1) ^guarded.1() ^notMarker.1()
+    notMarker.1():
+      unreachable
+    guarded.1():
+      %loop_invariant.2 : py.Value = py.loadGlobal("li_o_split", "loop_invariant") ^propagate.0()
+      %isMarker.2 : base.Bool = py.isMarker(%loop_invariant.2)
+      branch(%isMarker.2) ^guarded.2() ^notMarker.2()
+    notMarker.2():
+      unreachable
+    guarded.2():
+      %loop_invariant.3 : py.Value = py.loadGlobal("li_o_split", "loop_invariant") ^propagate.0()
+      %isMarker.3 : base.Bool = py.isMarker(%loop_invariant.3)
+      branch(%isMarker.3) ^guarded.3() ^notMarker.3()
+    notMarker.3():
+      unreachable
+    guarded.3():
+      %loop_invariant.4 : py.Value = py.loadGlobal("li_o_split", "loop_invariant") ^propagate.0()
+      %isMarker.4 : base.Bool = py.isMarker(%loop_invariant.4)
+      branch(%isMarker.4) ^guarded.4() ^notMarker.4()
+    notMarker.4():
+      unreachable
+    guarded.4():
+      jump ^head.0(%int.0)
+    head.0(%i.7 : py.Value):
+      %inv.0 : base.Unit = base.loopInvariant {
+        inv.0():
+          %n.20 : py.Value = py.requireDefined(%add.0, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^fail.0()
+          %int.2 : py.Value = py.intLit(0)
+          %gt.0 : py.Value = py.gt(%n.20, %int.2) ^fail.0()
+          %cond.0 : base.Bool = py.truthy(%gt.0) ^fail.0()
+          branch(%cond.0) ^then.0() ^else.0()
+        then.0():
+          %old.0 : py.Value = base.old[py.Value, py.Value] ^fail.0() {
+            old.0():
+              %a.3 : py.Value = py.undef("a")
+              %b.3 : py.Value = py.undef("b")
+              %n.24 : py.Value = py.undef("n")
+              %xs.3 : py.Value = py.undef("xs")
+              %defaults.1 : py.Value = py.mkTuple(%a.3, %b.3, %n.24, %xs.3)
+              %bound.1 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.1, "f", 0, 4, false, false, "a", "b", "n", "xs") ^propagate.1()
+              %a.4 : py.Value = py.tupleGet(%bound.1, 0)
+              %scalar.0 : base.Bool = py.isImmutableScalar(%a.4)
+              branch(%scalar.0) ^scalar.0() ^mutable.0()
+            scalar.0():
+              %res.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%a.4)
+              ret(%res.0)
+            mutable.0():
+              %res.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%a.4)
+              ret(%res.1)
+            propagate.1(%exc.0 : py.Value):
+              %err.0 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+              ret(%err.0)
+          }
+          jump ^join.0(%old.0)
+        else.0():
+          %int.3 : py.Value = py.intLit(0)
+          jump ^join.0(%int.3)
+        join.0(%ifexp.0 : py.Value):
+          %int.4 : py.Value = py.intLit(0)
+          %gtE.0 : py.Value = py.gtE(%ifexp.0, %int.4) ^fail.0()
+          %cond.1 : base.Bool = py.truthy(%gtE.0) ^fail.0()
+          branch(%cond.1) ^holds.0() ^or.0()
+        or.0():
+          %bool.0 : py.Value = py.boolLit(true)
+          %cond.2 : base.Bool = py.truthy(%bool.0) ^fail.0()
+          branch(%cond.2) ^holds.0() ^fails.0()
+        holds.0():
+          ret(true)
+        fails.0():
+          ret(false)
+        fail.0(%e.2 : py.Value):
+          ret(false)
+      }
+      %inv.1 : base.Unit = base.loopInvariant {
+        inv.1():
+          %old.1 : py.Value = base.old[py.Value, py.Value] ^fail.1() {
+            old.1():
+              %a.5 : py.Value = py.undef("a")
+              %b.6 : py.Value = py.undef("b")
+              %n.29 : py.Value = py.undef("n")
+              %xs.4 : py.Value = py.undef("xs")
+              %defaults.2 : py.Value = py.mkTuple(%a.5, %b.6, %n.29, %xs.4)
+              %bound.2 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.2, "f", 0, 4, false, false, "a", "b", "n", "xs") ^propagate.2()
+              %a.6 : py.Value = py.tupleGet(%bound.2, 0)
+              %scalar.1 : base.Bool = py.isImmutableScalar(%a.6)
+              branch(%scalar.1) ^scalar.1() ^mutable.1()
+            scalar.1():
+              %res.2 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%a.6)
+              ret(%res.2)
+            mutable.1():
+              %res.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%a.6)
+              ret(%res.3)
+            propagate.2(%exc.1 : py.Value):
+              %err.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+              ret(%err.1)
+          }
+          %n.32 : py.Value = py.requireDefined(%add.0, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^fail.1()
+          %add.1 : py.Value = py.add(%old.1, %n.32) ^fail.1()
+          %neg.0 : py.Value = py.uSub(%add.1) ^fail.1()
+          %int.5 : py.Value = py.intLit(0)
+          %ltE.0 : py.Value = py.ltE(%neg.0, %int.5) ^fail.1()
+          %cond.3 : base.Bool = py.truthy(%ltE.0) ^fail.1()
+          branch(%cond.3) ^holds.1() ^or.1()
+        or.1():
+          %bool.1 : py.Value = py.boolLit(true)
+          %cond.4 : base.Bool = py.truthy(%bool.1) ^fail.1()
+          branch(%cond.4) ^holds.1() ^fails.1()
+        holds.1():
+          ret(true)
+        fails.1():
+          ret(false)
+        fail.1(%e.4 : py.Value):
+          ret(false)
+      }
+      %inv.2 : base.Unit = base.loopInvariant {
+        inv.2():
+          %xs.6 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^fail.2()
+          %old.2 : py.Value = base.old[py.Value, py.Value] ^fail.2() {
+            old.2():
+              %a.7 : py.Value = py.undef("a")
+              %b.9 : py.Value = py.undef("b")
+              %n.36 : py.Value = py.undef("n")
+              %xs.7 : py.Value = py.undef("xs")
+              %defaults.3 : py.Value = py.mkTuple(%a.7, %b.9, %n.36, %xs.7)
+              %bound.3 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.3, "f", 0, 4, false, false, "a", "b", "n", "xs") ^propagate.3()
+              %a.8 : py.Value = py.tupleGet(%bound.3, 0)
+              %scalar.2 : base.Bool = py.isImmutableScalar(%a.8)
+              branch(%scalar.2) ^scalar.2() ^mutable.2()
+            scalar.2():
+              %res.4 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%a.8)
+              ret(%res.4)
+            mutable.2():
+              %res.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%a.8)
+              ret(%res.5)
+            propagate.3(%exc.2 : py.Value):
+              %err.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+              ret(%err.2)
+          }
+          %n.39 : py.Value = py.requireDefined(%add.0, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^fail.2()
+          %none.0 : py.Value = py.noneLit
+          %slice.0 : py.Value = py.getSlice(%xs.6, %old.2, %n.39, %none.0) ^fail.2()
+          %len.0 : py.Value = py.len(%slice.0) ^fail.2()
+          %int.6 : py.Value = py.intLit(0)
+          %gtE.1 : py.Value = py.gtE(%len.0, %int.6) ^fail.2()
+          %cond.5 : base.Bool = py.truthy(%gtE.1) ^fail.2()
+          branch(%cond.5) ^holds.2() ^fails.2()
+        holds.2():
+          ret(true)
+        fails.2():
+          ret(false)
+        fail.2(%e.7 : py.Value):
+          ret(false)
+      }
+      %inv.3 : base.Unit = base.loopInvariant {
+        inv.3():
+          %old.3 : py.Value = base.old[py.Value, py.Value] ^fail.3() {
+            old.3():
+              %a.9 : py.Value = py.undef("a")
+              %b.12 : py.Value = py.undef("b")
+              %n.43 : py.Value = py.undef("n")
+              %xs.8 : py.Value = py.undef("xs")
+              %defaults.4 : py.Value = py.mkTuple(%a.9, %b.12, %n.43, %xs.8)
+              %bound.4 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.4, "f", 0, 4, false, false, "a", "b", "n", "xs") ^propagate.4()
+              %b.13 : py.Value = py.tupleGet(%bound.4, 1)
+              %cond.6 : base.Bool = py.truthy(%b.13) ^propagate.4()
+              branch(%cond.6) ^then.1() ^else.1()
+            then.1():
+              %a.10 : py.Value = py.tupleGet(%bound.4, 0)
+              jump ^join.2(%a.10)
+            else.1():
+              %int.7 : py.Value = py.intLit(0)
+              jump ^join.2(%int.7)
+            join.2(%ifexp.1 : py.Value):
+              %int.8 : py.Value = py.intLit(0)
+              %gtE.2 : py.Value = py.gtE(%ifexp.1, %int.8) ^propagate.4()
+              %cond.7 : base.Bool = py.truthy(%gtE.2) ^propagate.4()
+              branch(%cond.7) ^join.1(%gtE.2) ^or.2()
+            or.2():
+              %bool.2 : py.Value = py.boolLit(true)
+              jump ^join.1(%bool.2)
+            join.1(%bool.3 : py.Value):
+              %scalar.3 : base.Bool = py.isImmutableScalar(%bool.3)
+              branch(%scalar.3) ^scalar.3() ^mutable.3()
+            scalar.3():
+              %res.6 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%bool.3)
+              ret(%res.6)
+            mutable.3():
+              %res.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%bool.3)
+              ret(%res.7)
+            propagate.4(%exc.3 : py.Value):
+              %err.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+              ret(%err.3)
+          }
+          %cond.8 : base.Bool = py.truthy(%old.3) ^fail.3()
+          branch(%cond.8) ^holds.3() ^fails.3()
+        holds.3():
+          ret(true)
+        fails.3():
+          ret(false)
+        fail.3(%e.8 : py.Value):
+          ret(false)
+      }
+      %inv.4 : base.Unit = base.loopInvariant {
+        inv.4():
+          %old.4 : py.Value = base.old[py.Value, py.Value] ^fail.4() {
+            old.4():
+              %a.11 : py.Value = py.undef("a")
+              %b.16 : py.Value = py.undef("b")
+              %n.48 : py.Value = py.undef("n")
+              %xs.9 : py.Value = py.undef("xs")
+              %defaults.5 : py.Value = py.mkTuple(%a.11, %b.16, %n.48, %xs.9)
+              %bound.5 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.5, "f", 0, 4, false, false, "a", "b", "n", "xs") ^propagate.5()
+              %xs.10 : py.Value = py.tupleGet(%bound.5, 3)
+              %a.12 : py.Value = py.tupleGet(%bound.5, 0)
+              %none.1 : py.Value = py.noneLit
+              %none.2 : py.Value = py.noneLit
+              %slice.1 : py.Value = py.getSlice(%xs.10, %a.12, %none.1, %none.2) ^propagate.5()
+              %len.1 : py.Value = py.len(%slice.1) ^propagate.5()
+              %int.9 : py.Value = py.intLit(0)
+              %gtE.3 : py.Value = py.gtE(%len.1, %int.9) ^propagate.5()
+              %cond.9 : base.Bool = py.truthy(%gtE.3) ^propagate.5()
+              branch(%cond.9) ^join.3(%gtE.3) ^or.3()
+            or.3():
+              %bool.4 : py.Value = py.boolLit(true)
+              jump ^join.3(%bool.4)
+            join.3(%bool.5 : py.Value):
+              %scalar.4 : base.Bool = py.isImmutableScalar(%bool.5)
+              branch(%scalar.4) ^scalar.4() ^mutable.4()
+            scalar.4():
+              %res.8 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%bool.5)
+              ret(%res.8)
+            mutable.4():
+              %res.9 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%bool.5)
+              ret(%res.9)
+            propagate.5(%exc.4 : py.Value):
+              %err.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+              ret(%err.4)
+          }
+          %cond.10 : base.Bool = py.truthy(%old.4) ^fail.4()
+          branch(%cond.10) ^holds.4() ^fails.4()
+        holds.4():
+          ret(true)
+        fails.4():
+          ret(false)
+        fail.4(%e.9 : py.Value):
+          ret(false)
+      }
+      %i.2 : py.Value = py.requireDefined(%i.7, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0()
+      %int.10 : py.Value = py.intLit(2)
+      %lt.0 : py.Value = py.lt(%i.2, %int.10) ^raised.0()
+      %cond.11 : base.Bool = py.truthy(%lt.0) ^raised.0()
+      branch(%cond.11) ^body.0() ^normal.0()
+    body.0():
+      %i.4 : py.Value = py.requireDefined(%i.7, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0()
+      %int.11 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%i.4, %int.11) ^raised.0()
+      jump ^head.0(%iAdd.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.5 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.5)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
+    exit.0():
+      %i.6 : py.Value = py.requireDefined(%i.7, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.6)
+      ret(%ret.0)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
+  }
+}
+

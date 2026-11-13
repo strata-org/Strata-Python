@@ -1,0 +1,58 @@
+all(v > 0 for v in tables[len(OLD(xs))].values())
+    => all(((v > 0) for v in (tables[OLD(len(xs))]).values()))
+all(True for x in OLD(xs))
+    => OLD(all((True for x in xs)))
+all(True for k, v in OLD(d).items())
+    => OLD(all((True for (k, v) in (d).items())))
+OLD(d).items()
+    => (OLD(d)).items()
+OLD(d).values()
+    => (OLD(d)).values()
+OLD(t)[OLD(i)].items()
+    => (OLD(t[i])).items()
+all(v > 0 for v in OLD(t)[OLD(i)].values())
+    => all(((v > 0) for v in (OLD(t[i])).values()))
+len(OLD(xs)) == len(xs) + 1
+    => (OLD(len(xs)) == (len(xs) + 1))
+OLD(xs) == xs
+    => (OLD(xs) == xs)
+all(x > 0 for x in OLD(xs))
+    => all(((x > 0) for x in OLD(xs)))
+all(v > 0 for k, v in OLD(d).items())
+    => all(((v > 0) for (k, v) in (OLD(d)).items()))
+len(xs[OLD(a):]) >= 0
+    => (len(xs[OLD(a):]) >= 0)
+len(xs[OLD(a):OLD(b)]) >= 0
+    => (len(xs[OLD(a):OLD(b)]) >= 0)
+len(OLD(xs)[OLD(a):]) >= 0
+    => OLD((len(xs[a:]) >= 0))
+isinstance(OLD(x), int)
+    => isinstance(OLD(x), int)
+allocated == OLD(allocated) + 1
+    => (allocated == OLD((allocated + 1)))
+all(OLD(y) > 0 for y in ys)
+    => all((OLD((y > 0)) for y in ys))
+(OLD(a) if OLD(b) else 0) >= 0
+    => OLD(((a if b else 0) >= 0))
+-(OLD(a) + n) <= 0
+    => ((- (OLD(a) + n)) <= 0)
+all(True for x in OLD(xs) if x)
+    => all((True for x in OLD(xs) if x))
+any(OLD(a) + 1 for x in xs)
+    => any((OLD((a + 1)) for x in xs))
+OLD(d).items
+    => OLD((d).items)
+all(x > 0 for x in xs if OLD(n) > 0)
+    => all(((x > 0) for x in xs if OLD((n > 0))))
+all(any(True for y in OLD(ys)) for x in OLD(xs))
+    => OLD(all((any((True for y in ys)) for x in xs)))
+all(OLD(x) for x in OLD(xs))
+    => OLD(all((x for x in xs)))
+OLD(a) > 0 and x > 0
+    => (OLD((a > 0)) and (x > 0))
+not OLD(b)
+    => OLD((not b))
+0 < OLD(a) < n
+    => (0 < OLD(a) < n)
+OLD(a) > 0 or OLD(b) > 0
+    => OLD(((a > 0) or (b > 0)))

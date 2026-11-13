@@ -133,6 +133,16 @@ li_nested_both | agree
 li_nested_function | agree
 li_nested_outer | agree
 li_no_import | agree
+li_o_binder | agree
+li_o_callee_split | agree
+li_o_forms | agree
+li_o_global_free | agree
+li_o_mutable | agree
+li_o_params | agree
+li_o_pyspec_examples | agree
+li_o_quant_whole | agree
+li_o_quantifier_in_old | agree
+li_o_split | agree
 li_only_loop_invariant | agree
 li_other_module | gap | import of module li_other_module_helper is not modelled yet
 li_other_module_helper | agree
@@ -172,8 +182,13 @@ li_r_len_rebound | gap | the translator does not support len in a loop invariant
 li_r_len_two | gap | the translator does not support a call in a loop invariant
 li_r_marker_inside | gap | the translator does not support a use of loop_invariant other than a statement right before a loop
 li_r_method_call | gap | the translator does not support a call in a loop invariant
-li_r_old | gap | the translator does not support OLD in a loop invariant
+li_r_old | gap | the translator does not support a local that is not a parameter inside OLD in a loop invariant
+li_r_old_is | gap | the translator does not support is with an OLD part in a loop invariant
+li_r_old_is_view | gap | the translator does not support is with an OLD part in a loop invariant
+li_r_old_module | gap | the translator does not support OLD at module level in a loop invariant
+li_r_old_nested | gap | the translator does not support an OLD inside an OLD in a loop invariant
 li_r_old_not_imported | gap | the translator does not support OLD without importing it from pyhard
+li_r_old_two_args | gap | the translator does not support a call in a loop invariant
 li_r_starred | gap | the translator does not support a starred expression in a loop invariant
 li_r_tuple_target | gap | the translator does not support a quantifier whose target is not a name in a loop invariant
 li_r_two_fors | gap | the translator does not support a quantifier with several for clauses in a loop invariant

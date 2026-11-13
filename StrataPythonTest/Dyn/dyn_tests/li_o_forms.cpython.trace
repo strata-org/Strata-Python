@@ -1,0 +1,13 @@
+--- stdout 4
+6
+1
+
+--- outcome
+ok
+--- globals
+Acc = <class 'Acc'>
+OLD = <marker OLD>
+__doc__ = None
+__name__ = '__main__'
+acc = <Acc object>
+loop_invariant = <marker loop_invariant>

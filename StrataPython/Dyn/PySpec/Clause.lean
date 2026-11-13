@@ -5,6 +5,7 @@
 -/
 module
 public import StrataPython.Dyn.PySpec.Resolve
+public import StrataPython.Dyn.OldSplit
 
 set_option autoImplicit false
 
@@ -142,19 +143,93 @@ def CExpr.ghostsRead : CExpr → List String
   | .quant _ a b => a.ghostsRead ++ b.ghostsRead
   | _ => []
 
-/-- Whether `e` reads, outside its `OLD`s, nothing but constants, so that the whole of `e` can be
-read in the state at the call. A parameter or a quantifier's binder outside `OLD` is an object
-after the call: `len(xs)` reads its contents then. So `len(OLD(xs))` can move into `base.old`,
-and `OLD(xs) == xs` can't. -/
-@[expose] def CExpr.readsOnlyOld : CExpr → Bool
-  | .int _ | .float _ | .bool _ | .none | .str _ | .const _ | .old _ => true
-  | .param _ | .binder _ | .extraKwargs _ | .result | .ghost .. | .bindsTo .. | .kwargsWithin _ =>
-    false
+/-- The children that the old-part rule looks into: the operands of every constructor but
+`old`. -/
+@[expose] def CExpr.oldChildren : CExpr → List CExpr
   | .attr e _ | .len e | .neg e | .isNone e _ | .contains _ e | .reSearch _ e | .enum e _
   | .notEnum e _ | .isInstance e _ | .typeTest e _ | .subclassOf e _ | .strIsOneOf e _
-  | .intIsOneOf e _ | .isDefined e | .not e => e.readsOnlyOld
+  | .intIsOneOf e _ | .isDefined e | .not e => [e]
   | .item a b | .arith _ a b | .cmp _ a b | .and a b | .or a b | .implies a b
-  | .quant _ a b => a.readsOnlyOld && b.readsOnlyOld
+  | .quant _ a b => [a, b]
+  | _ => []
+
+/-- `e` with each of its `oldChildren` replaced by `f`'s result. -/
+@[expose] def CExpr.mapOldChildren : (e : CExpr) → ((c : CExpr) → c ∈ e.oldChildren → CExpr) → CExpr
+  | .attr e f', g => .attr (g e (by simp [CExpr.oldChildren])) f'
+  | .len e, g => .len (g e (by simp [CExpr.oldChildren]))
+  | .neg e, g => .neg (g e (by simp [CExpr.oldChildren]))
+  | .isNone e p, g => .isNone (g e (by simp [CExpr.oldChildren])) p
+  | .contains k e, g => .contains k (g e (by simp [CExpr.oldChildren]))
+  | .reSearch p e, g => .reSearch p (g e (by simp [CExpr.oldChildren]))
+  | .enum e vs, g => .enum (g e (by simp [CExpr.oldChildren])) vs
+  | .notEnum e v, g => .notEnum (g e (by simp [CExpr.oldChildren])) v
+  | .isInstance e c, g => .isInstance (g e (by simp [CExpr.oldChildren])) c
+  | .typeTest e cs, g => .typeTest (g e (by simp [CExpr.oldChildren])) cs
+  | .subclassOf e c, g => .subclassOf (g e (by simp [CExpr.oldChildren])) c
+  | .strIsOneOf e l, g => .strIsOneOf (g e (by simp [CExpr.oldChildren])) l
+  | .intIsOneOf e l, g => .intIsOneOf (g e (by simp [CExpr.oldChildren])) l
+  | .isDefined e, g => .isDefined (g e (by simp [CExpr.oldChildren]))
+  | .not e, g => .not (g e (by simp [CExpr.oldChildren]))
+  | .item a b, g => .item (g a (by simp [CExpr.oldChildren])) (g b (by simp [CExpr.oldChildren]))
+  | .arith op a b, g =>
+    .arith op (g a (by simp [CExpr.oldChildren])) (g b (by simp [CExpr.oldChildren]))
+  | .cmp op a b, g => .cmp op (g a (by simp [CExpr.oldChildren])) (g b (by simp [CExpr.oldChildren]))
+  | .and a b, g => .and (g a (by simp [CExpr.oldChildren])) (g b (by simp [CExpr.oldChildren]))
+  | .or a b, g => .or (g a (by simp [CExpr.oldChildren])) (g b (by simp [CExpr.oldChildren]))
+  | .implies a b, g =>
+    .implies (g a (by simp [CExpr.oldChildren])) (g b (by simp [CExpr.oldChildren]))
+  | .quant q a b, g =>
+    .quant q (g a (by simp [CExpr.oldChildren])) (g b (by simp [CExpr.oldChildren]))
+  | e, _ => e
+
+/-- A clause's syntax for the old-part rule (§12.4, *`OLD(e)`*). A parameter, a quantifier's
+binder, `**kw`, `result`, a ghost, `py.bindsTo` and `py.dictKeysWithin` read state at the call:
+a parameter or a binder outside `OLD` is an object after the call, and `len(xs)` reads its
+contents then. So `len(OLD(xs))` can move into `base.old`, and `OLD(xs) == xs` can't. -/
+instance : OldSyntax CExpr where
+  oldArg? | .old e => some e | _ => none
+  mkOld := .old
+  wrappable _ := true
+  readsState
+    | .param _ | .binder _ | .extraKwargs _ | .result | .ghost .. | .bindsTo .. | .kwargsWithin _ =>
+      true
+    | _ => false
+  children := CExpr.oldChildren
+  children_lt e c h := by
+    cases e <;> simp only [CExpr.oldChildren, List.mem_cons, List.mem_nil_iff, or_false] at h <;>
+      (try rcases h with h | h) <;> (try exact absurd h id) <;> subst_vars <;>
+      simp only [CExpr.attr.sizeOf_spec, CExpr.item.sizeOf_spec, CExpr.len.sizeOf_spec,
+        CExpr.arith.sizeOf_spec, CExpr.neg.sizeOf_spec, CExpr.cmp.sizeOf_spec,
+        CExpr.isNone.sizeOf_spec, CExpr.contains.sizeOf_spec, CExpr.reSearch.sizeOf_spec,
+        CExpr.enum.sizeOf_spec, CExpr.notEnum.sizeOf_spec, CExpr.isInstance.sizeOf_spec,
+        CExpr.typeTest.sizeOf_spec, CExpr.subclassOf.sizeOf_spec, CExpr.strIsOneOf.sizeOf_spec,
+        CExpr.intIsOneOf.sizeOf_spec, CExpr.isDefined.sizeOf_spec, CExpr.and.sizeOf_spec,
+        CExpr.or.sizeOf_spec, CExpr.not.sizeOf_spec, CExpr.implies.sizeOf_spec,
+        CExpr.quant.sizeOf_spec, Bool.sizeOf_eq_one, Nat.lt_add_left_iff_pos, Nat.lt_add_one] <;>
+      omega
+  oldArg_lt e a h := by
+    cases e <;> simp only [reduceCtorEq, Option.some.injEq] at h
+    subst h
+    simp only [CExpr.old.sizeOf_spec]
+    omega
+  mapChildren := CExpr.mapOldChildren
+  children_mapChildren e f := by cases e <;> simp [CExpr.mapOldChildren, CExpr.oldChildren]
+
+/-- Whether `e` reads, outside its `OLD`s, nothing but constants, so that the whole of `e` can be
+read in the state at the call (`OldSplit.readsOnlyOld`). -/
+@[expose] def CExpr.readsOnlyOld (e : CExpr) : Bool := OldSplit.readsOnlyOld e
+
+/-- Whether `e` holds an `old` part. -/
+@[expose] def CExpr.hasOld (e : CExpr) : Bool := OldSplit.hasOld e
+
+/-- `e` with every `old` marker removed: the expression inside a `base.old` region. -/
+@[expose] def CExpr.unOld (e : CExpr) : CExpr := OldSplit.unOld e
+
+/-- The old parts of a post-state clause: each largest subexpression that holds an `OLD` and
+reads only state at the call, outside its `OLD`s, becomes one `old` part (§12.4, *`OLD(e)`*).
+`len(OLD(xs)) == len(xs) + 1` gives `old(len(xs)) == len(xs) + 1`, and `allocated ==
+OLD(allocated) + 1` gives `allocated == old(allocated + 1)`. -/
+@[expose] def CExpr.splitOld (e : CExpr) : CExpr := OldSplit.splitOld e
 
 /-- Whether `e` uses an `and`, an `or`, an implication, a regex search, `x == "A" or x == "B"`
 or `x != "A"` where a value is needed, as in `(x or 3) == result` or
@@ -177,75 +252,6 @@ exact only if `x == "A" or x == "B"` and `x != "A"` have one reading, which they
   | .intIsOneOf a _ | .isDefined a => a.condAsValue true
   | .item a b | .arith _ a b | .cmp _ a b => a.condAsValue true || b.condAsValue true
   | _ => false
-
-/-- Whether `e` holds an `old` part. -/
-@[expose] def CExpr.hasOld : CExpr → Bool
-  | .old _ => true
-  | .attr e _ | .len e | .neg e | .isNone e _ | .contains _ e | .reSearch _ e | .enum e _
-  | .notEnum e _ | .isInstance e _ | .typeTest e _ | .subclassOf e _ | .strIsOneOf e _
-  | .intIsOneOf e _ | .isDefined e | .not e => e.hasOld
-  | .item a b | .arith _ a b | .cmp _ a b | .and a b | .or a b | .implies a b
-  | .quant _ a b => a.hasOld || b.hasOld
-  | _ => false
-
-/-- `e` with every `old` marker removed: the expression inside a `base.old` region. -/
-@[expose] def CExpr.unOld : CExpr → CExpr
-  | .old e => e.unOld
-  | .attr e f => .attr e.unOld f
-  | .item a b => .item a.unOld b.unOld
-  | .len e => .len e.unOld
-  | .arith op a b => .arith op a.unOld b.unOld
-  | .neg e => .neg e.unOld
-  | .cmp op a b => .cmp op a.unOld b.unOld
-  | .isNone e p => .isNone e.unOld p
-  | .contains k e => .contains k e.unOld
-  | .reSearch p e => .reSearch p e.unOld
-  | .enum e vs => .enum e.unOld vs
-  | .notEnum e v => .notEnum e.unOld v
-  | .isInstance e c => .isInstance e.unOld c
-  | .typeTest e cs => .typeTest e.unOld cs
-  | .subclassOf e c => .subclassOf e.unOld c
-  | .strIsOneOf e l => .strIsOneOf e.unOld l
-  | .intIsOneOf e l => .intIsOneOf e.unOld l
-  | .isDefined e => .isDefined e.unOld
-  | .and a b => .and a.unOld b.unOld
-  | .or a b => .or a.unOld b.unOld
-  | .not e => .not e.unOld
-  | .implies a b => .implies a.unOld b.unOld
-  | .quant q c b => .quant q c.unOld b.unOld
-  | e => e
-
-/-- The old parts of a post-state clause: each largest subexpression that holds an `OLD` and
-reads only state at the call, outside its `OLD`s, becomes one `old` part (§12.4, *`OLD(e)`*).
-`len(OLD(xs)) == len(xs) + 1` gives `old(len(xs)) == len(xs) + 1`, and `allocated ==
-OLD(allocated) + 1` gives `allocated == old(allocated + 1)`. -/
-@[expose] def CExpr.splitOld (e : CExpr) : CExpr :=
-  if e.hasOld && e.readsOnlyOld then .old e.unOld
-  else match e with
-  | .attr a f => .attr a.splitOld f
-  | .item a b => .item a.splitOld b.splitOld
-  | .len a => .len a.splitOld
-  | .arith op a b => .arith op a.splitOld b.splitOld
-  | .neg a => .neg a.splitOld
-  | .cmp op a b => .cmp op a.splitOld b.splitOld
-  | .isNone a p => .isNone a.splitOld p
-  | .contains k a => .contains k a.splitOld
-  | .reSearch p a => .reSearch p a.splitOld
-  | .enum a vs => .enum a.splitOld vs
-  | .notEnum a v => .notEnum a.splitOld v
-  | .isInstance a c => .isInstance a.splitOld c
-  | .typeTest a cs => .typeTest a.splitOld cs
-  | .subclassOf a c => .subclassOf a.splitOld c
-  | .strIsOneOf a l => .strIsOneOf a.splitOld l
-  | .intIsOneOf a l => .intIsOneOf a.splitOld l
-  | .isDefined a => .isDefined a.splitOld
-  | .and a b => .and a.splitOld b.splitOld
-  | .or a b => .or a.splitOld b.splitOld
-  | .not a => .not a.splitOld
-  | .implies a b => .implies a.splitOld b.splitOld
-  | .quant q c b => .quant q c.splitOld b.splitOld
-  | .old a => .old a.unOld
-  | e => e
 
 /-- Whether no `OLD` part of `e` mentions `result`. The checker rejects `OLD(result)`, so
 every checked clause has this property. -/

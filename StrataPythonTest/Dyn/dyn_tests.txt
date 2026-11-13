@@ -813,7 +813,7 @@ li_r_items_same_name | yes | a quantifier over items() whose target is not two d
 li_r_items_not_pair | yes | a quantifier over items() whose target is not two different names
 li_r_items_mangled_same | yes | a quantifier over items() whose target is not two different names
 li_r_complex | yes | complex literal
-li_r_old | yes | OLD in a loop invariant
+li_r_old | yes | a local that is not a parameter inside OLD in a loop invariant
 li_m_import_dup | yes | importing a pyhard marker twice, rebinding the marker loop_invariant
 li_r_len_two | yes | a call in a loop invariant
 li_r_isinstance_one | yes | a call in a loop invariant
@@ -826,3 +826,18 @@ li_r_async_quantifier | yes | an async quantifier in a loop invariant
 li_module_comprehension | yes |
 li_r_comp_nested | yes | a name that the lambda reads as a global but the loop binds in a loop invariant
 li_p_mangled_mixed | yes |
+li_o_callee_split | yes |
+li_o_quant_whole | yes |
+li_o_params | yes |
+li_o_global_free | yes |
+li_o_pyspec_examples | yes |
+li_o_mutable | yes |
+li_o_binder | yes |
+li_o_quantifier_in_old | yes |
+li_r_old_nested | yes | an OLD inside an OLD in a loop invariant
+li_r_old_module | yes | OLD at module level in a loop invariant
+li_r_old_is | yes | is with an OLD part in a loop invariant
+li_r_old_two_args | yes | a call in a loop invariant
+li_o_forms | yes |
+li_o_split | yes |
+li_r_old_is_view | yes | is with an OLD part in a loop invariant

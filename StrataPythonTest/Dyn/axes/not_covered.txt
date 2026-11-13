@@ -27,7 +27,7 @@ py.allIn | a contract operation: it appears only in contract clauses, such as th
 py.anyIn | a contract operation: it appears only in contract clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
 base.callCode | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.cellLoc | the translator doesn't emit it for Python source (no golden of the corpus has it)
-base.old | the translator doesn't emit it for Python source (no golden of the corpus has it)
+base.old | it appears only in ensures clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
 base.loopInvariant | the machine skips it without running its region, and no grid case states a loop invariant
 base.Except.case | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.Unit.case | the translator doesn't emit it for Python source (no golden of the corpus has it)

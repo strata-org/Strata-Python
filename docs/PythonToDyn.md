@@ -1209,7 +1209,7 @@ literals, the arithmetic, unary and comparison operators (`is` and `in` included
 head would take its true branch, so a `__bool__` runs once for each operand that `and`, `or` or
 `not` tests. A name is read as the loop's code reads it. An exception inside `P` makes the
 invariant `false`. Anything else is rejected, among them other calls, displays, comprehensions,
-lambdas, assignment expressions and f-strings, and, for now, `OLD`. `len`, `isinstance`, `all`
+lambdas, assignment expressions and f-strings. `len`, `isinstance`, `all`
 and `any` can't be used in a module where some scope binds that name. A name that the lambda reads
 as a global is rejected when the loop's function binds it, which happens when the function binds
 it only in a list, set or dict comprehension: CPython 3.12 makes it a local of the function, while
@@ -1232,15 +1232,47 @@ differs from CPython's `all` and `any` in three ways:
   may stop earlier at a `False` and its `any` at a `True`: `any(1 // x > 0 for x in [1, 0])` is
   `True` in CPython.
 
+**`OLD(e)`** reads `e` in the state at the function's entry, with `base.old`. As in PySpec
+models (§12.4), the part read at entry is the largest subexpression around it that reads no name
+outside its `OLD`s, and the same rule (`StrataPython/Dyn/OldSplit.lean`) splits both:
+`len(OLD(xs)) == len(xs) + 1` reads `len(xs)` at entry, and `allocated == OLD(allocated) + 1`
+reads `allocated + 1` there. A slice and a dict view are never a part read at entry, since neither
+is an immutable scalar: `len(xs[OLD(a):])` reads `a` at entry, and in
+`all(v > 0 for k, v in OLD(d).items())` the part is `d`. The part read at entry must give
+an immutable scalar, or the invariant is `false`: so `OLD(xs) == xs` for a list `xs` is `false`.
+Inside the part read at entry:
+
+* a parameter is the value that the call bound to it, whatever the body assigned to it since:
+  the old region binds the call's arguments again, once, with `py.bindArgs`, with the defaults
+  that the function was defined with. A program that writes a function's `__defaults__` or
+  `__kwdefaults__`, or a library that changes them, makes the part read at entry differ from what
+  the call bound; as for a rebound `len`, that changes only what a verifier checks;
+* a free variable is the content of its cell at the entry of the function that the loop is in;
+* a global is read with `py.loadGlobal`, at entry;
+* a quantifier's variable is the element, which may not exist at entry, such as a key that the
+  loop adds; reading it there is then not well defined, and a verifier assumes nothing from it;
+* a local that is not a parameter is rejected, since it has no value at entry.
+
+`OLD` at module level, an `OLD` inside an `OLD`, and a comparison that has an `is` or `is not`
+and an `OLD` anywhere in it are rejected. The last one is because the part read at entry is
+computed again: with a literal default `p=1.5`, `OLD(p) is p` is `True` in CPython, but the old
+region makes a new `1.5`.
+
 PySpec models read some of these constructs differently from `P` (§12.4), because PySpec reads a
 model's clauses its own way:
 
 * `x == None` is `py.is` in a model and `py.eq` in `P`;
 * `isinstance(x, T)` resolves `T` to a class when a model is translated, and reads `T` inside the
-  region in `P`;
+  region in `P`, so `isinstance(OLD(x), int)` reads only `x` at entry in `P` and wholly at entry
+  in a model;
 * `x == "A" or x == "B"` and `x != "A"` have special forms in a model, and are CPython's `py.eq`
   chain and `py.notEq` in `P`;
-* a model's clause reads a parameter with `py.argOf`, and `P` reads the cell of a local.
+* a model's clause reads a parameter with `py.argOf`, and `P` reads the cell of a local, or,
+  inside `OLD`, the value that `py.bindArgs` binds again;
+* a model's `OLD` may read only state that the frame covers, and may not read a global;
+  an invariant's `OLD` may read any parameter, free variable or global, since a loop invariant
+  has no frame and is always checked before a verifier assumes it;
+* `is` with an `OLD` part has no special rule in a model.
 
 ## 7. Exceptions, `finally` and `with`
 

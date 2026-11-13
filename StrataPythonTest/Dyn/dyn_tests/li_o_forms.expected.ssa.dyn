@@ -1,0 +1,501 @@
+module li_o_forms {
+  func @|li_o_forms.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      jump ^start.0()
+    start.0():
+      %str.0 : py.Value = py.strLit("li_o_forms")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("li_o_forms", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("li_o_forms", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %loop_invariant.0 : py.Value = py.importFrom("pyhard", "loop_invariant") ^propagate.0()
+      %loop_invariant.cell.0 : base.Ref(py.Value) = py.globalCell("li_o_forms", "loop_invariant")
+      %set.2 : base.Unit = base.refSet[py.Value](%loop_invariant.cell.0, %loop_invariant.0)
+      %OLD.0 : py.Value = py.importFrom("pyhard", "OLD") ^propagate.0()
+      %OLD.cell.0 : base.Ref(py.Value) = py.globalCell("li_o_forms", "OLD")
+      %set.3 : base.Unit = base.refSet[py.Value](%OLD.cell.0, %OLD.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|li_o_forms.Acc.<body>|, "<body>", "li_o_forms")
+      %str.1 : py.Value = py.strLit("Acc")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %Acc.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %Acc.cell.0 : base.Ref(py.Value) = py.globalCell("li_o_forms", "Acc")
+      %set.4 : base.Unit = base.refSet[py.Value](%Acc.cell.0, %Acc.0)
+      %Acc.1 : py.Value = py.loadGlobal("li_o_forms", "Acc") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%Acc.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %acc.cell.0 : base.Ref(py.Value) = py.globalCell("li_o_forms", "acc")
+      %set.5 : base.Unit = base.refSet[py.Value](%acc.cell.0, %call.0)
+      %print.0 : py.Value = py.loadGlobal("li_o_forms", "print") ^propagate.0()
+      %acc.0 : py.Value = py.loadGlobal("li_o_forms", "acc") ^propagate.0()
+      %add.0 : py.Value = py.attr(%acc.0, "add") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1)
+      %int.2 : py.Value = py.intLit(2)
+      %tuple.2 : py.Value = py.mkTuple(%list.0, %int.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%add.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%call.1)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.3, %kwargs.3) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("li_o_forms", "print") ^propagate.0()
+      %acc.1 : py.Value = py.loadGlobal("li_o_forms", "acc") ^propagate.0()
+      %same.0 : py.Value = py.attr(%acc.1, "same") ^propagate.0()
+      %int.3 : py.Value = py.intLit(1)
+      %list.1 : py.Value = py.mkList(%int.3)
+      %tuple.4 : py.Value = py.mkTuple(%list.1)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%same.0, %tuple.4, %kwargs.4) ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple(%call.3)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.1, %tuple.5, %kwargs.5) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|li_o_forms.Acc.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "add", binding = "def"}, {name = "same", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("li_o_forms", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Acc")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@li_o_forms.Acc.__init__, "__init__", "li_o_forms")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@li_o_forms.Acc.add, "add", "li_o_forms")
+      %str.5 : py.Value = py.strLit("add")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@li_o_forms.Acc.same, "same", "li_o_forms")
+      %str.6 : py.Value = py.strLit("same")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @li_o_forms.Acc.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Acc.__init__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
+      %int.0 : py.Value = py.intLit(0)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %total.0 : base.Unit = py.setAttr(%self.4, "total", %int.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @li_o_forms.Acc.add(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %xs.0 : py.Value = py.undef("xs")
+      %xs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%xs.0)
+      %_Acc__k.0 : py.Value = py.undef("_Acc__k")
+      %_Acc__k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%_Acc__k.0)
+      %rest.0 : py.Value = py.undef("rest")
+      %rest.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%rest.0)
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %self.1 : py.Value = py.undef("self")
+      %xs.1 : py.Value = py.undef("xs")
+      %int.0 : py.Value = py.intLit(1)
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %xs.1, %int.0)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Acc.add", 0, 3, true, false, "self", "xs", "_Acc__k") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %xs.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %_Acc__k.1 : py.Value = py.tupleGet(%bound.0, 2)
+      %rest.1 : py.Value = py.tupleGet(%bound.0, 3)
+      jump ^start.0()
+    start.0():
+      %int.1 : py.Value = py.intLit(0)
+      %loop_invariant.0 : py.Value = py.loadGlobal("li_o_forms", "loop_invariant") ^propagate.0()
+      %isMarker.0 : base.Bool = py.isMarker(%loop_invariant.0)
+      branch(%isMarker.0) ^guarded.0() ^notMarker.0()
+    notMarker.0():
+      unreachable
+    guarded.0():
+      %loop_invariant.1 : py.Value = py.loadGlobal("li_o_forms", "loop_invariant") ^propagate.0()
+      %isMarker.1 : base.Bool = py.isMarker(%loop_invariant.1)
+      branch(%isMarker.1) ^guarded.1() ^notMarker.1()
+    notMarker.1():
+      unreachable
+    guarded.1():
+      %loop_invariant.2 : py.Value = py.loadGlobal("li_o_forms", "loop_invariant") ^propagate.0()
+      %isMarker.2 : base.Bool = py.isMarker(%loop_invariant.2)
+      branch(%isMarker.2) ^guarded.2() ^notMarker.2()
+    notMarker.2():
+      unreachable
+    guarded.2():
+      jump ^head.0(%int.1)
+    head.0(%i.7 : py.Value):
+      %inv.0 : base.Unit = base.loopInvariant {
+        inv.0():
+          %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^fail.0()
+          %total.0 : py.Value = py.attr(%self.4, "total") ^fail.0()
+          %old.0 : py.Value = base.old[py.Value, py.Value] ^fail.0() {
+            old.0():
+              %self.5 : py.Value = py.undef("self")
+              %xs.3 : py.Value = py.undef("xs")
+              %int.2 : py.Value = py.intLit(1)
+              %defaults.1 : py.Value = py.mkTuple(%self.5, %xs.3, %int.2)
+              %bound.1 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.1, "Acc.add", 0, 3, true, false, "self", "xs", "_Acc__k") ^propagate.1()
+              %self.6 : py.Value = py.tupleGet(%bound.1, 0)
+              %total.1 : py.Value = py.attr(%self.6, "total") ^propagate.1()
+              %scalar.0 : base.Bool = py.isImmutableScalar(%total.1)
+              branch(%scalar.0) ^scalar.0() ^mutable.0()
+            scalar.0():
+              %res.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%total.1)
+              ret(%res.0)
+            mutable.0():
+              %res.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%total.1)
+              ret(%res.1)
+            propagate.1(%exc.0 : py.Value):
+              %err.0 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+              ret(%err.0)
+          }
+          %gtE.0 : py.Value = py.gtE(%total.0, %old.0) ^fail.0()
+          %cond.0 : base.Bool = py.truthy(%gtE.0) ^fail.0()
+          branch(%cond.0) ^and.0() ^fails.0()
+        and.0():
+          %old.1 : py.Value = base.old[py.Value, py.Value] ^fail.0() {
+            old.1():
+              %self.7 : py.Value = py.undef("self")
+              %xs.4 : py.Value = py.undef("xs")
+              %int.3 : py.Value = py.intLit(1)
+              %defaults.2 : py.Value = py.mkTuple(%self.7, %xs.4, %int.3)
+              %bound.2 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.2, "Acc.add", 0, 3, true, false, "self", "xs", "_Acc__k") ^propagate.2()
+              %self.8 : py.Value = py.tupleGet(%bound.2, 0)
+              %total.2 : py.Value = py.attr(%self.8, "total") ^propagate.2()
+              %int.4 : py.Value = py.intLit(0)
+              %gtE.1 : py.Value = py.gtE(%total.2, %int.4) ^propagate.2()
+              %scalar.1 : base.Bool = py.isImmutableScalar(%gtE.1)
+              branch(%scalar.1) ^scalar.1() ^mutable.1()
+            scalar.1():
+              %res.2 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%gtE.1)
+              ret(%res.2)
+            mutable.1():
+              %res.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%gtE.1)
+              ret(%res.3)
+            propagate.2(%exc.1 : py.Value):
+              %err.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+              ret(%err.1)
+          }
+          %cond.1 : base.Bool = py.truthy(%old.1) ^fail.0()
+          branch(%cond.1) ^holds.0() ^fails.0()
+        holds.0():
+          ret(true)
+        fails.0():
+          ret(false)
+        fail.0(%e.1 : py.Value):
+          ret(false)
+      }
+      %inv.1 : base.Unit = base.loopInvariant {
+        inv.1():
+          %old.2 : py.Value = base.old[py.Value, py.Value] ^fail.1() {
+            old.2():
+              %self.9 : py.Value = py.undef("self")
+              %xs.5 : py.Value = py.undef("xs")
+              %int.5 : py.Value = py.intLit(1)
+              %defaults.3 : py.Value = py.mkTuple(%self.9, %xs.5, %int.5)
+              %bound.3 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.3, "Acc.add", 0, 3, true, false, "self", "xs", "_Acc__k") ^propagate.3()
+              %_Acc__k.2 : py.Value = py.tupleGet(%bound.3, 2)
+              %neg.0 : py.Value = py.uSub(%_Acc__k.2) ^propagate.3()
+              %int.6 : py.Value = py.intLit(0)
+              %lt.0 : py.Value = py.lt(%neg.0, %int.6) ^propagate.3()
+              %cond.2 : base.Bool = py.truthy(%lt.0) ^propagate.3()
+              branch(%cond.2) ^and.1() ^join.0(%lt.0)
+            and.1():
+              %xs.6 : py.Value = py.tupleGet(%bound.3, 1)
+              %cond.3 : base.Bool = py.truthy(%xs.6) ^propagate.3()
+              branch(%cond.3) ^then.0() ^else.0()
+            then.0():
+              %_Acc__k.3 : py.Value = py.tupleGet(%bound.3, 2)
+              jump ^join.1(%_Acc__k.3)
+            else.0():
+              %int.7 : py.Value = py.intLit(0)
+              jump ^join.1(%int.7)
+            join.1(%ifexp.0 : py.Value):
+              %int.8 : py.Value = py.intLit(0)
+              %gtE.2 : py.Value = py.gtE(%ifexp.0, %int.8) ^propagate.3()
+              jump ^join.0(%gtE.2)
+            join.0(%bool.0 : py.Value):
+              %scalar.2 : base.Bool = py.isImmutableScalar(%bool.0)
+              branch(%scalar.2) ^scalar.2() ^mutable.2()
+            scalar.2():
+              %res.4 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%bool.0)
+              ret(%res.4)
+            mutable.2():
+              %res.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%bool.0)
+              ret(%res.5)
+            propagate.3(%exc.2 : py.Value):
+              %err.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+              ret(%err.2)
+          }
+          %cond.4 : base.Bool = py.truthy(%old.2) ^fail.1()
+          branch(%cond.4) ^holds.1() ^fails.1()
+        holds.1():
+          ret(true)
+        fails.1():
+          ret(false)
+        fail.1(%e.2 : py.Value):
+          ret(false)
+      }
+      %inv.2 : base.Unit = base.loopInvariant {
+        inv.2():
+          %old.3 : py.Value = base.old[py.Value, py.Value] ^fail.2() {
+            old.3():
+              %self.10 : py.Value = py.undef("self")
+              %xs.7 : py.Value = py.undef("xs")
+              %int.9 : py.Value = py.intLit(1)
+              %defaults.4 : py.Value = py.mkTuple(%self.10, %xs.7, %int.9)
+              %bound.4 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.4, "Acc.add", 0, 3, true, false, "self", "xs", "_Acc__k") ^propagate.4()
+              %xs.8 : py.Value = py.tupleGet(%bound.4, 1)
+              %int.10 : py.Value = py.intLit(0)
+              %int.11 : py.Value = py.intLit(1)
+              %none.0 : py.Value = py.noneLit
+              %slice.0 : py.Value = py.getSlice(%xs.8, %int.10, %int.11, %none.0) ^propagate.4()
+              %len.0 : py.Value = py.len(%slice.0) ^propagate.4()
+              %int.12 : py.Value = py.intLit(1)
+              %ltE.0 : py.Value = py.ltE(%len.0, %int.12) ^propagate.4()
+              %cond.5 : base.Bool = py.truthy(%ltE.0) ^propagate.4()
+              branch(%cond.5) ^and.2() ^join.2(%ltE.0)
+            and.2():
+              %_Acc__k.4 : py.Value = py.tupleGet(%bound.4, 2)
+              %int.13 : py.Value = py.intLit(0)
+              %gt.0 : py.Value = py.gt(%_Acc__k.4, %int.13) ^propagate.4()
+              %cond.6 : base.Bool = py.truthy(%gt.0) ^propagate.4()
+              branch(%cond.6) ^and.3() ^join.4(%gt.0)
+            and.3():
+              %_Acc__k.5 : py.Value = py.tupleGet(%bound.4, 2)
+              %int.14 : py.Value = py.intLit(9)
+              %lt.1 : py.Value = py.lt(%_Acc__k.5, %int.14) ^propagate.4()
+              jump ^join.4(%lt.1)
+            join.4(%bool.1 : py.Value):
+              %cond.7 : base.Bool = py.truthy(%bool.1) ^propagate.4()
+              branch(%cond.7) ^join.3(%bool.1) ^or.0()
+            or.0():
+              %bool.2 : py.Value = py.boolLit(true)
+              jump ^join.3(%bool.2)
+            join.3(%bool.3 : py.Value):
+              jump ^join.2(%bool.3)
+            join.2(%bool.4 : py.Value):
+              %scalar.3 : base.Bool = py.isImmutableScalar(%bool.4)
+              branch(%scalar.3) ^scalar.3() ^mutable.3()
+            scalar.3():
+              %res.6 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%bool.4)
+              ret(%res.6)
+            mutable.3():
+              %res.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%bool.4)
+              ret(%res.7)
+            propagate.4(%exc.3 : py.Value):
+              %err.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+              ret(%err.3)
+          }
+          %cond.8 : base.Bool = py.truthy(%old.3) ^fail.2()
+          branch(%cond.8) ^holds.2() ^fails.2()
+        holds.2():
+          ret(true)
+        fails.2():
+          ret(false)
+        fail.2(%e.3 : py.Value):
+          ret(false)
+      }
+      %i.2 : py.Value = py.requireDefined(%i.7, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0()
+      %len.1 : py.Value = py.loadGlobal("li_o_forms", "len") ^raised.0()
+      %xs.10 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^raised.0()
+      %tuple.0 : py.Value = py.mkTuple(%xs.10)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%len.1, %tuple.0, %kwargs.1) ^raised.0()
+      %lt.2 : py.Value = py.lt(%i.2, %call.0) ^raised.0()
+      %cond.9 : base.Bool = py.truthy(%lt.2) ^raised.0()
+      branch(%cond.9) ^body.0() ^normal.0()
+    body.0():
+      %self.12 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^raised.0()
+      %total.3 : py.Value = py.attr(%self.12, "total") ^raised.0()
+      %xs.12 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^raised.0()
+      %i.4 : py.Value = py.requireDefined(%i.7, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0()
+      %item.0 : py.Value = py.getItem(%xs.12, %i.4) ^raised.0()
+      %_Acc__k.7 : py.Value = py.requireDefined(%_Acc__k.1, "_Acc__k", "UnboundLocalError", "cannot access local variable '_Acc__k' where it is not associated with a value") ^raised.0()
+      %mult.0 : py.Value = py.mult(%item.0, %_Acc__k.7) ^raised.0()
+      %iAdd.0 : py.Value = py.iAdd(%total.3, %mult.0) ^raised.0()
+      %total.4 : base.Unit = py.setAttr(%self.12, "total", %iAdd.0) ^raised.0()
+      %i.6 : py.Value = py.requireDefined(%i.7, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0()
+      %int.15 : py.Value = py.intLit(1)
+      %iAdd.1 : py.Value = py.iAdd(%i.6, %int.15) ^raised.0()
+      jump ^head.0(%iAdd.1)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.4 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.4)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
+    exit.0():
+      %self.14 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %total.5 : py.Value = py.attr(%self.14, "total") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%total.5)
+      ret(%ret.0)
+    propagate.0(%exc.5 : py.Value):
+      %exc.6 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.5)
+      ret(%exc.6)
+  }
+  func @li_o_forms.Acc.same(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %xs.0 : py.Value = py.undef("xs")
+      %xs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%xs.0)
+      %rest.0 : py.Value = py.undef("rest")
+      %rest.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%rest.0)
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %self.1 : py.Value = py.undef("self")
+      %xs.1 : py.Value = py.undef("xs")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %xs.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Acc.same", 0, 2, true, false, "self", "xs") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %xs.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %rest.1 : py.Value = py.tupleGet(%bound.0, 2)
+      jump ^start.0()
+    start.0():
+      %int.0 : py.Value = py.intLit(0)
+      %loop_invariant.0 : py.Value = py.loadGlobal("li_o_forms", "loop_invariant") ^propagate.0()
+      %isMarker.0 : base.Bool = py.isMarker(%loop_invariant.0)
+      branch(%isMarker.0) ^guarded.0() ^notMarker.0()
+    notMarker.0():
+      unreachable
+    guarded.0():
+      jump ^head.0(%int.0)
+    head.0(%i.7 : py.Value):
+      %inv.0 : base.Unit = base.loopInvariant {
+        inv.0():
+          %old.0 : py.Value = base.old[py.Value, py.Value] ^fail.0() {
+            old.0():
+              %self.3 : py.Value = py.undef("self")
+              %xs.3 : py.Value = py.undef("xs")
+              %defaults.1 : py.Value = py.mkTuple(%self.3, %xs.3)
+              %bound.1 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.1, "Acc.same", 0, 2, true, false, "self", "xs") ^propagate.1()
+              %rest.2 : py.Value = py.tupleGet(%bound.1, 2)
+              %rest.3 : py.Value = py.tupleGet(%bound.1, 2)
+              %is.0 : py.Value = py.is(%rest.2, %rest.3)
+              %cond.0 : base.Bool = py.truthy(%is.0) ^propagate.1()
+              branch(%cond.0) ^and.0() ^join.1(%is.0)
+            and.0():
+              %xs.4 : py.Value = py.tupleGet(%bound.1, 1)
+              %none.0 : py.Value = py.noneLit
+              %is.1 : py.Value = py.is(%xs.4, %none.0)
+              %bool.0 : py.Value = py.boolLit(false)
+              %eq.0 : py.Value = py.eq(%is.1, %bool.0) ^propagate.1()
+              jump ^join.1(%eq.0)
+            join.1(%bool.1 : py.Value):
+              %cond.1 : base.Bool = py.truthy(%bool.1) ^propagate.1()
+              branch(%cond.1) ^join.0(%bool.1) ^or.0()
+            or.0():
+              %bool.2 : py.Value = py.boolLit(true)
+              jump ^join.0(%bool.2)
+            join.0(%bool.3 : py.Value):
+              %scalar.0 : base.Bool = py.isImmutableScalar(%bool.3)
+              branch(%scalar.0) ^scalar.0() ^mutable.0()
+            scalar.0():
+              %res.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%bool.3)
+              ret(%res.0)
+            mutable.0():
+              %res.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%bool.3)
+              ret(%res.1)
+            propagate.1(%exc.0 : py.Value):
+              %err.0 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+              ret(%err.0)
+          }
+          %cond.2 : base.Bool = py.truthy(%old.0) ^fail.0()
+          branch(%cond.2) ^holds.0() ^fails.0()
+        holds.0():
+          ret(true)
+        fails.0():
+          ret(false)
+        fail.0(%e.0 : py.Value):
+          ret(false)
+      }
+      %i.2 : py.Value = py.requireDefined(%i.7, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0()
+      %len.0 : py.Value = py.loadGlobal("li_o_forms", "len") ^raised.0()
+      %xs.6 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^raised.0()
+      %tuple.0 : py.Value = py.mkTuple(%xs.6)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.1) ^raised.0()
+      %lt.0 : py.Value = py.lt(%i.2, %call.0) ^raised.0()
+      %cond.3 : base.Bool = py.truthy(%lt.0) ^raised.0()
+      branch(%cond.3) ^body.0() ^normal.0()
+    body.0():
+      %i.4 : py.Value = py.requireDefined(%i.7, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0()
+      %int.1 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%i.4, %int.1) ^raised.0()
+      jump ^head.0(%iAdd.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
+    exit.0():
+      %i.6 : py.Value = py.requireDefined(%i.7, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.6)
+      ret(%ret.0)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+}
+

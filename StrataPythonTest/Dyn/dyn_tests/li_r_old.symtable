@@ -3,7 +3,6 @@ module top
   f: local (assigned)
   loop_invariant: local (imported)
   function f
-    d: local (parameter)
     i: cell (assigned, referenced)
     len: global implicit (referenced)
     loop_invariant: global implicit (referenced)

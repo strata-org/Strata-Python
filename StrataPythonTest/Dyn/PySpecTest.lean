@@ -13,7 +13,7 @@ set_option autoImplicit false
 
 /-! # The PySpec translation's pure parts
 
-The model table's rejections, the format-version check, `CExpr.splitOld` on §12.4's three
+The model table's rejections, the format-version check, `CExpr.splitOld` on §12.4's
 examples, the declared-type tests and schemas of §12.3, float literals, and the checks of whole
 model sets. The translation of whole models is tested by `StrataPythonTestExtra/PySpecDynTest`. -/
 
@@ -80,6 +80,14 @@ def xs : CExpr := .param { name := "xs", pos := 0, noneDefault := false }
 
 -- A part that reads `result` never moves.
 #guard txt (CExpr.cmp "eq" .result (.old xs)).splitOld == "eq(result, old(xs))"
+
+-- A quantifier over an old collection whose body reads nothing moves whole.
+#guard txt (CExpr.quant (.members true "x") (.old xs) (.const true)).splitOld ==
+  "old(all(x in xs: true))"
+
+-- A body that reads the binder reads state, so only the collection moves.
+#guard txt (CExpr.quant (.members true "x") (.old xs) (.binder "x")).splitOld ==
+  "all(x in old(xs): x)"
 
 /-! ## Declared types (§12.3) -/
 

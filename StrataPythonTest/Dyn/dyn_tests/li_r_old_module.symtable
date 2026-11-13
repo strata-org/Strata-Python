@@ -1,0 +1,9 @@
+module top
+  OLD: local (imported)
+  i: local (assigned, referenced)
+  loop_invariant: local (imported, referenced)
+  n: local (assigned, referenced)
+  function lambda
+    OLD: global implicit (referenced)
+    n: global implicit (referenced)
+qualnames: <lambda>

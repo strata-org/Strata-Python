@@ -1,0 +1,44 @@
+module top
+  Acc: local (assigned, referenced)
+  OLD: local (imported)
+  acc: local (assigned, referenced)
+  loop_invariant: local (imported)
+  print: global implicit (referenced)
+  class Acc
+    __init__: local (assigned)
+    add: local (assigned)
+    same: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+    function add
+      _Acc__k: cell (parameter, referenced)
+      i: local (assigned, referenced)
+      len: global implicit (referenced)
+      loop_invariant: global implicit (referenced)
+      rest: local (parameter)
+      self: cell (parameter, referenced)
+      xs: cell (parameter, referenced)
+      function lambda
+        OLD: global implicit (referenced)
+        self: free (referenced)
+      function lambda
+        OLD: global implicit (referenced)
+        _Acc__k: free (referenced)
+        xs: free (referenced)
+      function lambda
+        OLD: global implicit (referenced)
+        _Acc__k: free (referenced)
+        len: global implicit (referenced)
+        xs: free (referenced)
+    function same
+      i: local (assigned, referenced)
+      len: global implicit (referenced)
+      loop_invariant: global implicit (referenced)
+      rest: cell (parameter)
+      self: local (parameter)
+      xs: cell (parameter, referenced)
+      function lambda
+        OLD: global implicit (referenced)
+        rest: free (referenced)
+        xs: free (referenced)
+qualnames: Acc, Acc.__init__, Acc.add, Acc.add.<locals>.<lambda>, Acc.add.<locals>.<lambda>, Acc.add.<locals>.<lambda>, Acc.same, Acc.same.<locals>.<lambda>
