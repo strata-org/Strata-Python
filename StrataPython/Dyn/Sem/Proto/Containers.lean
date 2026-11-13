@@ -423,9 +423,10 @@ def containsCore [PyCalls m V] (x s : V) : m Bool := do
   | some (.tuple xs) => memberOf x xs (xs.size + 1) 0
   | some (.list l _) => listMemberLive x l walkFuel 0
   | some (.str hay) =>
-    match ← PyPure.immView x with
-    | some (.str n) => pure (isInfix n.s.toList hay.s.toList)
-    | _ => raiseBuiltin "TypeError" s!"'in <string>' requires string as left operand, not {← typeName x}"
+    -- `PyUnicode_Contains` takes any `str`, an instance of a subclass of `str` included.
+    let some (.str n) ← seqImm? x |
+      raiseBuiltin "TypeError" s!"'in <string>' requires string as left operand, not {← typeName x}"
+    pure (isInfix n.s.toList hay.s.toList)
   | some (.bytes hay) =>
     match ← PyPure.immViewAll x with
     | some (.bytes n) => pure (isInfix n.toList hay.toList)

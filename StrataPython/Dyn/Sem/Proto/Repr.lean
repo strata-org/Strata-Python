@@ -255,7 +255,9 @@ def dictRepr [PyCalls m V] : Nat → V → m String
 
 /-- `set_repr`, for a set or a frozenset or an instance of a subclass of either: `T(...)` for one
 met again, `T()` when empty, else the `repr` of the list of its members, in braces, after `T(`
-unless it is an exact `set`.  An order that the model doesn't know stops with a gap. -/
+unless it is an exact `set`.  An order that the model doesn't know stops with a gap, and so does a
+class whose MRO has a user class that defines `__iter__` or `__len__`: CPython lists the members
+with `PySequence_List`, which calls them. -/
 def setRepr [PyCalls m V] : Nat → V → m String
   | 0, _ => PyPure.gap "a repr nested deeper than the model follows"
   | n + 1, v => do
@@ -267,6 +269,14 @@ def setRepr [PyCalls m V] : Nat → V → m String
     | .fresh => PyReads.withRepr v do
       let some vw ← PyReads.setView v | PyPure.modelInvariant "set.__repr__ of a value that is not a set"
       if vw.unordered.isEmpty then return s!"{name}()"
+      -- `PySequence_List` iterates the set through its type's `__iter__` and asks its `__len__` for
+      -- a length hint, so a subclass's own ones run there.
+      if ← isUserObject v then
+        let some mro ← mroOf t | PyPure.gap "a class without an MRO"
+        for c in mro do
+          if let some cd ← classData? c then
+            if (← dictFindStr cd.ns "__iter__").isSome || (← dictFindStr cd.ns "__len__").isSome then
+              PyPure.gap "the repr of a set whose class defines __iter__ or __len__ is not modelled yet"
       -- A set of one member has one order.
       let some ms := if vw.unordered.size ≤ 1 then some vw.unordered else vw.inOrder? |
         PyPure.gap "the repr of a set whose order the model doesn't know is not modelled yet"

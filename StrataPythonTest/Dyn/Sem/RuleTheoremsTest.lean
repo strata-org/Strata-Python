@@ -81,6 +81,7 @@ public environment PyT extends Py where
   insn subclassContainers (^err (exc : Value)) : Value
   insn seqSlotSub (k : base.Int) (^err (exc : Value)) : Value
   insn seqSlotCleared (k : base.Int) (^err (exc : Value)) : Value
+  insn strSetSubOps (k : base.Int) (^err (exc : Value)) : Value
   insn resumeCase (f : Value) (^err (exc : Value)) : Value
   insn callInst (^err (exc : Value)) : Value
   insn callLevelStep (^err (exc : Value)) : Value
@@ -803,6 +804,50 @@ CPython's `TypeError`, since another sequence type's slot clears the slot too. -
     | _ => Proto.binaryOp .add x (.tuple #[.int 2])
     : PyM σ .writes false Value)
 
+/-- `in` with an instance of a class `S(str)` and `repr` of an instance of a subclass of `set`:
+`S("a") in "ab"` (`0`), `S("ab") in S("ab")` (`1`) and `S("z") in "ab"` (`2`), CPython's `True`,
+`True` and `False`; `repr(Q({1}))` for a `Q(set)` that defines `__iter__` (`3`) or `__len__`
+(`4`), which CPython's `set_repr` runs through `PySequence_List`, so the model stops with a gap;
+`repr(P({1}))` for a `P(set)` with neither (`5`), CPython's `P({1})`; `repr(Q())` for a `Q(set)`
+that defines `__iter__` (`6`), CPython's `Q()`, since an empty set lists nothing; `repr(Q({1}))`
+for a `Q(M, set)` whose user base `M` defines `__iter__` (`7`), a gap; and `I(1) in "ab"` for a
+class `I(int)` (`8`), CPython's `TypeError`. -/
+@[dyn_sem PyT.strSetSubOps, expose] public def strSetSubOps (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let sc ← subclassOf "S" .str
+    let mk (t : String) : PyM σ .writes false Value :=
+      PyReads.allocInstance sc (.str (.ofString t)) #[] #[]
+    match k with
+    | 0 => pure (Value.bool (← Proto.contains (← mk "a") (.ofString "ab")))
+    | 1 => pure (Value.bool (← Proto.contains (← mk "ab") (← mk "ab")))
+    | 2 => pure (Value.bool (← Proto.contains (← mk "z") (.ofString "ab")))
+    | 8 => do
+      let i ← PyReads.allocInstance (← subclassOf "I" .int) (.int 1) #[] #[]
+      pure (Value.bool (← Proto.contains i (.ofString "ab")))
+    | _ => do
+      let ns ← PyPure.allocDict
+      if k == 3 || k == 6 then
+        PyWrites.dictSet ns (.ofString "__iter__") (.builtin .len) none fun _ => pure false
+      if k == 4 then PyWrites.dictSet ns (.ofString "__len__") (.builtin .len) none fun _ => pure false
+      let name := if k == 5 then "P" else "Q"
+      let c ← if k == 7 then do
+          let mns ← PyPure.allocDict
+          PyWrites.dictSet mns (.ofString "__iter__") (.builtin .len) none fun _ => pure false
+          let mc ← PyPure.allocObj (.builtin .type) (.cls
+            { name := "M", qualname := "M", «module» := "m", bases := #[.builtin .object],
+              mroTail := #[.builtin .object], ns := mns, solidBase := .builtin .object })
+          PyPure.allocObj (.builtin .type) (.cls
+            { name, qualname := name, «module» := "m", bases := #[mc, .builtin .set],
+              mroTail := #[mc, .builtin .set, .builtin .object], ns, solidBase := .builtin .set })
+        else PyPure.allocObj (.builtin .type) (.cls
+          { name, qualname := name, «module» := "m", bases := #[.builtin .set],
+            mroTail := #[.builtin .set, .builtin .object], ns, solidBase := .builtin .set })
+      let x ← PyReads.allocInstance c .set #[] #[]
+      if k != 6 then PyWrites.setAdd x (Value.int 1) none fun _ => pure false
+      Proto.reprOf x
+    : PyM σ .writes false Value)
+
 /-- The operators on instances of classes `L(list)`, `T(tuple)` and `D(dict)` with no dunders of
 their own, which run the built-in type's slots on the built-in part: for `l = L([1, 2])`,
 `t = T((1, 2))` and `d = D({1: 'a'})`, the results of `(l + [3])[2]`, `l == [1, 2]`, `bool(l)`,
@@ -1253,7 +1298,7 @@ def ptEffect : String → Effects.Level
   | "pt.oldPrims" | "pt.frozenSeal" | "pt.nativeDepth" | "pt.nativeGapped" | "pt.nextView" | "pt.setUpdateSub" | "pt.classDescr" | "pt.startCheck" => .writes
   | "pt.frozenOr" | "pt.frozenAdd" | "pt.objPrims" => .writes
   | "pt.frozenWalk" | "pt.frozenMerge" | "pt.subclassOps" => .calls
-  | "pt.subclassContainers" | "pt.seqSlotSub" | "pt.seqSlotCleared" | "pt.callInst" | "pt.callLevelStep" | "pt.resumeCase" | "pt.resumeDirect" | "pt.resumeNoFit"
+  | "pt.subclassContainers" | "pt.seqSlotSub" | "pt.seqSlotCleared" | "pt.strSetSubOps" | "pt.callInst" | "pt.callLevelStep" | "pt.resumeCase" | "pt.resumeDirect" | "pt.resumeNoFit"
   | "pt.foreignIter" | "pt.foreignLen" | "pt.strSubIter" | "pt.iterBounds" | "pt.zipNext"
   | "pt.enumNext" | "pt.revNext" | "pt.listRevNext" | "pt.dictRevNext" | "pt.startZero"
   | "pt.staleSlice" => .writes
@@ -1937,6 +1982,44 @@ info: StrataPython.Dyn.Sem.Value.tuple
       { s := "unsupported operand type(s) for *: 'TL' and 'int'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.seqSlotCleared(11) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.bool true -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSetSubOps(0) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.bool true -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSetSubOps(1) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.bool false -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSetSubOps(2) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the repr of a set whose class defines __iter__ or __len__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSetSubOps(3) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the repr of a set whose class defines __iter__ or __len__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSetSubOps(4) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.str { s := "P({1})", ascii := true, ascii_eq := _ } -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSetSubOps(5) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.str { s := "Q()", ascii := true, ascii_eq := _ } -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSetSubOps(6) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the repr of a set whose class defines __iter__ or __len__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSetSubOps(7) ^err.0()"
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "'in <string>' requires string as left operand, not I", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSetSubOps(8) ^err.0()"
 
 -- A frozenset is a value only once closed: hashing an open one, or writing to a closed one, is a
 -- model invariant; every maker closes what it makes.
