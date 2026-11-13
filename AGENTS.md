@@ -115,6 +115,11 @@ the number of loops times that size; `CANON_SCALE_TIME=1` also times it.
 `DYN_SCALE_TIME=1` does it also time them, to check that they take linear time. Lake does not
 elaborate a module again when only the environment changes, so run it as
 `DYN_SCALE_TIME=1 lake lean StrataDynTest/ScaleTest.lean`.
+`StrataPythonTestExtra/DynTranslateScaleTest.lean` runs `pydyn` on 5,000 and on 20,000 top-level
+`if`s; only with `DYN_SCALE_TIME=1` does it also time them, to check that the translator takes
+linear time in the branches of a function. Run it as
+`DYN_SCALE_TIME=1 lake env lean StrataPythonTestExtra/DynTranslateScaleTest.lean`, after
+`lake build pydyn StrataPythonTest`.
 `lake exe pydyn read FILE` reads one golden.
 A new program in `StrataPythonTest/Dyn/dyn_tests/` or in `StrataPythonTest/tests/` also needs
 its CPython trace and its verdict for the Python semantics' differential test: run

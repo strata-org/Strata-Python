@@ -52,6 +52,7 @@ guarantees the function is well formed.
 * `freshLabel`, `startBlock`, `startBlock₁`, `param`, `int`, `bool`, `str`, `float`, `unit`,
   `code`, `jump`, `branch`, `ret`, `withFailureBlock`: the builder's operations at typed values.
 * `Build.named` and `let%`: a value or a block named after the Lean binder it is bound to.
+* `Build.withInfo`: run an action with a default annotation, for what it emits without one.
 
 ## Names
 
@@ -217,6 +218,16 @@ leaves it with an `r`. -/
 def withExit {β : Type} (r : TypeExpr env) (body : Target env [r] → m β) : m β := do
   let inner ← liftBuild (do return (← get).regions.back? : BuildM env α (Option Label))
   body ⟨⟨Label.exit, #[]⟩, some (match inner with | some l => .region l | none => .func)⟩
+
+/-- `act`, with `info` as the default annotation, and the old one restored afterwards.  If `act`
+throws, the default stays `info`.  `act` runs in `m` itself, not wrapped with `m`'s state into a
+`BuildM` action, so nothing else refers to that state while `act` runs, and `act` updates it in
+place. -/
+def withInfo {β : Type} (info : α) (act : m β) : m β := do
+  let saved ← liftBuild (modifyGet fun s => (s.info, { s with info }) : BuildM env α α)
+  let r ← act
+  liftBuild (modify ({ · with info := saved }) : BuildM env α Unit)
+  return r
 
 /-- `terminate`, with regions built in any monad that emits into the function. -/
 def terminateWith {isig : InsnSig env} (r : InsnRef env isig) (args : Array ValId)

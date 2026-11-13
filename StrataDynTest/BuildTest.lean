@@ -242,6 +242,22 @@ private def startedWithTyped : Built Nat :=
 
 #guard (startedWithTyped.toOption.map (·.1.blocks.map (·.info))) == some #[3, 5]
 
+/-- `withInfo 7 act` in a monad that throws, with `act` returning or throwing, then a constant
+and an application that take the default annotation. -/
+private def afterWithInfo (throws : Bool) : Built Nat :=
+  build (.str .base "a") (Base.Except Base.String Base.Int) 0 do
+    let _ ← startFreshBlock
+    let act : ExceptT String (BuildM base Nat) Unit := if throws then throw "x" else pure ()
+    let _ ← (tryCatch (withInfo 7 act) fun _ => pure ()).run
+    let a ← emitConst (.str .base "a") (.int 1)
+    let r ← emitApply (.str .base "ret") (Base.Except Base.String Base.Int) Base.Except.ok.ref #[a]
+    finishBlock (.ret 0 r)
+
+-- `withInfo` runs `act` in the monad that throws.  It restores the default after `act` returns,
+-- and keeps `info` after `act` throws.
+#guard ((afterWithInfo false).toOption.map (instrInfos ·.1)) == some #[0, 0]
+#guard ((afterWithInfo true).toOption.map (instrInfos ·.1)) == some #[7, 7]
+
 /-! ## Misuse
 
 Each is an error, and `build` fails.  `errors` shows the misuses it fails with. -/

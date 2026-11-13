@@ -206,12 +206,8 @@ variable {β : Type}
 def build (x : PyM Info β) : TransM β := monadLift x
 
 /-- Run `act` with `r` as the default annotation. -/
-def withRange (r : SourceRange) (act : TransM β) : TransM β := do
-  let ctx ← read
-  let s ← get
-  let (b, s') ← build (PyBuild.withInfo { range := r } ((act.run ctx).run s))
-  set s'
-  return b
+def withRange (r : SourceRange) (act : TransM β) : TransM β :=
+  Build.withInfo { range := r } act
 
 /-- Run `act` with `e` pushed on the exits stack. -/
 def withExit (e : Exit) (act : TransM β) : TransM β := do

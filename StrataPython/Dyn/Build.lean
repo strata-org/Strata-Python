@@ -115,12 +115,8 @@ def withHandler [Monad m] [MonadPy α m] (l : BlockRef Py.env [Py.Value]) (act :
 /-! ## Annotations
 
 Every emitter below takes an optional annotation; without one it uses the default the
-builder carries.  `withInfo` is how a translator sets that default once for everything a
+builder carries.  `Build.withInfo` is how a translator sets that default once for everything a
 source construct emits. -/
-
-/-- Emit `act` with `info` as the default annotation, restoring the old one afterwards. -/
-def withInfo (info : α) (act : PyM α β) : PyM α β :=
-  fun env => Build.withInfo info (act env)
 
 /-- The annotation to use: `info` if given, the current default otherwise. -/
 def resolveInfo (info : Option α) : PyM α α := Build.resolveInfo (env := Py.env) info

@@ -45,7 +45,6 @@ print.
 
 The operations:
 
-* `withInfo`: set the annotation given to what is emitted;
 * `freshVal`, `rename`: a fresh value, and a new stem for one;
 * `emitConst`, `emitFunc`, `emitApply`, `emitApplyWith`, `emitApplyNamed`: emit an
   instruction, `emitApplyWith` with regions built in any monad `BuildM` lifts into, and
@@ -234,14 +233,6 @@ def checkClosed (what : String) : BuildM env α Unit := do
 /-- The annotation to use: `info` if given, the current default otherwise. -/
 def resolveInfo (info : Option α) : BuildM env α α := do
   return info.getD (← get).info
-
-/-- Run `m` with `info` as the default annotation, restoring the old one afterwards. -/
-def withInfo {β : Type} (info : α) (m : BuildM env α β) : BuildM env α β := do
-  let saved := (← get).info
-  modify ({ · with info })
-  let r ← m
-  modify ({ · with info := saved })
-  return r
 
 /-! ## Values -/
 

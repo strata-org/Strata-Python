@@ -847,7 +847,7 @@ The builder monad is `BuildM env α := StateM (Build.State env α)`, where `α` 
   * `Unit`
   * none open; opens `label`
 *
-  * `Build.withInfo (info : α) (act : BuildM env α β)`
+  * `Build.withInfo (info : α) (act : m β)`, in any monad `m` with `MonadBuild env α m`
   * `β`
   * any
 *
