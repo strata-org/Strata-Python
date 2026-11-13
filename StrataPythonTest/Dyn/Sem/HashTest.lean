@@ -129,6 +129,14 @@ def hashOf? (v : Value) : Option Hash :=
 -- A descriptor hashes by its address.
 #guard Value.immHash (.descr .int "__add__" .slotWrapper) == .hash (.symbolic (.descr .int "__add__"))
 #guard (HashSrc.descr .int "__add__").isAddr
+
+/-- A descriptor of a built-in type hashes by its address, which its type and name identify. A
+built-in type's `tp_new` is the exception: its hash is unknown here. -/
+example (t : Builtin) (name : String) (k : DescrKind) :
+    (Value.descr t name k).immHash =
+      if k = .tpNew then .unknown else .hash (.symbolic (.descr t name)) := by
+  cases k <;> simp [Value.immHash]
+
 -- Not modelled yet: a bound method's hash combines its `__self__` and its function.
 #guard Value.immHash (.method (.obj 0) (.obj 1)) == .unknown
 #guard Value.immHash (.bound (.obj 0) .list "append" .method) == .unknown

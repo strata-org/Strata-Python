@@ -216,6 +216,9 @@ def Value.immHash : Value → HashResult
   | .builtin b => builtinHash b
   | .notImplemented => .hash (.symbolic (.singleton false))
   | .ellipsis => .hash (.symbolic (.singleton true))
+  -- CPython hashes a built-in type's `tp_new` as a bound built-in function, from its `__self__`
+  -- and its C function, which the model doesn't compute.
+  | .descr _ _ .tpNew => .unknown
   | .descr t name _ => .hash (.symbolic (.descr t name))
   | .obj _ => .needsStore
   | .undef _ | .bound .. | .method .. | .traceback => .unknown

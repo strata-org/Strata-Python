@@ -2157,6 +2157,11 @@ info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.startCheck(5) ^err.0()"
 
+/-- No entry of a built-in type's table is a `tp_new`: `AttrKind.descr?`, which gives the kind of
+each descriptor that `builtinEntry` makes, never gives `.tpNew`. -/
+example (k : AttrKind) : k.descr? ≠ some .tpNew := by
+  cases k <;> simp [AttrKind.descr?]
+
 -- `next()` of a dict view raises CPython's `TypeError`: its class has no `__next__`.
 /--
 info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
