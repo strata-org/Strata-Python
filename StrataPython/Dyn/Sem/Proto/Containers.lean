@@ -790,8 +790,9 @@ repetition; `b`'s only when `a`'s type has no sequence slots at all (a number or
 instance of a user class, a dict, a set or a range has them without a repetition; else CPython's
 `TypeError`. -/
 def inplaceRepeat [PyCalls m V] (a b : V) : m V := do
-  if let some v ← repeatSeq a b then return v
-  if (← seqName? a).isSome then
+  let ra ← hasSeqSlot a ["__mul__", "__rmul__"]
+  if ra then if let some v ← repeatSeq a b then return v
+  if ra && (← seqName? a).isSome then
     raiseBuiltin "TypeError" s!"can't multiply sequence by non-int of type '{← typeName b}'"
   let noSeqSlots ← match ← PyPure.immView a with
     | some (.range ..) => pure false
@@ -799,7 +800,7 @@ def inplaceRepeat [PyCalls m V] (a b : V) : m V := do
     | none =>
       if (← isUserObject a) || (← isDict a) || (← anySet? a).isSome then pure false
       else PyPure.gap "an in-place repetition of an object of this type is not modelled yet"
-  if noSeqSlots then
+  if noSeqSlots && (← hasSeqSlot b ["__mul__", "__rmul__"]) then
     if let some v ← repeatSeq b a then return v
     if (← seqName? b).isSome then
       raiseBuiltin "TypeError" s!"can't multiply sequence by non-int of type '{← typeName a}'"

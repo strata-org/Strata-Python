@@ -424,6 +424,21 @@ def seqSlotApplies [PyReads m V] (f self : V) (name : String) : m Bool := do
           PyPure.gap s!"a {t.info.name} slot on an instance of a subclass of {t.info.name} with its own {d} is not modelled yet"
   return true
 
+/-- Whether the type of `v` keeps the sequence slot that the dunders `names` fill (`__add__` for
+`sq_concat`, `__mul__` and `__rmul__` for `sq_repeat`), if it has one; the caller checks that `v`
+is a sequence. A built-in value's type keeps it. A user class keeps it only when each name's
+lookup on its MRO finds, under that same name, the slot of a sequence type on its MRO: CPython's
+`update_one_slot` clears the slot when a lookup finds anything else, since the slot has no generic
+function. -/
+def hasSeqSlot [PyReads m V] (v : V) (names : List String) : m Bool := do
+  if !(← isUserObject v) then return true
+  let t ← PyReads.classOf v
+  let some mro ← mroOf t | PyPure.gap "a class without an MRO"
+  names.allM fun n => do
+    let some f ← lookupType t n | return false
+    let some (s, n') ← seqSlot? f | return false
+    return n' == n && (← inMro (PyPure.imm (m := m) (.builtin s)) mro)
+
 /-- The built-in types whose binary and comparison slots give `NotImplemented` for an operand that
 is a plain user object: the exceptions, the iterators, and the types listed here. The sequences'
 `+` and `*`, the `%` of `str` and `bytes`, and the in-place slots of `list` and `dict` take other
@@ -513,8 +528,10 @@ def binaryTail [PyCalls m V] (sym : String) (op : Arith.BinOp) (a b : V) : m V :
     PyPure.modelInvariant "an operator of two sets is `setOp`"
   match op with
   | .add =>
-    if let some v ← concatSeq a b then return v
-    match ← seqName? a with
+    let concat ← hasSeqSlot a ["__add__"]
+    if concat then
+      if let some v ← concatSeq a b then return v
+    match ← if concat then seqName? a else pure none with
     | some "bytes" =>
       -- A `bytes` concatenates any object with the buffer protocol, which a class gets from
       -- `__buffer__` in 3.12.
@@ -524,11 +541,11 @@ def binaryTail [PyCalls m V] (sym : String) (op : Arith.BinOp) (a b : V) : m V :
     | some t => raiseBuiltin "TypeError" s!"can only concatenate {t} (not \"{← typeName b}\") to {t}"
     | none => pure ()
   | .mul =>
-    if let some v ← repeatSeq a b then return v
-    if let some v ← repeatSeq b a then return v
-    if (← seqName? a).isSome then
+    if (← seqName? a).isSome && (← hasSeqSlot a ["__mul__", "__rmul__"]) then
+      if let some v ← repeatSeq a b then return v
       raiseBuiltin "TypeError" s!"can't multiply sequence by non-int of type '{← typeName b}'"
-    if (← seqName? b).isSome then
+    if (← seqName? b).isSome && (← hasSeqSlot b ["__mul__", "__rmul__"]) then
+      if let some v ← repeatSeq b a then return v
       raiseBuiltin "TypeError" s!"can't multiply sequence by non-int of type '{← typeName a}'"
   | _ => pure ()
   let msg := s!"unsupported operand type(s) for {sym}: '{← typeName a}' and '{← typeName b}'"

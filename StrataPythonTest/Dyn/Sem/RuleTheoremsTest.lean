@@ -80,6 +80,7 @@ public environment PyT extends Py where
   insn subclassOps (^err (exc : Value)) : Value
   insn subclassContainers (^err (exc : Value)) : Value
   insn seqSlotSub (k : base.Int) (^err (exc : Value)) : Value
+  insn seqSlotCleared (k : base.Int) (^err (exc : Value)) : Value
   insn resumeCase (f : Value) (^err (exc : Value)) : Value
   insn callInst (^err (exc : Value)) : Value
   insn callLevelStep (^err (exc : Value)) : Value
@@ -752,6 +753,56 @@ slot; `__mul__` is of the other family, so `1` gives the list's own concatenatio
     pure (Value.bool (← Proto.richCompare .eq r (← PyPure.allocList #[.int 1, .int 3])))
     : PyM σ .writes false Value)
 
+/-- A subclass of a sequence whose own `__add__`, `__mul__` or `__rmul__` gives `NotImplemented`
+(`object.__eq__` here), which clears the sequence's concatenation or repetition in CPython:
+`T((1,)) + U()` for a plain `U` (`0`), `L([1]) + [2]` (`1`), `M([1]) * 2` (`2`), `TM((1,)) * 2`
+(`3`), `x *= 2` for `x = TM((1,))` (`4`), `2 * TR((1,))` with `TR.__rmul__` (`5`), `x *= TR((1,))`
+for `x = 2` (`8`) and `S("a") + "b"` for an `S(str)` (`9`), each CPython's `TypeError`; also
+`P((1,)) + (2,)` for a `P(tuple)` with no dunders of its own (`6`), CPython's `(1, 2)`; and
+`I((1,)) * [5]` for an `I(tuple)` whose `__index__` is `tuple.__len__` (`7`), CPython's
+`TypeError`, since only the left operand's repetition runs; and, past the operator's dunders,
+the sequence fallback of `LT([1]) + [2]` for an `LT(list)` whose `__add__` is `tuple.__add__`
+(`10`) and of `TL((1,)) * 2` for a `TL(tuple)` whose `__rmul__` is `list.__rmul__` (`11`), each
+CPython's `TypeError`, since another sequence type's slot clears the slot too. -/
+@[dyn_sem PyT.seqSlotCleared, expose] public def seqSlotCleared (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let ns ← PyPure.allocDict
+    let (name, base, d) : String × Builtin × String := match k with
+      | 0 => ("T", .tuple, "__add__") | 1 => ("L", .list, "__add__") | 2 => ("M", .list, "__mul__")
+      | 3 | 4 => ("TM", .tuple, "__mul__") | 5 | 8 => ("TR", .tuple, "__rmul__")
+      | 7 => ("I", .tuple, "__index__") | 9 => ("S", .str, "__add__")
+      | 10 => ("LT", .list, "__add__") | 11 => ("TL", .tuple, "__rmul__") | _ => ("P", .tuple, "")
+    if d == "__index__" then
+      PyWrites.dictSet ns (.ofString d) (Value.descr .tuple "__len__" .slotWrapper) none fun _ => pure false
+    else if k == 10 then
+      PyWrites.dictSet ns (.ofString d) (Value.descr .tuple "__add__" .slotWrapper) none fun _ => pure false
+    else if k == 11 then
+      PyWrites.dictSet ns (.ofString d) (Value.descr .list "__rmul__" .slotWrapper) none fun _ => pure false
+    else if d != "" then
+      PyWrites.dictSet ns (.ofString d) (Value.descr .object "__eq__" .slotWrapper) none fun _ => pure false
+    let c ← PyPure.allocObj (.builtin .type) (.cls
+      { name, qualname := name, «module» := "m", bases := #[.builtin base],
+        mroTail := #[.builtin base, .builtin .object], ns, solidBase := .builtin base })
+    let part : BuiltinPart Value := match base with
+      | .list => .list #[.int 1] | .str => .str (.ofString "a") | _ => .tuple #[.int 1]
+    let x ← PyReads.allocInstance c part #[] #[]
+    match k with
+    | 0 => do
+      let u ← PyReads.allocInstance (← subclassOf "U" .object) .plain #[] #[]
+      Proto.binaryOp .add x u
+    | 1 => Proto.binaryOp .add x (← PyPure.allocList #[.int 2])
+    | 2 | 3 => Proto.binaryOp .mul x (.int 2)
+    | 4 => Proto.inplaceOp .mul x (.int 2)
+    | 5 => Proto.binaryOp .mul (.int 2) x
+    | 7 => Proto.binaryOp .mul x (← PyPure.allocList #[.int 5])
+    | 8 => Proto.inplaceOp .mul (.int 2) x
+    | 9 => Proto.binaryOp .add x (.ofString "b")
+    | 10 => Proto.binaryTail "+" .add x (← PyPure.allocList #[.int 2])
+    | 11 => Proto.binaryTail "*" .mul x (.int 2)
+    | _ => Proto.binaryOp .add x (.tuple #[.int 2])
+    : PyM σ .writes false Value)
+
 /-- The operators on instances of classes `L(list)`, `T(tuple)` and `D(dict)` with no dunders of
 their own, which run the built-in type's slots on the built-in part: for `l = L([1, 2])`,
 `t = T((1, 2))` and `d = D({1: 'a'})`, the results of `(l + [3])[2]`, `l == [1, 2]`, `bool(l)`,
@@ -1202,7 +1253,7 @@ def ptEffect : String → Effects.Level
   | "pt.oldPrims" | "pt.frozenSeal" | "pt.nativeDepth" | "pt.nativeGapped" | "pt.nextView" | "pt.setUpdateSub" | "pt.classDescr" | "pt.startCheck" => .writes
   | "pt.frozenOr" | "pt.frozenAdd" | "pt.objPrims" => .writes
   | "pt.frozenWalk" | "pt.frozenMerge" | "pt.subclassOps" => .calls
-  | "pt.subclassContainers" | "pt.seqSlotSub" | "pt.callInst" | "pt.callLevelStep" | "pt.resumeCase" | "pt.resumeDirect" | "pt.resumeNoFit"
+  | "pt.subclassContainers" | "pt.seqSlotSub" | "pt.seqSlotCleared" | "pt.callInst" | "pt.callLevelStep" | "pt.resumeCase" | "pt.resumeDirect" | "pt.resumeNoFit"
   | "pt.foreignIter" | "pt.foreignLen" | "pt.strSubIter" | "pt.iterBounds" | "pt.zipNext"
   | "pt.enumNext" | "pt.revNext" | "pt.listRevNext" | "pt.dictRevNext" | "pt.startZero"
   | "pt.staleSlice" => .writes
@@ -1816,6 +1867,76 @@ info: StrataPython.Dyn.Sem.Value.tuple
 /-- info: fault: Strata.Dyn.Exec.Fault.gap "a list slot found as __mul__ on an instance of a subclass of list is not modelled yet" -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.seqSlotSub(3) ^err.0()"
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for +: 'T' and 'U'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotCleared(0) ^err.0()"
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for +: 'L' and 'list'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotCleared(1) ^err.0()"
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for *: 'M' and 'int'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotCleared(2) ^err.0()"
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for *: 'TM' and 'int'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotCleared(3) ^err.0()"
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for *=: 'TM' and 'int'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotCleared(4) ^err.0()"
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for *: 'int' and 'TR'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotCleared(5) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 1, StrataPython.Dyn.Sem.Value.int 2] -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotCleared(6) ^err.0()"
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "can't multiply sequence by non-int of type 'list'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotCleared(7) ^err.0()"
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for *=: 'int' and 'TR'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotCleared(8) ^err.0()"
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for +: 'S' and 'str'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotCleared(9) ^err.0()"
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for +: 'LT' and 'list'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotCleared(10) ^err.0()"
+
+/-- info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for *: 'TL' and 'int'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotCleared(11) ^err.0()"
 
 -- A frozenset is a value only once closed: hashing an open one, or writing to a closed one, is a
 -- model invariant; every maker closes what it makes.
