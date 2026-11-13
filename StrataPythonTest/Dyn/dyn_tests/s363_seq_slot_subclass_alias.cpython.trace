@@ -1,0 +1,9 @@
+--- stdout 7
+[2, 1]
+
+--- outcome
+ok
+--- globals
+L1 = <class 'L1'>
+__doc__ = None
+__name__ = '__main__'

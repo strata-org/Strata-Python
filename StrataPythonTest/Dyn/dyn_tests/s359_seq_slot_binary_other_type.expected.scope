@@ -1,0 +1,8 @@
+module
+  D: local (assigned, referenced)
+  print: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  class D
+    __add__: local (assigned)
+    list: global implicit (referenced)

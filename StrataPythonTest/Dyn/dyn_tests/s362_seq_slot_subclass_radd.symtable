@@ -1,0 +1,18 @@
+module top
+  M: local (assigned, referenced)
+  R: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  list: global implicit (referenced)
+  print: global implicit (referenced)
+  class R
+    __radd__: local (assigned)
+    function __radd__
+      o: local (parameter)
+      self: local (parameter)
+  class M
+    __radd__: local (assigned)
+    function __radd__
+      o: local (parameter)
+      self: local (parameter)
+qualnames: M, M.__radd__, R, R.__radd__

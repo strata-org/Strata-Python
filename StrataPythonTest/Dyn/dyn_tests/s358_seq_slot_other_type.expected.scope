@@ -1,0 +1,9 @@
+module
+  C: local (assigned, referenced)
+  x: local (assigned)
+  print: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  class C
+    __iadd__: local (assigned)
+    list: global implicit (referenced)

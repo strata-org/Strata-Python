@@ -1,0 +1,16 @@
+module
+  X: local (assigned, referenced)
+  Exception: global implicit (referenced)
+  print: global implicit (referenced)
+  x: local (assigned, referenced)
+  class X
+    __radd__: local (assigned)
+    __rmul__: local (assigned)
+    function X.__radd__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter)
+    function X.__rmul__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter)

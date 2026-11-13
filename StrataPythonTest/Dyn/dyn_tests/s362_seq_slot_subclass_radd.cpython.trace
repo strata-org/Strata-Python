@@ -1,0 +1,10 @@
+--- stdout 54
+TypeError can only concatenate list (not "R") to list
+
+--- outcome
+ok
+--- globals
+M = <class 'M'>
+R = <class 'R'>
+__doc__ = None
+__name__ = '__main__'

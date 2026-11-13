@@ -1,0 +1,182 @@
+module s362_seq_slot_subclass_radd {
+  func @|s362_seq_slot_subclass_radd.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s362_seq_slot_subclass_radd")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s362_seq_slot_subclass_radd", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s362_seq_slot_subclass_radd", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s362_seq_slot_subclass_radd.R.<body>|, "<body>", "s362_seq_slot_subclass_radd")
+      %str.1 : py.Value = py.strLit("R")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %R.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %R.cell.0 : base.Ref(py.Value) = py.globalCell("s362_seq_slot_subclass_radd", "R")
+      %set.2 : base.Unit = base.refSet[py.Value](%R.cell.0, %R.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|s362_seq_slot_subclass_radd.M.<body>|, "<body>", "s362_seq_slot_subclass_radd")
+      %str.2 : py.Value = py.strLit("M")
+      %list.0 : py.Value = py.loadGlobal("s362_seq_slot_subclass_radd", "list") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2, %list.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %M.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %M.cell.0 : base.Ref(py.Value) = py.globalCell("s362_seq_slot_subclass_radd", "M")
+      %set.3 : base.Unit = base.refSet[py.Value](%M.cell.0, %M.0)
+      %print.0 : py.Value = py.loadGlobal("s362_seq_slot_subclass_radd", "print") ^catch.0()
+      %M.1 : py.Value = py.loadGlobal("s362_seq_slot_subclass_radd", "M") ^catch.0()
+      %int.0 : py.Value = py.intLit(1)
+      %list.1 : py.Value = py.mkList(%int.0)
+      %tuple.2 : py.Value = py.mkTuple(%list.1)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%M.1, %tuple.2, %kwargs.2) ^catch.0()
+      %R.1 : py.Value = py.loadGlobal("s362_seq_slot_subclass_radd", "R") ^catch.0()
+      %tuple.3 : py.Value = py.mkTuple
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%R.1, %tuple.3, %kwargs.3) ^catch.0()
+      %add.0 : py.Value = py.add(%call.0, %call.1) ^catch.0()
+      %tuple.4 : py.Value = py.mkTuple(%add.0)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.4, %kwargs.4) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("s362_seq_slot_subclass_radd", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s362_seq_slot_subclass_radd", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.1 : py.Value = py.loadGlobal("s362_seq_slot_subclass_radd", "print") ^clear.0()
+      %str.3 : py.Value = py.strLit("TypeError")
+      %e.0 : py.Value = py.loadGlobal("s362_seq_slot_subclass_radd", "e") ^clear.0()
+      %tuple.5 : py.Value = py.mkTuple(%str.3, %e.0)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.1, %tuple.5, %kwargs.5) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s362_seq_slot_subclass_radd", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s362_seq_slot_subclass_radd", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+  func @|s362_seq_slot_subclass_radd.R.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__radd__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s362_seq_slot_subclass_radd", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("R")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s362_seq_slot_subclass_radd.R.__radd__, "__radd__", "s362_seq_slot_subclass_radd")
+      %str.4 : py.Value = py.strLit("__radd__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s362_seq_slot_subclass_radd.M.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["list"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__radd__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s362_seq_slot_subclass_radd", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("M")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s362_seq_slot_subclass_radd.M.__radd__, "__radd__", "s362_seq_slot_subclass_radd")
+      %str.4 : py.Value = py.strLit("__radd__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s362_seq_slot_subclass_radd.R.__radd__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %o.0 : py.Value = py.undef("o")
+      %o.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%o.0)
+      %self.1 : py.Value = py.undef("self")
+      %o.1 : py.Value = py.undef("o")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %o.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "R.__radd__", 0, 2, false, false, "self", "o") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %str.0 : py.Value = py.strLit("R.radd")
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s362_seq_slot_subclass_radd.M.__radd__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %o.0 : py.Value = py.undef("o")
+      %o.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%o.0)
+      %self.1 : py.Value = py.undef("self")
+      %o.1 : py.Value = py.undef("o")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %o.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.__radd__", 0, 2, false, false, "self", "o") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %str.0 : py.Value = py.strLit("M.radd")
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

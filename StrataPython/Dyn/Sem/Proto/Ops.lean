@@ -385,20 +385,49 @@ def binDunders : Arith.BinOp → String × String
   | .rshift => ("__rshift__", "__rrshift__") | .and => ("__and__", "__rand__")
   | .or => ("__or__", "__ror__") | .xor => ("__xor__", "__rxor__")
 
-/-- Whether `f` is the `+`, `*`, `+=` or `*=` of a built-in sequence type (`list.__add__`,
-`str.__mul__`, `list.__iadd__`): CPython's `sq_concat`, `sq_repeat`, `sq_inplace_concat` and
-`sq_inplace_repeat`, which the number protocol doesn't try. -/
-def isSeqSlot [PyPure m V] (f : V) : m Bool := do
+/-- The built-in sequence type and the name of the `+`, `*`, `+=` or `*=` that `f` is
+(`list.__add__`, `str.__mul__`, `list.__iadd__`): CPython's `sq_concat`, `sq_repeat`,
+`sq_inplace_concat` and `sq_inplace_repeat`, which the number protocol doesn't try; `none` for any
+other `f`. -/
+def seqSlot? [PyPure m V] (f : V) : m (Option (Builtin × String)) := do
   match ← PyPure.immView f with
   | some (.descr t n _) =>
-    return [Builtin.list, .tuple, .str, .bytes].contains t &&
-      ["__add__", "__mul__", "__rmul__", "__iadd__", "__imul__"].contains n
-  | _ => return false
+    if [Builtin.list, .tuple, .str, .bytes].contains t &&
+        ["__add__", "__mul__", "__rmul__", "__iadd__", "__imul__"].contains n then
+      return some (t, n)
+    return none
+  | _ => return none
+
+/-- Whether `f`, found as `name` on the type of `self`, is a sequence's slot (`seqSlot?`) and
+`self` is a value of that built-in sequence type: then the sequence protocol handles it, not the
+number protocol. On an object of another type, the slot is called as any dunder is: CPython's type
+check raises, and the model stops with a gap where it binds the slot (`descrGetN`).
+
+An instance of a subclass of that sequence counts as a value of it only when the slot is found
+under its own name and no user class of its MRO defines a dunder of the slot's family: `__add__`,
+`__radd__` or `__iadd__` for `+`, and `__mul__`, `__rmul__` or `__imul__` for `*`. Otherwise
+CPython's number slot may call the slot, which the model doesn't follow, so it stops with a gap.
+`__iadd__` and `__imul__` are separate in-place slots, so the gap on them is conservative. -/
+def seqSlotApplies [PyReads m V] (f self : V) (name : String) : m Bool := do
+  let some (t, n) ← seqSlot? f | return false
+  if !(← isUserObject self) then return true
+  let some mro ← mroOf (← PyReads.classOf self) | return false
+  if !(← inMro (PyPure.imm (m := m) (.builtin t)) mro) then return false
+  if n != name then
+    PyPure.gap s!"a {t.info.name} slot found as {name} on an instance of a subclass of {t.info.name} is not modelled yet"
+  let family := if n == "__add__" || n == "__iadd__" then ["__add__", "__radd__", "__iadd__"]
+    else ["__mul__", "__rmul__", "__imul__"]
+  for c in mro do
+    if let some cd ← classData? c then
+      for d in family do
+        if (← dictFindStr cd.ns d).isSome then
+          PyPure.gap s!"a {t.info.name} slot on an instance of a subclass of {t.info.name} with its own {d} is not modelled yet"
+  return true
 
 /-- The built-in types whose binary and comparison slots give `NotImplemented` for an operand that
 is a plain user object: the exceptions, the iterators, and the types listed here. The sequences'
 `+` and `*`, the `%` of `str` and `bytes`, and the in-place slots of `list` and `dict` take other
-operands, but other rules handle them before (`isSeqSlot`, `printfFirst?`, `inplaceOp`). -/
+operands, but other rules handle them before (`seqSlotApplies`, `printfFirst?`, `inplaceOp`). -/
 def givesNotImpl (b : Builtin) : Bool :=
   b.info.mro.contains .BaseException || b.info.name.endsWith "iterator" ||
   [Builtin.NoneType, .NotImplementedType, .ellipsis, .bool, .int, .float, .complex, .str, .bytes,
@@ -411,8 +440,9 @@ def givesNotImpl (b : Builtin) : Bool :=
 
 /-- One side of CPython's `binary_op1` and `do_richcompare`: the dunder `name` of `self`'s type,
 a user function or a built-in type's slot, called with `other`; `none` when the type has no such
-dunder (a sequence's `+` and `*`, which CPython tries after the numbers, count as none) or it gave
-`NotImplemented`.  With `swallow`, as `slot_tp_richcompare` does, an exception raised while the
+dunder (a sequence's own `+` and `*` on a value of that sequence, which CPython tries after the
+numbers, count as none: `seqSlotApplies`) or it gave `NotImplemented`.  With `swallow`, as
+`slot_tp_richcompare` does, an exception raised while the
 dunder is bound to `self` counts as none too. -/
 def trySlot [PyCalls m V] (self other : V) (name : String) (swallow : Bool := false) :
     m (Option V) := do
@@ -434,7 +464,7 @@ def trySlot [PyCalls m V] (self other : V) (name : String) (swallow : Bool := fa
     return none
   let t ← PyReads.classOf self
   let some f ← lookupType t name | return none
-  if ← isSeqSlot f then return none
+  if ← seqSlotApplies f self name then return none
   let g? ← if swallow then bindMaybe f self t
     else some <$> descrGetN dispatchDepth f (some self) t
   let some g := g? | return none

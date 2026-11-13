@@ -1,0 +1,19 @@
+module
+  R: local (assigned, referenced)
+  M: local (assigned, referenced)
+  list: global implicit (referenced)
+  print: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  class R
+    __radd__: local (assigned)
+    function R.__radd__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter)
+  class M
+    __radd__: local (assigned)
+    function M.__radd__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter)

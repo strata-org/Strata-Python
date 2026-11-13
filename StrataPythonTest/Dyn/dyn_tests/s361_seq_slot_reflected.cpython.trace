@@ -1,0 +1,12 @@
+--- stdout 49
+X.radd X.radd X.radd X.radd
+X.rmul X.rmul
+X.radd
+
+--- outcome
+ok
+--- globals
+X = <class 'X'>
+__doc__ = None
+__name__ = '__main__'
+x = 'X.radd'

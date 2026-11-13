@@ -1,0 +1,7 @@
+module
+  L1: local (assigned, referenced)
+  list: global implicit (referenced)
+  print: global implicit (referenced)
+  class L1
+    __radd__: local (assigned)
+    list: global implicit (referenced)

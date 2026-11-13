@@ -79,6 +79,7 @@ public environment PyT extends Py where
   insn bindCase (i : base.Int) (^err (exc : Value)) : Value
   insn subclassOps (^err (exc : Value)) : Value
   insn subclassContainers (^err (exc : Value)) : Value
+  insn seqSlotSub (k : base.Int) (^err (exc : Value)) : Value
   insn resumeCase (f : Value) (^err (exc : Value)) : Value
   insn callInst (^err (exc : Value)) : Value
   insn callLevelStep (^err (exc : Value)) : Value
@@ -730,6 +731,27 @@ name (`0`), which CPython accepts, and with `3` (`1`), which it rejects. -/
     Builtins.buildClass .none (.tuple #[f, name]) (← PyPure.allocDict)
     : PyM σ .writes false Value)
 
+/-- `m + [3]` for an instance `m` of a class `M(list)` that holds `[1]` and defines `__radd__`
+(`0`), `__mul__` (`1`) or `__iadd__` (`2`), and `m * [3]` with `__mul__ = list.__add__` (`3`).
+`__radd__` makes CPython's number slot call the list's `+`, which the model doesn't follow, so `0`
+stops with a gap, and so does `2`, a conservative gap, since `__iadd__` is a separate in-place
+slot; `__mul__` is of the other family, so `1` gives the list's own concatenation, equal to
+`[1, 3]`; and `3`, the list's `+` slot found as `__mul__`, which CPython calls, stops with a gap. -/
+@[dyn_sem PyT.seqSlotSub, expose] public def seqSlotSub (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let ns ← PyPure.allocDict
+    let d := if k == 0 then "__radd__" else if k == 2 then "__iadd__" else "__mul__"
+    let v := if k == 3 then Value.descr .list "__add__" .slotWrapper else .builtin .len
+    PyWrites.dictSet ns (.ofString d) v none fun _ => pure false
+    let c ← PyPure.allocObj (.builtin .type) (.cls
+      { name := "M", qualname := "M", «module» := "m", bases := #[.builtin .list],
+        mroTail := #[.builtin .list, .builtin .object], ns, solidBase := .builtin .list })
+    let x ← PyReads.allocInstance c (.list #[.int 1]) #[] #[]
+    let r ← Proto.binaryOp (if k == 3 then .mul else .add) x (← PyPure.allocList #[.int 3])
+    pure (Value.bool (← Proto.richCompare .eq r (← PyPure.allocList #[.int 1, .int 3])))
+    : PyM σ .writes false Value)
+
 /-- The operators on instances of classes `L(list)`, `T(tuple)` and `D(dict)` with no dunders of
 their own, which run the built-in type's slots on the built-in part: for `l = L([1, 2])`,
 `t = T((1, 2))` and `d = D({1: 'a'})`, the results of `(l + [3])[2]`, `l == [1, 2]`, `bool(l)`,
@@ -1180,7 +1202,7 @@ def ptEffect : String → Effects.Level
   | "pt.oldPrims" | "pt.frozenSeal" | "pt.nativeDepth" | "pt.nativeGapped" | "pt.nextView" | "pt.setUpdateSub" | "pt.classDescr" | "pt.startCheck" => .writes
   | "pt.frozenOr" | "pt.frozenAdd" | "pt.objPrims" => .writes
   | "pt.frozenWalk" | "pt.frozenMerge" | "pt.subclassOps" => .calls
-  | "pt.subclassContainers" | "pt.callInst" | "pt.callLevelStep" | "pt.resumeCase" | "pt.resumeDirect" | "pt.resumeNoFit"
+  | "pt.subclassContainers" | "pt.seqSlotSub" | "pt.callInst" | "pt.callLevelStep" | "pt.resumeCase" | "pt.resumeDirect" | "pt.resumeNoFit"
   | "pt.foreignIter" | "pt.foreignLen" | "pt.strSubIter" | "pt.iterBounds" | "pt.zipNext"
   | "pt.enumNext" | "pt.revNext" | "pt.listRevNext" | "pt.dictRevNext" | "pt.startZero"
   | "pt.staleSlice" => .writes
@@ -1778,6 +1800,22 @@ info: StrataPython.Dyn.Sem.Value.tuple
 -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.subclassContainers ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a list slot on an instance of a subclass of list with its own __radd__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotSub(0) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.bool true -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotSub(1) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a list slot on an instance of a subclass of list with its own __iadd__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotSub(2) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a list slot found as __mul__ on an instance of a subclass of list is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.seqSlotSub(3) ^err.0()"
 
 -- A frozenset is a value only once closed: hashing an open one, or writing to a closed one, is a
 -- model invariant; every maker closes what it makes.

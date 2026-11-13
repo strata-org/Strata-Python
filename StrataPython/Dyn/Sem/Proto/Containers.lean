@@ -822,7 +822,7 @@ def inplaceOp [PyWrites m V] [PyNew m V] (op : Arith.BinOp) (a b : V) : m V := d
     let name := "__i" ++ ((binDunders op).1.drop 2).toString
     let t ← PyReads.classOf a
     if let some f ← lookupType t name then
-      if !(← isSeqSlot f) then
+      if !(← seqSlotApplies f a name) then
         let r ← callFound name f a t #[b] (← PyPure.allocDict)
         if !(← isNotImpl r) then return r
   else if (← anySet? a) matches some false then

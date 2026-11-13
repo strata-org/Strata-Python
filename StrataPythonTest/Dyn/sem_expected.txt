@@ -461,7 +461,13 @@ s354_iter_property | agree
 s355_iter_property_getitem | gap | an __iter__ whose __get__ raises, on a class with __getitem__, is not modelled yet
 s356_method_descriptor_dunders | agree
 s357_repr_property_raises | gap | the default repr of an object whose __repr__ raises while it binds, which shows its address
+s358_seq_slot_other_type | gap | a slot wrapper bound to an object of another type is not modelled yet
+s359_seq_slot_binary_other_type | gap | a slot wrapper bound to an object of another type is not modelled yet
 s35_live_set_walks | agree
+s360_seq_slot_compare | gap | a slot wrapper bound to an object of another type is not modelled yet
+s361_seq_slot_reflected | agree
+s362_seq_slot_subclass_radd | gap | built-in method list.__new__ is not modelled yet
+s363_seq_slot_subclass_alias | gap | built-in method list.__new__ is not modelled yet
 s36_rich_twice | agree
 s37_rich_once | agree
 s38_seq_order_raw | agree

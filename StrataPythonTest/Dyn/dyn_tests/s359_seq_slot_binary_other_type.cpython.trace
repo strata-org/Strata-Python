@@ -1,0 +1,9 @@
+--- stdout 75
+TypeError descriptor '__add__' requires a 'list' object but received a 'D'
+
+--- outcome
+ok
+--- globals
+D = <class 'D'>
+__doc__ = None
+__name__ = '__main__'
