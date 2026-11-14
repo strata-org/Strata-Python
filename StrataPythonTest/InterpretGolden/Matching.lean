@@ -131,9 +131,13 @@ private def pythonMinor (python : String) : IO (Option Nat) := do
     bounds execution steps but not translation, so the wall-clock bound is what keeps a
     non-terminating case from hanging CI. The interpreter echoes the scratch path it is
     handed, so the output is rewritten back to the canonical corpus path the `.expected`
-    patterns embed. -/
+    patterns embed. `exe`, when given, names a binary in `.lake/build/bin` and the
+    arguments that select the interpreter, so the same case can run through
+    `strataPy pyInterpret`; without it the case runs through `pyInterpret`. -/
 public def compileAndRun (python : String) (root : System.FilePath) (stem : String)
-    (v2 : Bool) : IO (Except String (UInt32 × String)) := do
+    (v2 : Bool) (exe : Option (String × Array String) := none)
+    : IO (Except String (UInt32 × String)) := do
+  let (interpreter, selectArgs) := exe.getD ("pyInterpret", #[])
   let canonical := s!"StrataPythonTest/tests/{stem}.python.st.ion"
   let timeoutStr := ((← IO.getEnv "INTERPRET_TIMEOUT").getD "60")
   let pyPath := root / "StrataPythonTest" / "tests" / (stem ++ ".py")
@@ -162,7 +166,7 @@ public def compileAndRun (python : String) (root : System.FilePath) (stem : Stri
       return .error s!"{loweringFailureMessage stem python (← pythonMinor python) out}\n{out}"
     let runOut ← IO.Process.output {
       cmd := "timeout"
-      args := #[timeoutStr, (root / ".lake" / "build" / "bin" / "pyInterpret").toString]
+      args := #[timeoutStr, (root / ".lake" / "build" / "bin" / interpreter).toString] ++ selectArgs
                 ++ (if v2 then #["--v2"] else #[]) ++ #[ionAbs.toString]
       cwd := some root.toString
       inheritEnv := true

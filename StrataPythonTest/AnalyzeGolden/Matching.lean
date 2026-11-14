@@ -158,17 +158,22 @@ public def withCompiledCase {α : Type} (python : String) (root : System.FilePat
 /-- Run one front end's analyzer on a case already compiled by `withCompiledCase`,
     from the scratch directory, on `<subdir>/<stem>.python.st.ion`. `timeoutSecs` wraps
     the run in `timeout`. Any `user_errors.txt` is captured and removed, so the next
-    run in the same scratch directory starts clean. -/
+    run in the same scratch directory starts clean. `exe`, when given, names a binary in
+    `.lake/build/bin` and the arguments that select `pyAnalyzeLaurel`, so the same case
+    can run through `strataPy pyAnalyzeLaurel`; `v2` then adds `--v2`. -/
 public def analyzeCompiled (root scratch : System.FilePath) (subdir stem : String)
     (v2 : Bool) (extraArgs : Array String) (timeoutSecs : Option String := none)
-    : IO AnalyzeResult := do
+    (exe : Option (String × Array String) := none) : IO AnalyzeResult := do
   let userErrorsFile := scratch / "user_errors.txt"
   if ← userErrorsFile.pathExists then IO.FS.removeFile userErrorsFile
-  let analyzer := (analyzerPath root v2).toString
+  let (analyzer, selectArgs) := match exe with
+    | some (name, args) => ((root / ".lake" / "build" / "bin" / name).toString,
+                            args ++ (if v2 then #["--v2"] else #[]))
+    | none => ((analyzerPath root v2).toString, #[])
   let ionRel := s!"{subdir}/{stem}.python.st.ion"
   let (cmd, args) := match timeoutSecs with
-    | some t => ("timeout", #[t, analyzer] ++ extraArgs ++ #[ionRel])
-    | none => (analyzer, extraArgs ++ #[ionRel])
+    | some t => ("timeout", #[t, analyzer] ++ selectArgs ++ extraArgs ++ #[ionRel])
+    | none => (analyzer, selectArgs ++ extraArgs ++ #[ionRel])
   let out ← IO.Process.output {
     cmd, args
     cwd := some scratch.toString
