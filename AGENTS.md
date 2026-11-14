@@ -103,6 +103,19 @@ A new program in `StrataPythonTest/Dyn/dyn_tests/` or in `StrataPythonTest/tests
 its CPython trace and its verdict for the Python semantics' differential test: run
 `StrataPythonTestExtra/SemDiffTest.lean` with `SEM_UPDATE=1`.
 
+The axis grid (`StrataPythonTest/Dyn/axes/`) compares the Python semantics with CPython 3.12 on
+one generated program per case: an operation with one kind of input, such as an instance of a
+subclass of a built-in type, a user method that re-enters the built-in that called it, or a
+special method that is a property. `catalog.py` holds the operations and the kinds, and what
+CPython must do in each case; `grid.py` writes the programs. `StrataPythonTestExtra/AxisGridTest.lean`
+runs them, and fails on a case that doesn't run its operation in CPython (a generator bug), on a
+difference from CPython, and on a change of verdict (`grid_expected.txt`). It needs CPython 3.12.
+After a change to the catalog, `grid.py` or `trace.py`, run it with `SEM_UPDATE=1`: that compares
+CPython's traces under the hash seeds 0 to 7, checks that each case's trace changes without its
+operation, and rewrites the verdicts, the known runs (`grid_known/`), the summary and the digest.
+A difference that its owner doesn't fix yet is pinned as `<id> | known | <reason>` in
+`grid_expected.txt` before the update.
+
 ## Convention: `open Strata` pattern
 
 Since StrataPython was extracted from the `Strata` package, many files use

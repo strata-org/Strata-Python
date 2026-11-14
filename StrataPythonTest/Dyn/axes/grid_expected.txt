@@ -1,0 +1,4283 @@
+a1_abs_float_exact | agree
+a1_abs_float_sub | agree
+a1_abs_float_sub-dict | agree
+a1_abs_float_sub-over | agree
+a1_abs_float_sub-over-other | agree
+a1_abs_float_sub-slots | agree
+a1_abs_float_user | agree
+a1_abs_float_user-not | agree
+a1_abs_int_bool-as-int | agree
+a1_abs_int_exact | agree
+a1_abs_int_sub | agree
+a1_abs_int_sub-dict | agree
+a1_abs_int_sub-over | agree
+a1_abs_int_sub-over-other | agree
+a1_abs_int_sub-slots | agree
+a1_abs_int_user | agree
+a1_abs_int_user-not | agree
+a1_add_bool_exact | agree
+a1_add_bool_user | agree
+a1_add_bool_user-not | agree
+a1_add_bytes_exact | agree
+a1_add_bytes_sub | agree
+a1_add_bytes_sub-dict | agree
+a1_add_bytes_sub-over | agree
+a1_add_bytes_sub-over-other | agree
+a1_add_bytes_sub-slots | agree
+a1_add_bytes_user | agree
+a1_add_bytes_user-not | agree
+a1_add_float_exact | agree
+a1_add_float_sub | agree
+a1_add_float_sub-dict | agree
+a1_add_float_sub-over | agree
+a1_add_float_sub-over-other | agree
+a1_add_float_sub-slots | agree
+a1_add_float_user | agree
+a1_add_float_user-not | agree
+a1_add_int_bool-as-int_exact | agree
+a1_add_int_exact_exact | agree
+a1_add_int_exact_sub | agree
+a1_add_int_exact_sub-over | agree
+a1_add_int_exact_user | agree
+a1_add_int_exact_user-not | agree
+a1_add_int_sub-dict_exact | agree
+a1_add_int_sub-over-other_exact | agree
+a1_add_int_sub-over_exact | agree
+a1_add_int_sub-over_sub | agree
+a1_add_int_sub-over_sub-over | agree
+a1_add_int_sub-over_user | agree
+a1_add_int_sub-over_user-not | agree
+a1_add_int_sub-slots_exact | agree
+a1_add_int_sub_exact | agree
+a1_add_int_sub_sub | agree
+a1_add_int_sub_sub-over | agree
+a1_add_int_sub_user | agree
+a1_add_int_sub_user-not | agree
+a1_add_int_user-not_exact | agree
+a1_add_int_user-not_sub | agree
+a1_add_int_user-not_sub-over | agree
+a1_add_int_user-not_user | agree
+a1_add_int_user-not_user-not | agree
+a1_add_int_user_exact | agree
+a1_add_int_user_sub | agree
+a1_add_int_user_sub-over | agree
+a1_add_int_user_user | agree
+a1_add_int_user_user-not | agree
+a1_add_list_exact | agree
+a1_add_list_sub | agree
+a1_add_list_sub-dict | agree
+a1_add_list_sub-over | agree
+a1_add_list_sub-over-other | agree
+a1_add_list_sub-slots | agree
+a1_add_list_user | agree
+a1_add_list_user-not | agree
+a1_add_str_exact_exact | agree
+a1_add_str_exact_sub | agree
+a1_add_str_exact_sub-over | agree
+a1_add_str_exact_user | agree
+a1_add_str_exact_user-not | agree
+a1_add_str_sub-dict_exact | agree
+a1_add_str_sub-over-other_exact | agree
+a1_add_str_sub-over_exact | agree
+a1_add_str_sub-over_sub | agree
+a1_add_str_sub-over_sub-over | agree
+a1_add_str_sub-over_user | agree
+a1_add_str_sub-over_user-not | agree
+a1_add_str_sub-slots_exact | agree
+a1_add_str_sub_exact | agree
+a1_add_str_sub_sub | agree
+a1_add_str_sub_sub-over | agree
+a1_add_str_sub_user | agree
+a1_add_str_sub_user-not | agree
+a1_add_str_user-not_exact | agree
+a1_add_str_user-not_sub | agree
+a1_add_str_user-not_sub-over | agree
+a1_add_str_user-not_user | agree
+a1_add_str_user-not_user-not | agree
+a1_add_str_user_exact | agree
+a1_add_str_user_sub | agree
+a1_add_str_user_sub-over | agree
+a1_add_str_user_user | agree
+a1_add_str_user_user-not | agree
+a1_add_tuple_exact | agree
+a1_add_tuple_sub | agree
+a1_add_tuple_sub-dict | agree
+a1_add_tuple_sub-over | agree
+a1_add_tuple_sub-over-other | agree
+a1_add_tuple_sub-slots | agree
+a1_add_tuple_user | agree
+a1_add_tuple_user-not | agree
+a1_and_bool_exact | agree
+a1_and_bool_user | agree
+a1_and_bool_user-not | agree
+a1_and_frozenset_exact | gap | a slot of a set whose layout is inexact
+a1_and_frozenset_sub | gap | a slot of a set whose layout is inexact
+a1_and_frozenset_sub-dict | gap | a slot of a set whose layout is inexact
+a1_and_frozenset_sub-over | agree
+a1_and_frozenset_sub-over-other | gap | a slot of a set whose layout is inexact
+a1_and_frozenset_sub-slots | gap | a slot of a set whose layout is inexact
+a1_and_frozenset_user | agree
+a1_and_frozenset_user-not | agree
+a1_and_int_bool-as-int_exact | agree
+a1_and_int_exact_exact | agree
+a1_and_int_exact_sub | agree
+a1_and_int_exact_sub-over | agree
+a1_and_int_exact_user | agree
+a1_and_int_exact_user-not | agree
+a1_and_int_sub-dict_exact | agree
+a1_and_int_sub-over-other_exact | agree
+a1_and_int_sub-over_exact | agree
+a1_and_int_sub-over_sub | agree
+a1_and_int_sub-over_sub-over | agree
+a1_and_int_sub-over_user | agree
+a1_and_int_sub-over_user-not | agree
+a1_and_int_sub-slots_exact | agree
+a1_and_int_sub_exact | agree
+a1_and_int_sub_sub | agree
+a1_and_int_sub_sub-over | agree
+a1_and_int_sub_user | agree
+a1_and_int_sub_user-not | agree
+a1_and_int_user-not_exact | agree
+a1_and_int_user-not_sub | agree
+a1_and_int_user-not_sub-over | agree
+a1_and_int_user-not_user | agree
+a1_and_int_user-not_user-not | agree
+a1_and_int_user_exact | agree
+a1_and_int_user_sub | agree
+a1_and_int_user_sub-over | agree
+a1_and_int_user_user | agree
+a1_and_int_user_user-not | agree
+a1_and_set_exact_exact | gap | a slot of a set whose layout is inexact
+a1_and_set_exact_sub | gap | a slot of a set whose layout is inexact
+a1_and_set_exact_sub-over | agree
+a1_and_set_exact_user | agree
+a1_and_set_exact_user-not | agree
+a1_and_set_sub-dict_exact | gap | a slot of a set whose layout is inexact
+a1_and_set_sub-over-other_exact | gap | a slot of a set whose layout is inexact
+a1_and_set_sub-over_exact | agree
+a1_and_set_sub-over_sub | agree
+a1_and_set_sub-over_sub-over | agree
+a1_and_set_sub-over_user | agree
+a1_and_set_sub-over_user-not | agree
+a1_and_set_sub-slots_exact | gap | a slot of a set whose layout is inexact
+a1_and_set_sub_exact | gap | a slot of a set whose layout is inexact
+a1_and_set_sub_sub | gap | a slot of a set whose layout is inexact
+a1_and_set_sub_sub-over | gap | a slot of a set whose layout is inexact
+a1_and_set_sub_user | agree
+a1_and_set_sub_user-not | agree
+a1_and_set_user-not_exact | agree
+a1_and_set_user-not_sub | agree
+a1_and_set_user-not_sub-over | agree
+a1_and_set_user-not_user | agree
+a1_and_set_user-not_user-not | agree
+a1_and_set_user_exact | agree
+a1_and_set_user_sub | agree
+a1_and_set_user_sub-over | agree
+a1_and_set_user_user | agree
+a1_and_set_user_user-not | agree
+a1_any_list_exact | agree
+a1_any_list_sub | agree
+a1_any_list_sub-dict | agree
+a1_any_list_sub-over | agree
+a1_any_list_sub-over-other | agree
+a1_any_list_sub-slots | agree
+a1_any_list_user | agree
+a1_any_list_user-not | agree
+a1_any_str_exact | agree
+a1_any_str_sub | agree
+a1_any_str_sub-dict | agree
+a1_any_str_sub-over | agree
+a1_any_str_sub-over-other | agree
+a1_any_str_sub-slots | agree
+a1_any_str_user | agree
+a1_any_str_user-not | agree
+a1_any_tuple_exact | agree
+a1_any_tuple_sub | agree
+a1_any_tuple_sub-dict | agree
+a1_any_tuple_sub-over | agree
+a1_any_tuple_sub-over-other | agree
+a1_any_tuple_sub-slots | agree
+a1_any_tuple_user | agree
+a1_any_tuple_user-not | agree
+a1_bool_bool_exact | agree
+a1_bool_bool_user | agree
+a1_bool_bool_user-not | agree
+a1_bool_bytes_exact | agree
+a1_bool_bytes_sub | agree
+a1_bool_bytes_sub-dict | agree
+a1_bool_bytes_sub-over | agree
+a1_bool_bytes_sub-over-other | agree
+a1_bool_bytes_sub-slots | agree
+a1_bool_bytes_user | agree
+a1_bool_bytes_user-not | agree
+a1_bool_dict_exact | agree
+a1_bool_dict_sub | agree
+a1_bool_dict_sub-dict | agree
+a1_bool_dict_sub-over | agree
+a1_bool_dict_sub-over-other | agree
+a1_bool_dict_sub-slots | agree
+a1_bool_dict_user | agree
+a1_bool_dict_user-not | agree
+a1_bool_float_exact | agree
+a1_bool_float_sub | agree
+a1_bool_float_sub-dict | agree
+a1_bool_float_sub-over | agree
+a1_bool_float_sub-over-other | agree
+a1_bool_float_sub-slots | agree
+a1_bool_float_user | agree
+a1_bool_float_user-not | agree
+a1_bool_frozenset_exact | agree
+a1_bool_frozenset_sub | agree
+a1_bool_frozenset_sub-dict | agree
+a1_bool_frozenset_sub-over | agree
+a1_bool_frozenset_sub-over-other | agree
+a1_bool_frozenset_sub-slots | agree
+a1_bool_frozenset_user | agree
+a1_bool_frozenset_user-not | agree
+a1_bool_int_bool-as-int | agree
+a1_bool_int_exact | agree
+a1_bool_int_sub | agree
+a1_bool_int_sub-dict | agree
+a1_bool_int_sub-over | agree
+a1_bool_int_sub-over-other | agree
+a1_bool_int_sub-slots | agree
+a1_bool_int_user | agree
+a1_bool_int_user-not | agree
+a1_bool_list_exact | agree
+a1_bool_list_sub | agree
+a1_bool_list_sub-dict | agree
+a1_bool_list_sub-over | agree
+a1_bool_list_sub-over-other | agree
+a1_bool_list_sub-slots | agree
+a1_bool_list_user | agree
+a1_bool_list_user-not | agree
+a1_bool_range_exact | agree
+a1_bool_range_user | agree
+a1_bool_range_user-not | agree
+a1_bool_set_exact | agree
+a1_bool_set_sub | agree
+a1_bool_set_sub-dict | agree
+a1_bool_set_sub-over | agree
+a1_bool_set_sub-over-other | agree
+a1_bool_set_sub-slots | agree
+a1_bool_set_user | agree
+a1_bool_set_user-not | agree
+a1_bool_str_exact | agree
+a1_bool_str_sub | agree
+a1_bool_str_sub-dict | agree
+a1_bool_str_sub-over | agree
+a1_bool_str_sub-over-other | agree
+a1_bool_str_sub-slots | agree
+a1_bool_str_user | agree
+a1_bool_str_user-not | agree
+a1_bool_tuple_exact | agree
+a1_bool_tuple_sub | agree
+a1_bool_tuple_sub-dict | agree
+a1_bool_tuple_sub-over | agree
+a1_bool_tuple_sub-over-other | agree
+a1_bool_tuple_sub-slots | agree
+a1_bool_tuple_user | agree
+a1_bool_tuple_user-not | agree
+a1_delitem_list_exact | agree
+a1_delitem_list_sub | agree
+a1_delitem_list_sub-dict | agree
+a1_delitem_list_sub-over | agree
+a1_delitem_list_sub-over-other | agree
+a1_delitem_list_sub-slots | agree
+a1_delitem_list_user | agree
+a1_delitem_list_user-not | agree
+a1_dict_display_dict_exact | agree
+a1_dict_display_dict_sub | agree
+a1_dict_display_dict_sub-dict | agree
+a1_dict_display_dict_sub-over | agree
+a1_dict_display_dict_sub-over-other | gap | built-in method dict_keyiterator.__length_hint__ is not modelled yet
+a1_dict_display_dict_sub-slots | agree
+a1_dict_display_dict_user | agree
+a1_dict_display_dict_user-not | agree
+a1_dict_of_dict_exact | agree
+a1_dict_of_dict_sub | agree
+a1_dict_of_dict_sub-dict | agree
+a1_dict_of_dict_sub-over | agree
+a1_dict_of_dict_sub-over-other | gap | built-in method dict_keyiterator.__length_hint__ is not modelled yet
+a1_dict_of_dict_sub-slots | agree
+a1_dict_of_dict_user | agree
+a1_dict_of_dict_user-not | agree
+a1_eq_bool_exact | agree
+a1_eq_bool_user | agree
+a1_eq_bool_user-not | agree
+a1_eq_bytes_exact | agree
+a1_eq_bytes_sub | agree
+a1_eq_bytes_sub-dict | agree
+a1_eq_bytes_sub-over | agree
+a1_eq_bytes_sub-over-other | agree
+a1_eq_bytes_sub-slots | agree
+a1_eq_bytes_user | agree
+a1_eq_bytes_user-not | agree
+a1_eq_dict_exact | agree
+a1_eq_dict_sub | agree
+a1_eq_dict_sub-dict | agree
+a1_eq_dict_sub-over | agree
+a1_eq_dict_sub-over-other | agree
+a1_eq_dict_sub-slots | agree
+a1_eq_dict_user | agree
+a1_eq_dict_user-not | agree
+a1_eq_float_exact | agree
+a1_eq_float_sub | agree
+a1_eq_float_sub-dict | agree
+a1_eq_float_sub-over | agree
+a1_eq_float_sub-over-other | agree
+a1_eq_float_sub-slots | agree
+a1_eq_float_user | agree
+a1_eq_float_user-not | agree
+a1_eq_frozenset_exact | agree
+a1_eq_frozenset_sub | agree
+a1_eq_frozenset_sub-dict | agree
+a1_eq_frozenset_sub-over | agree
+a1_eq_frozenset_sub-over-other | agree
+a1_eq_frozenset_sub-slots | agree
+a1_eq_frozenset_user | agree
+a1_eq_frozenset_user-not | agree
+a1_eq_int_bool-as-int_exact | agree
+a1_eq_int_exact_exact | agree
+a1_eq_int_exact_sub | agree
+a1_eq_int_exact_sub-over | agree
+a1_eq_int_exact_user | agree
+a1_eq_int_exact_user-not | agree
+a1_eq_int_sub-dict_exact | agree
+a1_eq_int_sub-over-other_exact | agree
+a1_eq_int_sub-over_exact | agree
+a1_eq_int_sub-over_sub | agree
+a1_eq_int_sub-over_sub-over | agree
+a1_eq_int_sub-over_user | agree
+a1_eq_int_sub-over_user-not | agree
+a1_eq_int_sub-slots_exact | agree
+a1_eq_int_sub_exact | agree
+a1_eq_int_sub_sub | agree
+a1_eq_int_sub_sub-over | agree
+a1_eq_int_sub_user | agree
+a1_eq_int_sub_user-not | agree
+a1_eq_int_user-not_exact | agree
+a1_eq_int_user-not_sub | agree
+a1_eq_int_user-not_sub-over | agree
+a1_eq_int_user-not_user | agree
+a1_eq_int_user-not_user-not | agree
+a1_eq_int_user_exact | agree
+a1_eq_int_user_sub | agree
+a1_eq_int_user_sub-over | agree
+a1_eq_int_user_user | agree
+a1_eq_int_user_user-not | agree
+a1_eq_list_exact | agree
+a1_eq_list_sub | agree
+a1_eq_list_sub-dict | agree
+a1_eq_list_sub-over | agree
+a1_eq_list_sub-over-other | agree
+a1_eq_list_sub-slots | agree
+a1_eq_list_user | agree
+a1_eq_list_user-not | agree
+a1_eq_range_exact | agree
+a1_eq_range_user | agree
+a1_eq_range_user-not | agree
+a1_eq_set_exact_exact | agree
+a1_eq_set_exact_sub | agree
+a1_eq_set_exact_sub-over | agree
+a1_eq_set_exact_user | agree
+a1_eq_set_exact_user-not | agree
+a1_eq_set_sub-dict_exact | agree
+a1_eq_set_sub-over-other_exact | agree
+a1_eq_set_sub-over_exact | agree
+a1_eq_set_sub-over_sub | agree
+a1_eq_set_sub-over_sub-over | agree
+a1_eq_set_sub-over_user | agree
+a1_eq_set_sub-over_user-not | agree
+a1_eq_set_sub-slots_exact | agree
+a1_eq_set_sub_exact | agree
+a1_eq_set_sub_sub | agree
+a1_eq_set_sub_sub-over | agree
+a1_eq_set_sub_user | agree
+a1_eq_set_sub_user-not | agree
+a1_eq_set_user-not_exact | agree
+a1_eq_set_user-not_sub | agree
+a1_eq_set_user-not_sub-over | agree
+a1_eq_set_user-not_user | agree
+a1_eq_set_user-not_user-not | agree
+a1_eq_set_user_exact | agree
+a1_eq_set_user_sub | agree
+a1_eq_set_user_sub-over | agree
+a1_eq_set_user_user | agree
+a1_eq_set_user_user-not | agree
+a1_eq_str_exact_exact | agree
+a1_eq_str_exact_sub | agree
+a1_eq_str_exact_sub-over | agree
+a1_eq_str_exact_user | agree
+a1_eq_str_exact_user-not | agree
+a1_eq_str_sub-dict_exact | agree
+a1_eq_str_sub-over-other_exact | agree
+a1_eq_str_sub-over_exact | agree
+a1_eq_str_sub-over_sub | agree
+a1_eq_str_sub-over_sub-over | agree
+a1_eq_str_sub-over_user | agree
+a1_eq_str_sub-over_user-not | agree
+a1_eq_str_sub-slots_exact | agree
+a1_eq_str_sub_exact | agree
+a1_eq_str_sub_sub | agree
+a1_eq_str_sub_sub-over | agree
+a1_eq_str_sub_user | agree
+a1_eq_str_sub_user-not | agree
+a1_eq_str_user-not_exact | agree
+a1_eq_str_user-not_sub | agree
+a1_eq_str_user-not_sub-over | agree
+a1_eq_str_user-not_user | agree
+a1_eq_str_user-not_user-not | agree
+a1_eq_str_user_exact | agree
+a1_eq_str_user_sub | agree
+a1_eq_str_user_sub-over | agree
+a1_eq_str_user_user | agree
+a1_eq_str_user_user-not | agree
+a1_eq_tuple_exact | agree
+a1_eq_tuple_sub | agree
+a1_eq_tuple_sub-dict | agree
+a1_eq_tuple_sub-over | agree
+a1_eq_tuple_sub-over-other | agree
+a1_eq_tuple_sub-slots | agree
+a1_eq_tuple_user | agree
+a1_eq_tuple_user-not | agree
+a1_float_float_exact | agree
+a1_float_float_sub | agree
+a1_float_float_sub-dict | agree
+a1_float_float_sub-over | agree
+a1_float_float_sub-over-other | agree
+a1_float_float_sub-slots | agree
+a1_float_float_user | agree
+a1_float_float_user-not | agree
+a1_float_int_bool-as-int | agree
+a1_float_int_exact | agree
+a1_float_int_sub | agree
+a1_float_int_sub-dict | agree
+a1_float_int_sub-over | agree
+a1_float_int_sub-over-other | agree
+a1_float_int_sub-slots | agree
+a1_float_int_user | agree
+a1_float_int_user-not | agree
+a1_floordiv_bool_exact | agree
+a1_floordiv_bool_user | agree
+a1_floordiv_bool_user-not | agree
+a1_floordiv_float_exact | agree
+a1_floordiv_float_sub | agree
+a1_floordiv_float_sub-dict | agree
+a1_floordiv_float_sub-over | agree
+a1_floordiv_float_sub-over-other | agree
+a1_floordiv_float_sub-slots | agree
+a1_floordiv_float_user | agree
+a1_floordiv_float_user-not | agree
+a1_floordiv_int_bool-as-int_exact | agree
+a1_floordiv_int_exact_exact | agree
+a1_floordiv_int_exact_sub | agree
+a1_floordiv_int_exact_sub-over | agree
+a1_floordiv_int_exact_user | agree
+a1_floordiv_int_exact_user-not | agree
+a1_floordiv_int_sub-dict_exact | agree
+a1_floordiv_int_sub-over-other_exact | agree
+a1_floordiv_int_sub-over_exact | agree
+a1_floordiv_int_sub-over_sub | agree
+a1_floordiv_int_sub-over_sub-over | agree
+a1_floordiv_int_sub-over_user | agree
+a1_floordiv_int_sub-over_user-not | agree
+a1_floordiv_int_sub-slots_exact | agree
+a1_floordiv_int_sub_exact | agree
+a1_floordiv_int_sub_sub | agree
+a1_floordiv_int_sub_sub-over | agree
+a1_floordiv_int_sub_user | agree
+a1_floordiv_int_sub_user-not | agree
+a1_floordiv_int_user-not_exact | agree
+a1_floordiv_int_user-not_sub | agree
+a1_floordiv_int_user-not_sub-over | agree
+a1_floordiv_int_user-not_user | agree
+a1_floordiv_int_user-not_user-not | agree
+a1_floordiv_int_user_exact | agree
+a1_floordiv_int_user_sub | agree
+a1_floordiv_int_user_sub-over | agree
+a1_floordiv_int_user_user | agree
+a1_floordiv_int_user_user-not | agree
+a1_for_dict_exact | agree
+a1_for_dict_sub | agree
+a1_for_dict_sub-dict | agree
+a1_for_dict_sub-over | agree
+a1_for_dict_sub-over-other | agree
+a1_for_dict_sub-slots | agree
+a1_for_dict_user | agree
+a1_for_dict_user-not | agree
+a1_for_list_exact | agree
+a1_for_list_sub | agree
+a1_for_list_sub-dict | agree
+a1_for_list_sub-over | agree
+a1_for_list_sub-over-other | agree
+a1_for_list_sub-slots | agree
+a1_for_list_user | agree
+a1_for_list_user-not | agree
+a1_for_range_exact | agree
+a1_for_range_user | agree
+a1_for_range_user-not | agree
+a1_for_str_exact | agree
+a1_for_str_sub | agree
+a1_for_str_sub-dict | agree
+a1_for_str_sub-over | agree
+a1_for_str_sub-over-other | agree
+a1_for_str_sub-slots | agree
+a1_for_str_user | agree
+a1_for_str_user-not | agree
+a1_for_tuple_exact | agree
+a1_for_tuple_sub | agree
+a1_for_tuple_sub-dict | agree
+a1_for_tuple_sub-over | agree
+a1_for_tuple_sub-over-other | agree
+a1_for_tuple_sub-slots | agree
+a1_for_tuple_user | agree
+a1_for_tuple_user-not | agree
+a1_format_bool_exact | gap | built-in format is not modelled yet
+a1_format_bool_user | gap | built-in format is not modelled yet
+a1_format_bool_user-not | gap | built-in format is not modelled yet
+a1_format_float_exact | gap | built-in format is not modelled yet
+a1_format_float_sub | gap | built-in format is not modelled yet
+a1_format_float_sub-dict | gap | built-in format is not modelled yet
+a1_format_float_sub-over | gap | built-in format is not modelled yet
+a1_format_float_sub-over-other | gap | built-in format is not modelled yet
+a1_format_float_sub-slots | gap | built-in format is not modelled yet
+a1_format_float_user | gap | built-in format is not modelled yet
+a1_format_float_user-not | gap | built-in format is not modelled yet
+a1_format_int_bool-as-int | gap | built-in format is not modelled yet
+a1_format_int_exact | gap | built-in format is not modelled yet
+a1_format_int_sub | gap | built-in format is not modelled yet
+a1_format_int_sub-dict | gap | built-in format is not modelled yet
+a1_format_int_sub-over | gap | built-in format is not modelled yet
+a1_format_int_sub-over-other | gap | built-in format is not modelled yet
+a1_format_int_sub-slots | gap | built-in format is not modelled yet
+a1_format_int_user | gap | built-in format is not modelled yet
+a1_format_int_user-not | gap | built-in format is not modelled yet
+a1_format_str_exact | gap | built-in format is not modelled yet
+a1_format_str_sub | gap | built-in format is not modelled yet
+a1_format_str_sub-dict | gap | built-in format is not modelled yet
+a1_format_str_sub-over | gap | built-in format is not modelled yet
+a1_format_str_sub-over-other | gap | built-in format is not modelled yet
+a1_format_str_sub-slots | gap | built-in format is not modelled yet
+a1_format_str_user | gap | built-in format is not modelled yet
+a1_format_str_user-not | gap | built-in format is not modelled yet
+a1_fstring_float_exact | agree
+a1_fstring_float_sub | agree
+a1_fstring_float_sub-dict | agree
+a1_fstring_float_sub-over | agree
+a1_fstring_float_sub-over-other | agree
+a1_fstring_float_sub-slots | agree
+a1_fstring_float_user | agree
+a1_fstring_float_user-not | agree
+a1_fstring_int_bool-as-int | agree
+a1_fstring_int_exact | agree
+a1_fstring_int_sub | agree
+a1_fstring_int_sub-dict | agree
+a1_fstring_int_sub-over | agree
+a1_fstring_int_sub-over-other | agree
+a1_fstring_int_sub-slots | agree
+a1_fstring_int_user | agree
+a1_fstring_int_user-not | agree
+a1_fstring_str_exact | agree
+a1_fstring_str_sub | agree
+a1_fstring_str_sub-dict | agree
+a1_fstring_str_sub-over | agree
+a1_fstring_str_sub-over-other | agree
+a1_fstring_str_sub-slots | agree
+a1_fstring_str_user | agree
+a1_fstring_str_user-not | agree
+a1_ge_bool_exact | agree
+a1_ge_bool_user | agree
+a1_ge_bool_user-not | agree
+a1_ge_float_exact | agree
+a1_ge_float_sub | agree
+a1_ge_float_sub-dict | agree
+a1_ge_float_sub-over | agree
+a1_ge_float_sub-over-other | agree
+a1_ge_float_sub-slots | agree
+a1_ge_float_user | agree
+a1_ge_float_user-not | agree
+a1_ge_frozenset_exact | agree
+a1_ge_frozenset_sub | agree
+a1_ge_frozenset_sub-dict | agree
+a1_ge_frozenset_sub-over | agree
+a1_ge_frozenset_sub-over-other | agree
+a1_ge_frozenset_sub-slots | agree
+a1_ge_frozenset_user | agree
+a1_ge_frozenset_user-not | agree
+a1_ge_int_bool-as-int_exact | agree
+a1_ge_int_exact_exact | agree
+a1_ge_int_exact_sub | agree
+a1_ge_int_exact_sub-over | agree
+a1_ge_int_exact_user | agree
+a1_ge_int_exact_user-not | agree
+a1_ge_int_sub-dict_exact | agree
+a1_ge_int_sub-over-other_exact | agree
+a1_ge_int_sub-over_exact | agree
+a1_ge_int_sub-over_sub | agree
+a1_ge_int_sub-over_sub-over | agree
+a1_ge_int_sub-over_user | agree
+a1_ge_int_sub-over_user-not | agree
+a1_ge_int_sub-slots_exact | agree
+a1_ge_int_sub_exact | agree
+a1_ge_int_sub_sub | agree
+a1_ge_int_sub_sub-over | agree
+a1_ge_int_sub_user | agree
+a1_ge_int_sub_user-not | agree
+a1_ge_int_user-not_exact | agree
+a1_ge_int_user-not_sub | agree
+a1_ge_int_user-not_sub-over | agree
+a1_ge_int_user-not_user | agree
+a1_ge_int_user-not_user-not | agree
+a1_ge_int_user_exact | agree
+a1_ge_int_user_sub | agree
+a1_ge_int_user_sub-over | agree
+a1_ge_int_user_user | agree
+a1_ge_int_user_user-not | agree
+a1_ge_list_exact | agree
+a1_ge_list_sub | agree
+a1_ge_list_sub-dict | agree
+a1_ge_list_sub-over | agree
+a1_ge_list_sub-over-other | agree
+a1_ge_list_sub-slots | agree
+a1_ge_list_user | agree
+a1_ge_list_user-not | agree
+a1_ge_set_exact_exact | agree
+a1_ge_set_exact_sub | agree
+a1_ge_set_exact_sub-over | agree
+a1_ge_set_exact_user | agree
+a1_ge_set_exact_user-not | agree
+a1_ge_set_sub-dict_exact | agree
+a1_ge_set_sub-over-other_exact | agree
+a1_ge_set_sub-over_exact | agree
+a1_ge_set_sub-over_sub | agree
+a1_ge_set_sub-over_sub-over | agree
+a1_ge_set_sub-over_user | agree
+a1_ge_set_sub-over_user-not | agree
+a1_ge_set_sub-slots_exact | agree
+a1_ge_set_sub_exact | agree
+a1_ge_set_sub_sub | agree
+a1_ge_set_sub_sub-over | agree
+a1_ge_set_sub_user | agree
+a1_ge_set_sub_user-not | agree
+a1_ge_set_user-not_exact | agree
+a1_ge_set_user-not_sub | agree
+a1_ge_set_user-not_sub-over | agree
+a1_ge_set_user-not_user | agree
+a1_ge_set_user-not_user-not | agree
+a1_ge_set_user_exact | agree
+a1_ge_set_user_sub | agree
+a1_ge_set_user_sub-over | agree
+a1_ge_set_user_user | agree
+a1_ge_set_user_user-not | agree
+a1_ge_str_exact_exact | agree
+a1_ge_str_exact_sub | agree
+a1_ge_str_exact_sub-over | agree
+a1_ge_str_exact_user | agree
+a1_ge_str_exact_user-not | agree
+a1_ge_str_sub-dict_exact | agree
+a1_ge_str_sub-over-other_exact | agree
+a1_ge_str_sub-over_exact | agree
+a1_ge_str_sub-over_sub | agree
+a1_ge_str_sub-over_sub-over | agree
+a1_ge_str_sub-over_user | agree
+a1_ge_str_sub-over_user-not | agree
+a1_ge_str_sub-slots_exact | agree
+a1_ge_str_sub_exact | agree
+a1_ge_str_sub_sub | agree
+a1_ge_str_sub_sub-over | agree
+a1_ge_str_sub_user | agree
+a1_ge_str_sub_user-not | agree
+a1_ge_str_user-not_exact | agree
+a1_ge_str_user-not_sub | agree
+a1_ge_str_user-not_sub-over | agree
+a1_ge_str_user-not_user | agree
+a1_ge_str_user-not_user-not | agree
+a1_ge_str_user_exact | agree
+a1_ge_str_user_sub | agree
+a1_ge_str_user_sub-over | agree
+a1_ge_str_user_user | agree
+a1_ge_str_user_user-not | agree
+a1_ge_tuple_exact | agree
+a1_ge_tuple_sub | agree
+a1_ge_tuple_sub-dict | agree
+a1_ge_tuple_sub-over | agree
+a1_ge_tuple_sub-over-other | agree
+a1_ge_tuple_sub-slots | agree
+a1_ge_tuple_user | agree
+a1_ge_tuple_user-not | agree
+a1_getitem_bytes_exact | agree
+a1_getitem_bytes_sub | agree
+a1_getitem_bytes_sub-dict | agree
+a1_getitem_bytes_sub-over | agree
+a1_getitem_bytes_sub-over-other | agree
+a1_getitem_bytes_sub-slots | agree
+a1_getitem_bytes_user | agree
+a1_getitem_bytes_user-not | agree
+a1_getitem_list_exact | agree
+a1_getitem_list_sub | agree
+a1_getitem_list_sub-dict | agree
+a1_getitem_list_sub-over | agree
+a1_getitem_list_sub-over-other | agree
+a1_getitem_list_sub-slots | agree
+a1_getitem_list_user | agree
+a1_getitem_list_user-not | agree
+a1_getitem_range_exact | agree
+a1_getitem_range_user | agree
+a1_getitem_range_user-not | agree
+a1_getitem_str_exact | agree
+a1_getitem_str_sub | agree
+a1_getitem_str_sub-dict | agree
+a1_getitem_str_sub-over | agree
+a1_getitem_str_sub-over-other | agree
+a1_getitem_str_sub-slots | agree
+a1_getitem_str_user | agree
+a1_getitem_str_user-not | agree
+a1_getitem_tuple_exact | agree
+a1_getitem_tuple_sub | agree
+a1_getitem_tuple_sub-dict | agree
+a1_getitem_tuple_sub-over | agree
+a1_getitem_tuple_sub-over-other | agree
+a1_getitem_tuple_sub-slots | agree
+a1_getitem_tuple_user | agree
+a1_getitem_tuple_user-not | agree
+a1_getkey_dict_exact | agree
+a1_getkey_dict_sub | agree
+a1_getkey_dict_sub-dict | agree
+a1_getkey_dict_sub-over | agree
+a1_getkey_dict_sub-over-other | agree
+a1_getkey_dict_sub-slots | agree
+a1_getkey_dict_user | agree
+a1_getkey_dict_user-not | agree
+a1_hash_bool_exact | agree
+a1_hash_bool_user | agree
+a1_hash_bool_user-not | agree
+a1_hash_float_exact | agree
+a1_hash_float_sub | agree
+a1_hash_float_sub-dict | agree
+a1_hash_float_sub-over | agree
+a1_hash_float_sub-over-other | agree
+a1_hash_float_sub-slots | agree
+a1_hash_float_user | agree
+a1_hash_float_user-not | agree
+a1_hash_frozenset_exact | agree
+a1_hash_frozenset_sub | agree
+a1_hash_frozenset_sub-dict | agree
+a1_hash_frozenset_sub-over | agree
+a1_hash_frozenset_sub-over-other | agree
+a1_hash_frozenset_sub-slots | agree
+a1_hash_frozenset_user | agree
+a1_hash_frozenset_user-not | agree
+a1_hash_int_bool-as-int | agree
+a1_hash_int_exact | agree
+a1_hash_int_sub | agree
+a1_hash_int_sub-dict | agree
+a1_hash_int_sub-over | agree
+a1_hash_int_sub-over-other | agree
+a1_hash_int_sub-slots | agree
+a1_hash_int_user | agree
+a1_hash_int_user-not | agree
+a1_hash_tuple_exact | agree
+a1_hash_tuple_sub | agree
+a1_hash_tuple_sub-dict | agree
+a1_hash_tuple_sub-over | agree
+a1_hash_tuple_sub-over-other | agree
+a1_hash_tuple_sub-slots | agree
+a1_hash_tuple_user | agree
+a1_hash_tuple_user-not | agree
+a1_iadd_int_bool-as-int_exact | agree
+a1_iadd_int_exact_exact | agree
+a1_iadd_int_exact_sub | agree
+a1_iadd_int_exact_sub-over | agree
+a1_iadd_int_exact_user | agree
+a1_iadd_int_exact_user-not | agree
+a1_iadd_int_sub-dict_exact | agree
+a1_iadd_int_sub-over-other_exact | agree
+a1_iadd_int_sub-over_exact | agree
+a1_iadd_int_sub-over_sub | agree
+a1_iadd_int_sub-over_sub-over | agree
+a1_iadd_int_sub-over_user | agree
+a1_iadd_int_sub-over_user-not | agree
+a1_iadd_int_sub-slots_exact | agree
+a1_iadd_int_sub_exact | agree
+a1_iadd_int_sub_sub | agree
+a1_iadd_int_sub_sub-over | agree
+a1_iadd_int_sub_user | agree
+a1_iadd_int_sub_user-not | agree
+a1_iadd_int_user-not_exact | agree
+a1_iadd_int_user-not_sub | agree
+a1_iadd_int_user-not_sub-over | agree
+a1_iadd_int_user-not_user | agree
+a1_iadd_int_user-not_user-not | agree
+a1_iadd_int_user_exact | agree
+a1_iadd_int_user_sub | agree
+a1_iadd_int_user_sub-over | agree
+a1_iadd_int_user_user | agree
+a1_iadd_int_user_user-not | agree
+a1_iadd_list_exact | agree
+a1_iadd_list_sub | gap | an in-place operator on an instance of a subclass of list is not modelled yet
+a1_iadd_list_sub-dict | gap | an in-place operator on an instance of a subclass of list is not modelled yet
+a1_iadd_list_sub-over | gap | an in-place operator on an instance of a subclass of list is not modelled yet
+a1_iadd_list_sub-over-other | gap | an in-place operator on an instance of a subclass of list is not modelled yet
+a1_iadd_list_sub-slots | gap | an in-place operator on an instance of a subclass of list is not modelled yet
+a1_iadd_list_user | agree
+a1_iadd_list_user-not | agree
+a1_iadd_str_exact_exact | agree
+a1_iadd_str_exact_sub | agree
+a1_iadd_str_exact_sub-over | agree
+a1_iadd_str_exact_user | agree
+a1_iadd_str_exact_user-not | agree
+a1_iadd_str_sub-dict_exact | agree
+a1_iadd_str_sub-over-other_exact | agree
+a1_iadd_str_sub-over_exact | agree
+a1_iadd_str_sub-over_sub | agree
+a1_iadd_str_sub-over_sub-over | agree
+a1_iadd_str_sub-over_user | agree
+a1_iadd_str_sub-over_user-not | agree
+a1_iadd_str_sub-slots_exact | agree
+a1_iadd_str_sub_exact | agree
+a1_iadd_str_sub_sub | agree
+a1_iadd_str_sub_sub-over | agree
+a1_iadd_str_sub_user | agree
+a1_iadd_str_sub_user-not | agree
+a1_iadd_str_user-not_exact | agree
+a1_iadd_str_user-not_sub | agree
+a1_iadd_str_user-not_sub-over | agree
+a1_iadd_str_user-not_user | agree
+a1_iadd_str_user-not_user-not | agree
+a1_iadd_str_user_exact | agree
+a1_iadd_str_user_sub | agree
+a1_iadd_str_user_sub-over | agree
+a1_iadd_str_user_user | agree
+a1_iadd_str_user_user-not | agree
+a1_iadd_tuple_exact | agree
+a1_iadd_tuple_sub | agree
+a1_iadd_tuple_sub-dict | agree
+a1_iadd_tuple_sub-over | agree
+a1_iadd_tuple_sub-over-other | agree
+a1_iadd_tuple_sub-slots | agree
+a1_iadd_tuple_user | agree
+a1_iadd_tuple_user-not | agree
+a1_in_dict_exact | agree
+a1_in_dict_sub | agree
+a1_in_dict_sub-dict | agree
+a1_in_dict_sub-over | agree
+a1_in_dict_sub-over-other | agree
+a1_in_dict_sub-slots | agree
+a1_in_dict_user | agree
+a1_in_dict_user-not | agree
+a1_in_frozenset_exact | agree
+a1_in_frozenset_sub | agree
+a1_in_frozenset_sub-dict | agree
+a1_in_frozenset_sub-over | agree
+a1_in_frozenset_sub-over-other | agree
+a1_in_frozenset_sub-slots | agree
+a1_in_frozenset_user | agree
+a1_in_frozenset_user-not | agree
+a1_in_list_exact | agree
+a1_in_list_sub | agree
+a1_in_list_sub-dict | agree
+a1_in_list_sub-over | agree
+a1_in_list_sub-over-other | agree
+a1_in_list_sub-slots | agree
+a1_in_list_user | agree
+a1_in_list_user-not | agree
+a1_in_range_exact | agree
+a1_in_range_user | agree
+a1_in_range_user-not | agree
+a1_in_set_exact | agree
+a1_in_set_sub | agree
+a1_in_set_sub-dict | agree
+a1_in_set_sub-over | agree
+a1_in_set_sub-over-other | agree
+a1_in_set_sub-slots | agree
+a1_in_set_user | agree
+a1_in_set_user-not | agree
+a1_in_tuple_exact | agree
+a1_in_tuple_sub | agree
+a1_in_tuple_sub-dict | agree
+a1_in_tuple_sub-over | agree
+a1_in_tuple_sub-over-other | agree
+a1_in_tuple_sub-slots | agree
+a1_in_tuple_user | agree
+a1_in_tuple_user-not | agree
+a1_index_bool_exact | agree
+a1_index_bool_user | agree
+a1_index_bool_user-not | agree
+a1_index_int_bool-as-int | agree
+a1_index_int_exact | agree
+a1_index_int_sub | agree
+a1_index_int_sub-dict | agree
+a1_index_int_sub-over | agree
+a1_index_int_sub-over-other | agree
+a1_index_int_sub-slots | agree
+a1_index_int_user | agree
+a1_index_int_user-not | agree
+a1_int_bool_exact | agree
+a1_int_bool_user | agree
+a1_int_bool_user-not | agree
+a1_int_float_exact | agree
+a1_int_float_sub | agree
+a1_int_float_sub-dict | agree
+a1_int_float_sub-over | agree
+a1_int_float_sub-over-other | agree
+a1_int_float_sub-slots | agree
+a1_int_float_user | agree
+a1_int_float_user-not | agree
+a1_int_int_bool-as-int | agree
+a1_int_int_exact | agree
+a1_int_int_sub | agree
+a1_int_int_sub-dict | agree
+a1_int_int_sub-over | agree
+a1_int_int_sub-over-other | agree
+a1_int_int_sub-slots | agree
+a1_int_int_user | agree
+a1_int_int_user-not | agree
+a1_invert_int_bool-as-int | gap | not modelled: ~ on a bool, which warns
+a1_invert_int_exact | agree
+a1_invert_int_sub | agree
+a1_invert_int_sub-dict | agree
+a1_invert_int_sub-over | agree
+a1_invert_int_sub-over-other | agree
+a1_invert_int_sub-slots | agree
+a1_invert_int_user | agree
+a1_invert_int_user-not | agree
+a1_ior_dict_exact | agree
+a1_ior_dict_sub | agree
+a1_ior_dict_sub-dict | agree
+a1_ior_dict_sub-over | agree
+a1_ior_dict_sub-over-other | agree
+a1_ior_dict_sub-slots | agree
+a1_ior_dict_user | agree
+a1_ior_dict_user-not | agree
+a1_ior_int_bool-as-int_exact | agree
+a1_ior_int_exact_exact | agree
+a1_ior_int_exact_sub | agree
+a1_ior_int_exact_sub-over | agree
+a1_ior_int_exact_user | agree
+a1_ior_int_exact_user-not | agree
+a1_ior_int_sub-dict_exact | agree
+a1_ior_int_sub-over-other_exact | agree
+a1_ior_int_sub-over_exact | agree
+a1_ior_int_sub-over_sub | agree
+a1_ior_int_sub-over_sub-over | agree
+a1_ior_int_sub-over_user | agree
+a1_ior_int_sub-over_user-not | agree
+a1_ior_int_sub-slots_exact | agree
+a1_ior_int_sub_exact | agree
+a1_ior_int_sub_sub | agree
+a1_ior_int_sub_sub-over | agree
+a1_ior_int_sub_user | agree
+a1_ior_int_sub_user-not | agree
+a1_ior_int_user-not_exact | agree
+a1_ior_int_user-not_sub | agree
+a1_ior_int_user-not_sub-over | agree
+a1_ior_int_user-not_user | agree
+a1_ior_int_user-not_user-not | agree
+a1_ior_int_user_exact | agree
+a1_ior_int_user_sub | agree
+a1_ior_int_user_sub-over | agree
+a1_ior_int_user_user | agree
+a1_ior_int_user_user-not | agree
+a1_ior_set_exact_exact | gap | a slot of a set whose layout is inexact
+a1_ior_set_exact_sub | gap | a slot of a set whose layout is inexact
+a1_ior_set_exact_sub-over | gap | a slot of a set whose layout is inexact
+a1_ior_set_exact_user | agree
+a1_ior_set_exact_user-not | agree
+a1_ior_set_sub-dict_exact | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_ior_set_sub-over-other_exact | gap | the repr of a set whose class defines __iter__ or __len__ is not modelled yet
+a1_ior_set_sub-over_exact | agree
+a1_ior_set_sub-over_sub | agree
+a1_ior_set_sub-over_sub-over | agree
+a1_ior_set_sub-over_user | agree
+a1_ior_set_sub-over_user-not | agree
+a1_ior_set_sub-slots_exact | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_ior_set_sub_exact | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_ior_set_sub_sub | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_ior_set_sub_sub-over | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_ior_set_sub_user | agree
+a1_ior_set_sub_user-not | agree
+a1_ior_set_user-not_exact | agree
+a1_ior_set_user-not_sub | agree
+a1_ior_set_user-not_sub-over | agree
+a1_ior_set_user-not_user | agree
+a1_ior_set_user-not_user-not | agree
+a1_ior_set_user_exact | agree
+a1_ior_set_user_sub | agree
+a1_ior_set_user_sub-over | agree
+a1_ior_set_user_user | agree
+a1_ior_set_user_user-not | agree
+a1_isinstance_bool_exact | agree
+a1_isinstance_bool_user-not | agree
+a1_isinstance_bytes_exact | agree
+a1_isinstance_bytes_sub | agree
+a1_isinstance_bytes_sub-dict | agree
+a1_isinstance_bytes_sub-slots | agree
+a1_isinstance_bytes_user-not | agree
+a1_isinstance_dict_exact | agree
+a1_isinstance_dict_sub | agree
+a1_isinstance_dict_sub-dict | agree
+a1_isinstance_dict_sub-slots | agree
+a1_isinstance_dict_user-not | agree
+a1_isinstance_float_exact | agree
+a1_isinstance_float_sub | agree
+a1_isinstance_float_sub-dict | agree
+a1_isinstance_float_sub-slots | agree
+a1_isinstance_float_user-not | agree
+a1_isinstance_frozenset_exact | agree
+a1_isinstance_frozenset_sub | agree
+a1_isinstance_frozenset_sub-dict | agree
+a1_isinstance_frozenset_sub-slots | agree
+a1_isinstance_frozenset_user-not | agree
+a1_isinstance_int_bool-as-int | agree
+a1_isinstance_int_exact | agree
+a1_isinstance_int_sub | agree
+a1_isinstance_int_sub-dict | agree
+a1_isinstance_int_sub-slots | agree
+a1_isinstance_int_user-not | agree
+a1_isinstance_list_exact | agree
+a1_isinstance_list_sub | agree
+a1_isinstance_list_sub-dict | agree
+a1_isinstance_list_sub-slots | agree
+a1_isinstance_list_user-not | agree
+a1_isinstance_range_exact | agree
+a1_isinstance_range_user-not | agree
+a1_isinstance_set_exact | agree
+a1_isinstance_set_sub | agree
+a1_isinstance_set_sub-dict | agree
+a1_isinstance_set_sub-slots | agree
+a1_isinstance_set_user-not | agree
+a1_isinstance_str_exact | agree
+a1_isinstance_str_sub | agree
+a1_isinstance_str_sub-dict | agree
+a1_isinstance_str_sub-slots | agree
+a1_isinstance_str_user-not | agree
+a1_isinstance_tuple_exact | agree
+a1_isinstance_tuple_sub | agree
+a1_isinstance_tuple_sub-dict | agree
+a1_isinstance_tuple_sub-slots | agree
+a1_isinstance_tuple_user-not | agree
+a1_iter_next_dict_exact | agree
+a1_iter_next_dict_sub | agree
+a1_iter_next_dict_sub-dict | agree
+a1_iter_next_dict_sub-over | agree
+a1_iter_next_dict_sub-over-other | agree
+a1_iter_next_dict_sub-slots | agree
+a1_iter_next_dict_user | agree
+a1_iter_next_dict_user-not | agree
+a1_iter_next_list_exact | agree
+a1_iter_next_list_sub | agree
+a1_iter_next_list_sub-dict | agree
+a1_iter_next_list_sub-over | agree
+a1_iter_next_list_sub-over-other | agree
+a1_iter_next_list_sub-slots | agree
+a1_iter_next_list_user | agree
+a1_iter_next_list_user-not | agree
+a1_iter_next_range_exact | agree
+a1_iter_next_range_user | agree
+a1_iter_next_range_user-not | agree
+a1_iter_next_str_exact | agree
+a1_iter_next_str_sub | agree
+a1_iter_next_str_sub-dict | agree
+a1_iter_next_str_sub-over | agree
+a1_iter_next_str_sub-over-other | agree
+a1_iter_next_str_sub-slots | agree
+a1_iter_next_str_user | agree
+a1_iter_next_str_user-not | agree
+a1_iter_next_tuple_exact | agree
+a1_iter_next_tuple_sub | agree
+a1_iter_next_tuple_sub-dict | agree
+a1_iter_next_tuple_sub-over | agree
+a1_iter_next_tuple_sub-over-other | agree
+a1_iter_next_tuple_sub-slots | agree
+a1_iter_next_tuple_user | agree
+a1_iter_next_tuple_user-not | agree
+a1_join_str_exact | agree
+a1_join_str_sub | agree
+a1_join_str_sub-dict | agree
+a1_join_str_sub-over | agree
+a1_join_str_sub-over-other | agree
+a1_join_str_sub-slots | agree
+a1_join_str_user | agree
+a1_join_str_user-not | agree
+a1_len_bytes_exact | agree
+a1_len_bytes_sub | agree
+a1_len_bytes_sub-dict | agree
+a1_len_bytes_sub-over | agree
+a1_len_bytes_sub-over-other | agree
+a1_len_bytes_sub-slots | agree
+a1_len_bytes_user | agree
+a1_len_bytes_user-not | agree
+a1_len_dict_exact | agree
+a1_len_dict_sub | agree
+a1_len_dict_sub-dict | agree
+a1_len_dict_sub-over | agree
+a1_len_dict_sub-over-other | agree
+a1_len_dict_sub-slots | agree
+a1_len_dict_user | agree
+a1_len_dict_user-not | agree
+a1_len_frozenset_exact | agree
+a1_len_frozenset_sub | agree
+a1_len_frozenset_sub-dict | agree
+a1_len_frozenset_sub-over | agree
+a1_len_frozenset_sub-over-other | agree
+a1_len_frozenset_sub-slots | agree
+a1_len_frozenset_user | agree
+a1_len_frozenset_user-not | agree
+a1_len_list_exact | agree
+a1_len_list_sub | agree
+a1_len_list_sub-dict | agree
+a1_len_list_sub-over | agree
+a1_len_list_sub-over-other | agree
+a1_len_list_sub-slots | agree
+a1_len_list_user | agree
+a1_len_list_user-not | agree
+a1_len_range_exact | agree
+a1_len_range_user | agree
+a1_len_range_user-not | agree
+a1_len_set_exact | agree
+a1_len_set_sub | agree
+a1_len_set_sub-dict | agree
+a1_len_set_sub-over | agree
+a1_len_set_sub-over-other | agree
+a1_len_set_sub-slots | agree
+a1_len_set_user | agree
+a1_len_set_user-not | agree
+a1_len_str_exact | agree
+a1_len_str_sub | agree
+a1_len_str_sub-dict | agree
+a1_len_str_sub-over | agree
+a1_len_str_sub-over-other | agree
+a1_len_str_sub-slots | agree
+a1_len_str_user | agree
+a1_len_str_user-not | agree
+a1_len_tuple_exact | agree
+a1_len_tuple_sub | agree
+a1_len_tuple_sub-dict | agree
+a1_len_tuple_sub-over | agree
+a1_len_tuple_sub-over-other | agree
+a1_len_tuple_sub-slots | agree
+a1_len_tuple_user | agree
+a1_len_tuple_user-not | agree
+a1_list_of_dict_exact | agree
+a1_list_of_dict_sub | agree
+a1_list_of_dict_sub-dict | agree
+a1_list_of_dict_sub-over | agree
+a1_list_of_dict_sub-over-other | agree
+a1_list_of_dict_sub-slots | agree
+a1_list_of_dict_user | agree
+a1_list_of_dict_user-not | agree
+a1_list_of_list_exact | agree
+a1_list_of_list_sub | agree
+a1_list_of_list_sub-dict | agree
+a1_list_of_list_sub-over | agree
+a1_list_of_list_sub-over-other | agree
+a1_list_of_list_sub-slots | agree
+a1_list_of_list_user | agree
+a1_list_of_list_user-not | agree
+a1_list_of_range_exact | agree
+a1_list_of_range_user | agree
+a1_list_of_range_user-not | agree
+a1_list_of_set_exact | gap | a slot of a set whose layout is inexact
+a1_list_of_set_sub | gap | a slot of a set whose layout is inexact
+a1_list_of_set_sub-dict | gap | a slot of a set whose layout is inexact
+a1_list_of_set_sub-over | agree
+a1_list_of_set_sub-over-other | gap | a slot of a set whose layout is inexact
+a1_list_of_set_sub-slots | gap | a slot of a set whose layout is inexact
+a1_list_of_set_user | agree
+a1_list_of_set_user-not | agree
+a1_list_of_str_exact | agree
+a1_list_of_str_sub | agree
+a1_list_of_str_sub-dict | agree
+a1_list_of_str_sub-over | agree
+a1_list_of_str_sub-over-other | agree
+a1_list_of_str_sub-slots | agree
+a1_list_of_str_user | agree
+a1_list_of_str_user-not | agree
+a1_list_of_tuple_exact | agree
+a1_list_of_tuple_sub | agree
+a1_list_of_tuple_sub-dict | agree
+a1_list_of_tuple_sub-over | agree
+a1_list_of_tuple_sub-over-other | agree
+a1_list_of_tuple_sub-slots | agree
+a1_list_of_tuple_user | agree
+a1_list_of_tuple_user-not | agree
+a1_listcomp_list_exact | agree
+a1_listcomp_list_sub | agree
+a1_listcomp_list_sub-dict | agree
+a1_listcomp_list_sub-over | agree
+a1_listcomp_list_sub-over-other | agree
+a1_listcomp_list_sub-slots | agree
+a1_listcomp_list_user | agree
+a1_listcomp_list_user-not | agree
+a1_listcomp_set_exact | gap | a slot of a set whose layout is inexact
+a1_listcomp_set_sub | gap | a slot of a set whose layout is inexact
+a1_listcomp_set_sub-dict | gap | a slot of a set whose layout is inexact
+a1_listcomp_set_sub-over | agree
+a1_listcomp_set_sub-over-other | gap | a slot of a set whose layout is inexact
+a1_listcomp_set_sub-slots | gap | a slot of a set whose layout is inexact
+a1_listcomp_set_user | agree
+a1_listcomp_set_user-not | agree
+a1_listcomp_str_exact | agree
+a1_listcomp_str_sub | agree
+a1_listcomp_str_sub-dict | agree
+a1_listcomp_str_sub-over | agree
+a1_listcomp_str_sub-over-other | agree
+a1_listcomp_str_sub-slots | agree
+a1_listcomp_str_user | agree
+a1_listcomp_str_user-not | agree
+a1_listcomp_tuple_exact | agree
+a1_listcomp_tuple_sub | agree
+a1_listcomp_tuple_sub-dict | agree
+a1_listcomp_tuple_sub-over | agree
+a1_listcomp_tuple_sub-over-other | agree
+a1_listcomp_tuple_sub-slots | agree
+a1_listcomp_tuple_user | agree
+a1_listcomp_tuple_user-not | agree
+a1_lshift_bool_exact | agree
+a1_lshift_bool_user | agree
+a1_lshift_bool_user-not | agree
+a1_lshift_int_bool-as-int_exact | agree
+a1_lshift_int_exact_exact | agree
+a1_lshift_int_exact_sub | agree
+a1_lshift_int_exact_sub-over | agree
+a1_lshift_int_exact_user | agree
+a1_lshift_int_exact_user-not | agree
+a1_lshift_int_sub-dict_exact | agree
+a1_lshift_int_sub-over-other_exact | agree
+a1_lshift_int_sub-over_exact | agree
+a1_lshift_int_sub-over_sub | agree
+a1_lshift_int_sub-over_sub-over | agree
+a1_lshift_int_sub-over_user | agree
+a1_lshift_int_sub-over_user-not | agree
+a1_lshift_int_sub-slots_exact | agree
+a1_lshift_int_sub_exact | agree
+a1_lshift_int_sub_sub | agree
+a1_lshift_int_sub_sub-over | agree
+a1_lshift_int_sub_user | agree
+a1_lshift_int_sub_user-not | agree
+a1_lshift_int_user-not_exact | agree
+a1_lshift_int_user-not_sub | agree
+a1_lshift_int_user-not_sub-over | agree
+a1_lshift_int_user-not_user | agree
+a1_lshift_int_user-not_user-not | agree
+a1_lshift_int_user_exact | agree
+a1_lshift_int_user_sub | agree
+a1_lshift_int_user_sub-over | agree
+a1_lshift_int_user_user | agree
+a1_lshift_int_user_user-not | agree
+a1_lt_bool_exact | agree
+a1_lt_bool_user | agree
+a1_lt_bool_user-not | agree
+a1_lt_bytes_exact | agree
+a1_lt_bytes_sub | agree
+a1_lt_bytes_sub-dict | agree
+a1_lt_bytes_sub-over | agree
+a1_lt_bytes_sub-over-other | agree
+a1_lt_bytes_sub-slots | agree
+a1_lt_bytes_user | agree
+a1_lt_bytes_user-not | agree
+a1_lt_float_exact | agree
+a1_lt_float_sub | agree
+a1_lt_float_sub-dict | agree
+a1_lt_float_sub-over | agree
+a1_lt_float_sub-over-other | agree
+a1_lt_float_sub-slots | agree
+a1_lt_float_user | agree
+a1_lt_float_user-not | agree
+a1_lt_frozenset_exact | agree
+a1_lt_frozenset_sub | agree
+a1_lt_frozenset_sub-dict | agree
+a1_lt_frozenset_sub-over | agree
+a1_lt_frozenset_sub-over-other | agree
+a1_lt_frozenset_sub-slots | agree
+a1_lt_frozenset_user | agree
+a1_lt_frozenset_user-not | agree
+a1_lt_int_bool-as-int_exact | agree
+a1_lt_int_exact_exact | agree
+a1_lt_int_exact_sub | agree
+a1_lt_int_exact_sub-over | agree
+a1_lt_int_exact_user | agree
+a1_lt_int_exact_user-not | agree
+a1_lt_int_sub-dict_exact | agree
+a1_lt_int_sub-over-other_exact | agree
+a1_lt_int_sub-over_exact | agree
+a1_lt_int_sub-over_sub | agree
+a1_lt_int_sub-over_sub-over | agree
+a1_lt_int_sub-over_user | agree
+a1_lt_int_sub-over_user-not | agree
+a1_lt_int_sub-slots_exact | agree
+a1_lt_int_sub_exact | agree
+a1_lt_int_sub_sub | agree
+a1_lt_int_sub_sub-over | agree
+a1_lt_int_sub_user | agree
+a1_lt_int_sub_user-not | agree
+a1_lt_int_user-not_exact | agree
+a1_lt_int_user-not_sub | agree
+a1_lt_int_user-not_sub-over | agree
+a1_lt_int_user-not_user | agree
+a1_lt_int_user-not_user-not | agree
+a1_lt_int_user_exact | agree
+a1_lt_int_user_sub | agree
+a1_lt_int_user_sub-over | agree
+a1_lt_int_user_user | agree
+a1_lt_int_user_user-not | agree
+a1_lt_list_exact | agree
+a1_lt_list_sub | agree
+a1_lt_list_sub-dict | agree
+a1_lt_list_sub-over | agree
+a1_lt_list_sub-over-other | agree
+a1_lt_list_sub-slots | agree
+a1_lt_list_user | agree
+a1_lt_list_user-not | agree
+a1_lt_set_exact_exact | agree
+a1_lt_set_exact_sub | agree
+a1_lt_set_exact_sub-over | agree
+a1_lt_set_exact_user | agree
+a1_lt_set_exact_user-not | agree
+a1_lt_set_sub-dict_exact | agree
+a1_lt_set_sub-over-other_exact | agree
+a1_lt_set_sub-over_exact | agree
+a1_lt_set_sub-over_sub | agree
+a1_lt_set_sub-over_sub-over | agree
+a1_lt_set_sub-over_user | agree
+a1_lt_set_sub-over_user-not | agree
+a1_lt_set_sub-slots_exact | agree
+a1_lt_set_sub_exact | agree
+a1_lt_set_sub_sub | agree
+a1_lt_set_sub_sub-over | agree
+a1_lt_set_sub_user | agree
+a1_lt_set_sub_user-not | agree
+a1_lt_set_user-not_exact | agree
+a1_lt_set_user-not_sub | agree
+a1_lt_set_user-not_sub-over | agree
+a1_lt_set_user-not_user | agree
+a1_lt_set_user-not_user-not | agree
+a1_lt_set_user_exact | agree
+a1_lt_set_user_sub | agree
+a1_lt_set_user_sub-over | agree
+a1_lt_set_user_user | agree
+a1_lt_set_user_user-not | agree
+a1_lt_str_exact_exact | agree
+a1_lt_str_exact_sub | agree
+a1_lt_str_exact_sub-over | agree
+a1_lt_str_exact_user | agree
+a1_lt_str_exact_user-not | agree
+a1_lt_str_sub-dict_exact | agree
+a1_lt_str_sub-over-other_exact | agree
+a1_lt_str_sub-over_exact | agree
+a1_lt_str_sub-over_sub | agree
+a1_lt_str_sub-over_sub-over | agree
+a1_lt_str_sub-over_user | agree
+a1_lt_str_sub-over_user-not | agree
+a1_lt_str_sub-slots_exact | agree
+a1_lt_str_sub_exact | agree
+a1_lt_str_sub_sub | agree
+a1_lt_str_sub_sub-over | agree
+a1_lt_str_sub_user | agree
+a1_lt_str_sub_user-not | agree
+a1_lt_str_user-not_exact | agree
+a1_lt_str_user-not_sub | agree
+a1_lt_str_user-not_sub-over | agree
+a1_lt_str_user-not_user | agree
+a1_lt_str_user-not_user-not | agree
+a1_lt_str_user_exact | agree
+a1_lt_str_user_sub | agree
+a1_lt_str_user_sub-over | agree
+a1_lt_str_user_user | agree
+a1_lt_str_user_user-not | agree
+a1_lt_tuple_exact | agree
+a1_lt_tuple_sub | agree
+a1_lt_tuple_sub-dict | agree
+a1_lt_tuple_sub-over | agree
+a1_lt_tuple_sub-over-other | agree
+a1_lt_tuple_sub-slots | agree
+a1_lt_tuple_user | agree
+a1_lt_tuple_user-not | agree
+a1_max_list_exact | agree
+a1_max_list_sub | agree
+a1_max_list_sub-dict | agree
+a1_max_list_sub-over | agree
+a1_max_list_sub-over-other | agree
+a1_max_list_sub-slots | agree
+a1_max_list_user | agree
+a1_max_list_user-not | agree
+a1_max_range_exact | agree
+a1_max_range_user | agree
+a1_max_range_user-not | agree
+a1_max_str_exact | agree
+a1_max_str_sub | agree
+a1_max_str_sub-dict | agree
+a1_max_str_sub-over | agree
+a1_max_str_sub-over-other | agree
+a1_max_str_sub-slots | agree
+a1_max_str_user | agree
+a1_max_str_user-not | agree
+a1_max_tuple_exact | agree
+a1_max_tuple_sub | agree
+a1_max_tuple_sub-dict | agree
+a1_max_tuple_sub-over | agree
+a1_max_tuple_sub-over-other | agree
+a1_max_tuple_sub-slots | agree
+a1_max_tuple_user | agree
+a1_max_tuple_user-not | agree
+a1_mod_bool_exact | agree
+a1_mod_bool_user | agree
+a1_mod_bool_user-not | agree
+a1_mod_bytes_exact | agree
+a1_mod_bytes_sub | agree
+a1_mod_bytes_sub-dict | agree
+a1_mod_bytes_sub-over | agree
+a1_mod_bytes_sub-over-other | agree
+a1_mod_bytes_sub-slots | agree
+a1_mod_bytes_user | agree
+a1_mod_bytes_user-not | agree
+a1_mod_float_exact | agree
+a1_mod_float_sub | agree
+a1_mod_float_sub-dict | agree
+a1_mod_float_sub-over | agree
+a1_mod_float_sub-over-other | agree
+a1_mod_float_sub-slots | agree
+a1_mod_float_user | agree
+a1_mod_float_user-not | agree
+a1_mod_int_bool-as-int_exact | agree
+a1_mod_int_exact_exact | agree
+a1_mod_int_exact_sub | agree
+a1_mod_int_exact_sub-over | agree
+a1_mod_int_exact_user | agree
+a1_mod_int_exact_user-not | agree
+a1_mod_int_sub-dict_exact | agree
+a1_mod_int_sub-over-other_exact | agree
+a1_mod_int_sub-over_exact | agree
+a1_mod_int_sub-over_sub | agree
+a1_mod_int_sub-over_sub-over | agree
+a1_mod_int_sub-over_user | agree
+a1_mod_int_sub-over_user-not | agree
+a1_mod_int_sub-slots_exact | agree
+a1_mod_int_sub_exact | agree
+a1_mod_int_sub_sub | agree
+a1_mod_int_sub_sub-over | agree
+a1_mod_int_sub_user | agree
+a1_mod_int_sub_user-not | agree
+a1_mod_int_user-not_exact | agree
+a1_mod_int_user-not_sub | agree
+a1_mod_int_user-not_sub-over | agree
+a1_mod_int_user-not_user | agree
+a1_mod_int_user-not_user-not | agree
+a1_mod_int_user_exact | agree
+a1_mod_int_user_sub | agree
+a1_mod_int_user_sub-over | agree
+a1_mod_int_user_user | agree
+a1_mod_int_user_user-not | agree
+a1_mod_str_exact_exact | agree
+a1_mod_str_exact_sub | agree
+a1_mod_str_exact_sub-over | agree
+a1_mod_str_exact_user | agree
+a1_mod_str_exact_user-not | agree
+a1_mod_str_sub-dict_exact | gap | a % format that is an instance of a subclass of str is not modelled yet
+a1_mod_str_sub-over-other_exact | gap | a % format that is an instance of a subclass of str is not modelled yet
+a1_mod_str_sub-over_exact | agree
+a1_mod_str_sub-over_sub | agree
+a1_mod_str_sub-over_sub-over | agree
+a1_mod_str_sub-over_user | agree
+a1_mod_str_sub-over_user-not | agree
+a1_mod_str_sub-slots_exact | gap | a % format that is an instance of a subclass of str is not modelled yet
+a1_mod_str_sub_exact | gap | a % format that is an instance of a subclass of str is not modelled yet
+a1_mod_str_sub_sub | gap | a % format that is an instance of a subclass of str is not modelled yet
+a1_mod_str_sub_sub-over | gap | a % format that is an instance of a subclass of str is not modelled yet
+a1_mod_str_sub_user | gap | a % format that is an instance of a subclass of str is not modelled yet
+a1_mod_str_sub_user-not | gap | a % format that is an instance of a subclass of str is not modelled yet
+a1_mod_str_user-not_exact | agree
+a1_mod_str_user-not_sub | agree
+a1_mod_str_user-not_sub-over | agree
+a1_mod_str_user-not_user | agree
+a1_mod_str_user-not_user-not | agree
+a1_mod_str_user_exact | agree
+a1_mod_str_user_sub | agree
+a1_mod_str_user_sub-over | agree
+a1_mod_str_user_user | agree
+a1_mod_str_user_user-not | agree
+a1_mul_bool_exact | agree
+a1_mul_bool_user | agree
+a1_mul_bool_user-not | agree
+a1_mul_bytes_exact | agree
+a1_mul_bytes_sub | agree
+a1_mul_bytes_sub-dict | agree
+a1_mul_bytes_sub-over | agree
+a1_mul_bytes_sub-over-other | agree
+a1_mul_bytes_sub-slots | agree
+a1_mul_bytes_user | agree
+a1_mul_bytes_user-not | agree
+a1_mul_float_exact | agree
+a1_mul_float_sub | agree
+a1_mul_float_sub-dict | agree
+a1_mul_float_sub-over | agree
+a1_mul_float_sub-over-other | agree
+a1_mul_float_sub-slots | agree
+a1_mul_float_user | agree
+a1_mul_float_user-not | agree
+a1_mul_int_bool-as-int_exact | agree
+a1_mul_int_exact_exact | agree
+a1_mul_int_exact_sub | agree
+a1_mul_int_exact_sub-over | agree
+a1_mul_int_exact_user | agree
+a1_mul_int_exact_user-not | agree
+a1_mul_int_sub-dict_exact | agree
+a1_mul_int_sub-over-other_exact | agree
+a1_mul_int_sub-over_exact | agree
+a1_mul_int_sub-over_sub | agree
+a1_mul_int_sub-over_sub-over | agree
+a1_mul_int_sub-over_user | agree
+a1_mul_int_sub-over_user-not | agree
+a1_mul_int_sub-slots_exact | agree
+a1_mul_int_sub_exact | agree
+a1_mul_int_sub_sub | agree
+a1_mul_int_sub_sub-over | agree
+a1_mul_int_sub_user | agree
+a1_mul_int_sub_user-not | agree
+a1_mul_int_user-not_exact | agree
+a1_mul_int_user-not_sub | agree
+a1_mul_int_user-not_sub-over | agree
+a1_mul_int_user-not_user | agree
+a1_mul_int_user-not_user-not | agree
+a1_mul_int_user_exact | agree
+a1_mul_int_user_sub | agree
+a1_mul_int_user_sub-over | agree
+a1_mul_int_user_user | agree
+a1_mul_int_user_user-not | agree
+a1_mul_list_exact | agree
+a1_mul_list_sub | agree
+a1_mul_list_sub-dict | agree
+a1_mul_list_sub-over | agree
+a1_mul_list_sub-over-other | agree
+a1_mul_list_sub-slots | agree
+a1_mul_list_user | agree
+a1_mul_list_user-not | agree
+a1_mul_str_exact_exact | agree
+a1_mul_str_exact_sub | agree
+a1_mul_str_exact_sub-over | agree
+a1_mul_str_exact_user | agree
+a1_mul_str_exact_user-not | agree
+a1_mul_str_sub-dict_exact | agree
+a1_mul_str_sub-over-other_exact | agree
+a1_mul_str_sub-over_exact | agree
+a1_mul_str_sub-over_sub | agree
+a1_mul_str_sub-over_sub-over | agree
+a1_mul_str_sub-over_user | agree
+a1_mul_str_sub-over_user-not | agree
+a1_mul_str_sub-slots_exact | agree
+a1_mul_str_sub_exact | agree
+a1_mul_str_sub_sub | agree
+a1_mul_str_sub_sub-over | agree
+a1_mul_str_sub_user | agree
+a1_mul_str_sub_user-not | agree
+a1_mul_str_user-not_exact | agree
+a1_mul_str_user-not_sub | agree
+a1_mul_str_user-not_sub-over | agree
+a1_mul_str_user-not_user | agree
+a1_mul_str_user-not_user-not | agree
+a1_mul_str_user_exact | agree
+a1_mul_str_user_sub | agree
+a1_mul_str_user_sub-over | agree
+a1_mul_str_user_user | agree
+a1_mul_str_user_user-not | agree
+a1_mul_tuple_exact | agree
+a1_mul_tuple_sub | agree
+a1_mul_tuple_sub-dict | agree
+a1_mul_tuple_sub-over | agree
+a1_mul_tuple_sub-over-other | agree
+a1_mul_tuple_sub-slots | agree
+a1_mul_tuple_user | agree
+a1_mul_tuple_user-not | agree
+a1_ne_bool_exact | agree
+a1_ne_bool_user | agree
+a1_ne_bool_user-not | agree
+a1_ne_bytes_exact | agree
+a1_ne_bytes_sub | agree
+a1_ne_bytes_sub-dict | agree
+a1_ne_bytes_sub-over | agree
+a1_ne_bytes_sub-over-other | agree
+a1_ne_bytes_sub-slots | agree
+a1_ne_bytes_user | agree
+a1_ne_bytes_user-not | agree
+a1_ne_dict_exact | agree
+a1_ne_dict_sub | agree
+a1_ne_dict_sub-dict | agree
+a1_ne_dict_sub-over | agree
+a1_ne_dict_sub-over-other | agree
+a1_ne_dict_sub-slots | agree
+a1_ne_dict_user | agree
+a1_ne_dict_user-not | agree
+a1_ne_float_exact | agree
+a1_ne_float_sub | agree
+a1_ne_float_sub-dict | agree
+a1_ne_float_sub-over | agree
+a1_ne_float_sub-over-other | agree
+a1_ne_float_sub-slots | agree
+a1_ne_float_user | agree
+a1_ne_float_user-not | agree
+a1_ne_frozenset_exact | agree
+a1_ne_frozenset_sub | agree
+a1_ne_frozenset_sub-dict | agree
+a1_ne_frozenset_sub-over | agree
+a1_ne_frozenset_sub-over-other | agree
+a1_ne_frozenset_sub-slots | agree
+a1_ne_frozenset_user | agree
+a1_ne_frozenset_user-not | agree
+a1_ne_int_bool-as-int_exact | agree
+a1_ne_int_exact_exact | agree
+a1_ne_int_exact_sub | agree
+a1_ne_int_exact_sub-over | agree
+a1_ne_int_exact_user | agree
+a1_ne_int_exact_user-not | agree
+a1_ne_int_sub-dict_exact | agree
+a1_ne_int_sub-over-other_exact | agree
+a1_ne_int_sub-over_exact | agree
+a1_ne_int_sub-over_sub | agree
+a1_ne_int_sub-over_sub-over | agree
+a1_ne_int_sub-over_user | agree
+a1_ne_int_sub-over_user-not | agree
+a1_ne_int_sub-slots_exact | agree
+a1_ne_int_sub_exact | agree
+a1_ne_int_sub_sub | agree
+a1_ne_int_sub_sub-over | agree
+a1_ne_int_sub_user | agree
+a1_ne_int_sub_user-not | agree
+a1_ne_int_user-not_exact | agree
+a1_ne_int_user-not_sub | agree
+a1_ne_int_user-not_sub-over | agree
+a1_ne_int_user-not_user | agree
+a1_ne_int_user-not_user-not | agree
+a1_ne_int_user_exact | agree
+a1_ne_int_user_sub | agree
+a1_ne_int_user_sub-over | agree
+a1_ne_int_user_user | agree
+a1_ne_int_user_user-not | agree
+a1_ne_list_exact | agree
+a1_ne_list_sub | agree
+a1_ne_list_sub-dict | agree
+a1_ne_list_sub-over | agree
+a1_ne_list_sub-over-other | agree
+a1_ne_list_sub-slots | agree
+a1_ne_list_user | agree
+a1_ne_list_user-not | agree
+a1_ne_range_exact | agree
+a1_ne_range_user | agree
+a1_ne_range_user-not | agree
+a1_ne_set_exact_exact | agree
+a1_ne_set_exact_sub | agree
+a1_ne_set_exact_sub-over | agree
+a1_ne_set_exact_user | agree
+a1_ne_set_exact_user-not | agree
+a1_ne_set_sub-dict_exact | agree
+a1_ne_set_sub-over-other_exact | agree
+a1_ne_set_sub-over_exact | agree
+a1_ne_set_sub-over_sub | agree
+a1_ne_set_sub-over_sub-over | agree
+a1_ne_set_sub-over_user | agree
+a1_ne_set_sub-over_user-not | agree
+a1_ne_set_sub-slots_exact | agree
+a1_ne_set_sub_exact | agree
+a1_ne_set_sub_sub | agree
+a1_ne_set_sub_sub-over | agree
+a1_ne_set_sub_user | agree
+a1_ne_set_sub_user-not | agree
+a1_ne_set_user-not_exact | agree
+a1_ne_set_user-not_sub | agree
+a1_ne_set_user-not_sub-over | agree
+a1_ne_set_user-not_user | agree
+a1_ne_set_user-not_user-not | agree
+a1_ne_set_user_exact | agree
+a1_ne_set_user_sub | agree
+a1_ne_set_user_sub-over | agree
+a1_ne_set_user_user | agree
+a1_ne_set_user_user-not | agree
+a1_ne_str_exact_exact | agree
+a1_ne_str_exact_sub | agree
+a1_ne_str_exact_sub-over | agree
+a1_ne_str_exact_user | agree
+a1_ne_str_exact_user-not | agree
+a1_ne_str_sub-dict_exact | agree
+a1_ne_str_sub-over-other_exact | agree
+a1_ne_str_sub-over_exact | agree
+a1_ne_str_sub-over_sub | agree
+a1_ne_str_sub-over_sub-over | agree
+a1_ne_str_sub-over_user | agree
+a1_ne_str_sub-over_user-not | agree
+a1_ne_str_sub-slots_exact | agree
+a1_ne_str_sub_exact | agree
+a1_ne_str_sub_sub | agree
+a1_ne_str_sub_sub-over | agree
+a1_ne_str_sub_user | agree
+a1_ne_str_sub_user-not | agree
+a1_ne_str_user-not_exact | agree
+a1_ne_str_user-not_sub | agree
+a1_ne_str_user-not_sub-over | agree
+a1_ne_str_user-not_user | agree
+a1_ne_str_user-not_user-not | agree
+a1_ne_str_user_exact | agree
+a1_ne_str_user_sub | agree
+a1_ne_str_user_sub-over | agree
+a1_ne_str_user_user | agree
+a1_ne_str_user_user-not | agree
+a1_ne_tuple_exact | agree
+a1_ne_tuple_sub | agree
+a1_ne_tuple_sub-dict | agree
+a1_ne_tuple_sub-over | agree
+a1_ne_tuple_sub-over-other | agree
+a1_ne_tuple_sub-slots | agree
+a1_ne_tuple_user | agree
+a1_ne_tuple_user-not | agree
+a1_neg_bool_exact | agree
+a1_neg_bool_user | agree
+a1_neg_bool_user-not | agree
+a1_neg_float_exact | agree
+a1_neg_float_sub | agree
+a1_neg_float_sub-dict | agree
+a1_neg_float_sub-over | agree
+a1_neg_float_sub-over-other | agree
+a1_neg_float_sub-slots | agree
+a1_neg_float_user | agree
+a1_neg_float_user-not | agree
+a1_neg_int_bool-as-int | agree
+a1_neg_int_exact | agree
+a1_neg_int_sub | agree
+a1_neg_int_sub-dict | agree
+a1_neg_int_sub-over | agree
+a1_neg_int_sub-over-other | agree
+a1_neg_int_sub-slots | agree
+a1_neg_int_user | agree
+a1_neg_int_user-not | agree
+a1_not_bool_exact | agree
+a1_not_bool_user | agree
+a1_not_bool_user-not | agree
+a1_not_bytes_exact | agree
+a1_not_bytes_sub | agree
+a1_not_bytes_sub-dict | agree
+a1_not_bytes_sub-over | agree
+a1_not_bytes_sub-over-other | agree
+a1_not_bytes_sub-slots | agree
+a1_not_bytes_user | agree
+a1_not_bytes_user-not | agree
+a1_not_dict_exact | agree
+a1_not_dict_sub | agree
+a1_not_dict_sub-dict | agree
+a1_not_dict_sub-over | agree
+a1_not_dict_sub-over-other | agree
+a1_not_dict_sub-slots | agree
+a1_not_dict_user | agree
+a1_not_dict_user-not | agree
+a1_not_float_exact | agree
+a1_not_float_sub | agree
+a1_not_float_sub-dict | agree
+a1_not_float_sub-over | agree
+a1_not_float_sub-over-other | agree
+a1_not_float_sub-slots | agree
+a1_not_float_user | agree
+a1_not_float_user-not | agree
+a1_not_frozenset_exact | agree
+a1_not_frozenset_sub | agree
+a1_not_frozenset_sub-dict | agree
+a1_not_frozenset_sub-over | agree
+a1_not_frozenset_sub-over-other | agree
+a1_not_frozenset_sub-slots | agree
+a1_not_frozenset_user | agree
+a1_not_frozenset_user-not | agree
+a1_not_int_bool-as-int | agree
+a1_not_int_exact | agree
+a1_not_int_sub | agree
+a1_not_int_sub-dict | agree
+a1_not_int_sub-over | agree
+a1_not_int_sub-over-other | agree
+a1_not_int_sub-slots | agree
+a1_not_int_user | agree
+a1_not_int_user-not | agree
+a1_not_list_exact | agree
+a1_not_list_sub | agree
+a1_not_list_sub-dict | agree
+a1_not_list_sub-over | agree
+a1_not_list_sub-over-other | agree
+a1_not_list_sub-slots | agree
+a1_not_list_user | agree
+a1_not_list_user-not | agree
+a1_not_range_exact | agree
+a1_not_range_user | agree
+a1_not_range_user-not | agree
+a1_not_set_exact | agree
+a1_not_set_sub | agree
+a1_not_set_sub-dict | agree
+a1_not_set_sub-over | agree
+a1_not_set_sub-over-other | agree
+a1_not_set_sub-slots | agree
+a1_not_set_user | agree
+a1_not_set_user-not | agree
+a1_not_str_exact | agree
+a1_not_str_sub | agree
+a1_not_str_sub-dict | agree
+a1_not_str_sub-over | agree
+a1_not_str_sub-over-other | agree
+a1_not_str_sub-slots | agree
+a1_not_str_user | agree
+a1_not_str_user-not | agree
+a1_not_tuple_exact | agree
+a1_not_tuple_sub | agree
+a1_not_tuple_sub-dict | agree
+a1_not_tuple_sub-over | agree
+a1_not_tuple_sub-over-other | agree
+a1_not_tuple_sub-slots | agree
+a1_not_tuple_user | agree
+a1_not_tuple_user-not | agree
+a1_or_bool_exact | agree
+a1_or_bool_user | agree
+a1_or_bool_user-not | agree
+a1_or_dict_exact | agree
+a1_or_dict_sub | agree
+a1_or_dict_sub-dict | agree
+a1_or_dict_sub-over | agree
+a1_or_dict_sub-over-other | gap | a | of a dict whose class overrides how its entries are read is not modelled yet
+a1_or_dict_sub-slots | agree
+a1_or_dict_user | agree
+a1_or_dict_user-not | agree
+a1_or_frozenset_exact | gap | a slot of a set whose layout is inexact
+a1_or_frozenset_sub | gap | a slot of a set whose layout is inexact
+a1_or_frozenset_sub-dict | gap | a slot of a set whose layout is inexact
+a1_or_frozenset_sub-over | agree
+a1_or_frozenset_sub-over-other | gap | a slot of a set whose layout is inexact
+a1_or_frozenset_sub-slots | gap | a slot of a set whose layout is inexact
+a1_or_frozenset_user | agree
+a1_or_frozenset_user-not | agree
+a1_or_int_bool-as-int_exact | agree
+a1_or_int_exact_exact | agree
+a1_or_int_exact_sub | agree
+a1_or_int_exact_sub-over | agree
+a1_or_int_exact_user | agree
+a1_or_int_exact_user-not | agree
+a1_or_int_sub-dict_exact | agree
+a1_or_int_sub-over-other_exact | agree
+a1_or_int_sub-over_exact | agree
+a1_or_int_sub-over_sub | agree
+a1_or_int_sub-over_sub-over | agree
+a1_or_int_sub-over_user | agree
+a1_or_int_sub-over_user-not | agree
+a1_or_int_sub-slots_exact | agree
+a1_or_int_sub_exact | agree
+a1_or_int_sub_sub | agree
+a1_or_int_sub_sub-over | agree
+a1_or_int_sub_user | agree
+a1_or_int_sub_user-not | agree
+a1_or_int_user-not_exact | agree
+a1_or_int_user-not_sub | agree
+a1_or_int_user-not_sub-over | agree
+a1_or_int_user-not_user | agree
+a1_or_int_user-not_user-not | agree
+a1_or_int_user_exact | agree
+a1_or_int_user_sub | agree
+a1_or_int_user_sub-over | agree
+a1_or_int_user_user | agree
+a1_or_int_user_user-not | agree
+a1_or_set_exact_exact | gap | a slot of a set whose layout is inexact
+a1_or_set_exact_sub | gap | a slot of a set whose layout is inexact
+a1_or_set_exact_sub-over | agree
+a1_or_set_exact_user | agree
+a1_or_set_exact_user-not | agree
+a1_or_set_sub-dict_exact | gap | a slot of a set whose layout is inexact
+a1_or_set_sub-over-other_exact | gap | a slot of a set whose layout is inexact
+a1_or_set_sub-over_exact | agree
+a1_or_set_sub-over_sub | agree
+a1_or_set_sub-over_sub-over | agree
+a1_or_set_sub-over_user | agree
+a1_or_set_sub-over_user-not | agree
+a1_or_set_sub-slots_exact | gap | a slot of a set whose layout is inexact
+a1_or_set_sub_exact | gap | a slot of a set whose layout is inexact
+a1_or_set_sub_sub | gap | a slot of a set whose layout is inexact
+a1_or_set_sub_sub-over | gap | a slot of a set whose layout is inexact
+a1_or_set_sub_user | agree
+a1_or_set_sub_user-not | agree
+a1_or_set_user-not_exact | agree
+a1_or_set_user-not_sub | agree
+a1_or_set_user-not_sub-over | agree
+a1_or_set_user-not_user | agree
+a1_or_set_user-not_user-not | agree
+a1_or_set_user_exact | agree
+a1_or_set_user_sub | agree
+a1_or_set_user_sub-over | agree
+a1_or_set_user_user | agree
+a1_or_set_user_user-not | agree
+a1_pow_bool_exact | agree
+a1_pow_bool_user | agree
+a1_pow_bool_user-not | agree
+a1_pow_float_exact | agree
+a1_pow_float_sub | agree
+a1_pow_float_sub-dict | agree
+a1_pow_float_sub-over | agree
+a1_pow_float_sub-over-other | agree
+a1_pow_float_sub-slots | agree
+a1_pow_float_user | agree
+a1_pow_float_user-not | agree
+a1_pow_int_bool-as-int_exact | agree
+a1_pow_int_exact_exact | agree
+a1_pow_int_exact_sub | agree
+a1_pow_int_exact_sub-over | agree
+a1_pow_int_exact_user | agree
+a1_pow_int_exact_user-not | agree
+a1_pow_int_sub-dict_exact | agree
+a1_pow_int_sub-over-other_exact | agree
+a1_pow_int_sub-over_exact | agree
+a1_pow_int_sub-over_sub | agree
+a1_pow_int_sub-over_sub-over | agree
+a1_pow_int_sub-over_user | agree
+a1_pow_int_sub-over_user-not | agree
+a1_pow_int_sub-slots_exact | agree
+a1_pow_int_sub_exact | agree
+a1_pow_int_sub_sub | agree
+a1_pow_int_sub_sub-over | agree
+a1_pow_int_sub_user | agree
+a1_pow_int_sub_user-not | agree
+a1_pow_int_user-not_exact | agree
+a1_pow_int_user-not_sub | agree
+a1_pow_int_user-not_sub-over | agree
+a1_pow_int_user-not_user | agree
+a1_pow_int_user-not_user-not | agree
+a1_pow_int_user_exact | agree
+a1_pow_int_user_sub | agree
+a1_pow_int_user_sub-over | agree
+a1_pow_int_user_user | agree
+a1_pow_int_user_user-not | agree
+a1_print_bool_exact | agree
+a1_print_bool_user | agree
+a1_print_bool_user-not | agree
+a1_print_bytes_exact | agree
+a1_print_bytes_sub | agree
+a1_print_bytes_sub-dict | agree
+a1_print_bytes_sub-over | agree
+a1_print_bytes_sub-over-other | agree
+a1_print_bytes_sub-slots | agree
+a1_print_bytes_user | agree
+a1_print_bytes_user-not | agree
+a1_print_dict_exact | agree
+a1_print_dict_sub | agree
+a1_print_dict_sub-dict | agree
+a1_print_dict_sub-over | agree
+a1_print_dict_sub-over-other | agree
+a1_print_dict_sub-slots | agree
+a1_print_dict_user | agree
+a1_print_dict_user-not | agree
+a1_print_float_exact | agree
+a1_print_float_sub | agree
+a1_print_float_sub-dict | agree
+a1_print_float_sub-over | agree
+a1_print_float_sub-over-other | agree
+a1_print_float_sub-slots | agree
+a1_print_float_user | agree
+a1_print_float_user-not | agree
+a1_print_frozenset_exact | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_print_frozenset_sub | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_print_frozenset_sub-dict | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_print_frozenset_sub-over | agree
+a1_print_frozenset_sub-over-other | gap | the repr of a set whose class defines __iter__ or __len__ is not modelled yet
+a1_print_frozenset_sub-slots | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_print_frozenset_user | agree
+a1_print_frozenset_user-not | agree
+a1_print_int_bool-as-int | agree
+a1_print_int_exact | agree
+a1_print_int_sub | agree
+a1_print_int_sub-dict | agree
+a1_print_int_sub-over | agree
+a1_print_int_sub-over-other | agree
+a1_print_int_sub-slots | agree
+a1_print_int_user | agree
+a1_print_int_user-not | agree
+a1_print_list_exact | agree
+a1_print_list_sub | agree
+a1_print_list_sub-dict | agree
+a1_print_list_sub-over | agree
+a1_print_list_sub-over-other | agree
+a1_print_list_sub-slots | agree
+a1_print_list_user | agree
+a1_print_list_user-not | agree
+a1_print_range_exact | agree
+a1_print_range_user | agree
+a1_print_range_user-not | agree
+a1_print_set_exact | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_print_set_sub | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_print_set_sub-dict | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_print_set_sub-over | agree
+a1_print_set_sub-over-other | gap | the repr of a set whose class defines __iter__ or __len__ is not modelled yet
+a1_print_set_sub-slots | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_print_set_user | agree
+a1_print_set_user-not | agree
+a1_print_str_exact | agree
+a1_print_str_sub | agree
+a1_print_str_sub-dict | agree
+a1_print_str_sub-over | agree
+a1_print_str_sub-over-other | agree
+a1_print_str_sub-slots | agree
+a1_print_str_user | agree
+a1_print_str_user-not | agree
+a1_print_tuple_exact | agree
+a1_print_tuple_sub | agree
+a1_print_tuple_sub-dict | agree
+a1_print_tuple_sub-over | agree
+a1_print_tuple_sub-over-other | agree
+a1_print_tuple_sub-slots | agree
+a1_print_tuple_user | agree
+a1_print_tuple_user-not | agree
+a1_repr_bool_exact | agree
+a1_repr_bool_user | agree
+a1_repr_bool_user-not | agree
+a1_repr_bytes_exact | agree
+a1_repr_bytes_sub | agree
+a1_repr_bytes_sub-dict | agree
+a1_repr_bytes_sub-over | agree
+a1_repr_bytes_sub-over-other | agree
+a1_repr_bytes_sub-slots | agree
+a1_repr_bytes_user | agree
+a1_repr_bytes_user-not | agree
+a1_repr_dict_exact | agree
+a1_repr_dict_sub | agree
+a1_repr_dict_sub-dict | agree
+a1_repr_dict_sub-over | agree
+a1_repr_dict_sub-over-other | agree
+a1_repr_dict_sub-slots | agree
+a1_repr_dict_user | agree
+a1_repr_dict_user-not | agree
+a1_repr_float_exact | agree
+a1_repr_float_sub | agree
+a1_repr_float_sub-dict | agree
+a1_repr_float_sub-over | agree
+a1_repr_float_sub-over-other | agree
+a1_repr_float_sub-slots | agree
+a1_repr_float_user | agree
+a1_repr_float_user-not | agree
+a1_repr_frozenset_exact | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_repr_frozenset_sub | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_repr_frozenset_sub-dict | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_repr_frozenset_sub-over | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_repr_frozenset_sub-over-other | gap | the repr of a set whose class defines __iter__ or __len__ is not modelled yet
+a1_repr_frozenset_sub-slots | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_repr_frozenset_user | agree
+a1_repr_frozenset_user-not | agree
+a1_repr_int_bool-as-int | agree
+a1_repr_int_exact | agree
+a1_repr_int_sub | agree
+a1_repr_int_sub-dict | agree
+a1_repr_int_sub-over | agree
+a1_repr_int_sub-over-other | agree
+a1_repr_int_sub-slots | agree
+a1_repr_int_user | agree
+a1_repr_int_user-not | agree
+a1_repr_list_exact | agree
+a1_repr_list_sub | agree
+a1_repr_list_sub-dict | agree
+a1_repr_list_sub-over | agree
+a1_repr_list_sub-over-other | agree
+a1_repr_list_sub-slots | agree
+a1_repr_list_user | agree
+a1_repr_list_user-not | agree
+a1_repr_range_exact | agree
+a1_repr_range_user | agree
+a1_repr_range_user-not | agree
+a1_repr_set_exact | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_repr_set_sub | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_repr_set_sub-dict | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_repr_set_sub-over | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_repr_set_sub-over-other | gap | the repr of a set whose class defines __iter__ or __len__ is not modelled yet
+a1_repr_set_sub-slots | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_repr_set_user | agree
+a1_repr_set_user-not | agree
+a1_repr_str_exact | agree
+a1_repr_str_sub | agree
+a1_repr_str_sub-dict | agree
+a1_repr_str_sub-over | agree
+a1_repr_str_sub-over-other | agree
+a1_repr_str_sub-slots | agree
+a1_repr_str_user | agree
+a1_repr_str_user-not | agree
+a1_repr_tuple_exact | agree
+a1_repr_tuple_sub | agree
+a1_repr_tuple_sub-dict | agree
+a1_repr_tuple_sub-over | agree
+a1_repr_tuple_sub-over-other | agree
+a1_repr_tuple_sub-slots | agree
+a1_repr_tuple_user | agree
+a1_repr_tuple_user-not | agree
+a1_rshift_bool_exact | agree
+a1_rshift_bool_user | agree
+a1_rshift_bool_user-not | agree
+a1_rshift_int_bool-as-int_exact | agree
+a1_rshift_int_exact_exact | agree
+a1_rshift_int_exact_sub | agree
+a1_rshift_int_exact_sub-over | agree
+a1_rshift_int_exact_user | agree
+a1_rshift_int_exact_user-not | agree
+a1_rshift_int_sub-dict_exact | agree
+a1_rshift_int_sub-over-other_exact | agree
+a1_rshift_int_sub-over_exact | agree
+a1_rshift_int_sub-over_sub | agree
+a1_rshift_int_sub-over_sub-over | agree
+a1_rshift_int_sub-over_user | agree
+a1_rshift_int_sub-over_user-not | agree
+a1_rshift_int_sub-slots_exact | agree
+a1_rshift_int_sub_exact | agree
+a1_rshift_int_sub_sub | agree
+a1_rshift_int_sub_sub-over | agree
+a1_rshift_int_sub_user | agree
+a1_rshift_int_sub_user-not | agree
+a1_rshift_int_user-not_exact | agree
+a1_rshift_int_user-not_sub | agree
+a1_rshift_int_user-not_sub-over | agree
+a1_rshift_int_user-not_user | agree
+a1_rshift_int_user-not_user-not | agree
+a1_rshift_int_user_exact | agree
+a1_rshift_int_user_sub | agree
+a1_rshift_int_user_sub-over | agree
+a1_rshift_int_user_user | agree
+a1_rshift_int_user_user-not | agree
+a1_set_of_frozenset_exact | agree
+a1_set_of_frozenset_sub | agree
+a1_set_of_frozenset_sub-dict | agree
+a1_set_of_frozenset_sub-over | agree
+a1_set_of_frozenset_sub-over-other | agree
+a1_set_of_frozenset_sub-slots | agree
+a1_set_of_frozenset_user | agree
+a1_set_of_frozenset_user-not | agree
+a1_set_of_list_exact | agree
+a1_set_of_list_sub | agree
+a1_set_of_list_sub-dict | agree
+a1_set_of_list_sub-over | agree
+a1_set_of_list_sub-over-other | agree
+a1_set_of_list_sub-slots | agree
+a1_set_of_list_user | agree
+a1_set_of_list_user-not | agree
+a1_set_of_set_exact | agree
+a1_set_of_set_sub | agree
+a1_set_of_set_sub-dict | agree
+a1_set_of_set_sub-over | agree
+a1_set_of_set_sub-over-other | agree
+a1_set_of_set_sub-slots | agree
+a1_set_of_set_user | agree
+a1_set_of_set_user-not | agree
+a1_set_of_tuple_exact | agree
+a1_set_of_tuple_sub | agree
+a1_set_of_tuple_sub-dict | agree
+a1_set_of_tuple_sub-over | agree
+a1_set_of_tuple_sub-over-other | agree
+a1_set_of_tuple_sub-slots | agree
+a1_set_of_tuple_user | agree
+a1_set_of_tuple_user-not | agree
+a1_setitem_dict_exact | agree
+a1_setitem_dict_sub | agree
+a1_setitem_dict_sub-dict | agree
+a1_setitem_dict_sub-over | agree
+a1_setitem_dict_sub-over-other | agree
+a1_setitem_dict_sub-slots | agree
+a1_setitem_dict_user | agree
+a1_setitem_dict_user-not | agree
+a1_setitem_list_exact | agree
+a1_setitem_list_sub | agree
+a1_setitem_list_sub-dict | agree
+a1_setitem_list_sub-over | agree
+a1_setitem_list_sub-over-other | agree
+a1_setitem_list_sub-slots | agree
+a1_setitem_list_user | agree
+a1_setitem_list_user-not | agree
+a1_slice_bytes_exact | agree
+a1_slice_bytes_sub | agree
+a1_slice_bytes_sub-dict | agree
+a1_slice_bytes_sub-over | agree
+a1_slice_bytes_sub-over-other | agree
+a1_slice_bytes_sub-slots | agree
+a1_slice_bytes_user | agree
+a1_slice_bytes_user-not | agree
+a1_slice_list_exact | agree
+a1_slice_list_sub | agree
+a1_slice_list_sub-dict | agree
+a1_slice_list_sub-over | agree
+a1_slice_list_sub-over-other | agree
+a1_slice_list_sub-slots | agree
+a1_slice_list_user | agree
+a1_slice_list_user-not | agree
+a1_slice_range_exact | agree
+a1_slice_range_user | agree
+a1_slice_range_user-not | agree
+a1_slice_str_exact | agree
+a1_slice_str_sub | agree
+a1_slice_str_sub-dict | agree
+a1_slice_str_sub-over | agree
+a1_slice_str_sub-over-other | agree
+a1_slice_str_sub-slots | agree
+a1_slice_str_user | agree
+a1_slice_str_user-not | agree
+a1_slice_tuple_exact | agree
+a1_slice_tuple_sub | agree
+a1_slice_tuple_sub-dict | agree
+a1_slice_tuple_sub-over | agree
+a1_slice_tuple_sub-over-other | agree
+a1_slice_tuple_sub-slots | agree
+a1_slice_tuple_user | agree
+a1_slice_tuple_user-not | agree
+a1_sorted_frozenset_exact | agree
+a1_sorted_frozenset_sub | gap | a slot of a set whose layout is inexact
+a1_sorted_frozenset_sub-dict | gap | a slot of a set whose layout is inexact
+a1_sorted_frozenset_sub-over | agree
+a1_sorted_frozenset_sub-over-other | gap | a slot of a set whose layout is inexact
+a1_sorted_frozenset_sub-slots | gap | a slot of a set whose layout is inexact
+a1_sorted_frozenset_user | agree
+a1_sorted_frozenset_user-not | agree
+a1_sorted_list_exact | agree
+a1_sorted_list_sub | agree
+a1_sorted_list_sub-dict | agree
+a1_sorted_list_sub-over | agree
+a1_sorted_list_sub-over-other | agree
+a1_sorted_list_sub-slots | agree
+a1_sorted_list_user | agree
+a1_sorted_list_user-not | agree
+a1_sorted_set_exact | agree
+a1_sorted_set_sub | gap | a slot of a set whose layout is inexact
+a1_sorted_set_sub-dict | gap | a slot of a set whose layout is inexact
+a1_sorted_set_sub-over | agree
+a1_sorted_set_sub-over-other | gap | a slot of a set whose layout is inexact
+a1_sorted_set_sub-slots | gap | a slot of a set whose layout is inexact
+a1_sorted_set_user | agree
+a1_sorted_set_user-not | agree
+a1_sorted_str_exact | agree
+a1_sorted_str_sub | agree
+a1_sorted_str_sub-dict | agree
+a1_sorted_str_sub-over | agree
+a1_sorted_str_sub-over-other | agree
+a1_sorted_str_sub-slots | agree
+a1_sorted_str_user | agree
+a1_sorted_str_user-not | agree
+a1_sorted_tuple_exact | agree
+a1_sorted_tuple_sub | agree
+a1_sorted_tuple_sub-dict | agree
+a1_sorted_tuple_sub-over | agree
+a1_sorted_tuple_sub-over-other | agree
+a1_sorted_tuple_sub-slots | agree
+a1_sorted_tuple_user | agree
+a1_sorted_tuple_user-not | agree
+a1_star_args_list_exact | agree
+a1_star_args_list_sub | agree
+a1_star_args_list_sub-dict | agree
+a1_star_args_list_sub-over | agree
+a1_star_args_list_sub-over-other | agree
+a1_star_args_list_sub-slots | agree
+a1_star_args_list_user | agree
+a1_star_args_list_user-not | gap | a TypeError that names a function is not modelled yet
+a1_star_args_str_exact | agree
+a1_star_args_str_sub | agree
+a1_star_args_str_sub-dict | agree
+a1_star_args_str_sub-over | agree
+a1_star_args_str_sub-over-other | agree
+a1_star_args_str_sub-slots | agree
+a1_star_args_str_user | agree
+a1_star_args_str_user-not | gap | a TypeError that names a function is not modelled yet
+a1_star_args_tuple_exact | agree
+a1_star_args_tuple_sub | agree
+a1_star_args_tuple_sub-dict | agree
+a1_star_args_tuple_sub-over | agree
+a1_star_args_tuple_sub-over-other | agree
+a1_star_args_tuple_sub-slots | agree
+a1_star_args_tuple_user | agree
+a1_star_args_tuple_user-not | gap | a TypeError that names a function is not modelled yet
+a1_star_kwargs_dict_exact | agree
+a1_star_kwargs_dict_sub | agree
+a1_star_kwargs_dict_sub-dict | agree
+a1_star_kwargs_dict_sub-over | agree
+a1_star_kwargs_dict_sub-over-other | gap | built-in method dict_keyiterator.__length_hint__ is not modelled yet
+a1_star_kwargs_dict_sub-slots | agree
+a1_star_kwargs_dict_user | agree
+a1_star_kwargs_dict_user-not | gap | a TypeError that names a function is not modelled yet
+a1_star_list_dict_exact | agree
+a1_star_list_dict_sub | agree
+a1_star_list_dict_sub-dict | agree
+a1_star_list_dict_sub-over | agree
+a1_star_list_dict_sub-over-other | agree
+a1_star_list_dict_sub-slots | agree
+a1_star_list_dict_user | agree
+a1_star_list_dict_user-not | agree
+a1_star_list_list_exact | agree
+a1_star_list_list_sub | agree
+a1_star_list_list_sub-dict | agree
+a1_star_list_list_sub-over | agree
+a1_star_list_list_sub-over-other | agree
+a1_star_list_list_sub-slots | agree
+a1_star_list_list_user | agree
+a1_star_list_list_user-not | agree
+a1_star_list_range_exact | agree
+a1_star_list_range_user | agree
+a1_star_list_range_user-not | agree
+a1_star_list_set_exact | gap | iterating a set whose order is not CPython's
+a1_star_list_set_sub | gap | a slot of a set whose layout is inexact
+a1_star_list_set_sub-dict | gap | a slot of a set whose layout is inexact
+a1_star_list_set_sub-over | agree
+a1_star_list_set_sub-over-other | gap | a slot of a set whose layout is inexact
+a1_star_list_set_sub-slots | gap | a slot of a set whose layout is inexact
+a1_star_list_set_user | agree
+a1_star_list_set_user-not | agree
+a1_star_list_str_exact | agree
+a1_star_list_str_sub | agree
+a1_star_list_str_sub-dict | agree
+a1_star_list_str_sub-over | agree
+a1_star_list_str_sub-over-other | agree
+a1_star_list_str_sub-slots | agree
+a1_star_list_str_user | agree
+a1_star_list_str_user-not | agree
+a1_star_list_tuple_exact | agree
+a1_star_list_tuple_sub | agree
+a1_star_list_tuple_sub-dict | agree
+a1_star_list_tuple_sub-over | agree
+a1_star_list_tuple_sub-over-other | agree
+a1_star_list_tuple_sub-slots | agree
+a1_star_list_tuple_user | agree
+a1_star_list_tuple_user-not | agree
+a1_star_set_frozenset_exact | agree
+a1_star_set_frozenset_sub | agree
+a1_star_set_frozenset_sub-dict | agree
+a1_star_set_frozenset_sub-over | agree
+a1_star_set_frozenset_sub-over-other | agree
+a1_star_set_frozenset_sub-slots | agree
+a1_star_set_frozenset_user | agree
+a1_star_set_frozenset_user-not | agree
+a1_star_set_list_exact | agree
+a1_star_set_list_sub | agree
+a1_star_set_list_sub-dict | agree
+a1_star_set_list_sub-over | agree
+a1_star_set_list_sub-over-other | agree
+a1_star_set_list_sub-slots | agree
+a1_star_set_list_user | agree
+a1_star_set_list_user-not | agree
+a1_star_set_set_exact | agree
+a1_star_set_set_sub | agree
+a1_star_set_set_sub-dict | agree
+a1_star_set_set_sub-over | agree
+a1_star_set_set_sub-over-other | agree
+a1_star_set_set_sub-slots | agree
+a1_star_set_set_user | agree
+a1_star_set_set_user-not | agree
+a1_star_set_tuple_exact | agree
+a1_star_set_tuple_sub | agree
+a1_star_set_tuple_sub-dict | agree
+a1_star_set_tuple_sub-over | agree
+a1_star_set_tuple_sub-over-other | agree
+a1_star_set_tuple_sub-slots | agree
+a1_star_set_tuple_user | agree
+a1_star_set_tuple_user-not | agree
+a1_str_bool_exact | agree
+a1_str_bool_user | agree
+a1_str_bool_user-not | agree
+a1_str_bytes_exact | agree
+a1_str_bytes_sub | agree
+a1_str_bytes_sub-dict | agree
+a1_str_bytes_sub-over | agree
+a1_str_bytes_sub-over-other | agree
+a1_str_bytes_sub-slots | agree
+a1_str_bytes_user | agree
+a1_str_bytes_user-not | agree
+a1_str_dict_exact | agree
+a1_str_dict_sub | agree
+a1_str_dict_sub-dict | agree
+a1_str_dict_sub-over | agree
+a1_str_dict_sub-over-other | agree
+a1_str_dict_sub-slots | agree
+a1_str_dict_user | agree
+a1_str_dict_user-not | agree
+a1_str_float_exact | agree
+a1_str_float_sub | agree
+a1_str_float_sub-dict | agree
+a1_str_float_sub-over | agree
+a1_str_float_sub-over-other | agree
+a1_str_float_sub-slots | agree
+a1_str_float_user | agree
+a1_str_float_user-not | agree
+a1_str_frozenset_exact | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_str_frozenset_sub | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_str_frozenset_sub-dict | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_str_frozenset_sub-over | agree
+a1_str_frozenset_sub-over-other | gap | the repr of a set whose class defines __iter__ or __len__ is not modelled yet
+a1_str_frozenset_sub-slots | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_str_frozenset_user | agree
+a1_str_frozenset_user-not | agree
+a1_str_in_str_exact | agree
+a1_str_in_str_sub | agree
+a1_str_in_str_sub-dict | agree
+a1_str_in_str_sub-over | agree
+a1_str_in_str_sub-over-other | agree
+a1_str_in_str_sub-slots | agree
+a1_str_in_str_user | agree
+a1_str_in_str_user-not | agree
+a1_str_int_bool-as-int | agree
+a1_str_int_exact | agree
+a1_str_int_sub | agree
+a1_str_int_sub-dict | agree
+a1_str_int_sub-over | agree
+a1_str_int_sub-over-other | agree
+a1_str_int_sub-slots | agree
+a1_str_int_user | agree
+a1_str_int_user-not | agree
+a1_str_list_exact | agree
+a1_str_list_sub | agree
+a1_str_list_sub-dict | agree
+a1_str_list_sub-over | agree
+a1_str_list_sub-over-other | agree
+a1_str_list_sub-slots | agree
+a1_str_list_user | agree
+a1_str_list_user-not | agree
+a1_str_range_exact | agree
+a1_str_range_user | agree
+a1_str_range_user-not | agree
+a1_str_set_exact | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_str_set_sub | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_str_set_sub-dict | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_str_set_sub-over | agree
+a1_str_set_sub-over-other | gap | the repr of a set whose class defines __iter__ or __len__ is not modelled yet
+a1_str_set_sub-slots | gap | the repr of a set whose order the model doesn't know is not modelled yet
+a1_str_set_user | agree
+a1_str_set_user-not | agree
+a1_str_str_exact | agree
+a1_str_str_sub | agree
+a1_str_str_sub-dict | agree
+a1_str_str_sub-over | agree
+a1_str_str_sub-over-other | agree
+a1_str_str_sub-slots | agree
+a1_str_str_user | agree
+a1_str_str_user-not | agree
+a1_str_tuple_exact | agree
+a1_str_tuple_sub | agree
+a1_str_tuple_sub-dict | agree
+a1_str_tuple_sub-over | agree
+a1_str_tuple_sub-over-other | agree
+a1_str_tuple_sub-slots | agree
+a1_str_tuple_user | agree
+a1_str_tuple_user-not | agree
+a1_sub_bool_exact | agree
+a1_sub_bool_user | agree
+a1_sub_bool_user-not | agree
+a1_sub_float_exact | agree
+a1_sub_float_sub | agree
+a1_sub_float_sub-dict | agree
+a1_sub_float_sub-over | agree
+a1_sub_float_sub-over-other | agree
+a1_sub_float_sub-slots | agree
+a1_sub_float_user | agree
+a1_sub_float_user-not | agree
+a1_sub_frozenset_exact | gap | a slot of a set whose layout is inexact
+a1_sub_frozenset_sub | gap | a slot of a set whose layout is inexact
+a1_sub_frozenset_sub-dict | gap | a slot of a set whose layout is inexact
+a1_sub_frozenset_sub-over | agree
+a1_sub_frozenset_sub-over-other | gap | a slot of a set whose layout is inexact
+a1_sub_frozenset_sub-slots | gap | a slot of a set whose layout is inexact
+a1_sub_frozenset_user | agree
+a1_sub_frozenset_user-not | agree
+a1_sub_int_bool-as-int_exact | agree
+a1_sub_int_exact_exact | agree
+a1_sub_int_exact_sub | agree
+a1_sub_int_exact_sub-over | agree
+a1_sub_int_exact_user | agree
+a1_sub_int_exact_user-not | agree
+a1_sub_int_sub-dict_exact | agree
+a1_sub_int_sub-over-other_exact | agree
+a1_sub_int_sub-over_exact | agree
+a1_sub_int_sub-over_sub | agree
+a1_sub_int_sub-over_sub-over | agree
+a1_sub_int_sub-over_user | agree
+a1_sub_int_sub-over_user-not | agree
+a1_sub_int_sub-slots_exact | agree
+a1_sub_int_sub_exact | agree
+a1_sub_int_sub_sub | agree
+a1_sub_int_sub_sub-over | agree
+a1_sub_int_sub_user | agree
+a1_sub_int_sub_user-not | agree
+a1_sub_int_user-not_exact | agree
+a1_sub_int_user-not_sub | agree
+a1_sub_int_user-not_sub-over | agree
+a1_sub_int_user-not_user | agree
+a1_sub_int_user-not_user-not | agree
+a1_sub_int_user_exact | agree
+a1_sub_int_user_sub | agree
+a1_sub_int_user_sub-over | agree
+a1_sub_int_user_user | agree
+a1_sub_int_user_user-not | agree
+a1_sub_set_exact_exact | gap | a slot of a set whose layout is inexact
+a1_sub_set_exact_sub | gap | a slot of a set whose layout is inexact
+a1_sub_set_exact_sub-over | agree
+a1_sub_set_exact_user | agree
+a1_sub_set_exact_user-not | agree
+a1_sub_set_sub-dict_exact | gap | a slot of a set whose layout is inexact
+a1_sub_set_sub-over-other_exact | gap | a slot of a set whose layout is inexact
+a1_sub_set_sub-over_exact | agree
+a1_sub_set_sub-over_sub | agree
+a1_sub_set_sub-over_sub-over | agree
+a1_sub_set_sub-over_user | agree
+a1_sub_set_sub-over_user-not | agree
+a1_sub_set_sub-slots_exact | gap | a slot of a set whose layout is inexact
+a1_sub_set_sub_exact | gap | a slot of a set whose layout is inexact
+a1_sub_set_sub_sub | gap | a slot of a set whose layout is inexact
+a1_sub_set_sub_sub-over | gap | a slot of a set whose layout is inexact
+a1_sub_set_sub_user | agree
+a1_sub_set_sub_user-not | agree
+a1_sub_set_user-not_exact | agree
+a1_sub_set_user-not_sub | agree
+a1_sub_set_user-not_sub-over | agree
+a1_sub_set_user-not_user | agree
+a1_sub_set_user-not_user-not | agree
+a1_sub_set_user_exact | agree
+a1_sub_set_user_sub | agree
+a1_sub_set_user_sub-over | agree
+a1_sub_set_user_user | agree
+a1_sub_set_user_user-not | agree
+a1_sum_list_exact | agree
+a1_sum_list_sub | agree
+a1_sum_list_sub-dict | agree
+a1_sum_list_sub-over | agree
+a1_sum_list_sub-over-other | agree
+a1_sum_list_sub-slots | agree
+a1_sum_list_user | agree
+a1_sum_list_user-not | agree
+a1_sum_range_exact | agree
+a1_sum_range_user | agree
+a1_sum_range_user-not | agree
+a1_sum_set_exact | agree
+a1_sum_set_sub | gap | a slot of a set whose layout is inexact
+a1_sum_set_sub-dict | gap | a slot of a set whose layout is inexact
+a1_sum_set_sub-over | agree
+a1_sum_set_sub-over-other | gap | a slot of a set whose layout is inexact
+a1_sum_set_sub-slots | gap | a slot of a set whose layout is inexact
+a1_sum_set_user | agree
+a1_sum_set_user-not | agree
+a1_sum_tuple_exact | agree
+a1_sum_tuple_sub | agree
+a1_sum_tuple_sub-dict | agree
+a1_sum_tuple_sub-over | agree
+a1_sum_tuple_sub-over-other | agree
+a1_sum_tuple_sub-slots | agree
+a1_sum_tuple_user | agree
+a1_sum_tuple_user-not | agree
+a1_truediv_bool_exact | agree
+a1_truediv_bool_user | agree
+a1_truediv_bool_user-not | agree
+a1_truediv_float_exact | agree
+a1_truediv_float_sub | agree
+a1_truediv_float_sub-dict | agree
+a1_truediv_float_sub-over | agree
+a1_truediv_float_sub-over-other | agree
+a1_truediv_float_sub-slots | agree
+a1_truediv_float_user | agree
+a1_truediv_float_user-not | agree
+a1_truediv_int_bool-as-int_exact | agree
+a1_truediv_int_exact_exact | agree
+a1_truediv_int_exact_sub | agree
+a1_truediv_int_exact_sub-over | agree
+a1_truediv_int_exact_user | agree
+a1_truediv_int_exact_user-not | agree
+a1_truediv_int_sub-dict_exact | agree
+a1_truediv_int_sub-over-other_exact | agree
+a1_truediv_int_sub-over_exact | agree
+a1_truediv_int_sub-over_sub | agree
+a1_truediv_int_sub-over_sub-over | agree
+a1_truediv_int_sub-over_user | agree
+a1_truediv_int_sub-over_user-not | agree
+a1_truediv_int_sub-slots_exact | agree
+a1_truediv_int_sub_exact | agree
+a1_truediv_int_sub_sub | agree
+a1_truediv_int_sub_sub-over | agree
+a1_truediv_int_sub_user | agree
+a1_truediv_int_sub_user-not | agree
+a1_truediv_int_user-not_exact | agree
+a1_truediv_int_user-not_sub | agree
+a1_truediv_int_user-not_sub-over | agree
+a1_truediv_int_user-not_user | agree
+a1_truediv_int_user-not_user-not | agree
+a1_truediv_int_user_exact | agree
+a1_truediv_int_user_sub | agree
+a1_truediv_int_user_sub-over | agree
+a1_truediv_int_user_user | agree
+a1_truediv_int_user_user-not | agree
+a1_truthy_bool_exact | agree
+a1_truthy_bool_user | agree
+a1_truthy_bool_user-not | agree
+a1_truthy_bytes_exact | agree
+a1_truthy_bytes_sub | agree
+a1_truthy_bytes_sub-dict | agree
+a1_truthy_bytes_sub-over | agree
+a1_truthy_bytes_sub-over-other | agree
+a1_truthy_bytes_sub-slots | agree
+a1_truthy_bytes_user | agree
+a1_truthy_bytes_user-not | agree
+a1_truthy_dict_exact | agree
+a1_truthy_dict_sub | agree
+a1_truthy_dict_sub-dict | agree
+a1_truthy_dict_sub-over | agree
+a1_truthy_dict_sub-over-other | agree
+a1_truthy_dict_sub-slots | agree
+a1_truthy_dict_user | agree
+a1_truthy_dict_user-not | agree
+a1_truthy_float_exact | agree
+a1_truthy_float_sub | agree
+a1_truthy_float_sub-dict | agree
+a1_truthy_float_sub-over | agree
+a1_truthy_float_sub-over-other | agree
+a1_truthy_float_sub-slots | agree
+a1_truthy_float_user | agree
+a1_truthy_float_user-not | agree
+a1_truthy_frozenset_exact | agree
+a1_truthy_frozenset_sub | agree
+a1_truthy_frozenset_sub-dict | agree
+a1_truthy_frozenset_sub-over | agree
+a1_truthy_frozenset_sub-over-other | agree
+a1_truthy_frozenset_sub-slots | agree
+a1_truthy_frozenset_user | agree
+a1_truthy_frozenset_user-not | agree
+a1_truthy_int_bool-as-int | agree
+a1_truthy_int_exact | agree
+a1_truthy_int_sub | agree
+a1_truthy_int_sub-dict | agree
+a1_truthy_int_sub-over | agree
+a1_truthy_int_sub-over-other | agree
+a1_truthy_int_sub-slots | agree
+a1_truthy_int_user | agree
+a1_truthy_int_user-not | agree
+a1_truthy_list_exact | agree
+a1_truthy_list_sub | agree
+a1_truthy_list_sub-dict | agree
+a1_truthy_list_sub-over | agree
+a1_truthy_list_sub-over-other | agree
+a1_truthy_list_sub-slots | agree
+a1_truthy_list_user | agree
+a1_truthy_list_user-not | agree
+a1_truthy_range_exact | agree
+a1_truthy_range_user | agree
+a1_truthy_range_user-not | agree
+a1_truthy_set_exact | agree
+a1_truthy_set_sub | agree
+a1_truthy_set_sub-dict | agree
+a1_truthy_set_sub-over | agree
+a1_truthy_set_sub-over-other | agree
+a1_truthy_set_sub-slots | agree
+a1_truthy_set_user | agree
+a1_truthy_set_user-not | agree
+a1_truthy_str_exact | agree
+a1_truthy_str_sub | agree
+a1_truthy_str_sub-dict | agree
+a1_truthy_str_sub-over | agree
+a1_truthy_str_sub-over-other | agree
+a1_truthy_str_sub-slots | agree
+a1_truthy_str_user | agree
+a1_truthy_str_user-not | agree
+a1_truthy_tuple_exact | agree
+a1_truthy_tuple_sub | agree
+a1_truthy_tuple_sub-dict | agree
+a1_truthy_tuple_sub-over | agree
+a1_truthy_tuple_sub-over-other | agree
+a1_truthy_tuple_sub-slots | agree
+a1_truthy_tuple_user | agree
+a1_truthy_tuple_user-not | agree
+a1_tuple_of_list_exact | agree
+a1_tuple_of_list_sub | agree
+a1_tuple_of_list_sub-dict | agree
+a1_tuple_of_list_sub-over | agree
+a1_tuple_of_list_sub-over-other | agree
+a1_tuple_of_list_sub-slots | agree
+a1_tuple_of_list_user | agree
+a1_tuple_of_list_user-not | agree
+a1_tuple_of_range_exact | agree
+a1_tuple_of_range_user | agree
+a1_tuple_of_range_user-not | agree
+a1_tuple_of_str_exact | agree
+a1_tuple_of_str_sub | agree
+a1_tuple_of_str_sub-dict | agree
+a1_tuple_of_str_sub-over | agree
+a1_tuple_of_str_sub-over-other | agree
+a1_tuple_of_str_sub-slots | agree
+a1_tuple_of_str_user | agree
+a1_tuple_of_str_user-not | agree
+a1_unpack_bytes_exact | agree
+a1_unpack_bytes_sub | agree
+a1_unpack_bytes_sub-dict | agree
+a1_unpack_bytes_sub-over | agree
+a1_unpack_bytes_sub-over-other | agree
+a1_unpack_bytes_sub-slots | agree
+a1_unpack_bytes_user | agree
+a1_unpack_bytes_user-not | agree
+a1_unpack_dict_exact | agree
+a1_unpack_dict_sub | agree
+a1_unpack_dict_sub-dict | agree
+a1_unpack_dict_sub-over | agree
+a1_unpack_dict_sub-over-other | agree
+a1_unpack_dict_sub-slots | agree
+a1_unpack_dict_user | agree
+a1_unpack_dict_user-not | agree
+a1_unpack_ex_list_exact | agree
+a1_unpack_ex_list_sub | agree
+a1_unpack_ex_list_sub-dict | agree
+a1_unpack_ex_list_sub-over | agree
+a1_unpack_ex_list_sub-over-other | agree
+a1_unpack_ex_list_sub-slots | agree
+a1_unpack_ex_list_user | agree
+a1_unpack_ex_list_user-not | agree
+a1_unpack_ex_range_exact | agree
+a1_unpack_ex_range_user | agree
+a1_unpack_ex_range_user-not | agree
+a1_unpack_ex_str_exact | agree
+a1_unpack_ex_str_sub | agree
+a1_unpack_ex_str_sub-dict | agree
+a1_unpack_ex_str_sub-over | agree
+a1_unpack_ex_str_sub-over-other | agree
+a1_unpack_ex_str_sub-slots | agree
+a1_unpack_ex_str_user | agree
+a1_unpack_ex_str_user-not | agree
+a1_unpack_ex_tuple_exact | agree
+a1_unpack_ex_tuple_sub | agree
+a1_unpack_ex_tuple_sub-dict | agree
+a1_unpack_ex_tuple_sub-over | agree
+a1_unpack_ex_tuple_sub-over-other | agree
+a1_unpack_ex_tuple_sub-slots | agree
+a1_unpack_ex_tuple_user | agree
+a1_unpack_ex_tuple_user-not | agree
+a1_unpack_frozenset_exact | gap | iterating a set whose order is not CPython's
+a1_unpack_frozenset_sub | gap | a slot of a set whose layout is inexact
+a1_unpack_frozenset_sub-dict | gap | a slot of a set whose layout is inexact
+a1_unpack_frozenset_sub-over | agree
+a1_unpack_frozenset_sub-over-other | gap | a slot of a set whose layout is inexact
+a1_unpack_frozenset_sub-slots | gap | a slot of a set whose layout is inexact
+a1_unpack_frozenset_user | agree
+a1_unpack_frozenset_user-not | agree
+a1_unpack_list_exact | agree
+a1_unpack_list_sub | agree
+a1_unpack_list_sub-dict | agree
+a1_unpack_list_sub-over | agree
+a1_unpack_list_sub-over-other | agree
+a1_unpack_list_sub-slots | agree
+a1_unpack_list_user | agree
+a1_unpack_list_user-not | agree
+a1_unpack_set_exact | gap | iterating a set whose order is not CPython's
+a1_unpack_set_sub | gap | a slot of a set whose layout is inexact
+a1_unpack_set_sub-dict | gap | a slot of a set whose layout is inexact
+a1_unpack_set_sub-over | agree
+a1_unpack_set_sub-over-other | gap | a slot of a set whose layout is inexact
+a1_unpack_set_sub-slots | gap | a slot of a set whose layout is inexact
+a1_unpack_set_user | agree
+a1_unpack_set_user-not | agree
+a1_unpack_str_exact | agree
+a1_unpack_str_sub | agree
+a1_unpack_str_sub-dict | agree
+a1_unpack_str_sub-over | agree
+a1_unpack_str_sub-over-other | agree
+a1_unpack_str_sub-slots | agree
+a1_unpack_str_user | agree
+a1_unpack_str_user-not | agree
+a1_unpack_tuple_exact | agree
+a1_unpack_tuple_sub | agree
+a1_unpack_tuple_sub-dict | agree
+a1_unpack_tuple_sub-over | agree
+a1_unpack_tuple_sub-over-other | agree
+a1_unpack_tuple_sub-slots | agree
+a1_unpack_tuple_user | agree
+a1_unpack_tuple_user-not | agree
+a1_xor_bool_exact | agree
+a1_xor_bool_user | agree
+a1_xor_bool_user-not | agree
+a1_xor_frozenset_exact | gap | a slot of a set whose layout is inexact
+a1_xor_frozenset_sub | gap | a slot of a set whose layout is inexact
+a1_xor_frozenset_sub-dict | gap | a slot of a set whose layout is inexact
+a1_xor_frozenset_sub-over | agree
+a1_xor_frozenset_sub-over-other | gap | a slot of a set whose layout is inexact
+a1_xor_frozenset_sub-slots | gap | a slot of a set whose layout is inexact
+a1_xor_frozenset_user | agree
+a1_xor_frozenset_user-not | agree
+a1_xor_int_bool-as-int_exact | agree
+a1_xor_int_exact_exact | agree
+a1_xor_int_exact_sub | agree
+a1_xor_int_exact_sub-over | agree
+a1_xor_int_exact_user | agree
+a1_xor_int_exact_user-not | agree
+a1_xor_int_sub-dict_exact | agree
+a1_xor_int_sub-over-other_exact | agree
+a1_xor_int_sub-over_exact | agree
+a1_xor_int_sub-over_sub | agree
+a1_xor_int_sub-over_sub-over | agree
+a1_xor_int_sub-over_user | agree
+a1_xor_int_sub-over_user-not | agree
+a1_xor_int_sub-slots_exact | agree
+a1_xor_int_sub_exact | agree
+a1_xor_int_sub_sub | agree
+a1_xor_int_sub_sub-over | agree
+a1_xor_int_sub_user | agree
+a1_xor_int_sub_user-not | agree
+a1_xor_int_user-not_exact | agree
+a1_xor_int_user-not_sub | agree
+a1_xor_int_user-not_sub-over | agree
+a1_xor_int_user-not_user | agree
+a1_xor_int_user-not_user-not | agree
+a1_xor_int_user_exact | agree
+a1_xor_int_user_sub | agree
+a1_xor_int_user_sub-over | agree
+a1_xor_int_user_user | agree
+a1_xor_int_user_user-not | agree
+a1_xor_set_exact_exact | gap | a slot of a set whose layout is inexact
+a1_xor_set_exact_sub | gap | a slot of a set whose layout is inexact
+a1_xor_set_exact_sub-over | agree
+a1_xor_set_exact_user | agree
+a1_xor_set_exact_user-not | agree
+a1_xor_set_sub-dict_exact | gap | a slot of a set whose layout is inexact
+a1_xor_set_sub-over-other_exact | gap | a slot of a set whose layout is inexact
+a1_xor_set_sub-over_exact | agree
+a1_xor_set_sub-over_sub | agree
+a1_xor_set_sub-over_sub-over | agree
+a1_xor_set_sub-over_user | agree
+a1_xor_set_sub-over_user-not | agree
+a1_xor_set_sub-slots_exact | gap | a slot of a set whose layout is inexact
+a1_xor_set_sub_exact | gap | a slot of a set whose layout is inexact
+a1_xor_set_sub_sub | gap | a slot of a set whose layout is inexact
+a1_xor_set_sub_sub-over | gap | a slot of a set whose layout is inexact
+a1_xor_set_sub_user | agree
+a1_xor_set_sub_user-not | agree
+a1_xor_set_user-not_exact | agree
+a1_xor_set_user-not_sub | agree
+a1_xor_set_user-not_sub-over | agree
+a1_xor_set_user-not_user | agree
+a1_xor_set_user-not_user-not | agree
+a1_xor_set_user_exact | agree
+a1_xor_set_user_sub | agree
+a1_xor_set_user_sub-over | agree
+a1_xor_set_user_user | agree
+a1_xor_set_user_user-not | agree
+a2_dict_eq_rebuild | gap | a dict that changes during a lookup is not modelled yet
+a2_dict_iter_delete | agree
+a2_dict_iter_insert | agree
+a2_dict_update_keys_mutate | agree
+a2_eq_mutual_lists | gap | a C recursion depth over 9000
+a2_eq_self_list | agree
+a2_extend_self_iter | agree
+a2_iter_sentinel_exhaust | agree
+a2_join_mutate | agree
+a2_list_eq_clear_in | agree
+a2_list_eq_clear_index | agree
+a2_list_eq_clear_remove | agree
+a2_max_key_mutate | agree
+a2_replace_eq_during_lookup | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+a2_repr_self_dict | agree
+a2_repr_self_list | agree
+a2_set_eq_clear | gap | a set that changes during a lookup is not modelled yet
+a2_set_iter_add | gap | a slot of a set whose layout is inexact
+a2_sort_key_append | agree
+a2_sort_lt_clear | agree
+a2_zip_advance | agree
+a3_abs_builtin-function | agree
+a3_abs_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_abs_callable | agree
+a3_abs_classmethod | agree
+a3_abs_function | agree
+a3_abs_getattr | agree
+a3_abs_getattribute | agree
+a3_abs_inherited | agree
+a3_abs_instance | agree
+a3_abs_lambda | agree
+a3_abs_metaclass | agree
+a3_abs_none | agree
+a3_abs_property | agree
+a3_abs_second-base | agree
+a3_abs_staticmethod | agree
+a3_add_builtin-function | agree
+a3_add_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_add_callable | agree
+a3_add_classmethod | agree
+a3_add_function | agree
+a3_add_getattr | agree
+a3_add_getattribute | agree
+a3_add_inherited | agree
+a3_add_instance | agree
+a3_add_lambda | agree
+a3_add_metaclass | agree
+a3_add_none | agree
+a3_add_property | agree
+a3_add_second-base | agree
+a3_add_staticmethod | agree
+a3_bool_builtin-function | agree
+a3_bool_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_bool_callable | agree
+a3_bool_classmethod | agree
+a3_bool_function | agree
+a3_bool_getattr | agree
+a3_bool_getattribute | agree
+a3_bool_inherited | agree
+a3_bool_instance | agree
+a3_bool_lambda | agree
+a3_bool_metaclass | agree
+a3_bool_none | agree
+a3_bool_property | agree
+a3_bool_second-base | agree
+a3_bool_staticmethod | agree
+a3_call_builtin-function | agree
+a3_call_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_call_callable | agree
+a3_call_classmethod | agree
+a3_call_function | agree
+a3_call_getattr | agree
+a3_call_getattribute | agree
+a3_call_inherited | agree
+a3_call_instance | agree
+a3_call_lambda | agree
+a3_call_metaclass | agree
+a3_call_none | agree
+a3_call_property | agree
+a3_call_second-base | agree
+a3_call_staticmethod | agree
+a3_contains_builtin-function | agree
+a3_contains_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_contains_callable | agree
+a3_contains_classmethod | agree
+a3_contains_function | agree
+a3_contains_getattr | agree
+a3_contains_getattribute | agree
+a3_contains_inherited | agree
+a3_contains_instance | agree
+a3_contains_lambda | agree
+a3_contains_metaclass | agree
+a3_contains_none | agree
+a3_contains_property | agree
+a3_contains_second-base | agree
+a3_contains_staticmethod | agree
+a3_delitem_builtin-function | agree
+a3_delitem_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_delitem_callable | agree
+a3_delitem_classmethod | agree
+a3_delitem_function | agree
+a3_delitem_getattr | agree
+a3_delitem_getattribute | agree
+a3_delitem_inherited | agree
+a3_delitem_instance | agree
+a3_delitem_lambda | agree
+a3_delitem_metaclass | agree
+a3_delitem_none | agree
+a3_delitem_property | agree
+a3_delitem_second-base | agree
+a3_delitem_staticmethod | agree
+a3_eq_builtin-function | agree
+a3_eq_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_eq_callable | agree
+a3_eq_classmethod | agree
+a3_eq_function | agree
+a3_eq_getattr | agree
+a3_eq_getattribute | agree
+a3_eq_inherited | agree
+a3_eq_instance | agree
+a3_eq_lambda | agree
+a3_eq_none | agree
+a3_eq_property | agree
+a3_eq_second-base | agree
+a3_eq_staticmethod | agree
+a3_float_builtin-function | agree
+a3_float_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_float_callable | agree
+a3_float_classmethod | agree
+a3_float_function | agree
+a3_float_getattr | agree
+a3_float_getattribute | agree
+a3_float_inherited | agree
+a3_float_instance | agree
+a3_float_lambda | agree
+a3_float_metaclass | agree
+a3_float_none | agree
+a3_float_property | agree
+a3_float_second-base | agree
+a3_float_staticmethod | agree
+a3_format_builtin-function | gap | built-in format is not modelled yet
+a3_format_builtin-method | gap | built-in format is not modelled yet
+a3_format_callable | gap | built-in format is not modelled yet
+a3_format_classmethod | gap | built-in format is not modelled yet
+a3_format_function | gap | built-in format is not modelled yet
+a3_format_getattr | gap | built-in format is not modelled yet
+a3_format_getattribute | gap | built-in format is not modelled yet
+a3_format_inherited | gap | built-in format is not modelled yet
+a3_format_instance | gap | built-in format is not modelled yet
+a3_format_lambda | gap | built-in format is not modelled yet
+a3_format_metaclass | gap | built-in format is not modelled yet
+a3_format_none | gap | built-in format is not modelled yet
+a3_format_property | gap | built-in format is not modelled yet
+a3_format_second-base | gap | built-in format is not modelled yet
+a3_format_staticmethod | gap | built-in format is not modelled yet
+a3_getattr_builtin-function | agree
+a3_getattr_builtin-method | agree
+a3_getattr_callable | agree
+a3_getattr_classmethod | agree
+a3_getattr_function | agree
+a3_getattr_getattr | agree
+a3_getattr_getattribute | agree
+a3_getattr_inherited | agree
+a3_getattr_instance | agree
+a3_getattr_lambda | agree
+a3_getattr_metaclass | agree
+a3_getattr_none | agree
+a3_getattr_property | agree
+a3_getattr_second-base | agree
+a3_getattr_staticmethod | agree
+a3_getitem_builtin-function | agree
+a3_getitem_builtin-method | agree
+a3_getitem_callable | agree
+a3_getitem_classmethod | agree
+a3_getitem_function | agree
+a3_getitem_getattr | agree
+a3_getitem_getattribute | agree
+a3_getitem_inherited | agree
+a3_getitem_instance | agree
+a3_getitem_lambda | agree
+a3_getitem_metaclass | agree
+a3_getitem_none | agree
+a3_getitem_property | agree
+a3_getitem_second-base | agree
+a3_getitem_staticmethod | agree
+a3_hash_builtin-function | gap | built-in id is not modelled yet
+a3_hash_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_hash_callable | agree
+a3_hash_classmethod | agree
+a3_hash_function | agree
+a3_hash_getattr | gap | hash(x) depends on an address
+a3_hash_getattribute | gap | hash(x) depends on an address
+a3_hash_inherited | agree
+a3_hash_instance | gap | hash(x) depends on an address
+a3_hash_lambda | agree
+a3_hash_metaclass | gap | hash(x) depends on an address
+a3_hash_none | agree
+a3_hash_property | agree
+a3_hash_second-base | agree
+a3_hash_staticmethod | agree
+a3_iadd_builtin-function | agree
+a3_iadd_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_iadd_callable | agree
+a3_iadd_classmethod | agree
+a3_iadd_function | agree
+a3_iadd_getattr | agree
+a3_iadd_getattribute | agree
+a3_iadd_inherited | agree
+a3_iadd_instance | agree
+a3_iadd_lambda | agree
+a3_iadd_metaclass | agree
+a3_iadd_none | agree
+a3_iadd_property | agree
+a3_iadd_second-base | agree
+a3_iadd_staticmethod | agree
+a3_index_builtin-function | agree
+a3_index_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_index_callable | agree
+a3_index_classmethod | agree
+a3_index_function | agree
+a3_index_getattr | agree
+a3_index_getattribute | agree
+a3_index_inherited | agree
+a3_index_instance | agree
+a3_index_lambda | agree
+a3_index_metaclass | agree
+a3_index_none | agree
+a3_index_property | agree
+a3_index_second-base | agree
+a3_index_staticmethod | agree
+a3_int_builtin-function | agree
+a3_int_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_int_callable | agree
+a3_int_classmethod | agree
+a3_int_function | agree
+a3_int_getattr | agree
+a3_int_getattribute | agree
+a3_int_inherited | agree
+a3_int_instance | agree
+a3_int_lambda | agree
+a3_int_metaclass | agree
+a3_int_none | agree
+a3_int_property | agree
+a3_int_second-base | agree
+a3_int_staticmethod | agree
+a3_iter_builtin-function | agree
+a3_iter_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_iter_callable | agree
+a3_iter_classmethod | agree
+a3_iter_function | agree
+a3_iter_getattr | agree
+a3_iter_getattribute | agree
+a3_iter_inherited | agree
+a3_iter_instance | agree
+a3_iter_lambda | agree
+a3_iter_metaclass | agree
+a3_iter_none | agree
+a3_iter_property | agree
+a3_iter_second-base | agree
+a3_iter_staticmethod | agree
+a3_len_builtin-function | agree
+a3_len_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_len_callable | agree
+a3_len_classmethod | agree
+a3_len_function | agree
+a3_len_getattr | agree
+a3_len_getattribute | agree
+a3_len_inherited | agree
+a3_len_instance | agree
+a3_len_lambda | agree
+a3_len_metaclass | agree
+a3_len_none | agree
+a3_len_property | agree
+a3_len_second-base | agree
+a3_len_staticmethod | agree
+a3_length_hint_builtin-function | agree
+a3_length_hint_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_length_hint_callable | agree
+a3_length_hint_classmethod | agree
+a3_length_hint_function | agree
+a3_length_hint_getattr | agree
+a3_length_hint_getattribute | agree
+a3_length_hint_inherited | agree
+a3_length_hint_instance | agree
+a3_length_hint_lambda | agree
+a3_length_hint_metaclass | agree
+a3_length_hint_none | agree
+a3_length_hint_property | agree
+a3_length_hint_second-base | agree
+a3_length_hint_staticmethod | agree
+a3_lt_builtin-function | agree
+a3_lt_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_lt_callable | agree
+a3_lt_classmethod | agree
+a3_lt_function | agree
+a3_lt_getattr | agree
+a3_lt_getattribute | agree
+a3_lt_inherited | agree
+a3_lt_instance | agree
+a3_lt_lambda | agree
+a3_lt_metaclass | agree
+a3_lt_none | agree
+a3_lt_property | agree
+a3_lt_second-base | agree
+a3_lt_staticmethod | agree
+a3_neg_builtin-function | agree
+a3_neg_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_neg_callable | agree
+a3_neg_classmethod | agree
+a3_neg_function | agree
+a3_neg_getattr | agree
+a3_neg_getattribute | agree
+a3_neg_inherited | agree
+a3_neg_instance | agree
+a3_neg_lambda | agree
+a3_neg_metaclass | agree
+a3_neg_none | agree
+a3_neg_property | agree
+a3_neg_second-base | agree
+a3_neg_staticmethod | agree
+a3_next_builtin-function | agree
+a3_next_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_next_callable | agree
+a3_next_classmethod | agree
+a3_next_function | agree
+a3_next_getattr | agree
+a3_next_getattribute | agree
+a3_next_inherited | agree
+a3_next_instance | agree
+a3_next_lambda | agree
+a3_next_metaclass | agree
+a3_next_none | agree
+a3_next_property | agree
+a3_next_second-base | agree
+a3_next_staticmethod | agree
+a3_radd_builtin-function | agree
+a3_radd_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_radd_callable | agree
+a3_radd_classmethod | agree
+a3_radd_function | agree
+a3_radd_getattr | agree
+a3_radd_getattribute | agree
+a3_radd_inherited | agree
+a3_radd_instance | agree
+a3_radd_lambda | agree
+a3_radd_metaclass | agree
+a3_radd_none | agree
+a3_radd_property | agree
+a3_radd_second-base | agree
+a3_radd_staticmethod | agree
+a3_repr_builtin-function | agree
+a3_repr_builtin-method | agree
+a3_repr_callable | agree
+a3_repr_classmethod | agree
+a3_repr_function | agree
+a3_repr_getattr | gap | a repr that shows an object's address is not modelled yet
+a3_repr_getattribute | gap | a repr that shows an object's address is not modelled yet
+a3_repr_inherited | agree
+a3_repr_instance | gap | a repr that shows an object's address is not modelled yet
+a3_repr_lambda | agree
+a3_repr_metaclass | gap | a repr that shows an object's address is not modelled yet
+a3_repr_none | agree
+a3_repr_property | agree
+a3_repr_second-base | agree
+a3_repr_staticmethod | agree
+a3_reversed_builtin-function | agree
+a3_reversed_builtin-method | agree
+a3_reversed_callable | agree
+a3_reversed_classmethod | agree
+a3_reversed_function | agree
+a3_reversed_getattr | agree
+a3_reversed_getattribute | agree
+a3_reversed_inherited | agree
+a3_reversed_instance | agree
+a3_reversed_lambda | agree
+a3_reversed_metaclass | agree
+a3_reversed_none | agree
+a3_reversed_property | agree
+a3_reversed_second-base | agree
+a3_reversed_staticmethod | agree
+a3_setitem_builtin-function | agree
+a3_setitem_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_setitem_callable | agree
+a3_setitem_classmethod | agree
+a3_setitem_function | agree
+a3_setitem_getattr | agree
+a3_setitem_getattribute | agree
+a3_setitem_inherited | agree
+a3_setitem_instance | agree
+a3_setitem_lambda | agree
+a3_setitem_metaclass | agree
+a3_setitem_none | agree
+a3_setitem_property | agree
+a3_setitem_second-base | agree
+a3_setitem_staticmethod | agree
+a3_str_builtin-function | agree
+a3_str_builtin-method | gap | a slot wrapper bound to an object of another type is not modelled yet
+a3_str_callable | agree
+a3_str_classmethod | agree
+a3_str_function | agree
+a3_str_getattr | agree
+a3_str_getattribute | agree
+a3_str_inherited | agree
+a3_str_instance | agree
+a3_str_lambda | agree
+a3_str_metaclass | agree
+a3_str_none | agree
+a3_str_property | agree
+a3_str_second-base | agree
+a3_str_staticmethod | agree
+a4_abs_not-impl | agree
+a4_abs_raise-key | agree
+a4_abs_raise-stop | agree
+a4_abs_raise-user | agree
+a4_abs_raise-value | agree
+a4_abs_sub-result | agree
+a4_abs_wrong-big | agree
+a4_abs_wrong-neg | agree
+a4_abs_wrong-none | agree
+a4_abs_wrong-str | agree
+a4_add_not-impl | agree
+a4_add_raise-key | agree
+a4_add_raise-stop | agree
+a4_add_raise-user | agree
+a4_add_raise-value | agree
+a4_add_sub-result | agree
+a4_add_wrong-big | agree
+a4_add_wrong-neg | agree
+a4_add_wrong-none | agree
+a4_add_wrong-str | agree
+a4_bool_not-impl | agree
+a4_bool_raise-key | agree
+a4_bool_raise-stop | agree
+a4_bool_raise-user | agree
+a4_bool_raise-value | agree
+a4_bool_sub-result | agree
+a4_bool_wrong-big | agree
+a4_bool_wrong-neg | agree
+a4_bool_wrong-none | agree
+a4_bool_wrong-str | agree
+a4_call_not-impl | agree
+a4_call_raise-key | agree
+a4_call_raise-stop | agree
+a4_call_raise-user | agree
+a4_call_raise-value | agree
+a4_call_sub-result | agree
+a4_call_wrong-big | agree
+a4_call_wrong-neg | agree
+a4_call_wrong-none | agree
+a4_call_wrong-str | agree
+a4_contains_not-impl | gap | the truth of NotImplemented, which warns, is not modelled yet
+a4_contains_raise-key | agree
+a4_contains_raise-stop | agree
+a4_contains_raise-user | agree
+a4_contains_raise-value | agree
+a4_contains_sub-result | agree
+a4_contains_wrong-big | agree
+a4_contains_wrong-neg | agree
+a4_contains_wrong-none | agree
+a4_contains_wrong-str | agree
+a4_delitem_not-impl | agree
+a4_delitem_raise-key | agree
+a4_delitem_raise-stop | agree
+a4_delitem_raise-user | agree
+a4_delitem_raise-value | agree
+a4_delitem_sub-result | agree
+a4_delitem_wrong-big | agree
+a4_delitem_wrong-neg | agree
+a4_delitem_wrong-none | agree
+a4_delitem_wrong-str | agree
+a4_eq_not-impl | agree
+a4_eq_raise-key | agree
+a4_eq_raise-stop | agree
+a4_eq_raise-user | agree
+a4_eq_raise-value | agree
+a4_eq_sub-result | agree
+a4_eq_wrong-big | agree
+a4_eq_wrong-neg | agree
+a4_eq_wrong-none | agree
+a4_eq_wrong-str | agree
+a4_float_not-impl | agree
+a4_float_raise-key | agree
+a4_float_raise-stop | agree
+a4_float_raise-user | agree
+a4_float_raise-value | agree
+a4_float_sub-result | agree
+a4_float_wrong-big | agree
+a4_float_wrong-neg | agree
+a4_float_wrong-none | agree
+a4_float_wrong-str | agree
+a4_format_not-impl | gap | built-in format is not modelled yet
+a4_format_raise-key | gap | built-in format is not modelled yet
+a4_format_raise-stop | gap | built-in format is not modelled yet
+a4_format_raise-user | gap | built-in format is not modelled yet
+a4_format_raise-value | gap | built-in format is not modelled yet
+a4_format_sub-result | gap | built-in format is not modelled yet
+a4_format_wrong-big | gap | built-in format is not modelled yet
+a4_format_wrong-neg | gap | built-in format is not modelled yet
+a4_format_wrong-none | gap | built-in format is not modelled yet
+a4_format_wrong-str | gap | built-in format is not modelled yet
+a4_getitem_not-impl | agree
+a4_getitem_raise-key | agree
+a4_getitem_raise-stop | agree
+a4_getitem_raise-user | agree
+a4_getitem_raise-value | agree
+a4_getitem_sub-result | agree
+a4_getitem_wrong-big | agree
+a4_getitem_wrong-neg | agree
+a4_getitem_wrong-none | agree
+a4_getitem_wrong-str | agree
+a4_hash_not-impl | agree
+a4_hash_raise-key | agree
+a4_hash_raise-stop | agree
+a4_hash_raise-user | agree
+a4_hash_raise-value | agree
+a4_hash_sub-result | agree
+a4_hash_wrong-big | agree
+a4_hash_wrong-neg | agree
+a4_hash_wrong-none | agree
+a4_hash_wrong-str | agree
+a4_iadd_not-impl | agree
+a4_iadd_raise-key | agree
+a4_iadd_raise-stop | agree
+a4_iadd_raise-user | agree
+a4_iadd_raise-value | agree
+a4_iadd_sub-result | agree
+a4_iadd_wrong-big | agree
+a4_iadd_wrong-neg | agree
+a4_iadd_wrong-none | agree
+a4_iadd_wrong-str | agree
+a4_index_not-impl | agree
+a4_index_raise-key | agree
+a4_index_raise-stop | agree
+a4_index_raise-user | agree
+a4_index_raise-value | agree
+a4_index_sub-result | gap | an __index__ that returns a strict subclass of int, which warns, is not modelled yet
+a4_index_wrong-big | agree
+a4_index_wrong-neg | agree
+a4_index_wrong-none | agree
+a4_index_wrong-str | agree
+a4_int_not-impl | agree
+a4_int_raise-key | agree
+a4_int_raise-stop | agree
+a4_int_raise-user | agree
+a4_int_raise-value | agree
+a4_int_sub-result | gap | an __int__ that returns an instance of a subclass of int warns, which writes __warningregistry__
+a4_int_wrong-big | agree
+a4_int_wrong-neg | agree
+a4_int_wrong-none | agree
+a4_int_wrong-str | agree
+a4_iter_not-impl | agree
+a4_iter_raise-key | agree
+a4_iter_raise-stop | agree
+a4_iter_raise-user | agree
+a4_iter_raise-value | agree
+a4_iter_sub-result | agree
+a4_iter_wrong-big | agree
+a4_iter_wrong-neg | agree
+a4_iter_wrong-none | agree
+a4_iter_wrong-str | agree
+a4_len_not-impl | agree
+a4_len_raise-key | agree
+a4_len_raise-stop | agree
+a4_len_raise-user | agree
+a4_len_raise-value | agree
+a4_len_sub-result | agree
+a4_len_wrong-big | agree
+a4_len_wrong-neg | agree
+a4_len_wrong-none | agree
+a4_len_wrong-str | agree
+a4_length_hint_not-impl | agree
+a4_length_hint_raise-key | agree
+a4_length_hint_raise-stop | agree
+a4_length_hint_raise-user | agree
+a4_length_hint_raise-value | agree
+a4_length_hint_sub-result | agree
+a4_length_hint_wrong-big | agree
+a4_length_hint_wrong-neg | agree
+a4_length_hint_wrong-none | agree
+a4_length_hint_wrong-str | agree
+a4_lt_not-impl | agree
+a4_lt_raise-key | agree
+a4_lt_raise-stop | agree
+a4_lt_raise-user | agree
+a4_lt_raise-value | agree
+a4_lt_sub-result | agree
+a4_lt_wrong-big | agree
+a4_lt_wrong-neg | agree
+a4_lt_wrong-none | agree
+a4_lt_wrong-str | agree
+a4_neg_not-impl | agree
+a4_neg_raise-key | agree
+a4_neg_raise-stop | agree
+a4_neg_raise-user | agree
+a4_neg_raise-value | agree
+a4_neg_sub-result | agree
+a4_neg_wrong-big | agree
+a4_neg_wrong-neg | agree
+a4_neg_wrong-none | agree
+a4_neg_wrong-str | agree
+a4_next_not-impl | agree
+a4_next_raise-key | agree
+a4_next_raise-stop | agree
+a4_next_raise-user | agree
+a4_next_raise-value | agree
+a4_next_sub-result | agree
+a4_next_wrong-big | agree
+a4_next_wrong-neg | agree
+a4_next_wrong-none | agree
+a4_next_wrong-str | agree
+a4_radd_not-impl | agree
+a4_radd_raise-key | agree
+a4_radd_raise-stop | agree
+a4_radd_raise-user | agree
+a4_radd_raise-value | agree
+a4_radd_sub-result | agree
+a4_radd_wrong-big | agree
+a4_radd_wrong-neg | agree
+a4_radd_wrong-none | agree
+a4_radd_wrong-str | agree
+a4_repr_not-impl | agree
+a4_repr_raise-key | agree
+a4_repr_raise-stop | agree
+a4_repr_raise-user | agree
+a4_repr_raise-value | agree
+a4_repr_sub-result | agree
+a4_repr_wrong-big | agree
+a4_repr_wrong-neg | agree
+a4_repr_wrong-none | agree
+a4_repr_wrong-str | agree
+a4_reversed_not-impl | agree
+a4_reversed_raise-key | agree
+a4_reversed_raise-stop | agree
+a4_reversed_raise-user | agree
+a4_reversed_raise-value | agree
+a4_reversed_sub-result | agree
+a4_reversed_wrong-big | agree
+a4_reversed_wrong-neg | agree
+a4_reversed_wrong-none | agree
+a4_reversed_wrong-str | agree
+a4_setitem_not-impl | agree
+a4_setitem_raise-key | agree
+a4_setitem_raise-stop | agree
+a4_setitem_raise-user | agree
+a4_setitem_raise-value | agree
+a4_setitem_sub-result | agree
+a4_setitem_wrong-big | agree
+a4_setitem_wrong-neg | agree
+a4_setitem_wrong-none | agree
+a4_setitem_wrong-str | agree
+a4_str_not-impl | agree
+a4_str_raise-key | agree
+a4_str_raise-stop | agree
+a4_str_raise-user | agree
+a4_str_raise-value | agree
+a4_str_sub-result | agree
+a4_str_wrong-big | agree
+a4_str_wrong-neg | agree
+a4_str_wrong-none | agree
+a4_str_wrong-str | agree
+a5_big_int_ops | agree
+a5_bool_index | agree
+a5_deep_list_eq | gap | a value nested deeper than the trace prints
+a5_deep_list_repr | gap | a value nested deeper than the trace prints
+a5_empty_max | agree
+a5_empty_unpack | agree
+a5_hash_huge | agree
+a5_index_huge | agree
+a5_inf | agree
+a5_int_str_4300 | agree
+a5_int_str_limit | agree
+a5_len_huge | agree
+a5_list_repeat_overflow | gap | a repetition too large to model
+a5_nan_eq | gap | comparing values whose identity is unknown and that are not equal (a NaN)
+a5_neg_zero | gap | built-in round is not modelled yet
+a5_nonbmp | agree
+a5_repeat_overflow | gap | a repetition too large to model
+a5_slice_neg_step | agree
+a5_slice_zero_step | agree
+a5_str_sub_keyword | gap | a walk of a dict whose comparisons may run user code is not modelled yet
+a6_iter_not_iterator | agree
+a6_iter_raises | agree
+a6_len_negative | agree
+a6_length_hint_negative | agree
+a6_length_hint_notimpl | agree
+a6_length_hint_raises | agree
+a6_next_raises | agree
+a6_next_raises_dict | agree
+a6_next_raises_in_zip | agree
+a6_next_raises_join | agree
+a6_next_raises_sorted | agree
+a6_next_raises_star | agree
+a6_next_raises_sum | agree
+a6_resume_after_stop | agree
+a6_stop_with_value | agree
+a6_unpack_too_many | agree
+a7_1___add___delattr | gap | a write to the attribute method-wrapper.__doc__ is not modelled yet
+a7_1___add___getattr-default | agree
+a7_1___add___hasattr | gap | the attribute method-wrapper.__doc__ is not modelled yet
+a7_1___add___setattr | agree
+a7_3_delattr | agree
+a7_3_getattr-default | agree
+a7_3_hasattr | gap | the attribute int.__doc__ is not modelled yet
+a7_3_setattr | agree
+a7_Exception_delattr | agree
+a7_Exception_getattr-default | agree
+a7_Exception_hasattr | gap | the attribute type.__doc__ is not modelled yet
+a7_Exception_setattr | agree
+a7_None_delattr | agree
+a7_None_getattr-default | agree
+a7_None_hasattr | agree
+a7_None_setattr | agree
+a7__append_delattr | gap | a write to the attribute builtin_function_or_method.__doc__ is not modelled yet
+a7__append_getattr-default | agree
+a7__append_hasattr | gap | the attribute builtin_function_or_method.__doc__ is not modelled yet
+a7__append_setattr | agree
+a7_dict_delattr | agree
+a7_dict_getattr-default | agree
+a7_dict_hasattr | gap | the attribute type.__doc__ is not modelled yet
+a7_dict_setattr | agree
+a7_exit_delattr | gap | the attribute __doc__ of the built-in exit is not modelled yet
+a7_exit_getattr-default | gap | the attribute tag of the built-in exit is not modelled yet
+a7_exit_hasattr | gap | the attribute tag of the built-in exit is not modelled yet
+a7_exit_setattr | gap | the attribute tag of the built-in exit is not modelled yet
+a7_int_delattr | agree
+a7_int_getattr-default | agree
+a7_int_hasattr | gap | the attribute type.__doc__ is not modelled yet
+a7_int_setattr | agree
+a7_len_delattr | gap | a write to the attribute builtin_function_or_method.__doc__ is not modelled yet
+a7_len_getattr-default | agree
+a7_len_hasattr | gap | the attribute builtin_function_or_method.__doc__ is not modelled yet
+a7_len_setattr | agree
+a7_list_delattr | agree
+a7_list_getattr-default | agree
+a7_list_hasattr | gap | the attribute type.__doc__ is not modelled yet
+a7_list_setattr | agree
+a7_object_delattr | agree
+a7_object_getattr-default | agree
+a7_object_hasattr | gap | the attribute type.__doc__ is not modelled yet
+a7_object_setattr | agree
+a7_print_delattr | gap | a write to the attribute builtin_function_or_method.__doc__ is not modelled yet
+a7_print_getattr-default | agree
+a7_print_hasattr | gap | the attribute builtin_function_or_method.__doc__ is not modelled yet
+a7_print_setattr | agree
+a7_qabq_delattr | agree
+a7_qabq_getattr-default | agree
+a7_qabq_hasattr | gap | the attribute str.__doc__ is not modelled yet
+a7_qabq_setattr | agree
+a7_range2_delattr | agree
+a7_range2_getattr-default | agree
+a7_range2_hasattr | gap | the attribute range.__doc__ is not modelled yet
+a7_range2_setattr | agree
+a7_str_delattr | agree
+a7_str_getattr-default | agree
+a7_str_hasattr | gap | the attribute type.__doc__ is not modelled yet
+a7_str_setattr | agree
+a7_type_delattr | agree
+a7_type_getattr-default | agree
+a7_type_hasattr | gap | the attribute type.__doc__ is not modelled yet
+a7_type_setattr | agree
+fast_dict_key_int_sub_eq | agree
+fast_dict_merge_getitem | agree
+fast_extend_tuple_sub_iter | agree
+fast_format_empty_spec_int_sub | gap | built-in format is not modelled yet
+fast_fromkeys_sub | agree
+fast_hash_eq_only | agree
+fast_identity_in | agree
+fast_isinstance_exact_meta | agree
+fast_len_list_sub | agree
+fast_list_sub_truth | agree
+fast_num_sub_add | agree
+fast_orderfree_sub | agree
+fast_repr_list_with_sub_items | agree
+fast_set_update_sub_iter | agree
+fast_sort_int_sub_lt | agree
+fast_str_of_str_sub | agree
+fast_str_sub_eq | agree
+fast_sum_float_int_sub | agree
+fast_tryslot_radd | agree
+fast_tryslot_rmul | agree
+fast_tuple_sub_lt | agree
+fast_unbound_sub_self | agree
+m_bytes___len___bad_keyword | agree
+m_bytes___len___self_exact | agree
+m_bytes___len___self_sub | agree
+m_bytes___len___self_sub-over-other | agree
+m_bytes___len___too_many | agree
+m_bytes___len___too_many_sub | agree
+m_dict_clear_bad_keyword | agree
+m_dict_clear_self_exact | agree
+m_dict_clear_self_sub | agree
+m_dict_clear_self_sub-over-other | agree
+m_dict_clear_too_many | agree
+m_dict_clear_too_many_sub | gap | the message of a wrong call of dict.clear depends on how it is called
+m_dict_copy_bad_keyword | agree
+m_dict_copy_self_exact | agree
+m_dict_copy_self_sub | agree
+m_dict_copy_self_sub-over-other | agree
+m_dict_copy_too_many | agree
+m_dict_copy_too_many_sub | gap | the message of a wrong call of dict.copy depends on how it is called
+m_dict_get_arg-sub | agree
+m_dict_get_arg-user | agree
+m_dict_get_bad_keyword | agree
+m_dict_get_self_exact | agree
+m_dict_get_self_sub | agree
+m_dict_get_self_sub-over-other | agree
+m_dict_get_too_many | agree
+m_dict_get_too_many_sub | agree
+m_dict_items_bad_keyword | agree
+m_dict_items_self_exact | agree
+m_dict_items_self_sub | agree
+m_dict_items_self_sub-over-other | agree
+m_dict_items_too_many | agree
+m_dict_items_too_many_sub | gap | the message of a wrong call of dict.items depends on how it is called
+m_dict_keys_bad_keyword | agree
+m_dict_keys_self_exact | agree
+m_dict_keys_self_sub | agree
+m_dict_keys_self_sub-over-other | agree
+m_dict_keys_too_many | agree
+m_dict_keys_too_many_sub | gap | the message of a wrong call of dict.keys depends on how it is called
+m_dict_pop_arg-sub | agree
+m_dict_pop_arg-user | agree
+m_dict_pop_arg-user-not | agree
+m_dict_pop_bad_keyword | agree
+m_dict_pop_self_exact | agree
+m_dict_pop_self_sub | agree
+m_dict_pop_self_sub-over-other | agree
+m_dict_pop_too_many | agree
+m_dict_pop_too_many_sub | agree
+m_dict_popitem_bad_keyword | agree
+m_dict_popitem_self_exact | agree
+m_dict_popitem_self_sub | agree
+m_dict_popitem_self_sub-over-other | agree
+m_dict_popitem_too_many | agree
+m_dict_popitem_too_many_sub | gap | the message of a wrong call of dict.popitem depends on how it is called
+m_dict_setdefault_arg-sub | agree
+m_dict_setdefault_arg-user | agree
+m_dict_setdefault_arg-user-not | agree
+m_dict_setdefault_bad_keyword | agree
+m_dict_setdefault_self_exact | agree
+m_dict_setdefault_self_sub | agree
+m_dict_setdefault_self_sub-over-other | agree
+m_dict_setdefault_too_many | agree
+m_dict_setdefault_too_many_sub | agree
+m_dict_update_arg-sub | agree
+m_dict_update_arg-user | agree
+m_dict_update_arg-user-not | agree
+m_dict_update_bad_keyword | agree
+m_dict_update_self_exact | agree
+m_dict_update_self_sub | agree
+m_dict_update_self_sub-over-other | agree
+m_dict_update_too_many | agree
+m_dict_update_too_many_sub | agree
+m_dict_values_bad_keyword | agree
+m_dict_values_self_exact | agree
+m_dict_values_self_sub | agree
+m_dict_values_self_sub-over-other | agree
+m_dict_values_too_many | agree
+m_dict_values_too_many_sub | gap | the message of a wrong call of dict.values depends on how it is called
+m_frozenset_copy_bad_keyword | agree
+m_frozenset_copy_self_exact | gap | a slot of a set whose layout is inexact
+m_frozenset_copy_self_sub | gap | a slot of a set whose layout is inexact
+m_frozenset_copy_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_frozenset_copy_too_many | agree
+m_frozenset_copy_too_many_sub | gap | the message of a wrong call of frozenset.copy depends on how it is called
+m_frozenset_issubset_arg-sub | gap | a slot of a set whose layout is inexact
+m_frozenset_issubset_arg-user | gap | a slot of a set whose layout is inexact
+m_frozenset_issubset_arg-user-not | gap | a slot of a set whose layout is inexact
+m_frozenset_issubset_bad_keyword | agree
+m_frozenset_issubset_self_exact | gap | a slot of a set whose layout is inexact
+m_frozenset_issubset_self_sub | gap | a slot of a set whose layout is inexact
+m_frozenset_issubset_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_frozenset_issubset_too_many | agree
+m_frozenset_issubset_too_many_sub | gap | the message of a wrong call of frozenset.issubset depends on how it is called
+m_frozenset_union_arg-sub | gap | a slot of a set whose layout is inexact
+m_frozenset_union_arg-user | gap | a slot of a set whose layout is inexact
+m_frozenset_union_arg-user-not | gap | a slot of a set whose layout is inexact
+m_frozenset_union_bad_keyword | gap | the message of a keyword argument to union depends on how it is called
+m_frozenset_union_self_exact | gap | a slot of a set whose layout is inexact
+m_frozenset_union_self_sub | gap | a slot of a set whose layout is inexact
+m_frozenset_union_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_frozenset_union_too_many | agree
+m_frozenset_union_too_many_sub | agree
+m_list_append_arg-sub | agree
+m_list_append_arg-user | agree
+m_list_append_arg-user-not | agree
+m_list_append_bad_keyword | agree
+m_list_append_self_exact | agree
+m_list_append_self_sub | agree
+m_list_append_self_sub-over-other | agree
+m_list_append_too_many | agree
+m_list_append_too_many_sub | gap | the message of a wrong call of list.append depends on how it is called
+m_list_clear_bad_keyword | agree
+m_list_clear_self_exact | agree
+m_list_clear_self_sub | agree
+m_list_clear_self_sub-over-other | agree
+m_list_clear_too_many | agree
+m_list_clear_too_many_sub | gap | the message of a wrong call of list.clear depends on how it is called
+m_list_copy_bad_keyword | agree
+m_list_copy_self_exact | agree
+m_list_copy_self_sub | agree
+m_list_copy_self_sub-over-other | agree
+m_list_copy_too_many | agree
+m_list_copy_too_many_sub | gap | the message of a wrong call of list.copy depends on how it is called
+m_list_count_arg-sub | agree
+m_list_count_arg-user | agree
+m_list_count_arg-user-not | agree
+m_list_count_bad_keyword | agree
+m_list_count_self_exact | agree
+m_list_count_self_sub | agree
+m_list_count_self_sub-over-other | agree
+m_list_count_too_many | agree
+m_list_count_too_many_sub | gap | the message of a wrong call of list.count depends on how it is called
+m_list_extend_arg-sub | agree
+m_list_extend_arg-user | agree
+m_list_extend_arg-user-not | agree
+m_list_extend_bad_keyword | agree
+m_list_extend_self_exact | agree
+m_list_extend_self_sub | agree
+m_list_extend_self_sub-over-other | agree
+m_list_extend_too_many | agree
+m_list_extend_too_many_sub | gap | the message of a wrong call of list.extend depends on how it is called
+m_list_index_arg-sub | agree
+m_list_index_arg-user | agree
+m_list_index_arg-user-not | agree
+m_list_index_bad_keyword | agree
+m_list_index_self_exact | agree
+m_list_index_self_sub | agree
+m_list_index_self_sub-over-other | agree
+m_list_index_too_many | agree
+m_list_index_too_many_sub | agree
+m_list_insert_arg-sub | agree
+m_list_insert_arg-user | agree
+m_list_insert_arg-user-not | agree
+m_list_insert_bad_keyword | agree
+m_list_insert_self_exact | agree
+m_list_insert_self_sub | agree
+m_list_insert_self_sub-over-other | agree
+m_list_insert_too_many | agree
+m_list_insert_too_many_sub | agree
+m_list_pop_bad_keyword | agree
+m_list_pop_self_exact | agree
+m_list_pop_self_sub | agree
+m_list_pop_self_sub-over-other | agree
+m_list_pop_too_many | agree
+m_list_pop_too_many_sub | agree
+m_list_remove_arg-sub | agree
+m_list_remove_arg-user | agree
+m_list_remove_arg-user-not | agree
+m_list_remove_bad_keyword | agree
+m_list_remove_self_exact | agree
+m_list_remove_self_sub | agree
+m_list_remove_self_sub-over-other | agree
+m_list_remove_too_many | agree
+m_list_remove_too_many_sub | gap | the message of a wrong call of list.remove depends on how it is called
+m_list_reverse_bad_keyword | agree
+m_list_reverse_self_exact | agree
+m_list_reverse_self_sub | agree
+m_list_reverse_self_sub-over-other | agree
+m_list_reverse_too_many | agree
+m_list_reverse_too_many_sub | gap | the message of a wrong call of list.reverse depends on how it is called
+m_list_sort_bad_keyword | agree
+m_list_sort_self_exact | agree
+m_list_sort_self_sub | agree
+m_list_sort_self_sub-over-other | agree
+m_list_sort_too_many | agree
+m_list_sort_too_many_sub | agree
+m_range_count_arg-sub | agree
+m_range_count_arg-user | agree
+m_range_count_arg-user-not | agree
+m_range_count_bad_keyword | agree
+m_range_count_self_exact | agree
+m_range_count_too_many | agree
+m_range_index_arg-sub | agree
+m_range_index_arg-user | agree
+m_range_index_arg-user-not | agree
+m_range_index_bad_keyword | agree
+m_range_index_self_exact | agree
+m_range_index_too_many | agree
+m_set_add_arg-sub | gap | a slot of a set whose layout is inexact
+m_set_add_arg-user | gap | a slot of a set whose layout is inexact
+m_set_add_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_add_bad_keyword | agree
+m_set_add_self_exact | gap | a slot of a set whose layout is inexact
+m_set_add_self_sub | gap | a slot of a set whose layout is inexact
+m_set_add_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_add_too_many | agree
+m_set_add_too_many_sub | gap | the message of a wrong call of set.add depends on how it is called
+m_set_clear_bad_keyword | agree
+m_set_clear_self_exact | agree
+m_set_clear_self_sub | agree
+m_set_clear_self_sub-over-other | agree
+m_set_clear_too_many | agree
+m_set_clear_too_many_sub | gap | the message of a wrong call of set.clear depends on how it is called
+m_set_copy_bad_keyword | agree
+m_set_copy_self_exact | gap | a slot of a set whose layout is inexact
+m_set_copy_self_sub | gap | a slot of a set whose layout is inexact
+m_set_copy_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_copy_too_many | agree
+m_set_copy_too_many_sub | gap | the message of a wrong call of set.copy depends on how it is called
+m_set_difference_arg-sub | gap | a slot of a set whose layout is inexact
+m_set_difference_arg-user | gap | a slot of a set whose layout is inexact
+m_set_difference_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_difference_bad_keyword | gap | the message of a keyword argument to difference depends on how it is called
+m_set_difference_self_exact | gap | a slot of a set whose layout is inexact
+m_set_difference_self_sub | gap | a slot of a set whose layout is inexact
+m_set_difference_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_difference_too_many | agree
+m_set_difference_too_many_sub | agree
+m_set_difference_update_arg-sub | gap | a slot of a set whose layout is inexact
+m_set_difference_update_arg-user | gap | a slot of a set whose layout is inexact
+m_set_difference_update_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_difference_update_bad_keyword | gap | the message of a keyword argument to difference_update depends on how it is called
+m_set_difference_update_self_exact | gap | a slot of a set whose layout is inexact
+m_set_difference_update_self_sub | gap | a slot of a set whose layout is inexact
+m_set_difference_update_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_difference_update_too_many | agree
+m_set_difference_update_too_many_sub | agree
+m_set_discard_arg-sub | gap | a slot of a set whose layout is inexact
+m_set_discard_arg-user | gap | a slot of a set whose layout is inexact
+m_set_discard_bad_keyword | agree
+m_set_discard_self_exact | gap | a slot of a set whose layout is inexact
+m_set_discard_self_sub | gap | a slot of a set whose layout is inexact
+m_set_discard_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_discard_too_many | agree
+m_set_discard_too_many_sub | gap | the message of a wrong call of set.discard depends on how it is called
+m_set_intersection_arg-sub | gap | a slot of a set whose layout is inexact
+m_set_intersection_arg-user | gap | a slot of a set whose layout is inexact
+m_set_intersection_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_intersection_bad_keyword | gap | the message of a keyword argument to intersection depends on how it is called
+m_set_intersection_self_exact | gap | a slot of a set whose layout is inexact
+m_set_intersection_self_sub | gap | a slot of a set whose layout is inexact
+m_set_intersection_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_intersection_too_many | agree
+m_set_intersection_too_many_sub | agree
+m_set_intersection_update_arg-sub | agree
+m_set_intersection_update_arg-user | agree
+m_set_intersection_update_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_intersection_update_bad_keyword | gap | the message of a keyword argument to intersection_update depends on how it is called
+m_set_intersection_update_self_exact | agree
+m_set_intersection_update_self_sub | agree
+m_set_intersection_update_self_sub-over-other | agree
+m_set_intersection_update_too_many | agree
+m_set_intersection_update_too_many_sub | agree
+m_set_isdisjoint_arg-sub | gap | a slot of a set whose layout is inexact
+m_set_isdisjoint_arg-user | gap | a slot of a set whose layout is inexact
+m_set_isdisjoint_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_isdisjoint_bad_keyword | agree
+m_set_isdisjoint_self_exact | gap | a slot of a set whose layout is inexact
+m_set_isdisjoint_self_sub | gap | a slot of a set whose layout is inexact
+m_set_isdisjoint_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_isdisjoint_too_many | agree
+m_set_isdisjoint_too_many_sub | gap | the message of a wrong call of set.isdisjoint depends on how it is called
+m_set_issubset_arg-sub | gap | a slot of a set whose layout is inexact
+m_set_issubset_arg-user | gap | a slot of a set whose layout is inexact
+m_set_issubset_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_issubset_bad_keyword | agree
+m_set_issubset_self_exact | gap | a slot of a set whose layout is inexact
+m_set_issubset_self_sub | gap | a slot of a set whose layout is inexact
+m_set_issubset_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_issubset_too_many | agree
+m_set_issubset_too_many_sub | gap | the message of a wrong call of set.issubset depends on how it is called
+m_set_issuperset_arg-sub | gap | a slot of a set whose layout is inexact
+m_set_issuperset_arg-user | gap | a slot of a set whose layout is inexact
+m_set_issuperset_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_issuperset_bad_keyword | agree
+m_set_issuperset_self_exact | gap | a slot of a set whose layout is inexact
+m_set_issuperset_self_sub | gap | a slot of a set whose layout is inexact
+m_set_issuperset_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_issuperset_too_many | agree
+m_set_issuperset_too_many_sub | gap | the message of a wrong call of set.issuperset depends on how it is called
+m_set_pop_bad_keyword | agree
+m_set_pop_self_exact | gap | set.pop of a set whose order is not CPython's is not modelled yet
+m_set_pop_self_sub | gap | set.pop of a set whose order is not CPython's is not modelled yet
+m_set_pop_self_sub-over-other | gap | set.pop of a set whose order is not CPython's is not modelled yet
+m_set_pop_too_many | agree
+m_set_pop_too_many_sub | gap | the message of a wrong call of set.pop depends on how it is called
+m_set_remove_arg-sub | gap | a slot of a set whose layout is inexact
+m_set_remove_arg-user | gap | a slot of a set whose layout is inexact
+m_set_remove_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_remove_bad_keyword | agree
+m_set_remove_self_exact | gap | a slot of a set whose layout is inexact
+m_set_remove_self_sub | gap | a slot of a set whose layout is inexact
+m_set_remove_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_remove_too_many | agree
+m_set_remove_too_many_sub | gap | the message of a wrong call of set.remove depends on how it is called
+m_set_symmetric_difference_arg-sub | gap | a slot of a set whose layout is inexact
+m_set_symmetric_difference_arg-user | gap | a slot of a set whose layout is inexact
+m_set_symmetric_difference_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_symmetric_difference_bad_keyword | agree
+m_set_symmetric_difference_self_exact | gap | a slot of a set whose layout is inexact
+m_set_symmetric_difference_self_sub | gap | a slot of a set whose layout is inexact
+m_set_symmetric_difference_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_symmetric_difference_too_many | agree
+m_set_symmetric_difference_too_many_sub | gap | the message of a wrong call of set.symmetric_difference depends on how it is called
+m_set_union_arg-sub | gap | a slot of a set whose layout is inexact
+m_set_union_arg-user | gap | a slot of a set whose layout is inexact
+m_set_union_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_union_bad_keyword | gap | the message of a keyword argument to union depends on how it is called
+m_set_union_self_exact | gap | a slot of a set whose layout is inexact
+m_set_union_self_sub | gap | a slot of a set whose layout is inexact
+m_set_union_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_union_too_many | agree
+m_set_union_too_many_sub | agree
+m_set_update_arg-sub | gap | a slot of a set whose layout is inexact
+m_set_update_arg-user | gap | a slot of a set whose layout is inexact
+m_set_update_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_update_bad_keyword | gap | the message of a keyword argument to update depends on how it is called
+m_set_update_self_exact | gap | a slot of a set whose layout is inexact
+m_set_update_self_sub | gap | a slot of a set whose layout is inexact
+m_set_update_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_update_too_many | agree
+m_set_update_too_many_sub | agree
+m_str_capitalize_bad_keyword | agree
+m_str_capitalize_self_exact | agree
+m_str_capitalize_self_sub | agree
+m_str_capitalize_self_sub-over-other | agree
+m_str_capitalize_too_many | agree
+m_str_capitalize_too_many_sub | gap | the message of a wrong call of str.capitalize depends on how it is called
+m_str_casefold_bad_keyword | agree
+m_str_casefold_self_exact | agree
+m_str_casefold_self_sub | agree
+m_str_casefold_self_sub-over-other | agree
+m_str_casefold_too_many | agree
+m_str_casefold_too_many_sub | gap | the message of a wrong call of str.casefold depends on how it is called
+m_str_center_arg-sub | agree
+m_str_center_arg-user | agree
+m_str_center_arg-user-not | agree
+m_str_center_bad_keyword | agree
+m_str_center_self_exact | agree
+m_str_center_self_sub | agree
+m_str_center_self_sub-over-other | agree
+m_str_center_too_many | agree
+m_str_center_too_many_sub | agree
+m_str_count_arg-sub | agree
+m_str_count_arg-user-not | agree
+m_str_count_bad_keyword | gap | the message of a keyword argument to count depends on how it is called
+m_str_count_self_exact | agree
+m_str_count_self_sub | agree
+m_str_count_self_sub-over-other | agree
+m_str_count_too_many | agree
+m_str_count_too_many_sub | agree
+m_str_encode_bad_keyword | agree
+m_str_encode_self_exact | agree
+m_str_encode_self_sub | agree
+m_str_encode_self_sub-over-other | agree
+m_str_encode_too_many | agree
+m_str_encode_too_many_sub | agree
+m_str_endswith_arg-sub | agree
+m_str_endswith_arg-user-not | agree
+m_str_endswith_bad_keyword | gap | the message of a keyword argument to endswith depends on how it is called
+m_str_endswith_self_exact | agree
+m_str_endswith_self_sub | agree
+m_str_endswith_self_sub-over-other | agree
+m_str_endswith_too_many | agree
+m_str_endswith_too_many_sub | agree
+m_str_expandtabs_arg-sub | agree
+m_str_expandtabs_arg-user | agree
+m_str_expandtabs_arg-user-not | agree
+m_str_expandtabs_bad_keyword | agree
+m_str_expandtabs_self_exact | agree
+m_str_expandtabs_self_sub | agree
+m_str_expandtabs_self_sub-over-other | agree
+m_str_expandtabs_too_many | agree
+m_str_expandtabs_too_many_sub | agree
+m_str_find_arg-sub | agree
+m_str_find_arg-user-not | agree
+m_str_find_bad_keyword | gap | the message of a keyword argument to find depends on how it is called
+m_str_find_self_exact | agree
+m_str_find_self_sub | agree
+m_str_find_self_sub-over-other | agree
+m_str_find_too_many | agree
+m_str_find_too_many_sub | agree
+m_str_format_arg-sub | agree
+m_str_format_arg-user | agree
+m_str_format_arg-user-not | agree
+m_str_format_bad_keyword | agree
+m_str_format_self_exact | agree
+m_str_format_self_sub | agree
+m_str_format_self_sub-over-other | agree
+m_str_format_too_many | agree
+m_str_format_too_many_sub | agree
+m_str_index_arg-sub | agree
+m_str_index_arg-user-not | agree
+m_str_index_bad_keyword | gap | the message of a keyword argument to index depends on how it is called
+m_str_index_self_exact | agree
+m_str_index_self_sub | agree
+m_str_index_self_sub-over-other | agree
+m_str_index_too_many | agree
+m_str_index_too_many_sub | agree
+m_str_isalpha_bad_keyword | agree
+m_str_isalpha_self_exact | agree
+m_str_isalpha_self_sub | agree
+m_str_isalpha_self_sub-over-other | agree
+m_str_isalpha_too_many | agree
+m_str_isalpha_too_many_sub | gap | the message of a wrong call of str.isalpha depends on how it is called
+m_str_isascii_bad_keyword | agree
+m_str_isascii_self_exact | agree
+m_str_isascii_self_sub | agree
+m_str_isascii_self_sub-over-other | agree
+m_str_isascii_too_many | agree
+m_str_isascii_too_many_sub | gap | the message of a wrong call of str.isascii depends on how it is called
+m_str_isdigit_bad_keyword | agree
+m_str_isdigit_self_exact | agree
+m_str_isdigit_self_sub | agree
+m_str_isdigit_self_sub-over-other | agree
+m_str_isdigit_too_many | agree
+m_str_isdigit_too_many_sub | gap | the message of a wrong call of str.isdigit depends on how it is called
+m_str_isidentifier_bad_keyword | agree
+m_str_isidentifier_self_exact | agree
+m_str_isidentifier_self_sub | agree
+m_str_isidentifier_self_sub-over-other | agree
+m_str_isidentifier_too_many | agree
+m_str_isidentifier_too_many_sub | gap | the message of a wrong call of str.isidentifier depends on how it is called
+m_str_isspace_bad_keyword | agree
+m_str_isspace_self_exact | agree
+m_str_isspace_self_sub | agree
+m_str_isspace_self_sub-over-other | agree
+m_str_isspace_too_many | agree
+m_str_isspace_too_many_sub | gap | the message of a wrong call of str.isspace depends on how it is called
+m_str_join_arg-sub | agree
+m_str_join_arg-user | agree
+m_str_join_arg-user-not | agree
+m_str_join_bad_keyword | agree
+m_str_join_self_exact | agree
+m_str_join_self_sub | agree
+m_str_join_self_sub-over-other | agree
+m_str_join_too_many | agree
+m_str_join_too_many_sub | gap | the message of a wrong call of str.join depends on how it is called
+m_str_ljust_arg-sub | agree
+m_str_ljust_arg-user | agree
+m_str_ljust_arg-user-not | agree
+m_str_ljust_bad_keyword | agree
+m_str_ljust_self_exact | agree
+m_str_ljust_self_sub | agree
+m_str_ljust_self_sub-over-other | agree
+m_str_ljust_too_many | agree
+m_str_ljust_too_many_sub | agree
+m_str_lower_bad_keyword | agree
+m_str_lower_self_exact | agree
+m_str_lower_self_sub | agree
+m_str_lower_self_sub-over-other | agree
+m_str_lower_too_many | agree
+m_str_lower_too_many_sub | gap | the message of a wrong call of str.lower depends on how it is called
+m_str_lstrip_bad_keyword | agree
+m_str_lstrip_self_exact | agree
+m_str_lstrip_self_sub | agree
+m_str_lstrip_self_sub-over-other | agree
+m_str_lstrip_too_many | agree
+m_str_lstrip_too_many_sub | agree
+m_str_partition_arg-sub | agree
+m_str_partition_arg-user-not | agree
+m_str_partition_bad_keyword | agree
+m_str_partition_self_exact | agree
+m_str_partition_self_sub | agree
+m_str_partition_self_sub-over-other | agree
+m_str_partition_too_many | agree
+m_str_partition_too_many_sub | gap | the message of a wrong call of str.partition depends on how it is called
+m_str_removeprefix_arg-sub | agree
+m_str_removeprefix_arg-user-not | agree
+m_str_removeprefix_bad_keyword | agree
+m_str_removeprefix_self_exact | agree
+m_str_removeprefix_self_sub | agree
+m_str_removeprefix_self_sub-over-other | agree
+m_str_removeprefix_too_many | agree
+m_str_removeprefix_too_many_sub | gap | the message of a wrong call of str.removeprefix depends on how it is called
+m_str_removesuffix_arg-sub | agree
+m_str_removesuffix_arg-user-not | agree
+m_str_removesuffix_bad_keyword | agree
+m_str_removesuffix_self_exact | agree
+m_str_removesuffix_self_sub | agree
+m_str_removesuffix_self_sub-over-other | agree
+m_str_removesuffix_too_many | agree
+m_str_removesuffix_too_many_sub | gap | the message of a wrong call of str.removesuffix depends on how it is called
+m_str_replace_arg-sub | agree
+m_str_replace_arg-user-not | agree
+m_str_replace_bad_keyword | agree
+m_str_replace_self_exact | agree
+m_str_replace_self_sub | agree
+m_str_replace_self_sub-over-other | agree
+m_str_replace_too_many | agree
+m_str_replace_too_many_sub | agree
+m_str_rfind_arg-sub | agree
+m_str_rfind_arg-user-not | agree
+m_str_rfind_bad_keyword | gap | the message of a keyword argument to rfind depends on how it is called
+m_str_rfind_self_exact | agree
+m_str_rfind_self_sub | agree
+m_str_rfind_self_sub-over-other | agree
+m_str_rfind_too_many | agree
+m_str_rfind_too_many_sub | agree
+m_str_rjust_arg-sub | agree
+m_str_rjust_arg-user | agree
+m_str_rjust_arg-user-not | agree
+m_str_rjust_bad_keyword | agree
+m_str_rjust_self_exact | agree
+m_str_rjust_self_sub | agree
+m_str_rjust_self_sub-over-other | agree
+m_str_rjust_too_many | agree
+m_str_rjust_too_many_sub | agree
+m_str_rpartition_arg-sub | agree
+m_str_rpartition_arg-user-not | agree
+m_str_rpartition_bad_keyword | agree
+m_str_rpartition_self_exact | agree
+m_str_rpartition_self_sub | agree
+m_str_rpartition_self_sub-over-other | agree
+m_str_rpartition_too_many | agree
+m_str_rpartition_too_many_sub | gap | the message of a wrong call of str.rpartition depends on how it is called
+m_str_rsplit_arg-sub | agree
+m_str_rsplit_arg-user-not | agree
+m_str_rsplit_bad_keyword | agree
+m_str_rsplit_self_exact | agree
+m_str_rsplit_self_sub | agree
+m_str_rsplit_self_sub-over-other | agree
+m_str_rsplit_too_many | agree
+m_str_rsplit_too_many_sub | agree
+m_str_rstrip_bad_keyword | agree
+m_str_rstrip_self_exact | agree
+m_str_rstrip_self_sub | agree
+m_str_rstrip_self_sub-over-other | agree
+m_str_rstrip_too_many | agree
+m_str_rstrip_too_many_sub | agree
+m_str_split_arg-sub | agree
+m_str_split_arg-user-not | agree
+m_str_split_bad_keyword | agree
+m_str_split_self_exact | agree
+m_str_split_self_sub | agree
+m_str_split_self_sub-over-other | agree
+m_str_split_too_many | agree
+m_str_split_too_many_sub | agree
+m_str_splitlines_bad_keyword | agree
+m_str_splitlines_self_exact | agree
+m_str_splitlines_self_sub | agree
+m_str_splitlines_self_sub-over-other | agree
+m_str_splitlines_too_many | agree
+m_str_splitlines_too_many_sub | agree
+m_str_startswith_arg-sub | agree
+m_str_startswith_arg-user-not | agree
+m_str_startswith_bad_keyword | gap | the message of a keyword argument to startswith depends on how it is called
+m_str_startswith_self_exact | agree
+m_str_startswith_self_sub | agree
+m_str_startswith_self_sub-over-other | agree
+m_str_startswith_too_many | agree
+m_str_startswith_too_many_sub | agree
+m_str_strip_arg-sub | agree
+m_str_strip_arg-user-not | agree
+m_str_strip_bad_keyword | agree
+m_str_strip_self_exact | agree
+m_str_strip_self_sub | agree
+m_str_strip_self_sub-over-other | agree
+m_str_strip_too_many | agree
+m_str_strip_too_many_sub | agree
+m_str_swapcase_bad_keyword | agree
+m_str_swapcase_self_exact | agree
+m_str_swapcase_self_sub | agree
+m_str_swapcase_self_sub-over-other | agree
+m_str_swapcase_too_many | agree
+m_str_swapcase_too_many_sub | gap | the message of a wrong call of str.swapcase depends on how it is called
+m_str_title_bad_keyword | agree
+m_str_title_self_exact | agree
+m_str_title_self_sub | agree
+m_str_title_self_sub-over-other | agree
+m_str_title_too_many | agree
+m_str_title_too_many_sub | gap | the message of a wrong call of str.title depends on how it is called
+m_str_translate_arg-sub | agree
+m_str_translate_arg-user | agree
+m_str_translate_arg-user-not | agree
+m_str_translate_bad_keyword | agree
+m_str_translate_self_exact | agree
+m_str_translate_self_sub | agree
+m_str_translate_self_sub-over-other | agree
+m_str_translate_too_many | agree
+m_str_translate_too_many_sub | gap | the message of a wrong call of str.translate depends on how it is called
+m_str_upper_bad_keyword | agree
+m_str_upper_self_exact | agree
+m_str_upper_self_sub | agree
+m_str_upper_self_sub-over-other | agree
+m_str_upper_too_many | agree
+m_str_upper_too_many_sub | gap | the message of a wrong call of str.upper depends on how it is called
+m_str_zfill_arg-sub | agree
+m_str_zfill_arg-user | agree
+m_str_zfill_arg-user-not | agree
+m_str_zfill_bad_keyword | agree
+m_str_zfill_self_exact | agree
+m_str_zfill_self_sub | agree
+m_str_zfill_self_sub-over-other | agree
+m_str_zfill_too_many | agree
+m_str_zfill_too_many_sub | gap | the message of a wrong call of str.zfill depends on how it is called
+m_tuple_count_arg-sub | agree
+m_tuple_count_arg-user | agree
+m_tuple_count_arg-user-not | agree
+m_tuple_count_bad_keyword | agree
+m_tuple_count_self_exact | agree
+m_tuple_count_self_sub | agree
+m_tuple_count_self_sub-over-other | agree
+m_tuple_count_too_many | agree
+m_tuple_count_too_many_sub | gap | the message of a wrong call of tuple.count depends on how it is called
+m_tuple_index_arg-sub | agree
+m_tuple_index_arg-user | agree
+m_tuple_index_arg-user-not | agree
+m_tuple_index_bad_keyword | agree
+m_tuple_index_self_exact | agree
+m_tuple_index_self_sub | agree
+m_tuple_index_self_sub-over-other | agree
+m_tuple_index_too_many | agree
+m_tuple_index_too_many_sub | agree
+reg_10_mutable_builtin_types | gap | an attribute write to the mutable built-in type ExceptionGroup is not modelled yet
+reg_11_exit_attribute | gap | the attribute tag of the built-in exit is not modelled yet
+reg_12_mod_fold | agree
+reg_13_dict_resize_after_deletes | agree
+reg_13_dict_walk_after_deletes | agree
+reg_14_mappingproxy_or | gap | the attribute type.__dict__ is not modelled yet
+reg_15_str_sub_name | gap | a class name that is an instance of a subclass of str is not modelled yet
+reg_16_mod_fold_index | agree
+reg_17_hash_int_sub | agree
+reg_18_set_sub_in_set | agree
+reg_19_property_iter | agree
+reg_1_iter_sentinel_reenter | gap | Python call depth over 900
+reg_20_str_sub_format | gap | built-in format is not modelled yet
+reg_2_getitem_iter_reenter | agree
+reg_3_length_hint_reenter | agree
+reg_4_dict_or_subclass | gap | a | of a dict whose class overrides how its entries are read is not modelled yet
+reg_6_str_sub_keyword | gap | a walk of a dict whose comparisons may run user code is not modelled yet
+reg_7_subtype_self_error | gap | the message of a wrong call of list.append depends on how it is called
+reg_8_exc_str | agree
+reg_9_c_depth_eq | gap | a C recursion depth over 9000
+reg_9_c_depth_repr | gap | a C recursion depth over 9000
+reg_lib_dict_copy_iter | gap | built-in method dict_keyiterator.__length_hint__ is not modelled yet
+reg_lib_huge_width | agree
+reg_lib_repr_in_int_error | agree
+reg_lib_split_identity | agree
+res_bool_returns_int | agree
+res_index_returns_int_sub | gap | an __index__ that returns a strict subclass of int, which warns, is not modelled yet
+res_int_returns_int_sub | gap | an __int__ that returns an instance of a subclass of int warns, which writes __warningregistry__
+res_len_returns_int_sub | agree
+res_str_returns_str_sub | gap | built-in format is not modelled yet
+res_str_sub_add_empty | agree
+res_str_sub_mod_no_spec | gap | a % format that is an instance of a subclass of str is not modelled yet
+res_str_sub_mul_one | agree
+res_tuple_sub_add_empty | agree
