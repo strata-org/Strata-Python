@@ -16,7 +16,9 @@ set_option autoImplicit false
 Rules that `#py_rule_shapes` must reject: a computation written inline at `PyM`, a rule written
 directly in `Sem`, a generic definition given an instance that isn't declared, a generic
 definition given a `PyM` computation as an argument (written inline, or under a name of its own),
-a definition whose own type names `PyM`, and a region that the rule makes itself; and the ways
+a definition whose own type names `PyM`, and a region that the rule makes itself, alone or next to
+a handle of the operation's own region; a handle of a term made from a region, one whose input or
+output works at the rule monad, and one given by a definition; and the ways
 around a check of names alone: a computation typed by an abbreviation of `PyM`, an equation of
 the monad with `PyM`, an instance of the record declared next to the rule, a class outside the
 record, regions from a definition, a trusted primitive passed to a generic definition, and a
@@ -24,7 +26,7 @@ generic definition that reads the marker of a `Depth` it is given; a definition 
 `PyM` under a plain definition, one that takes no monad, a monad other than `PyM`, a second monad,
 an instance given a level and a runner given a test that are computed from a `PyM` computation;
 and an exception whose rule has the generic shape.  A rule that runs a generic definition or a
-record primitive passes.
+record primitive passes, and so does one with a handle of its operation's own region.
 -/
 
 namespace StrataPython.Dyn.Sem.RuleShapesTest
@@ -44,6 +46,12 @@ public environment PyS extends Py where
   insn pymType (x : Value) (^err (exc : Value)) : Value
   insn hidden (x : Value) (^err (exc : Value)) : Value
   insn handles (x : Value) (^err (exc : Value)) : Value
+  insn ownRegion (&body (x : Value) : raising base.Unit) (^err (exc : Value)) : Value
+  insn mixedHandles (&body (x : Value) : raising base.Unit) (^err (exc : Value)) : Value
+  insn notOwnRegion (&body (x : Value) : raising base.Unit) (^err (exc : Value)) : Value
+  insn monadicInput (&body (x : Value) : raising base.Unit) (^err (exc : Value)) : Value
+  insn monadicOutput (&body (x : Value) : raising base.Unit) (^err (exc : Value)) : Value
+  insn handleDef (&body (x : Value) : raising base.Unit) (^err (exc : Value)) : Value
   insn abbrevArg (x : Value) (^err (exc : Value)) : Value
   insn eqArg (x : Value) (^err (exc : Value)) : Value
   insn ownInst (x : Value) (^err (exc : Value)) : Value
@@ -161,6 +169,55 @@ def hiddenGap : PyM σ .pure true Value := PyM.gap "x"
 @[dyn_sem PyS.handles] def handles (x : Value) (err : Target E [Value]) : Sem ε E Value :=
   runRuleFree err #[fun _ => pure (.ok .none)] (Proto.notValue (m := PyM σ .calls true) x)
 
+/-- `bool(None)`, with a handle of the operation's own region, which passes. -/
+@[dyn_sem PyS.ownRegion] def ownRegion (body : Region ε [Value] (Except Value Unit))
+    (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[regionHandle body oneValue fun _ => .none]
+    (Proto.notValue (m := PyM σ .calls true) .none)
+
+/-- `bool(None)`, with a handle of the operation's own region and a region that the rule makes
+itself. -/
+@[dyn_sem PyS.mixedHandles] def mixedHandles (body : Region ε [Value] (Except Value Unit))
+    (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[regionHandle body oneValue fun _ => .none,
+    fun _ => pure (.ok .none)] (Proto.notValue (m := PyM σ .calls true) .none)
+
+/-- `bool(None)`, with a handle of a region that is not a variable of the rule, but a term made
+from one. -/
+@[dyn_sem PyS.notOwnRegion] def notOwnRegion (body : Region ε [Value] (Except Value Unit))
+    (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[regionHandle (id body) oneValue fun _ => .none]
+    (Proto.notValue (m := PyM σ .calls true) .none)
+
+/-- `bool(None)`, with a handle of the operation's own region whose input works at the rule
+monad. -/
+@[dyn_sem PyS.monadicInput] def monadicInput (body : Region ε [Value] (Except Value Unit))
+    (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err
+    #[regionHandle body (fun a => if condOf (σ := σ) (PyM.gap "x") then a[0]? else none)
+      fun _ => .none]
+    (Proto.notValue (m := PyM σ .calls true) .none)
+
+/-- `bool(None)`, with a handle of the operation's own region whose output works at the rule
+monad. -/
+@[dyn_sem PyS.monadicOutput] def monadicOutput (body : Region ε [Value] (Except Value Unit))
+    (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err
+    #[regionHandle body oneValue
+      fun _ => if condOf (σ := σ) (PyM.gap "x") then .none else .none]
+    (Proto.notValue (m := PyM σ .calls true) .none)
+
+/-- A handle of a region, under a name of its own. -/
+def handleOf (body : Region ε [Value] (Except Value Unit)) :
+    Array Value → Sem ε E (Except Value Value) :=
+  regionHandle body oneValue fun _ => .none
+
+/-- `bool(None)`, with a handle of the operation's own region given by a definition, which the
+check doesn't unfold. -/
+@[dyn_sem PyS.handleDef] def handleDef (body : Region ε [Value] (Except Value Unit))
+    (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[handleOf body] (Proto.notValue (m := PyM σ .calls true) .none)
+
 /-- A write of the handled exception, typed by an abbreviation of `PyM`. -/
 def hiddenWrite : HiddenM σ := do Prim.setHandled .none; pure .none
 
@@ -273,6 +330,22 @@ error: #py_rule_shapes: the rule of ps.hidden (hidden) is not a runner of a defi
 error: #py_rule_shapes: the rule of ps.handles (handles) is not a runner of a definition generic in its monad: its regions are not the operation's own: #[fun
     x =>
   pure (Except.ok Value.none)]
+---
+error: #py_rule_shapes: the rule of ps.mixedHandles (mixedHandles) is not a runner of a definition generic in its monad: its regions are not the operation's own: #[regionHandle
+    body oneValue fun x => Value.none,
+  fun x => pure (Except.ok Value.none)]
+---
+error: #py_rule_shapes: the rule of ps.notOwnRegion (notOwnRegion) is not a runner of a definition generic in its monad: its regions are not the operation's own: #[regionHandle
+    (id body) oneValue fun x => Value.none]
+---
+error: #py_rule_shapes: the rule of ps.monadicInput (monadicInput) is not a runner of a definition generic in its monad: its regions are not the operation's own: #[regionHandle
+    body (fun a => if condOf (PyM.gap "x") = true then a[0]? else none) fun x => Value.none]
+---
+error: #py_rule_shapes: the rule of ps.monadicOutput (monadicOutput) is not a runner of a definition generic in its monad: its regions are not the operation's own: #[regionHandle
+    body oneValue fun x => if condOf (PyM.gap "x") = true then Value.none else Value.none]
+---
+error: #py_rule_shapes: the rule of ps.handleDef (handleDef) is not a runner of a definition generic in its monad: its regions are not the operation's own: #[handleOf
+    body]
 ---
 error: #py_rule_shapes: the rule of ps.abbrevArg (abbrevArg) is not a runner of a definition generic in its monad: same takes an argument in its monad: m
   V

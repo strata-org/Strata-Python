@@ -465,6 +465,7 @@ s312_meta_object_getattribute | yes |
 s313_type_getattribute_on_instance | yes |
 s314_new_init_same_keyword | yes |
 s315_init_subclass_metaclass_keyword | yes |
+s316_comprehension_order | yes |
 s317_callable_iter_exhausted | yes |
 s318_getitem_iter_reentrant | yes |
 s319_length_hint_len_ends | yes |
@@ -517,6 +518,8 @@ s368_sym_hash_member | yes |
 s369_sym_hash_member_second | yes |
 s333_class_annotations | yes |
 s370_long_class_name_write | yes |
+s334_comp_clauses_calls | yes |
+s335_comp_functions_calls | yes |
 s129_iter_builtins | yes |
 s130_iter_loops | yes |
 s131_dict_merge | yes |

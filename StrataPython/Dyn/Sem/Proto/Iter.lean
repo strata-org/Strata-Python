@@ -469,6 +469,70 @@ def setUpdateStep [PyWrites m V] (s it : V) (st : Option V) : m (LoopStep V Unit
   | .done _ => return .done ()
   | .more i => return .more i
 
+/-- **A comprehension's first `for` clause, as CPython 3.12 runs it**, one activation of it: at
+the first, `iter(iterable)`, then a new accumulator from `new`; then region `0` on the
+accumulator and each item, in order, until the iterator ends.  The iterator and the accumulator
+are the state, and the accumulator is the result. -/
+def compStep [PyWrites m V] (new : m V) (iterable : V) (st : Option (V × V)) :
+    m (LoopStep (V × V) V) := do
+  let (it, acc) ← match st with
+    | some s => pure s
+    | none => do
+      let it ← getIter iterable
+      pure (it, ← new)
+  match ← forEachItem iterNext it () fun x _ => do
+      discard <| PyPure.region 0 #[acc, x]
+      pure (.next ()) with
+  | .done _ => return .done acc
+  | .more _ => return .more (it, acc)
+
+/-- **A list comprehension's first `for` clause** (`compStep`), whose accumulator is a new list. -/
+def listCompStep [PyWrites m V] (iterable : V) (st : Option (V × V)) : m (LoopStep (V × V) V) :=
+  compStep (PyPure.allocList #[]) iterable st
+
+/-- **A set comprehension's first `for` clause** (`compStep`), whose accumulator is a new set. -/
+def setCompStep [PyWrites m V] (iterable : V) (st : Option (V × V)) : m (LoopStep (V × V) V) :=
+  compStep (PyPure.allocSet false false) iterable st
+
+/-- **A dict comprehension's first `for` clause** (`compStep`), whose accumulator is a new dict. -/
+def dictCompStep [PyWrites m V] (iterable : V) (st : Option (V × V)) : m (LoopStep (V × V) V) :=
+  compStep PyPure.allocDict iterable st
+
+/-- **A list comprehension's element** (`LIST_APPEND`): region `0`, appended to the list `out`. -/
+def compAppendRun [PyWrites m V] (out : V) : m Unit := do
+  PyWrites.listAppend out (← PyPure.region 0 #[])
+
+/-- **A set comprehension's element** (`SET_ADD`): region `0`, added to the set `out`. -/
+def compAddRun [PyWrites m V] (out : V) : m Unit := do
+  Proto.setAddItem out (← PyPure.region 0 #[])
+
+/-- **A comprehension's later `for` clause**, one activation of it: as `compStep`, with no
+accumulator, so region `0` takes only each item, and the iterator is the state. -/
+def compForStep [PyWrites m V] (iterable : V) (st : Option V) : m (LoopStep V Unit) := do
+  let it ← match st with
+    | some i => pure i
+    | none => getIter iterable
+  match ← forEachItem iterNext it () fun x _ => do
+      discard <| PyPure.region 0 #[x]
+      pure (.next ()) with
+  | .done _ => return .done ()
+  | .more _ => return .more it
+
+/-- **A comprehension's `if` clauses**: region `0`, which tests them, then region `1` if it gave
+`True`. -/
+def compIfRun [PyCalls m V] : m Unit := do
+  match ← PyPure.immView (← PyPure.region 0 #[]) with
+  | some (.bool true) => discard <| PyPure.region 1 #[]
+  | some (.bool false) => pure ()
+  | _ => PyPure.modelInvariant "compIf: the condition region gave no bool"
+
+/-- **A dict comprehension's element**, CPython's `MAP_ADD`: region `0`, the key, then region
+`1`, the value, then the value stored under the key in the dict `d`, the key hashed last. -/
+def compStoreRun [PyWrites m V] (d : V) : m Unit := do
+  let k ← PyPure.region 0 #[]
+  let v ← PyPure.region 1 #[]
+  PyWrites.dictSet d k v (some (← hash k)) (keyEq k)
+
 /-- **`a, b, … = v` with `n` targets, as CPython's `UNPACK_SEQUENCE`**: an exact built-in
 container at once; otherwise `iter(v)`, `n` items, and one more to check that the iterator has
 ended, all in one activation. -/

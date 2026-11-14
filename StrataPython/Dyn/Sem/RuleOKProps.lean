@@ -15,8 +15,10 @@ set_option autoImplicit false
 Key theorems: `runRule_ok`, `runTotal_ok`, `runRuleFree_ok`, `runTotalFree_ok`,
 `runRuleIf_ok`, `runLoop_ok` and `runLoopFree_ok`, which give `RuleOK` for every rule that runs a
 `PyM` computation, each activation of a looping rule from its own start; `RuleOK.lift`, which
-lifts `RuleOK` to a higher effect; and `ImplOK.within`, which gives `ImplWithin` from `ImplOK`,
-at the spec `pySpec`, which has the laws (`pySpec_laws`).
+lifts `RuleOK` to a higher effect; `treeOK_handle` and `handlesOK_toArray`, which prove a rule's
+handles when each is a `regionHandle` of a region whose parameters hold no ref; and
+`ImplOK.within`, which gives `ImplWithin` from `ImplOK`, at the spec `pySpec`, which has the laws
+(`pySpec_laws`).
 
 The definitions are in `RuleOK.lean`: `RuleOK`, with `StartWithin` and `AnyStart`, `ImplOK`,
 `ImplWithin` and `pySpec`.
@@ -53,8 +55,38 @@ private theorem contOK_gap {e : Level} {α : Type} (s : Start) {Q : Typing → �
   ⟨fun _ => Spec.sat_fault, fun _ => trivial⟩
 
 /-- The handles of a rule without regions. -/
-private theorem handlesOK_nil (s : Start) :
+theorem handlesOK_nil (s : Start) :
     HandlesOK (rs := rs) (ps := ps) (S := S) V s #[] := fun _ h => absurd h (Nat.not_lt_zero _)
+
+/-- Handles given as a list are proved when each of them is. -/
+theorem handlesOK_toArray (s : Start) (l : List (Array Value → BTree σ rs ps S (Except Value Value)))
+    (h : ∀ x ∈ l, ∀ args e, TreeOK V s e (x args)) : HandlesOK V s l.toArray :=
+  fun i hi args e => by
+    simp only [List.getElem_toArray]
+    exact h _ (List.getElem_mem _) args e
+
+/-- **A region of the operation whose parameters hold no ref is a proved handle**, under the
+laws: its request is a region request, which the laws' `region` allows, and a region request is
+within every level; values that the handle doesn't take are a fault. -/
+theorem treeOK_handle {tg : Tags σ} (hc : PyCertLaws rs tg V) {ts : List Type} {α : Type}
+    (r : Region (BEff σ rs) ts (Except Value α)) (inp : Array Value → Option (Payload ts))
+    (out : α → Value)
+    (hr : ∀ a, ∃ slot args, r.req a = .region slot args ∧ ∀ t ∈ (rs.get slot).1, t ∈ tg.noRef)
+    (s : Start) (args : Array Value) (e : Level) :
+    TreeOK V s e (regionHandle (E := Out (Dec σ) ps S) r inp out args) := by
+  simp only [regionHandle]
+  cases inp args with
+  | none => exact ContOK.fault _
+  | some p => ?_
+  obtain ⟨slot, a, heq, hfree⟩ := hr p
+  obtain ⟨req, ans⟩ := r
+  dsimp only at heq ⊢
+  generalize ans p = k
+  revert k
+  rw [heq]
+  intro k
+  exact ⟨fun g => Spec.sat_vis.mpr ⟨hc.region g slot a hfree, fun _ _ _ _ => Spec.sat_ret.mpr trivial⟩,
+    fun _ _ => trivial⟩
 
 /-- A rule that reads the start of the store and runs `k` from it satisfies `V` from every
 typing, and is within `e` from the world at its start. -/
@@ -72,52 +104,56 @@ private theorem ruleOK_start {e : Level} {Q : Typing → R → Prop}
 with the laws that allows every exit, and every `Q` that holds of every result. -/
 theorem runRule_ok {e : Level} {fr : Bool} {α : Type} (m : PyM σ e fr α) (tg : Tags σ)
     (hc : PyCertLaws rs tg V) (Q : Typing → α → Prop) (hQ : ∀ g a, Q g a)
-    (hX : ∀ g x, V.Exit g x) (err : Target (Out (Dec σ) ps S) [Value]) :
+    (hX : ∀ g x, V.Exit g x) (err : Target (Out (Dec σ) ps S) [Value])
+    (hs : @Handles (BEff σ rs) (Out (Dec σ) ps S)) (hh : ∀ s, HandlesOK V s hs) :
     RuleOK V Q e
-      (@runRule σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e α fr err #[] m) :=
-  ruleOK_start _ fun s => m.2.1 rs ps S tg V hc s #[] (handlesOK_nil s) e (Nat.le_refl _) Q _
+      (@runRule σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e α fr err hs m) :=
+  ruleOK_start _ fun s => m.2.1 rs ps S tg V hc s hs (hh s) e (Nat.le_refl _) Q _
     pure (jump err) (contOK_ret s hQ) (fun _ => contOK_jump s hX _)
 
 /-- **A rule of an operation that can't raise, that runs a `PyM` computation, satisfies `V` and
 is within its effect**, for every `V` with the laws, and every `Q` that holds of every result. -/
 theorem runTotal_ok {e : Level} {fr : Bool} {α : Type} (op : String) (m : PyM σ e fr α)
-    (tg : Tags σ) (hc : PyCertLaws rs tg V) (Q : Typing → α → Prop) (hQ : ∀ g a, Q g a) :
+    (tg : Tags σ) (hc : PyCertLaws rs tg V) (Q : Typing → α → Prop) (hQ : ∀ g a, Q g a)
+    (hs : @Handles (BEff σ rs) (Out (Dec σ) ps S)) (hh : ∀ s, HandlesOK V s hs) :
     RuleOK V Q e
-      (@runTotal σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e α fr op #[] m) :=
-  ruleOK_start _ fun s => m.2.1 rs ps S tg V hc s #[] (handlesOK_nil s) e (Nat.le_refl _) Q _
+      (@runTotal σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e α fr op hs m) :=
+  ruleOK_start _ fun s => m.2.1 rs ps S tg V hc s hs (hh s) e (Nat.le_refl _) Q _
     pure (fun _ => semanticGap s!"an exception in an operation that can't raise: {op}")
     (contOK_ret s hQ) (fun _ => contOK_gap s _)
 
 /-- A rule whose computation needs no start, from every start: what `StartFree` gives. -/
 private theorem ruleOK_free {e : Level} {α : Type} {Q : Typing → R → Prop} (m : PyM σ e true α)
-    (tg : Tags σ) (k : α → BTree σ rs ps S R) (ke : Value → BTree σ rs ps S R)
+    (tg : Tags σ) (hs : @Handles (BEff σ rs) (Out (Dec σ) ps S)) (k : α → BTree σ rs ps S R) (ke : Value → BTree σ rs ps S R)
     (hm : ∀ s, ContOK V s e Q (fun _ _ => True)
-      (@m.1 (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) #[] s _ k ke)) :
-    RuleOK V Q e (@m.1 (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) #[] ⟨0⟩ _ k ke) := by
+      (@m.1 (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) hs s _ k ke)) :
+    RuleOK V Q e (@m.1 (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) hs ⟨0⟩ _ k ke) := by
   refine ⟨(hm ⟨0⟩).1, .inr fun s N => ?_⟩
   have h2 : StartFree @m.1 := m.2.2 rfl
   unfold StartFree at h2
-  rw [@h2 (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) #[] ⟨0⟩ s _ k ke]
+  rw [@h2 (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) hs ⟨0⟩ s _ k ke]
   exact (hm s).2 N
 
 /-- **A rule that runs a `PyM` computation that needs no start satisfies `V` and is within its
 effect from every start**, under the hypotheses of `runRule_ok`. -/
 theorem runRuleFree_ok {e : Level} {α : Type} (m : PyM σ e true α) (tg : Tags σ)
     (hc : PyCertLaws rs tg V) (Q : Typing → α → Prop) (hQ : ∀ g a, Q g a)
-    (hX : ∀ g x, V.Exit g x) (err : Target (Out (Dec σ) ps S) [Value]) :
+    (hX : ∀ g x, V.Exit g x) (err : Target (Out (Dec σ) ps S) [Value])
+    (hs : @Handles (BEff σ rs) (Out (Dec σ) ps S)) (hh : ∀ s, HandlesOK V s hs) :
     RuleOK V Q e
-      (@runRuleFree σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e α err #[] m) :=
-  ruleOK_free m tg _ _ fun s => m.2.1 rs ps S tg V hc s #[] (handlesOK_nil s) e (Nat.le_refl _)
+      (@runRuleFree σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e α err hs m) :=
+  ruleOK_free m tg hs _ _ fun s => m.2.1 rs ps S tg V hc s hs (hh s) e (Nat.le_refl _)
     Q _ pure (jump err) (contOK_ret s hQ) (fun _ => contOK_jump s hX _)
 
 /-- **A rule of an operation that can't raise, that runs a `PyM` computation that needs no
 start, satisfies `V` and is within its effect from every start**, under the hypotheses of
 `runTotal_ok`. -/
 theorem runTotalFree_ok {e : Level} {α : Type} (op : String) (m : PyM σ e true α)
-    (tg : Tags σ) (hc : PyCertLaws rs tg V) (Q : Typing → α → Prop) (hQ : ∀ g a, Q g a) :
+    (tg : Tags σ) (hc : PyCertLaws rs tg V) (Q : Typing → α → Prop) (hQ : ∀ g a, Q g a)
+    (hs : @Handles (BEff σ rs) (Out (Dec σ) ps S)) (hh : ∀ s, HandlesOK V s hs) :
     RuleOK V Q e
-      (@runTotalFree σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e α op #[] m) :=
-  ruleOK_free m tg _ _ fun s => m.2.1 rs ps S tg V hc s #[] (handlesOK_nil s) e (Nat.le_refl _)
+      (@runTotalFree σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e α op hs m) :=
+  ruleOK_free m tg hs _ _ fun s => m.2.1 rs ps S tg V hc s hs (hh s) e (Nat.le_refl _)
     Q _ pure (fun _ => semanticGap s!"an exception in an operation that can't raise: {op}")
     (contOK_ret s hQ) (fun _ => contOK_gap s _)
 
@@ -125,13 +161,14 @@ theorem runTotalFree_ok {e : Level} {α : Type} (op : String) (m : PyM σ e true
 satisfies `V` and is within its effect**, as `runRule_ok` and `runRuleFree_ok` give for each. -/
 theorem runRuleIf_ok {e : Level} {α : Type} (cond : Bool) (m : PyM σ e false α)
     (mFree : PyM σ e true α) (tg : Tags σ) (hc : PyCertLaws rs tg V) (Q : Typing → α → Prop)
-    (hQ : ∀ g a, Q g a) (hX : ∀ g x, V.Exit g x) (err : Target (Out (Dec σ) ps S) [Value]) :
+    (hQ : ∀ g a, Q g a) (hX : ∀ g x, V.Exit g x) (err : Target (Out (Dec σ) ps S) [Value])
+    (hs : @Handles (BEff σ rs) (Out (Dec σ) ps S)) (hh : ∀ s, HandlesOK V s hs) :
     RuleOK V Q e
-      (@runRuleIf σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e α cond err #[] m mFree) := by
+      (@runRuleIf σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e α cond err hs m mFree) := by
   unfold runRuleIf
   split
-  · exact runRule_ok m tg hc Q hQ hX err
-  · exact runRuleFree_ok mFree tg hc Q hQ hX err
+  · exact runRule_ok m tg hc Q hQ hX err hs hh
+  · exact runRuleFree_ok mFree tg hc Q hQ hX err hs hh
 
 /-- The continuation of a looping rule is `ContOK` on every step, when `Q` holds of every result
 and `V` allows every exit. -/
@@ -150,10 +187,11 @@ saved, under the hypotheses of `runRule_ok`. -/
 theorem runLoop_ok {e : Level} {fr : Bool} {α : Type} (m : Option S → PyM σ e fr (LoopStep S α))
     (tg : Tags σ) (hc : PyCertLaws rs tg V) (Q : Typing → α → Prop) (hQ : ∀ g a, Q g a)
     (hX : ∀ g x, V.Exit g x) (err : Target (Out (Dec σ) ps S) [Value])
-    (again : Again (Out (Dec σ) ps S) S) (o : Option S) :
+    (again : Again (Out (Dec σ) ps S) S) (o : Option S)
+    (hs : @Handles (BEff σ rs) (Out (Dec σ) ps S)) (hh : ∀ s, HandlesOK V s hs) :
     RuleOK V Q e
-      (@runLoop σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e S α fr err again o #[] m) :=
-  ruleOK_start _ fun s => (m o).2.1 rs ps S tg V hc s #[] (handlesOK_nil s) e (Nat.le_refl _) Q _
+      (@runLoop σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e S α fr err again o hs m) :=
+  ruleOK_start _ fun s => (m o).2.1 rs ps S tg V hc s hs (hh s) e (Nat.le_refl _) Q _
     (loopCont again) (jump err) (contOK_loop s hQ hX again) (fun _ => contOK_jump s hX _)
 
 /-- **One activation of a looping rule whose computation needs no start satisfies `V` and is
@@ -162,10 +200,11 @@ hypotheses of `runLoop_ok`. -/
 theorem runLoopFree_ok {e : Level} {α : Type} (m : Option S → PyM σ e true (LoopStep S α))
     (tg : Tags σ) (hc : PyCertLaws rs tg V) (Q : Typing → α → Prop) (hQ : ∀ g a, Q g a)
     (hX : ∀ g x, V.Exit g x) (err : Target (Out (Dec σ) ps S) [Value])
-    (again : Again (Out (Dec σ) ps S) S) (o : Option S) :
+    (again : Again (Out (Dec σ) ps S) S) (o : Option S)
+    (hs : @Handles (BEff σ rs) (Out (Dec σ) ps S)) (hh : ∀ s, HandlesOK V s hs) :
     RuleOK V Q e
-      (@runLoopFree σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e S α err again o #[] m) :=
-  ruleOK_free (m o) tg _ _ fun s => (m o).2.1 rs ps S tg V hc s #[] (handlesOK_nil s) e
+      (@runLoopFree σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e S α err again o hs m) :=
+  ruleOK_free (m o) tg hs _ _ fun s => (m o).2.1 rs ps S tg V hc s hs (hh s) e
     (Nat.le_refl _) Q _ (loopCont again) (jump err) (contOK_loop s hQ hX again)
     (fun _ => contOK_jump s hX _)
 
@@ -193,7 +232,8 @@ theorem pySpec_laws (tg : Tags σ) : PyCertLaws rs tg (pySpec tg rs ps S) := by
     ⟨fun _ _ _ _ _ => trivial, fun G _ _ o _ => ?_⟩,
     ⟨fun _ _ h => h.1, fun _ _ _ h hp => ⟨hp, h.2⟩⟩, ⟨fun _ _ h => h.2, fun _ _ _ h hp => ⟨h.1, hp⟩⟩,
     ⟨fun _ _ _ => refsOK_nil rfl, fun _ _ _ h _ => h⟩, ⟨fun _ _ _ => refsOK_nil rfl, fun _ _ _ h _ => h⟩,
-    ⟨fun _ _ _ => refsOK_nil rfl, fun _ _ _ h _ => h⟩, ⟨fun _ _ _ => refsOK_nil rfl, fun _ _ _ h _ => h⟩⟩
+    ⟨fun _ _ _ => refsOK_nil rfl, fun _ _ _ h _ => h⟩, ⟨fun _ _ _ => refsOK_nil rfl, fun _ _ _ h _ => h⟩,
+    fun _ _ _ _ => trivial⟩
   · change G.Valid o.loc tg.value.tag at h
     have hl : ∀ {α β : Type} (e : α = β) (c : Ref σ α), (cast (congrArg (Ref σ) e) c).loc = c.loc := by
       intro _ _ e c; subst e; rfl

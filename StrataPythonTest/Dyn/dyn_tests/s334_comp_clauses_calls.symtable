@@ -1,0 +1,119 @@
+module top
+  O: local (assigned, referenced)
+  between: local (assigned)
+  blocks: local (assigned)
+  d: local (assigned, referenced)
+  in_try: local (assigned)
+  later: local (assigned)
+  later_if: local (assigned)
+  later_unbound: local (assigned)
+  lengths: local (assigned)
+  nested: local (assigned)
+  o: local (assigned, referenced)
+  print: global implicit (referenced)
+  show: local (assigned, referenced)
+  targets: local (assigned)
+  unhashable_dict: local (assigned)
+  unhashable_set: local (assigned)
+  walrus_filter: local (assigned)
+  walrus_key: local (assigned)
+  function between
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced, comp_iter)
+    ys: local (parameter)
+  function later_if
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced, comp_iter)
+    ys: local (parameter)
+  function later
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced, comp_iter)
+    ys: local (parameter)
+  function later_unbound
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced, comp_iter)
+    ys: local (parameter)
+  function walrus_filter
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    y: local (assigned)
+  function walrus_key
+    k: local (assigned)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function targets
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    d: local (parameter)
+    o: local (parameter)
+    xs: local (parameter, referenced)
+  function unhashable_set
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function unhashable_dict
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function blocks
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    d: local (parameter)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function nested
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (assigned, referenced, comp_iter)
+    xss: local (parameter, referenced)
+    y: local (assigned, referenced, comp_iter)
+  function lengths
+    len: global implicit (referenced)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function in_try
+    ZeroDivisionError: global implicit (referenced)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  class O
+  function show
+    Exception: global implicit (referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    label: local (parameter, referenced)
+    print: global implicit (referenced)
+    type: global implicit (referenced)
+  function lambda
+    between: global implicit (referenced)
+  function lambda
+    later_if: global implicit (referenced)
+  function lambda
+    later: global implicit (referenced)
+  function lambda
+    later_unbound: global implicit (referenced)
+  function lambda
+    walrus_filter: global implicit (referenced)
+  function lambda
+    walrus_key: global implicit (referenced)
+  function lambda
+    d: global implicit (referenced)
+    o: global implicit (referenced)
+    targets: global implicit (referenced)
+  function lambda
+    unhashable_set: global implicit (referenced)
+  function lambda
+    unhashable_dict: global implicit (referenced)
+  function lambda
+    blocks: global implicit (referenced)
+  function lambda
+    nested: global implicit (referenced)
+  function lambda
+    in_try: global implicit (referenced)
+  function lambda
+    in_try: global implicit (referenced)
+  function lambda
+    lengths: global implicit (referenced)
+qualnames: <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, O, between, blocks, in_try, later, later_if, later_unbound, lengths, nested, show, targets, unhashable_dict, unhashable_set, walrus_filter, walrus_key

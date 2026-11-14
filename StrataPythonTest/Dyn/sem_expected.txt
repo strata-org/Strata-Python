@@ -117,12 +117,12 @@ m_walrus | agree
 m_while | agree
 m_with | gap | import of module sys is not modelled yet
 n01_async | gap | the translator does not support async def
-n02_listcomp | gap | not modelled yet: py.listComp
-n03_dictcomp | gap | not modelled yet: py.dictComp
+n02_listcomp | gap | built-in sum is not modelled yet
+n03_dictcomp | agree
 n04_generator | gap | the translator does not support generator expression
 n05_lambda | agree
 n06_yield | gap | the translator does not support generator function
-n07_walrus | gap | not modelled yet: py.listComp
+n07_walrus | agree
 n08_mixed | gap | the translator does not support async def
 p01_import_dotted | gap | import of module os is not modelled yet
 p02_import_as | gap | import of module os is not modelled yet
@@ -155,7 +155,7 @@ p28_global_nested | agree
 p29_mangling | agree
 p30_super | agree
 p31_free_class | agree
-p32_class_comprehension | gap | not modelled yet: py.listComp
+p32_class_comprehension | agree
 p33_with_for_targets | agree
 p34_match | gap | the translator does not support match
 p35_async | gap | the translator does not support async def
@@ -163,18 +163,18 @@ p36_decorators | agree
 p37_global_import | agree
 p38_type_alias | gap | the translator does not support type alias, type parameters
 p39_nested_sample | gap | import of module os is not modelled yet
-p40_comp_shadow | gap | not modelled yet: py.listComp
+p40_comp_shadow | agree
 p41_comp_nested | gap | the translator does not support generator expression
 p42_comp_reads_outer | gap | the translator does not support generator expression
 p43_comp_class_body | agree
 p44_comp_and_genexpr | gap | the translator does not support generator expression
-p45_comp_walrus | gap | not modelled yet: py.listComp
-p46_comp_lambda | gap | not modelled yet: py.listComp
+p45_comp_walrus | agree
+p46_comp_lambda | agree
 p47_scope_visit_order | gap | the translator does not support match
 p48_walrus_targets | agree
 p49_super_nested_comp | agree
 p50_free_nested_comp | agree
-p51_comp_clauses | gap | not modelled yet: py.listComp
+p51_comp_clauses | agree
 rr01_handler_param | agree
 rr02_merges | agree
 rr03_frame_lambda | agree
@@ -419,6 +419,7 @@ s312_meta_object_getattribute | gap | the __getattribute__ of the built-in objec
 s313_type_getattribute_on_instance | gap | the __getattribute__ of the built-in type on another type is not modelled yet
 s314_new_init_same_keyword | agree
 s315_init_subclass_metaclass_keyword | agree
+s316_comprehension_order | agree
 s317_callable_iter_exhausted | agree
 s318_getitem_iter_reentrant | agree
 s319_length_hint_len_ends | gap | a __len__ that ended the iterator it measures is not modelled yet
@@ -438,6 +439,8 @@ s330_builtin_instance_write | gap | the attribute x of the built-in exit is not 
 s331_getattr_hook_depth | gap | a C recursion depth over 9000
 s332_method_wrapper_depth | gap | a C recursion depth over 9000
 s333_class_annotations | agree
+s334_comp_clauses_calls | agree
+s335_comp_functions_calls | agree
 s336_int_mod_tuple | agree
 s337_dict_eq_compaction | gap | a dict whose entries may move during its comparison is not modelled yet
 s338_mappingproxy_compare | gap | the __eq__ of a mappingproxy with a user object is not modelled yet

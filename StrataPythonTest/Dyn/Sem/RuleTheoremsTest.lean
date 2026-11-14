@@ -18,7 +18,9 @@ set_option autoImplicit false
 # `#py_rule_theorems`, the record's effects, and coverage
 
 * A rule written over `PyM` gets its theorem; a rule written directly in `Sem`, without a lemma
-  of its own, fails `#py_rule_theorems`; so does a `PyM` rule above its declared effect.
+  of its own, fails `#py_rule_theorems`; so does a `PyM` rule above its declared effect, and one
+  that runs a region whose parameter is a ref (`pt.regionCell`; `pt.regionValue`, its twin on a
+  `Value`, gets its theorem).
 * A computation at `reads` can't use a `writes` primitive: Lean finds no instance.
 * `#dyn_coverage Py (complete)` names what has no rule yet: the contract operations.
 -/
@@ -61,6 +63,9 @@ public environment PyT extends Py where
   insn dictProxyCase (k : base.Int) (^err (exc : Value)) : Value
   insn setExactCase (^err (exc : Value)) : Value
   insn stubHooks (k : base.Int) (^err (exc : Value)) : Value
+  insn regionValue (c : cell) (&body (x : Value) : raising base.Unit) (^err (exc : Value)) : Value
+  insn regionCell (c : cell) (&body (r : cell) : raising base.Unit) (^err (exc : Value)) : Value
+  insn regionArity (k : base.Int) (&body (x : Value) : raising base.Unit) (^err (exc : Value)) : Value
   insn listPrims (^err (exc : Value)) : Value
   insn oldPrims (^err (exc : Value)) : Value
   insn newPrims (^err (exc : Value)) : Value
@@ -1351,6 +1356,36 @@ isn't a C type, `U.__dict__["__doc__"]` (`20`), `U.__doc__` when `U` holds and g
       pure (.bool ((← PyPure.identical q1 q2) matches .yes))
     : PyM σ .writes true Value)
 
+/-- Region `0` on `1`, with a cell operand that it doesn't pass: a region whose parameter holds no
+ref, which `#py_rule_theorems` proves. -/
+@[dyn_sem PyT.regionValue, expose] public def regionValue (_c : Ref σ Value)
+    (body : Region ε [Value] (Except Value Unit)) (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[regionHandle body oneValue fun _ => .none] (do
+    discard <| PyPure.region 0 #[.int 1]
+    pure Value.none
+    : PyM σ .pure true Value)
+
+/-- Region `0`, which takes one value, on no values (`0`), on two (`1`), and on one (`2`): a
+handle given values that its input doesn't take stops with a model-invariant gap. -/
+@[dyn_sem PyT.regionArity, expose] public def regionArity (k : Int)
+    (body : Region ε [Value] (Except Value Unit)) (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[regionHandle body oneValue fun _ => .none] (do
+    discard <| PyPure.region 0 (match k with
+      | 0 => #[]
+      | 1 => #[.int 1, .int 2]
+      | _ => #[.int 1])
+    pure Value.none
+    : PyM σ .pure true Value)
+
+/-- Region `0` on the cell `c`: a region whose parameter is a ref, which `#py_rule_theorems`
+rejects. -/
+@[dyn_sem PyT.regionCell, expose] public def regionCell (c : Ref σ Value)
+    (body : Region ε [Ref σ Value] (Except Value Unit)) (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[regionHandle body (fun _ => some c) fun _ => .none] (do
+    discard <| PyPure.region 0 #[]
+    pure Value.none
+    : PyM σ .pure true Value)
+
 /-- `startChecks`, which runs before a step machine starts, on a call of `tuple.__new__` on
 `(int, (1,))` (`0`), of `list.extend` on `(5, (1,))` (`1`), of `dict.__dict__["fromkeys"]` on
 `(list, (1,))` (`2`), and of `tuple.__new__` on `(tuple, (1,))` (`3`); and the start of a machine
@@ -1719,12 +1754,14 @@ def ptEffect : String → Effects.Level
 def ptTags (σ : Type) [Store σ] : @Tags σ _ ⟨PyTSem.interp σ⟩ :=
   letI : Decode σ := ⟨PyTSem.interp σ⟩
   ⟨⟨PyTSem.T.py.Value, rfl⟩, ⟨Ty.ref PyTSem.T.py.Value, rfl⟩,
-    ⟨PyTSem.T.base.Except PyTSem.T.py.Value PyTSem.T.py.Value, rfl⟩⟩
+    ⟨PyTSem.T.base.Except PyTSem.T.py.Value PyTSem.T.py.Value, rfl⟩, [PyTSem.T.py.Value]⟩
 
 /--
-error: #py_rule_theorems: the rule of pt.direct is not a `runRule`, `runTotal`, `runRuleFree`, `runTotalFree`, `runRuleIf`, `runLoop` or `runLoopFree` wrapper at an effect no higher than its declared one whose results and exits hold no ref, and has no lemmas StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.okOf.pt.direct and StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.certOf.pt.direct
+error: #py_rule_theorems: the rule of pt.direct is not a `runRule`, `runTotal`, `runRuleFree`, `runTotalFree`, `runRuleIf`, `runLoop` or `runLoopFree` wrapper at an effect no higher than its declared one, whose results and exits hold no ref and whose handles are `regionHandle`s of regions whose parameters hold no ref, and has no lemmas StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.okOf.pt.direct and StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.certOf.pt.direct
 ---
-error: #py_rule_theorems: the rule of pt.tooHigh is not a `runRule`, `runTotal`, `runRuleFree`, `runTotalFree`, `runRuleIf`, `runLoop` or `runLoopFree` wrapper at an effect no higher than its declared one whose results and exits hold no ref, and has no lemmas StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.okOf.pt.tooHigh and StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.certOf.pt.tooHigh
+error: #py_rule_theorems: the rule of pt.tooHigh is not a `runRule`, `runTotal`, `runRuleFree`, `runTotalFree`, `runRuleIf`, `runLoop` or `runLoopFree` wrapper at an effect no higher than its declared one, whose results and exits hold no ref and whose handles are `regionHandle`s of regions whose parameters hold no ref, and has no lemmas StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.okOf.pt.tooHigh and StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.certOf.pt.tooHigh
+---
+error: #py_rule_theorems: the rule of pt.regionCell is not a `runRule`, `runTotal`, `runRuleFree`, `runTotalFree`, `runRuleIf`, `runLoop` or `runLoopFree` wrapper at an effect no higher than its declared one, whose results and exits hold no ref and whose handles are `regionHandle`s of regions whose parameters hold no ref, and has no lemmas StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.okOf.pt.regionCell and StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.certOf.pt.regionCell
 -/
 #guard_msgs in
 #py_rule_theorems PyTSem for PyT (effects := ptEffect) (tags := ptTags)
@@ -1746,6 +1783,10 @@ example : ImplWithin PyTSem.interp .calls PyTSem.impl.pt.eqVal := PyTSem.ok.pt.e
 example : ImplOK PyTSem.interp ptTags .calls PyTSem.impl.pt.eqVal := PyTSem.implOK.pt.eqVal
 example : ImplWithin PyTSem.interp .writes PyTSem.impl.pt.setAny := PyTSem.ok.pt.setAny
 example : ImplOK PyTSem.interp ptTags .writes PyTSem.impl.pt.setAny := PyTSem.implOK.pt.setAny
+example : ImplOK PyTSem.interp ptTags .pure PyTSem.impl.pt.regionValue :=
+  PyTSem.implOK.pt.regionValue
+example : ImplOK PyTSem.interp ptTags .pure PyTSem.impl.pt.regionArity :=
+  PyTSem.implOK.pt.regionArity
 example : ImplWithin PyTSem.interp .pure PyTSem.impl.pt.good := PyTSem.ok.pt.good
 example : ImplOK PyTSem.interp ptTags .pure PyTSem.impl.pt.good := PyTSem.implOK.pt.good
 example : ImplWithin PyTSem.interp .calls PyTSem.impl.pt.callNew := PyTSem.ok.pt.callNew
@@ -3380,5 +3421,28 @@ info: StrataPython.Dyn.Sem.Value.tuple
 /-- info: StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.str_iterator) -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.strSubIter ^err.0()"
+
+-- A region handle stops with a model-invariant gap on values that its region doesn't take, and
+-- runs the region on the values that it takes.
+/-- A run of `pt.regionArity k`, whose body returns at once. -/
+def regionArityRun (k : Nat) : IO Unit :=
+  run s!"      %v.0 : py.Value = pt.regionArity({k}) ^err.0() \{
+        body.0(%x.0 : py.Value):
+          %unit.0 : base.Unit = base.unit
+          %ok.0 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
+          ret(%ok.0)
+      }"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "model invariant: a region called with 0 values, which it doesn't take" -/
+#guard_msgs in
+#eval regionArityRun 0
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "model invariant: a region called with 2 values, which it doesn't take" -/
+#guard_msgs in
+#eval regionArityRun 1
+
+/-- info: StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval regionArityRun 2
 
 end StrataPython.Dyn.Sem.RuleTheoremsTest

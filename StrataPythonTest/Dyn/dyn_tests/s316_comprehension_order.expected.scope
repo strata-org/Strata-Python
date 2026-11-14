@@ -1,0 +1,124 @@
+module
+  log: global explicit (assigned, referenced, declared_global)
+  note: local (assigned)
+  It: local (assigned, referenced)
+  K: local (assigned)
+  key: local (assigned)
+  val: local (assigned)
+  d: local (assigned, referenced)
+  print: global implicit (referenced)
+  len: global implicit (referenced)
+  s: local (assigned, referenced)
+  stop: local (assigned)
+  range: global implicit (referenced)
+  StopIteration: global implicit (referenced)
+  BadIter: local (assigned, referenced)
+  ValueError: global implicit (referenced)
+  e: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  x: local (assigned, referenced, comp_iter)
+  k: local (assigned, referenced, comp_iter)
+  a: local (assigned, referenced, comp_iter)
+  b: local (assigned, referenced, comp_iter)
+  function note
+    params: s
+    s: local (parameter, referenced)
+    log: global explicit (assigned, referenced, declared_global)
+  class It
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function It.__init__
+      params: self, n
+      self: local (parameter, referenced)
+      n: local (parameter, referenced)
+    function It.__iter__
+      params: self
+      self: local (parameter, referenced)
+      note: global implicit (referenced)
+    function It.__next__
+      params: self
+      self: local (parameter, referenced)
+      note: global implicit (referenced)
+      StopIteration: global implicit (referenced)
+  class K
+    __init__: local (assigned)
+    __hash__: local (assigned)
+    __eq__: local (assigned)
+    function K.__init__
+      params: self, v
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function K.__hash__
+      params: self
+      self: local (parameter, referenced)
+      note: global implicit (referenced)
+    function K.__eq__
+      params: self, other
+      self: local (parameter, referenced)
+      other: local (parameter, referenced)
+      note: global implicit (referenced)
+  function key
+    params: x
+    x: local (parameter, referenced)
+    note: global implicit (referenced)
+    K: global implicit (referenced)
+  function val
+    params: x
+    x: local (parameter, referenced)
+    note: global implicit (referenced)
+  inlined comprehension <dictcomp>
+    params: .0
+    .0: local (parameter)
+    x: local (assigned, referenced, comp_iter)
+    val: global implicit (referenced)
+    key: global implicit (referenced)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    k: local (assigned, referenced, comp_iter)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    k: local (assigned, referenced, comp_iter)
+    d: global implicit (referenced)
+  inlined comprehension <setcomp>
+    params: .0
+    .0: local (parameter)
+    x: local (assigned, referenced, comp_iter)
+    K: global implicit (referenced)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    a: local (assigned, referenced, comp_iter)
+    b: local (assigned, referenced, comp_iter)
+    It: global implicit (referenced)
+  function stop
+    StopIteration: global implicit (referenced)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    x: local (assigned, comp_iter)
+    stop: global implicit (referenced)
+  class BadIter
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function BadIter.__iter__
+      params: self
+      self: local (parameter, referenced)
+    function BadIter.__next__
+      params: self
+      self: local (parameter)
+      ValueError: global implicit (referenced)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    x: local (assigned, referenced, comp_iter)
+  inlined comprehension <dictcomp>
+    params: .0
+    .0: local (parameter)
+    x: local (assigned, referenced, comp_iter)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    x: local (assigned, referenced, comp_iter)

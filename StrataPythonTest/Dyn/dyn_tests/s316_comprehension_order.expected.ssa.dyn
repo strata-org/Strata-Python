@@ -1,0 +1,867 @@
+module s316_comprehension_order {
+  func @|s316_comprehension_order.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s316_comprehension_order")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %list.0 : py.Value = py.mkList
+      %log.cell.0 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "log")
+      %set.2 : base.Unit = base.refSet[py.Value](%log.cell.0, %list.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@s316_comprehension_order.note, "note", "s316_comprehension_order")
+      %note.cell.0 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "note")
+      %set.3 : base.Unit = base.refSet[py.Value](%note.cell.0, %clo.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|s316_comprehension_order.It.<body>|, "<body>", "s316_comprehension_order")
+      %str.1 : py.Value = py.strLit("It")
+      %tuple.0 : py.Value = py.mkTuple(%clo.1, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %It.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %It.cell.0 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "It")
+      %set.4 : base.Unit = base.refSet[py.Value](%It.cell.0, %It.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@|s316_comprehension_order.K.<body>|, "<body>", "s316_comprehension_order")
+      %str.2 : py.Value = py.strLit("K")
+      %tuple.1 : py.Value = py.mkTuple(%clo.2, %str.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %K.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %K.cell.0 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "K")
+      %set.5 : base.Unit = base.refSet[py.Value](%K.cell.0, %K.0)
+      %clo.3 : py.Value = py.mkClosure[[]](@s316_comprehension_order.key, "key", "s316_comprehension_order")
+      %key.cell.0 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "key")
+      %set.6 : base.Unit = base.refSet[py.Value](%key.cell.0, %clo.3)
+      %clo.4 : py.Value = py.mkClosure[[]](@s316_comprehension_order.val, "val", "s316_comprehension_order")
+      %val.cell.0 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "val")
+      %set.7 : base.Unit = base.refSet[py.Value](%val.cell.0, %clo.4)
+      %It.1 : py.Value = py.loadGlobal("s316_comprehension_order", "It") ^propagate.0()
+      %int.0 : py.Value = py.intLit(3)
+      %tuple.2 : py.Value = py.mkTuple(%int.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%It.1, %tuple.2, %kwargs.2) ^propagate.0()
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %dict.0 : py.Value = py.dictComp(%call.0) ^propagate.0() {
+        each.0(%out.0 : py.DictAcc, %item.0 : py.Value):
+          %store.0 : base.Unit = py.compStore(%out.0) ^propagate.1() {
+            key.0():
+              %key.0 : py.Value = py.loadGlobal("s316_comprehension_order", "key") ^propagate.2()
+              %x.2 : py.Value = py.requireDefined(%item.0, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
+              %tuple.3 : py.Value = py.mkTuple(%x.2)
+              %kwargs.3 : py.Value = py.mkKwargs
+              %call.1 : py.Value = py.call(%key.0, %tuple.3, %kwargs.3) ^propagate.2()
+              %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.1)
+              ret(%ok.0)
+            propagate.2(%exc.0 : py.Value):
+              %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+              ret(%exc.1)
+          } {
+            value.0():
+              %val.0 : py.Value = py.loadGlobal("s316_comprehension_order", "val") ^propagate.3()
+              %x.4 : py.Value = py.requireDefined(%item.0, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.3()
+              %tuple.4 : py.Value = py.mkTuple(%x.4)
+              %kwargs.4 : py.Value = py.mkKwargs
+              %call.2 : py.Value = py.call(%val.0, %tuple.4, %kwargs.4) ^propagate.3()
+              %ok.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.2)
+              ret(%ok.1)
+            propagate.3(%exc.2 : py.Value):
+              %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+              ret(%exc.3)
+          }
+          %unit.0 : base.Unit = base.unit
+          %ok.2 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
+          ret(%ok.2)
+        propagate.1(%exc.4 : py.Value):
+          %exc.5 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.4)
+          ret(%exc.5)
+      }
+      %d.cell.0 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "d")
+      %set.9 : base.Unit = base.refSet[py.Value](%d.cell.0, %dict.0)
+      %print.0 : py.Value = py.loadGlobal("s316_comprehension_order", "print") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("s316_comprehension_order", "len") ^propagate.0()
+      %d.0 : py.Value = py.loadGlobal("s316_comprehension_order", "d") ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple(%d.0)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%len.0, %tuple.5, %kwargs.5) ^propagate.0()
+      %d.1 : py.Value = py.loadGlobal("s316_comprehension_order", "d") ^propagate.0()
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %list.1 : py.Value = py.listComp(%d.1) ^propagate.0() {
+        each.1(%out.1 : py.ListAcc, %item.1 : py.Value):
+          %append.0 : base.Unit = py.compAppend(%out.1) ^propagate.4() {
+            elt.0():
+              %k.2 : py.Value = py.requireDefined(%item.1, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.5()
+              %v.0 : py.Value = py.attr(%k.2, "v") ^propagate.5()
+              %ok.3 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%v.0)
+              ret(%ok.3)
+            propagate.5(%exc.6 : py.Value):
+              %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+              ret(%exc.7)
+          }
+          %unit.1 : base.Unit = base.unit
+          %ok.4 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.1)
+          ret(%ok.4)
+        propagate.4(%exc.8 : py.Value):
+          %exc.9 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.8)
+          ret(%exc.9)
+      }
+      %d.2 : py.Value = py.loadGlobal("s316_comprehension_order", "d") ^propagate.0()
+      %k.3 : py.Value = py.undef("k")
+      %k.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%k.3)
+      %list.2 : py.Value = py.listComp(%d.2) ^propagate.0() {
+        each.2(%out.2 : py.ListAcc, %item.2 : py.Value):
+          %append.1 : base.Unit = py.compAppend(%out.2) ^propagate.6() {
+            elt.1():
+              %d.3 : py.Value = py.loadGlobal("s316_comprehension_order", "d") ^propagate.7()
+              %k.5 : py.Value = py.requireDefined(%item.2, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.7()
+              %item.3 : py.Value = py.getItem(%d.3, %k.5) ^propagate.7()
+              %ok.5 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%item.3)
+              ret(%ok.5)
+            propagate.7(%exc.10 : py.Value):
+              %exc.11 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.10)
+              ret(%exc.11)
+          }
+          %unit.2 : base.Unit = base.unit
+          %ok.6 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.2)
+          ret(%ok.6)
+        propagate.6(%exc.12 : py.Value):
+          %exc.13 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.12)
+          ret(%exc.13)
+      }
+      %log.0 : py.Value = py.loadGlobal("s316_comprehension_order", "log") ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple(%call.3, %list.1, %list.2, %log.0)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.0, %tuple.6, %kwargs.6) ^propagate.0()
+      %list.3 : py.Value = py.mkList
+      %log.cell.1 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "log")
+      %set.12 : base.Unit = base.refSet[py.Value](%log.cell.1, %list.3)
+      %It.2 : py.Value = py.loadGlobal("s316_comprehension_order", "It") ^propagate.0()
+      %int.1 : py.Value = py.intLit(3)
+      %tuple.7 : py.Value = py.mkTuple(%int.1)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%It.2, %tuple.7, %kwargs.7) ^propagate.0()
+      %x.5 : py.Value = py.undef("x")
+      %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.5)
+      %set.13 : py.Value = py.setComp(%call.5) ^propagate.0() {
+        each.3(%out.3 : py.SetAcc, %item.4 : py.Value):
+          %add.0 : base.Unit = py.compAdd(%out.3) ^propagate.8() {
+            elt.2():
+              %K.1 : py.Value = py.loadGlobal("s316_comprehension_order", "K") ^propagate.9()
+              %x.7 : py.Value = py.requireDefined(%item.4, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.9()
+              %int.2 : py.Value = py.intLit(2)
+              %mod.0 : py.Value = py.mod(%x.7, %int.2) ^propagate.9()
+              %tuple.8 : py.Value = py.mkTuple(%mod.0)
+              %kwargs.8 : py.Value = py.mkKwargs
+              %call.6 : py.Value = py.call(%K.1, %tuple.8, %kwargs.8) ^propagate.9()
+              %ok.7 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.6)
+              ret(%ok.7)
+            propagate.9(%exc.14 : py.Value):
+              %exc.15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.14)
+              ret(%exc.15)
+          }
+          %unit.3 : base.Unit = base.unit
+          %ok.8 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.3)
+          ret(%ok.8)
+        propagate.8(%exc.16 : py.Value):
+          %exc.17 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.16)
+          ret(%exc.17)
+      }
+      %s.cell.0 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "s")
+      %set.15 : base.Unit = base.refSet[py.Value](%s.cell.0, %set.13)
+      %print.1 : py.Value = py.loadGlobal("s316_comprehension_order", "print") ^propagate.0()
+      %len.1 : py.Value = py.loadGlobal("s316_comprehension_order", "len") ^propagate.0()
+      %s.0 : py.Value = py.loadGlobal("s316_comprehension_order", "s") ^propagate.0()
+      %tuple.9 : py.Value = py.mkTuple(%s.0)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%len.1, %tuple.9, %kwargs.9) ^propagate.0()
+      %log.1 : py.Value = py.loadGlobal("s316_comprehension_order", "log") ^propagate.0()
+      %tuple.10 : py.Value = py.mkTuple(%call.7, %log.1)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%print.1, %tuple.10, %kwargs.10) ^propagate.0()
+      %list.4 : py.Value = py.mkList
+      %log.cell.2 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "log")
+      %set.16 : base.Unit = base.refSet[py.Value](%log.cell.2, %list.4)
+      %print.2 : py.Value = py.loadGlobal("s316_comprehension_order", "print") ^propagate.0()
+      %It.3 : py.Value = py.loadGlobal("s316_comprehension_order", "It") ^propagate.0()
+      %int.3 : py.Value = py.intLit(2)
+      %tuple.11 : py.Value = py.mkTuple(%int.3)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%It.3, %tuple.11, %kwargs.11) ^propagate.0()
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %b.0 : py.Value = py.undef("b")
+      %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
+      %list.5 : py.Value = py.listComp(%call.9) ^propagate.0() {
+        each.4(%out.4 : py.ListAcc, %item.5 : py.Value):
+          %It.4 : py.Value = py.loadGlobal("s316_comprehension_order", "It") ^propagate.10()
+          %a.2 : py.Value = py.requireDefined(%item.5, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.10()
+          %tuple.12 : py.Value = py.mkTuple(%a.2)
+          %kwargs.12 : py.Value = py.mkKwargs
+          %call.10 : py.Value = py.call(%It.4, %tuple.12, %kwargs.12) ^propagate.10()
+          %for.0 : base.Unit = py.compFor(%call.10) ^propagate.10() {
+            each.5(%item.6 : py.Value):
+              %if.0 : base.Unit = py.compIf ^propagate.11() {
+                cond.0():
+                  %a.4 : py.Value = py.requireDefined(%item.5, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.12()
+                  %b.2 : py.Value = py.requireDefined(%item.6, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.12()
+                  %notEq.0 : py.Value = py.notEq(%a.4, %b.2) ^propagate.12()
+                  %cond.0 : base.Bool = py.truthy(%notEq.0) ^propagate.12()
+                  branch(%cond.0) ^true.0() ^false.0()
+                true.0():
+                  %ok.9 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](true)
+                  ret(%ok.9)
+                false.0():
+                  %ok.10 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](false)
+                  ret(%ok.10)
+                propagate.12(%exc.18 : py.Value):
+                  %exc.19 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.18)
+                  ret(%exc.19)
+              } {
+                then.0():
+                  %append.2 : base.Unit = py.compAppend(%out.4) ^propagate.13() {
+                    elt.3():
+                      %a.6 : py.Value = py.requireDefined(%item.5, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.14()
+                      %b.4 : py.Value = py.requireDefined(%item.6, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.14()
+                      %tuple.13 : py.Value = py.mkTuple(%a.6, %b.4)
+                      %ok.11 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.13)
+                      ret(%ok.11)
+                    propagate.14(%exc.20 : py.Value):
+                      %exc.21 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.20)
+                      ret(%exc.21)
+                  }
+                  %unit.4 : base.Unit = base.unit
+                  %ok.12 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.4)
+                  ret(%ok.12)
+                propagate.13(%exc.22 : py.Value):
+                  %exc.23 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.22)
+                  ret(%exc.23)
+              }
+              %unit.5 : base.Unit = base.unit
+              %ok.13 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.5)
+              ret(%ok.13)
+            propagate.11(%exc.24 : py.Value):
+              %exc.25 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.24)
+              ret(%exc.25)
+          }
+          %unit.6 : base.Unit = base.unit
+          %ok.14 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.6)
+          ret(%ok.14)
+        propagate.10(%exc.26 : py.Value):
+          %exc.27 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.26)
+          ret(%exc.27)
+      }
+      %log.2 : py.Value = py.loadGlobal("s316_comprehension_order", "log") ^propagate.0()
+      %tuple.14 : py.Value = py.mkTuple(%list.5, %log.2)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%print.2, %tuple.14, %kwargs.13) ^propagate.0()
+      %clo.5 : py.Value = py.mkClosure[[]](@s316_comprehension_order.stop, "stop", "s316_comprehension_order")
+      %stop.cell.0 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "stop")
+      %set.19 : base.Unit = base.refSet[py.Value](%stop.cell.0, %clo.5)
+      %range.0 : py.Value = py.loadGlobal("s316_comprehension_order", "range") ^catch.0()
+      %int.4 : py.Value = py.intLit(3)
+      %tuple.15 : py.Value = py.mkTuple(%int.4)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%range.0, %tuple.15, %kwargs.14) ^catch.0()
+      %x.8 : py.Value = py.undef("x")
+      %x.cell.2 : base.Ref(py.Value) = base.refNew[py.Value](%x.8)
+      %list.6 : py.Value = py.listComp(%call.12) ^catch.0() {
+        each.6(%out.5 : py.ListAcc, %item.7 : py.Value):
+          %append.3 : base.Unit = py.compAppend(%out.5) ^propagate.15() {
+            elt.4():
+              %stop.0 : py.Value = py.loadGlobal("s316_comprehension_order", "stop") ^propagate.16()
+              %tuple.16 : py.Value = py.mkTuple
+              %kwargs.15 : py.Value = py.mkKwargs
+              %call.13 : py.Value = py.call(%stop.0, %tuple.16, %kwargs.15) ^propagate.16()
+              %ok.15 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.13)
+              ret(%ok.15)
+            propagate.16(%exc.28 : py.Value):
+              %exc.29 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.28)
+              ret(%exc.29)
+          }
+          %unit.7 : base.Unit = base.unit
+          %ok.16 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.7)
+          ret(%ok.16)
+        propagate.15(%exc.30 : py.Value):
+          %exc.31 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.30)
+          ret(%exc.31)
+      }
+      jump ^join.0()
+    catch.0(%exc.32 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.32)
+      %StopIteration.0 : py.Value = py.loadGlobal("s316_comprehension_order", "StopIteration") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.32, %StopIteration.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %print.3 : py.Value = py.loadGlobal("s316_comprehension_order", "print") ^unwind.0()
+      %str.3 : py.Value = py.strLit("StopIteration from the element")
+      %tuple.17 : py.Value = py.mkTuple(%str.3)
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%print.3, %tuple.17, %kwargs.16) ^unwind.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^join.0()
+    next.0():
+      jump ^unwind.0(%exc.32)
+    unwind.0(%exc.33 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.33)
+    join.0():
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.6 : py.Value = py.mkClosure[[]](@|s316_comprehension_order.BadIter.<body>|, "<body>", "s316_comprehension_order")
+      %str.4 : py.Value = py.strLit("BadIter")
+      %tuple.18 : py.Value = py.mkTuple(%clo.6, %str.4)
+      %kwargs.17 : py.Value = py.mkKwargs
+      %BadIter.0 : py.Value = py.call(%__build_class__.2, %tuple.18, %kwargs.17) ^propagate.0()
+      %BadIter.cell.0 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "BadIter")
+      %set.21 : base.Unit = base.refSet[py.Value](%BadIter.cell.0, %BadIter.0)
+      %BadIter.1 : py.Value = py.loadGlobal("s316_comprehension_order", "BadIter") ^catch.1()
+      %tuple.19 : py.Value = py.mkTuple
+      %kwargs.18 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%BadIter.1, %tuple.19, %kwargs.18) ^catch.1()
+      %x.9 : py.Value = py.undef("x")
+      %x.cell.3 : base.Ref(py.Value) = base.refNew[py.Value](%x.9)
+      %list.7 : py.Value = py.listComp(%call.15) ^catch.1() {
+        each.7(%out.6 : py.ListAcc, %item.8 : py.Value):
+          %append.4 : base.Unit = py.compAppend(%out.6) ^propagate.17() {
+            elt.5():
+              %x.11 : py.Value = py.requireDefined(%item.8, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.18()
+              %ok.17 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.11)
+              ret(%ok.17)
+            propagate.18(%exc.34 : py.Value):
+              %exc.35 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.34)
+              ret(%exc.35)
+          }
+          %unit.8 : base.Unit = base.unit
+          %ok.18 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.8)
+          ret(%ok.18)
+        propagate.17(%exc.36 : py.Value):
+          %exc.37 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.36)
+          ret(%exc.37)
+      }
+      jump ^join.1()
+    catch.1(%exc.38 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.38)
+      %ValueError.0 : py.Value = py.loadGlobal("s316_comprehension_order", "ValueError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.38, %ValueError.0) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "e")
+      %set.23 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.38)
+      %print.4 : py.Value = py.loadGlobal("s316_comprehension_order", "print") ^clear.0()
+      %str.5 : py.Value = py.strLit("ValueError")
+      %e.11 : py.Value = py.loadGlobal("s316_comprehension_order", "e") ^clear.0()
+      %tuple.20 : py.Value = py.mkTuple(%str.5, %e.11)
+      %kwargs.19 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%print.4, %tuple.20, %kwargs.19) ^clear.0()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %e.12 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "e")
+      %set.24 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.12)
+      jump ^join.1()
+    clear.0(%exc.39 : py.Value):
+      %e.13 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "e")
+      %set.25 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.13)
+      jump ^unwind.1(%exc.39)
+    next.1():
+      jump ^unwind.1(%exc.38)
+    unwind.1(%exc.40 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.40)
+    join.1():
+      %int.5 : py.Value = py.intLit(1)
+      %list.8 : py.Value = py.mkList(%int.5)
+      %list.9 : py.Value = py.mkList(%list.8)
+      %x.12 : py.Value = py.undef("x")
+      %x.cell.4 : base.Ref(py.Value) = base.refNew[py.Value](%x.12)
+      %dict.1 : py.Value = py.dictComp(%list.9) ^catch.2() {
+        each.8(%out.7 : py.DictAcc, %item.9 : py.Value):
+          %store.1 : base.Unit = py.compStore(%out.7) ^propagate.19() {
+            key.1():
+              %x.14 : py.Value = py.requireDefined(%item.9, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.20()
+              %ok.19 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.14)
+              ret(%ok.19)
+            propagate.20(%exc.41 : py.Value):
+              %exc.42 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.41)
+              ret(%exc.42)
+          } {
+            value.1():
+              %int.6 : py.Value = py.intLit(1)
+              %ok.20 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.6)
+              ret(%ok.20)
+          }
+          %unit.9 : base.Unit = base.unit
+          %ok.21 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.9)
+          ret(%ok.21)
+        propagate.19(%exc.43 : py.Value):
+          %exc.44 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.43)
+          ret(%exc.44)
+      }
+      jump ^join.2()
+    catch.2(%exc.45 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.45)
+      %TypeError.0 : py.Value = py.loadGlobal("s316_comprehension_order", "TypeError") ^unwind.2()
+      %match.2 : base.Bool = py.excMatch(%exc.45, %TypeError.0) ^unwind.2()
+      branch(%match.2) ^except.2() ^next.2()
+    except.2():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "e")
+      %set.27 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.45)
+      %print.5 : py.Value = py.loadGlobal("s316_comprehension_order", "print") ^clear.1()
+      %str.6 : py.Value = py.strLit("TypeError")
+      %e.15 : py.Value = py.loadGlobal("s316_comprehension_order", "e") ^clear.1()
+      %tuple.21 : py.Value = py.mkTuple(%str.6, %e.15)
+      %kwargs.20 : py.Value = py.mkKwargs
+      %call.17 : py.Value = py.call(%print.5, %tuple.21, %kwargs.20) ^clear.1()
+      %pop.4 : base.Unit = py.popExcept(%prev.2)
+      %e.16 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "e")
+      %set.28 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.16)
+      jump ^join.2()
+    clear.1(%exc.46 : py.Value):
+      %e.17 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "e")
+      %set.29 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.17)
+      jump ^unwind.2(%exc.46)
+    next.2():
+      jump ^unwind.2(%exc.45)
+    unwind.2(%exc.47 : py.Value):
+      %pop.5 : base.Unit = py.popExcept(%prev.2)
+      jump ^propagate.0(%exc.47)
+    join.2():
+      %int.7 : py.Value = py.intLit(3)
+      %x.15 : py.Value = py.undef("x")
+      %x.cell.5 : base.Ref(py.Value) = base.refNew[py.Value](%x.15)
+      %list.10 : py.Value = py.listComp(%int.7) ^catch.3() {
+        each.9(%out.8 : py.ListAcc, %item.10 : py.Value):
+          %append.5 : base.Unit = py.compAppend(%out.8) ^propagate.22() {
+            elt.6():
+              %x.17 : py.Value = py.requireDefined(%item.10, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.23()
+              %ok.22 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.17)
+              ret(%ok.22)
+            propagate.23(%exc.48 : py.Value):
+              %exc.49 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.48)
+              ret(%exc.49)
+          }
+          %unit.10 : base.Unit = base.unit
+          %ok.23 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.10)
+          ret(%ok.23)
+        propagate.22(%exc.50 : py.Value):
+          %exc.51 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.50)
+          ret(%exc.51)
+      }
+      jump ^join.3()
+    catch.3(%exc.52 : py.Value):
+      %prev.3 : py.Value = py.pushExcInfo(%exc.52)
+      %TypeError.1 : py.Value = py.loadGlobal("s316_comprehension_order", "TypeError") ^unwind.3()
+      %match.3 : base.Bool = py.excMatch(%exc.52, %TypeError.1) ^unwind.3()
+      branch(%match.3) ^except.3() ^next.3()
+    except.3():
+      %e.cell.6 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "e")
+      %set.31 : base.Unit = base.refSet[py.Value](%e.cell.6, %exc.52)
+      %print.6 : py.Value = py.loadGlobal("s316_comprehension_order", "print") ^clear.2()
+      %str.7 : py.Value = py.strLit("TypeError")
+      %e.19 : py.Value = py.loadGlobal("s316_comprehension_order", "e") ^clear.2()
+      %tuple.22 : py.Value = py.mkTuple(%str.7, %e.19)
+      %kwargs.21 : py.Value = py.mkKwargs
+      %call.18 : py.Value = py.call(%print.6, %tuple.22, %kwargs.21) ^clear.2()
+      %pop.6 : base.Unit = py.popExcept(%prev.3)
+      %e.20 : py.Value = py.undef("e")
+      %e.cell.7 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "e")
+      %set.32 : base.Unit = base.refSet[py.Value](%e.cell.7, %e.20)
+      jump ^join.3()
+    clear.2(%exc.53 : py.Value):
+      %e.21 : py.Value = py.undef("e")
+      %e.cell.8 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "e")
+      %set.33 : base.Unit = base.refSet[py.Value](%e.cell.8, %e.21)
+      jump ^unwind.3(%exc.53)
+    next.3():
+      jump ^unwind.3(%exc.52)
+    unwind.3(%exc.54 : py.Value):
+      %pop.7 : base.Unit = py.popExcept(%prev.3)
+      jump ^propagate.0(%exc.54)
+    join.3():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.55 : py.Value):
+      %exc.56 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.55)
+      ret(%exc.56)
+  }
+  func @s316_comprehension_order.note(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %s.0 : py.Value = py.undef("s")
+      %s.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%s.0)
+      %s.1 : py.Value = py.undef("s")
+      %defaults.0 : py.Value = py.mkTuple(%s.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "note", 0, 1, false, false, "s") ^propagate.0()
+      %s.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %log.0 : py.Value = py.loadGlobal("s316_comprehension_order", "log") ^propagate.0()
+      %s.4 : py.Value = py.requireDefined(%s.2, "s", "UnboundLocalError", "cannot access local variable 's' where it is not associated with a value") ^propagate.0()
+      %list.0 : py.Value = py.mkList(%s.4)
+      %add.0 : py.Value = py.add(%log.0, %list.0) ^propagate.0()
+      %log.cell.0 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "log")
+      %set.1 : base.Unit = base.refSet[py.Value](%log.cell.0, %add.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s316_comprehension_order.It.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s316_comprehension_order", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("It")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s316_comprehension_order.It.__init__, "__init__", "s316_comprehension_order")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s316_comprehension_order.It.__iter__, "__iter__", "s316_comprehension_order")
+      %str.5 : py.Value = py.strLit("__iter__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@s316_comprehension_order.It.__next__, "__next__", "s316_comprehension_order")
+      %str.6 : py.Value = py.strLit("__next__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s316_comprehension_order.K.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__hash__", binding = "def"}, {name = "__eq__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s316_comprehension_order", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("K")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s316_comprehension_order.K.__init__, "__init__", "s316_comprehension_order")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s316_comprehension_order.K.__hash__, "__hash__", "s316_comprehension_order")
+      %str.5 : py.Value = py.strLit("__hash__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@s316_comprehension_order.K.__eq__, "__eq__", "s316_comprehension_order")
+      %str.6 : py.Value = py.strLit("__eq__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s316_comprehension_order.key(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %x.1 : py.Value = py.undef("x")
+      %defaults.0 : py.Value = py.mkTuple(%x.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "key", 0, 1, false, false, "x") ^propagate.0()
+      %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %note.0 : py.Value = py.loadGlobal("s316_comprehension_order", "note") ^propagate.0()
+      %str.0 : py.Value = py.strLit("key")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%note.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %K.0 : py.Value = py.loadGlobal("s316_comprehension_order", "K") ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %int.0 : py.Value = py.intLit(2)
+      %mod.0 : py.Value = py.mod(%x.4, %int.0) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%mod.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%K.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s316_comprehension_order.val(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %x.1 : py.Value = py.undef("x")
+      %defaults.0 : py.Value = py.mkTuple(%x.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "val", 0, 1, false, false, "x") ^propagate.0()
+      %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %note.0 : py.Value = py.loadGlobal("s316_comprehension_order", "note") ^propagate.0()
+      %str.0 : py.Value = py.strLit("val")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%note.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s316_comprehension_order.stop(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "stop", 0, 0, false, false) ^propagate.0()
+      %StopIteration.0 : py.Value = py.loadGlobal("s316_comprehension_order", "StopIteration") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @|s316_comprehension_order.BadIter.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s316_comprehension_order", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("BadIter")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s316_comprehension_order.BadIter.__iter__, "__iter__", "s316_comprehension_order")
+      %str.4 : py.Value = py.strLit("__iter__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s316_comprehension_order.BadIter.__next__, "__next__", "s316_comprehension_order")
+      %str.5 : py.Value = py.strLit("__next__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s316_comprehension_order.It.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %n.2 : py.Value = py.undef("n")
+      %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.2)
+      %self.1 : py.Value = py.undef("self")
+      %n.5 : py.Value = py.undef("n")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %n.5)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__init__", 0, 2, false, false, "self", "n") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %n.6 : py.Value = py.tupleGet(%bound.0, 1)
+      %int.0 : py.Value = py.intLit(0)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.0 : base.Unit = py.setAttr(%self.4, "i", %int.0) ^propagate.0()
+      %n.8 : py.Value = py.requireDefined(%n.6, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %self.6 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %n.9 : base.Unit = py.setAttr(%self.6, "n", %n.8) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s316_comprehension_order.It.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %note.0 : py.Value = py.loadGlobal("s316_comprehension_order", "note") ^propagate.0()
+      %str.0 : py.Value = py.strLit("iter")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%note.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s316_comprehension_order.It.__next__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__next__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.0 : py.Value = py.attr(%self.4, "i") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%i.0, %int.0) ^propagate.0()
+      %i.1 : base.Unit = py.setAttr(%self.4, "i", %iAdd.0) ^propagate.0()
+      %note.0 : py.Value = py.loadGlobal("s316_comprehension_order", "note") ^propagate.0()
+      %str.0 : py.Value = py.strLit("next")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%note.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %self.6 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.2 : py.Value = py.attr(%self.6, "i") ^propagate.0()
+      %self.8 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %n.3 : py.Value = py.attr(%self.8, "n") ^propagate.0()
+      %gt.0 : py.Value = py.gt(%i.2, %n.3) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%gt.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %StopIteration.0 : py.Value = py.loadGlobal("s316_comprehension_order", "StopIteration") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    else.0():
+      jump ^join.0()
+    join.0():
+      %self.10 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.3 : py.Value = py.attr(%self.10, "i") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.3)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s316_comprehension_order.K.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %v.0 : py.Value = py.undef("v")
+      %v.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%v.0)
+      %self.1 : py.Value = py.undef("self")
+      %v.1 : py.Value = py.undef("v")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %v.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.__init__", 0, 2, false, false, "self", "v") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %v.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %v.4 : py.Value = py.requireDefined(%v.2, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %v.5 : base.Unit = py.setAttr(%self.4, "v", %v.4) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s316_comprehension_order.K.__hash__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.__hash__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %note.0 : py.Value = py.loadGlobal("s316_comprehension_order", "note") ^propagate.0()
+      %str.0 : py.Value = py.strLit("hash")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%note.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %v.0 : py.Value = py.attr(%self.4, "v") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%v.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s316_comprehension_order.K.__eq__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %other.0 : py.Value = py.undef("other")
+      %other.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%other.0)
+      %self.1 : py.Value = py.undef("self")
+      %other.1 : py.Value = py.undef("other")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %other.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.__eq__", 0, 2, false, false, "self", "other") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %other.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %note.0 : py.Value = py.loadGlobal("s316_comprehension_order", "note") ^propagate.0()
+      %str.0 : py.Value = py.strLit("eq")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%note.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %v.0 : py.Value = py.attr(%self.4, "v") ^propagate.0()
+      %other.4 : py.Value = py.requireDefined(%other.2, "other", "UnboundLocalError", "cannot access local variable 'other' where it is not associated with a value") ^propagate.0()
+      %v.1 : py.Value = py.attr(%other.4, "v") ^propagate.0()
+      %eq.0 : py.Value = py.eq(%v.0, %v.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%eq.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s316_comprehension_order.BadIter.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "BadIter.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s316_comprehension_order.BadIter.__next__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "BadIter.__next__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %ValueError.0 : py.Value = py.loadGlobal("s316_comprehension_order", "ValueError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("next")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%ValueError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+}
+

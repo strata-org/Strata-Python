@@ -3,8 +3,8 @@ test_admitted_completion_case_07_finally_all_completions | agree
 test_admitted_completion_case_08_finally_override | gap | built-in method str.__new__ is not modelled yet
 test_admitted_completion_case_09_else_and_handler_regions | agree
 test_admitted_completion_case_10_loop_else_from_handlers | agree
-test_admitted_comprehensions_case_16_failure_and_walrus | gap | not modelled yet: py.listComp
-test_admitted_comprehensions_case_23_exception_order | gap | not modelled yet: py.listComp
+test_admitted_comprehensions_case_16_failure_and_walrus | gap | built-in method str.__new__ is not modelled yet
+test_admitted_comprehensions_case_23_exception_order | agree
 test_admitted_context_managers_case_14_with_edges | gap | built-in method str.__new__ is not modelled yet
 test_admitted_dataclasses_case_19_frozen_write_error | gap | import of module dataclasses is not modelled yet
 test_admitted_exception_groups_case_20_except_star_partition | gap | the translator does not support try/except*
@@ -276,10 +276,10 @@ test_language_semantics_ast_bytecode_002_cell_promotion_boundary | gap | built-i
 test_language_semantics_ast_bytecode_002_cell_promotion_supported | agree
 test_language_semantics_ast_bytecode_003_class_scope_opacity_boundary | agree
 test_language_semantics_ast_bytecode_003_class_scope_opacity_supported | agree
-test_language_semantics_ast_bytecode_004_comprehension_iter_asymmetry_boundary | gap | not modelled yet: py.listComp
-test_language_semantics_ast_bytecode_004_comprehension_iter_asymmetry_supported | gap | not modelled yet: py.listComp
-test_language_semantics_ast_bytecode_005_walrus_escape_boundary | gap | not modelled yet: py.listComp
-test_language_semantics_ast_bytecode_005_walrus_escape_supported | gap | not modelled yet: py.listComp
+test_language_semantics_ast_bytecode_004_comprehension_iter_asymmetry_boundary | agree
+test_language_semantics_ast_bytecode_004_comprehension_iter_asymmetry_supported | gap | built-in dir is not modelled yet
+test_language_semantics_ast_bytecode_005_walrus_escape_boundary | agree
+test_language_semantics_ast_bytecode_005_walrus_escape_supported | agree
 test_language_semantics_ast_bytecode_006_class_cell_synthesis_boundary | agree
 test_language_semantics_ast_bytecode_006_class_cell_synthesis_supported | agree
 test_language_semantics_ast_bytecode_007_annotation_scopes_boundary | gap | import of module sys is not modelled yet
@@ -299,7 +299,7 @@ test_language_semantics_ast_bytecode_013_decorator_anti_parallel_supported | gap
 test_language_semantics_ast_bytecode_014_default_argument_timing_boundary | gap | built-in method list.append is not modelled yet
 test_language_semantics_ast_bytecode_014_default_argument_timing_supported | gap | built-in method list.append is not modelled yet
 test_language_semantics_ast_bytecode_015_for_loop_iter_once_boundary | agree
-test_language_semantics_ast_bytecode_015_for_loop_iter_once_supported | gap | not modelled yet: py.listComp
+test_language_semantics_ast_bytecode_015_for_loop_iter_once_supported | agree
 test_language_semantics_ast_bytecode_016_for_else_while_else_boundary | agree
 test_language_semantics_ast_bytecode_016_for_else_while_else_supported | agree
 test_language_semantics_ast_bytecode_017_with_exit_before_enter_boundary | agree
@@ -320,8 +320,8 @@ test_language_semantics_ast_bytecode_024_generator_stopiteration_wrap_boundary |
 test_language_semantics_ast_bytecode_024_generator_stopiteration_wrap_supported | gap | the translator does not support generator function
 test_language_semantics_ast_bytecode_025_yield_from_delegation_boundary | gap | the translator does not support generator function
 test_language_semantics_ast_bytecode_025_yield_from_delegation_supported | gap | the translator does not support generator function
-test_language_semantics_ast_bytecode_026_comprehension_inlining_boundary | gap | not modelled yet: py.listComp
-test_language_semantics_ast_bytecode_026_comprehension_inlining_supported | gap | not modelled yet: py.listComp
+test_language_semantics_ast_bytecode_026_comprehension_inlining_boundary | agree
+test_language_semantics_ast_bytecode_026_comprehension_inlining_supported | agree
 test_language_semantics_ast_bytecode_027_class_body_as_function_boundary | agree
 test_language_semantics_ast_bytecode_027_class_body_as_function_supported | gap | built-in method list.append is not modelled yet
 test_language_semantics_ast_bytecode_028_closure_creation_boundary | agree
@@ -384,11 +384,11 @@ test_language_semantics_comprehensions_repros_ex6_setcomp | gap | import of modu
 test_language_semantics_comprehensions_repros_ex6_setcomp_fail | gap | import of module typing is not modelled yet
 test_language_semantics_comprehensions_repros_ex7_dictcomp | gap | import of module typing is not modelled yet
 test_language_semantics_comprehensions_repros_ex7_dictcomp_fail | gap | import of module typing is not modelled yet
-test_language_semantics_comprehensions_repros_k1_dictclash | gap | not modelled yet: py.dictComp
-test_language_semantics_comprehensions_repros_k2_setdup | gap | not modelled yet: py.setComp
-test_language_semantics_comprehensions_repros_k3_tuple_nodup | gap | not modelled yet: py.dictComp
-test_language_semantics_comprehensions_repros_k4_dictcomp_crash | gap | not modelled yet: py.dictComp
-test_language_semantics_comprehensions_repros_k5_clash_semantics | gap | not modelled yet: py.dictComp
+test_language_semantics_comprehensions_repros_k1_dictclash | agree
+test_language_semantics_comprehensions_repros_k2_setdup | agree
+test_language_semantics_comprehensions_repros_k3_tuple_nodup | agree
+test_language_semantics_comprehensions_repros_k4_dictcomp_crash | agree
+test_language_semantics_comprehensions_repros_k5_clash_semantics | gap | built-in hash is not modelled yet
 test_language_semantics_comprehensions_repros_repro | gap | import of module typing is not modelled yet
 test_language_semantics_comprehensions_repros_repro_fail | gap | import of module typing is not modelled yet
 test_language_semantics_comprehensions_repros_t1_typeddict_total | gap | import of module typing is not modelled yet
@@ -431,8 +431,8 @@ test_language_semantics_exceptions_admitted_completion_case_07_finally_all_compl
 test_language_semantics_exceptions_admitted_completion_case_08_finally_override | gap | built-in method str.__new__ is not modelled yet
 test_language_semantics_exceptions_admitted_completion_case_09_else_and_handler_regions | agree
 test_language_semantics_exceptions_admitted_completion_case_10_loop_else_from_handlers | agree
-test_language_semantics_exceptions_admitted_comprehensions_case_16_failure_and_walrus | gap | not modelled yet: py.listComp
-test_language_semantics_exceptions_admitted_comprehensions_case_23_exception_order | gap | not modelled yet: py.listComp
+test_language_semantics_exceptions_admitted_comprehensions_case_16_failure_and_walrus | gap | built-in method str.__new__ is not modelled yet
+test_language_semantics_exceptions_admitted_comprehensions_case_23_exception_order | agree
 test_language_semantics_exceptions_admitted_context_managers_case_14_with_edges | gap | built-in method str.__new__ is not modelled yet
 test_language_semantics_exceptions_admitted_dataclasses_case_19_frozen_write_error | gap | import of module dataclasses is not modelled yet
 test_language_semantics_exceptions_admitted_exception_groups_case_20_except_star_partition | gap | the translator does not support try/except*
@@ -1137,7 +1137,7 @@ test_pyresid_baseline_assignment_target_order | gap | built-in method list.__cla
 test_pyresid_baseline_builtin_protocol | agree
 test_pyresid_baseline_callee_order | agree
 test_pyresid_baseline_comparison_protocol | agree
-test_pyresid_baseline_comprehension_fixpoint | gap | not modelled yet: py.listComp
+test_pyresid_baseline_comprehension_fixpoint | agree
 test_pyresid_baseline_dict_literal_order | agree
 test_pyresid_baseline_exception_init | agree
 test_pyresid_baseline_exceptional_assignment | agree
@@ -1204,7 +1204,7 @@ test_pyresid_gr_sh_assign | agree
 test_pyresid_gr_sh_assign_func | agree
 test_pyresid_gr_sh_assign_method | agree
 test_pyresid_gr_sh_class | agree
-test_pyresid_gr_sh_comp_target | gap | not modelled yet: py.listComp
+test_pyresid_gr_sh_comp_target | agree
 test_pyresid_gr_sh_def | agree
 test_pyresid_gr_sh_handler | agree
 test_pyresid_gr_sh_param | agree
@@ -1225,7 +1225,7 @@ test_pyresid_gr_un_binop_shift | agree
 test_pyresid_gr_un_cmp_is | agree
 test_pyresid_gr_un_cmp_is_func | agree
 test_pyresid_gr_un_cmp_isnot | agree
-test_pyresid_gr_un_comp_target_tuple | gap | not modelled yet: py.listComp
+test_pyresid_gr_un_comp_target_tuple | agree
 test_pyresid_gr_un_const_bytes | agree
 test_pyresid_gr_un_const_bytes_func | agree
 test_pyresid_gr_un_const_complex | gap | the translator does not support complex literal
@@ -1242,7 +1242,7 @@ test_pyresid_gt_attr_named_list | agree
 test_pyresid_gt_aug_ok | agree
 test_pyresid_gt_bare_except | agree
 test_pyresid_gt_chained_cmp | agree
-test_pyresid_gt_dictcomp | gap | not modelled yet: py.dictComp
+test_pyresid_gt_dictcomp | gap | built-in method str.__new__ is not modelled yet
 test_pyresid_gt_docstrings | agree
 test_pyresid_gt_dunder_ok | agree
 test_pyresid_gt_eq_and_hash | agree
@@ -1253,8 +1253,8 @@ test_pyresid_gt_genexp | gap | the translator does not support generator express
 test_pyresid_gt_kwargs_at_call | agree
 test_pyresid_gt_method_named_builtin | agree
 test_pyresid_gt_raise_name_call | agree
-test_pyresid_gt_setcomp | gap | not modelled yet: py.setComp
-test_pyresid_gt_single_gen_comp | gap | not modelled yet: py.listComp
+test_pyresid_gt_setcomp | gap | built-in method set.add is not modelled yet
+test_pyresid_gt_single_gen_comp | agree
 test_pyresid_gt_ternary | agree
 test_pyresid_gt_typing_allowlist | gap | import of module typing is not modelled yet
 test_pyresid_gt_uadd_ok | agree
@@ -1322,7 +1322,7 @@ test_pyresid_reject_invalid_c3 | gap | an exception whose text has a line break
 test_pyresid_reject_lambda | agree
 test_pyresid_reject_match | gap | the translator does not support match
 test_pyresid_reject_metaclass | agree
-test_pyresid_reject_multigen_comp | gap | not modelled yet: py.listComp
+test_pyresid_reject_multigen_comp | agree
 test_pyresid_reject_nested_class | agree
 test_pyresid_reject_nested_function | agree
 test_pyresid_reject_non_exception_classes | agree
@@ -1346,7 +1346,7 @@ test_pyresid_stress | gap | the translator does not support generator function
 test_pyresid_t1_recency | gap | built-in method list.append is not modelled yet
 test_pyresid_t2_dispatch | agree
 test_pyresid_t3_flow | agree
-test_pyresid_t4_comp | gap | not modelled yet: py.listComp
+test_pyresid_t4_comp | agree
 test_pyresid_t5_typed | gap | import of module dataclasses is not modelled yet
 test_pyresid_t6_handler | agree
 test_pyresid_t7_init | agree
@@ -1425,7 +1425,7 @@ test_type_checker_differentials_mypy_a3_narrowing_indirect_program | agree
 test_type_checker_differentials_mypy_a4_overload_narrowing_program | gap | import of module typing is not modelled yet
 test_type_checker_differentials_mypy_a5_dunder_side_effects_program | gap | built-in method type.__or__ is not modelled yet
 test_type_checker_differentials_mypy_a6_match_narrowing_program | gap | the translator does not support match
-test_type_checker_differentials_mypy_a7_implicit_calls_program | gap | not modelled yet: py.listComp
+test_type_checker_differentials_mypy_a7_implicit_calls_program | agree
 test_type_checker_differentials_mypy_a8_context_manager_program | agree
 test_type_checker_differentials_mypy_a9_condition_side_effects_program | gap | the translator does not support generator expression
 test_type_checker_differentials_mypy_b1_mutable_override_program | gap | built-in method type.__or__ is not modelled yet

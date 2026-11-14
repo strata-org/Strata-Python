@@ -1,0 +1,24 @@
+--- stdout 436
+2 [1, 0] [3, 2] ['iter', 'next', 'key', 'val', 'hash', 'next', 'key', 'val', 'hash', 'next', 'key', 'val', 'hash', 'eq', 'next', 'hash', 'hash']
+2 ['iter', 'next', 'hash', 'next', 'hash', 'next', 'hash', 'eq', 'next']
+[(2, 1)] ['iter', 'next', 'iter', 'next', 'next', 'next', 'iter', 'next', 'next', 'next', 'next']
+StopIteration from the element
+ValueError next
+TypeError unhashable type: 'list'
+TypeError 'int' object is not iterable
+
+--- outcome
+ok
+--- globals
+BadIter = <class 'BadIter'>
+It = <class 'It'>
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+d = {<K object>: 3, <K object>: 2}
+key = <function object>
+log = ['iter', 'next', 'iter', 'next', 'next', 'next', 'iter', 'next', 'next', 'next', 'next']
+note = <function object>
+s = {<K object>, <K object>}
+stop = <function object>
+val = <function object>

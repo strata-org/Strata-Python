@@ -1,0 +1,222 @@
+module
+  between: local (assigned)
+  later_if: local (assigned)
+  later: local (assigned)
+  later_unbound: local (assigned)
+  walrus_filter: local (assigned)
+  walrus_key: local (assigned)
+  targets: local (assigned)
+  unhashable_set: local (assigned)
+  unhashable_dict: local (assigned)
+  blocks: local (assigned)
+  nested: local (assigned)
+  lengths: local (assigned)
+  in_try: local (assigned)
+  O: local (assigned, referenced)
+  show: local (assigned, referenced)
+  o: local (assigned, referenced)
+  d: local (assigned, referenced)
+  print: global implicit (referenced)
+  function between
+    params: xs, ys
+    xs: local (parameter, referenced)
+    ys: local (parameter)
+    x: local (assigned, referenced, comp_iter)
+    y: local (assigned, referenced, comp_iter)
+    inlined comprehension between.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      y: local (assigned, referenced, comp_iter)
+      ys: free (referenced)
+  function later_if
+    params: xs, ys
+    xs: local (parameter, referenced)
+    ys: local (parameter)
+    x: local (assigned, referenced, comp_iter)
+    y: local (assigned, referenced, comp_iter)
+    inlined comprehension later_if.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      y: local (assigned, referenced, comp_iter)
+      ys: free (referenced)
+  function later
+    params: xs, ys
+    xs: local (parameter, referenced)
+    ys: local (parameter)
+    x: local (assigned, referenced, comp_iter)
+    y: local (assigned, referenced, comp_iter)
+    inlined comprehension later.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      y: local (assigned, referenced, comp_iter)
+      ys: free (referenced)
+  function later_unbound
+    params: xs, ys
+    xs: local (parameter, referenced)
+    ys: local (parameter)
+    x: local (assigned, referenced, comp_iter)
+    y: local (assigned, referenced, comp_iter)
+    inlined comprehension later_unbound.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      y: local (assigned, referenced, comp_iter)
+      ys: free (referenced)
+  function walrus_filter
+    params: xs
+    xs: local (parameter, referenced)
+    y: local (assigned)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension walrus_filter.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      y: free (assigned, referenced, nonlocal)
+  function walrus_key
+    params: xs
+    xs: local (parameter, referenced)
+    k: local (assigned)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension walrus_key.<locals>.<dictcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      k: free (assigned, referenced, nonlocal)
+  function targets
+    params: o, d, xs
+    o: local (parameter)
+    d: local (parameter)
+    xs: local (parameter, referenced)
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    inlined comprehension targets.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      o: free (referenced, comp_iter)
+    inlined comprehension targets.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      d: free (referenced, comp_iter)
+  function unhashable_set
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension unhashable_set.<locals>.<setcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+  function unhashable_dict
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension unhashable_dict.<locals>.<dictcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+  function blocks
+    params: xs, d
+    xs: local (parameter, referenced)
+    d: local (parameter)
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension blocks.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+    inlined comprehension blocks.<locals>.<dictcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      d: free (referenced)
+  function nested
+    params: xss
+    xss: local (parameter, referenced)
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    xs: local (assigned, referenced, comp_iter)
+    x: local (assigned, referenced, comp_iter)
+    y: local (assigned, referenced, comp_iter)
+    inlined comprehension nested.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      xs: local (assigned, referenced, comp_iter)
+      x: local (assigned, referenced, comp_iter)
+      inlined comprehension nested.<locals>.<listcomp>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        x: local (assigned, referenced, comp_iter)
+    inlined comprehension nested.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      xs: local (assigned, referenced, comp_iter)
+      y: local (assigned, referenced, comp_iter)
+      x: local (assigned, referenced, comp_iter)
+      inlined comprehension nested.<locals>.<listcomp>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        x: local (assigned, referenced, comp_iter)
+  function lengths
+    params: xs
+    xs: local (parameter, referenced)
+    len: global implicit (referenced)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension lengths.<locals>.<setcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+    inlined comprehension lengths.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+  function in_try
+    params: xs
+    xs: local (parameter, referenced)
+    ZeroDivisionError: global implicit (referenced)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension in_try.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+  class O
+  function show
+    params: label, f
+    label: local (parameter, referenced)
+    f: local (parameter, referenced)
+    print: global implicit (referenced)
+    Exception: global implicit (referenced)
+    e: local (assigned, referenced)
+    type: global implicit (referenced)
+  lambda <lambda>
+    between: global implicit (referenced)
+  lambda <lambda>
+    later_if: global implicit (referenced)
+  lambda <lambda>
+    later: global implicit (referenced)
+  lambda <lambda>
+    later_unbound: global implicit (referenced)
+  lambda <lambda>
+    walrus_filter: global implicit (referenced)
+  lambda <lambda>
+    walrus_key: global implicit (referenced)
+  lambda <lambda>
+    targets: global implicit (referenced)
+    o: global implicit (referenced)
+    d: global implicit (referenced)
+  lambda <lambda>
+    unhashable_set: global implicit (referenced)
+  lambda <lambda>
+    unhashable_dict: global implicit (referenced)
+  lambda <lambda>
+    blocks: global implicit (referenced)
+  lambda <lambda>
+    nested: global implicit (referenced)
+  lambda <lambda>
+    in_try: global implicit (referenced)
+  lambda <lambda>
+    in_try: global implicit (referenced)
+  lambda <lambda>
+    lengths: global implicit (referenced)

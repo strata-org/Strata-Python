@@ -8,11 +8,11 @@ module
 meta import StrataPythonTest.Util.SemDiff
 meta import StrataPythonTest.Util.Python
 
-/-! # Seven loops cost linear time
+/-! # Eight loops cost linear time
 
-Runs `pydyn run` on seven loops, at 100,000 and at 1,000,000 iterations: `print`, a `try` whose
+Runs `pydyn run` on eight loops, at 100,000 and at 1,000,000 iterations: `print`, a `try` whose
 `except` catches, a list append (`l += [i]`), `d[i] = i`, `del d[i]` (after the writes), an
-attribute write, and a call of a Python function.  For each loop it prints the time and the peak
+attribute write, a call of a Python function, and a list comprehension.  For each loop it prints the time and the peak
 memory of both runs and the time of one iteration at 1,000,000.  It fails if a run doesn't end
 with the outcome `ok`, or if the run of 1,000,000 iterations takes more than 12 times the run of
 100,000, as a cost that grows quadratically would.  The runs take a few minutes, so the test
@@ -29,7 +29,8 @@ private meta def loops (n : Nat) : List (String × String) := [
   ("dict write", s!"d = \{}\nfor i in range({n}):\n    d[i] = i\n"),
   ("dict deletion", s!"d = \{}\nfor i in range({n}):\n    d[i] = i\nfor i in range({n}):\n    del d[i]\n"),
   ("attribute write", s!"class A:\n    pass\no = A()\nfor i in range({n}):\n    o.x = i\n"),
-  ("call", s!"def f(x):\n    return x\nfor i in range({n}):\n    f(i)\n")]
+  ("call", s!"def f(x):\n    return x\nfor i in range({n}):\n    f(i)\n"),
+  ("comprehension", s!"l = [i + 1 for i in range({n})]\n")]
 
 /-- A Python program that runs `pydyn run FILE` and prints its exit code, whether the run ended
 with the outcome `ok` (not with a gap or out of fuel), and its peak memory in kB. -/
@@ -55,7 +56,7 @@ private meta def measure (python : System.FilePath) (dir : System.FilePath) (nam
 
 #eval show IO Unit from do
   if (← IO.getEnv "SEM_LOOPS").isNone then
-    IO.println "SEM_LOOPS not set; skipping the seven loops."
+    IO.println "SEM_LOOPS not set; skipping the eight loops."
     return
   StrataPython.withPython fun python => IO.FS.withTempDir fun dir => do
     let mut failures : Array String := #[]

@@ -67,6 +67,33 @@ functions, and the tags of `Value`, of a global cell and of a function's result.
 /-- The operation's regions, each adapted to values, in operand order. -/
 abbrev Handles (ε : Eff) (E : Type) : Type := Array (Array Value → Sem ε E (Except Value Value))
 
+/-- Stop with a gap because a precondition of the model itself doesn't hold. -/
+@[inline] def modelInvariant {ε : Eff} {E α : Type} (msg : String) : Sem ε E α :=
+  semanticGap (modelInvariantPrefix ++ msg)
+
+/-- Region `r` of the operation as a handle: its arguments made from the handle's values by `inp`,
+and the value of its answer made a value by `out`.  Values that `inp` doesn't take (`none`), such
+as too few or too many, are a model-invariant gap: generic code never passes them. -/
+@[inline] def regionHandle {ε : Eff} {E : Type} {ts : List Type} {α : Type}
+    (r : Region ε ts (Except Value α)) (inp : Array Value → Option (Payload ts))
+    (out : α → Value) : Array Value → Sem ε E (Except Value Value) :=
+  fun args => match inp args with
+    | some a => .vis (r.req a) fun o => .ret ((r.ans a o).map out)
+    | none => modelInvariant s!"a region called with {args.size} values, which it doesn't take"
+
+/-- The input of a `regionHandle` whose region takes no values: only the empty array. -/
+@[inline] def noValues (a : Array Value) : Option Unit :=
+  if a.size = 0 then some () else none
+
+/-- The input of a `regionHandle` whose region takes one value: only an array of one. -/
+@[inline] def oneValue (a : Array Value) : Option Value :=
+  if h : a.size = 1 then some a[0] else none
+
+/-- The input of a `regionHandle` whose region takes two values: only an array of two, as a pair,
+which the rule then makes the region's arguments. -/
+@[inline] def twoValues (a : Array Value) : Option (Value × Value) :=
+  if h : a.size = 2 then some (a[0], a[1]) else none
+
 /-- What a computation of a rule is, before its proofs: from the operation's regions and start,
 and two continuations, one for a result and one for an exception, a tree. -/
 abbrev PyFn (σ : Type) [Store σ] [Decode σ] (α : Type) : Type 1 :=
@@ -88,6 +115,9 @@ structure Tags (σ : Type) [Store σ] [Decode σ] where
   value : TagOf σ Value
   cell : TagOf σ (Ref σ Value)
   exc : TagOf σ (Except Value Value)
+  /-- The tags of types whose values hold no ref: a region whose parameters all have one of them
+  may run on any arguments (`PyCertLaws.region`). -/
+  noRef : List Ty
 
 /-- `PyLang` at the engine boundary, with the tags `tg`. -/
 @[reducible] def bInst (rs : List (List Ty × Ty)) (tg : Tags σ) : PyLang σ (BEff σ rs) :=
@@ -164,7 +194,7 @@ theorem keepsClosures_modList (f : Array Value → Nat → Array Value × Nat) :
 
 /-- **What a computation relies on of a spec `V` of the machine at the engine boundary**, with
 the tags `tg` (the capability specs, `Exec/CertCaps.lean`): its cell requests on `Value`s, its calls
-of translated functions, and every part of the world. -/
+of translated functions, every part of the world, and its regions whose parameters hold no ref. -/
 structure PyCertLaws (rs : List (List Ty × Ty)) {E : Type} (tg : Tags σ)
     (V : Spec Typing (BEff σ rs) E) : Prop where
   heap : @HeapSpec _ _ σ _ _ V (HasHeap.mreq (I := Dec σ)) Value tg.value _
@@ -176,6 +206,8 @@ structure PyCertLaws (rs : List (List Ty × Ty)) {E : Type} (tg : Tags σ)
   depth : PartSpec (σ := σ) V Depth
   guard : PartSpec (σ := σ) V ReprGuard
   out : PartSpec (σ := σ) V Output
+  region : ∀ g (slot : Fin rs.length) (args : Args (Dec σ) (rs.get slot).1),
+    (∀ t ∈ (rs.get slot).1, t ∈ tg.noRef) → V.Pre g (.region slot args)
 
 /-- A tree satisfies `V` from every typing, and stays within `e` from every set of new cells,
 relative to the start `s`. -/
@@ -355,10 +387,6 @@ within `e`, and, if `free`, that it gives the same tree from every start, so tha
 it without reading the store first. -/
 def PyM (σ : Type) [Store σ] [Decode σ] (e : Level) (free : Bool) (α : Type) : Type 1 :=
   { f : PyFn σ α // Proved @f e ∧ (free = true → StartFree @f) }
-
-/-- Stop with a gap because a precondition of the model itself doesn't hold. -/
-@[inline] def modelInvariant {ε : Eff} {E α : Type} (msg : String) : Sem ε E α :=
-  semanticGap (modelInvariantPrefix ++ msg)
 
 namespace PyM
 variable {σ : Type} [Store σ] [Decode σ] {e : Level} {fr : Bool}

@@ -26,8 +26,9 @@ each instruction of the environment `E` that has a rule outside a pure function,
 The last two come from the first, which the command proves by taking the rule apart: a rule that
 runs a `PyM` computation through `runRule`, `runTotal`, `runRuleFree`, `runTotalFree` or
 `runRuleIf`, or that loops through `runLoop` or `runLoopFree` (both its first and its later
-activations), at an effect no higher than the declared one, is proved by their lemmas.  A rule with
-its own lemmas `T.okOf.<instruction>` and `T.certOf.<instruction>` is proved by them.  Any other
+activations), at an effect no higher than the declared one, with no handles or with the
+`regionHandle`s of regions whose parameters hold no ref (`py_handles_ok`), is proved by their
+lemmas.  A rule with its own lemmas `T.okOf.<instruction>` and `T.certOf.<instruction>` is proved by them.  Any other
 rule fails the build.
 -/
 
@@ -37,6 +38,25 @@ open Lean Elab Command Term Meta
 open Strata.Dyn Strata.Dyn.Exec
 
 public meta section
+
+/-- `py_handles_ok` closes a goal `∀ s, HandlesOK V s hs`, for a rule's handles `hs` given as an
+array literal of `regionHandle`s of the operation's regions whose parameters hold no ref
+(`treeOK_handle`), with `hc` the laws. -/
+macro "py_handles_ok " hc:term : tactic => `(tactic| (
+  intro s
+  first
+    | exact handlesOK_nil s
+    | refine handlesOK_toArray s _ ?_
+      repeat' first
+        | refine List.forall_mem_cons.mpr ⟨?_, ?_⟩
+        | exact List.forall_mem_nil _
+        | exact fun args e => treeOK_handle $hc _ _ _
+            (fun _ => ⟨_, _, rfl, of_decide_eq_true rfl⟩) s args e))
+
+/-- `py_lift_ok hc t` closes a rule's goal by the lemma `t`, raised to the declared effect, and
+the handles goal that `t` leaves by `py_handles_ok hc`. -/
+macro "py_lift_ok " hc:term:max t:term:max : tactic =>
+  `(tactic| (refine RuleOK.lift (of_decide_eq_true rfl) $t; py_handles_ok $hc))
 
 syntax (name := pyRuleTheorems) "#py_rule_theorems " ident " for " ident
   " (" &"effects" " := " term ")" " (" &"tags" " := " term ")"
@@ -93,14 +113,14 @@ elab_rules : command
           intro V hc hX Q hQ
           repeat intro
           first
-            | exact RuleOK.lift (of_decide_eq_true rfl) (runRule_ok _ _ hc Q hQ hX _)
-            | exact RuleOK.lift (of_decide_eq_true rfl) (runTotal_ok _ _ _ hc Q hQ)
-            | exact RuleOK.lift (of_decide_eq_true rfl) (runRuleFree_ok _ _ hc Q hQ hX _)
-            | exact RuleOK.lift (of_decide_eq_true rfl) (runTotalFree_ok _ _ _ hc Q hQ)
-            | exact RuleOK.lift (of_decide_eq_true rfl) (runRuleIf_ok _ _ _ _ hc Q hQ hX _)
+            | py_lift_ok hc (runRule_ok _ _ hc Q hQ hX _ _ ?_)
+            | py_lift_ok hc (runTotal_ok _ _ _ hc Q hQ _ ?_)
+            | py_lift_ok hc (runRuleFree_ok _ _ hc Q hQ hX _ _ ?_)
+            | py_lift_ok hc (runTotalFree_ok _ _ _ hc Q hQ _ ?_)
+            | py_lift_ok hc (runRuleIf_ok _ _ _ _ hc Q hQ hX _ _ ?_)
             | refine ⟨?_, ?_⟩ <;> (repeat intro) <;> first
-                | exact RuleOK.lift (of_decide_eq_true rfl) (runLoop_ok _ _ hc Q hQ hX _ _ _)
-                | exact RuleOK.lift (of_decide_eq_true rfl) (runLoopFree_ok _ _ hc Q hQ hX _ _ _)),
+                | py_lift_ok hc (runLoop_ok _ _ hc Q hQ hX _ _ _ _ ?_)
+                | py_lift_ok hc (runLoopFree_ok _ _ hc Q hQ hX _ _ _ _ ?_)),
           ← `(command| $okDoc:docComment theorem $okId : ImplWithin $interpId ($eff $nameLit)
             $implId := ImplOK.within $implOKId)]
         match acc? with
@@ -126,8 +146,9 @@ elab_rules : command
       if failed then
         logErrorAt tbl m!"#py_rule_theorems: the rule of {o.envName} is not a `runRule`, \
           `runTotal`, `runRuleFree`, `runTotalFree`, `runRuleIf`, `runLoop` or `runLoopFree` \
-          wrapper at an effect no higher than its declared one whose results and exits hold no \
-          ref, and has no lemmas {tblNs ++ `okOf ++ o.envName} and {tblNs ++ `certOf ++ o.envName}"
+          wrapper at an effect no higher than its declared one, whose results and exits hold no ref \
+          and whose handles are `regionHandle`s of regions whose parameters hold no ref, and has no \
+          lemmas {tblNs ++ `okOf ++ o.envName} and {tblNs ++ `certOf ++ o.envName}"
       else
         for cmd in cmds do
           elabCommand cmd
@@ -280,8 +301,36 @@ def pyGenericWhy (c : Expr) : MetaM (Option MessageData) := do
         return some (← addMessageContext m!"{.ofConstName g}'s result is not in its monad: {res}")
       return none
 
+/-- Whether `e` is a handle of one of the rule's own regions: `regionHandle r inp out`, written
+out, for a region `r` that is a variable of the rule (its type is a `Region`, by `regionHandle`'s
+signature), with `inp` and `out` that don't work at the rule monad (`pyAtMonad`).  A rule's
+variables of type `Region` are its operation's regions: the table's wrapper applies a rule to one
+`Region.slot` per region of its instruction, and to no other value of that type.  A handle that the rule makes itself, such as
+`fun _ => pure …`, or one given by a definition, is not. -/
+def pyOwnHandle (e : Expr) : MetaM Bool := do
+  let e := e.consumeMData
+  unless e.isAppOf ``regionHandle do return false
+  let args := e.getAppArgs
+  let some r := args[4]? | return false
+  let r := r.consumeMData
+  unless args.size == 7 && r.isFVar do return false
+  return !(← pyAtMonad args[5]!) && !(← pyAtMonad args[6]!)
+
+/-- The elements of the array literal `a` (`#[x, …]`), if it is one. -/
+def pyArrayLit? (a : Expr) : Option (List Expr) := do
+  guard (a.isAppOf ``List.toArray)
+  let rec go (l : Expr) (fuel : Nat) : Option (List Expr) := match fuel with
+    | 0 => none
+    | n + 1 =>
+      let l := l.consumeMData
+      if l.isAppOf ``List.nil then some []
+      else if l.isAppOfArity ``List.cons 3 then (l.getArg! 1 :: ·) <$> go (l.getArg! 2) n
+      else none
+  go a.appArg! 1000
+
 /-- Why the rule `decl` is not a `pyRunners` wrapper whose computations are generic in their
-monad (`pyGenericWhy`), whose regions are `#[]` or the rule's own, and whose other arguments are the
+monad (`pyGenericWhy`), whose handles are `#[]`, the operation's own, or handles of the rule's own
+regions (`pyOwnHandle`), and whose other arguments are the
 rule's own operands and targets, literals, or terms that don't work at the rule monad's level
 (`pyAtMonad`).  `none` when it is. -/
 def pyRuleShapeWhy (decl : Lean.Name) : MetaM (Option MessageData) := do
@@ -301,7 +350,11 @@ def pyRuleShapeWhy (decl : Lean.Name) : MetaM (Option MessageData) := do
         if t.getUsedConstants.contains ``PyM then
           if let some why ← pyGenericWhy a then return some why
         else if t.isAppOf ``Handles then
-          unless a.isFVar || empty do
+          -- The operation's own handles, none, or an array literal of handles of its regions.
+          let own ← match pyArrayLit? a with
+            | some es => es.allM fun e => pyOwnHandle e
+            | none => pure false
+          unless a.isFVar || empty || own do
             return some (← addMessageContext m!"its regions are not the operation's own: {a}")
         else unless a.isFVar || a.isLit || empty do
           if ← pyAtMonad a then

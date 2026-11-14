@@ -1,0 +1,239 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned)
+  g: global explicit (declared_global)
+  k48: local (assigned)
+  m_f: local (assigned)
+  m_outer: local (assigned)
+  m_shadowed: local (assigned)
+  p40_f: local (assigned)
+  p40_g: local (assigned)
+  p43_class_cell: local (assigned)
+  p43_class_name: local (assigned)
+  p43_free: local (assigned)
+  p43_lambdas: local (assigned)
+  p43_super: local (assigned)
+  p45_f: local (assigned)
+  p45_g: local (assigned)
+  p45_h: local (assigned)
+  p46_f: local (assigned)
+  p46_g: local (assigned)
+  p46_h: local (assigned)
+  p46_k: local (assigned)
+  p48_m: local (assigned)
+  p50_f: local (assigned)
+  show: local (assigned, referenced)
+  function show
+    Exception: global implicit (referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    label: local (parameter, referenced)
+    print: global implicit (referenced)
+    type: global implicit (referenced)
+  function p43_free
+    C: local (assigned, referenced)
+    rows: cell (parameter)
+    scale: cell (assigned)
+    class C
+      a: local (assigned)
+      r: local (assigned, referenced, comp_iter)
+      rows: free (referenced)
+      scale: free (referenced, free_class)
+  function p43_class_name
+    C: local (assigned, referenced)
+    rows: cell (parameter)
+    class C
+      a: local (assigned)
+      k: local (assigned)
+      r: local (assigned, referenced, comp_iter)
+      rows: free (referenced)
+  function p43_lambdas
+    C: local (assigned, referenced)
+    f: local (assigned, referenced, comp_iter)
+    rows: cell (parameter)
+    class C
+      fs: local (assigned)
+      r: cell (assigned, comp_iter, comp_cell)
+      rows: free (referenced)
+      function lambda
+        r: free (referenced)
+  function p43_class_cell
+    C: local (assigned, referenced)
+    rows: cell (parameter)
+    class C
+      _: local (assigned, comp_iter)
+      __class__: global implicit (referenced)
+      own: local (assigned)
+      rows: free (referenced)
+  function p43_super
+    C: local (assigned, referenced)
+    len: global implicit (referenced)
+    rows: cell (parameter)
+    class C
+      m: local (assigned)
+      rows: free
+      function m
+        _: local (assigned, comp_iter)
+        __class__: free (referenced)
+        rows: free (referenced)
+        self: local (parameter)
+        super: global implicit (referenced)
+  function m_f
+    _: local (assigned, comp_iter)
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    c: local (assigned, referenced)
+    d: local (assigned, referenced)
+    e: local (assigned, referenced)
+    g: local (assigned, referenced, comp_iter)
+    k: local (assigned, referenced, comp_iter)
+    pairs: local (parameter, referenced)
+    v: local (assigned, referenced, comp_iter)
+    x: local (assigned, referenced, comp_iter)
+    y: cell (assigned, referenced, comp_iter, comp_cell)
+    ys: local (parameter, referenced)
+    function lambda
+      y: free (referenced)
+  function m_outer
+    C: local (assigned, referenced)
+    n: cell (parameter)
+    class C
+      i: local (assigned, referenced, comp_iter)
+      n: free (referenced, free_class)
+      range: global implicit (referenced)
+      xs: local (assigned)
+  function m_shadowed
+    D: local (assigned, referenced)
+    n: cell (assigned)
+    class D
+      _: local (assigned, comp_iter)
+      n: local (assigned, free_class)
+      range: global implicit (referenced)
+      xs: local (assigned)
+  function p40_f
+    a: local (assigned, referenced)
+    x: local (assigned, referenced)
+    xs: local (parameter, referenced)
+  function p40_g
+    b: local (assigned, referenced)
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced)
+  function p45_f
+    a: local (assigned, referenced)
+    last: local (assigned, referenced)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function p45_g
+    a: local (assigned, referenced)
+    c: local (assigned, referenced, comp_iter)
+    cell: local (assigned, referenced)
+    row: local (assigned, referenced, comp_iter)
+    rows: local (parameter, referenced)
+  function p45_h
+    add: local (assigned, referenced)
+    total: cell (assigned)
+    xs: cell (parameter)
+    function add
+      total: free (assigned, nonlocal)
+      x: local (assigned, referenced, comp_iter)
+      xs: free (referenced)
+  function p46_f
+    g: local (assigned, referenced, comp_iter)
+    x: cell (assigned, comp_iter, comp_cell)
+    xs: local (parameter, referenced)
+    function lambda
+      x: free (referenced)
+  function p46_g
+    fs: local (assigned, referenced)
+    g: local (assigned, referenced, comp_iter)
+    x: cell (assigned, referenced, comp_cell)
+    xs: local (parameter, referenced)
+    function lambda
+      x: free (referenced)
+  function p46_h
+    g: local (assigned, referenced, comp_iter)
+    x: cell (assigned, comp_iter, comp_cell)
+    xs: local (parameter, referenced)
+    y: cell (assigned, comp_iter, comp_cell)
+    ys: local (parameter)
+    function lambda
+      x: free (referenced)
+      y: free (referenced)
+  function p46_k
+    g: local (assigned, referenced, comp_iter)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    function lambda
+      y: local (parameter, referenced)
+  class A
+    m: local (assigned)
+    function m
+      i: local (parameter, referenced)
+      self: local (parameter)
+  class B
+    m: local (assigned)
+    function m
+      __class__: free (referenced)
+      i: local (assigned, referenced, comp_iter)
+      r: local (assigned, referenced, comp_iter)
+      rows: local (parameter, referenced)
+      self: local (parameter)
+      super: global implicit (referenced)
+  function p50_f
+    _: local (assigned, comp_iter)
+    a: local (parameter, referenced)
+    b: local (assigned, referenced, comp_iter)
+    c: local (assigned, referenced, comp_iter)
+    k: local (parameter)
+  function p48_m
+    g: global explicit (assigned, declared_global)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function lambda
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced)
+  function lambda
+    p43_free: global implicit (referenced)
+  function lambda
+    p43_class_name: global implicit (referenced)
+  function lambda
+    p43_lambdas: global implicit (referenced)
+  function lambda
+    p43_class_cell: global implicit (referenced)
+  function lambda
+    p43_super: global implicit (referenced)
+  function lambda
+    m_f: global implicit (referenced)
+  function lambda
+    m_outer: global implicit (referenced)
+  function lambda
+    m_shadowed: global implicit (referenced)
+  function lambda
+    p40_f: global implicit (referenced)
+  function lambda
+    p40_g: global implicit (referenced)
+  function lambda
+    p45_f: global implicit (referenced)
+  function lambda
+    p45_g: global implicit (referenced)
+  function lambda
+    p45_h: global implicit (referenced)
+  function lambda
+    p46_f: global implicit (referenced)
+  function lambda
+    p46_g: global implicit (referenced)
+  function lambda
+    p46_h: global implicit (referenced)
+  function lambda
+    p46_k: global implicit (referenced)
+  function lambda
+    B: global implicit (referenced)
+  function lambda
+    p50_f: global implicit (referenced)
+  function lambda
+    g: global implicit (referenced)
+    p48_m: global implicit (referenced)
+  function lambda
+    k48: global implicit (referenced)
+qualnames: <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, A, A.m, B, B.m, m_f, m_f.<locals>.<lambda>, m_outer, m_outer.<locals>.C, m_shadowed, m_shadowed.<locals>.D, p40_f, p40_g, p43_class_cell, p43_class_cell.<locals>.C, p43_class_name, p43_class_name.<locals>.C, p43_free, p43_free.<locals>.C, p43_lambdas, p43_lambdas.<locals>.C, p43_lambdas.<locals>.C.<lambda>, p43_super, p43_super.<locals>.C, p43_super.<locals>.C.m, p45_f, p45_g, p45_h, p45_h.<locals>.add, p46_f, p46_f.<locals>.<lambda>, p46_g, p46_g.<locals>.<lambda>, p46_h, p46_h.<locals>.<lambda>, p46_k, p46_k.<locals>.<lambda>, p48_m, p50_f, show

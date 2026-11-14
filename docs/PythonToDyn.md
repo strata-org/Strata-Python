@@ -2401,7 +2401,7 @@ list, and the rejections with their messages with a golden there.
 does what CPython 3.12 does
 (`Rules/`, over the generic protocols of `Proto/`), as `docs/Dyn.md` §4 describes. A rule that
 reaches a case the semantics doesn't model yet stops the run with a gap, whose message names the
-case, e.g. `not modelled yet: py.listComp` or `import of module sys is not modelled yet`. A gap is
+case, e.g. `built-in sorted is not modelled yet` or `import of module sys is not modelled yet`. A gap is
 never a wrong result: the run stops there. Outside the known differences of §13.4 and the bugs of
 §13.5, a run that doesn't stop with a gap gives CPython's result.
 
@@ -2465,8 +2465,11 @@ asks a language that uses call brackets to keep four rules on the bracket's mark
   definitions they run show this. `#py_rule_shapes` checks that every rule except
   `globalCell` and `mkClosure` runs a definition that is generic in its monad, applied at `PyM`
   with the record's instances only. Its type names neither the world nor the marker, and it
-  reaches the world only through those instances. Lean has no theorem for this: it rests on
-  the type checker and on the check, and is trusted.
+  reaches the world only through those instances. A rule's region handles are `#[]`, its
+  operation's own, or an array literal of `regionHandle r inp out`s, each written out for one of
+  its operation's regions `r`, with `inp` and `out` that don't work at the rule monad; `regionHandle` is in the list
+  below. Lean has no theorem for this: it rests on the type checker and on the check, and is
+  trusted.
 
   The rest is the code below the rule monad: the record's instances at `PyM` and the primitives
   they use, the monad's own operations, the runners, those two rules, and the propositions and
@@ -2630,8 +2633,12 @@ with CPython 3.12, over 1422 generated cases.
   stop with a gap: a loop over a user iterator inside another operation's step (`l[:] = it`, `l +=
   it`), the length hint of a dict iterator, a length hint beyond `2**28` (where CPython may raise
   `MemoryError`), a dict whose keys change at the same size during its iteration, an iterator whose
-  class loses `__next__`, or an object whose class loses `__getitem__`, while a loop runs it, and
-  the comprehension operations (`py.listComp`, `py.compFor`, …).
+  class loses `__next__`, or an object whose class loses `__getitem__`, while a loop runs it.
+- Comprehensions: list, set and dict comprehensions with their `for` and `if` clauses, as CPython
+  3.12 runs them inlined (§6.8): `iter` of the first iterable, then a new list, set or dict, then
+  each element added as `LIST_APPEND`, `SET_ADD` and `MAP_ADD` add it (a dict's key is hashed
+  after its value is computed). Like a `for` loop, a comprehension over a user iterator runs one
+  `__next__` per activation.
 - CPython's recursion limit: nested comparisons, calls into Python and calls of built-in callables
   count toward it, at least as many levels as CPython counts, and a run stops with a gap when its
   count passes 9,000, 995 below CPython's limit, where CPython raises `RecursionError`. A call of a
@@ -2677,8 +2684,9 @@ same loop with the plain step only.
 Most of an attribute read's cost is per class of the MRO: three namespace lookups of a `str` key
 for each class, about 10 µs a class.
 
-`StrataPythonTestExtra/SemLoopsTest.lean` runs seven loops (`print`, a `try` whose `except`
-catches, `l += [i]`, `d[i] = i`, `del d[i]`, `o.x = i` and a call of a Python function) at 100,000
+`StrataPythonTestExtra/SemLoopsTest.lean` runs eight loops (`print`, a `try` whose `except`
+catches, `l += [i]`, `d[i] = i`, `del d[i]`, `o.x = i`, a call of a Python function and a list
+comprehension) at 100,000
 and at 1,000,000 iterations. It fails if a run doesn't end with the outcome `ok`, or if a run of
 1,000,000 takes more than 12 times the run of 100,000, as a quadratic cost would; each takes about
 9 times as long. Its runs take a few minutes, so it runs only when `SEM_LOOPS` is set.

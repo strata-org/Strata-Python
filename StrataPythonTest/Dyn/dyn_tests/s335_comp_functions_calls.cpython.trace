@@ -1,0 +1,52 @@
+--- stdout 497
+p43 free [3, 6]
+p43 class name NameError name 'k' is not defined
+p43 lambdas [2, 2]
+p43 class cell NameError name '__class__' is not defined
+p43 super 2
+m_f ([3], [(1, 4), (1, 5), (0, 4), (0, 5)], {1: 2, 0: 3}, {4, 5}, [5, 5])
+m_outer [0, 5]
+m_shadowed [1]
+p40_f ([1, 2], 0)
+p40_g ([2, 4], 1)
+p45_f ([1, 2], 2)
+p45_g ([[1], [2]], 2)
+p45_h [1, 3, 6]
+p46_f [2, 2]
+p46_g ([2, 2], 0)
+p46_h [(2, 3), (2, 3)]
+p46_k [1, 2]
+p49 [[1, 2], [3]]
+p50 [[[7], [7, 7]], [[7]]]
+p48_m ([1, 2], 2)
+p48_k ([3, 4], 4)
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+__doc__ = None
+__name__ = '__main__'
+g = 2
+k48 = <function object>
+m_f = <function object>
+m_outer = <function object>
+m_shadowed = <function object>
+p40_f = <function object>
+p40_g = <function object>
+p43_class_cell = <function object>
+p43_class_name = <function object>
+p43_free = <function object>
+p43_lambdas = <function object>
+p43_super = <function object>
+p45_f = <function object>
+p45_g = <function object>
+p45_h = <function object>
+p46_f = <function object>
+p46_g = <function object>
+p46_h = <function object>
+p46_k = <function object>
+p48_m = <function object>
+p50_f = <function object>
+show = <function object>

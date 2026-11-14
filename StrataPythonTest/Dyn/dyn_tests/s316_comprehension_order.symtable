@@ -1,0 +1,71 @@
+module top
+  BadIter: local (assigned, referenced)
+  It: local (assigned, referenced)
+  K: local (assigned)
+  StopIteration: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  a: local (assigned, referenced, comp_iter)
+  b: local (assigned, referenced, comp_iter)
+  d: local (assigned, referenced)
+  e: local (assigned, referenced)
+  k: local (assigned, referenced, comp_iter)
+  key: local (assigned)
+  len: global implicit (referenced)
+  log: global explicit (assigned, referenced, declared_global)
+  note: local (assigned)
+  print: global implicit (referenced)
+  range: global implicit (referenced)
+  s: local (assigned, referenced)
+  stop: local (assigned)
+  val: local (assigned)
+  x: local (assigned, referenced, comp_iter)
+  function note
+    log: global explicit (assigned, referenced, declared_global)
+    s: local (parameter, referenced)
+  class It
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __iter__
+      note: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      note: global implicit (referenced)
+      self: local (parameter, referenced)
+  class K
+    __eq__: local (assigned)
+    __hash__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __hash__
+      note: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __eq__
+      note: global implicit (referenced)
+      other: local (parameter, referenced)
+      self: local (parameter, referenced)
+  function key
+    K: global implicit (referenced)
+    note: global implicit (referenced)
+    x: local (parameter, referenced)
+  function val
+    note: global implicit (referenced)
+    x: local (parameter, referenced)
+  function stop
+    StopIteration: global implicit (referenced)
+  class BadIter
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      ValueError: global implicit (referenced)
+      self: local (parameter)
+qualnames: BadIter, BadIter.__iter__, BadIter.__next__, It, It.__init__, It.__iter__, It.__next__, K, K.__eq__, K.__hash__, K.__init__, key, note, stop, val

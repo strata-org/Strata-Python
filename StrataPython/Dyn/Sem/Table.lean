@@ -4,7 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataPython.Dyn.Sem.Rules.Gaps
+public import StrataPython.Dyn.Sem.Rules.Comprehensions
 public import StrataPython.Dyn.Sem.RuleTheorems
 public import StrataDyn.Exec.CertModelProps
 public import StrataDyn.Exec.EffectsProps
@@ -80,11 +80,15 @@ elab "#py_declared_effects" : command => do
 
 #py_declared_effects
 
+/-- The tags of Python's types whose values hold no ref: `Value` and the comprehensions'
+accumulators. -/
+def pyNoRef : List Ty := [PySem.T.py.Value, PySem.T.py.ListAcc, PySem.T.py.SetAcc, PySem.T.py.DictAcc]
+
 /-- The tags of `PyLang` in `PySem`. -/
 def pyTags (σ : Type) [Store σ] : @Tags σ _ ⟨PySem.interp σ⟩ :=
   letI : Decode σ := ⟨PySem.interp σ⟩
   ⟨⟨PySem.T.py.Value, rfl⟩, ⟨Ty.ref PySem.T.py.Value, rfl⟩,
-    ⟨PySem.T.base.Except PySem.T.py.Value PySem.T.py.Value, rfl⟩⟩
+    ⟨PySem.T.base.Except PySem.T.py.Value PySem.T.py.Value, rfl⟩, pyNoRef⟩
 
 /-- Where the refs of a value of Python's tag `t` are: heads `0` and `1` are a ref's and a
 closure's, `7` is Base's `Sequence` and `8` its `Except`; every other head, `py.Value` and
@@ -131,6 +135,18 @@ theorem valOK_value (G : Typing) (v : PySem.interp Run PySem.T.py.Value) :
   rw [pyAcct_value]
   exact Typing.allValid_nil G
 
+/-- The arguments of a region whose parameters all have one of the tags of `pyNoRef` hold no ref,
+so they are valid in every typing. -/
+theorem argsOK_noRef (G : Typing) : {ts : List Ty} → (a : Args (PySem.interp Run) ts) →
+    (∀ t ∈ ts, t ∈ pyNoRef) → pyAccounts.ArgsOK G a
+  | [], .nil, _ => trivial
+  | t :: _, .cons x xs, h => by
+    refine ⟨?_, argsOK_noRef G xs fun t' ht' => h t' (List.mem_cons_of_mem _ ht')⟩
+    show G.AllValid (pyAcct t x)
+    have ht := h t List.mem_cons_self
+    simp only [pyNoRef, List.mem_cons, List.not_mem_nil, or_false] at ht
+    rcases ht with rfl | rfl | rfl | rfl <;> exact Typing.allValid_nil G
+
 /-- **Python's accounts have the laws that the rule monad relies on**, at every operation shape:
 a `Value` holds no ref, a call's closure and a new cell are the engine's, and each part of the
 world holds its refs in the world's account. -/
@@ -160,7 +176,8 @@ theorem pyCertLaws (rs : List (List Ty × Ty)) (ps : List (List Ty)) {St : Type}
     ⟨fun G w h => ((hworld G w).mp h).1, fun G w p h hp => (hworld G _).mpr ⟨hp, ((hworld G w).mp h).2⟩⟩,
     ⟨fun G w h => ((hworld G w).mp h).2, fun G w p h hp => (hworld G _).mpr ⟨((hworld G w).mp h).1, hp⟩⟩,
     ⟨fun _ _ _ => refsOK_nil rfl, fun _ _ _ h _ => h⟩, ⟨fun _ _ _ => refsOK_nil rfl, fun _ _ _ h _ => h⟩,
-    ⟨fun _ _ _ => refsOK_nil rfl, fun _ _ _ h _ => h⟩, ⟨fun _ _ _ => refsOK_nil rfl, fun _ _ _ h _ => h⟩⟩
+    ⟨fun _ _ _ => refsOK_nil rfl, fun _ _ _ h _ => h⟩, ⟨fun _ _ _ => refsOK_nil rfl, fun _ _ _ h _ => h⟩,
+    fun G _ a h => argsOK_noRef G a h⟩
   · exact valOK_value _ _
   · show G.Valid (cast (congrArg (Ref Run) (pyTags Run).value.ok) o).loc _
     rw [hl (pyTags Run).value.ok]
@@ -407,7 +424,7 @@ their monad (`#py_rule_shapes`) are not among them.  The walk, and its choice of
 are below the rule monad, are trusted: no theorem proves that it misses no write or read of the
 marker. -/
 /--
-info: #py_part_writers: StrataPython.Dyn.Sem.PySem.ops reaches 183 definitions below the rule monad, which name StrataPython.Dyn.Sem.PyLang, StrataPython.Dyn.Sem.World, Strata.Dyn.Exec.Sem, StrataPython.Dyn.Sem.Depth, StrataPython.Dyn.Sem.PyM or a constant whose type does:
+info: #py_part_writers: StrataPython.Dyn.Sem.PySem.ops reaches 184 definitions below the rule monad, which name StrataPython.Dyn.Sem.PyLang, StrataPython.Dyn.Sem.World, Strata.Dyn.Exec.Sem, StrataPython.Dyn.Sem.Depth, StrataPython.Dyn.Sem.PyM or a constant whose type does:
 StrataPython.Dyn.Sem.BEff
 StrataPython.Dyn.Sem.BTree
 StrataPython.Dyn.Sem.ContOK
@@ -581,6 +598,7 @@ StrataPython.Dyn.Sem.machinesResume
 StrataPython.Dyn.Sem.machinesResume._f
 StrataPython.Dyn.Sem.machinesStart
 StrataPython.Dyn.Sem.modelInvariant
+StrataPython.Dyn.Sem.regionHandle
 StrataPython.Dyn.Sem.resolveBuiltin
 StrataPython.Dyn.Sem.runLoop
 StrataPython.Dyn.Sem.runLoopFree

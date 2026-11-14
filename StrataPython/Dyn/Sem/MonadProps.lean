@@ -17,6 +17,9 @@ Properties of the `Refs` instances of `Monad.lean`, for the store and the module
 object that a rule makes (`refsOK_alloc_lift`), an update of an object that adds no ref
 (`refsOK_update`), the closure of a function object (`refsOK_closure`), and the global cells of a
 module table (`valid_of_cell?`, `refsOK_withCell`) keep the refs valid or are valid.
+
+The inputs of a region handle take exactly their number of values: `noValues_eq_some`,
+`oneValue_eq_some` and `twoValues_eq_some`.
 -/
 
 namespace StrataPython.Dyn.Sem
@@ -121,6 +124,19 @@ theorem keepsClosures_obj {f : ObjPayload σ → ObjPayload σ} (hf : KeepsClosu
   fun o => hf o.payload
 
 end
+
+/-- `noValues` takes exactly the empty array. -/
+theorem noValues_eq_some (a : Array Value) : noValues a = some () ↔ a = #[] := by
+  rcases a with ⟨_ | ⟨x, l⟩⟩ <;> simp [noValues]
+
+/-- `oneValue` takes exactly the arrays of one value, and gives that value. -/
+theorem oneValue_eq_some (a : Array Value) (x : Value) : oneValue a = some x ↔ a = #[x] := by
+  rcases a with ⟨_ | ⟨y, _ | ⟨z, l⟩⟩⟩ <;> simp [oneValue]
+
+/-- `twoValues` takes exactly the arrays of two values, and gives them in order. -/
+theorem twoValues_eq_some (a : Array Value) (x y : Value) :
+    twoValues a = some (x, y) ↔ a = #[x, y] := by
+  rcases a with ⟨_ | ⟨u, _ | ⟨v, _ | ⟨w, l⟩⟩⟩⟩ <;> simp [twoValues]
 
 end
 

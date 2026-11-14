@@ -1,0 +1,433 @@
+module
+  show: local (assigned, referenced)
+  p43_free: local (assigned)
+  p43_class_name: local (assigned)
+  p43_lambdas: local (assigned)
+  p43_class_cell: local (assigned)
+  p43_super: local (assigned)
+  m_f: local (assigned)
+  m_outer: local (assigned)
+  m_shadowed: local (assigned)
+  p40_f: local (assigned)
+  p40_g: local (assigned)
+  p45_f: local (assigned)
+  p45_g: local (assigned)
+  p45_h: local (assigned)
+  p46_f: local (assigned)
+  p46_g: local (assigned)
+  p46_h: local (assigned)
+  p46_k: local (assigned)
+  A: local (assigned, referenced)
+  B: local (assigned)
+  p50_f: local (assigned)
+  p48_m: local (assigned)
+  g: global explicit (declared_global)
+  k48: local (assigned)
+  function show
+    params: label, f
+    label: local (parameter, referenced)
+    f: local (parameter, referenced)
+    print: global implicit (referenced)
+    Exception: global implicit (referenced)
+    e: local (assigned, referenced)
+    type: global implicit (referenced)
+  function p43_free
+    params: rows
+    rows: cell (parameter)
+    scale: cell (assigned)
+    C: local (assigned, referenced)
+    class p43_free.<locals>.C
+      a: local (assigned)
+      rows: free (referenced)
+      r: local (assigned, referenced, comp_iter)
+      scale: free (referenced, free_class)
+      inlined comprehension p43_free.<locals>.C.<listcomp>
+        params: .0
+        .0: local (parameter)
+        r: local (assigned, referenced, comp_iter)
+        scale: free (referenced)
+  function p43_class_name
+    params: rows
+    rows: cell (parameter)
+    C: local (assigned, referenced)
+    class p43_class_name.<locals>.C
+      k: local (assigned)
+      a: local (assigned)
+      rows: free (referenced)
+      r: local (assigned, referenced, comp_iter)
+      inlined comprehension p43_class_name.<locals>.C.<listcomp>
+        params: .0
+        .0: local (parameter)
+        r: local (assigned, referenced, comp_iter)
+        k: global implicit (referenced)
+  function p43_lambdas
+    params: rows
+    rows: cell (parameter)
+    C: local (assigned, referenced)
+    f: local (assigned, referenced, comp_iter)
+    class p43_lambdas.<locals>.C
+      fs: local (assigned)
+      rows: free (referenced)
+      r: cell (assigned, comp_iter, comp_cell)
+      inlined comprehension p43_lambdas.<locals>.C.<listcomp>
+        params: .0
+        .0: local (parameter)
+        r: cell (assigned, comp_iter)
+        lambda p43_lambdas.<locals>.C.<lambda>
+          r: free (referenced)
+    inlined comprehension p43_lambdas.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      f: local (assigned, referenced, comp_iter)
+  function p43_class_cell
+    params: rows
+    rows: cell (parameter)
+    C: local (assigned, referenced)
+    class p43_class_cell.<locals>.C
+      own: local (assigned)
+      rows: free (referenced)
+      _: local (assigned, comp_iter)
+      __class__: global implicit (referenced)
+      inlined comprehension p43_class_cell.<locals>.C.<listcomp>
+        params: .0
+        .0: local (parameter)
+        _: local (assigned, comp_iter)
+  function p43_super
+    params: rows
+    rows: cell (parameter)
+    C: local (assigned, referenced)
+    len: global implicit (referenced)
+    class p43_super.<locals>.C (needs __class__ cell)
+      m: local (assigned)
+      rows: free
+      function p43_super.<locals>.C.m
+        params: self
+        self: local (parameter)
+        rows: free (referenced)
+        _: local (assigned, comp_iter)
+        super: global implicit (referenced)
+        __class__: free (referenced)
+        inlined comprehension p43_super.<locals>.C.m.<locals>.<listcomp>
+          params: .0
+          .0: local (parameter)
+          _: local (assigned, comp_iter)
+          super: global implicit (referenced)
+          __class__: free (referenced)
+  function m_f
+    params: pairs, ys
+    pairs: local (parameter, referenced)
+    ys: local (parameter, referenced)
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    c: local (assigned, referenced)
+    d: local (assigned, referenced)
+    e: local (assigned, referenced)
+    x: local (assigned, referenced, comp_iter)
+    y: cell (assigned, referenced, comp_iter, comp_cell)
+    _: local (assigned, comp_iter)
+    k: local (assigned, referenced, comp_iter)
+    v: local (assigned, referenced, comp_iter)
+    g: local (assigned, referenced, comp_iter)
+    inlined comprehension m_f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      y: local (assigned, referenced, comp_iter)
+    inlined comprehension m_f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      _: local (assigned, comp_iter)
+      y: local (assigned, referenced, comp_iter)
+      ys: free (referenced)
+    inlined comprehension m_f.<locals>.<dictcomp>
+      params: .0
+      .0: local (parameter)
+      k: local (assigned, referenced, comp_iter)
+      v: local (assigned, referenced, comp_iter)
+    inlined comprehension m_f.<locals>.<setcomp>
+      params: .0
+      .0: local (parameter)
+      y: local (assigned, referenced, comp_iter)
+    inlined comprehension m_f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      y: cell (assigned, comp_iter)
+      lambda m_f.<locals>.<lambda>
+        y: free (referenced)
+    inlined comprehension m_f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      g: local (assigned, referenced, comp_iter)
+  function m_outer
+    params: n
+    n: cell (parameter)
+    C: local (assigned, referenced)
+    class m_outer.<locals>.C
+      xs: local (assigned)
+      range: global implicit (referenced)
+      i: local (assigned, referenced, comp_iter)
+      n: free (referenced, free_class)
+      inlined comprehension m_outer.<locals>.C.<listcomp>
+        params: .0
+        .0: local (parameter)
+        i: local (assigned, referenced, comp_iter)
+        n: free (referenced)
+  function m_shadowed
+    n: cell (assigned)
+    D: local (assigned, referenced)
+    class m_shadowed.<locals>.D
+      n: local (assigned, free_class)
+      xs: local (assigned)
+      range: global implicit (referenced)
+      _: local (assigned, comp_iter)
+      inlined comprehension m_shadowed.<locals>.D.<listcomp>
+        params: .0
+        .0: local (parameter)
+        _: local (assigned, comp_iter)
+        n: free (referenced)
+  function p40_f
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced)
+    a: local (assigned, referenced)
+    inlined comprehension p40_f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+  function p40_g
+    params: xs
+    xs: local (parameter, referenced)
+    b: local (assigned, referenced)
+    y: local (assigned, referenced)
+    inlined comprehension p40_g.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      y: local (assigned, referenced, comp_iter)
+  function p45_f
+    params: xs
+    xs: local (parameter, referenced)
+    a: local (assigned, referenced)
+    last: local (assigned, referenced)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension p45_f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      last: free (assigned, nonlocal)
+  function p45_g
+    params: rows
+    rows: local (parameter, referenced)
+    a: local (assigned, referenced)
+    cell: local (assigned, referenced)
+    row: local (assigned, referenced, comp_iter)
+    c: local (assigned, referenced, comp_iter)
+    inlined comprehension p45_g.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      row: local (assigned, referenced, comp_iter)
+      c: local (assigned, referenced, comp_iter)
+      cell: free (assigned, nonlocal)
+      inlined comprehension p45_g.<locals>.<listcomp>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        c: local (assigned, referenced, comp_iter)
+        cell: free (assigned, nonlocal)
+  function p45_h
+    params: xs
+    xs: cell (parameter)
+    total: cell (assigned)
+    add: local (assigned, referenced)
+    function p45_h.<locals>.add
+      total: free (assigned, nonlocal)
+      xs: free (referenced)
+      x: local (assigned, referenced, comp_iter)
+      inlined comprehension p45_h.<locals>.add.<locals>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        x: local (assigned, referenced, comp_iter)
+        total: free (assigned, referenced, nonlocal)
+  function p46_f
+    params: xs
+    xs: local (parameter, referenced)
+    x: cell (assigned, comp_iter, comp_cell)
+    g: local (assigned, referenced, comp_iter)
+    inlined comprehension p46_f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: cell (assigned, comp_iter)
+      lambda p46_f.<locals>.<lambda>
+        x: free (referenced)
+    inlined comprehension p46_f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      g: local (assigned, referenced, comp_iter)
+  function p46_g
+    params: xs
+    xs: local (parameter, referenced)
+    x: cell (assigned, referenced, comp_cell)
+    fs: local (assigned, referenced)
+    g: local (assigned, referenced, comp_iter)
+    inlined comprehension p46_g.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: cell (assigned, comp_iter)
+      lambda p46_g.<locals>.<lambda>
+        x: free (referenced)
+    inlined comprehension p46_g.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      g: local (assigned, referenced, comp_iter)
+  function p46_h
+    params: xs, ys
+    xs: local (parameter, referenced)
+    ys: local (parameter)
+    x: cell (assigned, comp_iter, comp_cell)
+    y: cell (assigned, comp_iter, comp_cell)
+    g: local (assigned, referenced, comp_iter)
+    inlined comprehension p46_h.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: cell (assigned, comp_iter)
+      y: cell (assigned, comp_iter)
+      ys: free (referenced)
+      lambda p46_h.<locals>.<lambda>
+        x: free (referenced)
+        y: free (referenced)
+    inlined comprehension p46_h.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      g: local (assigned, referenced, comp_iter)
+  function p46_k
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced, comp_iter)
+    g: local (assigned, referenced, comp_iter)
+    inlined comprehension p46_k.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      lambda p46_k.<locals>.<lambda>
+        params: y
+        y: local (parameter, referenced)
+    inlined comprehension p46_k.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      g: local (assigned, referenced, comp_iter)
+  class A
+    m: local (assigned)
+    function A.m
+      params: self, i
+      self: local (parameter)
+      i: local (parameter, referenced)
+  class B (needs __class__ cell)
+    m: local (assigned)
+    function B.m
+      params: self, rows
+      self: local (parameter)
+      rows: local (parameter, referenced)
+      r: local (assigned, referenced, comp_iter)
+      i: local (assigned, referenced, comp_iter)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+      inlined comprehension B.m.<locals>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        r: local (assigned, referenced, comp_iter)
+        i: local (assigned, referenced, comp_iter)
+        super: global implicit (referenced)
+        __class__: free (referenced)
+        inlined comprehension B.m.<locals>.<listcomp>.<listcomp>
+          params: .0
+          .0: local (parameter)
+          i: local (assigned, referenced, comp_iter)
+          super: global implicit (referenced)
+          __class__: free (referenced)
+  function p50_f
+    params: k, a
+    k: local (parameter)
+    a: local (parameter, referenced)
+    b: local (assigned, referenced, comp_iter)
+    c: local (assigned, referenced, comp_iter)
+    _: local (assigned, comp_iter)
+    inlined comprehension p50_f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      b: local (assigned, referenced, comp_iter)
+      c: local (assigned, referenced, comp_iter)
+      _: local (assigned, comp_iter)
+      k: free (referenced)
+      inlined comprehension p50_f.<locals>.<listcomp>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        c: local (assigned, referenced, comp_iter)
+        _: local (assigned, comp_iter)
+        k: free (referenced)
+        inlined comprehension p50_f.<locals>.<listcomp>.<listcomp>.<listcomp>
+          params: .0
+          .0: local (parameter)
+          _: local (assigned, comp_iter)
+          k: free (referenced)
+  function p48_m
+    params: xs
+    xs: local (parameter, referenced)
+    g: global explicit (assigned, declared_global)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension p48_m.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      g: global explicit (assigned, declared_global)
+  lambda <lambda>
+    params: xs
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension <lambda>.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      y: free (assigned, nonlocal)
+  lambda <lambda>
+    p43_free: global implicit (referenced)
+  lambda <lambda>
+    p43_class_name: global implicit (referenced)
+  lambda <lambda>
+    p43_lambdas: global implicit (referenced)
+  lambda <lambda>
+    p43_class_cell: global implicit (referenced)
+  lambda <lambda>
+    p43_super: global implicit (referenced)
+  lambda <lambda>
+    m_f: global implicit (referenced)
+  lambda <lambda>
+    m_outer: global implicit (referenced)
+  lambda <lambda>
+    m_shadowed: global implicit (referenced)
+  lambda <lambda>
+    p40_f: global implicit (referenced)
+  lambda <lambda>
+    p40_g: global implicit (referenced)
+  lambda <lambda>
+    p45_f: global implicit (referenced)
+  lambda <lambda>
+    p45_g: global implicit (referenced)
+  lambda <lambda>
+    p45_h: global implicit (referenced)
+  lambda <lambda>
+    p46_f: global implicit (referenced)
+  lambda <lambda>
+    p46_g: global implicit (referenced)
+  lambda <lambda>
+    p46_h: global implicit (referenced)
+  lambda <lambda>
+    p46_k: global implicit (referenced)
+  lambda <lambda>
+    B: global implicit (referenced)
+  lambda <lambda>
+    p50_f: global implicit (referenced)
+  lambda <lambda>
+    p48_m: global implicit (referenced)
+    g: global implicit (referenced)
+  lambda <lambda>
+    k48: global implicit (referenced)

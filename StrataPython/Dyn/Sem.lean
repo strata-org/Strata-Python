@@ -40,7 +40,7 @@ public import StrataPython.Dyn.Sem.Imm
 public import StrataPython.Dyn.Sem.ImmProps
 public import StrataPython.Dyn.Sem.MonadProps
 public import StrataPython.Dyn.Sem.DictLookup
-public import StrataPython.Dyn.Sem.Rules.Gaps
+public import StrataPython.Dyn.Sem.Rules.Comprehensions
 public import StrataPython.Dyn.Sem.Rules.Values
 public import StrataPython.Dyn.Sem.Rules.Ops
 public import StrataPython.Dyn.Sem.Proto.Ops
