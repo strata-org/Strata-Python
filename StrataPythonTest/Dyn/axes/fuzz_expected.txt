@@ -1,0 +1,200 @@
+fuzz_1_0 | agree
+fuzz_1_1 | agree
+fuzz_1_10 | agree
+fuzz_1_100 | agree
+fuzz_1_101 | agree
+fuzz_1_102 | gap | a slot of a set whose layout is inexact
+fuzz_1_103 | gap | the truth of NotImplemented, which warns, is not modelled yet
+fuzz_1_104 | agree
+fuzz_1_105 | agree
+fuzz_1_106 | agree
+fuzz_1_107 | agree
+fuzz_1_108 | agree
+fuzz_1_109 | agree
+fuzz_1_11 | agree
+fuzz_1_110 | gap | the truth of NotImplemented, which warns, is not modelled yet
+fuzz_1_111 | agree
+fuzz_1_112 | gap | a slot of a set whose layout is inexact
+fuzz_1_113 | agree
+fuzz_1_114 | agree
+fuzz_1_115 | agree
+fuzz_1_116 | agree
+fuzz_1_117 | agree
+fuzz_1_118 | agree
+fuzz_1_119 | agree
+fuzz_1_12 | agree
+fuzz_1_120 | gap | a slot of a set whose layout is inexact
+fuzz_1_121 | gap | a slot of a set whose layout is inexact
+fuzz_1_122 | agree
+fuzz_1_123 | agree
+fuzz_1_124 | agree
+fuzz_1_125 | agree
+fuzz_1_126 | agree
+fuzz_1_127 | agree
+fuzz_1_128 | agree
+fuzz_1_129 | agree
+fuzz_1_13 | agree
+fuzz_1_130 | agree
+fuzz_1_131 | agree
+fuzz_1_132 | agree
+fuzz_1_133 | agree
+fuzz_1_134 | agree
+fuzz_1_135 | gap | a slot of a set whose layout is inexact
+fuzz_1_136 | agree
+fuzz_1_137 | agree
+fuzz_1_138 | agree
+fuzz_1_139 | agree
+fuzz_1_14 | agree
+fuzz_1_140 | agree
+fuzz_1_141 | agree
+fuzz_1_142 | agree
+fuzz_1_143 | agree
+fuzz_1_144 | agree
+fuzz_1_145 | agree
+fuzz_1_146 | gap | the repr of a set whose class defines __iter__ or __len__ is not modelled yet
+fuzz_1_147 | agree
+fuzz_1_148 | agree
+fuzz_1_149 | gap | a slot of a set whose layout is inexact
+fuzz_1_15 | agree
+fuzz_1_150 | agree
+fuzz_1_151 | agree
+fuzz_1_152 | gap | the truth of NotImplemented, which warns, is not modelled yet
+fuzz_1_153 | agree
+fuzz_1_154 | agree
+fuzz_1_155 | agree
+fuzz_1_156 | agree
+fuzz_1_157 | agree
+fuzz_1_158 | agree
+fuzz_1_159 | agree
+fuzz_1_16 | agree
+fuzz_1_160 | agree
+fuzz_1_161 | agree
+fuzz_1_162 | gap | a slot of a set whose layout is inexact
+fuzz_1_163 | agree
+fuzz_1_164 | agree
+fuzz_1_165 | agree
+fuzz_1_166 | agree
+fuzz_1_167 | gap | a slot of a set whose layout is inexact
+fuzz_1_168 | agree
+fuzz_1_169 | agree
+fuzz_1_17 | agree
+fuzz_1_170 | gap | the truth of NotImplemented, which warns, is not modelled yet
+fuzz_1_171 | gap | a slot of a set whose layout is inexact
+fuzz_1_172 | agree
+fuzz_1_173 | agree
+fuzz_1_174 | agree
+fuzz_1_175 | agree
+fuzz_1_176 | gap | a tuple slot on an instance of a subclass of tuple with its own __radd__ is not modelled yet
+fuzz_1_177 | gap | a slot of a set whose layout is inexact
+fuzz_1_178 | agree
+fuzz_1_179 | agree
+fuzz_1_18 | agree
+fuzz_1_180 | gap | the truth of NotImplemented, which warns, is not modelled yet
+fuzz_1_181 | agree
+fuzz_1_182 | agree
+fuzz_1_183 | agree
+fuzz_1_184 | agree
+fuzz_1_185 | agree
+fuzz_1_186 | agree
+fuzz_1_187 | agree
+fuzz_1_188 | agree
+fuzz_1_189 | agree
+fuzz_1_19 | gap | the truth of NotImplemented, which warns, is not modelled yet
+fuzz_1_190 | agree
+fuzz_1_191 | gap | a slot of a set whose layout is inexact
+fuzz_1_192 | agree
+fuzz_1_193 | agree
+fuzz_1_194 | agree
+fuzz_1_195 | agree
+fuzz_1_196 | agree
+fuzz_1_197 | agree
+fuzz_1_198 | agree
+fuzz_1_199 | agree
+fuzz_1_2 | gap | a slot of a set whose layout is inexact
+fuzz_1_20 | agree
+fuzz_1_21 | agree
+fuzz_1_22 | gap | the repr of a set whose class defines __iter__ or __len__ is not modelled yet
+fuzz_1_23 | agree
+fuzz_1_24 | agree
+fuzz_1_25 | agree
+fuzz_1_26 | agree
+fuzz_1_27 | agree
+fuzz_1_28 | gap | the repr of a set whose class defines __iter__ or __len__ is not modelled yet
+fuzz_1_29 | agree
+fuzz_1_3 | agree
+fuzz_1_30 | agree
+fuzz_1_31 | agree
+fuzz_1_32 | agree
+fuzz_1_33 | agree
+fuzz_1_34 | agree
+fuzz_1_35 | agree
+fuzz_1_36 | agree
+fuzz_1_37 | agree
+fuzz_1_38 | gap | an __iter__ whose __get__ raises, on a class with __getitem__, is not modelled yet
+fuzz_1_39 | agree
+fuzz_1_4 | agree
+fuzz_1_40 | agree
+fuzz_1_41 | agree
+fuzz_1_42 | gap | the repr of a set whose class defines __iter__ or __len__ is not modelled yet
+fuzz_1_43 | agree
+fuzz_1_44 | agree
+fuzz_1_45 | gap | built-in method NoneType.__eq__ is not modelled yet
+fuzz_1_46 | agree
+fuzz_1_47 | agree
+fuzz_1_48 | agree
+fuzz_1_49 | gap | a slot of a set whose layout is inexact
+fuzz_1_5 | agree
+fuzz_1_50 | agree
+fuzz_1_51 | gap | a slot of a set whose layout is inexact
+fuzz_1_52 | agree
+fuzz_1_53 | agree
+fuzz_1_54 | agree
+fuzz_1_55 | agree
+fuzz_1_56 | agree
+fuzz_1_57 | agree
+fuzz_1_58 | gap | a slot of a set whose layout is inexact
+fuzz_1_59 | agree
+fuzz_1_6 | agree
+fuzz_1_60 | agree
+fuzz_1_61 | agree
+fuzz_1_62 | agree
+fuzz_1_63 | gap | a slot of a set whose layout is inexact
+fuzz_1_64 | agree
+fuzz_1_65 | agree
+fuzz_1_66 | agree
+fuzz_1_67 | gap | the hash of this value is not modelled yet
+fuzz_1_68 | gap | a slot of a set whose layout is inexact
+fuzz_1_69 | agree
+fuzz_1_7 | gap | a slot of a set whose layout is inexact
+fuzz_1_70 | agree
+fuzz_1_71 | agree
+fuzz_1_72 | agree
+fuzz_1_73 | agree
+fuzz_1_74 | agree
+fuzz_1_75 | agree
+fuzz_1_76 | agree
+fuzz_1_77 | gap | the repr of a set whose class defines __iter__ or __len__ is not modelled yet
+fuzz_1_78 | gap | the truth of NotImplemented, which warns, is not modelled yet
+fuzz_1_79 | agree
+fuzz_1_8 | agree
+fuzz_1_80 | agree
+fuzz_1_81 | agree
+fuzz_1_82 | agree
+fuzz_1_83 | agree
+fuzz_1_84 | agree
+fuzz_1_85 | agree
+fuzz_1_86 | agree
+fuzz_1_87 | agree
+fuzz_1_88 | agree
+fuzz_1_89 | agree
+fuzz_1_9 | agree
+fuzz_1_90 | agree
+fuzz_1_91 | agree
+fuzz_1_92 | agree
+fuzz_1_93 | agree
+fuzz_1_94 | agree
+fuzz_1_95 | gap | a slot of a set whose layout is inexact
+fuzz_1_96 | agree
+fuzz_1_97 | agree
+fuzz_1_98 | agree
+fuzz_1_99 | agree

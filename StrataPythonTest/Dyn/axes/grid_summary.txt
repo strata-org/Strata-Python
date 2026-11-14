@@ -13,7 +13,7 @@ methods | A1 | 375 agree | 4 gap | 0 known
 methods | A8 | 187 agree | 57 gap | 0 known
 operators | A1 | 1562 agree | 21 gap | 0 known
 reentry | A2 | 16 agree | 5 gap | 0 known
-regressions | regression | 13 agree | 12 gap | 0 known
+regressions | regression | 14 agree | 13 gap | 0 known
 results | A1 | 5 agree | 4 gap | 0 known
 syntax | syntax | 37 agree | 0 gap | 0 known
 typing | A1 | 6 agree | 0 gap | 0 known
@@ -24,7 +24,7 @@ typing | A5 | 3 agree | 0 gap | 0 known
 typing | natives | 21 agree | 7 gap | 0 known
 typing | options | 3 agree | 0 gap | 0 known
 typing | plain | 38 agree | 1 gap | 0 known
-total | 5091 cases | 4649 agree | 442 gap | 0 known
+total | 5093 cases | 4650 agree | 443 gap | 0 known
 covered only by the catalog's entries | 86 names
   dict.__class_getitem__ | declared by call_class_getitem
   frozenset.__class_getitem__ | declared by call_class_getitem

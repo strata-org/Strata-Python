@@ -226,4 +226,134 @@ private meta def declaredOnly : Array Evidence :=
 #guard declaredBy #["a", "b", "c"] == "a and 2 more"
 #guard declaredBy #[] == "no case"
 
+-- Fuzz programs.
+#guard (parseFuzz "fuzz_1_0 | plain | c:C0,v:v0,o0 | -\nfuzz_1_1 | seed | o0,seed | c:C1\n").map
+    (·.map fun p => (p.id, p.seedBucket, p.steps, p.failing)) ==
+  .ok #[("fuzz_1_0", false, ["c:C0", "v:v0", "o0"], []), ("fuzz_1_1", true, ["o0", "seed"], ["c:C1"])]
+#guard (parseFuzz "x | other | o0 | -\n").map (·.size) == .error "unknown bucket: x | other | o0 | -"
+#guard (parseFuzz "x | plain\n").map (·.size) == .error "malformed fuzz line: x | plain"
+#guard (parseFuzz "x | seed | o0 | -\n").map (·.size) ==
+  .error "the bucket disagrees with the last step: x | seed | o0 | -"
+
+private meta def prog (steps : List String) (failing : List String := []) : FuzzProgram :=
+  ⟨"f", steps, failing⟩
+private meta def steps (body : List String) : String := "\n".intercalate body ++ "\n"
+
+#guard fuzzBug? (prog ["c:C0", "o0"])
+    (okTrace (steps ["@op c:C0", "= NoneType None", "@done c:C0", "@op o0", "! TypeError: x", "@done o0"]))
+    (.trace "") == none
+#guard fuzzBug? (prog ["c:C0", "o0"]) (okTrace (steps ["@op c:C0", "= NoneType None", "@done c:C0"]))
+    (.trace "") == some "f: generator bug: step o0 didn't run (no @op or @done line)"
+-- A class whose creation raises is a generator bug unless the tree says it is meant to raise.
+#guard fuzzBug? (prog ["c:C0"]) (okTrace (steps ["@op c:C0", "! TypeError: x", "@done c:C0"]))
+    (.trace "") ==
+  some "f: generator bug: the creation of c:C0 raises, or doesn't, against the program's tree"
+#guard fuzzBug? (prog ["c:C0"] ["c:C0"]) (okTrace (steps ["@op c:C0", "! TypeError: x", "@done c:C0"]))
+    (.trace "") == none
+#guard fuzzBug? (prog ["c:C0"] ["c:C0"]) (okTrace (steps ["@op c:C0", "= NoneType None", "@done c:C0"]))
+    (.trace "") ==
+  some "f: generator bug: the creation of c:C0 raises, or doesn't, against the program's tree"
+-- A class whose base failed skips, whatever its tree says.
+#guard fuzzBug? (prog ["c:C1"] ["c:C1"]) (okTrace (steps ["@op c:C1", "skip c:C1", "@done c:C1"]))
+    (.trace "") == none
+-- A step that uses a name that no step defined is a generator bug.
+#guard fuzzBug? (prog ["o0"]) (okTrace (steps ["@op o0", "! NameError: name 'v2' is not defined", "@done o0"]))
+    (.trace "") == some "f: generator bug: a step uses a name that no step defined"
+#guard fuzzBug? (prog ["o0"]) SemDiff.endlessTrace (.trace "") ==
+  some "f: generator bug: CPython's run doesn't end in time"
+#guard fuzzBug? (prog ["o0"]) SemDiff.syntaxTrace (.trace "") ==
+  some "f: generator bug: CPython doesn't compile the program"
+#guard fuzzBug? (prog ["o0"]) "no header\n" (.trace "") ==
+  some "f: generator bug: CPython's trace has no output section"
+#guard fuzzBug? (prog ["o0"])
+    (SemDiff.traceOf (steps ["@op o0", "= int 1", "@done o0"]) "--- outcome\nraised X: y\n--- globals\n")
+    (.trace "") == some "f: generator bug: CPython's run doesn't end with `ok`"
+#guard fuzzBug? (prog ["o0"]) (okTrace (steps ["@op o0", "= int 1", "@done o0"])) .syntax ==
+  some "f: generator bug: the translator reports a syntax error"
+#guard fuzzBug? (prog ["o0"]) (okTrace (steps ["@op o0", "= int 1", "@done o0"])) (.unsupported ["x"]) ==
+  some "f: generator bug: the translator rejects x"
+
+/-- CPython's trace of a seed-dependent program whose last step prints `order`. -/
+private meta def seedTrace (order : String) : String :=
+  okTrace (steps ["@op o0", "= int 1", "@done o0", "@op seed", s!"= list {order}", "@done seed"])
+
+private meta def traces : Array String := #[seedTrace "['a', 'b']", seedTrace "['b', 'a']"] ++
+  (List.replicate 6 (seedTrace "['a', 'b']")).toArray
+
+/-- Our run that prints `out` and then stops with a gap. -/
+private meta def gapRun (out : String) : SemDiff.Ours :=
+  .trace (SemDiff.traceOf out "--- gap the order of a set\n")
+
+-- A run that gaps before the seed-dependent step agrees with every trace up to its gap.
+#guard judgeSeedDependent "f" (gapRun (steps ["@op o0", "= int 1", "@done o0", "@op seed"])) traces ==
+  .ok (.gap "the order of a set")
+-- A run that prints seed 0's order, then gaps, agrees with only some traces: it fails.
+#guard (judgeSeedDependent "f"
+    (gapRun (steps ["@op o0", "= int 1", "@done o0", "@op seed", "= list ['a', 'b']", "@done seed"]))
+    traces).isOk == false
+#guard match judgeSeedDependent "f"
+    (gapRun (steps ["@op o0", "= int 1", "@done o0", "@op seed", "= list ['a', 'b']", "@done seed"]))
+    traces with
+  | .error e => e.startsWith "f: the run differs before its gap from CPython's run under PYTHONHASHSEED=1"
+  | .ok _ => false
+-- A gap whose message is a model invariant still fails through the judge.
+#guard judgeSeedDependent "f"
+    (.trace (SemDiff.traceOf (steps ["@op o0", "= int 1", "@done o0"]) s!"--- gap {StrataPython.Dyn.Sem.modelInvariantPrefix}x\n"))
+    traces == .error s!"f: the run breaks a model invariant: {StrataPython.Dyn.Sem.modelInvariantPrefix}x"
+-- A run that gives a result where CPython's runs differ fails.
+#guard match judgeSeedDependent "f" (.trace (seedTrace "['a', 'b']")) traces with
+  | .error e => e.startsWith "f: the run gives a result where CPython's runs depend on the hash seed"
+  | .ok _ => false
+-- Eight equal traces: the seed-dependent step showed nothing seed-dependent.
+#guard judgeSeedDependent "f" (gapRun "") (Array.replicate 8 (seedTrace "['a', 'b']")) ==
+  .error "f: generator bug: its seed-dependent step shows the same order under every seed"
+
+-- A known program whose run differs before its gap: `known` when the run is its pinned trace.
+private meta def wrongGap : SemDiff.Ours := gapRun (steps ["@op o0", "= int 2", "@done o0", "@op seed"])
+private meta def wrongGapTrace : String := SemDiff.traceOf (steps ["@op o0", "= int 2", "@done o0", "@op seed"])
+  "--- gap the order of a set\n"
+#guard knownGap? "f" false wrongGap traces ⟨"D6", none⟩ == some (.ok (.known "D6"))
+#guard knownGap? "f" false wrongGap traces ⟨"D6", some wrongGapTrace⟩ == some (.ok (.known "D6"))
+#guard knownGap? "f" false wrongGap traces ⟨"D6", some "other"⟩ ==
+  some (.error "f: the run's trace differs from its pinned trace")
+-- A run that agrees before its gap is the judge's to decide.
+#guard knownGap? "f" false (gapRun (steps ["@op o0", "= int 1", "@done o0", "@op seed"])) traces ⟨"D6", none⟩ == none
+-- A gap that is a model invariant, a fault, a run out of fuel or a result: still the judge's.
+#guard knownGap? "f" false (.trace (SemDiff.traceOf (steps ["@op o0", "= int 2"])
+  s!"--- gap {StrataPython.Dyn.Sem.modelInvariantPrefix}x\n")) traces ⟨"D6", none⟩ == none
+#guard knownGap? "f" false (.trace (SemDiff.traceOf (steps ["@op o0", "= int 2"]) "--- out of fuel\n--- gap g\n"))
+  traces ⟨"D6", none⟩ == none
+#guard knownGap? "f" false (.trace (seedTrace "['b', 'a']")) traces ⟨"D6", none⟩ == none
+#guard knownGap? "f" false .syntax traces ⟨"D6", none⟩ == none
+#guard knownGap? "f" false (.trace (SemDiff.traceOf (steps ["@op o0", "= int 2"]) "--- fault f\n--- gap g\n"))
+  traces ⟨"D6", none⟩ == none
+-- A seed-bucket program pinned as known must not print its seed step before the gap.
+#guard knownGap? "f" true wrongGap traces ⟨"D6", none⟩ == some (.ok (.known "D6"))
+#guard knownGap? "f" true (gapRun (steps ["@op o0", "= int 2", "@done o0", "@op seed", "= list ['a', 'b']"]))
+  traces ⟨"D6", none⟩ == some (.error "f: the run prints its seed-dependent step before its gap")
+-- CPython's run that doesn't end, or doesn't compile: still the judge's.
+#guard knownGap? "f" false wrongGap #[SemDiff.endlessTrace] ⟨"D6", none⟩ == none
+#guard knownGap? "f" false wrongGap #[SemDiff.syntaxTrace] ⟨"D6", none⟩ == none
+
+-- `stalePins` names the files of a pin directory that pin no known id, for every suffix, and
+-- `checkFile` reports a difference only outside update mode.
+#eval show IO Unit from do
+  let dir : System.FilePath := ".lake" / "build" / "axis-source-test" / "pins"
+  if ← dir.pathExists then IO.FS.removeDirAll dir
+  IO.FS.createDirAll dir
+  -- `a` has no pin suffix, so it pins nothing, though it is named like the known id.
+  for n in ["a.known.trace", "a.py", "a", "b.known.trace", "c.py"] do IO.FS.writeFile (dir / n) ""
+  let stale ← stalePins dir [".known.trace", ".py"] (· == "a") "program"
+  let names := (stale.map fun m => (m.splitOn "/").getLast!).qsort (· < ·)
+  unless names == #["a: pinned for no known program", "b.known.trace: pinned for no known program",
+      "c.py: pinned for no known program"] do
+    throw <| .userError s!"stalePins: {names}"
+  let f := dir.parent.get! / "file.txt"
+  IO.FS.writeFile f "old"
+  unless (← checkFile f "old" false).isNone do throw <| .userError "checkFile: equal text differs"
+  unless (← checkFile f "new" false).isSome do throw <| .userError "checkFile: missed a difference"
+  unless (← checkFile f "new" true).isNone && (← IO.FS.readFile f) == "new" do
+    throw <| .userError "checkFile: update mode didn't write"
+  IO.FS.removeDirAll dir.parent.get!
+
 end StrataPython.AxisSourceTest

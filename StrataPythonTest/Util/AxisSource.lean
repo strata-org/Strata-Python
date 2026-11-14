@@ -13,8 +13,9 @@ public meta import Std.Data.HashSet
 
 The axis grid (`StrataPythonTest/Dyn/axes/grid.py`) writes one program per case, and says what
 each case expects of CPython. Its build test runs every program with CPython 3.12 and with the
-Python semantics, and judges each pair with `SemDiff.judge`. This module holds what the test
-needs besides the judge:
+Python semantics, and judges each pair with `SemDiff.judge`; the fuzzer's build test
+(`AxisFuzzTest`) does the same for the programs of `fuzz.py`. This module holds what the two tests
+need besides the judge:
 
 * the *generator-bug checks*: a case whose CPython run doesn't run its operation, or doesn't end
   the way the case expects, tests nothing, so the test fails on it instead of pinning a verdict
@@ -24,7 +25,11 @@ needs besides the judge:
 * the summary of the verdicts by group and axis (`summary`);
 * the coverage check (`coverage`): every name of the model's tables is covered by a case that
   agrees with CPython, by observed evidence (a call in CPython's run, an instruction of the
-  operation's translation) or by a declared entry of the catalog, or `not_covered.txt` lists it.
+  operation's translation) or by a declared entry of the catalog, or `not_covered.txt` lists it;
+* the fuzzer's checks: its programs (`FuzzProgram`, `parseFuzz`), the generator-bug checks of a
+  fuzz program (`fuzzBug?`, with `runBug?`), the verdict of a program whose output depends on the
+  hash seed (`judgeSeedDependent`), and a pinned program that gaps (`knownGap?`);
+* the files that both tests compare or write (`checkFile`, `stalePins`).
 
 A case prints `@op <id>` right before its operation and `@done <id>` after the `try` around it;
 between them, a `= ...` line for a result or a `! <ExcType>: ...` line for an exception, an
@@ -128,6 +133,18 @@ def caseOutcome (id out : String) : Except String Outcome := do
     else throw s!"the case's last line is neither a result nor an exception: {l}"
   | none => throw "the case printed no result and no exception"
 
+/-- CPython's output of a generated program, from its trace `theirs`; or, as the error, why the
+program can't test anything: CPython doesn't compile it, its run doesn't end, or the run doesn't end
+with the outcome `ok`. -/
+def runBug? (theirs : String) : Except String String :=
+  if theirs == SemDiff.syntaxTrace then .error "CPython doesn't compile the program"
+  else if theirs == SemDiff.endlessTrace then .error "CPython's run doesn't end in time"
+  else match SemDiff.splitOutput theirs with
+    | none => .error "CPython's trace has no output section"
+    | some (out, rest) =>
+      if !rest.startsWith "--- outcome\nok\n" then .error "CPython's run doesn't end with `ok`"
+      else .ok out
+
 /-- Why the case `c` tests nothing, from CPython's trace `theirs` and what `pydyn run` gave; `none`
 when it tests its operation. -/
 def generatorBug? (c : Case) (theirs : String) (ours : SemDiff.Ours) : Option String :=
@@ -142,11 +159,10 @@ def generatorBug? (c : Case) (theirs : String) (ours : SemDiff.Ours) : Option St
   | .unsupported cs, _ => bug s!"the translator rejects {", ".intercalate cs}"
   | .trace _, .rejects construct => bug s!"the translator doesn't reject {construct}"
   | .trace _, expect =>
-    match SemDiff.splitOutput theirs with
-    | none => bug "CPython's trace has no output section"
-    | some (out, rest) =>
-      if !rest.startsWith "--- outcome\nok\n" then bug "CPython's run doesn't end with `ok`"
-      else match caseOutcome c.id out, expect with
+    match runBug? theirs with
+    | .error why => bug why
+    | .ok out =>
+      match caseOutcome c.id out, expect with
       | .error e, _ => bug e
       | .ok _, .any => none
       | .ok .result, .result => none
@@ -379,5 +395,133 @@ def coverage (required : Array String) (evs : Array Evidence) (nc : Array NotCov
   let entryOnly := (required.filter fun n => byEntries.contains n && !observed.contains n).map
     fun n => (n, byEntries.getD n #[])
   return ⟨fails, entryOnly⟩
+
+/-! ## Fuzz programs
+
+A fuzz program (`StrataPythonTest/Dyn/axes/fuzz.py`) is a list of steps, each between its own
+`@op <step>` and `@done <step>` lines; a step that uses a class or value whose definition raised
+prints `skip <step>` between them. A program of the `seed` bucket prints, as its last step, the
+iteration order of a set of strings, which depends on the hash seed. -/
+
+/-- One fuzz program: its id, its steps, and the steps that define a class whose creation is meant
+to raise. -/
+structure FuzzProgram where
+  id : String
+  steps : List String
+  failing : List String := []
+  deriving Repr, Inhabited
+
+/-- Whether the program is in the seed-dependent bucket: its last step is `seed`. -/
+def FuzzProgram.seedBucket (p : FuzzProgram) : Bool := p.steps.getLast? == some "seed"
+
+/-- The programs that `fuzz.py` printed, one `<id> | <plain or seed> | <steps> | <failing>` per
+line. -/
+def parseFuzz (text : String) : Except String (Array FuzzProgram) := do
+  let mut out := #[]
+  for line in text.splitOn "\n" do
+    if line.isEmpty then continue
+    match line.splitOn " | " with
+    | [id, bucket, steps, failing] =>
+      unless bucket == "plain" || bucket == "seed" do throw s!"unknown bucket: {line}"
+      let p : FuzzProgram := ⟨id, steps.splitOn ",", if failing == "-" then [] else failing.splitOn ","⟩
+      unless p.seedBucket == (bucket == "seed") do
+        throw s!"the bucket disagrees with the last step: {line}"
+      out := out.push p
+    | _ => throw s!"malformed fuzz line: {line}"
+  return out
+
+/-- Why the fuzz program `p` tests nothing, from CPython's trace `theirs` and what `pydyn run` gave;
+`none` when each of its steps ran. -/
+def fuzzBug? (p : FuzzProgram) (theirs : String) (ours : SemDiff.Ours) : Option String :=
+  let bug (why : String) := some s!"{p.id}: generator bug: {why}"
+  match ours, runBug? theirs with
+  | _, .error why => bug why
+  | .syntax, _ => bug "the translator reports a syntax error"
+  | .unsupported cs, _ => bug s!"the translator rejects {", ".intercalate cs}"
+  | .trace _, .ok out =>
+    let lines := out.splitOn "\n"
+    -- A step that names a value whose definition didn't run must skip, not fail.
+    if lines.any (·.startsWith "! NameError") then bug "a step uses a name that no step defined"
+    else match p.steps.find? fun s => !(lines.contains s!"@op {s}" && lines.contains s!"@done {s}") with
+    | some s => bug s!"step {s} didn't run (no @op or @done line)"
+    | none =>
+      -- A class step that runs raises exactly when the tree says that its creation is meant to
+      -- raise (a class whose base failed skips).
+      let raises (s : String) := caseOutcome s out matches .ok (.raises _)
+      match p.steps.find? fun s =>
+          s.startsWith "c:" && !lines.contains s!"skip {s}" && raises s != p.failing.contains s with
+      | some s => bug s!"the creation of {s} raises, or doesn't, against the program's tree"
+      | none => none
+
+/-- The verdict of a fuzz program pinned as `known` (`k`) whose run stops with a gap after its
+documented difference, which the judge rejects as a run that differs before its gap; `none` for any
+other run, which the judge decides. The judge's other checks still hold first: the gap is no model
+invariant, the run has no fault and isn't out of fuel, and each of CPython's `traces` is a plain
+run. The run must be its pinned trace, as in `Diff.classify`. A program of the seed bucket
+(`seedBucket`) must also stop before it prints anything of its seed step, so that the pin never
+covers output that depends on the hash seed. -/
+def knownGap? (name : String) (seedBucket : Bool) (ours : SemDiff.Ours) (traces : Array String)
+    (k : Diff.Known) : Option (Except String Verdict) := do
+  let .trace t := ours | none
+  let (out, before, msg) ← SemDiff.splitGap t
+  if seedBucket then
+    let lines := out.splitOn "\n"
+    if let some i := lines.idxOf? "@op seed" then
+      if (lines.drop (i + 1)).any (· != "") then
+        return .error s!"{name}: the run prints its seed-dependent step before its gap"
+  let outOfFuel := ((SemDiff.splitOutput t).map (·.2.splitOn "\n")).any (·.contains "--- out of fuel")
+  guard (!StrataPython.Dyn.Sem.isModelInvariant msg && (SemDiff.faultOf t).isNone && !outOfFuel)
+  guard (traces.all fun th => th != SemDiff.syntaxTrace && th != SemDiff.endlessTrace &&
+    !th.startsWith SemDiff.twoRunsHeader)
+  guard (traces.any fun th => !SemDiff.agreesBefore out before th)
+  pure <| match k with
+    | ⟨r, none⟩ => .ok (.known r)
+    | ⟨r, some pin⟩ =>
+      if pin == t then .ok (.known r) else .error s!"{name}: the run's trace differs from its pinned trace"
+
+/-- The verdict of a program of the seed bucket from what `pydyn run` gave and CPython's traces under
+the hash seeds of `seeds`: they must differ, else the program shows nothing seed-dependent (a
+generator bug); our run must stop with a gap that agrees with *every* trace up to it, so that it
+claims nothing where CPython's runs differ; and the judge against the first trace must accept it,
+so that its other checks (a model invariant, a fault, fuel) still apply. -/
+def judgeSeedDependent (name : String) (ours : SemDiff.Ours) (traces : Array String) :
+    Except String Verdict := do
+  if seedsAgree traces then
+    throw s!"{name}: generator bug: its seed-dependent step shows the same order under every seed"
+  let .trace t := ours
+    | throw s!"{name}: the translator rejects the program"
+  let some (out, before, msg) := SemDiff.splitGap t
+    | throw s!"{name}: the run gives a result where CPython's runs depend on the hash seed\n\
+        --- ours\n{t}"
+  for h : i in [:traces.size] do
+    unless SemDiff.agreesBefore out before traces[i] do
+      throw s!"{name}: the run differs before its gap from CPython's run under PYTHONHASHSEED={i}\n\
+        --- ours\n{t}--- CPython\n{traces[i]}"
+  match SemDiff.judge name ours traces[0]! none with
+  | .ok (.gap _) => return .gap msg
+  | .ok _ => throw s!"{name}: the judge doesn't see the gap"
+  | .error e => throw e
+
+/-- Compare `text` with the file `path`, or write it in update mode; the message of a
+difference, or `none`. -/
+def checkFile (path : System.FilePath) (text : String) (update : Bool) : IO (Option String) := do
+  if update then
+    IO.FS.writeFile path text
+    return none
+  let old ← if ← path.pathExists then IO.FS.readFile path else pure ""
+  return if old == text then none else
+    some s!"{path} differs from this run; run with SEM_UPDATE=1 after checking the change"
+
+/-- The files of the pin directory `dir` that pin nothing. A file pins something only when its name
+is `<id><suffix>` for one of `suffixes` and `known id` holds; any other file is stale. One message
+per stale file, naming what a pin is for (`what`, e.g. "case"). -/
+def stalePins (dir : System.FilePath) (suffixes : List String) (known : String → Bool)
+    (what : String) : IO (Array String) := do
+  let mut out := #[]
+  for f in ← dir.readDir do
+    let id? := (suffixes.find? (f.fileName.endsWith ·)).map fun sfx =>
+      (f.fileName.dropEnd sfx.length).toString
+    unless id?.any known do out := out.push s!"{f.path}: pinned for no known {what}"
+  return out
 
 end StrataPython.AxisSource

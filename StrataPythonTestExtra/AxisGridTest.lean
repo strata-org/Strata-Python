@@ -160,16 +160,6 @@ private meta def runCase (pythonCmd : System.FilePath) (update : Bool)
     return .ok (⟨c.id, v⟩, if update then some t else none, called, result)
   | .ok v, _ => return .ok (⟨c.id, v⟩, none, called, result)
 
-/-- Compare `text` with the file `path`, or write it in update mode. -/
-private meta def checkFile (path : System.FilePath) (text : String) (update : Bool) :
-    IO (Option String) := do
-  if update then
-    IO.FS.writeFile path text
-    return none
-  let old ← if ← path.pathExists then IO.FS.readFile path else pure ""
-  return if old == text then none else
-    some s!"{path} differs from this run; run with SEM_UPDATE=1 after checking the change"
-
 #eval show IO Unit from do
   if let some skip ← IO.getEnv "SKIP_PYTHON_TESTS" then
     if !skip.isEmpty then return
@@ -226,10 +216,7 @@ private meta def checkFile (path : System.FilePath) (text : String) (update : Bo
   if failures.isEmpty then
     failures := failures ++ cov.failures
   unless update do
-    for f in ← knownDir.readDir do
-      let n := (f.fileName.dropEnd knownSuffix.length).toString
-      unless reasons.contains n do
-        failures := failures.push s!"{f.path}: pinned run for no known case"
+    failures := failures ++ (← stalePins knownDir [knownSuffix] reasons.contains "case")
   -- An update writes its files only when every case passed, so that the digest's property holds.
   if failures.isEmpty then
     if let some f ← checkFile (here / "grid_digest.txt") digest update then

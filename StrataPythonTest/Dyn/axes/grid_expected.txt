@@ -4916,6 +4916,8 @@ reg_7_subtype_self_error | gap | the message of a wrong call of list.append depe
 reg_8_exc_str | agree
 reg_9_c_depth_eq | gap | a C recursion depth over 9000
 reg_9_c_depth_repr | gap | a C recursion depth over 9000
+reg_fuzz_list_sub_radd_other | gap | a list slot on an instance of a subclass of list with its own __radd__ is not modelled yet
+reg_fuzz_str_sub_in_str | agree
 reg_lib_dict_copy_iter | gap | built-in method dict_keyiterator.__length_hint__ is not modelled yet
 reg_lib_huge_width | agree
 reg_lib_repr_in_int_error | agree

@@ -135,6 +135,15 @@ also names what it calls by name in `calls`, and CPython's run must show each of
 typing and dataclasses cases that are whole programs are files in
 `StrataPythonTest/Dyn/axes/typing/`, named `<axis>_<name>.py`.
 
+`StrataPythonTest/Dyn/axes/fuzz.py` writes random programs from the same kinds of input: classes
+with special methods of each behaviour and descriptor kind, values and operations, each step in
+its own `try`. `StrataPythonTestExtra/AxisFuzzTest.lean` runs the 200 programs of seed 1 against
+`fuzz_expected.txt` (update with `SEM_UPDATE=1`, as the grid). A `known` pin holds for one
+program: `fuzz_known/` keeps the program beside our run, and the test fails when the generator
+gives that id another program. To fuzz further, run
+`FUZZ_SEED=S FUZZ_COUNT=N lake env lean StrataPythonTestExtra/AxisFuzzTest.lean`: it runs CPython
+under eight hash seeds, pins nothing, and fails on any difference.
+
 ## Convention: `open Strata` pattern
 
 Since StrataPython was extracted from the `Strata` package, many files use
