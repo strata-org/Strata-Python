@@ -25,7 +25,9 @@ gap and, where the level allows it, choose:
 * a gap where the answer depends on CPython's table layout: after a false comparison when user
   code could run, after a deletion when user code could run, and for a probe whose hash changed
   since the dict stored it (CPython may still find it by identity); and a gap when the dict
-  changes during a comparison.
+  changes during a comparison;
+* the layout of the data that a dataclass's generated `__eq__` and `__hash__` capture
+  (`generatedCaptured`), which the check of keys whose equality runs no user code reads.
 -/
 
 namespace StrataPython.Dyn.Sem
@@ -81,6 +83,39 @@ decreasing_by
     | omega
     | (have := Array.sizeOf_lt_of_mem ‹_ ∈ xs›; omega)
 
+/-- Whether `v`'s equality is fixed and runs no user code, for a value that is not a tuple, a `slice`
+or an object: `some true` for `None`, `NotImplemented`, `Ellipsis`, a `bool`, an `int`, a `str`, a
+`bytes`, a `range`, a built-in type or function (compared by identity) and a `float` that isn't a
+NaN; `some false` for a NaN (equal to itself only by identity, in a container), a symbolic hash
+value, a built-in object of another kind (such as `__spec__`, whose class defines `__eq__`) and the
+other values; `none` for a tuple, a `slice` or an object, whose members a walk must check. -/
+def Value.structuralImm? : Value → Option Bool
+  | .none | .notImplemented | .ellipsis | .bool _ | .int _ | .str _ | .bytes _ | .range .. =>
+    some true
+  | .builtin b => some (b.info.kind != .other)
+  | .float x => some !(Arith.isNaN x)
+  | .tuple _ | .slice .. | .obj _ => Option.none
+  | _ => some false
+
+/-- The data that the `__eq__` and `__hash__` of a dataclass capture: the class, the tuple of the
+names they compare, the name of the class's module, then the rest of what they need.  The lookup's
+check of structural keys reads the first three by these slots, and the module that makes the
+methods builds the data with `generatedCaptured`, so the two agree. -/
+def generatedCaptured {V : Type} (cls names «module» : V) (rest : Array V) : Array V :=
+  #[cls, names, «module»] ++ rest
+
+/-- The slot of the class in `generatedCaptured`. -/
+def generatedClsSlot : Nat := 0
+/-- The slot of the compared names in `generatedCaptured`. -/
+def generatedNamesSlot : Nat := 1
+/-- The slot of the module's name in `generatedCaptured`. -/
+def generatedModuleSlot : Nat := 2
+
+/-- The key of the `__eq__` that a dataclass generates. -/
+def generatedEqKey : String := "dataclasses.__eq__"
+/-- The key of the `__hash__` that a dataclass generates. -/
+def generatedHashKey : String := "dataclasses.__hash__"
+
 /-- Whether two different hashes may be equal in some runs and not in others: at least one is
 symbolic, and they are not the addresses of two different objects. -/
 def Hash.possiblyEq (a b : Hash) : Bool :=
@@ -104,6 +139,9 @@ structure LookupOps.{u} (m : Type → Type u) where
   eq : Value → m Bool
   /-- The dict's keys' version now, to see a change during a comparison. -/
   keysVersion : m Nat
+  /-- Whether the equality of the probe and of each of the keys is fixed and runs no user code,
+  read from the store without running code; `false` where that can't be read. -/
+  structural : Value → List Value → m Bool
 
 /-- The number of groups of kind `k`, other than `h`'s own, that a probe of class `kc` must
 consider, in a table whose groups by hash kind and key class are `groups` and whose groups by hash
@@ -168,20 +206,37 @@ def lookupCompare (ops : LookupOps m) (kc : KeyClass) (k : Value) (e : DictEntry
 
 /-- Compare the probe with the candidates `cs` in order, until one is equal: after a false
 comparison, a gap if that one or a later one could run user code, since CPython's table layout
-decides their order and whether one is compared again; a gap if the dict's keys change during a
-comparison. -/
-def lookupLoop (ops : LookupOps m) (t : DictTable) (kc : KeyClass) (k : Value) (v0 : Nat) :
-    List Nat → m (Option Nat)
+decides their order and whether one is compared again, unless `noUser` says that no comparison of
+the loop can run user code; a gap if the dict's keys change during a comparison. -/
+def lookupLoop (ops : LookupOps m) (t : DictTable) (kc : KeyClass) (k : Value) (v0 : Nat)
+    (noUser : Bool) : List Nat → m (Option Nat)
   | [] => pure none
   | i :: rest => do
-    let some e := t.entry? i | lookupLoop ops t kc k v0 rest
+    let some e := t.entry? i | lookupLoop ops t kc k v0 noUser rest
     let r ← lookupCompare ops kc k e
     if (← ops.keysVersion) != v0 then
       ops.gap "a dict that changes during a lookup is not modelled yet"
     if r then pure (some i) else
-    if kc.mayRunUser e.cls || rest.any (fun j => (t.entry? j).any (kc.mayRunUser ·.cls)) then
+    if !noUser &&
+        (kc.mayRunUser e.cls || rest.any (fun j => (t.entry? j).any (kc.mayRunUser ·.cls))) then
       ops.gap "a dict lookup after a false __eq__ depends on CPython's table layout"
-    lookupLoop ops t kc k v0 rest
+    lookupLoop ops t kc k v0 noUser rest
+
+/-- Whether the loop that compares the probe `k`, of class `kc`, with the keys `ks` may go on
+after a false comparison that could otherwise run user code: decided before the first
+comparison, on the exact branch (`exact`) only, when the probe and every key are `structural`.
+Then no comparison runs user code, so none changes the answer for the next one.  It answers
+`false`, which keeps the gap, without reading the store where the loop can't need it: when every
+comparison is between built-in keys, which never gaps, when there is no key, and when the first key
+is the probe object itself, which identity finds at once. -/
+def loopRunsNoUser (ops : LookupOps m) (exact : Bool) (kc : KeyClass) (k : Value)
+    (ks : List (Value × KeyClass)) : m Bool := do
+  if !exact || !(kc == .user || ks.any (·.2 == .user)) then return false
+  match k, ks with
+  | _, [] => return false
+  | .obj a, (.obj b, _) :: _ => if a == b then return false
+  | _, _ => pure ()
+  ops.structural k (ks.map (·.1))
 
 /-- **The position of the key `k`**, of class `kc` and hash `h`, in the dict table `t`, as CPython
 3.12 finds it, or `none`. -/
@@ -215,27 +270,30 @@ def dictLookup (ops : LookupOps m) (t : DictTable) (k : Value) (kc : KeyClass) (
   if t.deleted && cands.length ≥ 2 &&
       (kc == .user || cands.any fun j => (t.entry? j).any (·.cls == .user)) then
     ops.gap "a dict lookup after a deletion depends on CPython's table layout"
-  lookupLoop ops t kc k (← ops.keysVersion) cands
+  let keys := cands.filterMap fun j => (t.entry? j).map fun en => (en.key, en.cls)
+  let noUser ← loopRunsNoUser ops (b == 0 && e == 0 && a == 0) kc k keys
+  lookupLoop ops t kc k (← ops.keysVersion) noUser cands
 
 /-- Compare the probe with the set entries at the slots `cs` in order, until one is equal; a gap
 if `unchanged` says that the set changed during a comparison that may run user code.  Unless the
 order is CPython's (`ordered`), also a gap after a false comparison if that entry or a later one
-may run user code: CPython's probe sequence may visit an entry's slot again and compare it again,
-as often as its layout decides. -/
+may run user code, since CPython's probe sequence may visit an entry's slot again and compare it
+again, as often as its layout decides; unless `noUser` says that no comparison of the loop can run
+user code. -/
 def setLoop (ops : LookupOps m) (unchanged : m Bool) (t : SetTable) (kc : KeyClass) (k : Value)
-    (ordered : Bool) : List Nat → m (Option Nat)
+    (ordered noUser : Bool) : List Nat → m (Option Nat)
   | [] => pure none
   | i :: rest => do
-    let .entry eh ek ec := t.slot i | setLoop ops unchanged t kc k ordered rest
+    let .entry eh ek ec := t.slot i | setLoop ops unchanged t kc k ordered noUser rest
     let r ← lookupCompare ops kc k ⟨eh, ek, ec⟩
     if kc.mayRunUser ec then
       if !(← unchanged) then ops.gap "a set that changes during a lookup is not modelled yet"
     if r then pure (some i) else
-    if !ordered && (kc.mayRunUser ec || rest.any fun j => match t.slot j with
+    if !ordered && !noUser && (kc.mayRunUser ec || rest.any fun j => match t.slot j with
         | .entry _ _ c => kc.mayRunUser c
         | _ => false) then
       ops.gap "a set lookup after a false __eq__ depends on CPython's table layout"
-    setLoop ops unchanged t kc k ordered rest
+    setLoop ops unchanged t kc k ordered noUser rest
 
 /-- **The slot of the key `k`**, of class `kc` and hash `h`, in the set table `t`, as CPython 3.12
 finds it, or `none`.  The entries with the hash `h` are those that the search of `h` finds
@@ -282,7 +340,12 @@ def setLookup (ops : LookupOps m) (unchanged : m Bool) (t : SetTable) (k : Value
   if !ordered && cands.length ≥ 2 &&
       (kc == .user || cands.any fun i => classOf i == some .user) then
     ops.gap "a set lookup whose order of comparisons depends on the table's layout"
-  setLoop ops unchanged t kc k ordered cands
+  let keys := cands.filterMap fun i => match t.slot i with
+    | .entry _ ek ec => some (ek, ec)
+    | _ => none
+  -- While the order is CPython's, a false comparison never gaps, so the walk isn't needed.
+  let noUser ← loopRunsNoUser ops (!ordered && b == 0 && e == 0 && a == 0) kc k keys
+  setLoop ops unchanged t kc k ordered noUser cands
 
 end
 

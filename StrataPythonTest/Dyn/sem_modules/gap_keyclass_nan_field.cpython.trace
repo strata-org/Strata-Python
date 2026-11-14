@@ -1,0 +1,13 @@
+--- stdout 2
+x
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+d = {<K object>: 'x', <K object>: 'y'}
+dataclass = <function object>
+field = <function object>
+n1 = nan

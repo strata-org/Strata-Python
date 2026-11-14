@@ -429,7 +429,7 @@ their monad (`#py_rule_shapes`) are not among them.  The walk, and its choice of
 are below the rule monad, are trusted: no theorem proves that it misses no write or read of the
 marker. -/
 /--
-info: #py_part_writers: StrataPython.Dyn.Sem.PySem.ops reaches 185 definitions below the rule monad, which name StrataPython.Dyn.Sem.PyLang, StrataPython.Dyn.Sem.World, Strata.Dyn.Exec.Sem, StrataPython.Dyn.Sem.Depth, StrataPython.Dyn.Sem.PyM or a constant whose type does:
+info: #py_part_writers: StrataPython.Dyn.Sem.PySem.ops reaches 195 definitions below the rule monad, which name StrataPython.Dyn.Sem.PyLang, StrataPython.Dyn.Sem.World, Strata.Dyn.Exec.Sem, StrataPython.Dyn.Sem.Depth, StrataPython.Dyn.Sem.PyM or a constant whose type does:
 StrataPython.Dyn.Sem.BEff
 StrataPython.Dyn.Sem.BTree
 StrataPython.Dyn.Sem.ContOK
@@ -458,6 +458,7 @@ StrataPython.Dyn.Sem.Prim.classOf
 StrataPython.Dyn.Sem.Prim.classSetMro
 StrataPython.Dyn.Sem.Prim.classSetMroNew
 StrataPython.Dyn.Sem.Prim.classSetName
+StrataPython.Dyn.Sem.Prim.dataclassFields?
 StrataPython.Dyn.Sem.Prim.dictClear
 StrataPython.Dyn.Sem.Prim.dictDelete
 StrataPython.Dyn.Sem.Prim.dictDeleteNew
@@ -476,6 +477,7 @@ StrataPython.Dyn.Sem.Prim.dictTable
 StrataPython.Dyn.Sem.Prim.excSet
 StrataPython.Dyn.Sem.Prim.funcSetAnnotations
 StrataPython.Dyn.Sem.Prim.funcSetName
+StrataPython.Dyn.Sem.Prim.generatedOf?
 StrataPython.Dyn.Sem.Prim.globalGet
 StrataPython.Dyn.Sem.Prim.globalGetT
 StrataPython.Dyn.Sem.Prim.handledGet
@@ -493,7 +495,10 @@ StrataPython.Dyn.Sem.Prim.modifyOwnPayload
 StrataPython.Dyn.Sem.Prim.modifyPayload
 StrataPython.Dyn.Sem.Prim.moduleAdd
 StrataPython.Dyn.Sem.Prim.modulesGet
+StrataPython.Dyn.Sem.Prim.mroEntry?
 StrataPython.Dyn.Sem.Prim.mutSet
+StrataPython.Dyn.Sem.Prim.notImplementedOf?
+StrataPython.Dyn.Sem.Prim.nsEntry?
 StrataPython.Dyn.Sem.Prim.numBinary
 StrataPython.Dyn.Sem.Prim.numUnary
 StrataPython.Dyn.Sem.Prim.objClass
@@ -506,6 +511,8 @@ StrataPython.Dyn.Sem.Prim.ownData
 StrataPython.Dyn.Sem.Prim.ownDict
 StrataPython.Dyn.Sem.Prim.ownSet
 StrataPython.Dyn.Sem.Prim.partView
+StrataPython.Dyn.Sem.Prim.plainDict?
+StrataPython.Dyn.Sem.Prim.plainMro?
 StrataPython.Dyn.Sem.Prim.probeOf
 StrataPython.Dyn.Sem.Prim.raiseFailure
 StrataPython.Dyn.Sem.Prim.raiseNew
@@ -554,6 +561,9 @@ StrataPython.Dyn.Sem.Prim.slotPut
 StrataPython.Dyn.Sem.Prim.stateSet
 StrataPython.Dyn.Sem.Prim.strIterNext
 StrataPython.Dyn.Sem.Prim.strTable
+StrataPython.Dyn.Sem.Prim.structuralKeys
+StrataPython.Dyn.Sem.Prim.structuralWalk
+StrataPython.Dyn.Sem.Prim.structuralWalk._f
 StrataPython.Dyn.Sem.Prim.walkGuard
 StrataPython.Dyn.Sem.Prim.withRepr
 StrataPython.Dyn.Sem.Prim.writeOut

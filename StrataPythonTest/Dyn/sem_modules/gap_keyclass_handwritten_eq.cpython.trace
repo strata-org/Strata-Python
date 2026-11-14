@@ -1,0 +1,12 @@
+--- stdout 9
+True
+2 2
+
+--- outcome
+ok
+--- globals
+L = <class 'L'>
+__doc__ = None
+__name__ = '__main__'
+d = {<L object>: 1, <L object>: 2}
+dataclass = <function object>

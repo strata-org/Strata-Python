@@ -1,0 +1,12 @@
+--- stdout 2
+2
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+d = {<K object>: 1, <K object>: 2}
+dataclass = <function object>
+k = <K object>

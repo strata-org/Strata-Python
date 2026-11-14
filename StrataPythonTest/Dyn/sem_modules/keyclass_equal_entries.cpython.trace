@@ -1,0 +1,18 @@
+--- stdout 19
+second 3
+second 53
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+M = 2305843009213693951
+__doc__ = None
+__name__ = '__main__'
+d = {<K object>: 'first', <K object>: 'second', <K object>: 'third', <K object>: 0, <K object>: 1, <K object>: 2, <K object>: 3, <K object>: 4, <K object>: 5, <K object>: 6, <K object>: 7, <K object>: 8, <K object>: 9, <K object>: 10, <K object>: 11, <K object>: 12, <K object>: 13, <K object>: 14, <K object>: 15, <K object>: 16, <K object>: 17, <K object>: 18, <K object>: 19, <K object>: 20, <K object>: 21, <K object>: 22, <K object>: 23, <K object>: 24, <K object>: 25, <K object>: 26, <K object>: 27, <K object>: 28, <K object>: 29, <K object>: 30, <K object>: 31, <K object>: 32, <K object>: 33, <K object>: 34, <K object>: 35, <K object>: 36, <K object>: 37, <K object>: 38, <K object>: 39, <K object>: 40, <K object>: 41, <K object>: 42, <K object>: 43, <K object>: 44, <K object>: 45, <K object>: 46, <K object>: 47, <K object>: 48, <K object>: 49}
+dataclass = <function object>
+field = <function object>
+i = 49
+k1 = <K object>
+k2 = <K object>
+k3 = <K object>

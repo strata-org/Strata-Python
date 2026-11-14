@@ -586,17 +586,202 @@ def dictOf (id : ObjId) : PyM σ .reads true DictTable := do
   | some { payload := .dict t, .. } => pure t
   | _ => PyM.failure s!"object {id} is not a dict"
 
+/-- Whether the dict table `t` holds no key of class `user` or `symHash`, from its group counts:
+then a read of a `str` key compares no key that can run user code, and draws no choice. -/
+def _root_.StrataPython.Dyn.Sem.DictTable.plainKeys (t : DictTable) : Bool :=
+  [HashKind.exact, .addr, .otherSymbolic].all fun k =>
+    t.groupCount k .user == 0 && t.groupCount k .symHash == 0
+
+/-- The value of the `str` key `name` in the dict table `t`, for a table whose keys are
+`plainKeys`: only an exact `str` equals it, and the other keys of its hash compare without code. -/
+def _root_.StrataPython.Dyn.Sem.DictTable.strEntry? (t : DictTable) (name : String) :
+    Option Value :=
+  let k : Value := .str (.ofString name)
+  (t.positions (strHash (.ofString name))).toList.findSome? fun i =>
+    (t.entry? i).bind fun en => if en.key == k then some (t.value i) else none
+
+/-- The dict table of the dict object `id`, if its keys are `plainKeys`. -/
+def plainDict? (id : ObjId) : PyM σ .reads true (Option DictTable) := do
+  match ← objGet id with
+  | some { payload := .dict t, .. } => pure (if t.plainKeys then some t else none)
+  | _ => pure none
+
+/-- The entry `name` of the class object `c`'s namespace: `some none` when there is none, and
+`none` when it can't be read without running code (a gapped name, or a namespace with a key of
+class `user` or `symHash`). -/
+def nsEntry? (c : ClassObj) (name : String) : PyM σ .reads true (Option (Option Value)) := do
+  if c.gapped.contains name then return none
+  return (← plainDict? c.ns).map (·.strEntry? name)
+
+/-- The classes of the MRO of the class `cls`, if every class of it but its last is a class object
+of the store without slots of its own, and the last is `object`: then its instances have
+`object`'s layout. -/
+def plainMro? (cls : Value) : PyM σ .reads true (Option (Array ClassObj)) := do
+  let .obj cid := cls | return none
+  let some { payload := .cls c, .. } ← objGet cid | return none
+  let some (.builtin .«object») := c.mro.back? | return none
+  let mut out : Array ClassObj := #[]
+  for b in c.mro.pop do
+    let .obj bid := b | return none
+    let some { payload := .cls bc, .. } ← objGet bid | return none
+    if !bc.slots.isEmpty then return none
+    out := out.push bc
+  return some out
+
+/-- The entry `name` of the first class of `mro` that has one: `some none` when none has, and
+`none` when a namespace can't be read. -/
+def mroEntry? (mro : Array ClassObj) (name : String) :
+    PyM σ .reads true (Option (Option Value)) := do
+  for c in mro do
+    match ← nsEntry? c name with
+    | none => return none
+    | some (some v) => return some (some v)
+    | some none => pure ()
+  return some none
+
+/-- Whether `v` is the generated native `key` (`dataclasses.__eq__` or `dataclasses.__hash__`)
+of the class `cls` itself: its first captured value is `cls`.  Its captured values, if so. -/
+def generatedOf? (v : Value) (key : String) (cls : ObjId) :
+    PyM σ .reads true (Option (Array Value)) := do
+  let .obj nid := v | return none
+  let some { payload := .native f, .. } ← objGet nid | return none
+  if f.key != key then return none
+  match (f.captured[generatedClsSlot]? : Option Value) with
+  | some (.obj c) => return if c == cls then some f.captured else none
+  | _ => return none
+
+/-- Whether a class attribute `v` under a compared name is read without running code: no
+attribute at all, or an immediate whose class has no `__get__` (`None`, `NotImplemented`,
+`Ellipsis`, a `bool`, an `int`, a `float`, a `str`, a `bytes`, a tuple, a `range` or a `slice`).
+Only its kind matters: the object's own `__dict__` holds every compared field and wins over such an
+attribute, so its contents are never read. -/
+def plainClassAttr (v : Option Value) : Bool :=
+  match v with
+  | none => true
+  | some v => match v with
+    | .none | .notImplemented | .ellipsis | .bool _ | .int _ | .float _ | .str _ | .bytes _
+    | .tuple _ | .range .. | .slice .. => true
+    | _ => false
+
+/-- `NotImplemented` as the generated `__eq__` of a class of module `module` reads it: the
+module's global, then the builtins'; `none` when the builtins can't be read without running
+code. -/
+def notImplementedOf? (module : String) : PyM σ .reads true (Option Value) := do
+  if let some v ← globalGet module "NotImplemented" then return some v
+  return (← plainDict? 0).bind (·.strEntry? "NotImplemented")
+
+/-- The compared field names and their values of the object `id`, if its class `cls` passes every
+check of a dataclass whose equality is fixed and runs no user code: its `__eq__` and `__hash__`
+are its own generated natives; its MRO holds user classes with `object`'s layout, then `object`;
+no class of it but `object` defines `__getattribute__`, `__getattr__` or `__class__`, or has an
+attribute under a compared name that `plainClassAttr` rejects; `NotImplemented` is the constant; and
+every compared field is in the object's own `__dict__`, whose keys are `plainKeys`. -/
+def dataclassFields? (id : ObjId) (cls : Value) : PyM σ .reads true (Option (Array Value)) := do
+  let .obj cid := cls | return none
+  let some mro ← plainMro? cls | return none
+  let some (some eqv) ← mroEntry? mro "__eq__" | return none
+  let some (some hashv) ← mroEntry? mro "__hash__" | return none
+  let some eqCap ← generatedOf? eqv generatedEqKey cid | return none
+  let some _ ← generatedOf? hashv generatedHashKey cid | return none
+  let some (.tuple namesV) := (eqCap[generatedNamesSlot]? : Option Value) | return none
+  let some (.str modS) := (eqCap[generatedModuleSlot]? : Option Value) | return none
+  let names := namesV.filterMap fun | .str s => some s.s | _ => none
+  if names.size != namesV.size then return none
+  for n in #["__getattribute__", "__getattr__", "__class__"] do
+    let some none ← mroEntry? mro n | return none
+  for n in names do
+    for c in mro do
+      let some e ← nsEntry? c n | return none
+      if !plainClassAttr e then return none
+  let some .notImplemented ← notImplementedOf? modS.s | return none
+  let some { dict := some did, .. } ← objGet id | return none
+  let some t ← plainDict? did | return none
+  let mut vals : Array Value := #[]
+  for n in names do
+    let some v := t.strEntry? n | return none
+    vals := vals.push v
+  return some vals
+
+/-- The number of values that one lookup's `structuralKeys` may enter, over all its keys; past it,
+the answer is `false`, which keeps the lookup's gap.  It bounds the walk's time and stack. -/
+def structuralBudget : Nat := 4096
+
+/-- What `structuralKeys` keeps across its keys: the answers of the objects already checked, and
+how many more values it may enter. -/
+structure StructuralWalk where
+  memo : Std.HashMap ObjId Bool := ∅
+  left : Nat := structuralBudget
+
+/-- `structuralKeys` of one value, with `fuel` levels of objects and tuples; an object met again
+while it is still being checked (on `path`) is not structural, as `==` on it would recurse without
+end. -/
+def structuralWalk : Nat → Array ObjId → StructuralWalk → Value →
+    PyM σ .reads true (Bool × StructuralWalk)
+  | 0, _, w, _ => pure (false, w)
+  | fuel + 1, path, w, v => do
+    if w.left == 0 then return (false, w)
+    let w := { w with left := w.left - 1 }
+    -- A tuple or a `slice` is walked here, not by `Value.structuralImm?`, so that the budget
+    -- counts every element: a tuple whose two members are one tuple, at each of n levels, is a
+    -- tree of 2^n values.
+    match v with
+      | .tuple xs => do
+        let mut w := w
+        for x in xs do
+          let (r, w') ← structuralWalk fuel path w x
+          w := w'
+          if !r then return (false, w)
+        return (true, w)
+      | .slice a b c => do
+        let mut w := w
+        for x in [a, b, c] do
+          let (r, w') ← structuralWalk fuel path w x
+          w := w'
+          if !r then return (false, w)
+        return (true, w)
+      | .obj id => do
+        if let some r := w.memo[id]? then return (r, w)
+        if path.contains id then return (false, w)
+        let no := { w with memo := w.memo.insert id false }
+        let some cls ← objClass id |>.lift Level.AtLeast.le | return (false, no)
+        let some vals ← dataclassFields? id cls | return (false, no)
+        let mut w := w
+        for x in vals do
+          let (r, w') ← structuralWalk fuel (path.push id) w x
+          w := w'
+          if !r then return (false, { w with memo := w.memo.insert id false })
+        return (true, { w with memo := w.memo.insert id true })
+      | v => return (v.structuralImm? == some true, w)
+
+/-- **Whether the equality of the probe `k` and of each of the keys `ks` is fixed and runs no user
+code**, read from the store without running code: each is a value that `Value.structuralImm?`
+admits, a tuple or a `slice` of such values, or an instance of a dataclass that `dataclassFields?`
+admits whose compared field values are structural in turn.  One walk checks them all and keeps
+each object's answer, so an object shared by several keys is checked once.  An object first
+checked within `keyDepth` levels is accepted again when a deeper path reaches it, so the walk
+doesn't bound how deep a comparison recurses.  The generated `__eq__` charges a Python frame at
+each level, so a comparison that recurses too deep stops with a gap at `pyDepthLimit`.  Past
+`structuralBudget` values in all, the answer is `false`. -/
+def structuralKeys (k : Value) (ks : List Value) : PyM σ .reads true Bool := do
+  let mut w : StructuralWalk := {}
+  for v in k :: ks do
+    let (r, w') ← structuralWalk keyDepth #[] w v
+    w := w'
+    if !r then return false
+  return true
+
 section
 variable {e : Level} {fr : Bool}
 
 /-- The position of the entry `k` in the dict that `read` gives, as `dictLookup` finds it, with
 the key's class and hash. -/
 def dictLocate (read : PyM σ e fr DictTable) (choose? : Option (Nat → PyM σ e fr Nat))
-    (k : Value) (h? : Option Hash) (eq : Value → PyM σ e fr Bool) :
+    (k : Value) (h? : Option Hash) (eq : Value → PyM σ e fr Bool)
+    (structural : Value → List Value → PyM σ e fr Bool := fun _ _ => pure false) :
     PyM σ e fr (Option Nat × KeyClass × Hash) := do
   let t ← read
   let (kc, h) ← (probeOf k h?).relax.lift Level.AtLeast.le
-  let ops : LookupOps (PyM σ e fr) := ⟨PyM.gap, choose?, eq, (·.keysVersion) <$> read⟩
+  let ops : LookupOps (PyM σ e fr) := ⟨PyM.gap, choose?, eq, (·.keysVersion) <$> read, structural⟩
   pure (← dictLookup ops t k kc h, kc, h)
 
 /-- The value of the entry `k` of the dict `d`, as `dictLookup` finds it, read after the lookup,
@@ -605,7 +790,8 @@ def dictFind [Level.AtLeast .reads e] (d k : Value) (h? : Option Hash)
     (eq : Value → PyM σ e fr Bool) : PyM σ e fr (Option Value) := do
   let .obj id := d | PyM.failure "a dict lookup in a value that is not an object"
   let read : PyM σ e fr DictTable := (dictOf id).relax.lift Level.AtLeast.le
-  match (← dictLocate read (some fun n => (choose n).relax.lift Level.AtLeast.le) k h? eq).1 with
+  match (← dictLocate read (some fun n => (choose n).relax.lift Level.AtLeast.le) k h? eq
+      fun v vs => (structuralKeys v vs).relax.lift Level.AtLeast.le).1 with
   | some i => pure (some ((← read).value i))
   | none => pure none
 
@@ -614,18 +800,20 @@ key that `dictLookup` finds, or add the key.  The change applies to the table as
 lookup, whose comparisons may change the values. -/
 def dictSetWith (read : PyM σ e fr DictTable) (modify : (DictTable → DictTable) → PyM σ e fr Unit)
     (choose? : Option (Nat → PyM σ e fr Nat)) (k v : Value) (h? : Option Hash)
-    (eq : Value → PyM σ e fr Bool) : PyM σ e fr Unit := do
+    (eq : Value → PyM σ e fr Bool) (structural : Value → List Value → PyM σ e fr Bool := fun _ _ => pure false) :
+    PyM σ e fr Unit := do
   -- CPython converts a table of `str` keys before the lookup, whose comparisons may raise.
   modify (·.noteKey k)
-  match (← dictLocate read choose? k h? eq) with
+  match (← dictLocate read choose? k h? eq structural) with
   | (some i, _, _) => modify (·.setValue i v)
   | (none, kc, h) => modify (·.insertNew ⟨h, k, kc⟩ v)
 
 /-- Delete the entry `k` of the dict that `read` gives, with `modify`, and give its value. -/
 def dictDeleteWith (read : PyM σ e fr DictTable) (modify : (DictTable → DictTable) → PyM σ e fr Unit)
     (choose? : Option (Nat → PyM σ e fr Nat)) (k : Value) (h? : Option Hash)
-    (eq : Value → PyM σ e fr Bool) : PyM σ e fr (Option Value) := do
-  match (← dictLocate read choose? k h? eq).1 with
+    (eq : Value → PyM σ e fr Bool) (structural : Value → List Value → PyM σ e fr Bool := fun _ _ => pure false) :
+    PyM σ e fr (Option Value) := do
+  match (← dictLocate read choose? k h? eq structural).1 with
   | some i =>
     let v := (← read).value i
     modify (·.deleteAt i)
@@ -648,6 +836,7 @@ def dictSetNew (d k v : Value) (h? : Option Hash) (eq : Value → PyM σ e false
   let .obj id := d | PyM.failure "a dict write to a value that is not an object"
   dictSetWith ((ownDict id).lift Level.AtLeast.le) (fun f => (modifyOwnPayload id (PayloadG.modDict f) (keepsClosures_modDict _)).lift Level.AtLeast.le)
     (if h : Level.reads.le e then some fun n => (choose n).relax.lift h else none) k v h? eq
+    (if h : Level.reads.le e then fun x xs => (structuralKeys x xs).relax.lift h else fun _ _ => pure false)
 
 end
 
@@ -658,6 +847,7 @@ def dictDeleteNew {e : Level} (d k : Value) (h? : Option Hash) (eq : Value → P
   dictDeleteWith ((ownDict id).lift Level.AtLeast.le)
     (fun f => (modifyOwnPayload id (PayloadG.modDict f) (keepsClosures_modDict _)).lift Level.AtLeast.le)
     (if h : Level.reads.le e then some fun n => (choose n).relax.lift h else none) k h? eq
+    (if h : Level.reads.le e then fun x xs => (structuralKeys x xs).relax.lift h else fun _ _ => pure false)
 
 /-- `dictPopitemWith` on a dict that the operation made. -/
 def dictPopitemNew {e : Level} (d : Value) : PyM σ e false (Option (Value × Value)) := do
@@ -671,6 +861,7 @@ def dictSet {fr : Bool} (d k v : Value) (h? : Option Hash) (eq : Value → PyM �
   let .obj id := d | PyM.failure "a dict write to a value that is not an object"
   dictSetWith ((dictOf id).relax.lift (by decide)) (fun f => (modifyPayload id (PayloadG.modDict f) (keepsClosures_modDict _)).relax)
     (some fun n => (choose n).relax.lift (by decide)) k v h? eq
+    fun x xs => (structuralKeys x xs).relax.lift (by decide)
 
 /-- `dictDeleteWith` on any dict. -/
 def dictDelete {fr : Bool} (d k : Value) (h? : Option Hash) (eq : Value → PyM σ .writes fr Bool) :
@@ -678,6 +869,7 @@ def dictDelete {fr : Bool} (d k : Value) (h? : Option Hash) (eq : Value → PyM 
   let .obj id := d | PyM.failure "a dict write to a value that is not an object"
   dictDeleteWith ((dictOf id).relax.lift (by decide)) (fun f => (modifyPayload id (PayloadG.modDict f) (keepsClosures_modDict _)).relax)
     (some fun n => (choose n).relax.lift (by decide)) k h? eq
+    fun x xs => (structuralKeys x xs).relax.lift (by decide)
 
 /-- `dictPopitemWith` on any dict. -/
 def dictPopitem {fr : Bool} (d : Value) : PyM σ .writes fr (Option (Value × Value)) := do
@@ -803,19 +995,21 @@ variable {e : Level} {fr : Bool}
 /-- The slot of the member `k` in the set that `read` gives, as `setLookup` finds it, with the
 key's class and hash. -/
 def setLocate (read : PyM σ e fr SetTable) (choose? : Option (Nat → PyM σ e fr Nat))
-    (k : Value) (h? : Option Hash) (eq : Value → PyM σ e fr Bool) :
+    (k : Value) (h? : Option Hash) (eq : Value → PyM σ e fr Bool)
+    (structural : Value → List Value → PyM σ e fr Bool := fun _ _ => pure false) :
     PyM σ e fr (Option Nat × KeyClass × Hash) := do
   let t ← read
   let (kc, h) ← (probeOf k h?).relax.lift Level.AtLeast.le
-  let ops : LookupOps (PyM σ e fr) := ⟨PyM.gap, choose?, eq, pure 0⟩
+  let ops : LookupOps (PyM σ e fr) := ⟨PyM.gap, choose?, eq, pure 0, structural⟩
   let unchanged : PyM σ e fr Bool := (fun t' => t'.version == t.version) <$> read
   pure (← setLookup ops unchanged t k kc h, kc, h)
 
 /-- Add `k` to the set that `read` gives, with `modify`, unless it is there. -/
 def setAddWith (read : PyM σ e fr SetTable) (modify : (SetTable → SetTable) → PyM σ e fr Unit)
     (choose? : Option (Nat → PyM σ e fr Nat)) (k : Value) (h? : Option Hash)
-    (eq : Value → PyM σ e fr Bool) : PyM σ e fr Unit := do
-  let (found, kc, h) ← setLocate read choose? k h? eq
+    (eq : Value → PyM σ e fr Bool) (structural : Value → List Value → PyM σ e fr Bool := fun _ _ => pure false) :
+    PyM σ e fr Unit := do
+  let (found, kc, h) ← setLocate read choose? k h? eq structural
   if found.isSome then return
   let some s := (← read).search h | PyM.failure "a set table without an empty slot"
   modify (·.addNew s h k kc)
@@ -823,8 +1017,9 @@ def setAddWith (read : PyM σ e fr SetTable) (modify : (SetTable → SetTable) �
 /-- Remove `k` from the set that `read` gives, with `modify`; whether it was there. -/
 def setDiscardWith (read : PyM σ e fr SetTable) (modify : (SetTable → SetTable) → PyM σ e fr Unit)
     (choose? : Option (Nat → PyM σ e fr Nat)) (k : Value) (h? : Option Hash)
-    (eq : Value → PyM σ e fr Bool) : PyM σ e fr Bool := do
-  match (← setLocate read choose? k h? eq).1 with
+    (eq : Value → PyM σ e fr Bool) (structural : Value → List Value → PyM σ e fr Bool := fun _ _ => pure false) :
+    PyM σ e fr Bool := do
+  match (← setLocate read choose? k h? eq structural).1 with
   | some i =>
     modify (·.discardAt i)
     pure true
@@ -943,6 +1138,7 @@ def setAddNew (s k : Value) (h? : Option Hash) (eq : Value → PyM σ e false Bo
   let _ ← (ownSet id).lift Level.AtLeast.le
   setAddWith (Prod.fst <$> (ownSet id).lift Level.AtLeast.le)
     (fun f => (modifyOwnPayload id (PayloadG.modSet f) (keepsClosures_modSet _)).lift Level.AtLeast.le) (choicesAt e) k h? eq
+    (if h : Level.reads.le e then fun x xs => (structuralKeys x xs).relax.lift h else fun _ _ => pure false)
 
 /-- `setDiscardWith` on a set that the operation made. -/
 def setDiscardNew (s k : Value) (h? : Option Hash) (eq : Value → PyM σ e false Bool) :
@@ -951,6 +1147,7 @@ def setDiscardNew (s k : Value) (h? : Option Hash) (eq : Value → PyM σ e fals
   let _ ← (ownSet id).lift Level.AtLeast.le
   setDiscardWith (Prod.fst <$> (ownSet id).lift Level.AtLeast.le)
     (fun f => (modifyOwnPayload id (PayloadG.modSet f) (keepsClosures_modSet _)).lift Level.AtLeast.le) (choicesAt e) k h? eq
+    (if h : Level.reads.le e then fun x xs => (structuralKeys x xs).relax.lift h else fun _ _ => pure false)
 
 /-- `setPopWith` on a set that the operation made. -/
 def setPopNew (s : Value) : PyM σ e false (Option Value) := do
@@ -1042,6 +1239,7 @@ def setAdd (af : Bool) (s k : Value) (h? : Option Hash) (eq : Value → PyM σ .
   let _ ← (mutSet id af).relax.lift (by decide)
   setAddWith ((Prod.fst <$> mutSet id af).relax.lift (by decide)) (fun f => (modifyPayload id (PayloadG.modSet f) (keepsClosures_modSet _)).relax)
     (some fun n => (choose n).relax.lift (by decide)) k h? eq
+    fun x xs => (structuralKeys x xs).relax.lift (by decide)
 
 /-- `setDiscardWith` on any set; a frozenset only if `af`. -/
 def setDiscard (af : Bool) (s k : Value) (h? : Option Hash) (eq : Value → PyM σ .writes fr Bool) :
@@ -1050,6 +1248,7 @@ def setDiscard (af : Bool) (s k : Value) (h? : Option Hash) (eq : Value → PyM 
   let _ ← (mutSet id af).relax.lift (by decide)
   setDiscardWith ((Prod.fst <$> mutSet id af).relax.lift (by decide)) (fun f => (modifyPayload id (PayloadG.modSet f) (keepsClosures_modSet _)).relax)
     (some fun n => (choose n).relax.lift (by decide)) k h? eq
+    fun x xs => (structuralKeys x xs).relax.lift (by decide)
 
 /-- `setPopWith` on any set; a frozenset only if `af`. -/
 def setPop (af : Bool) (s : Value) : PyM σ .writes fr (Option Value) := do
@@ -1656,7 +1855,7 @@ instance {e : Level} {fr : Bool} [Level.AtLeast .reads e] : PyReads (PyM σ e fr
     let id ← Prim.setId s
     let read := (fun r => r.1) <$> (Prim.setRead (.obj id)).relax.lift Level.AtLeast.le
     return (← Prim.setLocate read (some fun n => (Prim.choose n).relax.lift Level.AtLeast.le)
-      k h? eq).1.isSome
+      k h? eq fun x xs => (Prim.structuralKeys x xs).relax.lift Level.AtLeast.le).1.isSome
   setView s := (Prim.setViewOf s).relax.lift Level.AtLeast.le
   setHasUser s := (·.1.hasUser) <$> (Prim.setRead s).relax.lift Level.AtLeast.le
   dictHasUser d := (·.hasUser) <$> (Prim.dictTable d).relax.lift Level.AtLeast.le

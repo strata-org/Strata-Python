@@ -1,0 +1,14 @@
+--- stdout 6
+2 x y
+
+--- outcome
+ok
+--- globals
+G = <class 'G'>
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+d = {<K object>: 'x', <K object>: 'y'}
+dataclass = <function object>
+field = <function object>
+g = <G object>

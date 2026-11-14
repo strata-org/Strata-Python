@@ -1,0 +1,22 @@
+--- stdout 48
+2 x y
+2 x y
+2 x y
+2 x y
+2 x y
+2 x y
+2 x y
+2 x y
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+d = {<K object>: 'x', <K object>: 'y'}
+dataclass = <function object>
+field = <function object>
+pairs = [(None, 0), (True, False), (1.5, 2.5), (b'x', b'y'), (range(0, 3), range(0, 4)), ((1, 'a'), (1, 'b')), (<class 'int'>, <class 'str'>), (Ellipsis, None)]
+x = Ellipsis
+y = None

@@ -1,0 +1,14 @@
+--- stdout 11
+None first
+
+--- outcome
+ok
+--- globals
+B = <class 'B'>
+C = <class 'C'>
+M = 2305843009213693951
+__doc__ = None
+__name__ = '__main__'
+d = {<C object>: 'first', <C object>: 'second'}
+dataclass = <function object>
+field = <function object>

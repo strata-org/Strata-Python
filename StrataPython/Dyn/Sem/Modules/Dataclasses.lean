@@ -5,6 +5,7 @@
 -/
 module
 public import StrataPython.Dyn.Sem.Modules.Typing
+public import StrataPython.Dyn.Sem.DictLookup
 
 set_option autoImplicit false
 
@@ -232,10 +233,12 @@ def genFunction [PyWrites m V] [PyNew m V] (info : GenInfo V) (funcModule key na
   let strs (xs : Array String) : V := tup (xs.map (strValue (m := m) ·))
   let inits := info.inits.map fun (k, v) => tup #[PyPure.imm (m := m) (.int k.code), v]
   let none := PyPure.imm (m := m) .none
-  let captured : Array V := #[info.cls, strs info.names, strValue (m := m) info.module, tup inits,
-    tup #[PyPure.imm (m := m) (.bool info.frozen), PyPure.imm (m := m) (.bool info.postInit),
-      strValue (m := m) info.selfName],
-    strs info.stdParams, strs info.kwParams, tup info.types, info.guard.getD none, info.frozenError.getD none]
+  let captured : Array V := generatedCaptured info.cls (strs info.names) (strValue (m := m) info.module)
+    #[tup inits,
+      tup #[PyPure.imm (m := m) (.bool info.frozen), PyPure.imm (m := m) (.bool info.postInit),
+        strValue (m := m) info.selfName],
+      strs info.stdParams, strs info.kwParams, tup info.types, info.guard.getD none,
+      info.frozenError.getD none]
   let nd : NativeData V :=
     { key := key, kind := .function, captured := captured, name := name,
       qualname := s!"{cd.qualname}.{name}", «module» := funcModule, defaults := defaults,
@@ -746,7 +749,7 @@ def processClass [PyWrites m V] [PyNew m V] (cls : V) (opts : Array V) : m V := 
   let cmpNames ← (← fields.filterM fun (_, f) => do truthy (← fieldGet f "compare")).mapM (pure ·.1)
   if eq then
     discard <| setNewAttribute cls "__eq__"
-      (← genFunction (mkInfo cmpNames) funcModule "dataclasses.__eq__" "__eq__")
+      (← genFunction (mkInfo cmpNames) funcModule generatedEqKey "__eq__")
   if order then
     for name in ["__lt__", "__le__", "__gt__", "__ge__"] do
       if ← setNewAttribute cls name
@@ -775,7 +778,7 @@ def processClass [PyWrites m V] [PyNew m V] (cls : V) (opts : Array V) : m V := 
       if (← PyPure.immView h) matches some .none then truthy (← fieldGet f "compare") else truthy h).mapM
         (pure ·.1)
     setAttr cls "__hash__"
-      (some (← genFunction (mkInfo hashNames) funcModule "dataclasses.__hash__" "__hash__"))
+      (some (← genFunction (mkInfo hashNames) funcModule generatedHashKey "__hash__"))
   | 3 => raiseBuiltin "TypeError" s!"Cannot overwrite attribute __hash__ in class {cd.name}"
   | _ => pure ()
   -- The docstring: `cls.__name__ + str(inspect.signature(cls))`.

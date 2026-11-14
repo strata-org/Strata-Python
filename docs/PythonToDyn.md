@@ -2582,7 +2582,19 @@ is recorded as caught.
   from CPython's (a copy that dropped holes, after `popitem`, an object's `__dict__`). `==` of an
   object's `__dict__` with more than one attribute stops with a gap, since CPython walks its class's
   shared keys. An operator or comparison of a plain user object with a built-in value whose type's
-  own slot may accept it (a `mappingproxy`, a `ModuleSpec`) stops with a gap.
+  own slot may accept it (a `mappingproxy`, a `ModuleSpec`) stops with a gap. A dict or set
+  lookup stops with a gap after a false comparison that may run user code, since CPython's table
+  layout then decides what is compared next, and how often. It goes on instead when no other key
+  of the dict may share the probe's hash and the probe and every key of its hash compare without
+  running user code: values of the kinds listed in the first item of this list (a NaN excepted),
+  built-in types and functions, tuples and slices of such values, and instances of a dataclass
+  that hold such values in their compared fields, when: the class's own generated `__eq__` and
+  `__hash__` compare them; every class of its MRO but `object` is a user class with no slots of
+  its own (`__slots__ = ()` is fine); no class of it but `object` defines `__getattribute__`,
+  `__getattr__` or `__class__`, or has an attribute under a compared field's name other than a
+  value of the kinds listed in the first item of this list; `NotImplemented` is the built-in constant; and every compared field is
+  in the instance's own `__dict__`, which, like each class's namespace, holds no key of a user class
+  and no symbolic hash value (`structuralKeys` in `StrataPython/Dyn/Sem/Concrete.lean`).
 - The dict views (`dict_keys`, `dict_values`, `dict_items`, exactly those classes): `len`,
   `bool`, `in`, the binary and in-place operators and the comparisons call the class's own table
   entries, which the built-in library's parts fill, as CPython's C slots, in `binary_op1`'s and

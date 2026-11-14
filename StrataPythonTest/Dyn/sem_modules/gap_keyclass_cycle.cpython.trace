@@ -1,0 +1,16 @@
+--- stdout 21
+False
+RecursionError
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+M = 2305843009213693951
+__doc__ = None
+__name__ = '__main__'
+d = {<K object>: 'x'}
+dataclass = <function object>
+field = <function object>
+j = <K object>
+k = <K object>

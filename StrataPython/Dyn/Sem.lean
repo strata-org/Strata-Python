@@ -13,6 +13,7 @@ public import StrataPython.Dyn.Sem.Index
 public import StrataPython.Dyn.Sem.IndexProps
 public import StrataPython.Dyn.Sem.Dict
 public import StrataPython.Dyn.Sem.DictProps
+public import StrataPython.Dyn.Sem.DictLookupProps
 public import StrataPython.Dyn.Sem.Set
 public import StrataPython.Dyn.Sem.SetProps
 public import StrataPython.Dyn.Sem.Mro

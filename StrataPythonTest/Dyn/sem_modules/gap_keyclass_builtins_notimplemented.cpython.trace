@@ -1,0 +1,15 @@
+--- stdout 4
+k 2
+
+--- outcome
+ok
+--- globals
+H = 202737195238355831
+K = <class 'K'>
+T = <class 'T'>
+__doc__ = None
+__name__ = '__main__'
+builtins = <module object>
+calls = [1, 1]
+d = {<K object>: 'k'}
+dataclass = <function object>

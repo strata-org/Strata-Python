@@ -1,0 +1,15 @@
+--- stdout 2
+2
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+M = 2305843009213693951
+__doc__ = None
+__name__ = '__main__'
+d = {<K object>: 'x', <K object>: 'y'}
+dataclass = <function object>
+field = <function object>
+i = 999
+t = <K object>

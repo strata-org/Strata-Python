@@ -71,6 +71,33 @@ gap_dataclass_str_subclass_ann | gap | a dataclass annotation that is an instanc
 gap_dataclass_unloaded_module | gap | a dataclass whose __module__ is not a loaded module is not modelled yet
 gap_dataclass_weakref_slot | gap | dataclass(slots=True) and dataclass(weakref_slot=True) are not modelled yet
 gap_instance_write | gap | an attribute write to an instance of GenericAlias is not modelled yet
+gap_keyclass_base_property | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_budget | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_builtins_notimplemented | gap | an attribute write to a module is not modelled yet
+gap_keyclass_class_tag | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_class_tag_compare_false | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_cycle | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_deep | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_delattr | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_dict_symkey | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_dict_userkey | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_getattr | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_getattribute | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_handwritten_eq | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_list_field | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_nan_field | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_notimplemented | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_patched | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_property | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_slice_user | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_slots_base | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_str_key | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_subclass | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_tuple_base | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_tuple_nan | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_tuple_user | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_user_field | gap | a dict lookup after a false __eq__ depends on CPython's table layout
+gap_keyclass_user_hash | gap | a dict lookup after a false __eq__ depends on CPython's table layout
 gap_kwargs_not_str | gap | a call of a built-in with a keyword that is not a str is not modelled yet
 gap_member_write | gap | an attribute write to an instance of GenericAlias is not modelled yet
 gap_namedtuple_asdict_fields | gap | _asdict with _fields that are not a tuple is not modelled yet
@@ -122,6 +149,16 @@ gap_union_base | gap | the attribute UnionType.__new__ is not modelled yet
 gap_union_call | gap | the attribute UnionType.__new__ is not modelled yet
 gap_union_metaclass | gap | comparing unions with arguments that the model doesn't know
 gap_union_str_subclass_name | gap | an attribute name that is an instance of a subclass of str is not modelled yet
+keyclass_class_attr_tuple | agree
+keyclass_collide | agree
+keyclass_deep_ok | agree
+keyclass_empty_slots_base | agree
+keyclass_equal_entries | agree
+keyclass_field_kinds | agree
+keyclass_nested | agree
+keyclass_set | agree
+keyclass_slice_field | agree
+keyclass_str | agree
 namedtuple_accessors | agree
 namedtuple_basics | agree
 namedtuple_binding | agree

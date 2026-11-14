@@ -1,0 +1,16 @@
+--- stdout 16
+2 1 2 False
+2 2
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+P = <class 'P'>
+U = <class 'U'>
+__doc__ = None
+__name__ = '__main__'
+d = {<K object>: 1, <K object>: 2}
+dataclass = <function object>
+e = {<U object>: 1, <U object>: 2}
+field = <function object>
