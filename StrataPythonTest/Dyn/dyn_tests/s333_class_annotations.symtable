@@ -1,0 +1,12 @@
+module top
+  A: local (assigned, referenced)
+  AttributeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  int: global implicit (referenced)
+  print: global implicit (referenced)
+  class A
+    int: global implicit (referenced)
+    str: global implicit (referenced)
+    x: local (assigned, annotated)
+    y: local (assigned, annotated)
+qualnames: A

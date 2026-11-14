@@ -348,7 +348,45 @@ def getItemCore [PyCalls m V] (obj key : V) : m V := do
   match ← PyPure.immView obj with
   | some (.builtin _) => PyPure.gap "subscripting a built-in type or function is not modelled yet"
   | some _ => raiseBuiltin "TypeError" s!"'{← typeName obj}' object is not subscriptable"
-  | none => PyPure.gap "subscripting this built-in object is not modelled yet"
+  | none =>
+    -- A proxy of a plain dict, CPython's `mappingproxy_getitem`: `d[key]`; for an instance of a
+    -- subclass of `dict`, whose `__getitem__` or `__missing__` may run, a gap.
+    if let some (.dictProxy d) ← PyReads.objView obj then
+      if !((← PyPure.immView (← PyReads.classOf d)) matches some (.builtin .dict)) then
+        PyPure.gap "a mappingproxy of an instance of a subclass of dict is not modelled yet"
+      let some v ← dictFindKey d key | raiseKeyError key
+      return v
+    -- A class's `__dict__`: the namespace's own `__getitem__`.
+    if let some (.mappingProxy d owner) ← PyReads.objView obj then
+      -- The names that the model doesn't hold in a namespace: the attributes a piece's class
+      -- gaps, and the `__dict__` and `__weakref__` descriptors of a user class.
+      let name? := match ← PyPure.immView key with
+        | some (.str k) => some k.s
+        | _ => none
+      if let some k := name? then
+        if let some cd ← classData? owner then
+          if cd.gapped.contains k then
+            PyPure.gap s!"the attribute {cd.name}.{k} is not modelled yet"
+      if name?.isNone then
+        if let some cd ← classData? owner then
+          if !cd.gapped.isEmpty then
+            PyPure.gap "a class's __dict__ subscripted by a key that is not a str is not modelled yet"
+      let some v ← dictFindKey d key |
+        match name? with
+        | some k => do
+          implicitDescrGap k ((← mroOf owner).getD #[])
+          -- A class that a piece made may lack an entry that CPython's type dict holds: `__doc__`
+          -- and `__module__`, which `type.__new__` always puts into a namespace, and for a C type,
+          -- a dunder such as `__new__`.
+          if let some cd ← classData? owner then
+            if k == "__doc__" || k == "__module__" ||
+                (cd.cType && k.startsWith "__" && k.endsWith "__") then
+              PyPure.gap s!"the attribute {cd.name}.{k} is not modelled yet"
+          raiseKeyError key
+        -- Any other key may equal one of those names.
+        | none => PyPure.gap "a class's __dict__ subscripted by a key that is not a str is not modelled yet"
+      return v
+    PyPure.gap "subscripting this built-in object is not modelled yet"
 
 /-- `obj[key]`: a user object's `__getitem__` (a class's `__class_getitem__`), a built-in `obj`'s
 own; otherwise CPython's `TypeError`. -/
@@ -359,7 +397,17 @@ def getItem [PyCalls m V] (obj key : V) : m V := do
       raiseBuiltin "TypeError" s!"'{← typeName obj}' object is not subscriptable"
   if ← isType obj then
     -- A class's `__class_getitem__`, as `PyObject_GetItem` tries it last.
-    if (← PyPure.immView obj) matches some (.builtin _) then
+    if let some (.builtin t) ← PyPure.immView obj then
+      let args := PyPure.imm (m := m) (.tuple #[key])
+      -- `PyObject_GetItem` makes a `types.GenericAlias` for exactly `type`, through a piece's body.
+      if t == .type then
+        return ← PyCalls.callBuiltin (PyPure.imm (m := m) (.bound obj .type typeGetItemHook .method))
+          args (← PyPure.allocDict)
+      -- A built-in class's own `__class_getitem__`, a class method, through a piece's body; its
+      -- call counts a C level, as CPython's call of the bound method does.
+      if t.ownNames.any (·.1 == "__class_getitem__") then
+        return ← PyReads.withDepth 1 <| PyCalls.callBuiltin
+          (PyPure.imm (m := m) (.bound obj t "__class_getitem__" .classMethod)) args (← PyPure.allocDict)
       PyPure.gap "subscripting a built-in class is not modelled yet"
     -- `_PyObject_LookupAttr` reads it with the attribute protocol, which looks at the metaclass
     -- first: a metaclass that defines it, a `__getattr__`, or a `__getattribute__` other than

@@ -38,10 +38,12 @@ meta def stdoutOf (trace : String) : Option String := do
   let [out, _] := text.splitOn "\n--- outcome" | none
   some out
 
-/-- Runs `trace.py` on `file` with `python`. -/
+/-- Runs `trace.py` on `file` with `python`, in a root of the test's own next to `file`
+(`STRATA_TRACE_ROOT`), so that the test shares no directory with another checkout or user. -/
 meta def trace (python file : System.FilePath) : IO IO.Process.Output :=
   IO.Process.output
-    { cmd := python.toString, args := #["-S", SemDiff.traceScript.toString, file.toString] }
+    { cmd := python.toString, args := #["-S", SemDiff.traceScript.toString, file.toString]
+      env := #[("STRATA_TRACE_ROOT", some ((file.parent.getD ".") / "trace-root").toString)] }
 
 #eval withPython312 fun python => IO.FS.withTempDir fun dir => do
   -- The program's own directory comes first on `sys.path`, and `sys.argv` is `[FILE]`.  Through

@@ -28,7 +28,7 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
 
 /-- The module object of `module`. -/
 def moduleObj (module : String) : Obj σ :=
-  ⟨.builtin .module, none, #[], .module ⟨module, #[], false⟩⟩
+  ⟨.builtin .module, none, #[], .module ⟨module, #[], false, .translated⟩⟩
 
 @[dyn_sem Py.globalCell] def globalCell (module name : String) : Sem ε E (Ref σ Value) := do
   let m ← getThe (Modules σ)

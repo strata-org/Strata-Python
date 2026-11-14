@@ -222,6 +222,12 @@ def typeNew [PyWrites m V] [PyNew m V] (_self args kwargs : V) : m V := do
     if let some (.builtin bt) ← PyPure.immView b then
       if !bt.info.basetype then
         raiseBuiltin "TypeError" s!"type '{bt.info.name}' is not an acceptable base type"
+    if let some cd ← classData? b then
+      match cd.asBase with
+      | .allowed => pure ()
+      | .notAcceptable =>
+        raiseBuiltin "TypeError" s!"type '{cd.tpName.getD cd.name}' is not an acceptable base type"
+      | .gap => PyPure.gap s!"a subclass of {cd.tpName.getD cd.name} is not modelled yet"
     -- A layout conflict with an earlier base comes before the next base's checks.
     discard <| bestBase (bases.extract 0 (i + 1))
   let best ← bestBase bases
@@ -449,11 +455,14 @@ def objectNew [PyWrites m V] [PyNew m V] (_self args kwargs : V) : m V := do
   let some cls := xs[0]? | raiseBuiltin "TypeError" "object.__new__(): not enough arguments"
   if !(← isType cls) then
     raiseBuiltin "TypeError" s!"object.__new__(X): X is not a type object ({← typeName cls})"
+  -- `object.__new__` of a C type, or of a subclass of one, raises "is not safe" in CPython.
+  if let some n ← cTypeAlong cls then
+    PyPure.gap s!"object.__new__ of the C type {n} is not modelled yet"
   if ← excessArgs args kwargs then
     if !(← tpNewIsObject cls) then
       raiseBuiltin "TypeError" "object.__new__() takes exactly one argument (the type to instantiate)"
     if !(← overrides cls "__init__") then
-      raiseBuiltin "TypeError" s!"{← classNameOf cls}() takes no arguments"
+      raiseBuiltin "TypeError" s!"{← classTpName cls}() takes no arguments"
   -- The layout is object's, with the slots of user classes added.
   if (← itemsizeOf cls).1 != "object" then
     PyPure.gap "object.__new__ of a class whose layout is not object's"
@@ -525,12 +534,13 @@ def objectGetattribute [PyWrites m V] (self args kwargs : V) : m V := do
   if ← isType self then
     PyPure.gap "object.__getattribute__ of a class is not modelled yet"
   -- `PyObject_GenericGetAttr` is the generic lookup for every kind of object, which the model
-  -- follows only for a plain instance and a plain immediate.
+  -- follows only for a plain instance, an object with opaque state that a piece makes, and a
+  -- plain immediate.
   let plainImm := match ← PyPure.immView self with
     | some (.method ..) | some (.bound ..) | some (.descr ..) => false
     | some _ => true
     | none => false
-  if !plainImm && !((← PyReads.objView self) matches some .inst) then
+  if !plainImm && !((← PyReads.objView self) matches some .inst | some (.opaque ..)) then
     PyPure.gap "object.__getattribute__ of this kind of object is not modelled yet"
   genericGetAttr self (← PyReads.classOf self) name
 
@@ -794,7 +804,17 @@ def isinstanceN [PyCalls m V] : Nat → V → V → m Bool
     | some ic => PyReads.withDepth 1 do
       if (← PyPure.immView ic) matches some (.descr .type _ _) then objectIsinstance obj cls
       else truthy (← callFound "__instancecheck__" ic cls mt #[obj] (← PyPure.allocDict))
-    | none => objectIsinstance obj cls
+    | none =>
+      -- A union, an opaque object whose class has no `__instancecheck__`: the classes of its
+      -- arguments, in order.
+      if (← PyReads.objView cls) matches some (.opaque ..) then
+        let hook := PyPure.imm (m := m) (.bound cls .object unionArgsHook .method)
+        let args ← PyCalls.callBuiltin hook (PyPure.imm (m := m) (.tuple #[])) (← PyPure.allocDict)
+        if let some (.tuple cs) ← PyPure.immView args then
+          for c in cs do
+            if ← PyReads.withDepth 1 (isinstanceN n obj c) then return true
+          return false
+      objectIsinstance obj cls
 
 /-- The `isinstance` built-in. -/
 def isinstanceFn [PyWrites m V] (_self args kwargs : V) : m V := do

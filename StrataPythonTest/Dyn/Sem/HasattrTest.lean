@@ -89,6 +89,6 @@ def summary : IO (Nat × Nat × Array String) := do
       | .error e => bad := bad.push s!"{label}.{name}: {e}"
   return (agree, gaps, bad)
 
-/-- info: (736, 63, #[]) -/
+/-- info: (741, 58, #[]) -/
 #guard_msgs in
 #eval summary

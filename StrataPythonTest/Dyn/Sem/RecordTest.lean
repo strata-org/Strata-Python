@@ -105,6 +105,7 @@ instance : PyReads TM Toy where
   setHasUser _ := pure false
   dictHasUser _ := pure false
   setWalkKinds _ := pure ⟨false, false, false⟩
+  setExact _ := pure false
   dictWalkKinds _ := pure ⟨false, false, false⟩
   setLen _ := pure 0
   setCopy _ _ := pure (.obj 4)

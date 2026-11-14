@@ -53,7 +53,18 @@ structure NativeFn where
   defaults : Option Value := none
   kwdefaults : Option Value := none
   gapped : Array String := #[]
+  /-- For a descriptor (a wrapper or method descriptor), the class whose instances it binds. -/
+  owner : Option Value := none
   deriving Repr, Inhabited
+
+/-- How `type.__new__` treats a class as a base of a new class: allowed; CPython's `TypeError`
+("type 'X' is not an acceptable base type"), for a class without `Py_TPFLAGS_BASETYPE`; or a gap,
+for a class whose subclasses the model doesn't follow. -/
+inductive BaseRule where
+  | allowed
+  | notAcceptable
+  | gap
+  deriving DecidableEq, Repr, Inhabited
 
 /-- A class made by `__build_class__` or by a module's builder.  Its metaclass is the object's
 class. -/
@@ -65,7 +76,9 @@ structure ClassObj where
   /-- Its method resolution order, computed once by C3; it starts with the class itself. -/
   mro : Array Value
   /-- Its namespace: a dict object, which no rule hands to Python code (`C.__dict__` is a
-  mappingproxy over it). -/
+  mappingproxy over it). A piece that makes a class puts into it, or gaps, the entries that
+  CPython's type dict holds: `__doc__`, `__module__` for every class except one that CPython defines
+  statically in C, and `__new__` for a type with a `tp_new`. -/
   ns : ObjId
   /-- The nearest class in its base chain whose instances have a layout of their own; `None` when
   that is the class itself (a class with slots of its own). -/
@@ -86,10 +99,14 @@ structure ClassObj where
   tpName : Option String := none
   /-- Whether it defines `__del__`. -/
   hasDel : Bool := false
+  /-- How a new class may have this class as a base. -/
+  asBase : BaseRule := .allowed
+  /-- Whether a piece makes this class as a C type, whose instances only its own `__new__` makes. -/
+  cType : Bool := false
 
 instance : Inhabited ClassObj :=
   ⟨⟨"", "", "", #[], #[], 0, .none, true, #[], false, #[], false,
-  false, none, false⟩⟩
+  false, none, false, .allowed, false⟩⟩
 
 /-- A translated function: its closure, with its cells bound in, its `__name__`, and its
 `__module__`, the value of its module's `__name__` global when it was made. -/
@@ -162,11 +179,22 @@ inductive IterStateG (V : Type) where
 /-- The state of a built-in iterator in the store. -/
 abbrev IterState := IterStateG Value
 
-/-- A module object: its name, and whether reads of some names and every write gap. -/
+/-- The kind of a module object, which says where its attributes are. -/
+inductive ModuleKind (V : Type) where
+  /-- The `builtins` module: its attributes are the entries of the `builtins` dict. -/
+  | builtins
+  /-- A translated program's module: its attributes are its global cells. -/
+  | translated
+  /-- A module that a piece's body made (`importHook`): the attributes that the body gave it. -/
+  | made (attrs : Array (String × V))
+  deriving Repr, Inhabited
+
+/-- A module object: its name, whether reads of some names and every write gap, and its kind. -/
 structure ModuleObj where
   name : String
   gapped : Array String := #[]
   writesGap : Bool := false
+  kind : ModuleKind Value
   deriving Repr, Inhabited
 
 /-- The built-in state of an object, whose function payload is an `F`. -/
@@ -206,8 +234,12 @@ inductive PayloadG (F : Type) where
   | opaque (tag : String) (state : Array Value)
   /-- The descriptor of slot `index` of the class `owner`. -/
   | member (owner : Value) (name : String) (index : Nat)
-  /-- A read-only view of the dict `d`: a class's `__dict__`. -/
-  | mappingProxy (d : Value)
+  /-- A read-only view of the dict `d`: the `__dict__` of the class `owner`, one of the two kinds
+  of mappingproxy (`ObjView.mappingProxy`). -/
+  | mappingProxy (d owner : Value)
+  /-- A read-only view of a plain dict `d`, such as a dict view's `mapping`, as
+  `allocMappingProxy` makes it: the other kind of mappingproxy (`ObjView.mappingProxy`). -/
+  | dictProxy (d : Value)
 
 instance {F : Type} : Inhabited (PayloadG F) := ⟨.plain⟩
 
@@ -277,7 +309,8 @@ def PayloadG.lift {F : Type} : PayloadData → PayloadG F
   | .super t o => .super t o
   | .opaque t s => .opaque t s
   | .member o n i => .member o n i
-  | .mappingProxy d => .mappingProxy d
+  | .mappingProxy d o => .mappingProxy d o
+  | .dictProxy d => .dictProxy d
 
 /-- A payload as a rule sees it: a function payload is seen as `none`. -/
 def PayloadG.data? {F : Type} : PayloadG F → Option PayloadData
@@ -303,7 +336,8 @@ def PayloadG.data? {F : Type} : PayloadG F → Option PayloadData
   | .super t o => some (.super t o)
   | .opaque t s => some (.opaque t s)
   | .member o n i => some (.member o n i)
-  | .mappingProxy d => some (.mappingProxy d)
+  | .mappingProxy d o => some (.mappingProxy d o)
+  | .dictProxy d => some (.dictProxy d)
 
 /-- An object with an empty function payload, as one with any. -/
 def ObjG.lift {F : Type} (o : ObjData) : ObjG F := { o with payload := o.payload.lift }

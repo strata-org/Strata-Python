@@ -1124,6 +1124,15 @@ def setViewOf (s : Value) : PyM σ .reads true (Option (SetView Value)) := do
   pure (some ⟨(t.active.map fun (_, h, k) => (k, h)).toArray, t.exactLayout,
     (t.kindGroupCount .exact, t.kindGroupCount .addr, t.kindGroupCount .otherSymbolic)⟩)
 
+/-- Whether `s` is a set whose order the model knows: `setViewOf`'s `exact`, without its walk. -/
+def setExactOf (s : Value) : PyM σ .reads true Bool := do
+  let .obj id := s | pure false
+  let d ← objGet id
+  if d matches some { payload := .frozenset _ false, .. } then
+    PyM.failure s!"a read of the frozenset {id}, which is still open"
+  let some (t, _) := setOf d | pure false
+  pure t.exactLayout
+
 /-- A new set with the members of `s`, as `set_merge` into an empty set puts them. -/
 def setCopy (s : Value) (frozen : Bool) : PyM σ .reads true Value := do
   let (t, _) ← setRead s
@@ -1149,20 +1158,21 @@ def newPayload (id : ObjId) : NewObj Value → Option PayloadData
           mro := #[.obj id] ++ c.mroTail, ns := n, solidBase := c.solidBase,
           instanceDict := c.instanceDict, slots := c.slots, immutable := c.immutable,
           gapped := c.gapped, writesGap := c.writesGap, instanceWritesGap := c.instanceWritesGap,
-          tpName := c.tpName, hasDel := c.hasDel }
+          tpName := c.tpName, hasDel := c.hasDel, asBase := c.asBase, cType := c.cType }
     | _ => none
   | .native f => some <| .native
       { key := f.key, kind := f.kind, captured := f.captured, name := f.name,
         qualname := f.qualname, «module» := f.module, defaults := f.defaults,
-        kwdefaults := f.kwdefaults, gapped := f.gapped }
-  | .module n g w => some (.module ⟨n, g, w⟩)
+        kwdefaults := f.kwdefaults, gapped := f.gapped, owner := f.owner }
+  | .module n g w a => some (.module ⟨n, g, w, .made a⟩)
   | .property a b c d => some (.property a b c d)
   | .classmethod f => some (.classmethod f)
   | .staticmethod f => some (.staticmethod f)
   | .super t o => some (.super t o)
   | .opaque t st => some (.opaque t st)
   | .member o n i => some (.member o n i)
-  | .mappingProxy d => some (.mappingProxy d)
+  | .mappingProxy d o => some (.mappingProxy d o)
+  | .dictProxy d => some (.dictProxy d)
   | .iter it => some (.iter it none)
 
 /-- A new object of the class `cls` with the contents `o`. -/
@@ -1176,7 +1186,7 @@ def classDataOf (c : ClassObj) : ClassData Value :=
     mroTail := c.mro.extract 1 c.mro.size, ns := .obj c.ns, solidBase := c.solidBase,
     instanceDict := c.instanceDict, slots := c.slots, immutable := c.immutable,
     gapped := c.gapped, writesGap := c.writesGap, instanceWritesGap := c.instanceWritesGap,
-    tpName := c.tpName, hasDel := c.hasDel }
+    tpName := c.tpName, hasDel := c.hasDel, asBase := c.asBase, cType := c.cType }
 
 /-- What the payload `p` is, other than a container. -/
 def viewOf : PayloadData → ObjView Value
@@ -1184,17 +1194,18 @@ def viewOf : PayloadData → ObjView Value
   | .native f => .native
       { key := f.key, kind := f.kind, captured := f.captured, name := f.name,
         qualname := f.qualname, «module» := f.module, defaults := f.defaults,
-        kwdefaults := f.kwdefaults, gapped := f.gapped }
+        kwdefaults := f.kwdefaults, gapped := f.gapped, owner := f.owner }
   | .exc e => .exc ⟨e.args, e.context, e.cause, e.suppressContext, e.traceback, e.fields⟩
   | .iter it _ => .iter it
-  | .module m => .module m.name m.gapped m.writesGap
+  | .module m => .module m.name m.gapped m.writesGap m.kind
   | .property a b c d => .property a b c d
   | .classmethod f => .classmethod f
   | .staticmethod f => .staticmethod f
   | .super t o => .super t o
   | .opaque t st => .opaque t st
   | .member o n i => .member o n i
-  | .mappingProxy d => .mappingProxy d
+  | .mappingProxy d o => .mappingProxy d o
+  | .dictProxy d => .dictProxy d
   | _ => .inst
 
 /-- What the store object `o` is, other than a container; a translated function shows its name
@@ -1650,6 +1661,7 @@ instance {e : Level} {fr : Bool} [Level.AtLeast .reads e] : PyReads (PyM σ e fr
   setHasUser s := (·.1.hasUser) <$> (Prim.setRead s).relax.lift Level.AtLeast.le
   dictHasUser d := (·.hasUser) <$> (Prim.dictTable d).relax.lift Level.AtLeast.le
   setWalkKinds s := (·.1.walkKinds) <$> (Prim.setRead s).relax.lift Level.AtLeast.le
+  setExact s := (Prim.setExactOf s).relax.lift Level.AtLeast.le
   dictWalkKinds d := (·.walkKinds) <$> (Prim.dictTable d).relax.lift Level.AtLeast.le
   setLen s := (·.1.used) <$> (Prim.setRead s).relax.lift Level.AtLeast.le
   setCopy s frozen := (Prim.setCopy s frozen).relax.lift Level.AtLeast.le
@@ -1688,6 +1700,8 @@ def resolveBuiltin (f args : Value) : PyM σ .reads true (Option (ImplKey × Val
   | .builtin b => pure (some (.function b, f, args))
   -- A type's `tp_new` as a class call runs it is its `__new__`'s body, under the key `tp_new`.
   | .bound self t name k => pure (some (.method t (if k == .tpNew then "tp_new" else name), self, args))
+  -- A static method takes no `self`: it runs on its arguments as they are.
+  | .descr t name .staticMethod => pure (some (.method t name, .none, args))
   | .descr t name _ => match args with
     | .tuple xs => match xs[0]? with
       | some self =>
@@ -1787,8 +1801,12 @@ def callBuiltinWith (impls : Impls) : Nat → Value → Value → Value → PyM 
     | none => PyM.gap (match key with
       | .function b => s!"built-in {b.info.name} is not modelled yet"
       -- A type's `tp_new` (`DescrKind.tpNew`) is its `__new__` to the program.
+      -- A hook's name (`importHook`, `typeGetItemHook`, `unionArgsHook`) says what has no body.
       | .method t name =>
-        s!"built-in method {t.info.name}.{if name == "tp_new" then "__new__" else name} is not modelled yet"
+        if name.startsWith "<" && name.endsWith ">" then
+          s!"{((name.drop 1).dropEnd 1).toString} is not modelled yet"
+        else
+          s!"built-in method {t.info.name}.{if name == "tp_new" then "__new__" else name} is not modelled yet"
       | .native k => s!"native function {k} has no body")
 
 /-- How deep the calls of built-ins may nest. -/

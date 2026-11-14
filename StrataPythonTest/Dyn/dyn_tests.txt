@@ -515,6 +515,8 @@ s366_utf8_bom | yes |
 s367_coding_line | yes |
 s368_sym_hash_member | yes |
 s369_sym_hash_member_second | yes |
+s333_class_annotations | yes |
+s370_long_class_name_write | yes |
 s129_iter_builtins | yes |
 s130_iter_loops | yes |
 s131_dict_merge | yes |

@@ -92,6 +92,15 @@ def hashOf? (v : Value) : Option Hash :=
 -- A slice of a `str` has a symbolic hash.
 #guard hashOf? (.slice (.ofString "a") (.int 1) .none) == some (.symbolic (.combine "slice" [strHash (.ofString "a"), .exact 1, .exact noneHash]))
 
+-- A static method of a built-in type hashes as the built-in function it is, one per type and
+-- name, and not as the descriptor that holds it.
+#guard hashOf? (.bound .none .str "maketrans" .staticMethod)
+  == some (.symbolic (.combine "<staticmethod>" [.symbolic (.descr .str "maketrans")]))
+#guard hashOf? (.bound .none .str "maketrans" .staticMethod)
+  != hashOf? (.descr .str "maketrans" .staticMethod)
+#guard hashOf? (.bound .none .str "maketrans" .staticMethod)
+  != hashOf? (.bound .none .bytes "maketrans" .staticMethod)
+
 -- `None`, `bool`, and the empty `str` and `bytes`.
 #guard exactHash .none == some 4238894112
 #guard exactHash (.bool true) == some 1
@@ -152,5 +161,12 @@ example (t : Builtin) (name : String) (k : DescrKind) :
 #guard (Value.symHash (.buffer [97])).immHash == .hash (.symbolic (HashSrc.buffer [97]).reduced)
 #guard (Value.symHash (HashSrc.buffer [97]).reduced).immHash == .hash (.symbolic (HashSrc.buffer [97]).reduced)
 #guard (HashSrc.buffer [97]).reduced != HashSrc.buffer [97]
+
+-- `combineHash`: `exact` of the parts' numbers when every part is exact, else a symbolic hash from
+-- the tag and the parts.
+#guard combineHash "t" [.exact 1, .exact 2] (fun ns => ns.foldl (· + ·) 10) == .exact 13
+#guard combineHash "t" [.exact 1, .symbolic (HashSrc.buffer [97])] (fun _ => 0) ==
+  .symbolic (HashSrc.combine "t" [.exact 1, .symbolic (HashSrc.buffer [97])])
+#guard combineHash "t" [] (fun _ => 5) == .exact 5
 
 end StrataPython.Dyn.Sem.HashTest

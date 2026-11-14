@@ -108,6 +108,15 @@ def tupleHash (hs : List Hash) : Hash :=
   | some ns => .exact (xxHashExact ns true)
   | none => .symbolic (.tuple hs)
 
+/-- A hash that a value's `__hash__` combines from the hashes `parts`, named by `tag`: `exact` of
+their numbers when every part is exact, else a symbolic hash from the tag and the parts.  Two
+symbolic hashes are equal when their tags and parts are, so a tag must name one `exact` function
+among all callers (`sliceHash` uses "slice", and a static method's hash "<staticmethod>"). -/
+def combineHash (tag : String) (parts : List Hash) (exact : List Int → Int) : Hash :=
+  match Hash.allExact? parts with
+  | some ns => .exact (exact ns)
+  | none => .symbolic (.combine tag parts)
+
 /-- The hash of a slice whose bounds have the hashes `hs`: CPython 3.12's `slicehash`. -/
 def sliceHash (hs : List Hash) : Hash :=
   match Hash.allExact? hs with
@@ -220,6 +229,11 @@ def Value.immHash : Value → HashResult
   -- and its C function, which the model doesn't compute.
   | .descr _ _ .tpNew => .unknown
   | .descr t name _ => .hash (.symbolic (.descr t name))
+  -- A static method of a built-in type is the built-in function that `staticmethod.__get__`
+  -- gives.  CPython hashes it from the type that holds it (its `m_self`; `__self__` reads `None`)
+  -- and its C function: one hash per type and name, and not the descriptor's own.
+  | .bound .none t name .staticMethod =>
+    .hash (.symbolic (.combine "<staticmethod>" [.symbolic (.descr t name)]))
   | .obj _ => .needsStore
   | .undef _ | .bound .. | .method .. | .traceback => .unknown
 

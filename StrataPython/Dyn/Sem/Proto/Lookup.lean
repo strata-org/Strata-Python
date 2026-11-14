@@ -98,12 +98,21 @@ def tpNameOf [PyReads m V] (c : V) : m String := do
     | some cd => pure (cd.tpName.getD cd.name)
     | none => PyPure.gap "the tp_name of a value that is not a class"
 
-/-- The `__name__` of the type of `v`, as CPython's messages give it (a built-in type's `tp_name`). -/
+/-- The `tp_name` of the class `c`, as CPython's messages give it: a built-in type's, the one that
+a piece gives its class (`ClassData.tpName`), or else the class's `__name__`; as `classNameOf`, a
+name longer than 50 bytes stops with a gap. -/
+def classTpName [PyReads m V] (c : V) : m String := do
+  let n ← match ← PyPure.immView c with
+    | some (.builtin b) => pure (if b.info.tpName.isEmpty then b.info.name else b.info.tpName)
+    | _ => match ← classData? c with
+      | some { tpName := some n, .. } => pure n
+      | _ => classNameOf c
+  if n.utf8ByteSize > 50 then PyPure.gap "a message with a class name longer than 50 bytes is not modelled yet"
+  pure n
+
+/-- The `tp_name` of the type of `v`, as CPython's messages give it (`classTpName`). -/
 def typeName [PyReads m V] (v : V) : m String := do
-  let t ← PyReads.classOf v
-  match ← PyPure.immView t with
-  | some (.builtin b) => pure (if b.info.tpName.isEmpty then b.info.name else b.info.tpName)
-  | _ => classNameOf t
+  classTpName (← PyReads.classOf v)
 
 /-- The name of `v`'s type as Argument Clinic's `_PyArg_BadArgument` gives it: `None` for `None`. -/
 def argTypeName [PyReads m V] (v : V) : m String := do
@@ -160,6 +169,7 @@ def _root_.StrataPython.Dyn.Sem.AttrKind.descr? : AttrKind → Option DescrKind
   | .slotWrapper => some .slotWrapper
   | .method => some .method
   | .classMethodDescr => some .classMethod
+  | .staticMethod => some .staticMethod
   | .getset => some .getset
   | .member => some .member
   | _ => none
@@ -194,8 +204,13 @@ def lookupOwnK [PyReads m V] (c : V) (name : String) (k : V) : m (Option V) := d
     | some cd =>
       if cd.gapped.contains name then
         PyPure.gap s!"the attribute {cd.name}.{name} is not modelled yet"
-      PyReads.dictFind cd.ns k none fun _ =>
+      let found ← PyReads.dictFind cd.ns k none fun _ =>
         PyPure.gap "a namespace whose keys run user code is not modelled yet"
+      -- `type.__new__` always puts `__doc__` and `__module__` into a class's namespace, so a class
+      -- without one is one that a piece made, whose entry CPython's type dict may hold.
+      if found.isNone && (name == "__doc__" || name == "__module__") then
+        PyPure.gap s!"the attribute {cd.name}.{name} is not modelled yet"
+      return found
     | none => pure none
 
 /-- The first entry `name` along the classes `mro`, with `k` as in `lookupOwnK`. -/
@@ -214,6 +229,34 @@ def lookupMro [PyReads m V] (mro : List V) (name : String) : m (Option V) :=
 def lookupType [PyReads m V] (t : V) (name : String) : m (Option V) := do
   let some mro ← mroOf t | PyPure.gap "a lookup on a type that is not a class"
   lookupMro mro.toList name
+
+/-- A gap for `__dict__` and `__weakref__` when a user class is among the classes `mro`:
+`type.__new__` puts a descriptor for each in a user class's namespace, which the model doesn't
+hold, so a lookup that finds nothing else may still find them in CPython. -/
+def implicitDescrGap [PyReads m V] (name : String) (mro : Array V) : m Unit := do
+  if name == "__dict__" || name == "__weakref__" then
+    if ← mro.anyM fun c => return (← PyPure.immView c).isNone then
+      PyPure.gap s!"the {name} that a user class's namespace holds is not modelled yet"
+
+/-- The `tp_name` of the first class along the MRO of the class `cls` that a piece makes as a C
+type (`ClassData.cType`), if there is one: a subclass of a C type is made by the C type's
+`tp_new`. -/
+def cTypeAlong [PyReads m V] (cls : V) : m (Option String) := do
+  let some mro ← mroOf cls | return none
+  for c in mro do
+    if let some cd ← classData? c then
+      if cd.cType then return some (cd.tpName.getD cd.name)
+  return none
+
+/-- A gap for a read of `__new__` on the class `cls` that would give `object.__new__`, when `cls` is
+a C type that a piece makes or a subclass of one (`cTypeAlong`): CPython raises when that
+`object.__new__` is called ("object.__new__(X) is not safe"), which the model doesn't follow. -/
+def cTypeNewGap [PyReads m V] (cls : V) : m Unit := do
+  let some n ← cTypeAlong cls | return
+  let viaObject ← match ← lookupType cls "__new__" with
+    | some f => pure ((← PyPure.immView f) matches some (.bound _ .object "__new__" _))
+    | none => pure true
+  if viaObject then PyPure.gap s!"object.__new__ of the C type {n} is not modelled yet"
 
 /-- The built-in type whose `__getattribute__` the class `t` inherits as its default lookup: the
 first built-in type along `t`'s MRO whose table has `__getattribute__`.  A `__getattribute__`
@@ -284,8 +327,16 @@ def builtinGetsetGet [PyReads m V] (t : Builtin) (name : String) (obj : V) : m V
       | some cd => match ← dictFindStr cd.ns "__module__" with
         | some x => pure x
         | none =>
-          let nameV := PyPure.imm (m := m) (.str (.ofString "__module__"))
-          raiseBuiltin "AttributeError" "__module__" #[("name", nameV), ("obj", obj)]
+          -- A C type's module is the part of its `tp_name` before the last dot, or `builtins`
+          -- (`type_module`).
+          if cd.cType then
+            let tp := cd.tpName.getD cd.name
+            let parts := tp.splitOn "."
+            let mod := if parts.length > 1 then ".".intercalate parts.dropLast else "builtins"
+            return PyPure.imm (m := m) (.str (.ofString mod))
+          -- `type.__new__` always puts `__module__` into a class's namespace, so this class is one
+          -- that a piece made, whose `__module__` CPython's type dict may hold.
+          PyPure.gap s!"the attribute {cd.name}.__module__ is not modelled yet"
       | none => gapIt
   | .type, "__mro__" => match ← mroOf obj with
     | some mro => return PyPure.imm (m := m) (.tuple mro)
@@ -297,16 +348,47 @@ def builtinGetsetGet [PyReads m V] (t : Builtin) (name : String) (obj : V) : m V
       | some cd => return PyPure.imm (m := m) (.tuple cd.bases)
       | none => gapIt
   | .type, "__dict__" => match ← classData? obj with
-    | some cd => PyPure.allocObj (PyPure.imm (m := m) (.builtin .mappingproxy)) (.mappingProxy cd.ns)
+    | some cd => PyPure.allocObj (PyPure.imm (m := m) (.builtin .mappingproxy)) (.mappingProxy cd.ns obj)
     | none => gapIt
+  -- `type_get_annotations`: a class's own namespace entry, never a base's; a static type (one
+  -- that CPython defines statically in C) has none.
+  | .type, "__annotations__" => match ← PyPure.immView obj with
+    | some (.builtin b) =>
+      if b.info.heapType then
+        PyPure.gap s!"the __annotations__ of the heap type {b.info.name} is not modelled yet"
+      let nameV := PyPure.imm (m := m) (.str (.ofString "__annotations__"))
+      raiseBuiltin "AttributeError"
+        s!"type object '{← classTpName obj}' has no attribute '__annotations__'"
+        #[("name", nameV), ("obj", obj)]
+    | _ => match ← classData? obj with
+      | some cd => match ← dictFindStr cd.ns "__annotations__" with
+        | some a =>
+          -- An entry with a `__get__` is bound first, which the model doesn't follow here.
+          if ← classIs a .dict then pure a
+          else PyPure.gap "a class's __annotations__ entry that is not a dict is not modelled yet"
+        | none => PyPure.gap "the __annotations__ of a class whose namespace has none is not modelled yet"
+      | none => gapIt
   | .type, "__doc__" => match ← classData? obj with
-    | some cd => return (← dictFindStr cd.ns "__doc__").getD (PyPure.imm (m := m) .none)
+    | some cd => do
+      -- A class without `__doc__` in its namespace is one that a piece made (`type.__new__`
+      -- always puts it there), whose doc CPython's `type_ready` may give.
+      if cd.gapped.contains "__doc__" then return ← gapIt
+      let some doc ← dictFindStr cd.ns "__doc__" | gapIt
+      return doc
     | none => gapIt
+  -- A native function that a piece makes (`NativeKind.function`) has its names as data.
   | .function, "__name__" => match ← PyReads.objView obj with
     | some (.func n _ _ _) => return PyPure.imm (m := m) (.str (.ofString n))
+    | some (.native { kind := .function, name, .. }) => return PyPure.imm (m := m) (.str (.ofString name))
+    | _ => gapIt
+  | .function, "__qualname__" => match ← PyReads.objView obj with
+    | some (.native { kind := .function, qualname, .. }) =>
+      return PyPure.imm (m := m) (.str (.ofString qualname))
     | _ => gapIt
   | .function, "__module__" => match ← PyReads.objView obj with
     | some (.func _ mo _ _) => pure mo
+    | some (.native { kind := .function, «module», .. }) =>
+      return PyPure.imm (m := m) (.str (.ofString «module»))
     | _ => gapIt
   | .function, "__annotations__" => match ← PyReads.objView obj with
     | some (.func _ _ (some a) _) => pure a
@@ -384,12 +466,6 @@ def descrSelf [PyReads m V] (t : Builtin) (name : String) (wrapper : Bool) (args
         s!"descriptor '{name}' for '{t.info.name}' objects doesn't apply to a '{← typeName self}' object"
   return (self, PyPure.imm (m := m) (.tuple (xs.extract 1 xs.size)))
 
-/-- The `tp_name` of the class `c`, as CPython's messages give it. -/
-def classTpName [PyReads m V] (c : V) : m String := do
-  match ← PyPure.immView c with
-  | some (.builtin b) => pure (if b.info.tpName.isEmpty then b.info.name else b.info.tpName)
-  | _ => classNameOf c
-
 /-- CPython's `classmethod_get` check of the class `cls` that the class method `name` of the
 built-in type `t` binds to: `TypeError` unless `cls` is a class that is `t` or a subclass of it. -/
 def classDescrCheck [PyReads m V] (t : Builtin) (name : String) (cls : V) : m Unit := do
@@ -459,6 +535,8 @@ def hasGet [PyReads m V] (d : V) : m Bool := do
   | none => match ← PyReads.objView d with
     | some (.func ..) | some (.classmethod _) | some (.staticmethod _) | some (.property ..)
     | some (.member ..) => pure true
+    | some (.native nf) =>
+      pure (nf.kind == .wrapperDescriptor || nf.kind == .methodDescriptor || nf.kind == .function)
     | some .inst => return (← lookupType (← PyReads.classOf d) "__get__").isSome
     | _ => pure false
 
@@ -658,7 +736,9 @@ def callN [PyCalls m V] : Nat → V → V → V → m V
         PyReads.withDepth 2 (PyCalls.callFunc f args kwargs)
       | some (.native _) => PyReads.withDepth 1 (PyCalls.callBuiltin f args kwargs)
       | some (.cls _) => typeCallN n true f args kwargs
-      | some .inst =>
+      -- An instance of a user class, or an object with opaque state that a piece makes, whose
+      -- class's `__call__` (a native, for the latter) is its `tp_call`.
+      | some .inst | some (.opaque ..) =>
         let t ← PyReads.classOf f
         match ← lookupType t "__call__" with
         | some c =>
@@ -666,7 +746,7 @@ def callN [PyCalls m V] : Nat → V → V → V → m V
           PyReads.withDepth 1 do
             let g ← descrGetN n c (some f) t
             callN n g args kwargs
-        | none => raiseBuiltin "TypeError" s!"'{← classNameOf t}' object is not callable"
+        | none => raiseBuiltin "TypeError" s!"'{← classTpName t}' object is not callable"
       | _ => PyPure.gap "a call of this built-in object is not modelled yet"
 
 /-- **A call of the class `cls`**: with `viaMeta`, a metaclass's own `__call__` if it has one; then,
@@ -674,7 +754,8 @@ as `type.__call__` (`type_call`), `type(x)`'s one-argument form, else `__new__`,
 if the result is an instance of `cls`. -/
 def typeCallN [PyCalls m V] : Nat → Bool → V → V → V → m V
   | 0, _, _, _, _ => PyPure.gap "a call dispatch nested deeper than the model follows"
-  | n + 1, viaMeta, cls, args, kwargs =>
+  | n + 1, viaMeta, cls, args, kwargs => do
+    cTypeNewGap cls
     -- A call of a class goes through `_PyObject_MakeTpCall`, which counts a C level.
     PyReads.withDepth 1 do
       let mt ← PyReads.classOf cls
@@ -741,14 +822,21 @@ def descrGetN [PyCalls m V] : Nat → V → Option V → V → m V
         let cls ← if (← PyPure.immView type) matches some .none then PyReads.classOf obj else pure type
         classDescrCheck t name cls
         pure (PyPure.imm (m := m) (.bound cls t name k))
-      | .staticMethod => pure d
+      -- `staticmethod.__get__` gives the C function it holds (a Python one is `.pyStaticMethod`),
+      -- whose `__self__` is `None`.
+      | .staticMethod => pure (PyPure.imm (m := m) (.bound (PyPure.imm (m := m) .none) t name k))
       | .tpNew => PyPure.modelInvariant "a type's tp_new outside a class call"
       | .getset | .member => if noObj then pure d else do
           descrCheck (PyPure.imm (m := m) (.builtin t)) name obj
           -- `type_get_doc`: a class's own `__doc__`, bound by its `__get__` when it has one.
+          -- `type.__new__` always puts `__doc__` into a class's namespace, so a class without it
+          -- is one that a piece made, whose doc CPython's `type_ready` may give.
           if t == .type && name == "__doc__" then
             if let some cd ← classData? obj then
-              let some doc ← dictFindStr cd.ns "__doc__" | return PyPure.imm (m := m) .none
+              if cd.gapped.contains "__doc__" then
+                PyPure.gap s!"the attribute {cd.name}.__doc__ is not modelled yet"
+              let some doc ← dictFindStr cd.ns "__doc__" |
+                PyPure.gap s!"the attribute {cd.name}.__doc__ is not modelled yet"
               if ← hasGet doc then return ← descrGetN n doc none obj
               return doc
           builtinGetsetGet t name obj
@@ -780,8 +868,31 @@ def descrGetN [PyCalls m V] : Nat → V → Option V → V → m V
         match ← PyReads.slotGet obj i with
           | some v => pure v
           | none => do
-            let tn ← classNameOf (← PyReads.classOf obj)
+            let tn ← classTpName (← PyReads.classOf obj)
             raiseAttr obj name s!"'{tn}' object has no attribute '{name}'"
+      -- A wrapper or method descriptor that a piece makes binds `obj` as CPython's `wrapperdescr_get`
+      -- and `method_get` do: after `descr_check` of its owner, a `method-wrapper` or a
+      -- `builtin_function_or_method` that captured `obj` after its own captures.
+      | some (.native nf) =>
+        let bound? : Option (NativeKind × Builtin) := match nf.kind with
+          | .wrapperDescriptor => some (.methodWrapper, .«method-wrapper»)
+          | .methodDescriptor => some (.builtinFunctionOrMethod, .«builtin_function_or_method»)
+          | _ => none
+        match bound?, obj? with
+        -- A native function binds as a Python function does (`func_descr_get`).
+        | none, some o => if nf.kind == .function then pure (PyPure.imm (m := m) (.method d o)) else pure d
+        | some (k, cls), some o =>
+          let some owner := nf.owner |
+            PyPure.gap s!"the descriptor {nf.qualname} without an owner class is not modelled yet"
+          if !(← isSubclass (← PyReads.classOf o) owner) then
+            -- As for a built-in slot wrapper, CPython's message depends on whether the attribute
+            -- is called as a method, which the IR doesn't show.
+            if nf.kind == .wrapperDescriptor then
+              PyPure.gap "a slot wrapper bound to an object of another type is not modelled yet"
+            raiseBuiltin "TypeError" s!"descriptor '{nf.name}' for '{← tpNameOf owner}' objects doesn't apply to a '{← typeName o}' object"
+          PyPure.allocObj (PyPure.imm (m := m) (.builtin cls))
+            (.native { nf with kind := k, captured := nf.captured.push o })
+        | _, _ => pure d
       | some .inst =>
         match ← lookupType (← PyReads.classOf d) "__get__" with
         -- `slot_tp_descr_get` calls `__get__` as it is, with the descriptor first.

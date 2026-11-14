@@ -31,4 +31,4 @@ tuple of defaults that a function's prologue builds, which holds `undef` for a p
 default, goes only to `bindArgs`. -/
 public theorem Value.identical_self_ne_no (v : Value) (h : ∀ n, v ≠ .undef n) :
     Value.identical v v ≠ .no := by
-  cases v <;> simp_all [Value.identical, Value.isConstant, Value.immKind]
+  cases v <;> simp_all [Value.identical, Value.isConstant, Value.immKind] <;> split <;> simp

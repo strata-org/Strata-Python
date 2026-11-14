@@ -131,15 +131,18 @@ def Assembly.parts : List Impls := [opsImpls]
 /-- The bodies of every piece, in the order the pieces build on each other. -/
 def Assembly.impls : Impls := (Assembly.parts.foldr Impls.join {}).withNewCheck
 
-/-- The keys that two of `parts` both fill: the built-in functions, and the names of every
-built-in type's attribute table; a native function's key belongs to the piece that makes it. -/
+/-- The keys that two of `parts` both fill: the built-in functions, the names of every built-in
+type's attribute table, and the hooks `typeGetItemHook` and `unionArgsHook`.  A native
+function's key and a module's import hook (`importHook`) belong to the piece that makes them,
+since their names can't be listed here. -/
 def Impls.overlaps (parts : List Impls) : List String :=
   let count (f : Impls → Bool) := (parts.filter f).length
   let fns := Builtin.allConstants.toList.filterMap fun b =>
     if count (fun p => (p.function b).isSome) > 1 then some b.info.name else none
-  let methods := Builtin.allConstants.toList.flatMap fun t =>
-    (t.ownNames.toList.map (·.1)).filterMap fun n =>
-      if count (fun p => (p.method t n).isSome) > 1 then some s!"{t.info.name}.{n}" else none
+  let keys := Builtin.allConstants.toList.flatMap (fun t => t.ownNames.toList.map (t, ·.1)) ++
+    [(.type, typeGetItemHook), (.object, unionArgsHook)]
+  let methods := keys.filterMap fun (t, n) =>
+    if count (fun p => (p.method t n).isSome) > 1 then some s!"{t.info.name}.{n}" else none
   fns ++ methods
 
 variable {σ : Type} [Store σ] [Decode σ]

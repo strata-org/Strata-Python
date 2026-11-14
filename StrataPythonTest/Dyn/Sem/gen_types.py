@@ -67,7 +67,7 @@ def _samples():
         iter(lambda: 0, 1), iter(_GetItem()), d.keys(), d.values(), d.items(), None, NotImplemented, ...,
         lambda: 0, [].append, len, str.upper, int.__add__, (1).__add__,
         dict.__dict__["fromkeys"], type.__dict__["__name__"], _Slotted.__dict__["x"],
-        type.__dict__, builtins, list[int], int | str, property(), classmethod(len),
+        type.__dict__, builtins, property(), classmethod(len),
         staticmethod(len), super(int, 1), (1).__index__, _Slotted().f, _cell(),
         builtins.exit, builtins.help, builtins.copyright, builtins.__spec__,
     ]
@@ -234,6 +234,9 @@ def main():
         "  itemsize : Nat",
         "  /-- Whether a class may derive from the type (CPython's `Py_TPFLAGS_BASETYPE`). -/",
         "  basetype : Bool",
+        "  /-- Whether a type is a heap type (CPython's `Py_TPFLAGS_HEAPTYPE`), such as `ExceptionGroup`:",
+        "  CPython makes it at start-up, as it makes a class. -/",
+        "  heapType : Bool",
         "  /-- Whether the instances of a type have a `__dict__` (CPython's `tp_dictoffset != 0`). -/",
         "  instanceDict : Bool",
         "  /-- Whether the type refuses a write of its attributes (CPython's `Py_TPFLAGS_IMMUTABLETYPE`). -/",
@@ -261,21 +264,22 @@ def main():
             solid = key_of(entries, solid_base(obj))
             itemsize = obj.__itemsize__
             basetype = bool(obj.__flags__ & (1 << 10))
+            heaptype = bool(obj.__flags__ & (1 << 9))
             instdict = obj.__dictoffset__ != 0
             immutable = bool(obj.__flags__ & (1 << 8))
         else:
             name = getattr(obj, "__name__", k) if kind == "function" else k
             qual = getattr(obj, "__qualname__", name) if kind == "function" else k
             mod = "builtins"
-            tpn, bases, mro, solid, itemsize, basetype = "", [], [], k, 0, False
+            tpn, bases, mro, solid, itemsize, basetype, heaptype = "", [], [], k, 0, False, False
             instdict = False
             immutable = False
         arr = lambda xs: "#[" + ", ".join(f".{lean_ident(x)}" for x in xs) + "]"
         lines.append(
             f"  | .{lean_ident(k)} => ⟨.{kind}, {lean_str(name)}, {lean_str(qual)}, "
             f"{lean_str(mod)}, {lean_str(tpn)}, {arr(bases)}, {arr(mro)}, .{lean_ident(solid)}, "
-            f"{itemsize}, {'true' if basetype else 'false'}, {'true' if instdict else 'false'}, "
-            f"{'true' if immutable else 'false'}, "
+            f"{itemsize}, {'true' if basetype else 'false'}, {'true' if heaptype else 'false'}, "
+            f"{'true' if instdict else 'false'}, {'true' if immutable else 'false'}, "
             f".{hash_kind(obj)}⟩"
         )
     lines += [

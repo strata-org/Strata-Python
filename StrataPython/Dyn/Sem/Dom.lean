@@ -92,6 +92,8 @@ structure ClassData (V : Type) where
   instanceWritesGap : Bool := false
   tpName : Option String := none
   hasDel : Bool := false
+  asBase : BaseRule := .allowed
+  cType : Bool := false
 
 /-- An exception's state as generic code reads it (`Store.lean`'s `ExcState`): `args` (a tuple),
 `__context__`, `__cause__`, `__suppress_context__`, `__traceback__`, and the fields of its class
@@ -127,6 +129,8 @@ structure NativeData (V : Type) where
   defaults : Option V := none
   kwdefaults : Option V := none
   gapped : Array String := #[]
+  /-- For a descriptor (a wrapper or method descriptor), the class whose instances it binds. -/
+  owner : Option V := none
 
 /-- What an object other than a container is, as generic code sees it; a list, a dict, a set, a
 frozenset and the built-in part of a subclass instance have views of their own. -/
@@ -140,7 +144,8 @@ inductive ObjView (V : Type) where
   | native (f : NativeData V)
   | exc (e : ExcData V)
   | iter (it : IterStateG V)
-  | module (name : String) (gapped : Array String) (writesGap : Bool)
+  /-- A module: its name, its gapped names, whether writes gap, and its kind (`ModuleKind`). -/
+  | module (name : String) (gapped : Array String) (writesGap : Bool) (kind : ModuleKind V)
   | property (fget fset fdel doc : V)
   /-- A `classmethod` with its callable; `none` until `__init__` sets it (CPython's `NULL`). -/
   | classmethod (f : Option V)
@@ -150,15 +155,22 @@ inductive ObjView (V : Type) where
   | opaque (tag : String) (state : Array V)
   /-- The descriptor of slot `index` of the class `owner`. -/
   | member (owner : V) (name : String) (index : Nat)
-  /-- A read-only view of the dict `d`. -/
-  | mappingProxy (d : V)
+  /-- A read-only view of the dict `d`, the namespace of the class `owner`. A mappingproxy has
+  one of two kinds, this one or `dictProxy`: a consumer that means any mappingproxy tests the
+  class `mappingproxy`, and one that reads the payload handles both kinds. -/
+  | mappingProxy (d owner : V)
+  /-- A read-only view of a plain dict `d` (`allocMappingProxy`), the other kind of mappingproxy
+  (`mappingProxy`). -/
+  | dictProxy (d : V)
 
 /-- A new object other than a container or an instance, with its final contents. -/
 inductive NewObj (V : Type) where
   | cls (c : ClassData V)
   | iter (it : IterStateG V)
   | native (f : NativeData V)
-  | module (name : String) (gapped : Array String) (writesGap : Bool)
+  /-- A module that a piece's body makes: its name, its gapped names, whether writes gap, and its
+  attributes. -/
+  | module (name : String) (gapped : Array String) (writesGap : Bool) (attrs : Array (String × V))
   | property (fget fset fdel doc : V)
   /-- A `classmethod` with its callable; `none` until `__init__` sets it (CPython's `NULL`). -/
   | classmethod (f : Option V)
@@ -167,7 +179,8 @@ inductive NewObj (V : Type) where
   | super (thisType obj : V)
   | opaque (tag : String) (state : Array V)
   | member (owner : V) (name : String) (index : Nat)
-  | mappingProxy (d : V)
+  | mappingProxy (d owner : V)
+  | dictProxy (d : V)
 
 /-- The built-in part of a new instance: none for an instance of a plain user class; else the
 state of the built-in type that its class derives from. -/
@@ -389,6 +402,9 @@ class PyReads (m : Type → Type 1) (V : outParam Type) extends PyPure m V where
   dictHasUser : V → m Bool
   /-- The kinds of the members of the set `s`, for `WalkKinds.mayRunUser`, in constant time. -/
   setWalkKinds : V → m WalkKinds
+  /-- Whether `v` is a set whose order the model knows, `setView`'s `exact`, in constant time;
+  `false` for any other value. -/
+  setExact : V → m Bool
   /-- The kinds of the keys of the dict `d`, as `setWalkKinds`. -/
   dictWalkKinds : V → m WalkKinds
   /-- The number of members of the set `s`. -/
@@ -507,6 +523,21 @@ for a function), its args tuple and its kwargs dict, its result.  It runs at `wr
 call bracket of a caller below `writes`. -/
 abbrev BuiltinImpl : Type 2 :=
   ∀ {m : Type → Type 1} {V : Type} [PyWrites m V] [PyNew m V], V → V → V → m V
+
+/-- The method name under which a piece gives the body that makes the module `module` at its first
+import (`Proto.importModule`): it makes the module object with its attributes and returns it, and
+`importModule` adds it to the module table if the body hasn't. -/
+def importHook (module : String) : String := s!"<import of module {module}>"
+
+/-- The method name of `type`'s body for `type[key]`, which CPython's `PyObject_GetItem` gives to
+`Py_GenericAlias`. -/
+def typeGetItemHook : String := "<subscripting the class type>"
+
+/-- The method name of `object`'s body that gives the arguments of a union (the object `self`) as a
+tuple, which `isinstance` checks in order (CPython's `_Py_union_args`), and `None` for an object
+that is not a union.  `isinstance` calls it for a second argument that is an object, not a class,
+whose class has no `__instancecheck__`, as a union's class has none. -/
+def unionArgsHook : String := "<union args>"
 
 /-- The bodies of the built-in callables, which `Assembly` joins from each piece's part: by
 built-in function, by built-in type and method name, and by native function's key. -/

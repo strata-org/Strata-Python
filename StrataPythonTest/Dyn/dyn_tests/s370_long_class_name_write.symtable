@@ -1,0 +1,6 @@
+module top
+  AVeryLongClassNameThatIsMuchLongerThanFiftyBytesInTotalLength: local (assigned, referenced)
+  o: local (assigned, referenced)
+  print: global implicit (referenced)
+  class AVeryLongClassNameThatIsMuchLongerThanFiftyBytesInTotalLength
+qualnames: AVeryLongClassNameThatIsMuchLongerThanFiftyBytesInTotalLength

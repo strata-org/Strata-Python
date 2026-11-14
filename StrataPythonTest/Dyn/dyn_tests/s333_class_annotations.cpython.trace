@@ -1,0 +1,11 @@
+--- stdout 114
+{'x': <class 'int'>, 'y': <class 'str'>}
+True
+AttributeError type object 'int' has no attribute '__annotations__'
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+__doc__ = None
+__name__ = '__main__'

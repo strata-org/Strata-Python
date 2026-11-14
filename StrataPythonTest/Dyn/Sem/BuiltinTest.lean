@@ -41,9 +41,9 @@ open StrataPython.Dyn.Sem
 #guard Builtin.«str_ascii_iterator».info.tpName == "str_ascii_iterator"
 #guard Builtin.«longrange_iterator».info.name == "longrange_iterator"
 #guard Builtin.«method-wrapper».info.tpName == "method-wrapper"
-#guard Builtin.«types.GenericAlias».info.tpName == "types.GenericAlias"
-#guard Builtin.«types.GenericAlias».info.name == "GenericAlias"
-#guard Builtin.«types.GenericAlias».info.module == "types"
+#guard Builtin.«_frozen_importlib.ModuleSpec».info.tpName == "ModuleSpec"
+#guard Builtin.«_frozen_importlib.ModuleSpec».info.name == "ModuleSpec"
+#guard Builtin.«_frozen_importlib.ModuleSpec».info.module == "_frozen_importlib"
 #guard Builtin.NoneType.info.tpName == "NoneType"
 #guard Builtin.ellipsis.info.tpName == "ellipsis"
 #guard Builtin.method.info.tpName == "method"
@@ -78,7 +78,7 @@ open StrataPython.Dyn.Sem
 #guard Builtin.bool.info.solidBase == .int
 
 -- Every constant appears once in `allConstants`.
-#guard Builtin.allConstants.size == 188
+#guard Builtin.allConstants.size == 186
 #guard (Builtin.allConstants.toList.eraseDups).length == Builtin.allConstants.size
 
 end StrataPython.Dyn.Sem.BuiltinTest

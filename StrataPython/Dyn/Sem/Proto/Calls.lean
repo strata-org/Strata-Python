@@ -98,32 +98,6 @@ def importCheck [PyCalls m V] : m Unit := do
       PyPure.gap "an import after builtins.__import__ was replaced is not modelled yet"
   | none => PyPure.gap "an import after builtins.__import__ was deleted is not modelled yet"
 
-/-- `import module`: the `builtins` module; any other module stops with a gap. -/
-def importModule [PyCalls m V] (module : String) : m V := do
-  importCheck
-  if module == "builtins" then
-    if let some v ← PyReads.moduleGet "builtins" then return v
-  PyPure.gap s!"import of module {module} is not modelled yet"
-
-/-- `from module import name`: an entry of the `builtins` module, or CPython's `ImportError`;
-any other module stops with a gap. -/
-def importFrom [PyCalls m V] (module name : String) : m V := do
-  importCheck
-  if module != "builtins" then PyPure.gap s!"import of module {module} is not modelled yet"
-  match ← PyReads.builtinGet name with
-  | some v => pure v
-  | none =>
-    -- `IMPORT_FROM` reads an attribute of the module object, and the module type's own
-    -- attributes, such as `__dict__`, are all dunder names.
-    if name.startsWith "__" && name.endsWith "__" then
-      PyPure.gap s!"from builtins import {name} is not modelled yet"
-    let msg := s!"cannot import name '{name}' from 'builtins' (unknown location)"
-    raiseBuiltin "ImportError" msg
-      #[("msg", PyPure.imm (m := m) (.str (.ofString msg))),
-        ("name", PyPure.imm (m := m) (.str (.ofString "builtins"))),
-        ("path", PyPure.imm (m := m) .none),
-        ("name_from", PyPure.imm (m := m) (.str (.ofString name)))]
-
 /-- `module.name` for the `builtins` module, which the translator uses for names that are not in
 the source; a missing name, or any other module, stops with a gap. -/
 def qualifiedRef [PyCalls m V] (module name : String) : m V := do
@@ -178,6 +152,7 @@ def typeInitStep (cls obj args kwargs : V) : m (CallStep S V) := do
 the `__new__` or the `__init__` that it calls may be a machine, which suspends as a `typeNew` or a
 `typeInit` frame. A metaclass's own `__call__` and `type`'s own call go through `typeCallN`. -/
 def typeCallStep (cls args kwargs : V) : m (CallStep S V) := do
+  cTypeNewGap cls
   if (← PyPure.immView cls) matches some (.builtin .type) then
     return .done (← typeCallN dispatchDepth true cls args kwargs)
   if (← metaCall? cls).isSome then
@@ -220,7 +195,7 @@ def callResumable : Nat → V → V → V → List S → m (CallStep S V)
     | none =>
       match ← PyReads.objView f with
       | some (.cls _) => typeCallStep f args kwargs
-      | some .inst =>
+      | some .inst | some (.opaque ..) =>
         let t ← PyReads.classOf f
         match ← lookupType t "__call__" with
         | some c =>

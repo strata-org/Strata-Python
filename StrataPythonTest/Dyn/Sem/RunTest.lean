@@ -71,6 +71,18 @@ def run (text : String) : IO Unit := do
 -- The check finds an overlap: a part joined with itself fills `print` twice.
 #guard (Impls.overlaps [opsImpls, opsImpls]).contains "print"
 
+/-- A part that fills only the hooks `typeGetItemHook` and `unionArgsHook`. -/
+def hookPart : Impls :=
+  { method := fun t n =>
+      if (t == .type && n == typeGetItemHook) || (t == .object && n == unionArgsHook) then
+        opsImpls.function .len
+      else none }
+
+-- The check finds two parts that fill the same hook.
+#guard Impls.overlaps [hookPart, hookPart] ==
+  ["type.<subscripting the class type>", "object.<union args>"]
+#guard Impls.overlaps [hookPart, opsImpls] == []
+
 /-- CPython 3.12's C recursion limit, as lists nested 9,995 deep compare and 9,996 deep raise
 `RecursionError` (measured on 3.12.15). -/
 def cpythonCLimit : Nat := 9995
@@ -1555,14 +1567,15 @@ def mainTotal (body : String) : String := s!"module m \{
       %t.0 : py.Value = py.iBitOr(%a.0, %c.0) ^err.0()
       %v.0 : py.Value = py.unpackSeq(%a.0, 2) ^err.0()")
 
--- `|` of a class makes a union type, which is not modelled yet.
-/-- info: fault: Strata.Dyn.Exec.Fault.gap "`|` of a class, which makes a union type, is not modelled yet" -/
+-- `|` of a class asks `type.__or__`, or `type.__ror__` of a class on the right, whose bodies a
+-- piece of the built-in library gives.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in method type.__or__ is not modelled yet" -/
 #guard_msgs in
 #eval run (main "      %a.0 : py.Value = py.loadGlobal(\"m\", \"int\") ^err.0()
       %b.0 : py.Value = py.loadGlobal(\"m\", \"str\") ^err.0()
       %v.0 : py.Value = py.bitOr(%a.0, %b.0) ^err.0()")
 
-/-- info: fault: Strata.Dyn.Exec.Fault.gap "`|` of a class, which makes a union type, is not modelled yet" -/
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in method type.__ror__ is not modelled yet" -/
 #guard_msgs in
 #eval run (main "      %a.0 : py.Value = py.loadGlobal(\"m\", \"int\") ^err.0()
       %b.0 : py.Value = py.noneLit()

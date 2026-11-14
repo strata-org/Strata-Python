@@ -407,7 +407,7 @@ their monad (`#py_rule_shapes`) are not among them.  The walk, and its choice of
 are below the rule monad, are trusted: no theorem proves that it misses no write or read of the
 marker. -/
 /--
-info: #py_part_writers: StrataPython.Dyn.Sem.PySem.ops reaches 182 definitions below the rule monad, which name StrataPython.Dyn.Sem.PyLang, StrataPython.Dyn.Sem.World, Strata.Dyn.Exec.Sem, StrataPython.Dyn.Sem.Depth, StrataPython.Dyn.Sem.PyM or a constant whose type does:
+info: #py_part_writers: StrataPython.Dyn.Sem.PySem.ops reaches 183 definitions below the rule monad, which name StrataPython.Dyn.Sem.PyLang, StrataPython.Dyn.Sem.World, Strata.Dyn.Exec.Sem, StrataPython.Dyn.Sem.Depth, StrataPython.Dyn.Sem.PyM or a constant whose type does:
 StrataPython.Dyn.Sem.BEff
 StrataPython.Dyn.Sem.BTree
 StrataPython.Dyn.Sem.ContOK
@@ -497,6 +497,7 @@ StrataPython.Dyn.Sem.Prim.setCopy
 StrataPython.Dyn.Sem.Prim.setDiscard
 StrataPython.Dyn.Sem.Prim.setDiscardNew
 StrataPython.Dyn.Sem.Prim.setDiscardWith
+StrataPython.Dyn.Sem.Prim.setExactOf
 StrataPython.Dyn.Sem.Prim.setFreeze
 StrataPython.Dyn.Sem.Prim.setFreezeNew
 StrataPython.Dyn.Sem.Prim.setHandled

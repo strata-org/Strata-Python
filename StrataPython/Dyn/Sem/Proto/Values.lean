@@ -131,6 +131,11 @@ def mkDict [PyPure m V] [PyNew m V] (kvs : Array V) : m V := do
   dictInsertAll d kvs.toList
   pure d
 
+/-- A new read-only view of the dict `d`, a mappingproxy (`types.MappingProxyType(d)`), such as a
+dict view's `mapping`. -/
+def allocMappingProxy [PyPure m V] (d : V) : m V :=
+  PyPure.allocObj (PyPure.imm (m := m) (.builtin .mappingproxy)) (.dictProxy d)
+
 end
 
 end

@@ -1,0 +1,10 @@
+--- stdout 2
+1
+
+--- outcome
+ok
+--- globals
+AVeryLongClassNameThatIsMuchLongerThanFiftyBytesInTotalLength = <class 'AVeryLongClassNameThatIsMuchLongerThanFiftyBytesInTotalLength'>
+__doc__ = None
+__name__ = '__main__'
+o = <AVeryLongClassNameThatIsMuchLongerThanFiftyBytesInTotalLength object>

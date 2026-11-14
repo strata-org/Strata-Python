@@ -46,6 +46,8 @@ def sym (s : HashSrc) : Hash := .symbolic s
 #guard (HashSrc.frozenset [sym (.const .int), sym (.const .str)]).storeAddrFree
 #guard (HashSrc.combine "list[int]" [sym (.const .list), sym (.const .int)]).storeAddrFree
 #guard (HashSrc.reduced (.tuple [.exact 5, sym (.buffer [97])])).storeAddrFree
+-- A static method's hash holds a descriptor's address, which is never freed.
+#guard (HashSrc.combine "<staticmethod>" [sym (.descr .str "maketrans")]).storeAddrFree
 
 -- Codes that no constructor makes fail closed.
 #guard !(HashSrc.mk []).storeAddrFree

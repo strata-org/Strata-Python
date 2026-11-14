@@ -74,9 +74,12 @@ def Value.immKind : Value → Option Nat
   | .symHash _ => some 10
   | _ => Option.none
 
-/-- Whether a value is a singleton or a built-in constant, which `is` compares by value. -/
+/-- Whether a value is a singleton or a built-in constant, which `is` compares by value.  A
+static method of a built-in type is one of them: `staticmethod.__get__` gives the one callable
+that the descriptor holds, so `str.maketrans is str.maketrans`. -/
 def Value.isConstant : Value → Bool
   | .none | .notImplemented | .ellipsis | .bool _ | .builtin _ | .descr .. => true
+  | .bound .none _ _ .staticMethod => true
   | _ => false
 
 /-- Whether `c` is a class whose values are always immediates: `NoneType`, `bool`, `int`,

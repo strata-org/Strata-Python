@@ -32,23 +32,15 @@ namespace StrataPython.Dyn.Sem.Proto
 section
 variable {m : Type → Type 1} {V : Type}
 
-/-- The value of the attribute `name` of the module object `v`, named `mod`: a global of the module,
-or an entry of the `builtins` dict. -/
-def moduleAttr [PyReads m V] (v : V) (mod : String) (gapped : Array String) (name : String) :
-    m V := do
+/-- The value of the attribute `name` of the module object `v`, named `mod`: an entry of the
+`builtins` dict for the `builtins` module (`isBuiltins`), a global of the module otherwise. -/
+def moduleAttr [PyReads m V] (v : V) (mod : String) (gapped : Array String) (isBuiltins : Bool)
+    (name : String) : m V := do
   if gapped.contains name then PyPure.gap s!"the attribute {mod}.{name} is not modelled yet"
-  let r ← if mod == "builtins" then PyReads.builtinGet name else PyReads.globalGet mod name
+  let r ← if isBuiltins then PyReads.builtinGet name else PyReads.globalGet mod name
   match r with
   | some x => pure x
   | none => raiseAttr v name s!"module '{mod}' has no attribute '{name}'"
-
-/-- A gap for `__dict__` and `__weakref__` when a user class is among the classes `mro`:
-`type.__new__` puts a descriptor for each in a user class's namespace, which the model doesn't
-hold, so a lookup that finds nothing else may still find them in CPython. -/
-def implicitDescrGap [PyReads m V] (name : String) (mro : Array V) : m Unit := do
-  if name == "__dict__" || name == "__weakref__" then
-    if ← mro.anyM fun c => return (← PyPure.immView c).isNone then
-      PyPure.gap s!"the {name} that a user class's namespace holds is not modelled yet"
 
 /-- A gap where `v`'s instance dict decides an attribute, if `v` is a built-in constant whose type
 gives its instances a `__dict__` (`exit`, `help`, `builtins.__spec__`): the model holds no dict for
@@ -85,11 +77,17 @@ def genericGetAttr [PyCalls m V] (v t : V) (name : String) : m V := do
   | some d => if ← hasGet d then descrGetN dispatchDepth d (some v) t else pure d
   | none =>
     implicitDescrGap name ((← mroOf t).getD #[])
-    raiseAttr v name s!"'{← classNameOf t}' object has no attribute '{name}'"
+    raiseAttr v name s!"'{← classTpName t}' object has no attribute '{name}'"
 
 /-- `type_getattro(cls, name)`: a data descriptor with a `__get__` on the metaclass, then the
 class's own MRO, then the metaclass's other attributes. -/
 def typeGetAttr [PyCalls m V] (cls : V) (name : String) : m V := do
+  if name == "__new__" then cTypeNewGap cls
+  -- A name that the class gaps gaps before the metaclass's data descriptors (`__module__`,
+  -- `__doc__`, …) read the class.
+  if let some cd ← classData? cls then
+    if cd.gapped.contains name then
+      PyPure.gap s!"the attribute {cd.name}.{name} is not modelled yet"
   let mt ← PyReads.classOf cls
   let metaAttr ← lookupType mt name
   if let some d := metaAttr then
@@ -100,7 +98,7 @@ def typeGetAttr [PyCalls m V] (cls : V) (name : String) : m V := do
   | some d => if ← hasGet d then descrGetN dispatchDepth d (some cls) mt else pure d
   | none =>
     implicitDescrGap name ((← mroOf cls).getD #[])
-    raiseAttr cls name s!"type object '{← classNameOf cls}' has no attribute '{name}'"
+    raiseAttr cls name s!"type object '{← classTpName cls}' has no attribute '{name}'"
 
 /-- `super_getattro`: the attribute `name` from the classes after `thisType` in the MRO of the
 start type (`obj`'s type, or `obj` itself when it is a subclass of `thisType`). -/
@@ -162,11 +160,28 @@ def getAttrCore [PyCalls m V] (v : V) (name : String) : m V := do
         PyPure.gap s!"the {name} of a classmethod or staticmethod of a function is not modelled yet"
     genericGetAttr v (← PyReads.classOf v) name
   | some (.super thisType obj) => superGetAttr v thisType obj name
-  | some (.module mod gapped _) =>
+  | some (.module mod gapped _ kind) =>
     -- `module_getattro` is the generic lookup first, which finds the module type's attributes.
     if (← lookupType (← PyReads.classOf v) name).isSome then
       PyPure.gap s!"the attribute {name} of a module, which its type gives, is not modelled yet"
-    moduleAttr v mod gapped name
+    if gapped.contains name then PyPure.gap s!"the attribute {mod}.{name} is not modelled yet"
+    let .made attrs := kind | moduleAttr v mod gapped (kind matches .builtins) name
+    let own := attrs.find? (·.1 == name)
+    -- CPython's import sets each imported submodule on its package, over any attribute that the
+    -- package's body gave the same name; a package's attribute that is the submodule itself is
+    -- the same either way.
+    if let some sub ← PyReads.moduleGet s!"{mod}.{name}" then
+      if let some (_, x) := own then
+        if (← PyPure.identical x sub) matches .yes then return x
+      PyPure.gap s!"the attribute {mod}.{name} is not modelled yet"
+    if let some (_, x) := own then return x
+    -- A module that a piece's body made has only the attributes that the body gave it. CPython's
+    -- import also sets dunders such as `__name__` and `__spec__`, and CPython calls a module's
+    -- `__getattr__` for a missing name, which the model doesn't.
+    if (name.startsWith "__" && name.endsWith "__") || attrs.any (·.1 == "__getattr__") ||
+        gapped.contains "__getattr__" then
+      PyPure.gap s!"the attribute {mod}.{name} is not modelled yet"
+    raiseAttr v name s!"module '{mod}' has no attribute '{name}'"
   | some (.native f) =>
     if f.gapped.contains name then
       PyPure.gap s!"the attribute {name} of the built-in {f.qualname} is not modelled yet"
@@ -268,7 +283,8 @@ def genericSetAttr [PyWrites m V] (v t : V) (name : String) (val : Option V) : m
   if let some cd ← classData? t then
     if cd.instanceWritesGap then
       PyPure.gap s!"an attribute write to an instance of {cd.name} is not modelled yet"
-  let noAttr : m Unit := raiseAttrPlain s!"'{← classNameOf t}' object has no attribute '{name}'"
+  -- Its message is built only when it is raised.
+  let noAttr : m Unit := do raiseAttrPlain s!"'{← classTpName t}' object has no attribute '{name}'"
   let (plain, descr) ← match ← lookupTypeEntry t name with
     | .plain .. => pure (true, none)
     | .entry d => pure (false, some d)
@@ -362,7 +378,7 @@ def typeSetAttr [PyWrites m V] (cls : V) (name : String) (val : Option V) : m Un
   | _ => pure ()
   let some cd ← classData? cls | PyPure.gap "an attribute write to a class that is not a class"
   if cd.immutable then
-    raiseBuiltin "TypeError" s!"cannot set '{name}' attribute of immutable type '{← classNameOf cls}'"
+    raiseBuiltin "TypeError" s!"cannot set '{name}' attribute of immutable type '{← classTpName cls}'"
   if cd.writesGap then PyPure.gap s!"an attribute write to the class {cd.name} is not modelled yet"
   if name == "__del__" then PyPure.gap "a class with a finalizer is not modelled yet"
   -- `type.__setattr__` is the generic write on the class: a data descriptor of the metaclass first.
@@ -384,7 +400,7 @@ def typeSetAttr [PyWrites m V] (cls : V) (name : String) (val : Option V) : m Un
     if r.isNone then
       -- `type_set_annotations` names only the attribute.
       if name == "__annotations__" then raiseAttrPlain name
-      raiseAttrPlain s!"type object '{← classNameOf cls}' has no attribute '{name}'"
+      raiseAttrPlain s!"type object '{← classTpName cls}' has no attribute '{name}'"
 
 /-- **`setattr(v, name, x)`** (`val = some x`) or **`delattr(v, name)`** (`none`), CPython's
 `PyObject_SetAttr`: a user `__setattr__` or `__delattr__`, else by the kind of `v`. -/
@@ -408,7 +424,7 @@ def setAttr [PyWrites m V] (v : V) (name : String) (val : Option V) : m Unit := 
   let write : m Unit := do
     if ← isType v then return ← typeSetAttr v name val
     match ← PyReads.objView v with
-    | some (.module mod _ writesGap) =>
+    | some (.module mod _ writesGap _) =>
       if writesGap then PyPure.gap s!"an attribute write to the module {mod} is not modelled yet"
       PyPure.gap "an attribute write to a module is not modelled yet"
     | _ => genericSetAttr v t name val
@@ -416,6 +432,69 @@ def setAttr [PyWrites m V] (v : V) (name : String) (val : Option V) : m Unit := 
   -- runs the built-in hook through its wrapper, which counts a C level.
   if ← builtinHook (if val.isSome then "__delattr__" else "__setattr__") then write
   else PyReads.withDepth 1 write
+
+
+/-- The import of the one module `module`, without the packages above it: the module from the module
+table, or, at its first import, the module that a piece's body makes (`importHook`), which adds it
+to the table; a module that no piece makes stops with a gap. So does the translated program's own
+module, whose attributes are its global cells: CPython's module also has the attributes that the
+import system sets (`__spec__`, …) and a module `__getattr__`, which the model doesn't follow. So
+does a body that raises after it added its module to the table: CPython removes the failed module
+from `sys.modules`, and a rule can't remove a table entry. A body that gives a program a
+module object (a modelled `__import__` or `sys.modules`, for example) goes through `importModule`,
+or tests the module's kind (`ModuleKind`). -/
+def importOne [PyCalls m V] (module : String) : m V := do
+  if let some v ← PyReads.moduleGet module then
+    if let some (.module _ _ _ .translated) ← PyReads.objView v then
+      PyPure.gap s!"import of the translated module {module} is not modelled yet"
+    return v
+  let hook := PyPure.imm (m := m) (.bound (PyPure.imm (m := m) .none) .module (importHook module) .method)
+  let args := PyPure.imm (m := m) (.tuple #[])
+  let v ← tryCatch (PyCalls.callBuiltin hook args (← PyPure.allocDict)) fun x => do
+    -- The body raised after it added its module to the table.
+    if (← PyReads.moduleGet module).isSome then
+      PyPure.gap s!"the failed import of {module} is not modelled yet"
+    throw x
+  -- CPython's import gives the module that the table holds after the body, which may be another
+  -- one than the body returns; the next import finds the module in the table.
+  if let some w ← PyReads.moduleGet module then return w
+  PyReads.moduleAdd module v
+  return v
+
+/-- **`import module`**: each package above the module first, outermost first (`a`, then `a.b`, for
+`a.b.c`), as CPython's import does, then the module itself, each by `importOne`. -/
+def importModule [PyCalls m V] (module : String) : m V := do
+  importCheck
+  let parts := module.splitOn "."
+  for i in List.range (parts.length - 1) do
+    discard <| importOne (".".intercalate (parts.take (i + 1)))
+  importOne module
+
+/-- `from module import name`: an entry of the `builtins` module, or CPython's `ImportError`;
+any other module stops with a gap. -/
+def importFrom [PyCalls m V] (module name : String) : m V := do
+  importCheck
+  if module != "builtins" then
+    -- `IMPORT_FROM` reads the attribute of the imported module; a missing one, whose
+    -- `ImportError` names the module's file, stops with a gap.
+    let mod ← importModule module
+    return ← tryCatch (getAttrRaw mod name) fun x => do
+      if ← isAttributeError x then
+        PyPure.gap s!"from {module} import {name} of a name that the module lacks is not modelled yet"
+      throw x
+  match ← PyReads.builtinGet name with
+  | some v => pure v
+  | none =>
+    -- `IMPORT_FROM` reads an attribute of the module object, and the module type's own
+    -- attributes, such as `__dict__`, are all dunder names.
+    if name.startsWith "__" && name.endsWith "__" then
+      PyPure.gap s!"from builtins import {name} is not modelled yet"
+    let msg := s!"cannot import name '{name}' from 'builtins' (unknown location)"
+    raiseBuiltin "ImportError" msg
+      #[("msg", PyPure.imm (m := m) (.str (.ofString msg))),
+        ("name", PyPure.imm (m := m) (.str (.ofString "builtins"))),
+        ("path", PyPure.imm (m := m) .none),
+        ("name_from", PyPure.imm (m := m) (.str (.ofString name)))]
 
 end
 

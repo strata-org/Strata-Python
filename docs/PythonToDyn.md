@@ -2584,7 +2584,9 @@ with CPython 3.12, over 1422 generated cases.
   3.12 warns (an `__int__` or `__index__` that returns an instance of a strict subclass of `int`, a
   `__float__` that returns one of `float`), it stops with a gap, and so does a `%b` of an object
   with the buffer protocol.
-- `import builtins` and `from builtins import name`.
+- `import builtins` and `from builtins import name`. The import of any other module runs the body
+  that a part of the built-in library gives for it, and stops with a gap while no part gives one;
+  an import of the translated program's own module stops with a gap.
 - Classes: `__build_class__` and `type.__new__`, with the metaclass, the MRO by C3, `__slots__`,
   `__set_name__` and `__init_subclass__`; instances made by `object.__new__`; `super`,
   `property`, `classmethod`, `staticmethod` and `isinstance`. A write or a deletion of a class's
@@ -2601,7 +2603,7 @@ with CPython 3.12, over 1422 generated cases.
   (and their `__init__` on one), a class whose metaclass defines `__get__`, `__set__` or
   `__delete__`, a class call or a `__class_getitem__` that a metaclass's own attribute hooks may
   answer, an instance dict from a base other than the best base, `object.__getattribute__` of
-  anything but a plain instance or immediate, an unbound `super` object, an unset `classmethod` or
+  anything but a plain instance, an immediate or an object whose state is opaque, an unbound `super` object, an unset `classmethod` or
   `staticmethod`, `__build_class__` called with a function that is not a class body, and an
   in-place `+=` or `*=` on an instance of a subclass of `list`. A message with a class name
   longer than 50 bytes of UTF-8 stops with a gap too, since CPython cuts such names.

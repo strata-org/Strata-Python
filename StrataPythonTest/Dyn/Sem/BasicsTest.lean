@@ -70,4 +70,9 @@ def typeName (v : Value) : Option String :=
 #guard (Value.builtin .int).isImmClass
 #guard !(Value.builtin .list).isImmClass
 
+-- A static method of a built-in type is one value per type and name, so `is` compares it by
+-- value; a method bound to a value is not.
+#guard (Value.bound .none .str "maketrans" .staticMethod).isConstant
+#guard !(Value.bound .none .list "append" .method).isConstant
+
 end StrataPython.Dyn.Sem.BasicsTest

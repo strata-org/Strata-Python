@@ -87,8 +87,7 @@ def userCheck [PyReads m V] (a b : V) : m Unit := do
   if (← isUserObject a) || (← isUserObject b) then PyPure.gap userGap
 
 /-- The built-in types whose instances keep `object`'s `__eq__`, `__hash__` and `__bool__`: they
-compare and hash by identity and are true.  A class (an instance of `type`) also has `|`, which
-`binaryOpAs` gaps. -/
+compare and hash by identity and are true. -/
 def hashesByAddr (b : Builtin) : Bool :=
   b.info.mro.contains .«BaseException» ||
   ["object", "type", "function", "module", "property", "classmethod", "staticmethod",
@@ -520,7 +519,18 @@ sequences, with the messages of their `sq_concat` and `sq_repeat`; otherwise `Ty
 def binaryTail [PyCalls m V] (sym : String) (op : Arith.BinOp) (a b : V) : m V := do
   otherCheck a b
   if op == .or && ((← isClass a) || (← isClass b)) then
-    PyPure.gap "`|` of a class, which makes a union type, is not modelled yet"
+    -- `type`'s `nb_or`, `type.__or__` of a class on the left, then `type.__ror__` of a class on
+    -- the right, which make a union through a piece's body; `NotImplemented` from both raises
+    -- the `TypeError` below.
+    let slot (self other : V) (name : String) : m V := do
+      PyCalls.callBuiltin (PyPure.imm (m := m) (.bound self .type name .slotWrapper))
+        (PyPure.imm (m := m) (.tuple #[other])) (← PyPure.allocDict)
+    if ← isClass a then
+      let r ← slot a b "__or__"
+      if !((← PyPure.immView r) matches some .notImplemented) then return r
+    if ← isClass b then
+      let r ← slot b a "__ror__"
+      if !((← PyPure.immView r) matches some .notImplemented) then return r
   if op == .or && (← isDict a) && (← isDict b) then
     PyPure.modelInvariant "`|` of two dicts is `orOp`"
   if (op == .or || op == .and || op == .sub || op == .xor) &&

@@ -194,7 +194,7 @@ def builtinsDict : DictTable :=
 every name of `vars(builtins)` to its value. -/
 def w0 : World σ where
   store := ⟨#[⟨.builtin .dict, none, #[], .dict builtinsDict⟩,
-    ⟨.builtin .module, some 0, #[], .module ⟨"builtins", #[], false⟩⟩]⟩
+    ⟨.builtin .module, some 0, #[], .module ⟨"builtins", #[], false, .builtins⟩⟩]⟩
   modules := ⟨Std.TreeMap.empty.insert "builtins" ⟨1, {}⟩⟩
 
 /-- A table starts its runs from the initial world. -/

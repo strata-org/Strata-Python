@@ -54,6 +54,13 @@ public environment PyT extends Py where
   insn nativeGapped (k : base.Int) (^err (exc : Value)) : Value
   insn classDescr (k : base.Int) (^err (exc : Value)) : Value
   insn startCheck (k : base.Int) (^err (exc : Value)) : Value
+  insn hooks (k : base.Int) (^err (exc : Value)) : Value
+  insn partHooks (k : base.Int) (^err (exc : Value)) : Value
+  insn staticDescr (k : base.Int) (^err (exc : Value)) : Value
+  insn heapAttrs (k : base.Int) (^err (exc : Value)) : Value
+  insn dictProxyCase (k : base.Int) (^err (exc : Value)) : Value
+  insn setExactCase (^err (exc : Value)) : Value
+  insn stubHooks (k : base.Int) (^err (exc : Value)) : Value
   insn listPrims (^err (exc : Value)) : Value
   insn oldPrims (^err (exc : Value)) : Value
   insn newPrims (^err (exc : Value)) : Value
@@ -84,6 +91,7 @@ public environment PyT extends Py where
   insn strSetSubOps (k : base.Int) (^err (exc : Value)) : Value
   insn resumeCase (f : Value) (^err (exc : Value)) : Value
   insn callInst (^err (exc : Value)) : Value
+  insn cTypeStep (k : base.Int) (^err (exc : Value)) : Value
   insn callLevelStep (^err (exc : Value)) : Value
   insn resumeDirect (^err (exc : Value)) : Value
   insn resumeNoFit (^err (exc : Value)) : Value
@@ -337,12 +345,12 @@ each stops with a gap. -/
     pure Value.none
     : PyM σ .writes true Value)
 
-/-- A write of a plain name to `types.GenericAlias`, an immutable built-in type whose C name differs
-from its name: CPython's `TypeError` names it by its C name. -/
+/-- A write of a plain name to `int`, an immutable built-in type: CPython's `TypeError`. (The
+message of a type whose C name differs from its name is `pt.hooks(31)`'s.) -/
 @[dyn_sem PyT.immutableWrite, expose] public def immutableWrite (err : Target E [Value]) :
     Sem ε E Value :=
   runRule err #[] (do
-    Proto.setAttr (.builtin .«types.GenericAlias») "x" (some (.int 1))
+    Proto.setAttr (.builtin .int) "x" (some (.int 1))
     pure Value.none
     : PyM σ .writes true Value)
 
@@ -390,7 +398,7 @@ read the count of running `__build_class__` calls; and the bytes of an instance 
     PyWrites.classSetName c "D" "D"
     PyNew.classSetMroNew c #[.builtin .int, object]
     let some cd ← Proto.classData? c | pure (Value.ofString "not a class")
-    let mo ← PyPure.allocObj (.builtin .module) (.module "mm" #[] false)
+    let mo ← PyPure.allocObj (.builtin .module) (.module "mm" #[] false #[])
     PyReads.moduleAdd "mm" mo
     let back ← PyReads.moduleGet "mm"
     let bytes := Value.builtin .bytes
@@ -955,6 +963,394 @@ otherwise, called through a table that holds only its body. -/
     | _ => Proto.descrGetN 5 fk none (.builtin .dict)
     : PyM σ .writes true Value)
 
+/-- A body that returns `7`. -/
+public def sevenBody : BuiltinImpl := fun {m} {_} [_] [_] _ _ _ => pure (PyPure.imm (m := m) (.int 7))
+
+/-- A table of bodies that holds only a body for `importHook "m"`, `sevenBody`. -/
+public def hookImpls : Impls :=
+  { method := fun t name => if t == .module && name == importHook "m" then some sevenBody else none }
+
+/-- The hooks that a piece of the built-in library fills, run with this piece's part alone
+(`opsImpls`), so that each still stops with the gap of a hook without a body: `isinstance(1, o)` for
+an object `o` with opaque state whose class has no `__instancecheck__`, which asks the union hook
+(`0`); `type[int]` (`1`) and `list[int]` (`2`); `int | None`, which asks `type.__or__` (`3`); and
+`list[int]` at C depth 9000 (`4`), whose call of `list.__class_getitem__` counts a level past the
+limit. -/
+@[dyn_sem PyT.partHooks, expose] public def partHooks (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    letI : PyWrites (PyM σ .writes true) Value :=
+      writesRecord (callBuiltinWith opsImpls.withNewCheck 5000)
+    match k with
+    | 0 => do
+      let ns ← PyPure.allocDict
+      let a ← PyPure.allocObj (.builtin .type) (.cls
+        { name := "A", qualname := "A", «module» := "m", bases := #[.builtin .object],
+          mroTail := #[.builtin .object], ns, solidBase := .builtin .object })
+      let o ← PyPure.allocObj a (.opaque "u" #[])
+      pure (.bool (← Builtins.isinstanceN 5 (.int 1) o))
+    | 1 => Proto.getItem (.builtin .type) (.builtin .int)
+    | 2 => Proto.getItem (.builtin .list) (.builtin .int)
+    | 3 => Proto.binaryTail "|" .or (.builtin .int) .none
+    | _ => PyReads.withDepth 9000 (Proto.getItem (.builtin .list) (.builtin .int))
+    : PyM σ .writes true Value)
+
+/-- A body that returns its arguments. -/
+public def argsBody : BuiltinImpl := fun {_} {_} [_] [_] _ args _ => pure args
+
+/-- A table of bodies that holds only a body for `str.maketrans`, `argsBody`. -/
+public def staticImpls : Impls :=
+  { method := fun t name => if t == .str && name == "maketrans" then some argsBody else none }
+
+/-- The static method `str.maketrans`, called on `("a", "b")` through the class (`0`), through
+the instance `"x"` (`1`), and as the descriptor `str.__dict__["maketrans"]` (`2`): each runs the
+body on `("a", "b")`, with no `self`.  It is also one value per type and name, so two lookups of
+it are identical (`3`), also through an instance (`7`), two types' are not (`4`), two lookups are
+equal (`6`), and it works as a dict key (`5`). -/
+@[dyn_sem PyT.staticDescr, expose] public def staticDescr (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    letI : PyWrites (PyM σ .writes true) Value :=
+      writesRecord (callBuiltinWith staticImpls 5000)
+    do
+      if k ≥ 3 then
+        -- `str.maketrans is str.maketrans` (`3`), `str.maketrans is bytes.maketrans` (`4`),
+        -- `str.maketrans` as a dict key, read by a second lookup of it (`5`),
+        -- `str.maketrans == str.maketrans` (`6`), and `"x".maketrans is str.maketrans` (`7`).
+        let a ← Proto.getAttr (if k == 7 then Value.ofString "x" else .builtin .str) "maketrans"
+        let b ← Proto.getAttr (.builtin (if k == 4 then .bytes else .str)) "maketrans"
+        if k == 5 then
+          let d ← Proto.mkDict #[]
+          Proto.setItem d a (.int 7)
+          return ← Proto.getItem d b
+        if k == 6 then return ← Proto.richCompareV .eq a b
+        return .bool (← Proto.isOp a b)
+      let f ← match k with
+        | 0 => Proto.getAttr (.builtin .str) "maketrans"
+        | 1 => Proto.getAttr (Value.ofString "x") "maketrans"
+        | _ => pure (.descr .str "maketrans" .staticMethod)
+      Proto.callN 5 f (.tuple #[Value.ofString "a", Value.ofString "b"]) (← PyPure.allocDict)
+    : PyM σ .writes true Value)
+
+/-- The attributes that stop with a gap where a built-in type is a heap type, not a static one, or
+where a class's namespace has no dict under `__annotations__`: `ExceptionGroup.__annotations__`, a heap
+type's (`0`); `B.__annotations__` for a class `B` whose namespace has no entry (`1`) and whose entry
+is `1` (`2`); `BuiltinImporter.create_module`, a static method of a Python function (`3`); and
+`ExceptionGroup.x = 1` (`4`), which CPython sets, since `ExceptionGroup` is not an immutable type. -/
+@[dyn_sem PyT.heapAttrs, expose] public def heapAttrs (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let cls (ann : Option Value) : PyM σ .writes true Value := do
+      let ns ← PyPure.allocDict
+      if let some a := ann then
+        PyWrites.dictSet ns (Value.ofString "__annotations__") a none fun _ => pure false
+      PyPure.allocObj (.builtin .type) (.cls
+        { name := "B", qualname := "B", «module» := "m", bases := #[.builtin .object],
+          mroTail := #[.builtin .object], ns, solidBase := .builtin .object })
+    match k with
+    | 0 => Proto.getAttr (.builtin .ExceptionGroup) "__annotations__"
+    | 1 => Proto.getAttr (← cls none) "__annotations__"
+    | 2 => Proto.getAttr (← cls (some (.int 1))) "__annotations__"
+    | 3 => Proto.getAttr (.builtin .BuiltinImporter) "create_module"
+    | _ => do Proto.setAttr (.builtin .ExceptionGroup) "x" (some (.int 1)); pure .none
+    : PyM σ .writes true Value)
+
+/-- A mappingproxy of a plain dict `d = {1: 2}` (`allocMappingProxy`): `p[1]` (`0`), `p[9]` (`1`),
+`p[[1]]` (`2`), `type(p)` (`3`), `p == p` (`4`), and `p[3]` after `d[3] = 4` (`5`); and `p[1]` for
+a proxy of an instance of a subclass of `dict` (`6`). -/
+@[dyn_sem PyT.dictProxyCase, expose] public def dictProxyCase (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let d ← Proto.mkDict #[.int 1, .int 2]
+    let p ← Proto.allocMappingProxy d
+    match k with
+    | 0 => Proto.getItem p (.int 1)
+    | 1 => Proto.getItem p (.int 9)
+    | 2 => do Proto.getItem p (← PyPure.allocList #[.int 1])
+    | 3 => PyReads.classOf p
+    | 4 => return .bool (← Proto.richCompare .eq p p)
+    | 5 => do
+        Proto.setItem d (.int 3) (.int 4)
+        Proto.getItem p (.int 3)
+    | _ => do
+        let ns ← PyPure.allocDict
+        let c ← PyPure.allocObj (.builtin .type) (.cls
+          { name := "D", qualname := "D", «module» := "m", bases := #[.builtin .dict],
+            mroTail := #[.builtin .dict, .builtin .object], ns, solidBase := .builtin .dict })
+        let sd ← PyReads.allocInstance c .dict #[] #[]
+        Proto.getItem (← Proto.allocMappingProxy sd) (.int 1)
+    : PyM σ .writes true Value)
+
+/-- The hooks that pieces of the built-in library fill, and the class flag `asBase`: the import hook
+called through a table with its body (`0`) and without (`1`); `isinstance(1, l)` for a list `l`,
+which doesn't ask the union hook (`19`); `import t` of a module without attributes that a piece
+made, which imports (`18`); a class whose `asBase` is `notAcceptable` (`5`) or `gap` (`6`) as the
+base of a new class; an attribute of a module that a body made (`7`); `import nosuch` (`8`); a call
+of a C type that a piece makes (`10`); a call of an object with opaque state, whose class's
+`__call__` is `len` (`11`); a native wrapper descriptor of a class `A` bound to `1` (`12`) and to an
+instance of `A`, whose type's name is given (`13`); the `tp_name` of such a class in `len()`'s
+message (`14`); its `__module__`, which its namespace doesn't hold (`15`); its `__dict__`
+subscripted by a name it holds (`16`), by one it doesn't (`17`), and by `__dict__` (`24`); a native
+method descriptor bound to `1` (`20`); `object.__new__` of the class (`21`); the class `|` its
+`__dict__` (`22`); the `__dict__` of a class that gaps the name `g`, subscripted by `g` (`23`); the
+class's `__new__`, which is `object.__new__` (`25`); the wrapper descriptor bound to no object,
+which gives the descriptor back (`26`); `object.__getattribute__` of the object with opaque state
+(`27`); its `__dict__` subscripted by `1` (`28`); and, for an immutable class `B` whose `tp_name` is
+`types.B`, the messages that name it: a call of an instance (`29`), a missing attribute (`30`), an
+attribute write (`31`) and `object.__new__(B, 1)` (`32`); and a native function's names (`33`) and
+the type of what it binds to `1`, a method (`34`), and of an attribute read of it on an instance of
+a class that holds it (`35`), and itself when bound to no object (`36`); and the `__dict__` of the
+class that gaps `g`, subscripted by `1` (`37`). -/
+@[dyn_sem PyT.hooks, expose] public def hooks (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let hook : Value := .bound .none .module (importHook "m") .method
+    let newClass (rule : BaseRule) : PyM σ .writes true Value := do
+      let ns ← PyPure.allocDict
+      let u ← PyPure.allocObj (.builtin .type) (.cls
+        { name := "U", qualname := "U", «module» := "m", bases := #[.builtin .object],
+          mroTail := #[.builtin .object], ns, solidBase := .builtin .object, asBase := rule })
+      let ns2 ← PyPure.allocDict
+      PyNew.dictSetNew ns2 (Value.ofString "__module__") (Value.ofString "m") none fun _ => pure false
+      Proto.callN 5 (.builtin .type) (.tuple #[Value.ofString "X", .tuple #[u], ns2])
+        (← PyPure.allocDict)
+    match k with
+    | 0 => callBuiltinWith hookImpls 5000 hook (.tuple #[]) (← PyPure.allocDict)
+    | 1 => callBuiltinWith {} 5000 hook (.tuple #[]) (← PyPure.allocDict)
+    | 5 => newClass .notAcceptable
+    | 6 => newClass .gap
+    | 7 => do
+      let mod ← PyPure.allocObj (.builtin .module) (.module "m" #[] false #[("a", .int 3)])
+      Proto.getAttr mod "a"
+    | 8 => Proto.importModule "nosuch"
+    | 18 => do
+      let mod ← PyPure.allocObj (.builtin .module) (.module "t" #[] false #[])
+      PyReads.moduleAdd "t" mod
+      Proto.importModule "t"
+    | 19 => do
+      let l ← PyPure.allocList #[.builtin .int]
+      pure (.bool (← Builtins.isinstanceN 5 (.int 1) l))
+    | _ => do
+      let ns ← PyPure.allocDict
+      PyNew.dictSetNew ns (Value.ofString "__call__") (.builtin .len) none fun _ => pure false
+      let a ← PyPure.allocObj (.builtin .type) (.cls
+        { name := "A", qualname := "A", «module» := "m", bases := #[.builtin .object],
+          mroTail := #[.builtin .object], ns, solidBase := .builtin .object,
+          tpName := some "types.A", cType := true })
+      let wrapper ← PyPure.allocObj (.builtin .«wrapper_descriptor») (.native
+        { key := "k", kind := .wrapperDescriptor, name := "__eq__", qualname := "A.__eq__",
+          «module» := "m", owner := some a })
+      let method ← PyPure.allocObj (.builtin .«method_descriptor») (.native
+        { key := "k", kind := .methodDescriptor, name := "m", qualname := "A.m", «module» := "m",
+          owner := some a })
+      let o ← PyPure.allocObj a (.opaque "a" #[])
+      match k with
+      | 10 => Proto.callN 5 a (.tuple #[]) (← PyPure.allocDict)
+      | 11 => Proto.callN 5 o (.tuple #[]) (← PyPure.allocDict)
+      | 12 => Proto.descrGetN 5 wrapper (some (.int 1)) (.builtin .int)
+      | 13 => do
+        let b ← Proto.descrGetN 5 wrapper (some o) a
+        pure (Value.ofString (← Proto.typeName b))
+      | 14 => Builtins.lenFn .none (.tuple #[o]) (← PyPure.allocDict)
+      | 15 => Proto.getAttr a "__module__"
+      | 20 => Proto.descrGetN 5 method (some (.int 1)) (.builtin .int)
+      | 21 => Builtins.objectNew .none (.tuple #[a]) (← PyPure.allocDict)
+      | 22 => Proto.binaryTail "|" .or a (← Proto.getAttr a "__dict__")
+      | 25 => Proto.getAttr a "__new__"
+      | 26 => do
+        let d ← Proto.descrGetN 5 wrapper none a
+        pure (.bool ((← PyPure.identical d wrapper) matches .yes))
+      | 27 => Builtins.objectGetattribute o (.tuple #[Value.ofString "x"]) (← PyPure.allocDict)
+      | 33 | 34 | 35 | 36 => do
+        let f ← PyPure.allocObj (.builtin .function) (.native
+          { key := "k", kind := .function, name := "cast", qualname := "cast", «module» := "typing" })
+        match k with
+        | 33 => do
+          let names ← ["__name__", "__qualname__", "__module__"].mapM (Proto.getAttr f)
+          pure (.tuple names.toArray)
+        | 34 => pure (Value.ofString (← Proto.typeName (← Proto.descrGetN 5 f (some (.int 1)) (.builtin .int))))
+        | 36 => pure (.bool ((← PyPure.identical (← Proto.descrGetN 5 f none (.builtin .int)) f) matches .yes))
+        | _ => do
+          let ns ← PyPure.allocDict
+          PyNew.dictSetNew ns (Value.ofString "m") f none fun _ => pure false
+          let c ← PyPure.allocObj (.builtin .type) (.cls
+            { name := "C", qualname := "C", «module» := "m", bases := #[.builtin .object],
+              mroTail := #[.builtin .object], ns, solidBase := .builtin .object })
+          let i ← PyReads.allocInstance c .plain #[] #[]
+          pure (Value.ofString (← Proto.typeName (← Proto.getAttr i "m")))
+      | 28 => Proto.getItem (← Proto.getAttr a "__dict__") (.int 1)
+      | 29 | 30 | 31 | 32 => do
+        let ns ← PyPure.allocDict
+        let b ← PyPure.allocObj (.builtin .type) (.cls
+          { name := "B", qualname := "B", «module» := "m", bases := #[.builtin .object],
+            mroTail := #[.builtin .object], ns, solidBase := .builtin .object,
+            tpName := some "types.B", immutable := true })
+        match k with
+        | 29 => Proto.callN 5 (← PyReads.allocInstance b .plain #[] #[]) (.tuple #[]) (← PyPure.allocDict)
+        | 30 => Proto.getAttr b "nope"
+        | 31 => do Proto.setAttr b "x" (some (.int 1)); pure .none
+        | _ => Builtins.objectNew .none (.tuple #[b, .int 1]) (← PyPure.allocDict)
+      | 23 | 37 => do
+        let ns ← PyPure.allocDict
+        let g ← PyPure.allocObj (.builtin .type) (.cls
+          { name := "G", qualname := "G", «module» := "m", bases := #[.builtin .object],
+            mroTail := #[.builtin .object], ns, solidBase := .builtin .object, gapped := #["g"] })
+        Proto.getItem (← Proto.getAttr g "__dict__") (if k == 23 then Value.ofString "g" else .int 1)
+      | _ => do
+        let d ← Proto.getAttr a "__dict__"
+        let key := if k == 16 then "__call__" else if k == 17 then "nope" else "__dict__"
+        Proto.getItem d (Value.ofString key)
+    : PyM σ .writes true Value)
+
+/-- `setExact` beside `setView`'s `exact`, on a set whose order is known (`{1, 2}`), on one whose
+order isn't (a set made inexact), on a list and on an `int`: pairs of the two answers. -/
+@[dyn_sem PyT.setExactCase, expose] public def setExactCase (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let s ← PyPure.allocSet false false
+    for k in [1, 2] do PyNew.setAddNew s (Value.int k) none fun _ => pure false
+    let t ← PyPure.allocSet false true
+    PyNew.setAddNew t (Value.int 1) none fun _ => pure false
+    let l ← PyPure.allocList #[.int 1]
+    let mut out : Array Value := #[]
+    for v in [s, t, l, .int 1] do
+      let view := ((← PyReads.setView v).map (·.exact)).getD false
+      out := out.push (.tuple #[.bool (← PyReads.setExact v), .bool view])
+    pure (Value.tuple out)
+    : PyM σ .reads false Value)
+
+/-- Stub bodies for the hooks: the union hook gives `(str, int)`, or `None` if `unionNone`;
+`type.__or__` and `type.__ror__` give `NotImplemented`; and the import of `q` makes a module with
+the attribute `a = 3`; the import of `g` a module whose only attribute is a `__getattr__`; the
+import of `h` a module that gaps `__getattr__`; the imports of `p` and `p.s` a package, whose body
+binds `s = 1`, and its submodule; the import of `z.s`, but not of `z`, a module; and the import of
+`r` a body that adds its module to the table and then raises `ValueError`, of `r2` a body that
+raises `ValueError` without adding it, and of `o` a package whose attribute `p` is its submodule
+`o.p`, which the body adds to the table, and of `w` a body that adds one module to the table and
+returns another. -/
+public def stubImpls (unionNone : Bool) : Impls :=
+  { method := fun t name =>
+      if t == .object && name == unionArgsHook then
+        some fun {m} {_} [_] [_] _ _ _ => pure (if unionNone then PyPure.imm (m := m) .none else
+          PyPure.imm (m := m) (.tuple #[PyPure.imm (m := m) (.builtin .str),
+            PyPure.imm (m := m) (.builtin .int)]))
+      else if t == .type && (name == "__or__" || name == "__ror__") then
+        some fun {m} {_} [_] [_] _ _ _ => pure (PyPure.imm (m := m) .notImplemented)
+      else if t == .module && name == importHook "q" then
+        some fun {m} {_} [_] [_] _ _ _ => do
+          let mod ← PyPure.allocObj (PyPure.imm (m := m) (.builtin .module))
+            (.module "q" #[] false #[("a", PyPure.imm (m := m) (.int 3))])
+          PyReads.moduleAdd "q" mod
+          pure mod
+      else if t == .module && name == importHook "h" then
+        some fun {m} {_} [_] [_] _ _ _ =>
+          PyPure.allocObj (PyPure.imm (m := m) (.builtin .module))
+            (.module "h" #["__getattr__"] false #[])
+      else if let some mod := (["p", "p.s", "z.s"].find? (importHook · == name)).filter
+          (fun _ => t == .module) then
+        some fun {m} {_} [_] [_] _ _ _ =>
+          PyPure.allocObj (PyPure.imm (m := m) (.builtin .module))
+            (.module mod #[] false #[("s", PyPure.imm (m := m) (.int 1))])
+      else if t == .module && name == importHook "r" then
+        some fun {m} {_} [_] [_] _ _ _ => do
+          let mod ← PyPure.allocObj (PyPure.imm (m := m) (.builtin .module))
+            (.module "r" #[] false #[])
+          PyReads.moduleAdd "r" mod
+          Proto.raiseBuiltin "ValueError" "r"
+      else if t == .module && name == importHook "r2" then
+        some fun {_} {_} [_] [_] _ _ _ => Proto.raiseBuiltin "ValueError" "r2"
+      else if t == .module && name == importHook "o" then
+        some fun {m} {_} [_] [_] _ _ _ => do
+          let sub ← PyPure.allocObj (PyPure.imm (m := m) (.builtin .module))
+            (.module "o.p" #[] false #[])
+          PyReads.moduleAdd "o.p" sub
+          PyPure.allocObj (PyPure.imm (m := m) (.builtin .module))
+            (.module "o" #[] false #[("p", sub)])
+      else if t == .module && name == importHook "w" then
+        some fun {m} {_} [_] [_] _ _ _ => do
+          let kept ← PyPure.allocObj (PyPure.imm (m := m) (.builtin .module))
+            (.module "w" #[] false #[])
+          PyReads.moduleAdd "w" kept
+          PyPure.allocObj (PyPure.imm (m := m) (.builtin .module)) (.module "w" #[] false #[])
+      else if t == .module && name == importHook "g" then
+        some fun {m} {_} [_] [_] _ _ _ =>
+          PyPure.allocObj (PyPure.imm (m := m) (.builtin .module))
+            (.module "g" #[] false #[("__getattr__", PyPure.imm (m := m) (.builtin .len))])
+      else none }
+
+/-- The paths that run once a part gives a hook's body, with the bodies of `stubImpls`:
+`isinstance(1, u)` for an object `u` with opaque state, whose union arguments are `(str, int)` (`0`)
+or `None` (`1`); `int | str`, which both slots decline (`2`); `from q import a` (`3`) and `from q
+import b` (`4`); whether two imports of `q` give one module (`5`); `q.__name__`, which CPython's
+import sets but the body didn't (`6`); `q.b` (`7`); `g.x`, which CPython gets from `g`'s
+`__getattr__` (`8`), and `h.x` (`9`); `p.s` after `import p.s`, which CPython's import sets on `p`
+over the body's `s` (`10`); `import z.s`, which imports `z` first (`11`); `p.s.s`, read on the
+module that `import p.s` gives (`12`); and `import r`, whose body raises after it added its module
+(`13`); `import r2`, whose body raises before it adds its module (`14`); and whether `o.p` is the
+module that `import o.p` gives (`15`); whether two imports of `w` give one module, the one in the
+table (`16`); and, for a C type `T` that a piece made, `T.__dict__["__doc__"]` (`17`) and
+`T.__dict__["x"]` (`18`), and `T.__doc__` (`19`); and, for a class `U` that a piece made, which
+isn't a C type, `U.__dict__["__doc__"]` (`20`), `U.__doc__` when `U` holds and gaps `__doc__`
+(`21`), the `__doc__` of an instance of `U` (`22`), `U.__module__` (`23`) and
+`U.__dict__["__module__"]` (`24`); and the `__module__` of an instance of `T` (`25`). -/
+@[dyn_sem PyT.stubHooks, expose] public def stubHooks (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    letI : PyWrites (PyM σ .writes true) Value :=
+      writesRecord (callBuiltinWith (stubImpls (k == 1)) 5000)
+    match k with
+    | 0 | 1 => do
+      let ns ← PyPure.allocDict
+      let a ← PyPure.allocObj (.builtin .type) (.cls
+        { name := "U", qualname := "U", «module» := "m", bases := #[.builtin .object],
+          mroTail := #[.builtin .object], ns, solidBase := .builtin .object })
+      let u ← PyPure.allocObj a (.opaque "u" #[])
+      pure (.bool (← Builtins.isinstanceN 5 (.int 1) u))
+    | 2 => Proto.binaryTail "|" .or (.builtin .int) (.builtin .str)
+    | 3 => Proto.importFrom "q" "a"
+    | 4 => Proto.importFrom "q" "b"
+    | 6 => do Proto.getAttr (← Proto.importModule "q") "__name__"
+    | 7 => do Proto.getAttr (← Proto.importModule "q") "b"
+    | 8 => do Proto.getAttr (← Proto.importModule "g") "x"
+    | 9 => do Proto.getAttr (← Proto.importModule "h") "x"
+    | 10 => do
+      discard <| Proto.importModule "p.s"
+      Proto.getAttr (← Proto.importModule "p") "s"
+    | 11 => Proto.importModule "z.s"
+    | 12 => do Proto.getAttr (← Proto.importModule "p.s") "s"
+    | 13 => Proto.importModule "r"
+    | 14 => Proto.importModule "r2"
+    | 15 => do
+      let sub ← Proto.importModule "o.p"
+      let p ← Proto.getAttr (← Proto.importModule "o") "p"
+      pure (.bool ((← PyPure.identical p sub) matches .yes))
+    | 16 => do
+      let w1 ← Proto.importModule "w"
+      let w2 ← Proto.importModule "w"
+      pure (.bool ((← PyPure.identical w1 w2) matches .yes))
+    | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 => do
+      let ns ← PyPure.allocDict
+      -- `U` of case 21 holds a `__doc__`, which it also gaps.
+      if k == 21 then
+        PyNew.dictSetNew ns (Value.ofString "__doc__") .none none fun _ => pure false
+      let c ← PyPure.allocObj (.builtin .type) (.cls
+        { name := if k ≤ 19 || k == 25 then "T" else "U", qualname := "T", «module» := "m",
+          bases := #[.builtin .object], mroTail := #[.builtin .object], ns,
+          solidBase := .builtin .object, cType := k ≤ 19 || k == 25,
+          gapped := if k == 21 then #["__doc__"] else #[] })
+      if k == 19 || k == 21 then return ← Proto.getAttr c "__doc__"
+      if k == 22 then return ← Proto.getAttr (← PyReads.allocInstance c .plain #[] #[]) "__doc__"
+      if k == 23 then return ← Proto.getAttr c "__module__"
+      if k == 25 then return ← Proto.getAttr (← PyReads.allocInstance c .plain #[] #[]) "__module__"
+      let key := Value.ofString
+        (if k == 18 then "x" else if k == 24 then "__module__" else "__doc__")
+      Proto.getItem (← Proto.getAttr c "__dict__") key
+    | _ => do
+      let q1 ← Proto.importModule "q"
+      let q2 ← Proto.importModule "q"
+      pure (.bool ((← PyPure.identical q1 q2) matches .yes))
+    : PyM σ .writes true Value)
+
 /-- `startChecks`, which runs before a step machine starts, on a call of `tuple.__new__` on
 `(int, (1,))` (`0`), of `list.extend` on `(5, (1,))` (`1`), of `dict.__dict__["fromkeys"]` on
 `(list, (1,))` (`2`), and of `tuple.__new__` on `(tuple, (1,))` (`3`); and the start of a machine
@@ -1254,6 +1650,21 @@ public def showStep : CallStep TState Value → Value
     pure (showStep (← Proto.callResumable (S := TState) 5 inst (.tuple #[]) (← PyPure.allocDict) []))
     : PyM σ .writes true Value)
 
+/-- One step of a call through `callResumable`, as `py.call` makes it, of a C type `A` that a piece
+makes (`0`), and of an object with opaque state whose class `A`'s `__call__` is `len` (`1`). -/
+@[dyn_sem PyT.cTypeStep, expose] public def cTypeStep (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let ns ← PyPure.allocDict
+    PyNew.dictSetNew ns (Value.ofString "__call__") (.builtin .len) none fun _ => pure false
+    let a ← PyPure.allocObj (.builtin .type) (.cls
+      { name := "A", qualname := "A", «module» := "m", bases := #[.builtin .object],
+        mroTail := #[.builtin .object], ns, solidBase := .builtin .object,
+        tpName := some "types.A", cType := true })
+    let f ← if k == 0 then pure a else PyPure.allocObj a (.opaque "a" #[])
+    pure (showStep (← Proto.callResumable (S := TState) 5 f (.tuple #[]) (← PyPure.allocDict) []))
+    : PyM σ .writes true Value)
+
 /-- `callResumable` with saved frames resumes the frame's machine with no dispatch of the callee
 (here `None`). -/
 public def resumeDirectM : PyM σ .writes true Value := do
@@ -1294,8 +1705,8 @@ def ptEffect : String → Effects.Level
   | "pt.eqVal" => .calls
   | "pt.setAny" => .writes
   | "pt.dictPrims" | "pt.setPrims" | "pt.slotInexact" | "pt.popInexact" | "pt.listPrims"
-  | "pt.newPrims" | "pt.bindCase" => .reads
-  | "pt.oldPrims" | "pt.frozenSeal" | "pt.nativeDepth" | "pt.nativeGapped" | "pt.nextView" | "pt.setUpdateSub" | "pt.classDescr" | "pt.startCheck" => .writes
+  | "pt.newPrims" | "pt.bindCase" | "pt.setExactCase" => .reads
+  | "pt.oldPrims" | "pt.frozenSeal" | "pt.nativeDepth" | "pt.nativeGapped" | "pt.nextView" | "pt.setUpdateSub" | "pt.classDescr" | "pt.startCheck" | "pt.hooks" | "pt.partHooks" | "pt.staticDescr" | "pt.heapAttrs" | "pt.dictProxyCase" | "pt.cTypeStep" | "pt.stubHooks" => .writes
   | "pt.frozenOr" | "pt.frozenAdd" | "pt.objPrims" => .writes
   | "pt.frozenWalk" | "pt.frozenMerge" | "pt.subclassOps" => .calls
   | "pt.subclassContainers" | "pt.seqSlotSub" | "pt.seqSlotCleared" | "pt.strSetSubOps" | "pt.callInst" | "pt.callLevelStep" | "pt.resumeCase" | "pt.resumeDirect" | "pt.resumeNoFit"
@@ -1565,7 +1976,7 @@ info: StrataPython.Dyn.Sem.Value.tuple
 /--
 info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
   #[StrataPython.Dyn.Sem.Value.str
-      { s := "cannot set 'x' attribute of immutable type 'types.GenericAlias'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+      { s := "cannot set 'x' attribute of immutable type 'int'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
 -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.immutableWrite() ^err.0()"
@@ -2162,6 +2573,506 @@ each descriptor that `builtinEntry` makes, never gives `.tpNew`. -/
 example (k : AttrKind) : k.descr? ≠ some .tpNew := by
   cases k <;> simp [AttrKind.descr?]
 
+-- The hooks that pieces of the built-in library fill (`pt.hooks`).
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "union args is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.partHooks(0) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "subscripting the class type is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.partHooks(1) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "built-in method list.__class_getitem__ is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.partHooks(2) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in method type.__or__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.partHooks(3) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a C recursion depth over 9000" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.partHooks(4) ^err.0()"
+
+-- The static method `str.maketrans`, through the class and through an instance (`pt.staticDescr`).
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "a", ascii := true, ascii_eq := _ },
+    StrataPython.Dyn.Sem.Value.str { s := "b", ascii := true, ascii_eq := _ }]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.staticDescr(0) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "a", ascii := true, ascii_eq := _ },
+    StrataPython.Dyn.Sem.Value.str { s := "b", ascii := true, ascii_eq := _ }]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.staticDescr(1) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "a", ascii := true, ascii_eq := _ },
+    StrataPython.Dyn.Sem.Value.str { s := "b", ascii := true, ascii_eq := _ }]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.staticDescr(2) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.bool true -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.staticDescr(3) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.bool false -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.staticDescr(4) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.int 7 -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.staticDescr(5) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.bool true -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.staticDescr(6) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.bool true -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.staticDescr(7) ^err.0()"
+
+-- The attributes of heap types and of class namespaces, and a write to a type that is not immutable,
+-- which stop with a gap (`pt.heapAttrs`).
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "the __annotations__ of the heap type ExceptionGroup is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.heapAttrs(0) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "the __annotations__ of a class whose namespace has none is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.heapAttrs(1) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "a class's __annotations__ entry that is not a dict is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.heapAttrs(2) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "the attribute BuiltinImporter.create_module is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.heapAttrs(3) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "an attribute write to the mutable built-in type ExceptionGroup is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.heapAttrs(4) ^err.0()"
+
+-- A mappingproxy of a plain dict (`pt.dictProxyCase`).
+/--
+info: StrataPython.Dyn.Sem.Value.int 2
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictProxyCase(0) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.KeyError) StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 9] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictProxyCase(1) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "unhashable type: 'list'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictProxyCase(2) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.mappingproxy)
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictProxyCase(3) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "the operators of this built-in type are not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictProxyCase(4) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.int 4
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictProxyCase(5) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "a mappingproxy of an instance of a subclass of dict is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictProxyCase(6) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.int 7
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(0) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "import of module m is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(1) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "type 'U' is not an acceptable base type", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(5) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "a subclass of U is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(6) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.int 3
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(7) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "import of module nosuch is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(8) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "object.__new__ of the C type types.A is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(10) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "len() takes exactly one argument (0 given)", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(11) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a slot wrapper bound to an object of another type is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(12) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.str { s := "method-wrapper", ascii := true, ascii_eq := _ }
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(13) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "object of type 'types.A' has no len()", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(14) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.str { s := "types", ascii := true, ascii_eq := _ } -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(15) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.len) -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(16) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.KeyError) StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.str { s := "nope", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(17) ^err.0()"
+
+/-- info: object 2 -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(18) ^err.0()"
+
+-- `import m` in the translated program `m`, whose globals are cells, stops with a gap.
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "import of the translated module m is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %c.0 : base.Ref(py.Value) = py.globalCell(\"m\", \"x\")
+      %v.0 : py.Value = py.importModule(\"m\") ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "isinstance() arg 2 must be a type, a tuple of types, or a union", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(19) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "descriptor 'm' for 'types.A' objects doesn't apply to a 'int' object", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(20) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "object.__new__ of the C type types.A is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(21) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "the operators of this built-in type are not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(22) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "the attribute G.g is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(23) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "the __dict__ that a user class's namespace holds is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(24) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "object.__new__ of the C type types.A is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(25) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.bool true
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(26) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.AttributeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "'types.A' object has no attribute 'x'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(27) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "a class's __dict__ subscripted by a key that is not a str is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(28) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "'types.B' object is not callable", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(29) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.AttributeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "type object 'types.B' has no attribute 'nope'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(30) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "cannot set 'x' attribute of immutable type 'types.B'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(31) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "types.B() takes no arguments", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(32) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "cast", ascii := true, ascii_eq := _ },
+    StrataPython.Dyn.Sem.Value.str { s := "cast", ascii := true, ascii_eq := _ },
+    StrataPython.Dyn.Sem.Value.str { s := "typing", ascii := true, ascii_eq := _ }]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(33) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.str { s := "method", ascii := true, ascii_eq := _ }
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(34) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.str { s := "method", ascii := true, ascii_eq := _ } -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(35) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.bool true -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(36) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a class's __dict__ subscripted by a key that is not a str is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.hooks(37) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.bool true
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(0) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "isinstance with a second argument that is an object, not a class"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(1) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for |: 'type' and 'type'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(2) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.int 3
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(3) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "from q import b of a name that the module lacks is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(4) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.bool true
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(5) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the attribute q.__name__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(6) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.AttributeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "module 'q' has no attribute 'b'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(7) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the attribute g.x is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(8) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the attribute h.x is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(9) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the attribute p.s is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(10) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "import of module z is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(11) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.int 1 -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(12) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "the failed import of r is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(13) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.ValueError) StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.str { s := "r2", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(14) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.bool true -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(15) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.bool true -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(16) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the attribute T.__doc__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(17) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.KeyError) StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.str { s := "x", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(18) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the attribute T.__doc__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(19) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the attribute U.__doc__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(20) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the attribute U.__doc__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(21) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the attribute U.__doc__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(22) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the attribute U.__module__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(23) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the attribute U.__module__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(24) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the attribute T.__module__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.stubHooks(25) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.bool true, StrataPython.Dyn.Sem.Value.bool true],
+    StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.bool false, StrataPython.Dyn.Sem.Value.bool false],
+    StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.bool false, StrataPython.Dyn.Sem.Value.bool false],
+    StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.bool false, StrataPython.Dyn.Sem.Value.bool false]]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.setExactCase ^err.0()"
+
 -- `next()` of a dict view raises CPython's `TypeError`: its class has no `__next__`.
 /--
 info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
@@ -2381,6 +3292,21 @@ info: StrataPython.Dyn.Sem.Value.tuple
 -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.callLevelStep ^err.0()"
+
+-- Through `callResumable`, a call of a C type that a piece makes stops with the gap of a C type's
+-- `object.__new__`, and a call of an object with opaque state goes through its class's `__call__`.
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "object.__new__ of the C type types.A is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.cTypeStep(0) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "len() takes exactly one argument (0 given)", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.cTypeStep(1) ^err.0()"
 
 -- A call of an instance whose `__call__` is a machine suspends as a `callLevel` frame, and resumes
 -- through it to the machine's result.

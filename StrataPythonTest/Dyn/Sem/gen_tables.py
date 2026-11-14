@@ -71,6 +71,10 @@ KINDS = {
 
 
 def kind_of(v):
+    # A `staticmethod` holds a C function (`str.maketrans`) or a Python one
+    # (`BuiltinImporter.create_module`), which reads give back as different types.
+    if type(v) is staticmethod and not isinstance(v.__func__, types.BuiltinFunctionType):
+        return "pyStaticMethod"
     k = KINDS.get(type(v))
     if k is None:
         raise SystemExit(f"no AttrKind for a value of type {type(v).__qualname__}")
@@ -120,7 +124,10 @@ def main():
         "  /-- A Python function. -/",
         "  | pyFunction",
         "  | classMethod",
+        "  /-- A static method of a C function, such as `str.maketrans`. -/",
         "  | staticMethod",
+        "  /-- A static method of a Python function, such as `BuiltinImporter.create_module`. -/",
+        "  | pyStaticMethod",
         "  | property",
         "  /-- The value `None`, such as `list.__hash__`. -/",
         "  | noneValue",
