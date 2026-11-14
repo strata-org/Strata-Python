@@ -116,20 +116,24 @@ operation, and rewrites the verdicts, the known runs (`grid_known/`), the summar
 A difference that its owner doesn't fix yet is pinned as `<id> | known | <reason>` in
 `grid_expected.txt` before the update.
 
-The same test checks coverage: every instruction of `Py.env` and every built-in function and
-method that the model implements must be covered by a case that agrees with CPython and gives a
-result, or be listed in `StrataPythonTest/Dyn/axes/not_covered.txt` with the reason. Two kinds of
-evidence cover a name:
+The same test checks coverage: every instruction of `Py.env`, every built-in function and method
+that the model implements, and every name and class native that it binds in `typing` and
+`dataclasses` must be covered by a case that agrees with CPython and gives a result, or be listed
+in `StrataPythonTest/Dyn/axes/not_covered.txt` with the reason. Two kinds of evidence cover a
+name:
 
 - observed: a call that CPython's run of the case shows (`cpython_calls.py`), or an instruction
   in the translation of the case's operation;
 - declared: a special method that the catalog says the case's operation reaches without a call
-  (`len` of a `list` reaches `list.__len__`), in the case's `entries`.
+  (`len` of a `list` reaches `list.__len__`), in the case's `entries`; and an attribute of
+  `typing` or `dataclasses` that the case's code reads, taken from the code, not from a run.
 
 No run checks a declared entry, so `grid_summary.txt` lists the names that only declared entries
 cover, each with the first case that declares it, and how many more. A new rule or built-in needs a case in `catalog.py`,
 or an entry in `not_covered.txt`; an entry for something that a case now covers fails too. A case
-also names what it calls by name in `calls`, and CPython's run must show each of those calls.
+also names what it calls by name in `calls`, and CPython's run must show each of those calls. The
+typing and dataclasses cases that are whole programs are files in
+`StrataPythonTest/Dyn/axes/typing/`, named `<axis>_<name>.py`.
 
 ## Convention: `open Strata` pattern
 

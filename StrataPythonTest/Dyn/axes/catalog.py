@@ -22,6 +22,7 @@ every user dunder but `__repr__` and `__init__` an `ev(name)` call as its first 
 and order of user calls is part of the output.
 """
 
+import pathlib
 import re
 from dataclasses import dataclass, field
 
@@ -50,6 +51,9 @@ class Case:
     # The built-in functions and methods that the case calls by name, as `<type>.<name>` or a
     # function's name; CPython's run must show each of them (`cpython_calls.py`).
     calls: list = field(default_factory=list)
+    # The attributes of `typing` and `dataclasses` that the case reads, as `<module>.<name>`
+    # (declared: CPython shows no call for an attribute read).
+    reads: list = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -1507,6 +1511,294 @@ SYNTAX = {
 }
 
 
+# ---------------------------------------------------------------------------------------------
+# Typing and dataclasses (the modules that the grid imports), with the axes: built-in subclasses
+# as values and fields (A1), field dunders that re-enter or raise (A2, A4), `default_factory` and
+# `__post_init__` of each kind (A3), the alias caches' eviction (A5).
+
+def _user(name, body):
+    return f"class {name}:\n{body}    def __repr__(self):\n        return '{name}()'\n"
+
+
+TYPING = {
+    # typing
+    "type_checking": ([], ["import typing", "r = typing.TYPE_CHECKING"], "result"),
+    "module_names": ([], ["import typing", "import dataclasses",
+                          "r = (typing.__name__, dataclasses.__name__)"], "result"),
+    "cast_kinds": (["class I(int):\n    pass\n"],
+                   ["from typing import cast", "x = I(3)", "r = (cast(int, 3), cast(str, x) is x, cast('T', [1]))"],
+                   "result"),
+    "any": ([], ["from typing import Any", "r = (repr(Any), Any == Any)"], "result"),
+    "any_isinstance": ([], ["from typing import Any", "r = isinstance(1, Any)"], "raises:TypeError"),
+    "forward_ref": ([], ["from typing import ForwardRef", "a = ForwardRef('int')",
+                         "r = (repr(a), a == ForwardRef('int'), a == ForwardRef('str'), hash(a) == hash(ForwardRef('int')))"],
+                    "result"),
+    "optional": ([], ["from typing import Optional, Union",
+                      "r = (repr(Optional[int]), Optional[int] == Union[int, None], repr(Union[int, str]), Union[int, int] is int)"],
+                 "result"),
+    "union_ops": ([], ["from typing import Union",
+                       "u = Union[int, str]", "r = (repr(u | None), repr(int | u), u.__args__, u == Union[str, int])"],
+                  "result"),
+    "union_isinstance": ([], ["from typing import Union", "u = Union[int, str]",
+                              "r = (isinstance(1, u), isinstance(1.5, u), isinstance('a', int | str), issubclass(bool, int | str))"],
+                         "result"),
+    "required_forms": ([], ["from typing import Required, NotRequired, TypeGuard",
+                            "r = (repr(Required[int]), repr(NotRequired[str]), repr(TypeGuard[int]))"],
+                       "result"),
+    "aliases": ([], ["from typing import List, Dict, Set, Tuple",
+                     "r = (repr(List[int]), repr(Dict[str, int]), repr(Set[int]), repr(Tuple[int, ...]), List[int] == List[int], List[int] != List[str], List[int].__origin__ is list)"],
+                "result"),
+    "alias_call": ([], ["from typing import List", "r = List[int]([1, 2])"], "raises:TypeError"),
+    "alias_isinstance": ([], ["from typing import List", "r = isinstance([], List[int])"], "raises:TypeError"),
+    "alias_attributes": ([], ["from typing import Dict", "d = Dict[str, int]",
+                              "r = (d.__args__, d.__origin__, d._name)"], "result"),
+    "typeddict": ([], ["from typing import TypedDict",
+                       "class TD(TypedDict):\n    a: int\n    b: str",
+                       "x = TD(a=1, b='x')",
+                       "r = (x, type(x).__name__, sorted(TD.__required_keys__), sorted(TD.__optional_keys__), TD.__total__)"],
+                  "result"),
+    "typeddict_total_false": ([], ["from typing import TypedDict, Required",
+                                   "class TD(TypedDict, total=False):\n    a: Required[int]\n    b: str",
+                                   "r = (TD(a=1), sorted(TD.__required_keys__), sorted(TD.__optional_keys__))"],
+                              "result"),
+    "typeddict_inherit": ([], ["from typing import TypedDict, NotRequired",
+                               "class A(TypedDict):\n    a: int",
+                               "class B(A):\n    b: NotRequired[str]",
+                               "r = (B(a=1, b='x'), sorted(B.__required_keys__), sorted(B.__annotations__))"],
+                          "result"),
+    "typeddict_isinstance": ([], ["from typing import TypedDict",
+                                  "class TD(TypedDict):\n    a: int",
+                                  "r = isinstance({}, TD)"], "raises:TypeError"),
+    "typeddict_sub_values": (["class I(int):\n    pass\n", "class S(str):\n    pass\n"],
+                             ["from typing import TypedDict",
+                              "class TD(TypedDict):\n    a: int\n    b: str",
+                              "x = TD(a=I(1), b=S('s'))", "r = (type(x['a']).__name__, type(x['b']).__name__, x)"],
+                             "result"),
+    "namedtuple": ([], ["from typing import NamedTuple",
+                        "class P(NamedTuple):\n    x: int\n    y: int = 0",
+                        "p = P(1)",
+                        "r = (p, p.x, p[1], p._replace(y=5), p._asdict(), p.__getnewargs__(), P._make([3, 4]), P.__match_args__, P._fields, P._field_defaults, tuple(p), p == (1, 0), hash(p) == hash((1, 0)))"],
+                   "result"),
+    "namedtuple_errors": ([], ["from typing import NamedTuple",
+                               "class P(NamedTuple):\n    x: int",
+                               "r = []",
+                               "for f in (lambda: P(), lambda: P(1, 2), lambda: P(x=1, z=2), lambda: P._make([1, 2]), lambda: P(1)._replace(z=1)):\n    try:\n        f()\n    except Exception as e:\n        r.append((type(e).__name__, str(e)))"],
+                          "result"),
+    "namedtuple_other_base": ([], ["from typing import NamedTuple",
+                                   "class P(NamedTuple, int):\n    x: int"],
+                              "raises:TypeError"),
+    "namedtuple_sub_fields": (["class I(int):\n    pass\n"],
+                              ["from typing import NamedTuple",
+                               "class P(NamedTuple):\n    x: int",
+                               "p = P(I(2))", "r = (type(p.x).__name__, p, p.x + 1)"], "result"),
+    "namedtuple_field_eq_reenters": ([_user("E", "    def __eq__(self, o):\n        ev('E.__eq__')\n        log.append('eq')\n        return True\n    __hash__ = object.__hash__\n")],
+                                     ["from typing import NamedTuple", "log = []",
+                                      "class P(NamedTuple):\n    x: object",
+                                      "e = E()", "r = (P(e) == P(E()), P(e) == P(e), log)"], "result"),
+    # dataclasses
+    "dataclass_basic": ([], ["from dataclasses import dataclass",
+                             "@dataclass\nclass D:\n    a: int\n    b: str = 'x'",
+                             "d = D(1)", "r = (d, d == D(1, 'x'), d != D(2), D.__match_args__, D.__doc__)"],
+                        "result"),
+    "dataclass_order": ([], ["from dataclasses import dataclass",
+                             "@dataclass(order=True)\nclass D:\n    a: int\n    b: int = 0",
+                             "r = (D(1) < D(2), D(1, 2) > D(1, 1), D(1) <= D(1), D(2) >= D(1), sorted([D(3), D(1), D(2)]))"],
+                        "result"),
+    "dataclass_order_mixed": ([], ["from dataclasses import dataclass",
+                                   "@dataclass(order=True)\nclass D:\n    a: int",
+                                   "r = D(1) < 1"], "raises:TypeError"),
+    "dataclass_frozen": ([], ["from dataclasses import dataclass, FrozenInstanceError",
+                              "@dataclass(frozen=True)\nclass D:\n    a: int",
+                              "d = D(1)",
+                              "try:\n    d.a = 2\nexcept FrozenInstanceError as e:\n    r = (type(e).__name__, str(e), hash(d) == hash(D(1)), d)"],
+                         "result"),
+    "dataclass_frozen_del": ([], ["from dataclasses import dataclass, FrozenInstanceError",
+                                  "@dataclass(frozen=True)\nclass D:\n    a: int",
+                                  "try:\n    del D(1).a\nexcept FrozenInstanceError as e:\n    r = str(e)"],
+                             "result"),
+    "dataclass_hash_actions": ([], ["from dataclasses import dataclass",
+                                    "@dataclass\nclass A:\n    a: int",
+                                    "@dataclass(eq=False)\nclass B:\n    a: int",
+                                    "@dataclass(unsafe_hash=True)\nclass C:\n    a: int",
+                                    "@dataclass(frozen=True, eq=True)\nclass E:\n    a: int",
+                                    "r = (A.__hash__, B.__hash__ is object.__hash__, hash(C(1)) == hash((1,)), hash(E(2)) == hash((2,)))"],
+                               "result"),
+    "dataclass_options": ([], ["from dataclasses import dataclass",
+                               "@dataclass(repr=False, init=False, eq=False, match_args=False)\nclass D:\n    a: int = 3",
+                               "d = D()", "r = (d.a, D.__repr__ is object.__repr__, hasattr(D, '__match_args__'), d == D())"],
+                          "result"),
+    "dataclass_kw_only": ([], ["from dataclasses import dataclass, field",
+                               "@dataclass(kw_only=True)\nclass D:\n    a: int\n    b: int = field(default=2, kw_only=False)",
+                               "r = (D(5, a=1), D.__match_args__)"], "result"),
+    "dataclass_kw_only_error": ([], ["from dataclasses import dataclass",
+                                     "@dataclass(kw_only=True)\nclass D:\n    a: int",
+                                     "r = D(1)"], "raises:TypeError"),
+    "dataclass_mutable_default": ([], ["from dataclasses import dataclass",
+                                       "@dataclass\nclass D:\n    a: list = []"],
+                                  "raises:ValueError"),
+    "dataclass_field_order_error": ([], ["from dataclasses import dataclass",
+                                         "@dataclass\nclass D:\n    a: int = 1\n    b: int"],
+                                    "raises:TypeError"),
+    "dataclass_post_init": ([], ["from dataclasses import dataclass, field",
+                                 "@dataclass\nclass D:\n    a: int\n    b: int = field(init=False)\n    def __post_init__(self):\n        ev('D.__post_init__')\n        self.b = self.a * 2",
+                                 "r = D(3)"], "result"),
+    "dataclass_replace": ([], ["from dataclasses import dataclass, replace",
+                               "@dataclass(frozen=True)\nclass D:\n    a: int\n    b: int = 0",
+                               "d = D(1)", "r = (replace(d, b=5), replace(d), d)"], "result"),
+    "dataclass_replace_error": ([], ["from dataclasses import dataclass, replace",
+                                     "@dataclass\nclass D:\n    a: int",
+                                     "r = replace(D(1), z=2)"], "raises:TypeError"),
+    "dataclass_field_object": ([], ["from dataclasses import field, Field, MISSING",
+                                    "f = field(default=3)",
+                                    "r = (type(f).__name__, isinstance(f, Field), f.default, f.default_factory is MISSING)"],
+                               "result"),
+    "dataclass_inherit": ([], ["from dataclasses import dataclass",
+                               "@dataclass\nclass A:\n    a: int",
+                               "@dataclass\nclass B(A):\n    b: int = 0",
+                               "r = (B(1), B(1, 2) == B(1, 2), B.__match_args__)"], "result"),
+    "dataclass_builtin_sub_fields": (["class I(int):\n    pass\n", "class L(list):\n    pass\n"],
+                                     ["from dataclasses import dataclass",
+                                      "@dataclass(order=True)\nclass D:\n    a: int\n    b: list",
+                                      "x = D(I(1), L([2]))", "r = (x, type(x.a).__name__, x == D(1, [2]), x < D(2, []))"],
+                                     "result"),
+    "dataclass_on_builtin_sub": ([], ["from dataclasses import dataclass",
+                                      "@dataclass\nclass D(list):\n    a: int = 0",
+                                      "d = D()", "r = (d, d.a, list.__len__(d))"], "result"),
+    "dataclass_field_eq_reenters": ([_user("E", "    def __eq__(self, o):\n        ev('E.__eq__')\n        log.append(len(log))\n        return True\n    __hash__ = object.__hash__\n")],
+                                    ["from dataclasses import dataclass", "log = []",
+                                     "@dataclass\nclass D:\n    a: object\n    b: object",
+                                     "r = (D(E(), 1) == D(E(), 1), D(1, E()) == D(1, E()), log)"], "result"),
+    "dataclass_field_eq_raises": ([_user("E", "    def __eq__(self, o):\n        raise ValueError('eq')\n    __hash__ = object.__hash__\n")],
+                                  ["from dataclasses import dataclass",
+                                   "@dataclass\nclass D:\n    a: object",
+                                   "r = D(E()) == D(E())"], "raises:ValueError"),
+    "dataclass_field_hash_raises": ([_user("H", "    def __hash__(self):\n        raise ValueError('hash')\n")],
+                                    ["from dataclasses import dataclass",
+                                     "@dataclass(unsafe_hash=True)\nclass D:\n    a: object",
+                                     "r = hash(D(H()))"], "raises:ValueError"),
+    "dataclass_field_repr_raises": (["class R:\n    def __repr__(self):\n        ev('R.__repr__')\n        raise KeyError('repr')\n"],
+                                    ["from dataclasses import dataclass",
+                                     "@dataclass\nclass D:\n    a: object",
+                                     "r = repr(D(R()))"], "raises:KeyError"),
+    "dataclass_field_lt_notimpl": ([_user("N", "    def __lt__(self, o):\n        ev('N.__lt__')\n        return NotImplemented\n    def __gt__(self, o):\n        ev('N.__gt__')\n        return NotImplemented\n")],
+                                   ["from dataclasses import dataclass",
+                                    "@dataclass(order=True)\nclass D:\n    a: object",
+                                    "r = D(N()) < D(N())"], "raises:TypeError"),
+    "dataclass_recursive_repr": ([], ["from dataclasses import dataclass",
+                                      "@dataclass\nclass D:\n    a: object = None",
+                                      "d = D()", "d.a = d", "r = repr(d)"], "result"),
+    "dataclass_eq_other_class": ([], ["from dataclasses import dataclass",
+                                      "@dataclass\nclass A:\n    a: int",
+                                      "@dataclass\nclass B:\n    a: int",
+                                      "r = (A(1) == B(1), A(1) == (1,), A(1).__eq__(B(1)))"], "result"),
+    # default_factory and __post_init__ of each kind (A3).
+    "factory_function": ([], ["from dataclasses import dataclass, field",
+                              "def make():\n    ev('make')\n    return [0]",
+                              "@dataclass\nclass D:\n    a: list = field(default_factory=make)",
+                              "r = (D(), D().a is not D().a)"], "result"),
+    "factory_lambda": ([], ["from dataclasses import dataclass, field",
+                            "@dataclass\nclass D:\n    a: dict = field(default_factory=lambda: {'k': 1})",
+                            "r = D()"], "result"),
+    "factory_builtin": ([], ["from dataclasses import dataclass, field",
+                             "@dataclass\nclass D:\n    a: list = field(default_factory=list)\n    b: set = field(default_factory=set)",
+                             "r = D()"], "result"),
+    "factory_class": ([_user("K", "    def __init__(self):\n        ev('K.__init__')\n")],
+                      ["from dataclasses import dataclass, field",
+                       "@dataclass\nclass D:\n    a: object = field(default_factory=K)",
+                       "r = D()"], "result"),
+    "factory_callable_object": ([_user("Mk", "    def __call__(self):\n        ev('Mk.__call__')\n        return 7\n")],
+                                ["from dataclasses import dataclass, field",
+                                 "@dataclass\nclass D:\n    a: int = field(default_factory=Mk())",
+                                 "r = D()"], "result"),
+    "factory_raises": ([], ["from dataclasses import dataclass, field",
+                            "def make():\n    raise ValueError('factory')",
+                            "@dataclass\nclass D:\n    a: int = field(default_factory=make)",
+                            "r = D()"], "raises:ValueError"),
+    "post_init_staticmethod": ([], ["from dataclasses import dataclass",
+                                    "@dataclass\nclass D:\n    a: int\n    @staticmethod\n    def __post_init__():\n        ev('D.__post_init__')",
+                                    "r = D(1)"], "result"),
+    "post_init_classmethod": ([], ["from dataclasses import dataclass",
+                                   "@dataclass\nclass D:\n    a: int\n    @classmethod\n    def __post_init__(cls):\n        ev('D.__post_init__')",
+                                   "r = D(1)"], "result"),
+    "post_init_raises": ([], ["from dataclasses import dataclass",
+                              "@dataclass\nclass D:\n    a: int\n    def __post_init__(self):\n        raise KeyError(self.a)",
+                              "r = D(1)"], "raises:KeyError"),
+    # types: GenericAlias and UnionType
+    "generic_alias": ([], ["r = (repr(list[int]), list[int] == list[int], list[int].__origin__ is list, list[int].__args__, repr(dict[str, list[int]]), repr(type[int]))"],
+                      "result"),
+    "union_type": ([], ["u = int | str", "r = (repr(u), type(u).__name__, u.__args__, int | int, repr(int | None), isinstance(1, u), u == (str | int))"],
+                   "result"),
+    "union_type_errors": ([], ["r = []",
+                               "for f in (lambda: int | 1, lambda: isinstance(1, list[int]), lambda: list[int](1)):\n    try:\n        r.append(f())\n    except Exception as e:\n        r.append(type(e).__name__)"],
+                          "result"),
+}
+
+def module_reads(op, cid):
+    """The attributes of `typing` and `dataclasses` that the operation reads: each name of a
+    `from <module> import …` and each `<module>.<name>`. A name that a `from … import` brings in
+    must be used in the operation, or the declared read would be no evidence."""
+    names = []
+    text = "\n".join(op)
+    for mod in ("typing", "dataclasses"):
+        for m in re.finditer(rf"from {mod} import ([\w, ]+)", text):
+            for n in (x.strip() for x in m.group(1).split(",")):
+                rest = text[:m.start()] + text[m.end():]
+                if not re.search(rf"\b{n}\b", rest):
+                    raise ValueError(f"{cid}: imports {mod}.{n} but doesn't use it")
+                names.append(f"{mod}.{n}")
+        names += [f"{mod}.{n}" for n in re.findall(rf"\b{mod}\.(\w+)", text)]
+    return sorted(set(names))
+
+
+# The axis of each case of `TYPING`: A1 for the kinds of value, A2 to A4 as in the grid, and
+# `plain` for a case of exact built-in values.
+TYPING_AXES = {
+    "cast_kinds": "A1", "typeddict_sub_values": "A1", "namedtuple_sub_fields": "A1",
+    "dataclass_builtin_sub_fields": "A1", "dataclass_on_builtin_sub": "A1",
+    "namedtuple_field_eq_reenters": "A2", "dataclass_field_eq_reenters": "A2",
+    "dataclass_recursive_repr": "A2",
+    "dataclass_field_eq_raises": "A4", "dataclass_field_hash_raises": "A4",
+    "dataclass_field_repr_raises": "A4", "dataclass_field_lt_notimpl": "A4",
+    "factory_raises": "A4", "post_init_raises": "A4",
+    "factory_function": "A3", "factory_lambda": "A3", "factory_builtin": "A3",
+    "factory_class": "A3", "factory_callable_object": "A3", "post_init_staticmethod": "A3",
+    "post_init_classmethod": "A3", "dataclass_post_init": "A3",
+}
+
+TYPING_DIR = pathlib.Path(__file__).resolve().parent / "typing"
+
+
+def typing_file_cases():
+    """The cases of `typing/<axis>_<name>.py`: each file is a whole operation. A line
+    `# expect: <outcome>` gives its expected outcome (default `result`), and a line
+    `# entries: <key>, …` the natives of the C types (`types.GenericAlias`, `types.UnionType`,
+    `collections._tuplegetter`) that its operation reaches without a call."""
+    cases = []
+    for f in sorted(TYPING_DIR.glob("*.py")):
+        axis, _, name = f.stem.partition("_")
+        text = f.read_text()
+        expect = "result"
+        entries = []
+        for line in text.splitlines():
+            if line.startswith("# expect: "):
+                expect = line[len("# expect: "):].strip()
+            if line.startswith("# entries: "):
+                entries = [e.strip() for e in line[len("# entries: "):].split(",")]
+        op = text.rstrip("\n").split("\n") + ["r = None"]
+        cid = f"tf_{f.stem}"
+        cases.append(Case(cid, "typing", axis, name, name, op, [], [], expect,
+                          reads=module_reads(op, cid) + entries))
+    return cases
+
+
+def typing_cases():
+    cases = table_cases("t", "typing", "typing", TYPING)
+    for c in cases:
+        c.axis = TYPING_AXES.get(c.kind, "plain")
+        c.reads = module_reads(c.op, c.id)
+    return cases + typing_file_cases()
+
+
 def regression_cases():
     return table_cases("reg", "regressions", "regression", REGRESSIONS)
 
@@ -1522,6 +1814,7 @@ def all_cases():
              + constructor_cases()
              + table_cases("call", "calls", "direct", CALLS, CALLS_CALLS, CALLS_ENTRIES)
              + table_cases("syn", "syntax", "syntax", SYNTAX)
+             + typing_cases()
              + regression_cases())
     seen = set()
     for c in cases:

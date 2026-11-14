@@ -24,8 +24,6 @@ py.isImmutableScalar | a contract operation: no Python source reaches it. A Pyth
 py.dictKeysWithin | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
 py.allIn | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
 py.anyIn | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
-py.importModule | only typing and dataclasses can be imported, and the grid's cases for them come with the typing and dataclasses cells
-py.importFrom | only typing and dataclasses can be imported, and the grid's cases for them come with the typing and dataclasses cells
 base.callCode | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.cellLoc | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.old | the translator doesn't emit it for Python source (no golden of the corpus has it)
@@ -34,9 +32,7 @@ base.Unit.case | the translator doesn't emit it for Python source (no golden of 
 base.unreachable | the operation's translation has it, but it stops the run with a failure, so no run that agrees with CPython executes it
 bool.__invert__ | every case that reaches it gaps, e.g. d_bool___invert__: not modelled: ~ on a bool, which warns
 bytes.__hash__ | every case that reaches it gaps, e.g. d_bytes___hash__: a hash whose number the model does not know
-classmethod.__new__ | every case that reaches it gaps, e.g. call_descriptor_types: a call of this built-in object is not modelled yet
 classmethod.__repr__ | every case that reaches it gaps, e.g. d_classmethod___repr__: a repr that shows an object's address is not modelled yet
-classmethod.__init__ | every case that reaches it gaps, e.g. call_descriptor_types: a call of this built-in object is not modelled yet
 frozenset.__repr__ | every case that reaches it gaps, e.g. a1_repr_frozenset_exact: the repr of a set whose order the model doesn't know is not modelled yet
 object.__repr__ | every case that reaches it gaps, e.g. d_object___repr__: a repr that shows an object's address is not modelled yet
 object.__hash__ | every case that reaches it gaps, e.g. d_object___hash__: hash(x) depends on an address
@@ -44,9 +40,7 @@ object.__format__ | every case that reaches it gaps, e.g. d_object___format__: a
 set.__repr__ | every case that reaches it gaps, e.g. a1_repr_set_exact: the repr of a set whose order the model doesn't know is not modelled yet
 set.pop | every case that reaches it gaps or raises in CPython, e.g. m_set_pop_self_exact: set.pop of a set whose order is not CPython's is not modelled yet
 slice.__repr__ | every case that reaches it gaps, e.g. d_slice___repr__: built-in method slice.__new__ is not modelled yet
-staticmethod.__new__ | every case that reaches it gaps, e.g. call_descriptor_types: a call of this built-in object is not modelled yet
 staticmethod.__repr__ | every case that reaches it gaps, e.g. d_staticmethod___repr__: a repr that shows an object's address is not modelled yet
-staticmethod.__init__ | every case that reaches it gaps, e.g. call_descriptor_types: a call of this built-in object is not modelled yet
 str.__hash__ | every case that reaches it gaps, e.g. d_str___hash__: a hash whose number the model does not know
 set_iterator.__next__ | every case that reaches it gaps, e.g. d_set_iterator___next__: a slot of a set whose layout is inexact
 dict_keys.__rsub__ | every case that reaches it gaps, e.g. d_dict_keys___rsub__: a set lookup after a false __eq__ depends on CPython's table layout
@@ -85,3 +79,12 @@ set_iterator.__next__ @ direct | every case of the axis that reaches it gaps, e.
 classmethod.__repr__ @ direct | every case of the axis that reaches it gaps, e.g. d_classmethod___repr__: a repr that shows an object's address is not modelled yet
 staticmethod.__repr__ @ direct | every case of the axis that reaches it gaps, e.g. d_staticmethod___repr__: a repr that shows an object's address is not modelled yet
 slice.__repr__ @ direct | every case of the axis that reaches it gaps, e.g. d_slice___repr__: built-in method slice.__new__ is not modelled yet
+types.GenericAlias.__hash__ | every case that reaches it gaps, e.g. tf_natives_ga_hash: a hash whose number the model does not know
+types.UnionType.__hash__ | every case that reaches it gaps, e.g. tf_natives_ga_hash: a hash whose number the model does not know
+types.GenericAlias.__getitem__ | it substitutes type variables, and typing.TypeVar is not bound by the model (it gaps), so no program reaches it
+types.UnionType.__getitem__ | it substitutes type variables, and typing.TypeVar is not bound by the model (it gaps), so no program reaches it
+typing.TypedDict @ A4 | every case of the axis that reaches it gaps, e.g. tf_A4_td_sub_str: a walk of a dict whose comparisons may run user code is not modelled yet
+typing._GenericAlias.__hash__ | its result depends on the hashes of the alias's types, which the model doesn't know (a hash whose number the model does not know), so every case that reaches it gaps
+typing.ForwardRef.__hash__ | every case that observes its result gaps (a hash whose number the model does not know); the alias cache hashes it inside typing, which is no evidence
+typing._UnionGenericAlias.__hash__ | every case that observes its result gaps (a hash whose number the model does not know); the alias cache hashes it inside typing, which is no evidence
+typing.ForwardRef @ plain | every case of the axis that reaches it gaps, e.g. t_forward_ref: the attribute ForwardRef.__init__ is not modelled yet

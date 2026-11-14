@@ -16,8 +16,16 @@ reentry | A2 | 16 agree | 5 gap | 0 known
 regressions | regression | 13 agree | 12 gap | 0 known
 results | A1 | 5 agree | 4 gap | 0 known
 syntax | syntax | 37 agree | 0 gap | 0 known
-total | 4968 cases | 4538 agree | 430 gap | 0 known
-covered only by the catalog's entries | 15 names
+typing | A1 | 6 agree | 0 gap | 0 known
+typing | A2 | 13 agree | 0 gap | 0 known
+typing | A3 | 16 agree | 3 gap | 0 known
+typing | A4 | 11 agree | 1 gap | 0 known
+typing | A5 | 3 agree | 0 gap | 0 known
+typing | natives | 21 agree | 7 gap | 0 known
+typing | options | 3 agree | 0 gap | 0 known
+typing | plain | 38 agree | 1 gap | 0 known
+total | 5091 cases | 4649 agree | 442 gap | 0 known
+covered only by the catalog's entries | 86 names
   dict.__class_getitem__ | declared by call_class_getitem
   frozenset.__class_getitem__ | declared by call_class_getitem
   list.__class_getitem__ | declared by call_class_getitem
@@ -33,3 +41,74 @@ covered only by the catalog's entries | 15 names
   NoneType.__repr__ | declared by call_type_repr
   NotImplementedType.__repr__ | declared by call_type_repr
   ellipsis.__repr__ | declared by call_type_repr
+  typing.__name__ | declared by t_module_names
+  typing.TYPE_CHECKING | declared by t_type_checking
+  typing.Any | declared by t_any and 3 more
+  typing._AnyMeta | declared by tf_natives_private_names
+  typing.ForwardRef | declared by tf_natives_forward_ref_in_alias
+  typing._Final | declared by tf_natives_private_names
+  typing._NotIterable | declared by tf_natives_private_names
+  typing._SpecialForm | declared by tf_natives_private_names
+  typing._BaseGenericAlias | declared by tf_natives_private_names
+  typing._GenericAlias | declared by tf_natives_private_names
+  typing._SpecialGenericAlias | declared by tf_natives_private_names
+  typing._TupleType | declared by tf_natives_private_names
+  typing._UnionGenericAlias | declared by tf_natives_private_names
+  typing.List | declared by t_aliases and 10 more
+  typing.Dict | declared by t_aliases and 4 more
+  typing.Set | declared by t_aliases and 1 more
+  typing.Tuple | declared by t_aliases and 3 more
+  typing.TypedDict | declared by t_typeddict and 6 more
+  typing._TypedDict | declared by tf_natives_private_names
+  typing._TypedDictMeta | declared by tf_natives_private_names
+  typing.NamedTuple | declared by t_namedtuple and 10 more
+  typing.NamedTupleMeta | declared by tf_natives_private_names
+  typing._NamedTuple | declared by tf_natives_private_names
+  typing.Optional | declared by t_optional and 6 more
+  typing.Union | declared by t_optional and 10 more
+  typing.NotRequired | declared by t_required_forms and 1 more
+  typing.Required | declared by t_required_forms and 1 more
+  typing.TypeGuard | declared by t_required_forms
+  dataclasses.__name__ | declared by t_module_names
+  dataclasses.Field | declared by t_dataclass_field_object
+  dataclasses.FrozenInstanceError | declared by t_dataclass_frozen and 1 more
+  dataclasses.MISSING | declared by t_dataclass_field_object and 2 more
+  dataclasses._MISSING_TYPE | declared by tf_natives_private_names
+  dataclasses._HAS_DEFAULT_FACTORY | declared by tf_natives_private_names
+  dataclasses._HAS_DEFAULT_FACTORY_CLASS | declared by tf_natives_private_names
+  dataclasses._FIELD | declared by tf_natives_private_names
+  dataclasses._FIELD_CLASSVAR | declared by tf_natives_private_names
+  dataclasses._FIELD_INITVAR | declared by tf_natives_private_names
+  dataclasses._FIELD_BASE | declared by tf_natives_private_names
+  dataclasses._DataclassParams | declared by tf_natives_private_names
+  dataclasses._FIELDS | declared by tf_natives_private_names
+  dataclasses._PARAMS | declared by tf_natives_private_names
+  dataclasses._POST_INIT_NAME | declared by tf_natives_private_names
+  collections._tuplegetter.__get__ | declared by tf_natives_c_types
+  collections._tuplegetter.__set__ | declared by tf_natives_tg_set
+  collections._tuplegetter.__delete__ | declared by tf_natives_tg_del
+  collections._tuplegetter.__repr__ | declared by tf_natives_c_types
+  types.GenericAlias.__repr__ | declared by tf_natives_c_types
+  types.GenericAlias.__call__ | declared by tf_natives_c_types
+  types.GenericAlias.__getattribute__ | declared by tf_natives_c_types
+  types.GenericAlias.__lt__ | declared by tf_natives_c_types
+  types.GenericAlias.__le__ | declared by tf_natives_c_types
+  types.GenericAlias.__eq__ | declared by tf_natives_c_types
+  types.GenericAlias.__ne__ | declared by tf_natives_c_types
+  types.GenericAlias.__gt__ | declared by tf_natives_c_types
+  types.GenericAlias.__ge__ | declared by tf_natives_c_types
+  types.GenericAlias.__or__ | declared by tf_natives_c_types
+  types.GenericAlias.__ror__ | declared by tf_natives_c_types
+  types.GenericAlias.__mro_entries__ | declared by tf_natives_c_types
+  types.GenericAlias.__instancecheck__ | declared by tf_natives_c_types
+  types.GenericAlias.__subclasscheck__ | declared by tf_natives_c_types
+  types.UnionType.__repr__ | declared by tf_natives_c_types
+  types.UnionType.__getattribute__ | declared by tf_natives_c_types
+  types.UnionType.__lt__ | declared by tf_natives_c_types
+  types.UnionType.__le__ | declared by tf_natives_c_types
+  types.UnionType.__eq__ | declared by tf_natives_c_types
+  types.UnionType.__ne__ | declared by tf_natives_c_types
+  types.UnionType.__gt__ | declared by tf_natives_c_types
+  types.UnionType.__ge__ | declared by tf_natives_c_types
+  types.UnionType.__or__ | declared by tf_natives_c_types
+  types.UnionType.__ror__ | declared by tf_natives_c_types

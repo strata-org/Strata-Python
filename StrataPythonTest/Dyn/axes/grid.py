@@ -13,7 +13,8 @@ of `OUTDIR/templates/null.py` (`r = None`) by the py.* instructions that the ope
 (`OUTDIR/templates/scaffold.py` is a whole program around a trivial operation, for the
 instructions that every case runs);
 the built-in functions and methods that the case calls by name; and the dunder entries that its
-operation reaches without a call (`list.__len__` for `len(x)`). A list is comma-separated, or `-`
+operation reaches without a call (`list.__len__` for `len(x)`), with the attributes of `typing` and
+`dataclasses` that it reads (`typing.List`). A list is comma-separated, or `-`
 when empty.
 
 Beside each program `<id>.py`, it writes `<id>.null.py`, the same program with the operation
@@ -192,6 +193,7 @@ def _exc(e):
           e.__suppress_context__)
 
 
+# --- end of the prelude ---
 '''
 
 
@@ -311,7 +313,13 @@ def write(outdir):
         key = hashlib.sha256(text.encode()).hexdigest()[:16]
         (templates / f"{key}.py").write_text(text)
 
-        entries = [e for e in (resolve(t, d) for (t, d) in case.entries) if e is not None]
+        entries = []
+        for (t, d) in case.entries:
+            e = resolve(t, d)
+            if e is None:
+                sys.exit(f"grid.py: {case.id}: no built-in type {t} defines {d}")
+            entries.append(e)
+        entries += case.reads
         print(f"{case.id} | {case.group} | {case.axis} | {case.expect} | {key} | "
               f"{field_of(case.calls)} | {field_of(entries)}")
 

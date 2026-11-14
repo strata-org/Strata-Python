@@ -31,9 +31,11 @@ The coverage check (`AxisSource.coverage`) then takes what the cases that agree 
 reach: observed, the built-in functions and methods that CPython calls in their operations
 (`StrataPythonTest/Dyn/axes/cpython_calls.py`) and the instructions that their operations'
 translations have (and those of the program around every operation, once any case agrees); and
-declared, the dunder entries that the catalog maps their operations to. It fails on a name of the
-model's tables (every instruction of `Py.env`, every built-in function and method that
-`Assembly.impls` implements) that nothing covers and that
+declared, the dunder entries that the catalog maps their operations to and the attributes of
+`typing` and `dataclasses` that they read. It fails on a name of the model's tables (every
+instruction of `Py.env`, every built-in function and method that `Assembly.impls` implements, every
+attribute that the model binds in `typing` and `dataclasses`, and the natives of those modules'
+classes, `moduleNatives`) that nothing covers and that
 `StrataPythonTest/Dyn/axes/not_covered.txt` doesn't list with a reason, and on a stale entry
 there. The summary lists the names that only declared entries cover.
 
@@ -55,10 +57,37 @@ private meta def knownDir : System.FilePath := here / "grid_known"
 private meta def knownSuffix : String := ".known.trace"
 
 open StrataPython.Dyn.Sem in
+open StrataPython.Dyn.Sem.Modules in
+/-- The natives of the classes of `typing`, `dataclasses`, `collections` and `types` that the model
+defines, by their keys (`<module>.<class>.<name>`): every `native`, `cached` and `staticNative`
+entry of the class specs, the methods that `@dataclass` generates (`dataclasses.__eq__`, …), and
+those of a named tuple class (`collections.namedtuple._make`, …). The specs are listed here: the
+model keeps no list of them. -/
+private meta def moduleNatives : List String :=
+  let specs := [finalSpec, notIterableSpec, specialFormSpec, baseGenericAliasSpec,
+    genericAliasSpec, specialGenericAliasSpec, tupleTypeSpec, unionGenericAliasSpec, forwardRefSpec,
+    anyMetaSpec, anySpec, typedDictMetaSpec, typedDictSpec, namedTupleMetaSpec, namedTupleSpec,
+    tupleGetterSpec, frozenErrorSpec, missingTypeSpec, hasFactorySpec, fieldBaseSpec, paramsSpec,
+    fieldSpec, gaSpec, unionSpec]
+  let keys := specs.flatMap fun spec => spec.entries.toList.filterMap fun
+    | .native _ key _ | .cached _ key | .staticNative _ key => some key
+    | _ => none
+  let generated := ["__init__", "__repr__", "__eq__", "__lt__", "__le__", "__gt__", "__ge__",
+    "__hash__", "__setattr__", "__delattr__"].map (s!"dataclasses.{·}")
+  let namedtuple := ["__new__", "_make", "_replace", "__repr__", "_asdict", "__getnewargs__"].map
+    (s!"collections.namedtuple.{·}")
+  -- The natives that no spec holds: the decorator that `@dataclass(...)` returns, and the
+  -- function that `TypedDict(...)` calls.
+  let others := ["dataclasses.dataclass.<locals>.wrap", "typing.TypedDict.<lambda>"]
+  keys ++ generated ++ namedtuple ++ others
+
+open StrataPython.Dyn.Sem in
 open Strata.Dyn in
 open StrataPython.Dyn in
-/-- The names that the grid must cover: the instructions of `Py.env`, and the built-in functions
-and the methods of the built-in types that `Assembly.impls` implements, as `<type>.<name>`. -/
+/-- The names that the grid must cover: the instructions of `Py.env`, the built-in functions and
+the methods of the built-in types that `Assembly.impls` implements, as `<type>.<name>`, the
+attributes that the model binds in `typing` and `dataclasses`, as `<module>.<name>`, and the
+natives of those modules' classes (`moduleNatives`). -/
 private meta def requiredNames : Array String :=
   let insns := Py.names.filterMap fun n =>
     match Py.env.get? n with
@@ -69,7 +98,9 @@ private meta def requiredNames : Array String :=
   let methods := Builtin.allConstants.toList.flatMap fun t =>
     ((Builtin.ownNames t).toList.map (·.1)).filterMap fun n =>
       if (Assembly.impls.method t n).isSome then some s!"{t.info.name}.{n}" else none
-  (insns ++ fns ++ methods).toArray
+  let modules := Modules.typingAttrNames.map (s!"typing.{·}") ++
+    Modules.dataclassesAttrNames.map (s!"dataclasses.{·}")
+  (insns ++ fns ++ methods ++ modules ++ moduleNatives).toArray
 
 /-- The names that CPython calls by name in the case `c`'s operation (`cpython_calls.py`). -/
 private meta def calledIn (pythonCmd : System.FilePath) (c : Case) : IO (List String) := do

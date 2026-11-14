@@ -4966,3 +4966,126 @@ syn_uadd | agree
 syn_with | agree
 syn_with_in_finally | agree
 syn_with_raises | agree
+t_alias_attributes | agree
+t_alias_call | agree
+t_alias_isinstance | agree
+t_aliases | agree
+t_any | agree
+t_any_isinstance | agree
+t_cast_kinds | agree
+t_dataclass_basic | agree
+t_dataclass_builtin_sub_fields | agree
+t_dataclass_eq_other_class | agree
+t_dataclass_field_eq_raises | agree
+t_dataclass_field_eq_reenters | agree
+t_dataclass_field_hash_raises | agree
+t_dataclass_field_lt_notimpl | agree
+t_dataclass_field_object | agree
+t_dataclass_field_order_error | agree
+t_dataclass_field_repr_raises | agree
+t_dataclass_frozen | agree
+t_dataclass_frozen_del | agree
+t_dataclass_hash_actions | agree
+t_dataclass_inherit | agree
+t_dataclass_kw_only | agree
+t_dataclass_kw_only_error | agree
+t_dataclass_mutable_default | agree
+t_dataclass_on_builtin_sub | agree
+t_dataclass_options | agree
+t_dataclass_order | agree
+t_dataclass_order_mixed | agree
+t_dataclass_post_init | agree
+t_dataclass_recursive_repr | agree
+t_dataclass_replace | agree
+t_dataclass_replace_error | agree
+t_factory_builtin | agree
+t_factory_callable_object | agree
+t_factory_class | agree
+t_factory_function | agree
+t_factory_lambda | agree
+t_factory_raises | agree
+t_forward_ref | gap | the attribute ForwardRef.__init__ is not modelled yet
+t_generic_alias | agree
+t_module_names | agree
+t_namedtuple | agree
+t_namedtuple_errors | agree
+t_namedtuple_field_eq_reenters | agree
+t_namedtuple_other_base | agree
+t_namedtuple_sub_fields | agree
+t_optional | agree
+t_post_init_classmethod | agree
+t_post_init_raises | agree
+t_post_init_staticmethod | agree
+t_required_forms | agree
+t_type_checking | agree
+t_typeddict | agree
+t_typeddict_inherit | agree
+t_typeddict_isinstance | agree
+t_typeddict_sub_values | agree
+t_typeddict_total_false | agree
+t_union_isinstance | agree
+t_union_ops | agree
+t_union_type | agree
+t_union_type_errors | agree
+tf_A1_sub_over_fields | agree
+tf_A2_eq_mutate | agree
+tf_A2_eq_recurse | agree
+tf_A2_eq_replace_class | agree
+tf_A2_factory_reenters | agree
+tf_A2_hash_mutate | agree
+tf_A2_lt_mutate | agree
+tf_A2_nt_eq_logs | agree
+tf_A2_post_init_replace_class | agree
+tf_A2_repr_field_reenters_repr | agree
+tf_A2_repr_mutate | agree
+tf_A3_df_bound_method | agree
+tf_A3_df_builtin_method | agree
+tf_A3_df_class_with_new | agree
+tf_A3_df_classmethod_obj | gap | a call of this built-in object is not modelled yet
+tf_A3_df_staticmethod_obj | gap | a call of this built-in object is not modelled yet
+tf_A3_pi_builtin | agree
+tf_A3_pi_callable_obj | agree
+tf_A3_pi_inherited | agree
+tf_A3_pi_metaclass_getattr | gap | a dataclass whose metaclass is not type is not modelled yet
+tf_A3_pi_none | agree
+tf_A3_pi_property | agree
+tf_A4_eq_nonbool | agree
+tf_A4_hash_nonint | agree
+tf_A4_nt_repr_raises | agree
+tf_A4_post_init_context | agree
+tf_A4_repr_nonstr | agree
+tf_A4_td_sub_str | gap | a walk of a dict whose comparisons may run user code is not modelled yet
+tf_A5_alias_cache_eviction | agree
+tf_A5_alias_cache_lru | agree
+tf_A5_identity | agree
+tf_natives_alias_call_caught | agree
+tf_natives_any_new | gap | a subclass of Any is not modelled yet
+tf_natives_any_new_only | agree
+tf_natives_c_types | agree
+tf_natives_field_setname | agree
+tf_natives_forward_ref_in_alias | agree
+tf_natives_fr_hash | gap | a hash whose number the model does not know
+tf_natives_ga_getattr | gap | an AttributeError without name and obj from an attribute read is not modelled yet
+tf_natives_ga_getattr_ok | agree
+tf_natives_ga_hash | gap | a hash whose number the model does not know
+tf_natives_ga_subclasscheck | agree
+tf_natives_generic_alias | agree
+tf_natives_overload | agree
+tf_natives_overload_impl | gap | overload of a value that is not a function object is not modelled yet
+tf_natives_params | agree
+tf_natives_private_names | agree
+tf_natives_set_name | agree
+tf_natives_setattr_fwd | agree
+tf_natives_sf_errors | gap | an AttributeError without name and obj from an attribute read is not modelled yet
+tf_natives_sf_errors_ok | agree
+tf_natives_sf_mro_entries | agree
+tf_natives_sf_or | agree
+tf_natives_sf_repr_or | agree
+tf_natives_sga | agree
+tf_natives_td_misc | agree
+tf_natives_tg_del | agree
+tf_natives_tg_set | agree
+tf_natives_tuplegetter | gap | built-in delattr is not modelled yet
+tf_options_field_compare_hash | agree
+tf_options_hash_action_rows | agree
+tf_options_option_errors | agree
