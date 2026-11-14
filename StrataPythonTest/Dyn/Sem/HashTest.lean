@@ -7,6 +7,8 @@ module
 public import StrataPython.Dyn.Sem.Hash
 -- The `#guard`s below run as compiled code.
 meta import StrataPython.Dyn.Sem.Hash
+import StrataPython.Dyn.Sem.Imm
+meta import StrataPython.Dyn.Sem.Imm
 
 set_option autoImplicit false
 
@@ -71,6 +73,29 @@ def hashOf? (v : Value) : Option Hash :=
 #guard (frozensetHash [.exact 1]) == .exact (-558064481276695278)
 #guard (frozensetHash [.exact 1, .exact 2, .exact 3]) == .exact (-272375401224217160)
 #guard (frozensetHash [.exact 3, .exact 1, .exact 2]) == .exact (-272375401224217160)
+-- A hash combined 9,000 levels deep, as a nested generic alias's is: built, checked, hashed and
+-- compared in linear time, since each level shares the one below it.
+def deepCombine : Nat → Hash
+  | 0 => .symbolic (.const .int)
+  | n + 1 => combineHash "alias" [.symbolic (.const .list), deepCombine n] fun _ => 0
+#guard match deepCombine 9000 with
+  | .symbolic s => s.storeAddrFree && s.tag == some 5
+  | .exact _ => false
+#guard hash (deepCombine 9000) == hash (deepCombine 9000) && deepCombine 9000 == deepCombine 9000
+#guard deepCombine 9000 != deepCombine 8999
+-- A hash that uses the hash below it twice at each of 12 levels, whose walks visit each use
+-- (`docs/PythonToDyn.md`): checked, hashed and compared.
+def sharedCombine : Nat → Hash
+  | 0 => .symbolic (.const .int)
+  | n + 1 => let h := sharedCombine n; combineHash "node" [h, h] fun _ => 0
+#guard match sharedCombine 12 with
+  | .symbolic s => s.storeAddrFree && s.tag == some 5
+  | .exact _ => false
+#guard hash (sharedCombine 12) != hash (sharedCombine 11) && sharedCombine 12 == sharedCombine 12
+#guard sharedCombine 12 != sharedCombine 11
+-- A symbolic frozenset hash doesn't depend on the order of its members' hashes.
+#guard frozensetHash [.symbolic (.buffer [97].toByteArray), .exact 1, .symbolic (.tuple [.symbolic (.const .int)])] ==
+  frozensetHash [.symbolic (.tuple [.symbolic (.const .int)]), .symbolic (.buffer [97].toByteArray), .exact 1]
 #guard (frozensetHash [.exact (-2)]) == .exact 6776983852052281967
 
 -- `range` and `slice`.
@@ -114,10 +139,10 @@ def hashOf? (v : Value) : Option Hash :=
 #guard (Value.ofString "Ā").immHash == (Value.bytes #[0, 1]).immHash
 #guard (Value.ofString "a").immHash != (Value.ofString "b").immHash
 -- PEP 393 buffers: a narrow character is widened by a wider one in the same `str`.
-#guard strBuffer (.ofString "aĀ") == [97, 0, 0, 1]
-#guard strBuffer (.ofString "😀") == [0x00, 0xF6, 0x01, 0x00]
-#guard strBuffer (.ofString "é") == [0xE9]
-#guard strBuffer (.ofString "ab") == [97, 98]
+#guard (strBuffer (.ofString "aĀ")).toList == [97, 0, 0, 1]
+#guard (strBuffer (.ofString "😀")).toList == [0x00, 0xF6, 0x01, 0x00]
+#guard (strBuffer (.ofString "é")).toList == [0xE9]
+#guard (strBuffer (.ofString "ab")).toList == [97, 98]
 #guard (PyStr.ofString "abc").ascii && !(PyStr.ofString "é").ascii
 
 -- Equal tuples and frozensets of `str`s share a source.
@@ -131,7 +156,7 @@ def hashOf? (v : Value) : Option Hash :=
 #guard Value.immHash (.builtin .len) == .hash (.symbolic (.builtinFn .len))
 #guard Value.immHash (.builtin .«__spec__») == .unhashable
 #guard (HashSrc.const .int).isAddr && !(HashSrc.builtinFn .len).isAddr
-#guard (HashSrc.addr 3).isAddr && (HashSrc.singleton true).isAddr && !(HashSrc.buffer [1]).isAddr
+#guard (HashSrc.addr 3).isAddr && (HashSrc.singleton true).isAddr && !(HashSrc.buffer [1].toByteArray).isAddr
 -- `Ellipsis` and `NotImplemented` hash by their addresses, so a tuple of them hashes too.
 #guard hashOf? (.tuple #[.ellipsis]) == some (.symbolic (.tuple [.symbolic (.singleton true)]))
 #guard Value.immHash .notImplemented == .hash (.symbolic (.singleton false))
@@ -158,15 +183,15 @@ example (t : Builtin) (name : String) (k : DescrKind) :
 #guard Value.immHash (.tuple #[.traceback]) == .unknown
 
 -- `hash()` of a symbolic hash value is reduced once; reducing again gives it back.
-#guard (Value.symHash (.buffer [97])).immHash == .hash (.symbolic (HashSrc.buffer [97]).reduced)
-#guard (Value.symHash (HashSrc.buffer [97]).reduced).immHash == .hash (.symbolic (HashSrc.buffer [97]).reduced)
-#guard (HashSrc.buffer [97]).reduced != HashSrc.buffer [97]
+#guard (Value.symHash (.buffer [97].toByteArray)).immHash == .hash (.symbolic (HashSrc.buffer [97].toByteArray).reduced)
+#guard (Value.symHash (HashSrc.buffer [97].toByteArray).reduced).immHash == .hash (.symbolic (HashSrc.buffer [97].toByteArray).reduced)
+#guard (HashSrc.buffer [97].toByteArray).reduced != HashSrc.buffer [97].toByteArray
 
 -- `combineHash`: `exact` of the parts' numbers when every part is exact, else a symbolic hash from
 -- the tag and the parts.
 #guard combineHash "t" [.exact 1, .exact 2] (fun ns => ns.foldl (· + ·) 10) == .exact 13
-#guard combineHash "t" [.exact 1, .symbolic (HashSrc.buffer [97])] (fun _ => 0) ==
-  .symbolic (HashSrc.combine "t" [.exact 1, .symbolic (HashSrc.buffer [97])])
+#guard combineHash "t" [.exact 1, .symbolic (HashSrc.buffer [97].toByteArray)] (fun _ => 0) ==
+  .symbolic (HashSrc.combine "t" [.exact 1, .symbolic (HashSrc.buffer [97].toByteArray)])
 #guard combineHash "t" [] (fun _ => 5) == .exact 5
 
 end StrataPython.Dyn.Sem.HashTest

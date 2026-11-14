@@ -187,7 +187,7 @@ def reused : SetTable := run [(true, 1), (true, 9), (false, 1), (true, 17)]
 -- make it exact again: in CPython, `s.add("a"); s.add(4); s.add(12); s.discard("a")` gives
 -- `[4, 12]` under some hash seeds and `[12, 4]` under others.  Only `clear` resets the flag.
 def strA : Value := .ofString "a"
-def hashA : Hash := .symbolic (.buffer [97])
+def hashA : Hash := .symbolic (.buffer [97].toByteArray)
 def withA : SetTable :=
   match SetTable.empty.search hashA with
   | some sr => SetTable.empty.addNew sr hashA strA .builtin
@@ -204,7 +204,7 @@ def aGone : SetTable :=
 #guard !(aGone.resize 8).exactLayout
 #guard aGone.clear.exactLayout
 -- A symbolic hash is placed by its source's hash.
-#guard hashA.placement == hash (HashSrc.buffer [97])
+#guard hashA.placement == hash (HashSrc.buffer [97].toByteArray)
 -- A search keeps only the entries whose stored hash is the searched one: an exact hash whose
 -- number is the placeholder of `"a"` finds no candidate.
 #guard (withA.search (.exact (hashA.placement.toNat : Int))).map (·.candidates) == some []
@@ -212,7 +212,7 @@ def aGone : SetTable :=
 
 /-- `s.add(x)` for the `str` `x`, whose hash is symbolic. -/
 def addStr (t : SetTable) (x : String) : SetTable :=
-  let h : Hash := .symbolic (.buffer x.toUTF8.toList)
+  let h : Hash := .symbolic (.buffer x.toUTF8)
   match t.search h with
   | some s => if s.candidates.isEmpty then t.addNew s h (.ofString x) .builtin else t
   | none => t

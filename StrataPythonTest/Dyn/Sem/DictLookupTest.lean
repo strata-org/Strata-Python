@@ -75,8 +75,8 @@ def strs : DictTable := table [(ha, a, .builtin), (hb, b, .builtin)]
 #guard (look strs (.int 5) .builtin (.exact 5)).toOption == some (none, [])
 
 -- A symbolic hash value as the probe: two other symbolic groups, so four kinds of run.
-def sh : Value := .symHash (.buffer [99])
-def hsh : Hash := .symbolic (HashSrc.buffer [99]).reduced
+def sh : Value := .symHash (.buffer [99].toByteArray)
+def hsh : Hash := .symbolic (HashSrc.buffer [99].toByteArray).reduced
 #guard (look strs sh .symHash hsh [0]).toOption == some (none, ["choose 3"])
 -- Answer 1: the group of "a" collides, and `==` of the two values is not modelled.
 #guard gapOf (look strs sh .symHash hsh [1]) == some "comparing these dict keys is not modelled yet"

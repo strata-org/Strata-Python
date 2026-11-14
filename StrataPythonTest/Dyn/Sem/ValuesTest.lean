@@ -44,7 +44,7 @@ open StrataPython.Dyn.Sem
 #guard pyEqImm (.int 1) (.ofFloat (0.0 / 0.0)) == some false
 -- What the model doesn't decide yet: a NaN against a float, a symbolic hash.
 #guard pyEqImm (.ofFloat (0.0 / 0.0)) (.ofFloat (0.0 / 0.0)) == none
-#guard pyEqImm (.symHash (HashSrc.buffer [97])) (.int 1) == none
+#guard pyEqImm (.symHash (HashSrc.buffer [97].toByteArray)) (.int 1) == none
 
 -- Structural equality: floats by their bits, members in order.
 #guard Value.beq (.ofFloat 0.0) (.ofFloat (-0.0)) == false

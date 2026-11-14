@@ -46,8 +46,8 @@ def typeName (v : Value) : Option String :=
 #guard Value.identical (.bound (.int 1) .int "__add__" .slotWrapper)
   (.bound (.int 1) .int "__add__" .slotWrapper) == .unknown
 -- A symbolic hash may equal an int in some run.
-#guard Value.identical (.symHash (HashSrc.buffer [97])) (.int 5) == .unknown
-#guard Value.identical (.symHash (HashSrc.buffer [97])) (.symHash (HashSrc.buffer [98])) == .unknown
+#guard Value.identical (.symHash (HashSrc.buffer [97].toByteArray)) (.int 5) == .unknown
+#guard Value.identical (.symHash (HashSrc.buffer [97].toByteArray)) (.symHash (HashSrc.buffer [98].toByteArray)) == .unknown
 -- Unequal immediates, values of two types, and an object against an immediate are never one.
 #guard Value.identical (.int 1) (.int 2) == .no
 #guard Value.identical (.int 1) (.bool true) == .no
@@ -63,7 +63,7 @@ def typeName (v : Value) : Option String :=
 #guard typeName (.builtin .len) == some "builtin_function_or_method"
 #guard typeName (.builtin .int) == some "type"
 #guard typeName (.builtin .exit) == some "Quitter"
-#guard typeName (.symHash (HashSrc.buffer [97])) == some "int"
+#guard typeName (.symHash (HashSrc.buffer [97].toByteArray)) == some "int"
 #guard typeName (.obj 3) == none
 
 -- No object has a class whose values are always immediates.

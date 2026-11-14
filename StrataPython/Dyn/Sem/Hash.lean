@@ -147,20 +147,20 @@ def frozensetHash (hs : List Hash) : Hash :=
 
 /-- The bytes that CPython hashes for a `str`: its PEP 393 buffer, Latin-1, UCS-2 or UCS-4
 little-endian, by its widest character.  An ASCII `str`'s buffer is its UTF-8 bytes. -/
-def strBuffer (s : PyStr) : List UInt8 :=
-  if s.ascii then s.s.toUTF8.toList
+def strBuffer (s : PyStr) : ByteArray :=
+  if s.ascii then s.s.toUTF8
   else
     let cs := s.s.toList
     let width := cs.foldl (fun w c => max w (if c.val < 256 then 1 else if c.val < 65536 then 2 else 4)) 1
-    cs.flatMap fun c =>
+    (cs.flatMap fun c =>
       let v := c.val
-      (List.range width).map fun i => (v >>> (8 * i).toUInt32).toUInt8
+      (List.range width).map fun i => (v >>> (8 * i).toUInt32).toUInt8).toByteArray
 
 /-- `hash(s)` of a `str`: `0` if it is empty, else symbolic. -/
 def strHash (s : PyStr) : Hash := if s.s.isEmpty then .exact 0 else .symbolic (.buffer (strBuffer s))
 
 /-- `hash(b)` of a `bytes`: `0` if it is empty, else symbolic. -/
-def bytesHash (b : Array UInt8) : Hash := if b.isEmpty then .exact 0 else .symbolic (.buffer b.toList)
+def bytesHash (b : Array UInt8) : Hash := if b.isEmpty then .exact 0 else .symbolic (.buffer ⟨b⟩)
 
 /-- `hash(None)`: a constant in CPython 3.12 (gh-99540). -/
 def noneHash : Int := 0xFCA86420

@@ -157,7 +157,7 @@ def gapOf {α : Type} (x : TM α) : Option String :=
 -- An int whose number depends on the hash seed stops the operators with a gap.
 /-- An int whose number depends on the hash seed: `hash("a")`. -/
 def seeded : Toy :=
-  if h : (HashSrc.buffer [97]).storeAddrFree = true then .imm (.symHash ⟨_, h⟩) else .undef
+  if h : (HashSrc.buffer [97].toByteArray).storeAddrFree = true then .imm (.symHash ⟨_, h⟩) else .undef
 
 #guard gapOf (binaryOp (m := TM) .add seeded
   (.imm (.int 1))) == some "arithmetic on a hash whose number the model does not know is not modelled yet"

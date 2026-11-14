@@ -37,51 +37,21 @@ def Builtin.freeableIdx : List Nat :=
 namespace HashSrc
 
 mutual
-/-- Whether the code of a source holds no store object's address, through `tuple`, `frozenset`,
-`combine` and `reduced`; the address of a freeable built-in constant counts as one.  It fails
-closed: a code without the shape of a constructor's code gives `false`. -/
-def codeFree : List Nat → Bool
-  | 0 :: bs => bs.all (· < 256)
-  | [2, i] => i < Builtin.allConstants.size && !Builtin.freeableIdx.contains i
-  | [7, b] => b ≤ 1
-  | [8, i] => i < Builtin.allConstants.size
-  | 9 :: t :: len :: cs => t < Builtin.allConstants.size && cs.length == len
-  | 3 :: rest => hashesFree rest
-  | 4 :: rest => hashesFree rest
-  | 5 :: tl :: rest => tl ≤ rest.length && hashesFree (rest.drop tl)
-  | 6 :: c => c.head? != some 6 && codeFree c
-  | _ => false
-termination_by l => l.length
-decreasing_by all_goals first | omega | (simp only [List.length_drop, List.length_cons]; omega)
+/-- **Whether no store object's address is inside `src`**, through `tuple`, `frozenset`, `combine`
+and `reduced`; the address of a freeable built-in constant counts as one. -/
+def storeAddrFree : HashSrc → Bool
+  | addr _ => false
+  | const b => !Builtin.freeableIdx.contains b.ctorIdx
+  | tuple' ps | frozenset' ps | combine' _ ps => partsFree ps
+  | reduced' s => s.storeAddrFree
+  | buffer _ | singleton _ | builtinFn _ | descr .. => true
 
-/-- Whether `encodeHashes`' output, a count and that many parts, holds no store object's
-address. -/
-def hashesFree : List Nat → Bool
-  | n :: parts => partsFree n parts
-  | [] => false
-termination_by l => l.length
-
-/-- Whether exactly `n` parts of `encodeHashes`, and nothing after them, hold no store object's
-address. -/
-def partsFree : Nat → List Nat → Bool
-  | 0, [] => true
-  | n + 1, len :: rest =>
-    len ≤ rest.length && encFree (rest.take len) && partsFree n (rest.drop len)
-  | _, _ => false
-termination_by _ l => l.length
-decreasing_by all_goals first | omega | (simp only [List.length_drop, List.length_take, List.length_cons]; omega)
-
-/-- Whether one hash's encoding holds no store object's address. -/
-def encFree : List Nat → Bool
-  | [0, sign, _] => sign ≤ 1
-  | 1 :: n :: c => c.length == n && codeFree c
-  | _ => false
-termination_by l => l.length
-decreasing_by all_goals first | omega | (simp only [List.length_cons]; omega)
+/-- Whether no store object's address is inside the parts `ps`. -/
+def partsFree : List (Int ⊕ HashSrc) → Bool
+  | [] => true
+  | .inl _ :: ps => partsFree ps
+  | .inr s :: ps => s.storeAddrFree && partsFree ps
 end
-
-/-- Whether no store object's address is inside `src`. -/
-def storeAddrFree (src : HashSrc) : Bool := codeFree src.code
 
 end HashSrc
 

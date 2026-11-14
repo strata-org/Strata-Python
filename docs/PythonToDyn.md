@@ -2695,6 +2695,21 @@ A non-ASCII `str` also keeps its characters in an array (`PyStr.chars`, 8 bytes 
 computed the first time it is indexed, sliced or measured with `len`, so that later indexing and
 slicing take constant time a character.
 
+A hash that depends on the hash seed or an address is a tree of the hashes it is built from
+(`HashSrc`), which it shares. Each walk of it (the address check, hashing, comparing) visits a
+part once for each place that uses it. So a hash nested n levels deep that uses each part once
+costs time linear in n to hash and to compare, as a dict or set key; one that uses a part twice
+at each level, directly or inside another part, costs time exponential in n. For example, a node
+that stores the hash of `(c, c)` for its child `c` when it is made, and returns it from
+`__hash__`, takes about a minute at 28 levels, where CPython takes under a millisecond.
+The check that it holds no object's address walks the whole hash once each time Python code
+receives it as an `int`. So a hash built one level at a time by Python code that reads each
+level's hash costs time quadratic in n: a loop that stores the hash of `(c, 1)` in each new node
+`c` takes about 38 s at 16,000 levels, where CPython takes milliseconds, and nothing bounds n.
+The order of two such hashes, which a frozenset's hash sorts its members' hashes by, compares
+their codes (`HashSrc.code`) in full, so it costs time in the size of the hashes written out as
+trees.
+
 Two kinds of input can exhaust `pydyn`'s native stack, and then `pydyn` may run for minutes or
 abort, and it gives no result:
 - Deep nesting, before the model's C depth limit (`cDepthLimit`, 9,000) stops it with a gap. For

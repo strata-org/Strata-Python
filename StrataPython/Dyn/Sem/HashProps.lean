@@ -5,6 +5,7 @@
 -/
 module
 public import StrataPython.Dyn.Sem.Hash
+public import StrataPython.Dyn.Sem.ValueProps
 
 set_option autoImplicit false
 
@@ -42,7 +43,7 @@ public instance : Std.TransOrd HashSrc :=
 
 /-- Two hash sources compare equal only when they are equal. -/
 public instance : Std.LawfulEqOrd HashSrc where
-  eq_of_compare h := HashSrc.ext (Std.LawfulEqOrd.eq_of_compare (α := List Nat) h)
+  eq_of_compare h := HashSrc.code_inj _ _ (Std.LawfulEqOrd.eq_of_compare (α := List Nat) h)
 
 /-- The derived order on hashes: exact hashes by number, before symbolic hashes by source. -/
 private theorem compare_hash (a b : Hash) : compare a b = match a, b with
