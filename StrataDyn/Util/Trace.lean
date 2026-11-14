@@ -1045,6 +1045,22 @@ theorem Quiet.map {O₁ : Type} {g : T → Config T G} (f : O → O₁) {k : Nat
   | cons hs ho _ ih => exact .cons hs (congrArg f ho) ih
 
 omit [DecidableEq O] in
+/-- Quiet steps end in a state observed as the first is. -/
+theorem Quiet.obs_eq {g : T → Config T G} {k : Nat} {t t₁ : T} (h : Quiet g obs k t t₁) :
+    obs t₁ = obs t := by
+  induction h with
+  | refl => rfl
+  | cons _ ho _ ih => exact ih.trans ho
+
+omit [DecidableEq O] in
+/-- Quiet steps compose. -/
+theorem Quiet.trans {g : T → Config T G} {k k₁ : Nat} {t t₁ t₂ : T} (h : Quiet g obs k t t₁)
+    (h₁ : Quiet g obs k₁ t₁ t₂) : Quiet g obs (k + k₁) t t₂ := by
+  induction h with
+  | refl => rw [Nat.zero_add]; exact h₁
+  | cons hs ho _ ih => rw [Nat.add_right_comm]; exact .cons hs ho (ih h₁)
+
+omit [DecidableEq O] in
 /-- Along a run of a function, quiet steps from a state of the run are a still stretch of it. -/
 theorem Quiet.still {g : T → Config T G} {t₀ : T} (r : Run (graph g) t₀) {k : Nat} {t t₂ : T}
     (h : Quiet g obs k t t₂) : ∀ {n : Nat}, r.cfg n = .running t →

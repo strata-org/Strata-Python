@@ -41,6 +41,8 @@ target only on those.
   (`OracleRefines.refines`), and a forward `Trace.Sim` under each oracle proves it
   (`oracleRefines_of_sim`, `oracleRefines_of_sim_obsCfg`).  `refines_iff` states `Refines` with
   oracles: for every target oracle, some source oracle.
+* `Silent`, `Diagram`, `simOfDiagram`: steps that change neither the world nor the number of
+  choices, the step diagram of a translation that keeps both, and the `Trace.Sim` it gives.
 
 **Computing a run.**  The run under one oracle, `oracleRun`, is one of the runs; its
 configurations, `trace hwf oracle s h n` (`trace_succ`, `trace_add`), compute, and so does what
@@ -452,6 +454,118 @@ theorem oracleRefines_of_sim_obsCfg
   oracleRefines_of_sim obs fun oracle =>
     let ⟨sim, hr⟩ := hsim oracle
     ⟨sim.mapObs Prod.fst, hr⟩
+
+end
+
+/-! ## Silent steps and step diagrams
+
+A translation that keeps the world and every choice is proved by a step diagram (`Diagram`):
+each source step is matched by a target step and then silent target steps, or by none with a
+smaller measure, and the source ends as the target does, or with a wrong result.  `simOfDiagram`
+turns the diagram into a `Trace.Sim` that observes the world and the choices. -/
+
+section
+variable (hwf) (oracle)
+
+/-- Steps under `oracle` that change neither the world nor the number of choices made: the
+quiet steps of a simulation that observes both. -/
+def Silent (c c₁ : Cfg m B) : Prop := ∃ k, Trace.Quiet (stepAt hwf oracle) (obsCfg id) k c c₁
+
+variable {hwf} {oracle}
+
+/-- No step is silent. -/
+theorem Silent.refl (c : Cfg m B) : Silent hwf oracle c c := ⟨0, .refl c⟩
+
+/-- A step that keeps the world and the choices, then silent steps, are silent steps. -/
+theorem Silent.step {c c₁ c₂ : Cfg m B} (hs : stepAt hwf oracle c = .running c₁)
+    (hw : c₁.1.core.world = c.1.core.world) (hd : c₁.1.drawn = c.1.drawn)
+    (h : Silent hwf oracle c₁ c₂) : Silent hwf oracle c c₂ :=
+  let ⟨k, hq⟩ := h
+  ⟨k + 1, .cons hs (by simp only [obsCfg, hw, hd]) hq⟩
+
+/-- Silent steps compose. -/
+theorem Silent.trans {c c₁ c₂ : Cfg m B} (h : Silent hwf oracle c c₁)
+    (h₁ : Silent hwf oracle c₁ c₂) : Silent hwf oracle c c₂ :=
+  let ⟨k, hq⟩ := h
+  let ⟨k₁, hq₁⟩ := h₁
+  ⟨k + k₁, hq.trans hq₁⟩
+
+/-- Silent steps are quiet steps of a simulation that observes the world through `obs`, and the
+choices. -/
+private theorem Silent.quiet {O : Type} (obs : M.W → O) {c c₁ : Cfg m B}
+    (h : Silent hwf oracle c c₁) : ∃ k, Trace.Quiet (stepAt hwf oracle) (obsCfg obs) k c c₁ :=
+  let ⟨k, hq⟩ := h
+  ⟨k, hq.map (Prod.map obs id)⟩
+
+end
+
+section
+variable {m₁ : LModule M} {B₁ : Ty} (hwf₁ : WF m₁) (oracle : Nat → Nat)
+  (rel : State M → State M → Prop) (μ : State M → Nat) (wrong : Result M.interp → Prop)
+
+/-- The target, from `c₁`, reaches by silent steps a state that `rel` relates to `s`. -/
+def SilentRel (s : State M) (c₁ : Cfg m₁ B₁) : Prop :=
+  ∃ c₂, Silent hwf₁ oracle c₁ c₂ ∧ rel s c₂.1
+
+/-- **A step diagram**, of a source step `r` from `s` and a target step `r₁` from `s₁`.  A source
+step to a state is matched by the target's step and then silent steps to a state that `rel`
+relates to it, or by none, when `rel` relates it to `s₁` and its measure `μ` is below that of
+`s`.  A source that has ended has a `wrong` result, or the target has ended with the same
+result, world and number of choices. -/
+def Diagram (s s₁ : State M) (r : StepR m B) (r₁ : StepR m₁ B₁) : Prop :=
+  match r with
+  | .next _ t _ =>
+    (∃ c₁, r₁.config = .running c₁ ∧ SilentRel hwf₁ oracle rel t c₁) ∨ (μ t < μ s ∧ rel t s₁)
+  | .final res _ w d => wrong res ∨ ∃ heap, r₁ = .final res heap w d
+
+variable {hwf₁ oracle rel μ wrong}
+
+/-- Steps to states that `rel` relates satisfy the diagram. -/
+theorem Diagram.next {s s₁ t t₁ : State M} {e e₁ : Event} {h : StateOK m B t}
+    {h₁ : StateOK m₁ B₁ t₁} (hr : rel t t₁) :
+    Diagram hwf₁ oracle rel μ wrong s s₁ (.next e t h) (.next e₁ t₁ h₁) :=
+  .inl ⟨_, rfl, _, .refl _, hr⟩
+
+variable (hwf hwf₁ oracle rel μ wrong) in
+/-- **A step diagram is a simulation.**  If `rel` relates only states with the same world and
+number of choices, and the steps from states that it relates satisfy the diagram, then the
+states that silently reach a related one are a `Trace.Sim` that observes the world, through
+`obs`, and the choices. -/
+def simOfDiagram {O : Type} [DecidableEq O] (obs : M.W → O)
+    (hobs : ∀ {s s₁ : State M}, rel s s₁ → s₁.drawn = s.drawn ∧ s₁.core.world = s.core.world)
+    (hstep : ∀ {s s₁ : State M} (h : StateOK m B s) (h₁ : StateOK m₁ B₁ s₁), rel s s₁ →
+      Diagram hwf₁ oracle rel μ wrong s s₁ (step hwf oracle s h) (step hwf₁ oracle s₁ h₁)) :
+    Trace.Sim (stepAt hwf oracle (B := B)) (stepAt hwf₁ oracle (B := B₁)) (obsCfg obs)
+      (obsCfg obs) Final.result Final.result wrong where
+  rel c c₁ := SilentRel hwf₁ oracle rel c.1 c₁
+  measure c := μ c.1
+  obs_eq := fun ⟨c₂, hsil, hr⟩ => by
+    obtain ⟨k, hq⟩ := hsil.quiet obs
+    obtain ⟨hd, hw⟩ := hobs hr
+    rw [← hq.obs_eq]
+    simp only [obsCfg, hd, hw]
+  next := fun {c c₁ _} ⟨c₂, hsil, hr⟩ hs => by
+    obtain ⟨k, hq⟩ := hsil.quiet obs
+    have hd := hstep c.2 c₂.2 hr
+    unfold stepAt at hs
+    generalize step hwf oracle c.1 c.2 = r at hs hd
+    cases r with
+    | final => exact nomatch hs
+    | next =>
+      cases hs
+      rcases hd with ⟨t₁, ht, hr₁⟩ | ⟨hlt, hr₁⟩
+      · exact .inl ⟨k, c₂, t₁, hq, ht, hr₁⟩
+      · exact .inr ⟨hlt, c₂, hsil, hr₁⟩
+  final := fun {c c₁ _} ⟨c₂, hsil, hr⟩ hs => by
+    obtain ⟨k, hq⟩ := hsil.quiet obs
+    have hd := hstep c.2 c₂.2 hr
+    unfold stepAt at hs
+    generalize step hwf oracle c.1 c.2 = r at hs hd
+    cases r with
+    | next => exact nomatch hs
+    | final =>
+      cases hs
+      exact hd.imp id fun ⟨_, ht⟩ => ⟨k, c₂, _, hq, congrArg StepR.config ht, rfl⟩
 
 end
 

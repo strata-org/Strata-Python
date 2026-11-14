@@ -6,6 +6,7 @@
 module
 public import StrataDyn.WF
 public import StrataDyn.Rewrite
+public import StrataDyn.Util.Suffixes
 public import Std.Data.HashMap
 public import Std.Data.HashSet
 public import Std.Data.TreeMap
@@ -789,11 +790,6 @@ it. -/
             (users.insert u (again.fold (·.insert ·) toU))
       | (none, alias) => aliasIter news params depth fuel work alias users
 
-/-- The stem and the suffix of a name: `x.3` is `(x, 3)`. -/
-@[expose] def splitNum : Name → Name × Option Nat
-  | .num n i => (n, some i)
-  | n => (n, none)
-
 /-- `P` with its new parameters given ids after every id of `fn`, in the order of the blocks
 `order` and of each block's carried cells, each named after its cell's `refNew` operand with a
 fresh suffix. -/
@@ -806,21 +802,16 @@ fresh suffix. -/
       | _ => m
   let stemOf (c : ValId) : Name :=
     match inits.get? c with
-    | some v => (splitNum (fn.names[v.id]?.getD .base)).1
+    | some v => (fn.names[v.id]?.getD .base).splitNum.1
     | none => .base
   let olds := order.flatMap fun l => (P.block l).carried.map fun (c, d) => (c, d.id)
   let renum : HashMap ValId ValId := olds.zipIdx.foldl (init := {}) fun m ((_, v), k) =>
     m.insert v ⟨next + k⟩
   let ren (v : ValId) : ValId := renum.getD v v
-  let suffixes : HashMap Name Nat := fn.names.foldl (init := {}) fun m nm =>
-    match splitNum nm with
-    | (s, some i) => m.insert s (max (m.getD s 0) (i + 1))
-    | _ => m
-  let (names, _) := olds.foldl (init := (([] : List (ValId × Name)), suffixes))
+  let (names, _) := olds.foldl (init := (([] : List (ValId × Name)), Suffixes.of fn.names))
     fun (acc, sfx) (c, v) =>
-      let stem := stemOf c
-      let k := sfx.getD stem 0
-      ((ren v, Name.num stem k) :: acc, sfx.insert stem (k + 1))
+      let (name, sfx) := sfx.fresh (stemOf c)
+      ((ren v, name) :: acc, sfx)
   let blocks := P.blocks.map fun _ bp =>
     { bp with
       carried := bp.carried.map fun (c, d) => (c, { d with id := ren d.id })

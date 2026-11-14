@@ -15,7 +15,8 @@ set_option autoImplicit false
 
 * `start`: the state that runs a function of a linked, validated module on arguments,
   from a `Snapshot` of a heap and a world: by default `Snapshot.initial`, or where an earlier
-  run ended, `o.snapshot`.
+  run ended, `o.snapshot`.  A start succeeds exactly on a function whose entry block the
+  arguments fit, with its entry frame (`startCore_ok`, `startCore_eq_ok`).
 * `runModule`: link, validate, start and run on `runFused`.
   An argument is a Lean value at its tag, `M.arg x`, and `M.read? r α`, or `o.read? α` on an
   outcome, reads a result as an `α`.  Both find `α`'s tag as a rule does, as a `TagOf σ α`, at
@@ -97,6 +98,53 @@ theorem startCore_entry {hwf : WF m} {i : Nat} {args : List (Dyn M.interp)} {sna
     obtain ⟨⟨fn, b⟩, hf, hb, ha⟩ := p
     cases hst
     exact ⟨fn, b, hf, hb, rfl⟩
+
+/-- What a successful start is: the function and its entry block, arguments that fit it, the
+function's result tag as the run's, and the entry frame with nothing waiting. -/
+theorem startCore_ok {hwf : WF m} {i : Nat} {args : List (Dyn M.interp)} {snap : Snapshot M}
+    {B : Ty} {c : Core M} {h : CoreOK m B c} (hs : startCore hwf i args snap = .ok ⟨B, c, h⟩) :
+    ∃ fn b, ∃ (hf : m.funcs[i]? = some fn) (hb : fn.blocks[0]? = some b),
+      args.map (·.1) = b.paramTys ∧
+      B = fn.ret ∧ c = { top := Frame.entry fn b (freshStore M fn.slots) args .nil (fresh_fits fn)
+                                  (hwf.fits_of_getElem? hf hb),
+                         conts := [], heap := snap.heap, world := snap.world } := by
+  unfold startCore at hs
+  cases he : entry? m i args with
+  | error e => rw [he] at hs; exact nomatch hs
+  | ok p =>
+    obtain ⟨⟨fn, b⟩, hf, hb, ha⟩ := p
+    rw [he] at hs
+    simp only [Except.map, Except.ok.injEq] at hs
+    obtain ⟨rfl, hc⟩ := Sigma.mk.inj hs
+    obtain rfl := congrArg Subtype.val (eq_of_heq hc).symm
+    exact ⟨fn, b, hf, hb, ha, rfl, rfl⟩
+
+/-- Function `i`, with an entry block that the arguments fit, starts. -/
+private theorem entry?_ok {i : Nat} {fn : LBody M} {b : LBlock M} {args : List (Dyn M.interp)}
+    (hf : m.funcs[i]? = some fn) (hb : fn.blocks[0]? = some b)
+    (ha : args.map (·.1) = b.paramTys) : ∃ p, entry? m i args = .ok p ∧ p.1 = (fn, b) := by
+  unfold entry?
+  rw [hf]
+  dsimp only
+  split
+  · rename_i he₂; rw [hb] at he₂; exact nomatch he₂
+  · rename_i b₁ he₂
+    rw [hb] at he₂
+    cases he₂
+    rw [dite_eq_left_of_eq_true (eq_true ha)]
+    exact ⟨_, rfl, rfl⟩
+
+/-- **Function `i`, with an entry block that the arguments fit, starts** on its entry frame, with
+nothing waiting: the converse of `startCore_ok`. -/
+theorem startCore_eq_ok (hwf : WF m) {i : Nat} {fn : LBody M} {b : LBlock M}
+    {args : List (Dyn M.interp)} (hf : m.funcs[i]? = some fn) (hb : fn.blocks[0]? = some b)
+    (ha : args.map (·.1) = b.paramTys) (snap : Snapshot M) :
+    startCore hwf i args snap = .ok ⟨fn.ret, _, start_ok hwf hf hb ha snap⟩ := by
+  obtain ⟨⟨⟨fn₁, b₁⟩, hf₁, hb₁, ha₁⟩, he, hp⟩ := entry?_ok hf hb ha
+  obtain ⟨rfl, rfl⟩ := Prod.mk.inj hp
+  unfold startCore
+  rw [he]
+  rfl
 
 /-- A state running function `i` on `args`, which must fit its entry block, from the
 heap and the world of `snap`, and its return code. -/

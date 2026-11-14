@@ -12,9 +12,9 @@ set_option autoImplicit false
 /-!
 # A certified promotion improves on the source under every oracle
 
-`promote_sim` packs the step diagram (`step_good`) as a simulation of the machine under one
-oracle (`Trace.Sim`), whose only wrong results are bad cells (`Wrong`); `promote_refines_cell`
-turns it, for every oracle, into trace refinement under one oracle
+`promote_sim` is the step diagram (`step_good`) as a simulation of the machine under one
+oracle (`Exec.simOfDiagram`), whose only wrong results are bad cells (`Wrong`);
+`promote_refines_cell` turns it, for every oracle, into trace refinement under one oracle
 (`Exec.oracleRefines_of_sim_obsCfg`).
 `promote_sound_cell` is the theorem: for linked modules that `ModOK` certifies, with rules whose
 trees respect the heap's typing, every start of function `i` of the source on arguments that hold
@@ -45,40 +45,9 @@ include hok hR hRT in
 world and the choices, whose only wrong results are bad cells. -/
 def promote_sim :
     Trace.Sim (stepAt hwf oracle (B := B)) (stepAt hwf₁ oracle (B := B₁)) (obsCfg obs) (obsCfg obs)
-      Final.result Final.result Wrong where
-  rel s s₁ := Rel A X s.1 s₁.1
-  measure s := measure s.1
-  obs_eq hr := by
-    obtain ⟨hd, hw, -⟩ := hr
-    simp only [obsCfg, hd, hw]
-  next {s t s₁} hr hs := by
-    have hg := step_good hwf hwf₁ hok hR hRT oracle s.2 t.2 hr
-    simp only [stepAt] at hs
-    revert hg
-    cases he : Exec.step hwf oracle s.1 s.2 with
-    | final r hp w d => rw [he] at hs; exact nomatch hs
-    | next e s₂ h₂ =>
-      rw [he] at hs
-      cases hs
-      intro hg
-      rcases hg with ⟨e₁, t₁, h₃, he₁, hr₁⟩ | ⟨hlt, hr₁⟩
-      · refine Or.inl ⟨0, t, ⟨t₁, h₃⟩, .refl _, ?_, hr₁⟩
-        simp only [stepAt, he₁, StepR.config]
-      · exact Or.inr ⟨hlt, hr₁⟩
-  final {s t f} hr hs := by
-    have hg := step_good hwf hwf₁ hok hR hRT oracle s.2 t.2 hr
-    simp only [stepAt] at hs
-    revert hg
-    cases he : Exec.step hwf oracle s.1 s.2 with
-    | next e s₂ h₂ => rw [he] at hs; exact nomatch hs
-    | final r₀ hp w d =>
-      rw [he] at hs
-      cases hs
-      intro hg
-      rcases hg with hw | ⟨hp₁, he₁⟩
-      · exact Or.inl hw
-      · refine Or.inr ⟨0, t, ⟨r₀, ⟨hp₁, w⟩, d⟩, .refl _, ?_, rfl⟩
-        simp only [stepAt, he₁, StepR.config]
+      Final.result Final.result Wrong :=
+  simOfDiagram hwf hwf₁ oracle (Rel A X) measure Wrong obs (fun hr => ⟨hr.1, hr.2.1⟩)
+    (step_good hwf hwf₁ hok hR hRT oracle)
 
 include hok hR hRT in
 /-- **Corresponding states refine under every oracle**: the target's run from a state
@@ -88,48 +57,11 @@ theorem promote_refines_cell {s s₁ : State M} {h : StateOK X.m B s}
     {h₁ : StateOK X.m₁ B₁ s₁} (hr : Rel A X s s₁) :
     Exec.OracleRefines hwf hwf₁ obs Wrong ⟨s, h⟩ ⟨s₁, h₁⟩ :=
   oracleRefines_of_sim_obsCfg obs fun oracle =>
-    ⟨promote_sim A X hwf hwf₁ hok hR hRT oracle obs, hr⟩
+    ⟨promote_sim A X hwf hwf₁ hok hR hRT oracle obs, _, .refl _, hr⟩
 
 /-- A bad cell is a wrong result. -/
 theorem wrong_of_badCell {r : Result M.interp} : Wrong r → Result.Wrong r
   | ⟨_, h⟩ => h ▸ trivial
-
-omit [DecidableEq O] in
-/-- What a successful start is: the function and its entry block, and arguments that fit it. -/
-private theorem startCore_ok {m : LModule M} {hwf : WF m} {i : Nat} {args : List (Dyn M.interp)}
-    {snap : Snapshot M} {B : Ty} {c : Core M} {h : CoreOK m B c}
-    (hs : startCore hwf i args snap = .ok ⟨B, c, h⟩) :
-    ∃ fn b, ∃ (hf : m.funcs[i]? = some fn) (hb : fn.blocks[0]? = some b),
-      args.map (·.1) = b.paramTys ∧
-      B = fn.ret ∧ c = { top := Frame.entry fn b (freshStore M fn.slots) args .nil (fresh_fits fn)
-                                  (hwf.fits_of_getElem? hf hb),
-                         conts := [], heap := snap.heap, world := snap.world } := by
-  unfold startCore at hs
-  cases he : entry? m i args with
-  | error e => rw [he] at hs; exact nomatch hs
-  | ok p =>
-    obtain ⟨⟨fn, b⟩, hf, hb, ha⟩ := p
-    rw [he] at hs
-    simp only [Except.map, Except.ok.injEq] at hs
-    obtain ⟨rfl, hc⟩ := Sigma.mk.inj hs
-    obtain rfl := congrArg Subtype.val (eq_of_heq hc).symm
-    exact ⟨fn, b, hf, hb, ha, rfl, rfl⟩
-
-omit [DecidableEq O] in
-/-- Function `i`, with an entry block that the arguments fit, starts. -/
-private theorem entry?_ok {m : LModule M} {i : Nat} {fn : LBody M} {b : LBlock M}
-    {args : List (Dyn M.interp)} (hf : m.funcs[i]? = some fn) (hb : fn.blocks[0]? = some b)
-    (ha : args.map (·.1) = b.paramTys) : ∃ p, entry? m i args = .ok p ∧ p.1 = (fn, b) := by
-  unfold entry?
-  rw [hf]
-  dsimp only
-  split
-  · rename_i he₂; rw [hb] at he₂; exact nomatch he₂
-  · rename_i b₁ he₂
-    rw [hb] at he₂
-    cases he₂
-    rw [dite_eq_left_of_eq_true (eq_true ha)]
-    exact ⟨_, rfl, rfl⟩
 
 /-- A snapshot whose values are all valid, in the typing of its own heap. -/
 def SnapOK (snap : Snapshot M) : Prop :=
@@ -172,13 +104,8 @@ theorem promote_sound_cell (i : Nat) (args : List (Dyn M.interp)) (snap : Snapsh
     have := hst.1
     rw [paramsOf_eq h0, paramsOf_eq h0₁] at this
     exact this.symm
-  obtain ⟨⟨⟨fn₂, b₂⟩, hf₂, hb₂, ha₂⟩, he₁, hp₁⟩ := entry?_ok (m := X.m₁) hf₁ hb₁ ha₁
-  obtain ⟨rfl, rfl⟩ := Prod.mk.inj hp₁
-  have hs₁ : startCore hwf₁ i args snap = .ok ⟨_, _, start_ok hwf₁ hf₁ hb₁ ha₁ snap⟩ := by
-    unfold startCore
-    rw [he₁]
-    rfl
-  refine ⟨_, _, _, hs₁, fun obs => promote_refines_cell A X hwf hwf₁ hok hR hRT obs ?_⟩
+  refine ⟨_, _, _, startCore_eq_ok hwf₁ hf₁ hb₁ ha₁ snap,
+    fun obs => promote_refines_cell A X hwf hwf₁ hok hR hRT obs ?_⟩
   have hl : ∀ (bb : LBlock M), args.map (·.1) = bb.paramTys →
       args.length + ([] : List Ty).length = bb.params.length := by
     intro bb hbb
@@ -191,7 +118,7 @@ theorem promote_sound_cell (i : Nat) (args : List (Dyn M.interp)) (snap : Snapsh
     (fresh_fits _) (fresh_fits _) (WF.fits_of_getElem? hwf hf (Array.getElem?_eq_getElem h0))
     (WF.fits_of_getElem? hwf₁ hf₁ hb₁)
   exact ⟨rfl, rfl, [], [_], [], ⟨rfl, fun _ _ => rfl, fun _ h => (nomatch h), rfl⟩, hsnap.1,
-    hsnap.2, ⟨_, rfl, hF⟩, trivial, ⟨fun l hl => (hnp l hl).elim, trivial⟩⟩
+    hsnap.2, .exec hF, .nil, ⟨fun l hl => (hnp l hl).elim, trivial⟩⟩
 
 include hok hR hRT in
 /-- **A certified promotion improves on the source under every oracle.**  If `ModOK` certifies

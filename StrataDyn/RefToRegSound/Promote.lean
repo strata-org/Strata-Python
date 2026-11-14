@@ -5,6 +5,7 @@
 -/
 module
 public import StrataDyn.RefToRegSound.Edge
+public import StrataDyn.Exec.SameSigs
 public import StrataDyn.Exec.Trace
 
 set_option autoImplicit false
@@ -29,13 +30,19 @@ A rule's tree is the same in the source and the target, on the same operands.  I
 machine's spec at the typing off `P` (`Accounts.TreeOK`), so every cell it asks for is off `P`,
 where the heaps agree: the machine answers it alike in both.
 
-Each source step is matched by one target step (`Lock`), except a removed `refGet` or `refSet`
-of a promoted cell, which the target does not take: the source's code gets shorter, the measure.
+The step diagram of a pair of steps is the machine's (`Exec.Diagram`): a source step is matched
+by a target step and then silent target steps, or by none with a smaller measure.  A promotion
+needs no silent step.  Each source step is matched by one target step, except a removed `refGet`
+or `refSet` of a promoted cell, which the target does not take: the source's code gets shorter,
+the measure (`measure`).
 
 The key theorem is `step_good`, the step diagram: from corresponding states, a source step is
-matched by a target step to states that correspond, or by none with a smaller measure.  It rests
-on `exec_good`, for running an instruction or a terminator; `settle_lock` and `serve_lock`, for
-a rule's tree and its requests to the machine; and `leave_good`, for leaving a body.
+matched by a target step and then silent steps to states that correspond, or by none with a
+smaller measure, and a source that has ended has a wrong result or the target has ended alike.
+It rests on `exec_good`, for running an instruction or a terminator; `settle_lock` and
+`serve_lock`, for a rule's tree and its requests to the machine; and `leave_good`, for leaving a
+body.  The cases of a rule's tree and of a call check, in the source and the target at once, are
+those of the eliminators of `Exec/SameSigs.lean`.
 -/
 
 namespace Strata.Dyn.RefToRegSound
@@ -50,41 +57,42 @@ variable {M : RunModel}
 `refSet` of a promoted cell can give where the target does not fault. -/
 def Wrong (r : Result M.interp) : Prop := ∃ l, r = .fault (.badCell l)
 
-/-- The target's version of a source rule's operation: another position, other edges and other
-operands. -/
-def mkInst (i : Inst M) (pc₁ : Nat) (succs₁ : List LSite) (args₁ : List Nat) : Inst M :=
-  { i with pc := pc₁, succs := succs₁, rerun := { i.rerun with args := args₁ } }
-
 variable (A : Accounts M) (X : CertEnv M)
 
 /-- The rule of the source's operation `i`, running in `f` with facts `F`, and of the target's
-`i₁`, running in `f₁`: `i₁` is `i` with certified operands and edges, its regions start from
-`F`, which holds no content of a cell `Wr` they may write, its tree from a state respects every
-typing, and the frames' code continues, when the rule returns, from the facts after `i`. -/
-def PendOK (P : List Nat) (heap : Heap M) (F : List Fact) (f f₁ : Frame M) (i i₁ : Inst M) :
-    Prop :=
-  ∃ E Wr pc₁ succs₁ args₁, i₁ = mkInst i pc₁ succs₁ args₁ ∧ BodyOK X f.func f₁.func E ∧
+version of it, with the operands `args₁` and the edges `succs₁`, running in `f₁`: the operands
+and edges are certified, its regions start from `F`, which holds no content of a cell `Wr` they
+may write, its tree from a state respects every typing, and the frames' code continues, when the
+rule returns, from the facts after `i`. -/
+def PendOK (P : List Nat) (heap : Heap M) (F : List Fact) (f f₁ : Frame M) (i : Inst M)
+    (succs₁ : List LSite) (args₁ : List Nat) : Prop :=
+  ∃ E Wr, BodyOK X f.func f₁.func E ∧
     Sound A P F f.env f₁.env heap ∧ WrOK F Wr ∧ (∀ u c, Fact.cell u c ∈ F → c ∉ Wr) ∧
     ArgsEq F args₁ i.rerun.args ∧ All₂ (SiteOK E f.func f₁.func F) i.succs succs₁ ∧
     (∀ k ∈ i.regs, RegionOK X (regFacts Wr F) k) ∧ AgainOK A i ∧
     ∀ r, i.ret = some r → CodeOK X E f.func f₁.func (after i.dst F) f.code f.term f₁.code f₁.term
 
 /-- A source frame waiting for a body and a target frame waiting for one correspond, with the
-facts `F` of the waiting frame: a paused rule, or the caller of a `callCode`. -/
-def WaitRel (P : List Nat) (heap : Heap M) (F : List Fact) : Wait M → Wait M → Prop
-  | .rule f p, .rule f₁ p₁ => PendOK A X P heap F f f₁ p.inst p₁.inst ∧ p₁.ret = p.ret ∧
-      HEq p₁.k p.k ∧ ResumeOK A (typOff heap P) p
-  | .call f dst r, .call f₁ dst₁ r₁ => dst₁ = dst ∧ r₁ = r ∧ ∃ E, BodyOK X f.func f₁.func E ∧
-      CodeOK X E f.func f₁.func (after dst F) f.code f.term f₁.code f₁.term ∧
-      Sound A P F f.env f₁.env heap
-  | _, _ => False
+facts `F` of the waiting frame: a paused rule, the target's operation being its version of the
+source's and resuming alike, or the caller of a `callCode`. -/
+inductive WaitRel (P : List Nat) (heap : Heap M) (F : List Fact) : Wait M → Wait M → Prop
+  | rule {f f₁ : Frame M} {i : Inst M} {pc₁ : Nat} {succs₁ : List LSite} {args₁ : List Nat}
+      {req req₁ : MReq M.interp i.rs} {r : Ty} {k : M.interp r → i.Tree} :
+      PendOK A X P heap F f f₁ i succs₁ args₁ → ResumeOK A (typOff heap P) ⟨i, req, r, k⟩ →
+      WaitRel P heap F (.rule f ⟨i, req, r, k⟩)
+        (.rule f₁ ⟨mkInst i pc₁ succs₁ args₁, req₁, r, k⟩)
+  | call {f f₁ : Frame M} {dst : Nat} {r : Ty} {E : Nat → List Fact} :
+      BodyOK X f.func f₁.func E →
+      CodeOK X E f.func f₁.func (after dst F) f.code f.term f₁.code f₁.term →
+      Sound A P F f.env f₁.env heap → WaitRel P heap F (.call f dst r) (.call f₁ dst r)
 
 /-- The waiting frames correspond, frame by frame, with the facts `Fs`. -/
-def StackRel (P : List Nat) (heap : Heap M) :
+inductive StackRel (P : List Nat) (heap : Heap M) :
     List (List Fact) → List (Wait M) → List (Wait M) → Prop
-  | [], [], [] => True
-  | F :: Fs, w :: ws, w₁ :: ws₁ => WaitRel A X P heap F w w₁ ∧ StackRel P heap Fs ws ws₁
-  | _, _, _ => False
+  | nil : StackRel P heap [] [] []
+  | cons {F : List Fact} {Fs : List (List Fact)} {w w₁ : Wait M} {ws ws₁ : List (Wait M)} :
+      WaitRel A X P heap F w w₁ → StackRel P heap Fs ws ws₁ →
+      StackRel P heap (F :: Fs) (w :: ws) (w₁ :: ws₁)
 
 /-- The waiting frames' stores with their facts. -/
 def stackFacts : List (List Fact) → List (Wait M) → List (Array (Dyn M.interp) × List Fact)
@@ -97,23 +105,31 @@ def Disjoint : List (Array (Dyn M.interp) × List Fact) → Prop
   | (env, F) :: rest => (∀ l, promLocs env F l → ∀ q ∈ rest, ¬ cellLocs q.1 q.2 l) ∧ Disjoint rest
 
 /-- The source's pending transition and the target's correspond, with the frames whose stores
-and facts `L` lists, the frames running or about to run. -/
-def ModeRel (P : List Nat) (heap : Heap M) (c c₁ : Core M) :
+and facts `L` lists, the frames running or about to run: the same transition, a rule's operation
+in the target being its version of the source's; or the source has ended with a wrong result,
+whatever the target's transition. -/
+inductive ModeRel (P : List Nat) (heap : Heap M) (c c₁ : Core M) :
     List (Array (Dyn M.interp) × List Fact) → Mode M → Mode M → Prop
-  | L, .exec, .exec => ∃ F, L = [(c.top.env, F)] ∧ FrameOK A X P heap F c.top c₁.top
-  | L, .jump to, .jump to₁ => ∃ F, L = [(to.env, F)] ∧ FrameOK A X P heap F to to₁
-  | L, .call g w, .call g₁ w₁ => ∃ F Fw, L = [(g.env, F), (w.frame.env, Fw)] ∧
-      FrameOK A X P heap F g g₁ ∧ WaitRel A X P heap Fw w w₁
-  | L, .ret v, .ret v₁ => L = [] ∧ v₁ = v ∧ A.DynOK (typOff heap P) v
-  | L, .request i t, .request i₁ t₁ => ∃ F, L = [(c.top.env, F)] ∧
-      PendOK A X P heap F c.top c₁.top i i₁ ∧ HEq t₁ t ∧
-      A.TreeOK (A.StOK i.rerun.key) (typOff heap P) i.ret t
-  | L, .again r, .again r₁ => ∃ F, L = [(c.top.env, F)] ∧
-      PendOK A X P heap F c.top c₁.top r.inst r₁.inst ∧ HEq r₁.st r.st ∧
-      A.StOK r.inst.rerun.key (typOff heap P) r.st
-  | L, .done r, .done r₁ => L = [] ∧ (r₁ = r ∨ Wrong r)
-  | _, .done r, _ => Wrong r
-  | _, _, _ => False
+  | exec {F : List Fact} : FrameOK A X P heap F c.top c₁.top →
+      ModeRel P heap c c₁ [(c.top.env, F)] .exec .exec
+  | jump {F : List Fact} {to to₁ : Frame M} : FrameOK A X P heap F to to₁ →
+      ModeRel P heap c c₁ [(to.env, F)] (.jump to) (.jump to₁)
+  | call {F Fw : List Fact} {g g₁ : Frame M} {w w₁ : Wait M} : FrameOK A X P heap F g g₁ →
+      WaitRel A X P heap Fw w w₁ →
+      ModeRel P heap c c₁ [(g.env, F), (w.frame.env, Fw)] (.call g w) (.call g₁ w₁)
+  | ret {v : Dyn M.interp} : A.DynOK (typOff heap P) v → ModeRel P heap c c₁ [] (.ret v) (.ret v)
+  | request {F : List Fact} {i : Inst M} {pc₁ : Nat} {succs₁ : List LSite} {args₁ : List Nat}
+      (t : i.Tree) : PendOK A X P heap F c.top c₁.top i succs₁ args₁ →
+      A.TreeOK (A.StOK i.rerun.key) (typOff heap P) i.ret t →
+      ModeRel P heap c c₁ [(c.top.env, F)] (.request i t)
+        (.request (mkInst i pc₁ succs₁ args₁) t)
+  | again {F : List Fact} {i : Inst M} {pc₁ : Nat} {succs₁ : List LSite} {args₁ : List Nat}
+      (st : i.St) : PendOK A X P heap F c.top c₁.top i succs₁ args₁ →
+      A.StOK i.rerun.key (typOff heap P) st →
+      ModeRel P heap c c₁ [(c.top.env, F)] (.again ⟨i, st⟩)
+        (.again ⟨mkInst i pc₁ succs₁ args₁, st⟩)
+  | done (r : Result M.interp) : ModeRel P heap c c₁ [] (.done r) (.done r)
+  | wrong {r : Result M.interp} {mode₁ : Mode M} : Wrong r → ModeRel P heap c c₁ [] (.done r) mode₁
 
 /-- A source state and a target state that correspond. -/
 def Rel (s s₁ : State M) : Prop :=
@@ -163,43 +179,31 @@ theorem Sound.step {P P₁ : List Nat} {F : List Fact} {env env₁ : Array (Dyn 
 
 /-- A paused rule's facts still hold after a change of the heap that keeps its cells. -/
 theorem PendOK.step {P P₁ : List Nat} {F : List Fact} {heap heap₁ : Heap M} {W : Nat → Prop}
-    {f f₁ : Frame M} {i i₁ : Inst M} (h : PendOK A X P heap F f f₁ i i₁)
-    (hst : HeapStep P P₁ heap heap₁ W) (hw : ∀ l, cellLocs f.env F l → ¬ W l) :
-    PendOK A X P₁ heap₁ F f f₁ i i₁ := by
-  obtain ⟨E, Wr, pc₁, succs₁, args₁, hi, hB, hS, hrest⟩ := h
-  exact ⟨E, Wr, pc₁, succs₁, args₁, hi, hB, hS.step hst hw, hrest⟩
+    {f f₁ : Frame M} {i : Inst M} {succs₁ : List LSite} {args₁ : List Nat}
+    (h : PendOK A X P heap F f f₁ i succs₁ args₁) (hst : HeapStep P P₁ heap heap₁ W)
+    (hw : ∀ l, cellLocs f.env F l → ¬ W l) : PendOK A X P₁ heap₁ F f f₁ i succs₁ args₁ := by
+  obtain ⟨E, Wr, hB, hS, hrest⟩ := h
+  exact ⟨E, Wr, hB, hS.step hst hw, hrest⟩
 
 /-- A waiting frame's correspondence survives a change of the heap that keeps its cells. -/
 theorem WaitRel.step {P P₁ : List Nat} {F : List Fact} {heap heap₁ : Heap M} {W : Nat → Prop}
     {w w₁ : Wait M} (h : WaitRel A X P heap F w w₁) (hst : HeapStep P P₁ heap heap₁ W)
     (hw : ∀ l, cellLocs w.frame.env F l → ¬ W l) : WaitRel A X P₁ heap₁ F w w₁ := by
-  cases w with
-  | rule f p =>
-    cases w₁ with
-    | rule f₁ p₁ =>
-      obtain ⟨hp, hr, hk, hres⟩ := h
-      exact ⟨hp.step hst hw, hr, hk, hres.mono hst.typ⟩
-    | call _ _ _ => exact h.elim
-  | call f dst r =>
-    cases w₁ with
-    | rule _ _ => exact h.elim
-    | call f₁ dst₁ r₁ =>
-      obtain ⟨hd, hr, E, hB, hc, hS⟩ := h
-      exact ⟨hd, hr, E, hB, hc, hS.step hst hw⟩
+  cases h with
+  | rule hp hres => exact .rule (hp.step hst hw) (hres.mono hst.typ)
+  | call hB hc hS => exact .call hB hc (hS.step hst hw)
 
 /-- The waiting frames' correspondence survives a change of the heap that keeps their cells. -/
 theorem StackRel.step {P P₁ : List Nat} {heap heap₁ : Heap M} {W : Nat → Prop}
-    (hst : HeapStep P P₁ heap heap₁ W) :
-    ∀ {Fs : List (List Fact)} {ws ws₁ : List (Wait M)}, StackRel A X P heap Fs ws ws₁ →
-      (∀ q ∈ stackFacts Fs ws, ∀ l, cellLocs q.1 q.2 l → ¬ W l) → StackRel A X P₁ heap₁ Fs ws ws₁
-  | [], [], [], _, _ => trivial
-  | _ :: _, _ :: _, _ :: _, ⟨hw, hs⟩, hq =>
-    ⟨hw.step hst (hq _ List.mem_cons_self),
-      StackRel.step hst hs fun q hm => hq q (List.mem_cons_of_mem _ hm)⟩
-  | [], [], _ :: _, h, _ => h.elim
-  | [], _ :: _, _, h, _ => h.elim
-  | _ :: _, [], _, h, _ => h.elim
-  | _ :: _, _ :: _, [], h, _ => h.elim
+    (hst : HeapStep P P₁ heap heap₁ W) {Fs : List (List Fact)} {ws ws₁ : List (Wait M)}
+    (h : StackRel A X P heap Fs ws ws₁)
+    (hq : ∀ q ∈ stackFacts Fs ws, ∀ l, cellLocs q.1 q.2 l → ¬ W l) :
+    StackRel A X P₁ heap₁ Fs ws ws₁ := by
+  induction h with
+  | nil => exact .nil
+  | cons hw _ ih =>
+    exact .cons (hw.step hst (hq _ List.mem_cons_self))
+      (ih fun q hm => hq q (List.mem_cons_of_mem _ hm))
 
 /-- A change of the heap that leaves the promoted cells alone keeps every waiting frame. -/
 theorem StackRel.stepOff {P P₁ : List Nat} {heap heap₁ : Heap M}
@@ -613,14 +617,15 @@ theorem start_frameOK {P : List Nat} {heap : Heap M} {fn fn₁ : LBody M} {b b�
 
 /-! ## Steps that correspond -/
 
+/-- The measure: a state about to run an instruction has its block's rest's length, plus
+one; any other has none. -/
+def measure (s : State M) : Nat :=
+  match s.mode with
+  | .exec => s.core.top.code.length + 1
+  | _ => 0
+
 section
 variable (A X) {B B₁ : Ty}
-
-/-- A source step and a target step that end, or lead, where they correspond. -/
-def Lock : StepR X.m B → StepR X.m₁ B₁ → Prop
-  | .next _ s _, .next _ s₁ _ => Rel A X s s₁
-  | .final r _ w d, .final r₁ _ w₁ d₁ => r₁ = r ∧ w₁ = w ∧ d₁ = d
-  | _, _ => False
 
 /-- What corresponds between two cores, besides their pending transitions: the world, the
 heaps, the source's values off `P`, and the waiting frames. -/
@@ -639,7 +644,7 @@ theorem Rel.of {P : List Nat} {Fs : List (List Fact)} {c c₁ : Core M}
     Rel A X ⟨c, mode, drawn, ()⟩ ⟨c₁, mode₁, drawn, ()⟩ :=
   ⟨rfl, hC.world, P, L, Fs, hC.heap, hC.inv, hC.wok, hm, hC.stack, hD⟩
 
-variable {A X} (hwf : WF X.m) (hwf₁ : WF X.m₁)
+variable {A X} (hwf₁ : WF X.m₁) (oracle : Nat → Nat)
 
 /-- Cores that correspond still do with other top frames. -/
 theorem CoreRel.withTop {P : List Nat} {Fs : List (List Fact)} {c c₁ : Core M}
@@ -648,26 +653,28 @@ theorem CoreRel.withTop {P : List Nat} {Fs : List (List Fact)} {c c₁ : Core M}
   ⟨hC.world, hC.heap, hC.inv, hC.wok, hC.stack⟩
 
 /-- Transfers that `NextRel` relates lead to states that correspond. -/
-theorem transfer_lock {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {c c₁ : Core M}
-    {n n₁ : Next M} (hn : NextOK X.m c.top n) (hK : ContsOK X.m B c.top.func.ret c.conts)
+theorem transfer_lock {s s₁ : State M} {P : List Nat} {Fs : List (List Fact)} {F : List Fact}
+    {c c₁ : Core M} {n n₁ : Next M} (hn : NextOK X.m c.top n)
+    (hK : ContsOK X.m B c.top.func.ret c.conts)
     (hn₁ : NextOK X.m₁ c₁.top n₁) (hK₁ : ContsOK X.m₁ B₁ c₁.top.func.ret c₁.conts) {drawn : Nat}
     {ev ev₁ : Event} (hC : CoreRel A X P Fs c c₁)
     (hD : Disjoint ((c.top.env, F) :: stackFacts Fs c.conts))
     (hr : NextRel A X P c.heap c.top.env F n n₁) :
-    Lock A X (transfer c n hn hK drawn ev) (transfer c₁ n₁ hn₁ hK₁ drawn ev₁) := by
+    Diagram hwf₁ oracle (Rel A X) measure Wrong s s₁ (transfer c n hn hK drawn ev)
+      (transfer c₁ n₁ hn₁ hK₁ drawn ev₁) := by
   cases n with
   | frame g =>
     cases n₁ with
     | frame g₁ =>
       obtain ⟨F₁, hF, hsub⟩ := hr
-      exact Rel.of A X hC ⟨F₁, rfl, hF⟩ (hD.sub hsub)
+      exact .next (Rel.of A X hC (.jump hF) (hD.sub hsub))
     | leave _ => exact hr.elim
   | leave v =>
     cases n₁ with
     | frame _ => exact hr.elim
     | leave v₁ =>
       obtain ⟨rfl, hv⟩ := hr
-      exact Rel.of A X hC ⟨rfl, rfl, hv⟩ hD.2
+      exact .next (Rel.of A X hC (.ret hv) hD.2)
 
 end
 
@@ -692,31 +699,12 @@ theorem WF.params_entry {m : LModule M} (hwf : WF m) {i : Nat} (hi : i < m.funcs
 variable (hok : ModOK X)
 include hok
 
-/-- The call check passes in the target exactly when it passes in the source, with the same
-captures: the functions take the same tags, and the heaps the same captures. -/
-theorem callOK_iff {P : List Nat} {heap heap₁ : Heap M} (hH : HeapRel P heap heap₁)
-    {idx captured : Nat} {ts : List Ty} {r : Ty} {caps : List (Dyn M.interp)} :
-    X.m₁.CallOK heap₁ idx captured ts r caps ↔ X.m.CallOK heap idx captured ts r caps := by
-  have hc : heap₁.captures? captured = heap.captures? captured := by
-    unfold Heap.captures?; rw [hH.caps]
-  constructor
-  · rintro ⟨hi₁, hcap, hp, hr⟩
-    have hi : idx < X.m.funcs.size := hok.funcs_size ▸ hi₁
-    obtain ⟨_, _, _, _, _, hps, hrt⟩ := hok.funcs idx hi
-    exact ⟨hi, hc ▸ hcap, hps ▸ hp, hrt ▸ hr⟩
-  · rintro ⟨hi, hcap, hp, hr⟩
-    obtain ⟨hi₁, _, _, _, _, hps, hrt⟩ := hok.funcs idx hi
-    exact ⟨hi₁, hc.symm ▸ hcap, hps.symm ▸ hp, hrt.symm ▸ hr⟩
-
-/-- The source's and the target's functions have the same names. -/
-theorem fnName_eq (i : Nat) : X.m₁.fnName i = X.m.fnName i := by
-  unfold LModule.fnName
-  by_cases hi : i < X.m.funcs.size
-  · obtain ⟨hi₁, -, -, -, hn, -⟩ := hok.funcs i hi
-    rw [Array.getElem?_eq_getElem hi, Array.getElem?_eq_getElem hi₁]
-    simp only [Option.map_some, Option.getD_some, hn]
-  · have hi₁ : ¬ i < X.m₁.funcs.size := by rw [hok.funcs_size]; exact hi
-    rw [Array.getElem?_eq_none (Nat.le_of_not_lt hi), Array.getElem?_eq_none (Nat.le_of_not_lt hi₁)]
+/-- A certified promotion keeps every function's name, parameters' tags and result tag. -/
+private theorem ModOK.sameSigs : SameSigs X.m X.m₁ where
+  size := hok.funcs_size
+  sig i hi _ :=
+    let ⟨_, _, _, _, hn, hps, hrt⟩ := hok.funcs i hi
+    ⟨hn, hps, hrt⟩
 
 /-- A call of function `idx` on valid values starts frames that correspond, with facts that
 promote no cell. -/
@@ -750,7 +738,7 @@ end
 /-! ## A rule's tree, continued -/
 
 section
-variable {B B₁ : Ty} (hwf : WF X.m) (hwf₁ : WF X.m₁) (hok : ModOK X)
+variable {B B₁ : Ty} (hwf : WF X.m) (hwf₁ : WF X.m₁) (hok : ModOK X) (oracle : Nat → Nat)
 
 /-- The parameters of a body's block, as `paramsOf` gives them. -/
 theorem paramsOf_eq {g : LBody M} {j : Nat} (hj : j < g.blocks.size) :
@@ -815,103 +803,65 @@ theorem regionStart_ok {P : List Nat} {heap : Heap M} {F : List Fact} {Wr : List
 include hok in
 /-- **A rule's tree, continued alike**: in frames whose facts hold, a tree that respects the
 typing off `P` leads, in the source and in the target, to states that correspond. -/
-theorem settle_lock {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {c c₁ : Core M}
-    {i i₁ : Inst M} (hi : InstOK X.m c.top i) (hK : ContsOK X.m B c.top.func.ret c.conts)
-    (hi₁ : InstOK X.m₁ c₁.top i₁) (hK₁ : ContsOK X.m₁ B₁ c₁.top.func.ret c₁.conts)
+theorem settle_lock {s s₁ : State M} {P : List Nat} {Fs : List (List Fact)} {F : List Fact}
+    {c c₁ : Core M} {i : Inst M} {pc₁ : Nat} {succs₁ : List LSite} {args₁ : List Nat}
+    (hi : InstOK X.m c.top i) (hK : ContsOK X.m B c.top.func.ret c.conts)
+    (hi₁ : InstOK X.m₁ c₁.top (mkInst i pc₁ succs₁ args₁))
+    (hK₁ : ContsOK X.m₁ B₁ c₁.top.func.ret c₁.conts)
     {drawn : Nat} {ev ev₁ : Event} (hC : CoreRel A X P Fs c c₁)
     (hD : Disjoint ((c.top.env, F) :: stackFacts Fs c.conts))
-    (hp : PendOK A X P c.heap F c.top c₁.top i i₁) (t : i.Tree) (t₁ : i₁.Tree) (he : HEq t₁ t)
+    (hp : PendOK A X P c.heap F c.top c₁.top i succs₁ args₁) {t t₁ : i.Tree} (he : t₁ = t)
     (ht : A.TreeOK (A.StOK i.rerun.key) (typOff c.heap P) i.ret t) :
-    Lock A X (settle hwf c i hi hK drawn ev t) (settle hwf₁ c₁ i₁ hi₁ hK₁ drawn ev₁ t₁) := by
+    Diagram hwf₁ oracle (Rel A X) measure Wrong s s₁ (settle hwf c i hi hK drawn ev t)
+      (settle hwf₁ c₁ (mkInst i pc₁ succs₁ args₁) hi₁ hK₁ drawn ev₁ t₁) := by
   have hp₀ := hp
-  obtain ⟨E, Wr, pc₁, succs₁, args₁, rfl, hB, hS, hWr, hWc, hargs, hsites, hregs, hag, hnext⟩ := hp
-  obtain rfl : t = t₁ := (eq_of_heq he).symm
-  cases t with
-  | ret a =>
-    simp only [settle]
-    obtain ⟨op, pc, dst, ret, ps, rs, regs, succs, rerun⟩ := i
+  obtain ⟨E, Wr, hB, hS, hWr, hWc, hargs, hsites, hregs, hag, hnext⟩ := hp
+  subst he
+  refine hok.sameSigs.settle_rec₂ hC.heap.caps
+    (P := fun t r r₁ => A.TreeOK (A.StOK i.rerun.key) (typOff c.heap P) i.ret t →
+      Diagram hwf₁ oracle (Rel A X) measure Wrong s s₁ r r₁)
+    (fun a ht => ?_) (fun e ht => ?_) (fun st ht => ?_) (fun _ _ _ => ?_)
+    (fun j args k ht => ?_) (fun sig idx captured args k caps hco hco₁ ht => ?_)
+    (fun _ ht => ?_) _ ht
+  · obtain ⟨op, pc, dst, ret, ps, rs, regs, succs, rerun⟩ := i
     cases ret with
     | none => exact nomatch a
     | some r =>
-      refine Rel.of A X (hC.withTop _ _) ⟨after dst F, rfl, E, hB, hnext r rfl, ?_⟩
-        (hD.sub fun l h => promLocs_after (by simp only [Frame.bind] at h; exact h))
+      refine .next (Rel.of A X (hC.withTop _ _) (.exec (F := after dst F) ⟨E, hB, hnext r rfl, ?_⟩)
+        (hD.sub fun l h => promLocs_after (by simp only [Frame.bind] at h; exact h)))
       have hv : A.ResOK (typOff c.heap P) (some r) a := A.treeOK_ret.mp ht
       simp only [Frame.bind]
       exact hS.bind (resDyn (some r) a) hv _ _
-  | stop s =>
-    cases s with
-    | jump o =>
-      cases o with
-      | exit e =>
-        simp only [settle]
-        exact transfer_lock _ _ _ _ hC hD (exitTo_rel A X hB hS e (A.treeOK_jump.mp ht) _ _ hsites)
-      | again st =>
-        simp only [settle]
-        exact Rel.of A X hC ⟨F, rfl, hp₀, HEq.rfl, A.treeOK_jump.mp ht⟩ hD
-    | fault f =>
-      simp only [settle, faultStep]
-      exact Rel.of A X hC ⟨rfl, Or.inl rfl⟩ hD.2
-  | choose k =>
-    simp only [settle]
-    exact Rel.of A X hC ⟨F, rfl, hp₀, HEq.rfl, ht⟩ hD
-  | update f =>
-    simp only [settle]
-    exact Rel.of A X hC ⟨F, rfl, hp₀, HEq.rfl, ht⟩ hD
-  | vis q k =>
-    cases q with
-    | region j args =>
-      have hsat := A.treeOK_vis.mp ht
-      simp only [settle, visitRegion]
-      have hkm : i.region j hi.length ∈ i.regs := List.getElem_mem _
-      obtain ⟨hfr, hsub⟩ := regionStart_ok hok hS (hregs _ hkm) (hi.region_lt j) (hi.region_entry j)
-        (hi.region_fits j).1 (hi.region_fits j).2 (hi₁.region_lt j) (hi₁.region_entry j)
-        (hi₁.region_fits j).1 (hi₁.region_fits j).2 args (Accounts.argsOK_toList hsat.1)
-        (InstOK.region_params hi j) (InstOK.region_params hi₁ j)
-      refine Rel.of A X hC ⟨_, F, rfl, hfr, hp₀, rfl, HEq.rfl, fun S₁ he o ho => hsat.2 S₁ he o ho⟩
-        ⟨fun l hl q hq => ?_, hD⟩
-      obtain ⟨c₀, hc₀, hr₀⟩ := hsub l hl
-      obtain ⟨hcW, hcF⟩ := mem_regFacts_prom hc₀
-      rcases List.mem_cons.mp hq with rfl | hq
-      · rintro ⟨u, c₂, hc₂, hr₂⟩
-        exact hS.distinct _ hcF _ hc₂ c₀ c₂ l rfl rfl (fun e => hWc u c₂ hc₂ (e ▸ hcW)) hr₀ hr₂
-      · exact hD.head l ⟨c₀, hcF, hr₀⟩ q hq
-    | call sig idx captured args =>
-      have hsat := A.treeOK_vis.mp ht
-      simp only [settle, visitCall]
-      by_cases hc : ∃ caps, X.m.CallOK c.heap idx captured sig.1 sig.2 caps
-      · obtain ⟨caps, hco⟩ := hc
-        have hco₁ := (callOK_iff hok hC.heap).mpr hco
-        rw [LModule.callee_pos hco, LModule.callee_pos hco₁]
-        have hv : ∀ d ∈ caps ++ Args.toList (Args.ofPayload sig.1 args),
-            A.DynOK (typOff c.heap P) d := by
-          intro d hd
-          rcases List.mem_append.mp hd with hd | hd
-          · exact hC.inv.captures hco.2.1 d hd
-          · exact Accounts.argsOK_toList hsat.1.2 d hd
-        obtain ⟨F₀, hfr, hnp⟩ := callFrame_ok hok hwf hwf₁ hco.1 hco₁.1 rfl rfl _ hv hco.2.2.1
-        exact Rel.of A X hC
-          ⟨F₀, F, rfl, hfr, hp₀, rfl, HEq.rfl, fun S₁ he o ho => hsat.2 S₁ he o ho⟩
-          ⟨fun l hl => (hnp l hl).elim, hD⟩
-      · rw [LModule.callee_neg (fun caps h => hc ⟨caps, h⟩),
-          LModule.callee_neg (fun caps h => hc ⟨caps, (callOK_iff hok hC.heap).mp h⟩)]
-        simp only [faultStep]
-        rw [fnName_eq hok]
-        exact Rel.of A X hC ⟨rfl, Or.inl rfl⟩ hD.2
-    | new _ _ =>
-      simp only [settle]
-      exact Rel.of A X hC ⟨F, rfl, hp₀, HEq.rfl, ht⟩ hD
-    | get _ _ =>
-      simp only [settle]
-      exact Rel.of A X hC ⟨F, rfl, hp₀, HEq.rfl, ht⟩ hD
-    | set _ _ _ =>
-      simp only [settle]
-      exact Rel.of A X hC ⟨F, rfl, hp₀, HEq.rfl, ht⟩ hD
-    | modify _ _ _ =>
-      simp only [settle]
-      exact Rel.of A X hC ⟨F, rfl, hp₀, HEq.rfl, ht⟩ hD
-    | bind _ _ _ _ _ =>
-      simp only [settle]
-      exact Rel.of A X hC ⟨F, rfl, hp₀, HEq.rfl, ht⟩ hD
+  · exact transfer_lock hwf₁ oracle _ _ _ _ hC hD
+      (exitTo_rel A X hB hS e (A.treeOK_jump.mp ht) _ _ hsites)
+  · exact .next (Rel.of A X hC (.again st hp₀ (A.treeOK_jump.mp ht)) hD)
+  · exact .next (Rel.of A X hC (.done _) hD.2)
+  · have hsat := A.treeOK_vis.mp ht
+    obtain ⟨hfr, hsub⟩ := regionStart_ok hok hS (hregs _ (List.getElem_mem _)) (hi.region_lt j)
+      (hi.region_entry j) (hi.region_fits j).1 (hi.region_fits j).2 (hi₁.region_lt j)
+      (hi₁.region_entry j) (hi₁.region_fits j).1 (hi₁.region_fits j).2 args
+      (Accounts.argsOK_toList hsat.1) (InstOK.region_params hi j) (InstOK.region_params hi₁ j)
+    refine .next (Rel.of A X hC
+      (.call hfr (.rule hp₀ fun S₁ he o ho => hsat.2 S₁ he o ho))
+      ⟨fun l hl q hq => ?_, hD⟩)
+    obtain ⟨c₀, hc₀, hr₀⟩ := hsub l hl
+    obtain ⟨hcW, hcF⟩ := mem_regFacts_prom hc₀
+    rcases List.mem_cons.mp hq with rfl | hq
+    · rintro ⟨u, c₂, hc₂, hr₂⟩
+      exact hS.distinct _ hcF _ hc₂ c₀ c₂ l rfl rfl (fun e => hWc u c₂ hc₂ (e ▸ hcW)) hr₀ hr₂
+    · exact hD.head l ⟨c₀, hcF, hr₀⟩ q hq
+  · have hsat := A.treeOK_vis.mp ht
+    have hv : ∀ d ∈ caps ++ Args.toList (Args.ofPayload sig.1 args),
+        A.DynOK (typOff c.heap P) d := by
+      intro d hd
+      rcases List.mem_append.mp hd with hd | hd
+      · exact hC.inv.captures hco.2.1 d hd
+      · exact Accounts.argsOK_toList hsat.1.2 d hd
+    obtain ⟨F₀, hfr, hnp⟩ := callFrame_ok hok hwf hwf₁ hco.1 hco₁.1 rfl rfl _ hv hco.2.2.1
+    exact .next (Rel.of A X hC
+      (.call hfr (.rule hp₀ fun S₁ he o ho => hsat.2 S₁ he o ho))
+      ⟨fun l hl => (hnp l hl).elim, hD⟩)
+  · exact .next (Rel.of A X hC (.request _ hp₀ ht) hD)
 
 end
 
@@ -946,30 +896,20 @@ include hok in
 /-- **Answering a rule's world or cell request alike**: a tree that respects the typing off `P`
 asks for no promoted cell, so the machine answers it in the source as in the target, and the
 states they lead to correspond. -/
-theorem serve_lock {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {c c₁ : Core M}
-    {i i₁ : Inst M} (h : InstOK X.m c.top i ∧ ContsOK X.m B c.top.func.ret c.conts)
-    (h₁ : InstOK X.m₁ c₁.top i₁ ∧ ContsOK X.m₁ B₁ c₁.top.func.ret c₁.conts) {drawn : Nat}
+theorem serve_lock {s s₁ : State M} {P : List Nat} {Fs : List (List Fact)} {F : List Fact}
+    {c c₁ : Core M} {i : Inst M} {pc₁ : Nat} {succs₁ : List LSite} {args₁ : List Nat}
+    (h : InstOK X.m c.top i ∧ ContsOK X.m B c.top.func.ret c.conts)
+    (h₁ : InstOK X.m₁ c₁.top (mkInst i pc₁ succs₁ args₁) ∧
+      ContsOK X.m₁ B₁ c₁.top.func.ret c₁.conts) {drawn : Nat}
     (hC : CoreRel A X P Fs c c₁) (hD : Disjoint ((c.top.env, F) :: stackFacts Fs c.conts))
-    (hp : PendOK A X P c.heap F c.top c₁.top i i₁) (t : i.Tree) (t₁ : i₁.Tree) (he : HEq t₁ t)
+    (hp : PendOK A X P c.heap F c.top c₁.top i succs₁ args₁) (t : i.Tree)
     (ht : A.TreeOK (A.StOK i.rerun.key) (typOff c.heap P) i.ret t) :
-    Lock A X (serve hwf oracle c i t h drawn) (serve hwf₁ oracle c₁ i₁ t₁ h₁ drawn) := by
-  have hp₀ := hp
-  obtain ⟨E, Wr, pc₁, succs₁, args₁, rfl, -⟩ := hp
-  obtain rfl : t = t₁ := (eq_of_heq he).symm
-  have settle₁ := fun {c c₁ : Core M} (hi : InstOK X.m c.top i)
-      (hK : ContsOK X.m B c.top.func.ret c.conts)
-      (hi₁ : InstOK X.m₁ c₁.top (mkInst i pc₁ succs₁ args₁))
-      (hK₁ : ContsOK X.m₁ B₁ c₁.top.func.ret c₁.conts) {drawn : Nat} {ev ev₁ : Event}
-      (hC : CoreRel A X P Fs c c₁) (hD : Disjoint ((c.top.env, F) :: stackFacts Fs c.conts))
-      (hp : PendOK A X P c.heap F c.top c₁.top i (mkInst i pc₁ succs₁ args₁)) (t : i.Tree)
-      (t₁ : (mkInst i pc₁ succs₁ args₁).Tree) (he : HEq t₁ t)
-      (ht : A.TreeOK (A.StOK i.rerun.key) (typOff c.heap P) i.ret t) =>
-    settle_lock hwf hwf₁ hok hi hK hi₁ hK₁ (drawn := drawn) (ev := ev) (ev₁ := ev₁) hC hD hp t t₁
-      he ht
+    Diagram hwf₁ oracle (Rel A X) measure Wrong s s₁ (serve hwf oracle c i t h drawn)
+      (serve hwf₁ oracle c₁ (mkInst i pc₁ succs₁ args₁) t h₁ drawn) := by
   cases t with
   | choose k =>
     simp only [serve]
-    exact settle₁ _ _ _ _ hC hD hp₀ _ _ HEq.rfl (A.treeOK_choose.mp ht _)
+    exact settle_lock hwf hwf₁ hok oracle _ _ _ _ hC hD hp rfl (A.treeOK_choose.mp ht _)
   | update f =>
     obtain ⟨top, conts, heap, w⟩ := c
     obtain ⟨top₁, conts₁, heap₁, w₁⟩ := c₁
@@ -977,23 +917,24 @@ theorem serve_lock {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {c c�
     subst hw
     have hu := (A.treeOK_update.mp ht) w₁ hC.wok
     simp only [serve]
-    exact settle₁ (c := ⟨top, conts, heap, (f w₁).1⟩) (c₁ := ⟨top₁, conts₁, heap₁, (f w₁).1⟩)
-      _ _ _ _ ⟨rfl, hC.heap, hC.inv, hu.1, hC.stack⟩ hD hp₀ _ _ HEq.rfl hu.2
+    exact settle_lock hwf hwf₁ hok oracle (c := ⟨top, conts, heap, (f w₁).1⟩)
+      (c₁ := ⟨top₁, conts₁, heap₁, (f w₁).1⟩) _ _ _ _ ⟨rfl, hC.heap, hC.inv, hu.1, hC.stack⟩ hD hp
+      rfl hu.2
   | ret a =>
     simp only [serve]
-    exact settle₁ _ _ _ _ hC hD hp₀ _ _ HEq.rfl ht
+    exact settle_lock hwf hwf₁ hok oracle _ _ _ _ hC hD hp rfl ht
   | stop s =>
     simp only [serve]
-    exact settle₁ _ _ _ _ hC hD hp₀ _ _ HEq.rfl ht
+    exact settle_lock hwf hwf₁ hok oracle _ _ _ _ hC hD hp rfl ht
   | vis q k =>
     have hsat := A.treeOK_vis.mp ht
     cases q with
     | region j args =>
       simp only [serve]
-      exact settle₁ _ _ _ _ hC hD hp₀ _ _ HEq.rfl ht
+      exact settle_lock hwf hwf₁ hok oracle _ _ _ _ hC hD hp rfl ht
     | call sig idx captured args =>
       simp only [serve]
-      exact settle₁ _ _ _ _ hC hD hp₀ _ _ HEq.rfl ht
+      exact settle_lock hwf hwf₁ hok oracle _ _ _ _ hC hD hp rfl ht
     | new ty v =>
       simp only [serve]
       have hsz := hC.heap.size
@@ -1002,19 +943,19 @@ theorem serve_lock {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {c c�
       have hval : (typOff (c.heap.push ⟨ty, v⟩) P).Valid c.heap.cells.size ty :=
         typOff_valid.mpr ⟨fun hm => Nat.lt_irrefl _ (hC.heap.bound _ hm),
           by simp [Heap.push], by simp [Heap.push]⟩
-      refine settle₁ (c := { c with heap := c.heap.push ⟨ty, v⟩ })
+      refine settle_lock hwf hwf₁ hok oracle (c := { c with heap := c.heap.push ⟨ty, v⟩ })
         (c₁ := { c₁ with heap := c₁.heap.push ⟨ty, v⟩ }) _ _ _ _
         ⟨hC.world, hC.heap.push _, hC.inv.push _ (.inr rfl) hsat.1,
           Typing.AllValid.mono hst.typ hC.wok, hC.stack.stepOff hst⟩ hD
-        (hp₀.step hst fun _ _ h => h) _ _ (by rw [hsz]; exact HEq.rfl) (hsat.2 _ hst.typ _ hval)
+        (hp.step hst fun _ _ h => h) (by rw [hsz]) (hsat.2 _ hst.typ _ hval)
     | get ty l =>
       obtain ⟨hlP, hl, htl⟩ := typOff_valid.mp hsat.1
       have hh : c.heap.Holds l ty := ⟨hl, htl⟩
       have hh₁ : c₁.heap.Holds l ty := (hC.heap.holds_iff hlP ty).mpr hh
       simp only [serve]
       rw [Heap.cell_pos hh, Heap.cell_pos hh₁]
-      exact settle₁ _ _ _ _ hC hD hp₀ _ _
-        (by rw [hC.heap.valueAt_eq hlP hh.lt hh.code hh₁.lt hh₁.code]; exact HEq.rfl)
+      exact settle_lock hwf hwf₁ hok oracle _ _ _ _ hC hD hp
+        (by rw [hC.heap.valueAt_eq hlP hh.lt hh.code hh₁.lt hh₁.code])
         (hsat.2 _ (Typing.Extends.refl _) _ (hC.inv.valueAt hh.lt hh.code))
     | set ty l v =>
       obtain ⟨hlP, hl, htl⟩ := typOff_valid.mp hsat.1.1
@@ -1026,11 +967,11 @@ theorem serve_lock {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {c c�
       have hst : HeapStep P P c.heap (c.heap.set l ⟨ty, v⟩ hh.lt) (fun _ => False) :=
         .of_frame hC.heap.bound (by rw [e]; exact Typing.Extends.refl _)
           (HeapFrame.set hh.lt hsat.1.1 _)
-      exact settle₁ (c := { c with heap := c.heap.set l ⟨ty, v⟩ hh.lt })
+      exact settle_lock hwf hwf₁ hok oracle (c := { c with heap := c.heap.set l ⟨ty, v⟩ hh.lt })
         (c₁ := { c₁ with heap := c₁.heap.set l ⟨ty, v⟩ hh₁.lt }) _ _ _ _
         ⟨hC.world, hC.heap.set _ _ _, hC.inv.set _ hh.code.symm hsat.1.2,
           Typing.AllValid.mono hst.typ hC.wok, hC.stack.stepOff hst⟩ hD
-        (hp₀.step hst fun _ _ h => h) _ _ HEq.rfl (hsat.2 _ hst.typ () trivial)
+        (hp.step hst fun _ _ h => h) rfl (hsat.2 _ hst.typ () trivial)
     | modify ty l g =>
       obtain ⟨hlP, hl, htl⟩ := typOff_valid.mp hsat.1.1
       have hh : c.heap.Holds l ty := ⟨hl, htl⟩
@@ -1041,35 +982,29 @@ theorem serve_lock {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {c c�
       have hst : HeapStep P P c.heap (c.heap.modify l ty g) (fun _ => False) :=
         .of_frame hC.heap.bound (by rw [e]; exact Typing.Extends.refl _)
           (HeapFrame.modify hsat.1.1 _)
-      exact settle₁ (c := { c with heap := c.heap.modify l ty g })
+      exact settle_lock hwf hwf₁ hok oracle (c := { c with heap := c.heap.modify l ty g })
         (c₁ := { c₁ with heap := c₁.heap.modify l ty g }) _ _ _ _
         ⟨hC.world, hC.heap.modify hlP _ _, hC.inv.modify hsat.1.2,
           Typing.AllValid.mono hst.typ hC.wok, hC.stack.stepOff hst⟩ hD
-        (hp₀.step hst fun _ _ h => h) _ _ HEq.rfl (hsat.2 _ hst.typ () trivial)
+        (hp.step hst fun _ _ h => h) rfl (hsat.2 _ hst.typ () trivial)
     | bind ty v sig idx captured =>
       simp only [serve]
-      by_cases hc : ∃ caps, X.m.CallOK c.heap idx captured (ty :: sig.1) sig.2 caps
-      · obtain ⟨caps, hco⟩ := hc
-        have hco₁ := (callOK_iff hok hC.heap).mpr hco
-        rw [LModule.callee_pos hco, LModule.callee_pos hco₁]
-        have hds : ∀ d ∈ caps ++ [⟨ty, v⟩], A.DynOK (typOff c.heap P) d := by
+      refine hok.sameSigs.callee_rec₂ hC.heap.caps rfl rfl (fun caps hco hco₁ => ?_) fun e => ?_
+      · have hds : ∀ d ∈ caps ++ [⟨ty, v⟩], A.DynOK (typOff c.heap P) d := by
           intro d hd
           rcases List.mem_append.mp hd with hd | hd
           · exact hC.inv.captures hco.2.1 d hd
           · rw [List.mem_singleton.mp hd]; exact hsat.1.2
         have hst : HeapStep P P c.heap (c.heap.capture (caps ++ [⟨ty, v⟩])) (fun _ => False) :=
           .of_frame hC.heap.bound (typOff_capture _) (HeapFrame.capture _)
-        exact settle₁ (c := { c with heap := c.heap.capture (caps ++ [⟨ty, v⟩]) })
+        exact settle_lock hwf hwf₁ hok oracle
+          (c := { c with heap := c.heap.capture (caps ++ [⟨ty, v⟩]) })
           (c₁ := { c₁ with heap := c₁.heap.capture (caps ++ [⟨ty, v⟩]) }) _ _ _ _
           ⟨hC.world, hC.heap.capture _, hC.inv.capture _ hds,
             Typing.AllValid.mono hst.typ hC.wok, hC.stack.stepOff hst⟩ hD
-          (hp₀.step hst fun _ _ h => h) _ _ (by rw [hC.heap.caps]; exact HEq.rfl)
+          (hp.step hst fun _ _ h => h) (by rw [hC.heap.caps])
           (hsat.2 _ hst.typ _ (typOff_capture_valid _))
-      · rw [LModule.callee_neg (fun caps h => hc ⟨caps, h⟩),
-          LModule.callee_neg (fun caps h => hc ⟨caps, (callOK_iff hok hC.heap).mp h⟩)]
-        simp only [faultStep]
-        rw [fnName_eq hok]
-        exact Rel.of A X hC ⟨rfl, Or.inl rfl⟩ hD.2
+      · exact e ▸ .next (Rel.of A X hC (.done _) hD.2)
 
 end
 
@@ -1077,29 +1012,6 @@ end
 
 section
 variable {B B₁ : Ty}
-
-/-- The measure: a state about to run an instruction has its block's rest's length, plus
-one; any other has none. -/
-def measure (s : State M) : Nat :=
-  match s.mode with
-  | .exec => s.core.top.code.length + 1
-  | _ => 0
-
-variable (A X) in
-/-- A source step is matched by a target step to a state that corresponds, or by none,
-from `s₁`, with the measure below `μ`; a source end is wrong or the target's. -/
-def Good (r : StepR X.m B) (r₁ : StepR X.m₁ B₁) (s₁ : State M) (μ : Nat) : Prop :=
-  match r with
-  | .next _ s _ => (∃ e₁ t h₁, r₁ = .next e₁ t h₁ ∧ Rel A X s t) ∨ (measure s < μ ∧ Rel A X s s₁)
-  | .final r _ w d => Wrong r ∨ ∃ hp₁, r₁ = .final r hp₁ w d
-
-/-- A matched pair of steps is good. -/
-private theorem Lock.good {r : StepR X.m B} {r₁ : StepR X.m₁ B₁} (h : Lock A X r r₁) (s₁ : State M)
-    (μ : Nat) : Good A X r r₁ s₁ μ := by
-  cases r <;> cases r₁ <;> simp only [Lock] at h
-  · exact Or.inl ⟨_, _, _, rfl, h⟩
-  · obtain ⟨rfl, rfl, rfl⟩ := h
-    exact Or.inr ⟨_, rfl⟩
 
 /-- The facts without some contents, again without them, are the same. -/
 private theorem dropCells_idem (Wr : List Nat) (F : List Fact) :
@@ -1113,16 +1025,15 @@ private theorem dropCells_idem (Wr : List Nat) (F : List Fact) :
 /-- The rule of an operation certified with the write set `Wr`, from facts `F`, runs as
 `PendOK` says, with the facts without the contents of `Wr`'s cells. -/
 private theorem pendOK_of {P : List Nat} {heap : Heap M} {F : List Fact} {f f₁ : Frame M}
-    {i : Inst M} {E : Nat → List Fact} {Wr : List Nat} {pc₁ : Nat} {succs₁ : List LSite}
-    {args₁ : List Nat}
+    {i : Inst M} {E : Nat → List Fact} {Wr : List Nat} {succs₁ : List LSite} {args₁ : List Nat}
     (hB : BodyOK X f.func f₁.func E) (hS : Sound A P F f.env f₁.env heap) (hWr : WrOK F Wr)
     (ha : ArgsEq (dropCells Wr F) args₁ i.rerun.args)
     (hs : All₂ (SiteOK E f.func f₁.func (dropCells Wr F)) i.succs succs₁)
     (hregs : ∀ k ∈ i.regs, RegionOK X (regFacts Wr F) k) (hag : AgainOK A i)
     (hnext : ∀ r, i.ret = some r →
       CodeOK X E f.func f₁.func (after i.dst (dropCells Wr F)) f.code f.term f₁.code f₁.term) :
-    PendOK A X P heap (dropCells Wr F) f f₁ i (mkInst i pc₁ succs₁ args₁) := by
-  refine ⟨E, Wr, pc₁, succs₁, args₁, rfl, hB, hS.sub fun φ hφ => (List.mem_filter.mp hφ).1,
+    PendOK A X P heap (dropCells Wr F) f f₁ i succs₁ args₁ := by
+  refine ⟨E, Wr, hB, hS.sub fun φ hφ => (List.mem_filter.mp hφ).1,
     fun c hc => List.mem_filter.mpr ⟨hWr c hc, rfl⟩, fun u c hm hc => ?_, ha, hs, ?_, hag, hnext⟩
   · have := (List.mem_filter.mp hm).2
     simp only [List.contains_iff_mem.mpr hc] at this
@@ -1143,31 +1054,23 @@ private theorem rel_exec {P : List Nat} {Fs : List (List Fact)} {F : List Fact} 
     (hC : CoreRel A X P Fs c c₁) {f f₁ : Frame M} (hF : FrameOK A X P c.heap F f f₁)
     (hD : Disjoint ((f.env, F) :: stackFacts Fs c.conts)) {drawn : Nat} :
     Rel A X ⟨{ c with top := f }, .exec, drawn, ()⟩ ⟨{ c₁ with top := f₁ }, .exec, drawn, ()⟩ :=
-  Rel.of A X (hC.withTop f f₁) ⟨F, rfl, hF⟩ hD
+  Rel.of A X (hC.withTop f f₁) (.exec hF) hD
 
 /-- The stack's frames hold the contents of cells of the heap only. -/
-private theorem StackRel.cellLocs_lt {P : List Nat} {heap : Heap M} :
-    ∀ {Fs : List (List Fact)} {ws ws₁ : List (Wait M)}, StackRel A X P heap Fs ws ws₁ →
-      ∀ q ∈ stackFacts Fs ws, ∀ l, cellLocs q.1 q.2 l → l < heap.cells.size
-  | [], [], [], _, _, hq, _, _ => nomatch hq
-  | _ :: _, w :: _, w₁ :: _, ⟨hw, hs⟩, q, hq, l, hl => by
+private theorem StackRel.cellLocs_lt {P : List Nat} {heap : Heap M} {Fs : List (List Fact)}
+    {ws ws₁ : List (Wait M)} (h : StackRel A X P heap Fs ws ws₁) :
+    ∀ q ∈ stackFacts Fs ws, ∀ l, cellLocs q.1 q.2 l → l < heap.cells.size := by
+  induction h with
+  | nil => exact fun _ hq => nomatch hq
+  | cons hw _ ih =>
+    intro q hq l hl
     rcases List.mem_cons.mp hq with rfl | hq
-    · cases w with
-      | rule f p =>
-        cases w₁ with
-        | rule f₁ p₁ =>
-          exact (hw.1.choose_spec.choose_spec.choose_spec.choose_spec.choose_spec.2.2.1.cellLocs_lt
-            hl).1
-        | call _ _ _ => exact hw.elim
-      | call f dst r =>
-        cases w₁ with
-        | rule _ _ => exact hw.elim
-        | call _ _ _ => exact (hw.2.2.choose_spec.2.2.cellLocs_lt hl).1
-    · exact StackRel.cellLocs_lt hs q hq l hl
-  | [], [], _ :: _, h, _, _, _, _ => h.elim
-  | [], _ :: _, _, h, _, _, _, _ => h.elim
-  | _ :: _, [], _, h, _, _, _, _ => h.elim
-  | _ :: _, _ :: _, [], h, _, _, _, _ => h.elim
+    · cases hw with
+      | rule hp _ =>
+        obtain ⟨_, _, _, hS, _⟩ := hp
+        exact (hS.cellLocs_lt hl).1
+      | call _ _ hS => exact (hS.cellLocs_lt hl).1
+    · exact ih q hq l hl
 
 end
 
@@ -1200,7 +1103,7 @@ theorem Sound.eq_valid {P : List Nat} {F : List Fact} {env env₁ : Array (Dyn M
 
 section
 variable {B B₁ : Ty} (hwf : WF X.m) (hwf₁ : WF X.m₁) (hok : ModOK X)
-  (hR : ∀ i, X.R i → A.InsnOK i) (hRT : ∀ t, X.RT t → A.TermOK t)
+  (hR : ∀ i, X.R i → A.InsnOK i) (hRT : ∀ t, X.RT t → A.TermOK t) (oracle : Nat → Nat)
 include hok hR hRT
 
 /-- **Running an instruction or a terminator** of frames that `FrameOK` relates. -/
@@ -1209,9 +1112,10 @@ theorem exec_good {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {top to
     (h : CoreOK X.m B ⟨top, conts, heap, world⟩) (h₁ : CoreOK X.m₁ B₁ ⟨top₁, conts₁, heap₁, world⟩)
     (hC : CoreRel A X P Fs ⟨top, conts, heap, world⟩ ⟨top₁, conts₁, heap₁, world⟩)
     (hD : Disjoint ((top.env, F) :: stackFacts Fs conts)) (hF : FrameOK A X P heap F top top₁) :
-    Good A X (exec hwf ⟨top, conts, heap, world⟩ h drawn)
-      (exec hwf₁ ⟨top₁, conts₁, heap₁, world⟩ h₁ drawn)
-      ⟨⟨top₁, conts₁, heap₁, world⟩, .exec, drawn, ()⟩ (top.code.length + 1) := by
+    Diagram hwf₁ oracle (Rel A X) measure Wrong ⟨⟨top, conts, heap, world⟩, .exec, drawn, ()⟩
+      ⟨⟨top₁, conts₁, heap₁, world⟩, .exec, drawn, ()⟩
+      (exec hwf ⟨top, conts, heap, world⟩ h drawn)
+      (exec hwf₁ ⟨top₁, conts₁, heap₁, world⟩ h₁ drawn) := by
   obtain ⟨E, hB, hcode, hS⟩ := hF
   obtain ⟨func, code, term, env, blk, pc, fits⟩ := top
   obtain ⟨func₁, code₁, term₁, env₁, blk₁, pc₁, fits₁⟩ := top₁
@@ -1221,35 +1125,31 @@ theorem exec_good {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {top to
     cases ht with
     | case hr ha hs =>
       simp only [exec, execCode, execTerm]
-      refine Lock.good ?_ _ _
-      refine transfer_lock _ _ _ _ hC hD ?_
+      refine transfer_lock hwf₁ oracle _ _ _ _ hC hD ?_
       rw [applyFn_congr (hS.args_get ha) _ _ _ (h.termReady rfl rfl).1]
       exact exitTo_rel A X hB hS _ (Accounts.FnOK.applyFn _ (hS.args_ok ha) (hRT _ hr _)) _ _ hs
     | sem Wr hr hWr ha hs hregs =>
       simp only [exec, execCode, execTerm]
-      refine Lock.good ?_ _ _
       have hok₀ := hRT _ hr
       have hS₁ := hS.sub (F₁ := dropCells Wr F) fun φ hφ => (List.mem_filter.mp hφ).1
-      refine settle_lock (F := dropCells Wr F) hwf hwf₁ hok _ _ _ _ hC
-        (hD.sub (F₁ := dropCells Wr F) fun _ h => promLocs_dropCells h) ?_ _ _ ?_ ?_
+      refine settle_lock (F := dropCells Wr F) hwf hwf₁ hok oracle _ _ _ _ hC
+        (hD.sub (F₁ := dropCells Wr F) fun _ h => promLocs_dropCells h) ?_ ?_ ?_
       · exact pendOK_of hB hS hWr ha hs hregs hok₀.2 fun _ h => nomatch h
-      · exact heq_of_eq (applyFn_congr (hS₁.args_get ha) _ _ _ _)
+      · exact applyFn_congr (hS₁.args_get ha) _ _ _ _
       · exact Accounts.FnOK.applyFn _ (hS₁.args_ok ha) (hok₀.1 _)
   | sem Wr hr hWr ha hs hregs hk =>
     simp only [exec, execCode]
-    refine Lock.good ?_ _ _
     have hok₀ := hR _ hr
     have hS₁ := hS.sub (F₁ := dropCells Wr F) fun φ hφ => (List.mem_filter.mp hφ).1
-    refine settle_lock (F := dropCells Wr F) hwf hwf₁ hok _ _ _ _ (hC.withTop _ _)
-      (hD.sub (F₁ := dropCells Wr F) fun _ h => promLocs_dropCells h) ?_ _ _ ?_ ?_
+    refine settle_lock (F := dropCells Wr F) hwf hwf₁ hok oracle _ _ _ _ (hC.withTop _ _)
+      (hD.sub (F₁ := dropCells Wr F) fun _ h => promLocs_dropCells h) ?_ ?_ ?_
     · exact pendOK_of hB hS hWr ha hs hregs hok₀.2 fun _ _ => hk
-    · exact heq_of_eq (applyFn_congr (hS₁.args_get ha) _ _ _ _)
+    · exact applyFn_congr (hS₁.args_get ha) _ _ _ _
     · exact Accounts.FnOK.applyFn _ (hS₁.args_ok ha) (hok₀.1 _)
   | const hr hk =>
     simp only [exec, execCode, Core.next]
-    refine Lock.good ?_ _ _
     have e := hR _ hr
-    refine rel_exec hC ⟨E, hB, hk, ?_⟩ ?_
+    refine .next (rel_exec hC ⟨E, hB, hk, ?_⟩ ?_)
     · refine hS.bind _ ?_ (Nat.lt_of_lt_of_le (h.dst_lt rfl) fits)
         (Nat.lt_of_lt_of_le (h₁.dst_lt (i := .const _ _) rfl) fits₁)
       unfold Accounts.DynOK Accounts.ValOK
@@ -1258,9 +1158,8 @@ theorem exec_good {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {top to
     · exact hD.sub fun _ h₂ => promLocs_after (hd := Nat.lt_of_lt_of_le (h.dst_lt rfl) fits) h₂
   | @pure _ d ts r f args args₁ is is₁ t t₁ hr ha hk =>
     simp only [exec, execCode, Core.next]
-    refine Lock.good ?_ _ _
     have hv := Accounts.FnOK.applyFn (h.ready rfl) (hS.args_ok ha) (hR _ hr (typOff heap P))
-    refine rel_exec hC ⟨E, hB, hk, ?_⟩ ?_
+    refine .next (rel_exec hC ⟨E, hB, hk, ?_⟩ ?_)
     · exact hS.bind' (congrArg _ (applyFn_congr (hS.args_get ha) _ _ _ _)) hv
         (Nat.lt_of_lt_of_le (h.dst_lt rfl) fits)
         (Nat.lt_of_lt_of_le (h₁.dst_lt (i := .pure d ts r f args₁) rfl) fits₁)
@@ -1276,7 +1175,7 @@ theorem exec_good {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {top to
         exact Option.some.inj hld
       simp only [Core.refGet, Core.next]
       refine Or.inr ⟨by simp [measure], Rel.of A X ⟨hC.world, hC.heap, hC.inv, hC.wok, hC.stack⟩
-        ⟨_, rfl, E, hB, hk, ?_⟩ (hD.sub fun l₁ h₂ => ?_)⟩
+        (.exec ⟨E, hB, hk, ?_⟩) (hD.sub fun l₁ h₂ => ?_)⟩
       · refine (hS.bindSrc _ (Nat.lt_of_lt_of_le (h.dst_lt rfl) fits)).cons
           ⟨d, ?_, hud, hC.inv.cells l d hld⟩ rfl
         simp only [LInsn.dst, Array.getElem?_set_self, hl, hd]
@@ -1285,8 +1184,8 @@ theorem exec_good {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {top to
         · exact nomatch e
         · exact promLocs_dropSrc (hd := Nat.lt_of_lt_of_le (h.dst_lt rfl) fits) ⟨c₁, hm, hr₁⟩
     · rw [Heap.cell_neg (by rw [hl]; exact hh)]
-      exact Or.inr ⟨by simp [measure], rfl, hC.world, P, [], Fs, hC.heap, hC.inv, hC.wok, ⟨_, rfl⟩,
-        hC.stack, hD.2⟩
+      exact Or.inr ⟨by simp [measure], rfl, hC.world, P, [], Fs, hC.heap, hC.inv, hC.wok,
+        .wrong ⟨_, rfl⟩, hC.stack, hD.2⟩
   | @setProm _ d ty c v u is _ _ _ hp hu hdc hk =>
     simp only [exec, execCode, Core.cellLoc]
     obtain ⟨l, hr, hlP, hlt⟩ := hS.holds _ hp
@@ -1306,7 +1205,7 @@ theorem exec_good {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {top to
       have hpl : promLocs env F l := ⟨c, hp, hr⟩
       refine Or.inr ⟨by simp [measure], Rel.of A X ⟨hC.world, ?_, hC.inv.set hh.lt htag hx,
         Typing.AllValid.mono hst.typ hC.wok, hC.stack.step hst fun q hq l₁ hl₁ he => ?_⟩
-        ⟨_, rfl, E, hB, hk, ?_⟩ (hD.sub fun l₁ h₂ => ?_)⟩
+        (.exec ⟨E, hB, hk, ?_⟩) (hD.sub fun l₁ h₂ => ?_)⟩
       · refine ⟨by simpa [Heap.set] using hC.heap.size, fun l₁ hl₁ => ?_, fun l₁ hl₁ => ?_,
           by simpa [Heap.set] using hC.heap.caps⟩
         · rw [hC.heap.agree l₁ hl₁]
@@ -1343,11 +1242,10 @@ theorem exec_good {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {top to
             ⟨c₁, hm, hr₁⟩
           exact ⟨c₂, (mem_dropCell.mp hm₂).1, hr₂⟩
     · rw [Heap.cell_neg (by rw [hl]; exact hh)]
-      exact Or.inr ⟨by simp [measure], rfl, hC.world, P, [], Fs, hC.heap, hC.inv, hC.wok, ⟨_, rfl⟩,
-        hC.stack, hD.2⟩
+      exact Or.inr ⟨by simp [measure], rfl, hC.world, P, [], Fs, hC.heap, hC.inv, hC.wok,
+        .wrong ⟨_, rfl⟩, hC.stack, hD.2⟩
   | @newKept _ d ty v u is _ _ _ hu hk =>
     simp only [exec, execCode, Core.refNew, Core.next]
-    refine Lock.good ?_ _ _
     have hv : v < env.size := h.ready rfl
     have hu₁ : u < env₁.size := h₁.ready (i := .refNew d ty u) rfl
     have hxx : getD env₁ u hu₁ = getD env v hv := by
@@ -1368,9 +1266,9 @@ theorem exec_good {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {top to
       unfold Accounts.DynOK Accounts.ValOK
       rw [A.ref, M.locOf_cellAt]
       exact Typing.allValid_singleton.mpr hval
-    refine Rel.of A X ⟨hC.world, hC.heap.push' hxx, hC.inv.push _ (.inr rfl) hx,
-      Typing.AllValid.mono hst.typ hC.wok, hC.stack.stepOff hst⟩ ⟨_, rfl, E, hB, hk, ?_⟩
-      (hD.sub fun _ h₂ => promLocs_after (hd := hd₀) h₂)
+    refine .next (Rel.of A X ⟨hC.world, hC.heap.push' hxx, hC.inv.push _ (.inr rfl) hx,
+      Typing.AllValid.mono hst.typ hC.wok, hC.stack.stepOff hst⟩ (.exec ⟨E, hB, hk, ?_⟩)
+      (hD.sub fun _ h₂ => promLocs_after (hd := hd₀) h₂))
     exact (hS.step hst fun _ _ h => h).bind' (d := d)
       (x := ⟨Ty.ref ty, M.cellAt ty heap.cells.size⟩)
       (x₁ := ⟨Ty.ref ty, M.cellAt ty heap₁.cells.size⟩) (by rw [hC.heap.size]) hnew hd₀ hd₁
@@ -1383,9 +1281,8 @@ theorem exec_good {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {top to
     have hh : heap.Holds _ ty := ⟨hlt, htl⟩
     have hh₁ := (hC.heap.holds_iff hlP ty).mpr hh
     rw [Heap.cell_pos hh, Heap.cell_pos (by rw [hl₁]; exact hh₁)]
-    refine Lock.good ?_ _ _
     simp only [Core.refGet, Core.next]
-    refine rel_exec hC ⟨E, hB, hk, ?_⟩ ?_
+    refine .next (rel_exec hC ⟨E, hB, hk, ?_⟩ ?_)
     · refine hS.bind' ?_ (hC.inv.cells _ _ (Array.getElem?_eq_getElem hlt))
         (Nat.lt_of_lt_of_le (h.dst_lt rfl) fits)
         (Nat.lt_of_lt_of_le (h₁.dst_lt (i := .refGet d ty c₁) rfl) fits₁)
@@ -1401,7 +1298,6 @@ theorem exec_good {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {top to
     have hh : heap.Holds _ ty := ⟨hlt, htl⟩
     have hh₁ := (hC.heap.holds_iff hlP ty).mpr hh
     rw [Heap.cell_pos hh, Heap.cell_pos (by rw [hl₁]; exact hh₁)]
-    refine Lock.good ?_ _ _
     simp only [Core.refSet, Core.next]
     have hvb : v < env.size := (h.ready rfl).2
     have hvb₁ : v₁ < env₁.size := (h₁.ready (i := .refSet d ty c₁ v₁) rfl).2
@@ -1423,8 +1319,8 @@ theorem exec_good {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {top to
       unfold Accounts.DynOK Accounts.ValOK
       rw [A.unit]
       exact Typing.allValid_nil _
-    refine Rel.of A X ⟨hC.world, ?_, hC.inv.set hlt htag hx, Typing.AllValid.mono hst.typ hC.wok,
-      hC.stack.stepOff hst⟩ ⟨_, rfl, E, hB, hk, ?_⟩ ?_
+    refine .next (Rel.of A X ⟨hC.world, ?_, hC.inv.set hlt htag hx,
+      Typing.AllValid.mono hst.typ hC.wok, hC.stack.stepOff hst⟩ (.exec ⟨E, hB, hk, ?_⟩) ?_)
     · have hset := hC.heap.set' (l := M.locOf (getT env c (Ty.ref ty) (h.ready rfl).1)) hlt
         hh₁.lt hxx
       simp only [hl₁]
@@ -1434,7 +1330,6 @@ theorem exec_good {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {top to
     · exact hD.sub fun _ h₂ => promLocs_after (hd := Nat.lt_of_lt_of_le (h.dst_lt rfl) fits) h₂
   | @newProm _ d ty v u is _ _ _ hu hud hk =>
     simp only [exec, execCode, Core.refNew, Core.next]
-    refine Lock.good ?_ _ _
     have hv : v < env.size := h.ready rfl
     have hx : A.DynOK (typOff heap P) (getD env v hv) :=
       hS.eq_ok hu _ (Array.getElem?_eq_getElem hv)
@@ -1463,9 +1358,9 @@ theorem exec_good {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {top to
       omega
     have h₃ := h₀.cons_prom (φ := .prom d) (c := d)
       ⟨_, hrd, List.mem_cons_self, by simp [Heap.push]⟩ rfl hnew
-    refine Rel.of A X ⟨hC.world, hC.heap.pushProm _ _, hC.inv.push _ (.inl rfl) hx,
+    refine .next (Rel.of A X ⟨hC.world, hC.heap.pushProm _ _, hC.inv.push _ (.inl rfl) hx,
       Typing.AllValid.mono hst.typ hC.wok, hC.stack.step hst fun _ _ _ _ h => h⟩
-      ⟨_, rfl, E, hB, hk, ?_⟩ ⟨fun l₁ h₂ q hq hc => ?_, hD.2⟩
+      (.exec ⟨E, hB, hk, ?_⟩) ⟨fun l₁ h₂ q hq hc => ?_, hD.2⟩)
     · refine h₃.cons_same (ψ := .prom d) ⟨heap.cells.size, getD env v hv, hrd,
         List.mem_cons_self, by simp [Heap.push], ?_⟩ rfl List.mem_cons_self rfl
       rw [Array.getElem?_set_ne _ (Ne.symm hud), hS.eq_get hu, Array.getElem?_eq_getElem hv]
@@ -1491,15 +1386,9 @@ theorem exec_good {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {top to
       congrArg _ (getT_congr _ _ (hS.eq_get hf))
     have hla : lookupAll env₁ args₁ hr₁.2 = lookupAll env args hr.2 :=
       lookupAll_congr (hS.args_get ha) _ _
-    by_cases hc : ∃ caps, X.m.CallOK heap (M.fnOf (getT env fn (Ty.fn ts r) hr.1)).idx
-        (M.fnOf (getT env fn (Ty.fn ts r) hr.1)).captured ts r caps
-    · obtain ⟨caps, hco⟩ := hc
-      have hco₁ : X.m₁.CallOK heap₁ (M.fnOf (getT env₁ fn₁ (Ty.fn ts r) hr₁.1)).idx
-          (M.fnOf (getT env₁ fn₁ (Ty.fn ts r) hr₁.1)).captured ts r caps := by
-        rw [key]; exact (callOK_iff hok hC.heap).mpr hco
-      rw [LModule.callee_pos hco, LModule.callee_pos hco₁]
-      refine Lock.good ?_ _ _
-      have hv : ∀ d ∈ appendCaps caps (lookupAll env args hr.2) ++
+    refine hok.sameSigs.callee_rec₂ hC.heap.caps (congrArg (·.idx) key)
+      (congrArg (·.captured) key) (fun caps hco hco₁ => ?_) fun e => ?_
+    · have hv : ∀ d ∈ appendCaps caps (lookupAll env args hr.2) ++
           Args.toList (Args.nil (I := M.interp)), A.DynOK (typOff heap P) d := by
         intro d hd
         rw [Args.toList, List.append_nil, appendCaps_eq] at hd
@@ -1512,87 +1401,57 @@ theorem exec_good {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {top to
         exact hco.2.2.1
       obtain ⟨F₀, hfr, hnp⟩ := callFrame_ok hok hwf hwf₁ hco.1 hco₁.1 (by rw [key])
         (ds₁ := appendCaps caps (lookupAll env₁ args₁ hr₁.2)) (by rw [hla]) _ hv hp
-      exact Rel.of A X hC ⟨F₀, F, rfl, hfr, rfl, rfl, E, hB, hk, hS⟩
-        ⟨fun l hl => (hnp l hl).elim, hD⟩
-    · rw [LModule.callee_neg (fun caps h => hc ⟨caps, h⟩),
-        LModule.callee_neg (fun caps h => hc ⟨caps, (callOK_iff hok hC.heap).mp (key ▸ h)⟩)]
-      refine Lock.good ?_ _ _
-      simp only [faultStep]
-      rw [key, fnName_eq hok]
-      exact Rel.of A X hC ⟨rfl, Or.inl rfl⟩ hD.2
+      exact .next (Rel.of A X hC (.call hfr (.call hB hk hS))
+        ⟨fun l hl => (hnp l hl).elim, hD⟩)
+    · exact e ▸ .next (Rel.of A X hC (.done _) hD.2)
 
 end
 
 section
 variable {B B₁ : Ty} (hwf : WF X.m) (hwf₁ : WF X.m₁) (hok : ModOK X)
-  (hR : ∀ i, X.R i → A.InsnOK i) (hRT : ∀ t, X.RT t → A.TermOK t)
+  (hR : ∀ i, X.R i → A.InsnOK i) (hRT : ∀ t, X.RT t → A.TermOK t) (oracle : Nat → Nat)
 
 include hok in
 /-- **Leaving a body alike**: a valid value, left by frames whose waiting frames correspond. -/
-theorem leave_good {P : List Nat} {Fs : List (List Fact)} {top top₁ : Frame M}
+theorem leave_good {s s₁ : State M} {P : List Nat} {Fs : List (List Fact)} {top top₁ : Frame M}
     {conts conts₁ : List (Wait M)} {heap heap₁ : Heap M} {world : M.W} {drawn : Nat}
     {v : Dyn M.interp} (h : LeftOK X.m B ⟨top, conts, heap, world⟩ v)
     (h₁ : LeftOK X.m₁ B₁ ⟨top₁, conts₁, heap₁, world⟩ v)
     (hC : CoreRel A X P Fs ⟨top, conts, heap, world⟩ ⟨top₁, conts₁, heap₁, world⟩)
     (hD : Disjoint (stackFacts Fs conts)) (hv : A.DynOK (typOff heap P) v) :
-    Lock A X (leave hwf ⟨top, conts, heap, world⟩ v h drawn)
+    Diagram hwf₁ oracle (Rel A X) measure Wrong s s₁
+      (leave hwf ⟨top, conts, heap, world⟩ v h drawn)
       (leave hwf₁ ⟨top₁, conts₁, heap₁, world⟩ v h₁ drawn) := by
-  have hst := hC.stack
+  have hst : StackRel A X P heap Fs conts conts₁ := hC.stack
   simp only [leave]
-  cases Fs with
+  cases hst with
   | nil =>
-    cases conts with
-    | nil =>
-      cases conts₁ with
-      | nil =>
-        simp only [leaveTo]
-        exact Rel.of A X hC ⟨rfl, Or.inl rfl⟩ hD
-      | cons _ _ => exact hst.elim
-    | cons _ _ => cases conts₁ <;> exact hst.elim
-  | cons Fw Fs =>
-    cases conts with
-    | nil => cases conts₁ <;> exact hst.elim
-    | cons w cs =>
-      cases conts₁ with
-      | nil => exact hst.elim
-      | cons w₁ cs₁ =>
-        obtain ⟨hw, hcs⟩ := hst
-        cases w with
-        | rule f p =>
-          cases w₁ with
-          | call _ _ _ => exact hw.elim
-          | rule f₁ p₁ =>
-            obtain ⟨hp, hret, hk, hres⟩ := hw
-            simp only [leaveTo]
-            obtain ⟨inst, req, ret, k⟩ := p
-            obtain ⟨inst₁, req₁, ret₁, k₁⟩ := p₁
-            simp only at hret hk hp hres
-            subst hret
-            have hp₀ := hp
-            obtain ⟨E, Wr, pc₁, succs₁, args₁, rfl, -⟩ := hp
-            obtain rfl : k₁ = k := eq_of_heq hk
-            exact settle_lock (c := ⟨f, cs, heap, world⟩) (c₁ := ⟨f₁, cs₁, heap₁, world⟩) (F := Fw)
-              hwf hwf₁ hok _ _ _ _ ⟨hC.world, hC.heap, hC.inv, hC.wok, hcs⟩ hD hp₀
-              _ _ HEq.rfl (hres _ (Typing.Extends.refl _) _ (Accounts.dynOK_at hv _))
-        | call f dst r =>
-          cases w₁ with
-          | rule _ _ => exact hw.elim
-          | call f₁ dst₁ r₁ =>
-            obtain ⟨rfl, rfl, E, hB, hk, hS⟩ := hw
-            simp only [leaveTo]
-            refine Rel.of A X ⟨hC.world, hC.heap, hC.inv, hC.wok, hcs⟩ ⟨_, rfl, E, hB, hk, ?_⟩
-              (hD.sub fun _ h₂ =>
-                promLocs_after (hd := Nat.lt_of_lt_of_le (LeftOK.call_dst h rfl) f.fits) h₂)
-            simp only [Frame.bind]
-            exact hS.bind v hv _ _
+    simp only [leaveTo]
+    exact .next (Rel.of A X hC (.done _) hD)
+  | @cons Fw Fs w w₁ cs cs₁ hw hcs =>
+    cases hw with
+    | rule hp hres =>
+      simp only [leaveTo]
+      exact settle_lock (c := ⟨_, cs, heap, world⟩) (c₁ := ⟨_, cs₁, heap₁, world⟩) (F := Fw)
+        hwf hwf₁ hok oracle _ _ _ _ ⟨hC.world, hC.heap, hC.inv, hC.wok, hcs⟩ hD hp rfl
+        (hres _ (Typing.Extends.refl _) _ (Accounts.dynOK_at hv _))
+    | @call f f₁ dst r E hB hk hS =>
+      simp only [leaveTo]
+      refine .next (Rel.of A X ⟨hC.world, hC.heap, hC.inv, hC.wok, hcs⟩
+        (.exec ⟨E, hB, hk, ?_⟩) (hD.sub fun _ h₂ =>
+          promLocs_after (hd := Nat.lt_of_lt_of_le (LeftOK.call_dst h rfl) f.fits) h₂))
+      simp only [Frame.bind]
+      exact hS.bind v hv _ _
 
 include hok hR hRT in
-/-- **The step diagram.**  From corresponding states, a source step is matched by a
-target step to states that correspond, or by none with a smaller measure; a source end
-is wrong or the target's. -/
-theorem step_good (oracle : Nat → Nat) {s s₁ : State M} (h : StateOK X.m B s)
-    (h₁ : StateOK X.m₁ B₁ s₁) (hr : Rel A X s s₁) :
-    Good A X (Exec.step hwf oracle s h) (Exec.step hwf₁ oracle s₁ h₁) s₁ (measure s) := by
+/-- **The step diagram.**  From corresponding states, a source step is matched by a target step
+and then silent steps to states that correspond, or by none with a smaller measure; a source
+that has ended has a wrong result, or the target has ended with the same result, world and
+number of choices. -/
+theorem step_good {s s₁ : State M} (h : StateOK X.m B s) (h₁ : StateOK X.m₁ B₁ s₁)
+    (hr : Rel A X s s₁) :
+    Diagram hwf₁ oracle (Rel A X) measure Wrong s s₁ (Exec.step hwf oracle s h)
+      (Exec.step hwf₁ oracle s₁ h₁) := by
   obtain ⟨⟨top, conts, heap, world⟩, mode, drawn, ⟨⟩⟩ := s
   obtain ⟨⟨top₁, conts₁, heap₁, world₁⟩, mode₁, drawn₁, ⟨⟩⟩ := s₁
   obtain ⟨hd, hw, P, L, Fs, hH, hI, hW, hm, hst, hD⟩ := hr
@@ -1602,61 +1461,29 @@ theorem step_good (oracle : Nat → Nat) {s s₁ : State M} (h : StateOK X.m B s
   subst hd₀ hw₀
   have hC : CoreRel A X P Fs ⟨top, conts, heap, world⟩ ⟨top₁, conts₁, heap₁, world⟩ :=
     ⟨rfl, hH, hI, hW, hst⟩
-  cases mode with
-  | done r =>
-    simp only [Exec.step, Good]
-    cases mode₁ with
-    | done r₁ =>
-      obtain ⟨-, hr | hr⟩ := hm
-      · subst hr; exact Or.inr ⟨_, rfl⟩
-      · exact Or.inl hr
-    | _ => exact Or.inl hm
-  | exec =>
-    cases mode₁ <;> simp only [ModeRel] at hm
-    obtain ⟨F, rfl, hF⟩ := hm
-    exact exec_good hwf hwf₁ hok hR hRT h h₁ hC hD hF
-  | jump to =>
-    cases mode₁ <;> simp only [ModeRel] at hm
-    obtain ⟨F, rfl, hF⟩ := hm
+  cases hm with
+  | wrong hw => exact Or.inl hw
+  | done r => exact Or.inr ⟨_, rfl⟩
+  | exec hF => exact exec_good hwf hwf₁ hok hR hRT oracle h h₁ hC hD hF
+  | jump hF =>
     simp only [Exec.step]
-    refine Lock.good ?_ _ _
-    exact rel_exec hC hF hD
-  | call callee w =>
-    cases mode₁ <;> simp only [ModeRel] at hm
-    rename_i callee₁ w₁
-    obtain ⟨F, Fw, rfl, hF, hW₁⟩ := hm
+    exact .next (rel_exec hC hF hD)
+  | @call F Fw callee callee₁ w w₁ hF hW₁ =>
     simp only [Exec.step]
     have hC₁ : CoreRel A X P (Fw :: Fs) ⟨callee, w :: conts, heap, world⟩
-        ⟨callee₁, w₁ :: conts₁, heap₁, world⟩ := ⟨rfl, hH, hI, hW, hW₁, hst⟩
-    refine Lock.good ?_ _ _
-    exact Rel.of A X hC₁ ⟨F, rfl, hF⟩ hD
-  | ret v =>
-    cases mode₁ <;> simp only [ModeRel] at hm
-    obtain ⟨rfl, rfl, hv⟩ := hm
+        ⟨callee₁, w₁ :: conts₁, heap₁, world⟩ := ⟨rfl, hH, hI, hW, .cons hW₁ hst⟩
+    exact .next (Rel.of A X hC₁ (.exec hF) hD)
+  | ret hv =>
     simp only [Exec.step]
-    refine Lock.good ?_ _ _
-    exact leave_good hwf hwf₁ hok h h₁ hC hD hv
-  | request i t =>
-    cases mode₁ <;> simp only [ModeRel] at hm
-    rename_i i₁ t₁
-    obtain ⟨F, rfl, hp, he, ht⟩ := hm
+    exact leave_good hwf hwf₁ hok oracle h h₁ hC hD hv
+  | request t hp ht =>
     simp only [Exec.step]
-    refine Lock.good ?_ _ _
-    exact serve_lock hwf hwf₁ hok oracle h h₁ hC hD hp t t₁ he ht
-  | again r =>
-    cases mode₁ <;> simp only [ModeRel] at hm
-    rename_i r₁
-    obtain ⟨F, rfl, hp, he, hst₀⟩ := hm
-    obtain ⟨inst, st⟩ := r
-    obtain ⟨inst₁, st₁⟩ := r₁
-    simp only at hp he hst₀
-    have hp₀ := hp
-    obtain ⟨E, Wr, pc₁, succs₁, args₁, rfl, hB, hS, -, -, hargs, -, -, hag, -⟩ := hp
-    obtain rfl := eq_of_heq he
+    exact serve_lock hwf hwf₁ hok oracle h h₁ hC hD hp t ht
+  | again st hp hst₀ =>
+    obtain ⟨_, _, _, hS, -, -, hargs, -, -, hag, -⟩ := id hp
     simp only [Exec.step]
-    refine Lock.good (settle_lock hwf hwf₁ hok _ _ _ _ hC hD hp₀ _ _ ?_ ?_) _ _
-    · refine heq_of_eq ?_
-      simp only [Inst.again, mkInst]
+    refine settle_lock hwf hwf₁ hok oracle _ _ _ _ hC hD hp ?_ ?_
+    · simp only [Inst.again, mkInst]
       exact congrFun (applyFn_congr (hS.args_get hargs) _ _ _ _) _
     · exact Accounts.FnOK.applyFn _ (hS.args_ok hargs) (hag _) _ hst₀
 

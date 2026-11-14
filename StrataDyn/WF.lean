@@ -464,6 +464,27 @@ contract's. -/
     List (Block env α) :=
   Block.withNestedList fn.blocks.toList ++ Region.blocksList fn.contract.regions
 
+/-- Every block of the module, at any depth: each function's, then each ghost's. -/
+@[expose] def Module.Raw.allBlocks {env : Env Unit} [base ≼ env] {α : Type}
+    (m : Module.Raw env α) : List (Block env α) :=
+  m.funcs.toList.flatMap Func.allBlocks ++
+    m.ghosts.toList.flatMap fun g => Region.blocksList g.regions
+
+/-- The listing with nested blocks keeps the blocks it starts from. -/
+private theorem Block.mem_withNestedList {env : Env Unit} {α : Type} {b : Block env α} :
+    ∀ {bs : List (Block env α)}, b ∈ bs → b ∈ Block.withNestedList bs
+  | ⟨_, _, ⟨_⟩, _, _⟩ :: _, h => by
+    simp only [Block.withNestedList, List.mem_cons, List.mem_append]
+    exact (List.mem_cons.mp h).imp_right fun h => .inr (Block.mem_withNestedList h)
+
+/-- A block of a function's body is a block of its module, so what holds of every block of a
+module holds of every body. -/
+theorem Module.Raw.mem_allBlocks {env : Env Unit} [base ≼ env] {α : Type}
+    {m : Module.Raw env α} {fn : Func env α} {b : Block env α}
+    (hfn : fn ∈ m.funcs) (hb : b ∈ fn.blocks) : b ∈ m.allBlocks :=
+  List.mem_append_left _ (List.mem_flatMap.mpr ⟨fn, Array.mem_toList_iff.mpr hfn,
+    List.mem_append_left _ (Block.mem_withNestedList (Array.mem_toList_iff.mpr hb))⟩)
+
 mutual
 
 /-- What an instruction defines, in the order it is written: its result, then what its
@@ -1424,6 +1445,14 @@ def Module.ofChecked {env : Env Unit} [base ≼ env] {α : Type} (name : Name)
   else .error (m.faulty (fun _ => false) (fun _ => false))
 
 end
+
+/-- The module that `check` returns is the one it checked. -/
+public theorem Module.Raw.raw_of_check {env : Env Unit} [base ≼ env] {α : Type}
+    {m : Module.Raw env α} {m' : Module env α} (h : m.check = .ok m') : m'.raw = m := by
+  unfold Module.Raw.check at h
+  split at h
+  · cases h; rfl
+  · cases h
 
 /-- A well-formed module names no function twice. -/
 public theorem Module.Raw.WF.nodup {env : Env Unit} [base ≼ env] {α : Type}

@@ -4,7 +4,8 @@ Dyn is a typed intermediate representation for programs, defined in Lean. A fron
 translates a source language into Dyn, and analyses and interpreters work on Dyn
 rather than on the source language. This document is a self-contained reference for Dyn
 itself. §4 shows how a language gives its programs a semantics that runs them, §5 how to
-reason about those runs, and §6 how Dyn's types are translated to Core.
+reason about those runs, §6 how Dyn's types are translated to Core, and §7 how datatype
+cases become ordinary control flow.
 [Python to Dyn](./PythonToDyn.md) describes how Python is translated into it.
 
 ## 1. Overview
@@ -1433,3 +1434,70 @@ every type expression, type-list splices included, and also in Core's own denota
 custom constructors are interpreted compositionally. Each emitted datatype agrees with its Dyn
 declaration for one unfolding, with recursive occurrences interpreted by arbitrary carriers;
 relating the recursive types themselves is left to the implementation translator.
+
+## 7. Case lowering
+
+A target with only jumps and two-way branches cannot take a datatype case. `cases`
+(`StrataDyn/Cases.lean`) replaces each case by tests of the constructors and reads of the fields,
+then jumps to the original arm, passing the arguments the arm had already bound and then the
+constructor's fields. So
+
+```
+test.Choice.case[base.Int](%v.0) ^empty.0() ^one.0(%bound.0) ^pair.0(%bound.0)
+```
+
+becomes
+
+```
+  %case.0 : base.Bool = test.isNone[base.Int](%v.0)
+  branch(%case.0) ^empty.0() ^cases.2()
+cases.2():
+  %case.1 : base.Bool = test.isOne[base.Int](%v.0)
+  branch(%case.1) ^cases.0() ^cases.1()
+cases.0():
+  %value.0 : base.Int = test.getOne[base.Int](%v.0)
+  jump ^one.0(%bound.0, %value.0)
+cases.1():
+  %lhs.0 : base.Int = test.getLeft[base.Int](%v.0)
+  %rhs.0 : base.Int = test.getRight[base.Int](%v.0)
+  jump ^pair.0(%bound.0, %lhs.0, %rhs.0)
+```
+
+The last constructor needs no test, and an arm that passes nothing is branched to directly. The
+pass also moves the arguments of every existing branch arm onto a jump in a new block, and
+rewrites clauses, frames and ghosts in the same way, at any depth.
+
+**Accessors.** The tests and field reads are instructions of the module's own environment, which
+the caller names (`CaseOps`): a tester for each constructor and a selector for each field. The
+pass checks only their signatures: pure, the datatype's type parameters in order, the scrutinee
+as the one operand, and `base.Bool` or the field's type as the result. What they compute is the
+caller's obligation: a tester is true exactly on its constructor, and a selector returns the
+field of a value of its constructor. Nothing is asked of a selector on any other constructor.
+
+**Result.** `cases` takes a well-formed module whose bodies have no regions or second exits and
+whose terminators are control or cases (`CasesInput`). It returns a well-formed module in which
+every terminator is a jump, a branch or `unreachable` (*plain control*) and no branch arm passes
+arguments (*bare branches*), in bodies and specifications alike (`Cased`). Otherwise it returns
+the first accessor that is missing or has another signature, with its function or ghost and its
+block. The shape and well-formedness of the result are decided on the lowered module, so the
+pass has an error for each decision failing (`illFormed`, `internal`). No admissible input is
+known to reach either; that none does is not proved.
+
+**What is proved.** `StrataDyn/CasesSound/` proves that a lowering keeps behaviour, for linked
+modules, as ref-to-reg's theorems are stated (§3, "What the pass keeps"). `lowering_sound` takes
+a source and a target module, both linked and validated, and the hypothesis `LoweringOK lm lm₁`:
+the linked target lowers the linked source's cases, block by block, as the certificate in
+`CasesSound/Cert.lean` describes it. For every start of a function, on any arguments and from
+any snapshot, every observation of the world and every oracle, the target's run behaves as the
+source's run under the same oracle: they show the same, and end with the same result or fault,
+or both diverge. `lowering_sound_runs` gives the same behaviours over all runs: every run of
+each behaves as some run of the other. Neither compares runs on a fixed fuel, since the target
+takes more steps. The accessors' laws are hypotheses of the certificate, about the linked
+instructions: a test followed by its branch takes the edge of its constructor, and the reads
+return the fields of the constructor the case picks. The theorems hold for any target that
+`LoweringOK` relates to the source, and do not mention the pass. That the output of `cases`,
+linked, satisfies `LoweringOK` is not proved, nor that a model's accessors satisfy the laws. So
+for the pass itself the evidence remains the tests, which compare the lowered module with its
+input on Dyn's engine; the certificate is proved for one hand-linked example
+(`StrataDynTest/CasesSound/SoundTest.lean`), given only that its tester is true exactly on its
+constructor.

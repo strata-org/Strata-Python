@@ -224,6 +224,10 @@ define are not included. -/
     Terminator env α → Array (Region env α)
   | .apply _ _ _ _ _ regions => regions
 
+/-- A terminator's annotation. -/
+@[expose] def Terminator.info {env : Env Unit} {α : Type} : Terminator env α → α
+  | .apply info .. => info
+
 /-! ## Control flow
 
 The base's terminal operations, as terminators.  A `T.case` is applied as any other terminal
