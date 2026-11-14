@@ -2564,7 +2564,17 @@ with CPython 3.12, over 1422 generated cases.
   from CPython's (a copy that dropped holes, after `popitem`, an object's `__dict__`). `==` of an
   object's `__dict__` with more than one attribute stops with a gap, since CPython walks its class's
   shared keys. An operator or comparison of a plain user object with a built-in value whose type's
-  own slot may accept it (a `mappingproxy`, a `ModuleSpec`, a dict view) stops with a gap.
+  own slot may accept it (a `mappingproxy`, a `ModuleSpec`) stops with a gap.
+- The dict views (`dict_keys`, `dict_values`, `dict_items`, exactly those classes): `len`,
+  `bool`, `in`, the binary and in-place operators and the comparisons call the class's own table
+  entries, which the built-in library's parts fill, as CPython's C slots, in `binary_op1`'s and
+  `do_richcompare`'s order; so does a read of the views' `mapping`, through its own hook name,
+  which a call of the getset descriptor doesn't reach. An entry without a body stops with a gap,
+  and so does a view against an operand whose operators the semantics doesn't model, such as a
+  `mappingproxy`. Every other built-in binary or comparison slot that the semantics takes as
+  `NotImplemented` without calling it gives `NotImplemented` for a view in CPython, as
+  `StrataPythonTestExtra/ViewPartnersTest.lean` checks; the sequence slots and `%` of `str`,
+  `bytes`, `tuple` and `list` are called.
 - Global names, with the fallback to `builtins`, and closures with their cells.
 - Calls of function objects, with positional and keyword arguments and `*` and `**` arguments.
   `**` builds a new dict and leaves the operand unchanged.

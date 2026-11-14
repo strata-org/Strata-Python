@@ -22,10 +22,11 @@ lists:
   by member (each member compared with the identity shortcut), `==` and `!=` of dicts entry by
   entry, sets by the subset order, and `==` and `!=` of values of two other kinds by identity.
 
-A user object goes through its type's dunders, in the order of CPython's slots.  Any other case
-raises CPython's `TypeError`, with its message, and an object of a built-in type whose operators
-are not modelled yet (a `bytearray`, for example) stops with a gap.  A comparison of nested tuples counts its depth, as
-CPython's C recursion count does, and stops with a gap before CPython's limit.
+A user object or a dict view goes through its type's dunders, in the order of CPython's slots. Any
+other case raises CPython's `TypeError`, with its message, and an object of a built-in type whose
+operators are not modelled yet (a `bytearray`, for example) stops with a gap. A comparison of nested
+tuples counts its depth, as CPython's C recursion count does, and stops with a gap before CPython's
+limit.
 -/
 
 namespace StrataPython.Dyn.Sem.Proto
@@ -81,6 +82,11 @@ variable {m : Type → Type 1} {V : Type}
 def isUserObject [PyReads m V] (v : V) : m Bool := do
   if (← PyPure.immView v).isSome || (← PyPure.isUndef v) then return false
   return !((← PyPure.immView (← PyReads.classOf v)) matches some (.builtin _))
+
+/-- Whether `v`'s operators are its type's dunders: a user object, or a dict view
+(`isTableDispatched`). -/
+def dunderDispatched [PyReads m V] (v : V) : m Bool := do
+  return (← isUserObject v) || (← isTableDispatched v)
 
 /-- A gap if either operand is a user object. -/
 def userCheck [PyReads m V] (a b : V) : m Unit := do
@@ -215,10 +221,11 @@ def setCompare [PyReads m V] (eqv : V → V → m Bool) (op : Arith.CmpOp) (a b 
   | .gt => return na > nb && (← setIsSubset eqv b a)
 
 /-- Whether `v` is an object of a built-in type whose operators are not modelled yet: not a list
-or a dict, and not of a type that `hashesByAddr`. -/
+or a dict, not a dict view, whose operators are its class's dunders (every operation that calls
+`otherCheck` also calls a view's dunders), and not of a type that `hashesByAddr`. -/
 def isOtherObject [PyReads m V] (v : V) : m Bool := do
   if (← PyPure.immView v).isSome || (← PyPure.isUndef v) then return false
-  if ← isUserObject v then return false
+  if ← dunderDispatched v then return false
   if (← listOf? v).isSome then return false
   match ← builtinClass? v with
   | some .dict | some .«set» | some .«frozenset» => return false
@@ -229,6 +236,13 @@ def isOtherObject [PyReads m V] (v : V) : m Bool := do
 def otherCheck [PyReads m V] (a b : V) : m Unit := do
   if (← isOtherObject a) || (← isOtherObject b) then
     PyPure.gap "the operators of this built-in type are not modelled yet"
+
+/-- Whether `a op b` goes through the operands' dunders: a user object or a dict view on either
+side. A dict view's partner whose operators the model doesn't have stops with a gap first. -/
+def dunderOperands [PyReads m V] (a b : V) : m Bool := do
+  let views := (← isTableDispatched a) || (← isTableDispatched b)
+  if views then otherCheck a b
+  return views || (← isUserObject a) || (← isUserObject b)
 
 /-- CPython's `PyNumber_Index` on `v`: the `int` that it is (a `bool` as `0` or `1`, an instance
 of a subclass of `int` as its number), or the `int` that its type's `__index__` gives; `none` if
@@ -463,9 +477,9 @@ def trySlot [PyCalls m V] (self other : V) (name : String) (swallow : Bool := fa
   -- A built-in value's own slot can take only another built-in value or an instance of a
   -- subclass of a built-in type: against a plain user object it gives `NotImplemented`, for the
   -- types of `givesNotImpl`. Another type's own slot may not (a `mappingproxy`'s forward to its
-  -- dict, a `ModuleSpec`'s `__eq__` reads the other operand's attributes, a dict view's set
-  -- operators take any iterable), so it stops with a gap.
-  if !(← isUserObject self) && ((← isPlainUser other) || !(← isUserObject other)) then
+  -- dict, a `ModuleSpec`'s `__eq__` reads the other operand's attributes), so it stops with a gap.
+  -- A dict view's slot is its class's table entry, called.
+  if !(← dunderDispatched self) && ((← isPlainUser other) || !(← isUserObject other)) then
     if let some (.builtin b) ← PyPure.immView (← PyReads.classOf self) then
       if !givesNotImpl b then
         let cls := PyPure.imm (m := m) (.builtin b)
@@ -495,9 +509,9 @@ def overridesReflected [PyReads m V] (ta tb : V) (rev : String) : m Bool := do
   | some _, none => return true
   | _, _ => return false
 
-/-- CPython's `binary_op1` when an operand is a user object: the forward dunder of `a`'s
-type and the reflected one of `b`'s, the reflected first when `b`'s type is a proper subclass of
-`a`'s that overrides it; `none` when both give `NotImplemented`. -/
+/-- CPython's `binary_op1` when an operand is a user object or a dict view: the forward dunder of
+`a`'s type and the reflected one of `b`'s, the reflected first when `b`'s type is a proper
+subclass of `a`'s that overrides it; `none` when both give `NotImplemented`. -/
 def binaryDunder [PyCalls m V] (fwd rev : String) (a b : V) : m (Option V) := do
   let ta ← PyReads.classOf a
   let tb ← PyReads.classOf b
@@ -575,16 +589,15 @@ def printfFirst? [PyCalls m V] (op : Arith.BinOp) (a b : V) : m (Option V) := do
       if let some r ← trySlot b a "__rmod__" then return some r
   return some (← callFound "__mod__" f a ta #[b] (← PyPure.allocDict))
 
-/-- `a op b`, CPython's `binary_op1`: the numbers, a user object's dunders in the order of CPython's
-slots, then `+` and `*`
-of sequences, with the messages of their `sq_concat` and `sq_repeat`; otherwise `TypeError`
-("unsupported operand type(s) for +: 'int' and 'str'"), whose message names the operator by
-`sym`. -/
+/-- `a op b`, CPython's `binary_op1`: the numbers, a user object's or a dict view's dunders in the
+order of CPython's slots, then `+` and `*` of sequences, with the messages of their `sq_concat`
+and `sq_repeat`; otherwise `TypeError` ("unsupported operand type(s) for +: 'int' and 'str'"),
+whose message names the operator by `sym`. -/
 def binaryOpAs [PyCalls m V] (sym : String) (op : Arith.BinOp) (a b : V) : m V := do
   if let some v ← PyReads.numBinary op a b then return v
   symCheck a b
   if let some r ← printfFirst? op a b then return r
-  if (← isUserObject a) || (← isUserObject b) then
+  if ← dunderOperands a b then
     let (fwd, rev) := binDunders op
     if let some r ← binaryDunder fwd rev a b then return r
   binaryTail sym op a b
@@ -592,10 +605,10 @@ def binaryOpAs [PyCalls m V] (sym : String) (op : Arith.BinOp) (a b : V) : m V :
 /-- `a op b`, as `binaryOpAs`. -/
 def binaryOp [PyCalls m V] (op : Arith.BinOp) (a b : V) : m V := binaryOpAs (binSymbol op) op a b
 
-/-- `a @ b`, with `sym` naming the operator: a user object's `__matmul__` and `__rmatmul__`; no
-built-in type has it. -/
+/-- `a @ b`, with `sym` naming the operator: a user object's or a dict view's `__matmul__` and
+`__rmatmul__`; no built-in type has it. -/
 def matMultOpAs [PyCalls m V] (sym : String) (a b : V) : m V := do
-  if (← isUserObject a) || (← isUserObject b) then
+  if (← dunderDispatched a) || (← dunderDispatched b) then
     if let some r ← binaryDunder "__matmul__" "__rmatmul__" a b then return r
   otherCheck a b
   raiseBuiltin "TypeError" s!"unsupported operand type(s) for {sym}: '{← typeName a}' and '{← typeName b}'"
@@ -603,20 +616,20 @@ def matMultOpAs [PyCalls m V] (sym : String) (a b : V) : m V := do
 /-- `a @ b`. -/
 def matMultOp [PyCalls m V] (a b : V) : m V := matMultOpAs "@" a b
 
-/-- `op a`: the numbers, and a user object's dunder; otherwise `TypeError` ("bad operand type for unary
--: 'str'"). -/
+/-- `op a`: the numbers, and a user object's or a dict view's dunder; otherwise `TypeError` ("bad
+operand type for unary -: 'str'"). -/
 def unaryOp [PyCalls m V] (op : Arith.UnaryOp) (a : V) : m V := do
   if let some v ← PyReads.numUnary op a then return v
   symCheck a a
-  if ← isUserObject a then
+  if ← dunderDispatched a then
     let name := match op with
       | .neg => "__neg__" | .pos => "__pos__" | .invert => "__invert__" | .abs => "__abs__"
     if let some r ← callSpecial? a name #[] then return r
   otherCheck a a
   raiseBuiltin "TypeError" s!"bad operand type for {unarySymbol op}: '{← typeName a}'"
 
-/-- `bool(v)`: `None` and the zeros and empty sequences are false; a user object's `__bool__`, then
-its `__len__`, decide. -/
+/-- `bool(v)`: `None` and the zeros and empty sequences are false; a user object's or a dict view's
+`__bool__`, then its `__len__`, decide. -/
 def truthy [PyCalls m V] (v : V) : m Bool := do
   match ← PyPure.immViewAll v with
   | some .none => pure false
@@ -634,7 +647,7 @@ def truthy [PyCalls m V] (v : V) : m Bool := do
   | some _ => pure true
   | none =>
     if ← PyPure.isUndef v then PyPure.gap "the truth of an undefined value"
-    if ← isUserObject v then
+    if ← dunderDispatched v then
       -- `__bool__`, which must give a `bool`, else `__len__`, else true.
       if let some r ← callSpecial? v "__bool__" #[] then
         match ← PyPure.immView r with
@@ -806,9 +819,9 @@ def cmpDunder : Arith.CmpOp → String
   | .eq => "__eq__" | .ne => "__ne__" | .lt => "__lt__" | .le => "__le__" | .gt => "__gt__"
   | .ge => "__ge__"
 
-/-- CPython's `do_richcompare` when an operand is a plain user object: the reflected comparison of
-`b`'s type first when it is a proper subclass of `a`'s, then `a`'s comparison, then `b`'s
-reflected one; `none` when all give `NotImplemented`. -/
+/-- CPython's `do_richcompare` when an operand is a user object or a dict view: the reflected
+comparison of `b`'s type first when it is a proper subclass of `a`'s, then `a`'s comparison,
+then `b`'s reflected one; `none` when all give `NotImplemented`. -/
 def richDunder [PyCalls m V] (op : Arith.CmpOp) (a b : V) : m (Option V) := do
   let ta ← PyReads.classOf a
   let tb ← PyReads.classOf b
@@ -858,7 +871,7 @@ def richCompareN [PyCalls m V] : Nat → Arith.CmpOp → V → V → m Bool
       | some (.tuple xs), some (.tuple ys) =>
         seqCompare (fun o x y => do pauseStep; richCompareN fuel o x y) op xs ys
       | _, _ =>
-        if (← isUserObject a) || (← isUserObject b) then
+        if ← dunderOperands a b then
           -- `PyObject_RichCompareBool`'s truth of a dunder's result; without one, `==` and `!=`
           -- compare identities.
           match ← richDunder op a b with
@@ -895,7 +908,7 @@ def richCompareVN [PyCalls m V] : Nat → Arith.CmpOp → V → V → m V
   | fuel + 1, op, a, b => do
     let boolV (r : Bool) : V := PyPure.imm (m := m) (.bool r)
     if let some r ← PyPure.numCompare op a b then return boolV r
-    if (← isUserObject a) || (← isUserObject b) then
+    if ← dunderOperands a b then
       -- One C level, as `PyObject_RichCompare` counts it.
       return ← PyReads.withDepth 1 do
         match ← richDunder op a b with

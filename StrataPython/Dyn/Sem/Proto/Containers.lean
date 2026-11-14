@@ -836,8 +836,8 @@ def setOp [PyCalls m V] [PyNew m V] (op : Arith.BinOp) (a b : V) : m V := do
 
 /-- The end of `a *= b`, after the number slots, as `PyNumber_InPlaceMultiply` does: `a`'s own
 repetition; `b`'s only when `a`'s type has no sequence slots at all (a number or `None`), since an
-instance of a user class, a dict, a set or a range has them without a repetition; else CPython's
-`TypeError`. -/
+instance of a user class, a dict view, a dict, a set or a range has them without a repetition;
+else CPython's `TypeError`. -/
 def inplaceRepeat [PyCalls m V] (a b : V) : m V := do
   let ra ← hasSeqSlot a ["__mul__", "__rmul__"]
   if ra then if let some v ← repeatSeq a b then return v
@@ -847,7 +847,7 @@ def inplaceRepeat [PyCalls m V] (a b : V) : m V := do
     | some (.range ..) => pure false
     | some _ => pure true
     | none =>
-      if (← isUserObject a) || (← isDict a) || (← anySet? a).isSome then pure false
+      if (← dunderDispatched a) || (← isDict a) || (← anySet? a).isSome then pure false
       else PyPure.gap "an in-place repetition of an object of this type is not modelled yet"
   if noSeqSlots && (← hasSeqSlot b ["__mul__", "__rmul__"]) then
     if let some v ← repeatSeq b a then return v
@@ -862,7 +862,7 @@ in-place operator in its messages. -/
 def inplaceOp [PyWrites m V] [PyNew m V] (op : Arith.BinOp) (a b : V) : m V := do
   if let some v ← PyReads.numBinary op a b then return v
   symCheck a b
-  let user := (← isUserObject a) || (← isUserObject b)
+  let user ← dunderOperands a b
   -- On an instance of a subclass of `list`, the list's in-place slots come in CPython's order
   -- among the subclass's own, which the model doesn't follow.
   if (op == .add || op == .mul) && (← isUserObject a) && (← listOf? a).isSome then

@@ -61,6 +61,8 @@ public environment PyT extends Py where
   insn staticDescr (k : base.Int) (^err (exc : Value)) : Value
   insn heapAttrs (k : base.Int) (^err (exc : Value)) : Value
   insn dictProxyCase (k : base.Int) (^err (exc : Value)) : Value
+  insn viewOps (k : base.Int) (^err (exc : Value)) : Value
+  insn viewBare (k : base.Int) (^err (exc : Value)) : Value
   insn setExactCase (^err (exc : Value)) : Value
   insn stubHooks (k : base.Int) (^err (exc : Value)) : Value
   insn regionValue (c : cell) (&body (x : Value) : raising base.Unit) (^err (exc : Value)) : Value
@@ -1060,6 +1062,129 @@ is `1` (`2`); `BuiltinImporter.create_module`, a static method of a Python funct
     | _ => do Proto.setAttr (.builtin .ExceptionGroup) "x" (some (.int 1)); pure .none
     : PyM σ .writes true Value)
 
+/-- A test body of a dict view's table entry `name`: a keys view's `__len__` gives `7` and its
+`__contains__` `True`; its `__and__`, `__rand__`, `__or__` and `__ror__` the str of their name
+without the underscores; its `__eq__` the str "eq" for a set and `NotImplemented` otherwise, and
+its `__lt__` `NotImplemented`; its `mapping` getset the str "mp"; a values view's `__iter__` an
+iterator over `(1, 2)`. -/
+public def viewBody (name : String) : BuiltinImpl := fun {m} {_} [_] [_] _ args _ => do
+  let other : m _ := do
+    let some (.tuple xs) ← PyPure.immView args | PyPure.modelInvariant "an args tuple"
+    let some x := xs[0]? | PyPure.modelInvariant "an argument"
+    pure x
+  match name with
+  | "__len__" => pure (PyPure.imm (m := m) (.int 7))
+  | "__contains__" => pure (PyPure.imm (m := m) (.bool true))
+  | "__and__" | "__rand__" | "__or__" | "__ror__" =>
+    pure (PyPure.imm (m := m) (.str (.ofString ((name.drop 2).dropEnd 2).toString)))
+  | "__eq__" =>
+    if (← Proto.anySet? (← other)).isSome then pure (PyPure.imm (m := m) (.str (.ofString "eq")))
+    else pure (PyPure.imm (m := m) .notImplemented)
+  | "__iter__" => Proto.getIter (PyPure.imm (m := m) (.tuple #[PyPure.imm (m := m) (.int 1),
+      PyPure.imm (m := m) (.int 2)]))
+  | "<getset mapping>" => pure (PyPure.imm (m := m) (.str (.ofString "mp")))
+  | _ => pure (PyPure.imm (m := m) .notImplemented)
+
+/-- This piece's table of bodies (`opsImpls`), with the test bodies of the dict views
+(`viewBody`): `dict_keys`' `__len__`, `__contains__`, `__and__`, `__rand__`, `__or__`, `__ror__`,
+`__eq__`, `__lt__` and `mapping`, and `dict_values`' `__iter__`. -/
+public def viewImpls : Impls :=
+  let base := opsImpls.withNewCheck
+  { base with
+    method := fun t name =>
+      if t == .«dict_keys» && ["__len__", "__contains__", "__and__", "__rand__", "__or__",
+          "__ror__", "__eq__", "__lt__", getsetHook "mapping"].contains name then some (viewBody name)
+      else if t == .«dict_values» && name == "__iter__" then some (viewBody name)
+      else base.method t name }
+
+/-- The dict views' operations through their tables, on a keys view `k` and a values view
+`w` of a dict `d`, with the test bodies of `viewImpls` (`pt.viewOps`) or with this piece's part
+alone (`pt.viewBare`): `len(k)` (`0`), `bool(k)` (`1`), `1 in k` (`2`) and `1 in w`, by iteration
+(`3`); `k & {1}` (`4`) and `{1} & k`, by `k`'s `__rand__` (`5`); `k == {1}` (`6`), `{1} == k` (`7`)
+and `k < 1` (`8`); `-k` (`9`), `k + 1` (`10`) and `3 *= k` (`11`); `{1} |= k` (`12`), `k &= {1}`
+(`13`), `k *= 2` (`14`) and `k *= (1,)` (`15`); `k == mp` and `mp | k` for a mappingproxy `mp`
+(`16`, `17`); `next(k)` (`18`), `hash(k)` (`19`) and `hash(w)` (`20`); `k.mapping` (`21`) and a
+call of the getset descriptor (`22`); `iter(w) is w` (`23`); `k == E()` and `E() == iter(())`
+for a class `E` whose `__eq__` and `__ror__` are `len` (`24`, `25`); `w == w` (`26`) and `w`
+against another values view of `d` (`27`); `k @ 1` (`28`); `len` of an items view (`29`);
+`k | E()` and `k |= E()`, which `k`'s `__or__` answers (`30`, `31`); `w != w` (`32`) and
+`k != {1}` (`33`); `k.__class__` (`34`) and `isinstance(k, set)` (`35`); `k |= mp` (`36`) and
+`k == mp` as a condition (`37`). -/
+public def viewCase {m : Type → Type 1} [PyWrites m Value] [PyNew m Value] (k : Int) : m Value := do
+  let d ← PyPure.allocDict
+  let kv ← Proto.newIter .«dict_keys» (.view .«dict_keys» d)
+  let wv ← Proto.newIter .«dict_values» (.view .«dict_values» d)
+  let iv ← Proto.newIter .«dict_items» (.view .«dict_items» d)
+  let one := Value.int 1
+  let s1 ← Proto.mkSet #[one]
+  let ns ← PyPure.allocDict
+  PyNew.dictSetNew ns (Value.ofString "__eq__") (.builtin .len) none fun _ => pure false
+  PyNew.dictSetNew ns (Value.ofString "__ror__") (.builtin .len) none fun _ => pure false
+  let e ← PyPure.allocObj (.builtin .type) (.cls
+    { name := "E", qualname := "E", «module» := "m", bases := #[.builtin .object],
+      mroTail := #[.builtin .object], ns, solidBase := .builtin .object })
+  let mp ← PyPure.allocObj (.builtin .mappingproxy) (.mappingProxy d e)
+  let boolV (b : Bool) : Value := .bool b
+  match k with
+  | 0 => return .int (← Proto.pyLen kv)
+  | 1 => return boolV (← Proto.truthy kv)
+  | 2 => return boolV (← Proto.contains one kv)
+  | 3 => return boolV (← Proto.contains one wv)
+  | 4 => return ← Proto.binaryOp .and kv s1
+  | 5 => return ← Proto.binaryOp .and s1 kv
+  | 6 => return ← Proto.richCompareV .eq kv s1
+  | 7 => return ← Proto.richCompareV .eq s1 kv
+  | 8 => return boolV (← Proto.richCompare .lt kv one)
+  | 9 => return ← Proto.unaryOp .neg kv
+  | 10 => return ← Proto.binaryOp .add kv one
+  | 11 => return ← Proto.inplaceOp .mul (.int 3) kv
+  | 12 => return ← Proto.inplaceOp .or s1 kv
+  | 13 => return ← Proto.inplaceOp .and kv s1
+  | 14 => return ← Proto.inplaceOp .mul kv (.int 2)
+  | 15 => return ← Proto.inplaceOp .mul kv (.tuple #[one])
+  | 16 => return ← Proto.richCompareV .eq kv mp
+  | 17 => return ← Proto.binaryOp .or mp kv
+  | 18 => return ← Builtins.nextFn .none (.tuple #[kv]) (← PyPure.allocDict)
+  | 19 => do discard <| Proto.hashN 5 kv; return .none
+  | 20 => do discard <| Proto.hashN 5 wv; return .none
+  | 21 => return ← Proto.getAttr kv "mapping"
+  | 22 => return ← Proto.callN 5 (.descr .«dict_keys» "mapping" .getset) (.tuple #[kv]) (← PyPure.allocDict)
+  | 23 => return boolV ((← PyPure.identical (← Proto.getIter wv) wv) == .yes)
+  | 24 => return ← Proto.richCompareV .eq kv (← PyReads.allocInstance e .plain #[] #[])
+  | 25 => do
+    let x ← PyReads.allocInstance e .plain #[] #[]
+    let it ← Proto.getIter (.tuple #[])
+    return ← Proto.richCompareV .eq x it
+  | 26 => return ← Proto.richCompareV .eq wv wv
+  | 27 => return ← Proto.richCompareV .eq wv (← Proto.newIter .«dict_values» (.view .«dict_values» d))
+  | 28 => return ← Proto.matMultOp kv one
+  | 29 => return .int (← Proto.pyLen iv)
+  | 30 => return ← Proto.binaryOp .or kv (← PyReads.allocInstance e .plain #[] #[])
+  | 31 => return ← Proto.inplaceOp .or kv (← PyReads.allocInstance e .plain #[] #[])
+  | 32 => return ← Proto.richCompareV .ne wv wv
+  | 33 => return ← Proto.richCompareV .ne kv s1
+  | 34 => return ← Proto.getAttr kv "__class__"
+  | 35 => return boolV (← Builtins.isinstanceN 5 kv (.builtin .«set»))
+  | 36 => return ← Proto.inplaceOp .or kv mp
+  | _ => return boolV (← Proto.richCompare .eq kv mp)
+
+/-- `viewCase k` with the test bodies of `viewImpls`. -/
+@[dyn_sem PyT.viewOps, expose] public def viewOps (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    letI : PyWrites (PyM σ .writes true) Value := writesRecord (callBuiltinWith viewImpls 5000)
+    viewCase (m := PyM σ .writes true) k
+    : PyM σ .writes true Value)
+
+/-- `viewCase k` with this piece's part alone, whose dict views have no bodies. -/
+@[dyn_sem PyT.viewBare, expose] public def viewBare (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    letI : PyWrites (PyM σ .writes true) Value :=
+      writesRecord (callBuiltinWith opsImpls.withNewCheck 5000)
+    viewCase (m := PyM σ .writes true) k
+    : PyM σ .writes true Value)
+
 /-- A mappingproxy of a plain dict `d = {1: 2}` (`allocMappingProxy`): `p[1]` (`0`), `p[9]` (`1`),
 `p[[1]]` (`2`), `type(p)` (`3`), `p == p` (`4`), and `p[3]` after `d[3] = 4` (`5`); and `p[1]` for
 a proxy of an instance of a subclass of `dict` (`6`). -/
@@ -1741,7 +1866,7 @@ def ptEffect : String → Effects.Level
   | "pt.setAny" => .writes
   | "pt.dictPrims" | "pt.setPrims" | "pt.slotInexact" | "pt.popInexact" | "pt.listPrims"
   | "pt.newPrims" | "pt.bindCase" | "pt.setExactCase" => .reads
-  | "pt.oldPrims" | "pt.frozenSeal" | "pt.nativeDepth" | "pt.nativeGapped" | "pt.nextView" | "pt.setUpdateSub" | "pt.classDescr" | "pt.startCheck" | "pt.hooks" | "pt.partHooks" | "pt.staticDescr" | "pt.heapAttrs" | "pt.dictProxyCase" | "pt.cTypeStep" | "pt.stubHooks" => .writes
+  | "pt.oldPrims" | "pt.frozenSeal" | "pt.nativeDepth" | "pt.nativeGapped" | "pt.nextView" | "pt.setUpdateSub" | "pt.classDescr" | "pt.startCheck" | "pt.hooks" | "pt.partHooks" | "pt.staticDescr" | "pt.heapAttrs" | "pt.dictProxyCase" | "pt.viewOps" | "pt.viewBare" | "pt.cTypeStep" | "pt.stubHooks" => .writes
   | "pt.frozenOr" | "pt.frozenAdd" | "pt.objPrims" => .writes
   | "pt.frozenWalk" | "pt.frozenMerge" | "pt.subclassOps" => .calls
   | "pt.subclassContainers" | "pt.seqSlotSub" | "pt.seqSlotCleared" | "pt.strSetSubOps" | "pt.callInst" | "pt.callLevelStep" | "pt.resumeCase" | "pt.resumeDirect" | "pt.resumeNoFit"
@@ -2717,6 +2842,337 @@ info: fault: Strata.Dyn.Exec.Fault.gap "an attribute write to the mutable built-
 -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.heapAttrs(4) ^err.0()"
+
+-- The dict views' operations through their tables, with test bodies (`pt.viewOps`) and without
+-- (`pt.viewBare`).
+/--
+info: StrataPython.Dyn.Sem.Value.int 7
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(0) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.bool true
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(1) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.bool true
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(2) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.bool true
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(3) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.str { s := "and", ascii := true, ascii_eq := _ }
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(4) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.str { s := "rand", ascii := true, ascii_eq := _ }
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(5) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.str { s := "eq", ascii := true, ascii_eq := _ }
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(6) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.str { s := "eq", ascii := true, ascii_eq := _ }
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(7) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "'<' not supported between instances of 'dict_keys' and 'int'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(8) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "bad operand type for unary -: 'dict_keys'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(9) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for +: 'dict_keys' and 'int'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(10) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for *=: 'int' and 'dict_keys'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(11) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.str { s := "ror", ascii := true, ascii_eq := _ }
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(12) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.str { s := "and", ascii := true, ascii_eq := _ }
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(13) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for *=: 'dict_keys' and 'int'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(14) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for *=: 'dict_keys' and 'tuple'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(15) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "the operators of this built-in type are not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(16) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "the operators of this built-in type are not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(17) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "'dict_keys' object is not an iterator", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(18) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "unhashable type: 'dict_keys'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(19) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "the hash of a dict_values is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(20) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.str { s := "mp", ascii := true, ascii_eq := _ }
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(21) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "built-in method dict_keys.mapping is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(22) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.bool false
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(23) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.int 7
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(24) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "object of type 'tuple_iterator' has no len()", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(25) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.bool true
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(26) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.bool false
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(27) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "built-in method dict_keys.__len__ is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewBare(0) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "built-in method dict_keys.__len__ is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewBare(1) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "built-in method dict_keys.__contains__ is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewBare(2) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "built-in method dict_keys.__and__ is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewBare(4) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "built-in method dict_keys.__rand__ is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewBare(5) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "built-in method dict_keys.__eq__ is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewBare(6) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "getset mapping is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewBare(21) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.bool true
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewBare(26) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.bool false
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewBare(27) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "unsupported operand type(s) for @: 'dict_keys' and 'int'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(28) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "built-in method dict_items.__len__ is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(29) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.str { s := "or", ascii := true, ascii_eq := _ }
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(30) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.str { s := "or", ascii := true, ascii_eq := _ }
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(31) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.bool false
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(32) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "built-in method dict_keys.__ne__ is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(33) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.dict_keys)
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(34) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.bool false
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(35) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "the operators of this built-in type are not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(36) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "the operators of this built-in type are not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewOps(37) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "built-in method dict_keys.__ror__ is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewBare(12) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "built-in method dict_keys.__and__ is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewBare(13) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "built-in method dict_items.__len__ is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewBare(29) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.bool false
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewBare(32) ^err.0()"
+
+/--
+info: fault: Strata.Dyn.Exec.Fault.gap "built-in method dict_keys.__ne__ is not modelled yet"
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.viewBare(33) ^err.0()"
 
 -- A mappingproxy of a plain dict (`pt.dictProxyCase`).
 /--

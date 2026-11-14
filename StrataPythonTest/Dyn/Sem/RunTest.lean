@@ -83,6 +83,14 @@ def hookPart : Impls :=
   ["type.<subscripting the class type>", "object.<union args>"]
 #guard Impls.overlaps [hookPart, opsImpls] == []
 
+/-- A part that fills only the getset hook of `dict_keys`' `mapping`. -/
+def getsetPart : Impls :=
+  { method := fun t n =>
+      if t == .«dict_keys» && n == getsetHook "mapping" then opsImpls.function .len else none }
+
+-- The check finds two parts that fill the same getset hook.
+#guard Impls.overlaps [getsetPart, getsetPart] == ["dict_keys.<getset mapping>"]
+
 /-- CPython 3.12's C recursion limit, as lists nested 9,995 deep compare and 9,996 deep raise
 `RecursionError` (measured on 3.12.15). -/
 def cpythonCLimit : Nat := 9995

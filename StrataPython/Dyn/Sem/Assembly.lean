@@ -132,7 +132,8 @@ def Assembly.parts : List Impls := [opsImpls]
 def Assembly.impls : Impls := (Assembly.parts.foldr Impls.join {}).withNewCheck
 
 /-- The keys that two of `parts` both fill: the built-in functions, the names of every built-in
-type's attribute table, and the hooks `typeGetItemHook` and `unionArgsHook`.  A native
+type's attribute table, the hooks `typeGetItemHook` and `unionArgsHook`, and the getset hook
+(`getsetHook`) of every getset of those tables.  A native
 function's key and a module's import hook (`importHook`) belong to the piece that makes them,
 since their names can't be listed here. -/
 def Impls.overlaps (parts : List Impls) : List String :=
@@ -140,7 +141,9 @@ def Impls.overlaps (parts : List Impls) : List String :=
   let fns := Builtin.allConstants.toList.filterMap fun b =>
     if count (fun p => (p.function b).isSome) > 1 then some b.info.name else none
   let keys := Builtin.allConstants.toList.flatMap (fun t => t.ownNames.toList.map (t, ·.1)) ++
-    [(.type, typeGetItemHook), (.object, unionArgsHook)]
+    [(.type, typeGetItemHook), (.object, unionArgsHook)] ++
+    Builtin.allConstants.toList.flatMap fun t =>
+      (t.ownNames.toList.filter (·.2 == .getset)).map fun (n, _) => (t, getsetHook n)
   let methods := keys.filterMap fun (t, n) =>
     if count (fun p => (p.method t n).isSome) > 1 then some s!"{t.info.name}.{n}" else none
   fns ++ methods

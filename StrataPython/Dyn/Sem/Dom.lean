@@ -539,6 +539,11 @@ that is not a union.  `isinstance` calls it for a second argument that is an obj
 whose class has no `__instancecheck__`, as a union's class has none. -/
 def unionArgsHook : String := "<union args>"
 
+/-- The method name under which a piece gives the body of the getset `name` of a dict view's class
+(`mapping`): the value that reading it on an instance gives.  A call of the getset descriptor
+itself resolves to the plain name, so it never reaches this body. -/
+def getsetHook (name : String) : String := s!"<getset {name}>"
+
 /-- The bodies of the built-in callables, which `Assembly` joins from each piece's part: by
 built-in function, by built-in type and method name, and by native function's key. -/
 structure Impls : Type 2 where

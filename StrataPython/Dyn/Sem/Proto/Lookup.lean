@@ -309,6 +309,20 @@ def classIs [PyReads m V] (v : V) (b : Builtin) : m Bool := do
   | some (.builtin b') => pure (b' == b)
   | _ => pure false
 
+/-- Whether the built-in is a class of dict views: `dict_keys`, `dict_values` or `dict_items`. -/
+def _root_.StrataPython.Dyn.Sem.Builtin.isDictView : Builtin → Bool
+  | .«dict_keys» | .«dict_values» | .«dict_items» => true
+  | _ => false
+
+/-- Whether `v` is an object whose class is exactly a class of dict views (never a subclass, which
+CPython forbids): a dict view, whose operators are its class's own table entries, which a part
+fills, as CPython's C slots. -/
+def isTableDispatched [PyReads m V] (v : V) : m Bool := do
+  if (← PyPure.immView v).isSome || (← PyPure.isUndef v) then return false
+  match ← PyPure.immView (← PyReads.classOf v) with
+  | some (.builtin t) => return t.isDictView
+  | _ => return false
+
 /-- The value of the getset or member `name` of the built-in type `t` on `obj`, for the ones that
 this piece models; a gap for the others. -/
 def builtinGetsetGet [PyReads m V] (t : Builtin) (name : String) (obj : V) : m V := do
@@ -828,6 +842,12 @@ def descrGetN [PyCalls m V] : Nat → V → Option V → V → m V
       | .tpNew => PyPure.modelInvariant "a type's tp_new outside a class call"
       | .getset | .member => if noObj then pure d else do
           descrCheck (PyPure.imm (m := m) (.builtin t)) name obj
+          -- A getset of a dict view's class (`mapping`) is a piece's body under its hook name,
+          -- which no call of the getset descriptor reaches.
+          if k == .getset && t.isDictView then
+            return ← PyCalls.callBuiltin
+              (PyPure.imm (m := m) (.bound obj t (getsetHook name) .method))
+              (PyPure.imm (m := m) (.tuple #[])) (← PyPure.allocDict)
           -- `type_get_doc`: a class's own `__doc__`, bound by its `__get__` when it has one.
           -- `type.__new__` always puts `__doc__` into a class's namespace, so a class without it
           -- is one that a piece made, whose doc CPython's `type_ready` may give.

@@ -363,7 +363,8 @@ def pyLen [PyCalls m V] (v : V) : m Nat := do
   | none => raiseBuiltin "TypeError" s!"object of type '{← typeName v}' has no len()"
   | some f =>
     if let some (.descr b "__len__" _) ← PyPure.immView f then
-      if (← builtinBase? v) != some b then
+      -- A dict view's `__len__` is its class's table entry, which a part fills.
+      if (← builtinBase? v) != some b || (← isTableDispatched v) then
         return ← lenResult (← callFound "__len__" f v t #[] (← PyPure.allocDict))
       match ← builtinLen? v with
       | some n => return n
@@ -598,7 +599,7 @@ def containsStep [PyCalls m V] (x s : V) (st : Option V) : m (LoopStep V Bool) :
       -- is not one.
       let isIter := (← PyReads.objView s) matches some (.iter _) &&
         (← lookupType (← PyReads.classOf s) "__next__").isSome
-      if !(← isUserObject s) && !isIter then return .done (← containsCore x s)
+      if !(← dunderDispatched s) && !isIter then return .done (← containsCore x s)
       let t ← PyReads.classOf s
       if let some f ← lookupType t "__contains__" then
         -- `slot_sq_contains` binds first: a `None` that the binding gives makes it no container.
