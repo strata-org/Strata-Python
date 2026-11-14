@@ -22,6 +22,7 @@ every user dunder but `__repr__` and `__init__` an `ev(name)` call as its first 
 and order of user calls is part of the output.
 """
 
+import re
 from dataclasses import dataclass, field
 
 # ---------------------------------------------------------------------------------------------
@@ -46,6 +47,9 @@ class Case:
     ident: str = ""
     entries: list = field(default_factory=list)
     receiver: str = ""
+    # The built-in functions and methods that the case calls by name, as `<type>.<name>` or a
+    # function's name; CPython's run must show each of them (`cpython_calls.py`).
+    calls: list = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -199,7 +203,7 @@ OPERATIONS = [
        entry="__iter__"),
     Op("star_args", "(lambda *a: a)(*{x})", "__iter__", "iter([7])", ["return iter([5])"],
        {"tuple": None, "list": None, "str": None}, "containers", entry="__iter__"),
-    Op("star_kwargs", "(lambda **k: sorted(k.items()))(**{x})", "keys", "['a']",
+    Op("star_kwargs", "(lambda **k: k)(**{x})", "keys", "['a']",
        ["return ['k']"], {"dict": None}, "containers", entry="keys"),
     Op("dict_display", "{**{x}}", "keys", "['a']", ["return ['k']"], {"dict": None},
        "containers", entry="keys"),
@@ -409,8 +413,48 @@ def a1_cases():
                                   op.name, lines, classes, setup,
                                   a1_expect(op, base, lk, rk), ident,
                                   [(base, op.entry)] if op.entry and lk in ("exact", "sub")
-                                  else []))
+                                  and (op.name, base, lk) not in FAST_SKIPS
+                                  else [],
+                                  calls=op_calls(op) if lk in ("exact", "sub") and
+                                  rk in ("exact", "sub") else []))
     return cases
+
+
+def op_calls(op):
+    """The built-in function or class that the operation `op` calls by name, if any: `len` for
+    `len({x})`, `list.__new__` for `list({x})`."""
+    m = re.match(r"(?:sorted\()?(\w+)\(", op.expr)
+    if not m:
+        return []
+    name = m.group(1)
+    if name in ("list", "tuple", "dict", "set", "int", "float", "str", "bool"):
+        return [f"{name}.__new__"]
+    if name in ("len", "repr", "format", "hash", "abs", "next", "iter", "sorted", "sum", "max",
+                "any", "isinstance", "print"):
+        return [name]
+    return []
+
+
+# The (operation, type, kind) whose operand CPython 3.12 handles on a fast path, without the dunder
+# entry that the operation reaches otherwise, so the case gives no evidence for that entry: an
+# exact `int` or `str` in `format` (`PyObject_Format`), an exact `str` in `str()` and `print`
+# (`PyObject_Str`), an exact `int` in `int()` and `float` in `float()`, any `int` as an index
+# (`_PyNumber_Index`), `True` in a truth test, an exact `list` or `tuple` read by `list_extend` and
+# `PySequence_Tuple`, any frozenset merged by `set_merge`, any dict with `dict.__iter__` merged by
+# `dict_merge`.
+FAST_SKIPS = (
+    {(op, t, "exact") for op in ("format", "fstring") for t in ("int", "str")}
+    | {(op, "str", "exact") for op in ("str", "print")}
+    | {("int", "int", "exact"), ("float", "float", "exact")}
+    | {("index", t, k) for t in ("int", "bool") for k in ("exact", "sub")}
+    | {(op, "bool", "exact") for op in ("not", "truthy", "bool")}
+    | {(op, t, "exact") for op in ("star_list", "star_args", "list_of", "sorted", "tuple_of")
+       for t in ("list", "tuple")}
+    | {(op, "frozenset", k) for op in ("star_set", "set_of", "list_of", "sorted")
+       for k in ("exact", "sub")}
+    | {(op, "dict", k) for op in ("star_kwargs", "dict_display", "dict_of")
+       for k in ("exact", "sub")}
+)
 
 
 # Operations that may return their own operand; the case prints `r is x` for a subclass operand.
@@ -772,13 +816,16 @@ def a7_cases():
     return cases
 
 
-def table_cases(prefix, group, axis, table):
+def table_cases(prefix, group, axis, table, calls=None, entries=None):
+    """The cases of a table of `name: (setup, operation, expected outcome)`, with the names that
+    each case calls (`calls`) and the dunder entries that its operation reaches (`entries`)."""
     out = []
     for name, (setup, op, expect) in table.items():
         classes = [s for s in setup if s.startswith("class ")]
         rest = [s for s in setup if not s.startswith("class ")]
         out.append(Case(f"{prefix}_{name}", group, axis, name, name, op, classes, rest,
-                        expect))
+                        expect, entries=(entries or {}).get(name, []),
+                        calls=(calls or {}).get(name, [])))
     return out
 
 
@@ -904,7 +951,7 @@ def method_cases():
                               f"{t}.{m}", [f"r = {call}"], list(cl), list(st),
                               METHOD_EXPECT.get((t, m, "self-" + sk), "result"),
                               "x" if sk.startswith("sub") else "",
-                              [(t, m)] if sk in ("exact", "sub") else [], "x"))
+                              [], "x", calls=[f"{t}.{m}"] if sk != "sub-over-other" else []))
         if akind:
             first, rest = split_first(args)
             sub, subcls, user = obj_arg(first) if akind == "obj" else ARG_KINDS[akind]
@@ -918,7 +965,8 @@ def method_cases():
                     continue
                 cases.append(Case(f"m_{t}_{m}_{ak}", "methods", "A1", ak, f"{t}.{m}",
                                   [f"r = x.{m}({aexpr}{rest})"], acl, [f"x = {lit}"],
-                                  METHOD_EXPECT.get((t, m, ak), exp), receiver="x"))
+                                  METHOD_EXPECT.get((t, m, ak), exp), receiver="x",
+                                  calls=[f"{t}.{m}"]))
         # A8: binding errors.
         extra = (args + ", " if args else "") + "1, 2, 3"
         cases.append(Case(f"m_{t}_{m}_too_many", "methods", "A8", "too-many", f"{t}.{m}",
@@ -1096,6 +1144,369 @@ FAST = {
 }
 
 
+# ---------------------------------------------------------------------------------------------
+# Direct calls: each method of a built-in type called by name, on a receiver of that type, so that
+# every entry of the model's tables is reached at least once, also those that no syntax reaches
+# (`int.__rsub__`, `dict_keys.isdisjoint`). The names come from `vars(T)` of CPython 3.12.
+
+# A receiver of each type, and the arguments for a one-argument method: an element (for
+# `__contains__`, `index`, `count`) and another value of a fitting kind.
+RECEIVERS = {
+    "int": ("3", "2"), "bool": ("True", "False"), "float": ("1.5", "2.0"),
+    "str": ("'ab'", "'b'"), "bytes": ("b'ab'", "b'b'"), "tuple": ("(1, 2)", "(3,)"),
+    "list": ("[2, 1]", "[3]"), "dict": ("{'a': 1}", "{'b': 2}"),
+    "set": ("{1, 2}", "{2, 3}"), "frozenset": ("frozenset({1, 2})", "frozenset({2, 3})"),
+    "range": ("range(3)", "range(2)"), "object": ("object()", "object()"),
+    "dict_keys": ("{'a': 1}.keys()", "{'a', 'b'}"), "dict_items": ("{'a': 1}.items()", "{('a', 1)}"),
+    "dict_values": ("{'a': 1}.values()", "1"),
+    "list_iterator": ("iter([1, 2])", "1"), "tuple_iterator": ("iter((1, 2))", "1"),
+    "str_ascii_iterator": ("iter('ab')", "1"), "str_iterator": ("iter('\\u00e9b')", "1"),
+    "bytes_iterator": ("iter(b'ab')", "1"), "range_iterator": ("iter(range(3))", "1"),
+    "longrange_iterator": ("iter(range(2 ** 70, 2 ** 70 + 2))", "1"),
+    "set_iterator": ("iter({1, 2})", "1"),
+    "dict_keyiterator": ("iter({'a': 1})", "1"), "dict_valueiterator": ("iter({'a': 1}.values())", "1"),
+    "dict_itemiterator": ("iter({'a': 1}.items())", "1"),
+    "list_reverseiterator": ("reversed([1, 2])", "1"),
+    "dict_reversekeyiterator": ("reversed({'a': 1})", "1"),
+    "dict_reversevalueiterator": ("reversed({'a': 1}.values())", "1"),
+    "dict_reverseitemiterator": ("reversed({'a': 1}.items())", "1"),
+    "reversed": ("reversed((1, 2))", "1"), "enumerate": ("enumerate('ab')", "1"),
+    "zip": ("zip('ab', [1, 2])", "1"),
+    "BaseException": ("BaseException('a', 1)", "'note'"), "Exception": ("Exception('a')", "'n'"),
+    "ValueError": ("ValueError('a')", "'n'"), "KeyError": ("KeyError('k')", "'n'"),
+    "OSError": ("OSError(2, 'no')", "'n'"), "StopIteration": ("StopIteration(5)", "'n'"),
+    "SystemExit": ("SystemExit(3)", "'n'"), "NameError": ("NameError('x', name='x')", "'n'"),
+    "AttributeError": ("AttributeError('x', name='a', obj=1)", "'n'"),
+    "ImportError": ("ImportError('x', name='m')", "'n'"),
+    "BaseExceptionGroup": ("BaseExceptionGroup('g', [ValueError(1)])", "'n'"),
+    "UnicodeDecodeError": ("UnicodeDecodeError('utf-8', b'x', 0, 1, 'bad')", "'n'"),
+    "UnicodeEncodeError": ("UnicodeEncodeError('ascii', 'x', 0, 1, 'bad')", "'n'"),
+    "property": ("property(lambda s: 1)", "lambda s: 2"),
+    "classmethod": ("classmethod(lambda c: 1)", "1"), "staticmethod": ("staticmethod(lambda: 1)", "1"),
+    "type": ("int", "str"), "super": ("super(int, 3)", "1"), "slice": ("slice(1, 2)", "1"),
+}
+
+# Methods left out: their result depends on the machine or the interpreter's internals.
+DIRECT_SKIP = {"__sizeof__", "__reduce__", "__reduce_ex__", "__getstate__", "__setstate__",
+               "__subclasshook__", "__dir__", "__getnewargs__", "__getnewargs_ex__",
+               "__del__", "__instancecheck__", "__subclasscheck__", "mro", "__subclasses__",
+               "__prepare__", "__new__", "__init__", "__init_subclass__", "__class_getitem__",
+               # `property.__set_name__` returns None and changes nothing visible in 3.12.
+               "__set_name__",
+               # `bytes.__buffer__` returns a memoryview, whose repr shows its address.
+               "__buffer__"}
+
+# Direct calls whose result shows an address: only the result's type is observed.
+ADDRESS_RESULTS = {("object", "__repr__"), ("object", "__str__"), ("object", "__format__"),
+                   ("classmethod", "__repr__"), ("staticmethod", "__repr__")}
+
+UNARY = {"__neg__", "__pos__", "__abs__", "__invert__", "__bool__", "__len__", "__hash__",
+         "__repr__", "__str__", "__iter__", "__reversed__", "__int__", "__float__", "__index__",
+         "__trunc__", "__floor__", "__ceil__", "__length_hint__", "__next__", "__bytes__",
+         "__copy__", "__round__", "__complex__", "__float__"}
+
+
+# Direct calls whose CPython outcome is an exception, because that is what the method does on
+# its receiver: `object()` has no `__dict__`, `int` is immutable, the property has no deleter.
+DIRECT_EXPECT = {
+    ("object", "__setattr__"): "raises:AttributeError",
+    ("object", "__delattr__"): "raises:AttributeError",
+    ("type", "__setattr__"): "raises:TypeError", ("type", "__delattr__"): "raises:TypeError",
+    ("property", "__delete__"): "raises:AttributeError",
+    ("property", "__set__"): "raises:AttributeError",
+}
+
+# Arguments for the methods that the rules of `direct_args` don't fit.
+DIRECT_ARGS = {
+    ("int", "from_bytes"): "b'\\x01\\x02', 'big'", ("float", "__getformat__"): "'double'",
+    ("float", "fromhex"): "'0x1p3'", ("str", "__mod__"): "()", ("bytes", "__mod__"): "()",
+    ("str", "center"): "6, '*'", ("str", "ljust"): "4", ("str", "rjust"): "4",
+    ("str", "replace"): "'a', 'z'", ("str", "translate"): "{97: 'z'}", ("str", "zfill"): "5",
+("bytes", "center"): "6", ("bytes", "fromhex"): "'6162'",
+    ("bytes", "ljust"): "4", ("bytes", "rjust"): "4", ("bytes", "replace"): "b'a', b'z'",
+    ("bytes", "translate"): "None, b'a'", ("bytes", "zfill"): "5",
+    ("bytes", "maketrans"): "b'ab', b'cd'", ("set", "add"): "3",
+    ("BaseExceptionGroup", "derive"): "[KeyError(2)]",
+    ("BaseExceptionGroup", "split"): "ValueError", ("BaseExceptionGroup", "subgroup"): "ValueError",
+    ("property", "__set__"): "1, 2", ("staticmethod", "__call__"): "",
+    ("type", "__call__"): "'7'", ("slice", "indices"): "5",
+}
+
+
+def direct_args(t, name):
+    """The arguments of the direct call of `t.name`, or `None` to leave it out."""
+    recv, other = RECEIVERS[t]
+    if name in DIRECT_SKIP:
+        return None
+    if (t, name) in DIRECT_ARGS:
+        return DIRECT_ARGS[(t, name)]
+    if name in UNARY:
+        return ""
+    if name in ("__contains__", "index", "count", "remove", "discard", "__getitem__"):
+        elem = {"str": "'a'", "bytes": "b'a'", "dict": "'a'", "dict_keys": "'a'",
+                "dict_items": "('a', 1)", "dict_values": "1"}.get(t, "1")
+        if name == "__getitem__" and t in ("str", "bytes", "tuple", "list", "range"):
+            elem = "0"
+        return elem
+    if name in ("__setitem__",):
+        return "0, 9" if t == "list" else "'z', 9"
+    if name == "__delitem__":
+        return "0" if t == "list" else "'a'"
+    if name == "__format__":
+        return "''"
+    if name in ("__getattribute__", "__delattr__"):
+        return "'__class__'" if name == "__getattribute__" else "'tag'"
+    if name == "__setattr__":
+        return "'tag', 1"
+    if name in ("__set_name__",):
+        return "int, 'n'"
+    if name in ("__get__",):
+        return "1, int"
+    if name in ("setter", "getter", "deleter"):
+        return other
+    if name in ("update", "difference_update", "intersection_update",
+                "symmetric_difference_update", "union", "intersection", "difference",
+                "symmetric_difference", "issubset", "issuperset", "isdisjoint", "extend",
+                "append", "join", "split", "find", "startswith", "endswith", "partition",
+                "rpartition", "rsplit", "rfind", "rindex", "removeprefix", "removesuffix",
+                "strip", "lstrip", "rstrip", "fromkeys", "get", "setdefault", "pop",
+                "insert"):
+        if t in ("set", "frozenset", "dict", "list", "str", "bytes", "dict_keys", "dict_items"):
+            if name == "insert":
+                return "0, 9"
+            if name in ("get", "setdefault", "pop") and t == "dict":
+                return "'a'"
+            if name == "pop" and t in ("set", "list"):
+                return ""
+            if name in ("index", "rindex", "find", "rfind", "split", "rsplit", "partition",
+                        "rpartition", "startswith", "endswith", "strip", "lstrip", "rstrip",
+                        "removeprefix", "removesuffix", "join") and t in ("str", "bytes"):
+                return {"join": "['x', 'y']" if t == "str" else "[b'x', b'y']"}.get(name, other)
+            return other
+    if name == "add_note":
+        return other
+    if name == "with_traceback":
+        return "None"
+    if name in ("__pow__", "__rpow__", "__rmul__", "__imul__", "__mul__"):
+        return "2"
+    if name == "__rmod__":
+        return {"str": "'<%s>'", "bytes": "b'<%s>'"}.get(t, other)
+    if name == "maketrans":
+        return "'ab', 'cd'"
+    if name == "format_map":
+        return "{}"
+    if name.startswith("__") and name.endswith("__"):
+        return other
+    return None
+
+
+def direct_cases():
+    import builtins
+    cases = []
+    for t in RECEIVERS:
+        cls = getattr(builtins, t, None)
+        if cls is None:
+            cls = type(eval(RECEIVERS[t][0]))
+        for name in sorted(vars(cls)):
+            attr = vars(cls)[name]
+            if not callable(getattr(cls, name, None)) or isinstance(attr, type) or \
+                    type(attr).__name__ in ("getset_descriptor", "member_descriptor"):
+                continue
+            args = direct_args(t, name)
+            if args is None and not (name.startswith("__") and name.endswith("__")):
+                args = ""
+            if args is None:
+                continue
+            recv = RECEIVERS[t][0]
+            # Called through the type, so that a method that the receiver's class shadows (a
+            # class's `__delattr__` is `type`'s, not the instance's) is the one named.
+            if type(attr).__name__ in ("classmethod_descriptor", "staticmethod", "classmethod"):
+                op = [f"r = type(x).{name}({args})"]
+            else:
+                op = [f"r = type(x).{name}(x{', ' + args if args else ''})"]
+            if name == "add_note":
+                op = [f"x.add_note({args})", "r = x.__notes__"]
+            if (t, name) in ADDRESS_RESULTS:
+                op = [f"r = type(type(x).{name}(x{', ' + args if args else ''})).__name__"]
+            if name == "__hash__":
+                # The hash of a str or bytes depends on the hash seed, of an object on its address.
+                op = [f"r = type(x).__hash__(x) == hash(x)"]
+            cases.append(Case(f"d_{t}_{name}", "direct", "direct", "direct",
+                              f"{t}.{name}", op, [], [f"x = {recv}"],
+                              DIRECT_EXPECT.get((t, name), "result"), receiver="x",
+                              calls=[f"{t}.{name}"]))
+    return cases
+
+
+def defining(cls, name):
+    """`<type>.<name>` for the class in the MRO of `cls` that defines `name`."""
+    for c in cls.__mro__:
+        if name in vars(c):
+            return f"{c.__qualname__}.{name}"
+    return f"{cls.__qualname__}.{name}"
+
+
+# Calls of built-in classes and functions that the other groups don't make inside an operation:
+# every built-in exception class, and the class statement itself.
+def constructor_cases():
+    import builtins
+    cases = []
+    for name in sorted(vars(builtins)):
+        cls = vars(builtins)[name]
+        # `EnvironmentError` and `IOError` are other names of `OSError`.
+        if isinstance(cls, type) and issubclass(cls, BaseException) and cls.__name__ == name:
+            args = {"UnicodeDecodeError": "'utf-8', b'x', 0, 1, 'bad'",
+                    "UnicodeEncodeError": "'ascii', 'x', 0, 1, 'bad'",
+                    "UnicodeTranslateError": "'x', 0, 1, 'bad'",
+                    "BaseExceptionGroup": "'g', [ValueError(1)]",
+                    "ExceptionGroup": "'g', [ValueError(1)]",
+                    # The second argument of a syntax error is its location.
+                    "SyntaxError": "'a', ('f', 1, 2, 'x')",
+                    "IndentationError": "'a', ('f', 1, 2, 'x')",
+                    "TabError": "'a', ('f', 1, 2, 'x')"}.get(name, "'a', 1")
+            cases.append(Case(f"c_{name}", "constructors", "direct", "constructor", name,
+                              [f"r = {name}({args})", "r = (type(r).__name__, r.args, str(r))"],
+                              expect="result",
+                              calls=[defining(cls, "__new__"), defining(cls, "__init__")]))
+    return cases
+
+
+CALLS = {
+    "class_statement": ([], ["class C:\n    x = 1", "r = C.x"], "result"),
+    "all": ([], ["r = (all([1, 0]), all([]))"], "result"),
+    "callable": ([], ["r = (callable(len), callable(1))"], "result"),
+    "divmod": ([], ["r = (divmod(7, 2), divmod(-7.5, 2))"], "result"),
+    "hex": ([], ["r = (hex(255), hex(-1))"], "result"),
+    "issubclass": ([], ["r = (issubclass(bool, int), issubclass(int, (str, object)))"], "result"),
+    "setattr": (["class C:\n    pass\n"], ["c = C()", "setattr(c, 'a', 1)", "r = c.a"], "result"),
+    "type_or": ([], ["r = (repr(int | str), repr(type.__or__(int, str)), repr(type.__ror__(str, int)))"],
+                "result"),
+    "type_repr": ([], ["r = (repr(int), repr(None), repr(...), repr(NotImplemented))"], "result"),
+    "class_getitem": ([], ["r = (repr(list[int]), repr(dict[str, int]), repr(tuple[int, ...]), repr(set[int]), repr(frozenset[int]))"],
+                      "result"),
+    "maketrans": ([], ["r = sorted(str.maketrans('ab', 'cd').items())"], "result"),
+    "set_iterator": ([], ["it = iter({1, 2})", "r = (next(it), it.__length_hint__())"], "result"),
+    "callable_iterator": (["def f():\n    return 1\n"],
+                          ["it = iter(f, 1)", "r = (iter(it) is it, next(it, 'end'))"], "result"),
+    "seq_iterator": (["class G:\n    def __getitem__(self, i):\n        if i > 1:\n            raise IndexError(i)\n        return i\n    def __repr__(self):\n        return 'G()'\n"],
+                     ["it = iter(G())", "r = (iter(it) is it, it.__length_hint__(), next(it), list(it))"],
+                     "result"),
+    "init_subclass": (["class B:\n    def __init_subclass__(cls, **kw):\n        ev('B.__init_subclass__')\n        super().__init_subclass__(**kw)\n"],
+                      ["class C(B):\n    pass", "r = C.__name__"], "result"),
+    "descriptor_types": ([], ["p = property(lambda s: 1)", "c = classmethod(len)", "s = staticmethod(len)",
+                              "r = (type(p).__name__, type(c).__name__, type(s).__name__, s(\"ab\"))"],
+                         "result"),
+    "super_call": (["class B:\n    def f(self):\n        return 'B.f'\n",
+                    "class C(B):\n    def f(self):\n        return super().f()\n"],
+                   ["r = (C().f(), super(C, C()).f())"], "result"),
+    "slice_repr": ([], ["r = repr(slice(1, None, 2))"], "result"),
+    "type_three_args": ([], ["C = type('C', (), {'a': 1, '__module__': '__main__'})", "r = (C.__name__, C.a, C.__bases__)"],
+                        "result"),
+    "object_setattr": (["class C:\n    pass\n"],
+                       ["c = C()", "object.__setattr__(c, 'a', 1)", "b = c.a", "object.__delattr__(c, 'a')",
+                        "r = (b, hasattr(c, 'a'))"], "result"),
+    "bytes_new": ([], ["r = (bytes([65, 66]), bytes(2), bytes('ab', 'ascii'))"], "result"),
+    "enumerate_new": ([], ["r = list(enumerate('ab', 1))"], "result"),
+    "property_set_name": ([], ["class C:\n    p = property(lambda s: 1)", "r = C().p"], "result"),
+    "bool_invert": ([], ["r = (~True, ~False)"], "result"),
+    "frozenset_ops": ([], ["a = frozenset({1, 2})", "b = frozenset({2, 3})",
+                           "r = (a | b, a & b, a - b, a ^ b, a < b, a <= a, a == b, a != b, a > b, a >= a, len(a), 1 in a, hash(a) == hash(frozenset({2, 1})))"],
+                      "result"),
+    "set_ops": ([], ["a = {1, 2}", "b = {2, 3}",
+                     "r = (a | b, a & b, a - b, a ^ b, a < b, a <= a, a == b, a != b, a > b, a >= a, len(a), 1 in a)"],
+                "result"),
+}
+
+
+# What each case of `CALLS` calls by name, and the dunder entries it reaches implicitly.
+CALLS_CALLS = {
+    "object_setattr": ["object.__setattr__", "object.__delattr__"],
+    "type_three_args": ["type.__new__", "type.__init__"],
+    "class_statement": ["__build_class__"], "all": ["all"], "callable": ["callable"],
+    "divmod": ["divmod"], "hex": ["hex"], "issubclass": ["issubclass"], "setattr": ["setattr"],
+    "type_or": ["type.__or__", "type.__ror__"], "maketrans": ["str.maketrans"],
+    "bytes_new": ["bytes.__new__"], "enumerate_new": ["enumerate.__new__"],
+}
+CALLS_ENTRIES = {
+    "type_repr": [("type", "__repr__"), ("NoneType", "__repr__"), ("ellipsis", "__repr__"),
+                  ("NotImplementedType", "__repr__")],
+    "class_getitem": [(t, "__class_getitem__") for t in ("list", "dict", "tuple", "set",
+                                                          "frozenset")],
+    "callable_iterator": [("callable_iterator", "__iter__"), ("callable_iterator", "__next__")],
+    "seq_iterator": [("iterator", "__iter__"), ("iterator", "__next__"),
+                     ("iterator", "__length_hint__")],
+    "init_subclass": [("object", "__init_subclass__")],
+    "property_set_name": [("property", "__set_name__")],
+    "bool_invert": [("bool", "__invert__")],
+}
+
+
+# Syntax that no other group reaches: the remaining operators, comprehensions, displays,
+# exceptions and `with`, `assert`, conversions in f-strings, slices with steps, `global`.
+SYNTAX = {
+    "isub": ([], ["r = 7", "r -= 2"], "result"), "imul": ([], ["r = 7", "r *= 2"], "result"),
+    "idiv": ([], ["r = 7", "r /= 2"], "result"), "ifloordiv": ([], ["r = 7", "r //= 2"], "result"),
+    "imod": ([], ["r = 7", "r %= 4"], "result"), "ipow": ([], ["r = 7", "r **= 2"], "result"),
+    "ilshift": ([], ["r = 7", "r <<= 2"], "result"), "irshift": ([], ["r = 7", "r >>= 1"], "result"),
+    "iand": ([], ["r = 7", "r &= 3"], "result"), "ixor": ([], ["r = 7", "r ^= 3"], "result"),
+    "matmul": (["class M:\n    def __matmul__(self, o):\n        return 'mm'\n    def __rmatmul__(self, o):\n        return 'rmm'\n    def __imatmul__(self, o):\n        return 'imm'\n    def __repr__(self):\n        return 'M()'\n"],
+               ["m = M()", "a = m @ 1", "b = 1 @ m", "m @= 2", "r = (a, b, m)"], "result"),
+    "matmul_int": ([], ["r = 2 @ 3"], "raises:TypeError"),
+    "uadd": ([], ["r = (+3, +1.5, +True)"], "result"),
+    "comparisons": ([], ["r = (1 <= 2, 'a' <= 'b', [1] <= [2], (1,) <= (0,), 2 > 1, 'b' > 'a')"],
+                    "result"),
+    "not_in": ([], ["r = (1 not in [1, 2], 'z' not in 'ab', 3 not in {1: 2})"], "result"),
+    "set_comp": ([], ["r = {v % 3 for v in range(7) if v > 1}"], "result"),
+    "dict_comp": ([], ["r = {v: v * v for v in range(4) if v != 2}"], "result"),
+    "list_comp_nested": ([], ["r = [(a, b) for a in range(3) for b in 'xy' if a != 1]"], "result"),
+    "displays": ([], ["x = [2, 3]", "d = {'b': 2}",
+                      "r = ([1, *x], (*x,), (0, *x), {1, *x}, {'a': 1, **d}, {'k%d' % i: i for i in range(2)})"],
+                 "result"),
+    "dict_display_long": ([], ["r = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6, 'g': 7, 'h': 8, 'i': 9, 'j': 10, 'k': 11, 'l': 12, 'm': 13, 'n': 14, 'o': 15, 'p': 16, 'q': 17, 'r': 18}"],
+                          "result"),
+    # The exceptions are caught in the operation, so that the case gives a result and its
+    # instructions count for coverage; the chain shows in the result.
+    "raise": ([], ["try:\n    raise ValueError('v')\nexcept ValueError as e:\n    r = (type(e).__name__, e.args)"],
+              "result"),
+    "raise_from": ([], ["try:\n    try:\n        raise KeyError('k')\n    except KeyError as e:\n        raise ValueError('v') from e\nexcept ValueError as e:\n    r = (type(e.__cause__).__name__, type(e.__context__).__name__, e.__suppress_context__)"],
+                   "result"),
+    "raise_context": ([], ["try:\n    try:\n        raise KeyError('k')\n    except KeyError:\n        raise ValueError('v')\nexcept ValueError as e:\n    r = (e.__cause__, type(e.__context__).__name__, e.__suppress_context__)"],
+                      "result"),
+    "bare_raise": ([], ["try:\n    try:\n        raise KeyError('k')\n    except KeyError:\n        raise\nexcept KeyError as e:\n    r = str(e)"],
+                   "result"),
+    "try_else_finally": ([], ["r = []", "try:\n    r.append(1)\nexcept ValueError:\n    r.append(2)\nelse:\n    r.append(3)\nfinally:\n    r.append(4)"],
+                         "result"),
+    "except_tuple": ([], ["r = []", "for e in (KeyError, IndexError, ValueError):\n    try:\n        raise e('x')\n    except (KeyError, IndexError) as x:\n        r.append(type(x).__name__)\n    except Exception:\n        r.append('other')"],
+                     "result"),
+    # The function is defined in the operation, so that its instructions are the template's.
+    "finally_completions": ([], ["def f(n):\n    for i in range(3):\n        try:\n            if n == 0:\n                return 'ret'\n            if n == 1:\n                break\n            if n == 2:\n                continue\n            if n == 3:\n                raise ValueError('v')\n        finally:\n            log.append(n)\n    return 'end'",
+                                 "log = []", "r = []", "for n in range(4):\n    try:\n        r.append(f(n))\n    except ValueError:\n        r.append('raised')", "r.append(log)"],
+                            "result"),
+    "with_in_finally": (["class CM:\n    def __enter__(self):\n        return self\n    def __exit__(self, t, v, tb):\n        return False\n    def __repr__(self):\n        return 'CM()'\n"],
+                        ["r = []", "try:\n    try:\n        raise KeyError('k')\n    finally:\n        with CM():\n            r.append('in')\nexcept KeyError as e:\n    r.append(type(e).__name__)"],
+                        "result"),
+    "reraise_in_finally": (["class CM:\n    def __enter__(self):\n        return self\n    def __exit__(self, t, v, tb):\n        return True\n    def __repr__(self):\n        return 'CM()'\n"],
+                           ["def f():\n    try:\n        raise KeyError('pending')\n    finally:\n        with CM():\n            raise",
+                            "try:\n    f()\n    r = 'no'\nexcept KeyError as e:\n    r = str(e)"], "result"),
+        "displays_after_star": ([], ["x = [2, 3]", "r = ([1, *x, 4], sorted({1, *x, 5}))"], "result"),
+    "with": (["class CM:\n    def __enter__(self):\n        return 'in'\n    def __exit__(self, t, v, tb):\n        return t is KeyError\n    def __repr__(self):\n        return 'CM()'\n"],
+             ["r = []", "with CM() as v:\n    r.append(v)", "with CM():\n    raise KeyError('swallowed')", "r.append('after')"],
+             "result"),
+    "with_raises": (["class CM:\n    def __enter__(self):\n        return self\n    def __exit__(self, t, v, tb):\n        return False\n    def __repr__(self):\n        return 'CM()'\n"],
+                    ["with CM():\n    raise ValueError('out')"], "raises:ValueError"),
+    "assert": ([], ["assert 1 == 1", "try:\n    assert 1 == 2, 'no'\nexcept AssertionError as e:\n    r = e.args"],
+               "result"),
+    "del_attr": (["class C:\n    pass\n"], ["c = C()", "c.a = 1", "del c.a", "r = hasattr(c, 'a')"],
+                 "result"),
+    "fstring_conversions": ([], ["x = 'é'", "r = f'{x!r} {x!s} {x!a} {3!r:>4}'"], "result"),
+    "slice_steps": ([], ["x = list(range(6))", "x[1:3] = [9]", "del x[::2]",
+                         "r = (x, 'abcdef'[1:5:2], (1, 2, 3)[::-1], x[-2:])"], "result"),
+    # The function is defined in the operation, so that `global` is in the template.
+    "global_statement": ([], ["def f():\n    global g\n    g = 5\n    return g + 1",
+                              "r = (f(), g)"], "result"),
+}
+
+
 def regression_cases():
     return table_cases("reg", "regressions", "regression", REGRESSIONS)
 
@@ -1107,6 +1518,10 @@ def all_cases():
              + table_cases("a6", "iteration", "A6", A6)
              + a7_cases() + table_cases("fast", "fast-paths", "fast", FAST)
              + table_cases("res", "results", "A1", RESULTS)
+             + direct_cases()
+             + constructor_cases()
+             + table_cases("call", "calls", "direct", CALLS, CALLS_CALLS, CALLS_ENTRIES)
+             + table_cases("syn", "syntax", "syntax", SYNTAX)
              + regression_cases())
     seen = set()
     for c in cases:

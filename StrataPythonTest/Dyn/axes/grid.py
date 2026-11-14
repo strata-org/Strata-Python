@@ -1,10 +1,20 @@
 #!/usr/bin/env python3
 """Write the axis grid's programs: one program per case of `catalog.py`.
 
-    python3 grid.py OUTDIR            write OUTDIR/<id>.py for each case, and print
-                                      `<id> | <group> | <axis> | <expected outcome>` per line
+    python3 grid.py OUTDIR            write OUTDIR/<id>.py for each case, and print one line per
+                                      case: `<id> | <group> | <axis> | <expected outcome> |
+                                      <template> | <calls> | <entries>`
     python3 grid.py --digest OUTDIR   print the SHA-256 of the programs in OUTDIR (written by the
                                       first form) and of `trace.py`, with the string "3.12"
+
+The last three fields are for the coverage check: the operation's template, a file
+`OUTDIR/templates/<template>.py` that holds only the operation, whose translation differs from that
+of `OUTDIR/templates/null.py` (`r = None`) by the py.* instructions that the operation adds
+(`OUTDIR/templates/scaffold.py` is a whole program around a trivial operation, for the
+instructions that every case runs);
+the built-in functions and methods that the case calls by name; and the dunder entries that its
+operation reaches without a call (`list.__len__` for `len(x)`). A list is comma-separated, or `-`
+when empty.
 
 Beside each program `<id>.py`, it writes `<id>.null.py`, the same program with the operation
 replaced by `r = None`. CPython's output of the two must differ, or the case observes nothing
@@ -18,11 +28,15 @@ operation ran (`@op`), how it ended (a `=` line or a `!` line), and every user c
 in order.
 """
 
+import builtins
 import hashlib
 import pathlib
 import re
 import sys
 
+if sys.version_info[:2] != (3, 12):
+    sys.exit(f"grid.py needs CPython 3.12, not {sys.version.split()[0]}: the catalog reads the "
+             "names of the built-in types from the running interpreter")
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import catalog  # noqa: E402
@@ -40,6 +54,27 @@ def ev(name):
 
 
 _EXACT = (int, bool, float, str, bytes, range)
+# Pairwise unequal (`grid.py` checks it), so that one stored member answers at most one probe.
+_PROBE = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 20, 77, 99, 2 ** 70, 1.5, 2.5,
+          "a", "b", "c", "ab", "k", "q", "u", "w", "x", "y", "z", "zz", b"a", b"b", ("a", 1),
+          ("b", 2), None]
+
+
+class _Spy:
+    """Equal to the probe `p`, with its hash; when a set compares a stored member with it, it
+    keeps that member, so that the set shows its exact members (`{1}`, `{True}`, `{1.0}`, and
+    `{('a', 1)}`, `{('a', True)}` all differ)."""
+
+    def __init__(self, p):
+        self.p = p
+        self.seen = []
+
+    def __hash__(self):
+        return hash(self.p)
+
+    def __eq__(self, o):
+        self.seen.append(o)
+        return o == self.p
 _CONTAINERS = (list, tuple, set, frozenset, dict)
 
 
@@ -99,16 +134,34 @@ def _render(v, seen, depth):
             parts = [_render(k, inner, depth + 1) + ": " + _render(w, inner, depth + 1)
                      for k, w in v.items()]
             return "{" + ", ".join(parts) + "}"
-        parts = [_render(w, inner, depth + 1) for w in v]
         if type(v) in (set, frozenset):
-            parts = sorted(parts)
+            # A set is shown by membership tests against the values the grid uses, without
+            # iterating it; only a set that holds other values is iterated (and sorted).
+            hits = []
+            for p in _PROBE:
+                spy = _Spy(p)
+                if spy in v:
+                    if len(spy.seen) == 1:
+                        o = spy.seen[0]
+                        hits.append(type(o).__name__ + " " + _render(o, inner, depth + 1))
+                    else:
+                        hits.append("? " + repr(p))
+            if len(hits) == len(v):
+                return type(v).__name__ + " of {" + ", ".join(hits) + "}"
+            parts = sorted([_render(w, inner, depth + 1) for w in v])
             return type(v).__name__ + "({" + ", ".join(parts) + "})"
+        parts = [_render(w, inner, depth + 1) for w in v]
         if type(v) is tuple:
             return "(" + ", ".join(parts) + ("," if len(parts) == 1 else "") + ")"
         return "[" + ", ".join(parts) + "]"
     if type(v).__name__ in ("function", "builtin_function_or_method", "method",
-                            "method-wrapper", "wrapper_descriptor", "method_descriptor"):
+                            "method-wrapper", "wrapper_descriptor", "method_descriptor",
+                            "staticmethod", "classmethod", "property", "super"):
+        # Their reprs show addresses.
         return "<" + type(v).__name__ + ">"
+    if type(v).__repr__ is object.__repr__:
+        # The default repr shows the address.
+        return "<" + type(v).__name__ + " object>"
     b = _builtin_base(v)
     if b is not None:
         return type(v).__name__ + "<" + b.__repr__(v) + "> " + repr(v)
@@ -122,7 +175,8 @@ def show(r):
 def _self(x):
     # A set's repr walks it with `__iter__`, which a subclass may override; `frozenset(x)` reads
     # its members directly.
-    shown = frozenset(x) if isinstance(x, (set, frozenset)) else x
+    shown = frozenset(x) if isinstance(x, (set, frozenset)) and type(x) not in (set, frozenset) \
+        else x
     print("self", type(x).__name__, _render(shown, [], 0))
 
 
@@ -189,15 +243,77 @@ def render(case, null=False):
             + tail + f'_mark("done", "{case.id}")\n')
 
 
+# Where CPython goes when a type doesn't define a dunder: truth falls back on `__len__`, an in-place
+# operator on the binary one.
+FALLBACK = {"__bool__": "__len__", "__iadd__": "__add__", "__ior__": "__or__",
+            "__isub__": "__sub__", "__imul__": "__mul__"}
+
+
+class _Seq:
+    """A class with only `__getitem__`, whose iterator is CPython's `iterator` type."""
+
+    def __getitem__(self, i):
+        raise IndexError(i)
+
+
+# The built-in types that `builtins` doesn't name, by the names the model's tables use.
+OTHER_TYPES = {"NoneType": type(None), "ellipsis": type(...),
+               "NotImplementedType": type(NotImplemented),
+               "callable_iterator": type(iter(int, 1)), "iterator": type(iter(_Seq()))}
+
+
+def resolve(t, d):
+    """`<type>.<dunder>` for the built-in type in the MRO of the type named `t` that defines the
+    dunder `d` (or its fallback), or `None` if none does (`object`'s truth)."""
+    cls = OTHER_TYPES.get(t) or getattr(builtins, t, None)
+    if not isinstance(cls, type):
+        return None
+    while d is not None:
+        for c in cls.__mro__:
+            if d in vars(c):
+                return f"{c.__qualname__}.{d}"
+        d = FALLBACK.get(d)
+    return None
+
+
+def check_probes():
+    """The probes of the prelude are pairwise unequal."""
+    ns = {}
+    exec(PRELUDE, ns)
+    probes = ns["_PROBE"]
+    for i, a in enumerate(probes):
+        for b in probes[i + 1:]:
+            if a == b:
+                sys.exit(f"grid.py: the probes {a!r} and {b!r} are equal")
+
+
+def field_of(items):
+    return ",".join(items) if items else "-"
+
+
 def write(outdir):
+    check_probes()
     out = pathlib.Path(outdir)
-    out.mkdir(parents=True, exist_ok=True)
-    for old in out.glob("*.py"):
+    templates = out / "templates"
+    templates.mkdir(parents=True, exist_ok=True)
+    for old in list(out.glob("*.py")) + list(templates.glob("*.py")):
         old.unlink()
+    # The operation replaced by `r = None`, against which each template's instructions count.
+    (templates / "null.py").write_text("r = None\n")
+    # The program around every operation (the prelude, the `try`, `show`): its instructions run in
+    # every case, so they count once any case agrees.
+    (templates / "scaffold.py").write_text(render(catalog.Case(
+        "scaffold", "", "", "", "", ["r = 1"], receiver="r")))
     for case in catalog.all_cases():
         (out / f"{case.id}.py").write_text(render(case))
         (out / f"{case.id}.null.py").write_text(render(case, null=True))
-        print(f"{case.id} | {case.group} | {case.axis} | {case.expect}")
+        text = "\n".join(case.op) + "\n"
+        key = hashlib.sha256(text.encode()).hexdigest()[:16]
+        (templates / f"{key}.py").write_text(text)
+
+        entries = [e for e in (resolve(t, d) for (t, d) in case.entries) if e is not None]
+        print(f"{case.id} | {case.group} | {case.axis} | {case.expect} | {key} | "
+              f"{field_of(case.calls)} | {field_of(entries)}")
 
 
 def digest(outdir):

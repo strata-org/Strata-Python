@@ -1,15 +1,35 @@
 builtins | A1 | 765 agree | 78 gap | 0 known
+calls | direct | 22 agree | 4 gap | 0 known
+constructors | direct | 62 agree | 5 gap | 0 known
 containers | A1 | 392 agree | 26 gap | 0 known
+direct | direct | 429 agree | 126 gap | 0 known
 failing | A4 | 237 agree | 13 gap | 0 known
 fast-paths | fast | 21 agree | 1 gap | 0 known
 iteration | A6 | 16 agree | 0 gap | 0 known
 limits | A5 | 13 agree | 7 gap | 0 known
 lookup | A3 | 344 agree | 45 gap | 0 known
 metadata | A7 | 42 agree | 22 gap | 0 known
-methods | A1 | 286 agree | 93 gap | 0 known
+methods | A1 | 375 agree | 4 gap | 0 known
 methods | A8 | 187 agree | 57 gap | 0 known
-operators | A1 | 1507 agree | 76 gap | 0 known
+operators | A1 | 1562 agree | 21 gap | 0 known
 reentry | A2 | 16 agree | 5 gap | 0 known
 regressions | regression | 13 agree | 12 gap | 0 known
 results | A1 | 5 agree | 4 gap | 0 known
-total | 4283 cases | 3844 agree | 439 gap | 0 known
+syntax | syntax | 37 agree | 0 gap | 0 known
+total | 4968 cases | 4538 agree | 430 gap | 0 known
+covered only by the catalog's entries | 15 names
+  dict.__class_getitem__ | declared by call_class_getitem
+  frozenset.__class_getitem__ | declared by call_class_getitem
+  list.__class_getitem__ | declared by call_class_getitem
+  object.__str__ | declared by a1_str_int_exact and 23 more
+  object.__init_subclass__ | declared by call_init_subclass
+  property.__set_name__ | declared by call_property_set_name
+  set.__class_getitem__ | declared by call_class_getitem
+  tuple.__class_getitem__ | declared by call_class_getitem
+  callable_iterator.__iter__ | declared by call_callable_iterator
+  callable_iterator.__next__ | declared by call_callable_iterator
+  iterator.__iter__ | declared by call_seq_iterator
+  iterator.__next__ | declared by call_seq_iterator
+  NoneType.__repr__ | declared by call_type_repr
+  NotImplementedType.__repr__ | declared by call_type_repr
+  ellipsis.__repr__ | declared by call_type_repr

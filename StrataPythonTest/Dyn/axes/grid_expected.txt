@@ -110,12 +110,12 @@ a1_add_tuple_user-not | agree
 a1_and_bool_exact | agree
 a1_and_bool_user | agree
 a1_and_bool_user-not | agree
-a1_and_frozenset_exact | gap | a slot of a set whose layout is inexact
-a1_and_frozenset_sub | gap | a slot of a set whose layout is inexact
-a1_and_frozenset_sub-dict | gap | a slot of a set whose layout is inexact
+a1_and_frozenset_exact | agree
+a1_and_frozenset_sub | agree
+a1_and_frozenset_sub-dict | agree
 a1_and_frozenset_sub-over | agree
-a1_and_frozenset_sub-over-other | gap | a slot of a set whose layout is inexact
-a1_and_frozenset_sub-slots | gap | a slot of a set whose layout is inexact
+a1_and_frozenset_sub-over-other | agree
+a1_and_frozenset_sub-slots | agree
 a1_and_frozenset_user | agree
 a1_and_frozenset_user-not | agree
 a1_and_int_bool-as-int_exact | agree
@@ -147,22 +147,22 @@ a1_and_int_user_sub | agree
 a1_and_int_user_sub-over | agree
 a1_and_int_user_user | agree
 a1_and_int_user_user-not | agree
-a1_and_set_exact_exact | gap | a slot of a set whose layout is inexact
-a1_and_set_exact_sub | gap | a slot of a set whose layout is inexact
+a1_and_set_exact_exact | agree
+a1_and_set_exact_sub | agree
 a1_and_set_exact_sub-over | agree
 a1_and_set_exact_user | agree
 a1_and_set_exact_user-not | agree
-a1_and_set_sub-dict_exact | gap | a slot of a set whose layout is inexact
-a1_and_set_sub-over-other_exact | gap | a slot of a set whose layout is inexact
+a1_and_set_sub-dict_exact | agree
+a1_and_set_sub-over-other_exact | agree
 a1_and_set_sub-over_exact | agree
 a1_and_set_sub-over_sub | agree
 a1_and_set_sub-over_sub-over | agree
 a1_and_set_sub-over_user | agree
 a1_and_set_sub-over_user-not | agree
-a1_and_set_sub-slots_exact | gap | a slot of a set whose layout is inexact
-a1_and_set_sub_exact | gap | a slot of a set whose layout is inexact
-a1_and_set_sub_sub | gap | a slot of a set whose layout is inexact
-a1_and_set_sub_sub-over | gap | a slot of a set whose layout is inexact
+a1_and_set_sub-slots_exact | agree
+a1_and_set_sub_exact | agree
+a1_and_set_sub_sub | agree
+a1_and_set_sub_sub-over | agree
 a1_and_set_sub_user | agree
 a1_and_set_sub_user-not | agree
 a1_and_set_user-not_exact | agree
@@ -979,9 +979,9 @@ a1_ior_int_user_sub | agree
 a1_ior_int_user_sub-over | agree
 a1_ior_int_user_user | agree
 a1_ior_int_user_user-not | agree
-a1_ior_set_exact_exact | gap | a slot of a set whose layout is inexact
-a1_ior_set_exact_sub | gap | a slot of a set whose layout is inexact
-a1_ior_set_exact_sub-over | gap | a slot of a set whose layout is inexact
+a1_ior_set_exact_exact | agree
+a1_ior_set_exact_sub | agree
+a1_ior_set_exact_sub-over | agree
 a1_ior_set_exact_user | agree
 a1_ior_set_exact_user-not | agree
 a1_ior_set_sub-dict_exact | gap | the repr of a set whose order the model doesn't know is not modelled yet
@@ -1838,12 +1838,12 @@ a1_or_dict_sub-over-other | gap | a | of a dict whose class overrides how its en
 a1_or_dict_sub-slots | agree
 a1_or_dict_user | agree
 a1_or_dict_user-not | agree
-a1_or_frozenset_exact | gap | a slot of a set whose layout is inexact
-a1_or_frozenset_sub | gap | a slot of a set whose layout is inexact
-a1_or_frozenset_sub-dict | gap | a slot of a set whose layout is inexact
+a1_or_frozenset_exact | agree
+a1_or_frozenset_sub | agree
+a1_or_frozenset_sub-dict | agree
 a1_or_frozenset_sub-over | agree
-a1_or_frozenset_sub-over-other | gap | a slot of a set whose layout is inexact
-a1_or_frozenset_sub-slots | gap | a slot of a set whose layout is inexact
+a1_or_frozenset_sub-over-other | agree
+a1_or_frozenset_sub-slots | agree
 a1_or_frozenset_user | agree
 a1_or_frozenset_user-not | agree
 a1_or_int_bool-as-int_exact | agree
@@ -1875,22 +1875,22 @@ a1_or_int_user_sub | agree
 a1_or_int_user_sub-over | agree
 a1_or_int_user_user | agree
 a1_or_int_user_user-not | agree
-a1_or_set_exact_exact | gap | a slot of a set whose layout is inexact
-a1_or_set_exact_sub | gap | a slot of a set whose layout is inexact
+a1_or_set_exact_exact | agree
+a1_or_set_exact_sub | agree
 a1_or_set_exact_sub-over | agree
 a1_or_set_exact_user | agree
 a1_or_set_exact_user-not | agree
-a1_or_set_sub-dict_exact | gap | a slot of a set whose layout is inexact
-a1_or_set_sub-over-other_exact | gap | a slot of a set whose layout is inexact
+a1_or_set_sub-dict_exact | agree
+a1_or_set_sub-over-other_exact | agree
 a1_or_set_sub-over_exact | agree
 a1_or_set_sub-over_sub | agree
 a1_or_set_sub-over_sub-over | agree
 a1_or_set_sub-over_user | agree
 a1_or_set_sub-over_user-not | agree
-a1_or_set_sub-slots_exact | gap | a slot of a set whose layout is inexact
-a1_or_set_sub_exact | gap | a slot of a set whose layout is inexact
-a1_or_set_sub_sub | gap | a slot of a set whose layout is inexact
-a1_or_set_sub_sub-over | gap | a slot of a set whose layout is inexact
+a1_or_set_sub-slots_exact | agree
+a1_or_set_sub_exact | agree
+a1_or_set_sub_sub | agree
+a1_or_set_sub_sub-over | agree
 a1_or_set_sub_user | agree
 a1_or_set_sub_user-not | agree
 a1_or_set_user-not_exact | agree
@@ -2461,12 +2461,12 @@ a1_sub_float_sub-over-other | agree
 a1_sub_float_sub-slots | agree
 a1_sub_float_user | agree
 a1_sub_float_user-not | agree
-a1_sub_frozenset_exact | gap | a slot of a set whose layout is inexact
-a1_sub_frozenset_sub | gap | a slot of a set whose layout is inexact
-a1_sub_frozenset_sub-dict | gap | a slot of a set whose layout is inexact
+a1_sub_frozenset_exact | agree
+a1_sub_frozenset_sub | agree
+a1_sub_frozenset_sub-dict | agree
 a1_sub_frozenset_sub-over | agree
-a1_sub_frozenset_sub-over-other | gap | a slot of a set whose layout is inexact
-a1_sub_frozenset_sub-slots | gap | a slot of a set whose layout is inexact
+a1_sub_frozenset_sub-over-other | agree
+a1_sub_frozenset_sub-slots | agree
 a1_sub_frozenset_user | agree
 a1_sub_frozenset_user-not | agree
 a1_sub_int_bool-as-int_exact | agree
@@ -2498,22 +2498,22 @@ a1_sub_int_user_sub | agree
 a1_sub_int_user_sub-over | agree
 a1_sub_int_user_user | agree
 a1_sub_int_user_user-not | agree
-a1_sub_set_exact_exact | gap | a slot of a set whose layout is inexact
-a1_sub_set_exact_sub | gap | a slot of a set whose layout is inexact
+a1_sub_set_exact_exact | agree
+a1_sub_set_exact_sub | agree
 a1_sub_set_exact_sub-over | agree
 a1_sub_set_exact_user | agree
 a1_sub_set_exact_user-not | agree
-a1_sub_set_sub-dict_exact | gap | a slot of a set whose layout is inexact
-a1_sub_set_sub-over-other_exact | gap | a slot of a set whose layout is inexact
+a1_sub_set_sub-dict_exact | agree
+a1_sub_set_sub-over-other_exact | agree
 a1_sub_set_sub-over_exact | agree
 a1_sub_set_sub-over_sub | agree
 a1_sub_set_sub-over_sub-over | agree
 a1_sub_set_sub-over_user | agree
 a1_sub_set_sub-over_user-not | agree
-a1_sub_set_sub-slots_exact | gap | a slot of a set whose layout is inexact
-a1_sub_set_sub_exact | gap | a slot of a set whose layout is inexact
-a1_sub_set_sub_sub | gap | a slot of a set whose layout is inexact
-a1_sub_set_sub_sub-over | gap | a slot of a set whose layout is inexact
+a1_sub_set_sub-slots_exact | agree
+a1_sub_set_sub_exact | agree
+a1_sub_set_sub_sub | agree
+a1_sub_set_sub_sub-over | agree
 a1_sub_set_sub_user | agree
 a1_sub_set_sub_user-not | agree
 a1_sub_set_user-not_exact | agree
@@ -2777,12 +2777,12 @@ a1_unpack_tuple_user-not | agree
 a1_xor_bool_exact | agree
 a1_xor_bool_user | agree
 a1_xor_bool_user-not | agree
-a1_xor_frozenset_exact | gap | a slot of a set whose layout is inexact
-a1_xor_frozenset_sub | gap | a slot of a set whose layout is inexact
-a1_xor_frozenset_sub-dict | gap | a slot of a set whose layout is inexact
+a1_xor_frozenset_exact | agree
+a1_xor_frozenset_sub | agree
+a1_xor_frozenset_sub-dict | agree
 a1_xor_frozenset_sub-over | agree
-a1_xor_frozenset_sub-over-other | gap | a slot of a set whose layout is inexact
-a1_xor_frozenset_sub-slots | gap | a slot of a set whose layout is inexact
+a1_xor_frozenset_sub-over-other | agree
+a1_xor_frozenset_sub-slots | agree
 a1_xor_frozenset_user | agree
 a1_xor_frozenset_user-not | agree
 a1_xor_int_bool-as-int_exact | agree
@@ -2814,22 +2814,22 @@ a1_xor_int_user_sub | agree
 a1_xor_int_user_sub-over | agree
 a1_xor_int_user_user | agree
 a1_xor_int_user_user-not | agree
-a1_xor_set_exact_exact | gap | a slot of a set whose layout is inexact
-a1_xor_set_exact_sub | gap | a slot of a set whose layout is inexact
+a1_xor_set_exact_exact | agree
+a1_xor_set_exact_sub | agree
 a1_xor_set_exact_sub-over | agree
 a1_xor_set_exact_user | agree
 a1_xor_set_exact_user-not | agree
-a1_xor_set_sub-dict_exact | gap | a slot of a set whose layout is inexact
-a1_xor_set_sub-over-other_exact | gap | a slot of a set whose layout is inexact
+a1_xor_set_sub-dict_exact | agree
+a1_xor_set_sub-over-other_exact | agree
 a1_xor_set_sub-over_exact | agree
 a1_xor_set_sub-over_sub | agree
 a1_xor_set_sub-over_sub-over | agree
 a1_xor_set_sub-over_user | agree
 a1_xor_set_sub-over_user-not | agree
-a1_xor_set_sub-slots_exact | gap | a slot of a set whose layout is inexact
-a1_xor_set_sub_exact | gap | a slot of a set whose layout is inexact
-a1_xor_set_sub_sub | gap | a slot of a set whose layout is inexact
-a1_xor_set_sub_sub-over | gap | a slot of a set whose layout is inexact
+a1_xor_set_sub-slots_exact | agree
+a1_xor_set_sub_exact | agree
+a1_xor_set_sub_sub | agree
+a1_xor_set_sub_sub-over | agree
 a1_xor_set_sub_user | agree
 a1_xor_set_sub_user-not | agree
 a1_xor_set_user-not_exact | agree
@@ -3602,6 +3602,654 @@ a7_type_delattr | agree
 a7_type_getattr-default | agree
 a7_type_hasattr | gap | the attribute type.__doc__ is not modelled yet
 a7_type_setattr | agree
+c_ArithmeticError | agree
+c_AssertionError | agree
+c_AttributeError | agree
+c_BaseException | agree
+c_BaseExceptionGroup | agree
+c_BlockingIOError | agree
+c_BrokenPipeError | agree
+c_BufferError | agree
+c_BytesWarning | agree
+c_ChildProcessError | agree
+c_ConnectionAbortedError | agree
+c_ConnectionError | agree
+c_ConnectionRefusedError | agree
+c_ConnectionResetError | agree
+c_DeprecationWarning | agree
+c_EOFError | agree
+c_EncodingWarning | agree
+c_Exception | agree
+c_ExceptionGroup | agree
+c_FileExistsError | agree
+c_FileNotFoundError | agree
+c_FloatingPointError | agree
+c_FutureWarning | agree
+c_GeneratorExit | agree
+c_ImportError | agree
+c_ImportWarning | agree
+c_IndentationError | gap | built-in method IndentationError.__init__ is not modelled yet
+c_IndexError | agree
+c_InterruptedError | agree
+c_IsADirectoryError | agree
+c_KeyError | agree
+c_KeyboardInterrupt | agree
+c_LookupError | agree
+c_MemoryError | agree
+c_ModuleNotFoundError | agree
+c_NameError | agree
+c_NotADirectoryError | agree
+c_NotImplementedError | agree
+c_OSError | agree
+c_OverflowError | agree
+c_PendingDeprecationWarning | agree
+c_PermissionError | agree
+c_ProcessLookupError | agree
+c_RecursionError | agree
+c_ReferenceError | agree
+c_ResourceWarning | agree
+c_RuntimeError | agree
+c_RuntimeWarning | agree
+c_StopAsyncIteration | agree
+c_StopIteration | agree
+c_SyntaxError | gap | built-in method SyntaxError.__init__ is not modelled yet
+c_SyntaxWarning | agree
+c_SystemError | agree
+c_SystemExit | agree
+c_TabError | gap | built-in method TabError.__init__ is not modelled yet
+c_TimeoutError | agree
+c_TypeError | agree
+c_UnboundLocalError | agree
+c_UnicodeDecodeError | agree
+c_UnicodeEncodeError | agree
+c_UnicodeError | gap | built-in method UnicodeError.__new__ is not modelled yet
+c_UnicodeTranslateError | gap | built-in method UnicodeTranslateError.__new__ is not modelled yet
+c_UnicodeWarning | agree
+c_UserWarning | agree
+c_ValueError | agree
+c_Warning | agree
+c_ZeroDivisionError | agree
+call_all | agree
+call_bool_invert | gap | not modelled: ~ on a bool, which warns
+call_bytes_new | agree
+call_callable | agree
+call_callable_iterator | agree
+call_class_getitem | agree
+call_class_statement | agree
+call_descriptor_types | gap | a call of this built-in object is not modelled yet
+call_divmod | agree
+call_enumerate_new | agree
+call_frozenset_ops | agree
+call_hex | agree
+call_init_subclass | agree
+call_issubclass | agree
+call_maketrans | agree
+call_object_setattr | agree
+call_property_set_name | agree
+call_seq_iterator | agree
+call_set_iterator | gap | a slot of a set whose layout is inexact
+call_set_ops | agree
+call_setattr | agree
+call_slice_repr | gap | built-in method slice.__new__ is not modelled yet
+call_super_call | agree
+call_type_or | agree
+call_type_repr | agree
+call_type_three_args | agree
+d_AttributeError___str__ | agree
+d_BaseExceptionGroup___str__ | agree
+d_BaseExceptionGroup_derive | gap | built-in method BaseExceptionGroup.derive is not modelled yet
+d_BaseExceptionGroup_split | gap | built-in method BaseExceptionGroup.split is not modelled yet
+d_BaseExceptionGroup_subgroup | gap | built-in method BaseExceptionGroup.subgroup is not modelled yet
+d_BaseException___getattribute__ | gap | built-in method BaseException.__getattribute__ is not modelled yet
+d_BaseException___repr__ | agree
+d_BaseException___str__ | agree
+d_BaseException_add_note | agree
+d_BaseException_with_traceback | gap | built-in method BaseException.with_traceback is not modelled yet
+d_ImportError___str__ | agree
+d_KeyError___str__ | agree
+d_NameError___str__ | agree
+d_OSError___str__ | agree
+d_UnicodeDecodeError___str__ | agree
+d_UnicodeEncodeError___str__ | agree
+d_bool___and__ | agree
+d_bool___invert__ | gap | not modelled: ~ on a bool, which warns
+d_bool___or__ | agree
+d_bool___rand__ | agree
+d_bool___repr__ | agree
+d_bool___ror__ | agree
+d_bool___rxor__ | agree
+d_bool___xor__ | agree
+d_bytes___add__ | agree
+d_bytes___bytes__ | agree
+d_bytes___contains__ | agree
+d_bytes___eq__ | agree
+d_bytes___ge__ | agree
+d_bytes___getattribute__ | gap | built-in method bytes.__getattribute__ is not modelled yet
+d_bytes___getitem__ | agree
+d_bytes___gt__ | agree
+d_bytes___hash__ | gap | a hash whose number the model does not know
+d_bytes___iter__ | agree
+d_bytes___le__ | agree
+d_bytes___len__ | agree
+d_bytes___lt__ | agree
+d_bytes___mod__ | agree
+d_bytes___mul__ | agree
+d_bytes___ne__ | agree
+d_bytes___repr__ | agree
+d_bytes___rmod__ | agree
+d_bytes___rmul__ | agree
+d_bytes___str__ | agree
+d_bytes_capitalize | gap | built-in method bytes.capitalize is not modelled yet
+d_bytes_center | gap | built-in method bytes.center is not modelled yet
+d_bytes_count | gap | built-in method bytes.count is not modelled yet
+d_bytes_decode | gap | built-in method bytes.decode is not modelled yet
+d_bytes_endswith | gap | built-in method bytes.endswith is not modelled yet
+d_bytes_expandtabs | gap | built-in method bytes.expandtabs is not modelled yet
+d_bytes_find | gap | built-in method bytes.find is not modelled yet
+d_bytes_fromhex | gap | built-in method bytes.fromhex is not modelled yet
+d_bytes_hex | gap | built-in method bytes.hex is not modelled yet
+d_bytes_index | gap | built-in method bytes.index is not modelled yet
+d_bytes_isalnum | gap | built-in method bytes.isalnum is not modelled yet
+d_bytes_isalpha | gap | built-in method bytes.isalpha is not modelled yet
+d_bytes_isascii | gap | built-in method bytes.isascii is not modelled yet
+d_bytes_isdigit | gap | built-in method bytes.isdigit is not modelled yet
+d_bytes_islower | gap | built-in method bytes.islower is not modelled yet
+d_bytes_isspace | gap | built-in method bytes.isspace is not modelled yet
+d_bytes_istitle | gap | built-in method bytes.istitle is not modelled yet
+d_bytes_isupper | gap | built-in method bytes.isupper is not modelled yet
+d_bytes_iterator___iter__ | agree
+d_bytes_iterator___length_hint__ | agree
+d_bytes_iterator___next__ | agree
+d_bytes_join | gap | built-in method bytes.join is not modelled yet
+d_bytes_ljust | gap | built-in method bytes.ljust is not modelled yet
+d_bytes_lower | gap | built-in method bytes.lower is not modelled yet
+d_bytes_lstrip | gap | built-in method bytes.lstrip is not modelled yet
+d_bytes_maketrans | gap | built-in method bytes.maketrans is not modelled yet
+d_bytes_partition | gap | built-in method bytes.partition is not modelled yet
+d_bytes_removeprefix | gap | built-in method bytes.removeprefix is not modelled yet
+d_bytes_removesuffix | gap | built-in method bytes.removesuffix is not modelled yet
+d_bytes_replace | gap | built-in method bytes.replace is not modelled yet
+d_bytes_rfind | gap | built-in method bytes.rfind is not modelled yet
+d_bytes_rindex | gap | built-in method bytes.rindex is not modelled yet
+d_bytes_rjust | gap | built-in method bytes.rjust is not modelled yet
+d_bytes_rpartition | gap | built-in method bytes.rpartition is not modelled yet
+d_bytes_rsplit | gap | built-in method bytes.rsplit is not modelled yet
+d_bytes_rstrip | gap | built-in method bytes.rstrip is not modelled yet
+d_bytes_split | gap | built-in method bytes.split is not modelled yet
+d_bytes_splitlines | gap | built-in method bytes.splitlines is not modelled yet
+d_bytes_startswith | gap | built-in method bytes.startswith is not modelled yet
+d_bytes_strip | gap | built-in method bytes.strip is not modelled yet
+d_bytes_swapcase | gap | built-in method bytes.swapcase is not modelled yet
+d_bytes_title | gap | built-in method bytes.title is not modelled yet
+d_bytes_translate | gap | built-in method bytes.translate is not modelled yet
+d_bytes_upper | gap | built-in method bytes.upper is not modelled yet
+d_bytes_zfill | gap | built-in method bytes.zfill is not modelled yet
+d_classmethod___get__ | gap | built-in method classmethod.__get__ is not modelled yet
+d_classmethod___repr__ | gap | a repr that shows an object's address is not modelled yet
+d_dict___contains__ | agree
+d_dict___delitem__ | agree
+d_dict___eq__ | agree
+d_dict___ge__ | agree
+d_dict___getattribute__ | gap | built-in method dict.__getattribute__ is not modelled yet
+d_dict___getitem__ | agree
+d_dict___gt__ | agree
+d_dict___ior__ | agree
+d_dict___iter__ | agree
+d_dict___le__ | agree
+d_dict___len__ | agree
+d_dict___lt__ | agree
+d_dict___ne__ | agree
+d_dict___or__ | agree
+d_dict___repr__ | agree
+d_dict___reversed__ | agree
+d_dict___ror__ | agree
+d_dict___setitem__ | agree
+d_dict_clear | agree
+d_dict_copy | agree
+d_dict_fromkeys | agree
+d_dict_get | agree
+d_dict_itemiterator___iter__ | agree
+d_dict_itemiterator___length_hint__ | gap | built-in method dict_itemiterator.__length_hint__ is not modelled yet
+d_dict_itemiterator___next__ | agree
+d_dict_items | agree
+d_dict_items___and__ | agree
+d_dict_items___contains__ | agree
+d_dict_items___eq__ | agree
+d_dict_items___ge__ | gap | a slot of a set whose layout is inexact
+d_dict_items___gt__ | agree
+d_dict_items___iter__ | agree
+d_dict_items___le__ | agree
+d_dict_items___len__ | agree
+d_dict_items___lt__ | agree
+d_dict_items___ne__ | agree
+d_dict_items___or__ | agree
+d_dict_items___rand__ | agree
+d_dict_items___repr__ | agree
+d_dict_items___reversed__ | agree
+d_dict_items___ror__ | agree
+d_dict_items___rsub__ | agree
+d_dict_items___rxor__ | agree
+d_dict_items___sub__ | agree
+d_dict_items___xor__ | agree
+d_dict_items_isdisjoint | gap | a slot of a set whose layout is inexact
+d_dict_keyiterator___iter__ | agree
+d_dict_keyiterator___length_hint__ | gap | built-in method dict_keyiterator.__length_hint__ is not modelled yet
+d_dict_keyiterator___next__ | agree
+d_dict_keys | agree
+d_dict_keys___and__ | gap | a set lookup after a false __eq__ depends on CPython's table layout
+d_dict_keys___contains__ | agree
+d_dict_keys___eq__ | agree
+d_dict_keys___ge__ | agree
+d_dict_keys___gt__ | agree
+d_dict_keys___iter__ | agree
+d_dict_keys___le__ | agree
+d_dict_keys___len__ | agree
+d_dict_keys___lt__ | agree
+d_dict_keys___ne__ | agree
+d_dict_keys___or__ | gap | a set lookup after a false __eq__ depends on CPython's table layout
+d_dict_keys___rand__ | gap | a set lookup after a false __eq__ depends on CPython's table layout
+d_dict_keys___repr__ | agree
+d_dict_keys___reversed__ | agree
+d_dict_keys___ror__ | gap | a set lookup after a false __eq__ depends on CPython's table layout
+d_dict_keys___rsub__ | gap | a set lookup after a false __eq__ depends on CPython's table layout
+d_dict_keys___rxor__ | gap | a set lookup after a false __eq__ depends on CPython's table layout
+d_dict_keys___sub__ | agree
+d_dict_keys___xor__ | gap | a set lookup after a false __eq__ depends on CPython's table layout
+d_dict_keys_isdisjoint | agree
+d_dict_pop | agree
+d_dict_popitem | agree
+d_dict_reverseitemiterator___iter__ | agree
+d_dict_reverseitemiterator___length_hint__ | agree
+d_dict_reverseitemiterator___next__ | agree
+d_dict_reversekeyiterator___iter__ | agree
+d_dict_reversekeyiterator___length_hint__ | agree
+d_dict_reversekeyiterator___next__ | agree
+d_dict_reversevalueiterator___iter__ | agree
+d_dict_reversevalueiterator___length_hint__ | agree
+d_dict_reversevalueiterator___next__ | agree
+d_dict_setdefault | agree
+d_dict_update | agree
+d_dict_valueiterator___iter__ | agree
+d_dict_valueiterator___length_hint__ | gap | built-in method dict_valueiterator.__length_hint__ is not modelled yet
+d_dict_valueiterator___next__ | agree
+d_dict_values | agree
+d_dict_values___iter__ | agree
+d_dict_values___len__ | agree
+d_dict_values___repr__ | agree
+d_dict_values___reversed__ | agree
+d_enumerate___getattribute__ | gap | built-in method enumerate.__getattribute__ is not modelled yet
+d_enumerate___iter__ | agree
+d_enumerate___next__ | agree
+d_float___abs__ | agree
+d_float___add__ | agree
+d_float___bool__ | agree
+d_float___ceil__ | gap | built-in method float.__ceil__ is not modelled yet
+d_float___divmod__ | agree
+d_float___eq__ | agree
+d_float___float__ | agree
+d_float___floor__ | gap | built-in method float.__floor__ is not modelled yet
+d_float___floordiv__ | agree
+d_float___format__ | agree
+d_float___ge__ | agree
+d_float___getformat__ | gap | built-in method float.__getformat__ is not modelled yet
+d_float___gt__ | agree
+d_float___hash__ | agree
+d_float___int__ | agree
+d_float___le__ | agree
+d_float___lt__ | agree
+d_float___mod__ | agree
+d_float___mul__ | agree
+d_float___ne__ | agree
+d_float___neg__ | agree
+d_float___pos__ | agree
+d_float___pow__ | agree
+d_float___radd__ | agree
+d_float___rdivmod__ | agree
+d_float___repr__ | agree
+d_float___rfloordiv__ | agree
+d_float___rmod__ | agree
+d_float___rmul__ | agree
+d_float___round__ | gap | built-in method float.__round__ is not modelled yet
+d_float___rpow__ | agree
+d_float___rsub__ | agree
+d_float___rtruediv__ | agree
+d_float___sub__ | agree
+d_float___truediv__ | agree
+d_float___trunc__ | agree
+d_float_as_integer_ratio | gap | built-in method float.as_integer_ratio is not modelled yet
+d_float_conjugate | gap | built-in method float.conjugate is not modelled yet
+d_float_fromhex | gap | built-in method float.fromhex is not modelled yet
+d_float_hex | gap | built-in method float.hex is not modelled yet
+d_float_is_integer | gap | built-in method float.is_integer is not modelled yet
+d_frozenset___and__ | agree
+d_frozenset___contains__ | agree
+d_frozenset___eq__ | agree
+d_frozenset___ge__ | agree
+d_frozenset___gt__ | agree
+d_frozenset___hash__ | agree
+d_frozenset___iter__ | agree
+d_frozenset___le__ | agree
+d_frozenset___len__ | agree
+d_frozenset___lt__ | agree
+d_frozenset___ne__ | agree
+d_frozenset___or__ | agree
+d_frozenset___rand__ | agree
+d_frozenset___repr__ | gap | the repr of a set whose order the model doesn't know is not modelled yet
+d_frozenset___ror__ | agree
+d_frozenset___rsub__ | agree
+d_frozenset___rxor__ | agree
+d_frozenset___sub__ | agree
+d_frozenset___xor__ | agree
+d_frozenset_copy | agree
+d_frozenset_difference | agree
+d_frozenset_intersection | agree
+d_frozenset_isdisjoint | agree
+d_frozenset_issubset | agree
+d_frozenset_issuperset | agree
+d_frozenset_symmetric_difference | agree
+d_frozenset_union | agree
+d_int___abs__ | agree
+d_int___add__ | agree
+d_int___and__ | agree
+d_int___bool__ | agree
+d_int___ceil__ | gap | built-in method int.__ceil__ is not modelled yet
+d_int___divmod__ | agree
+d_int___eq__ | agree
+d_int___float__ | agree
+d_int___floor__ | gap | built-in method int.__floor__ is not modelled yet
+d_int___floordiv__ | agree
+d_int___format__ | agree
+d_int___ge__ | agree
+d_int___getattribute__ | gap | built-in method int.__getattribute__ is not modelled yet
+d_int___gt__ | agree
+d_int___hash__ | agree
+d_int___index__ | agree
+d_int___int__ | agree
+d_int___invert__ | agree
+d_int___le__ | agree
+d_int___lshift__ | agree
+d_int___lt__ | agree
+d_int___mod__ | agree
+d_int___mul__ | agree
+d_int___ne__ | agree
+d_int___neg__ | agree
+d_int___or__ | agree
+d_int___pos__ | agree
+d_int___pow__ | agree
+d_int___radd__ | agree
+d_int___rand__ | agree
+d_int___rdivmod__ | agree
+d_int___repr__ | agree
+d_int___rfloordiv__ | agree
+d_int___rlshift__ | agree
+d_int___rmod__ | agree
+d_int___rmul__ | agree
+d_int___ror__ | agree
+d_int___round__ | gap | built-in method int.__round__ is not modelled yet
+d_int___rpow__ | agree
+d_int___rrshift__ | agree
+d_int___rshift__ | agree
+d_int___rsub__ | agree
+d_int___rtruediv__ | agree
+d_int___rxor__ | agree
+d_int___sub__ | agree
+d_int___truediv__ | agree
+d_int___trunc__ | agree
+d_int___xor__ | agree
+d_int_as_integer_ratio | gap | built-in method int.as_integer_ratio is not modelled yet
+d_int_bit_count | gap | built-in method int.bit_count is not modelled yet
+d_int_bit_length | gap | built-in method int.bit_length is not modelled yet
+d_int_conjugate | gap | built-in method int.conjugate is not modelled yet
+d_int_from_bytes | gap | built-in method int.from_bytes is not modelled yet
+d_int_is_integer | gap | built-in method int.is_integer is not modelled yet
+d_int_to_bytes | gap | built-in method int.to_bytes is not modelled yet
+d_list___add__ | agree
+d_list___contains__ | agree
+d_list___delitem__ | agree
+d_list___eq__ | agree
+d_list___ge__ | agree
+d_list___getattribute__ | gap | built-in method list.__getattribute__ is not modelled yet
+d_list___getitem__ | agree
+d_list___gt__ | agree
+d_list___iadd__ | agree
+d_list___imul__ | agree
+d_list___iter__ | agree
+d_list___le__ | agree
+d_list___len__ | agree
+d_list___lt__ | agree
+d_list___mul__ | agree
+d_list___ne__ | agree
+d_list___repr__ | agree
+d_list___reversed__ | agree
+d_list___rmul__ | agree
+d_list___setitem__ | agree
+d_list_append | agree
+d_list_clear | agree
+d_list_copy | agree
+d_list_count | agree
+d_list_extend | agree
+d_list_index | agree
+d_list_insert | agree
+d_list_iterator___iter__ | agree
+d_list_iterator___length_hint__ | agree
+d_list_iterator___next__ | agree
+d_list_pop | agree
+d_list_remove | agree
+d_list_reverse | agree
+d_list_reverseiterator___iter__ | agree
+d_list_reverseiterator___length_hint__ | agree
+d_list_reverseiterator___next__ | agree
+d_list_sort | agree
+d_longrange_iterator___iter__ | agree
+d_longrange_iterator___length_hint__ | agree
+d_longrange_iterator___next__ | agree
+d_object___delattr__ | agree
+d_object___eq__ | agree
+d_object___format__ | gap | a repr that shows an object's address is not modelled yet
+d_object___ge__ | agree
+d_object___getattribute__ | agree
+d_object___gt__ | agree
+d_object___hash__ | gap | hash(x) depends on an address
+d_object___le__ | agree
+d_object___lt__ | agree
+d_object___ne__ | agree
+d_object___repr__ | gap | a repr that shows an object's address is not modelled yet
+d_object___setattr__ | agree
+d_object___str__ | gap | a repr that shows an object's address is not modelled yet
+d_property___delete__ | gap | built-in method property.__delete__ is not modelled yet
+d_property___get__ | gap | built-in method property.__get__ is not modelled yet
+d_property___getattribute__ | gap | built-in method property.__getattribute__ is not modelled yet
+d_property___set__ | gap | built-in method property.__set__ is not modelled yet
+d_property_deleter | agree
+d_property_getter | gap | built-in method property.getter is not modelled yet
+d_property_setter | agree
+d_range___bool__ | agree
+d_range___contains__ | agree
+d_range___eq__ | agree
+d_range___ge__ | agree
+d_range___getattribute__ | gap | built-in method range.__getattribute__ is not modelled yet
+d_range___getitem__ | agree
+d_range___gt__ | agree
+d_range___hash__ | agree
+d_range___iter__ | agree
+d_range___le__ | agree
+d_range___len__ | agree
+d_range___lt__ | agree
+d_range___ne__ | agree
+d_range___repr__ | agree
+d_range___reversed__ | agree
+d_range_count | agree
+d_range_index | agree
+d_range_iterator___iter__ | agree
+d_range_iterator___length_hint__ | agree
+d_range_iterator___next__ | agree
+d_reversed___getattribute__ | gap | built-in method reversed.__getattribute__ is not modelled yet
+d_reversed___iter__ | agree
+d_reversed___length_hint__ | agree
+d_reversed___next__ | agree
+d_set___and__ | agree
+d_set___contains__ | agree
+d_set___eq__ | agree
+d_set___ge__ | agree
+d_set___getattribute__ | gap | built-in method set.__getattribute__ is not modelled yet
+d_set___gt__ | agree
+d_set___iand__ | agree
+d_set___ior__ | agree
+d_set___isub__ | agree
+d_set___iter__ | agree
+d_set___ixor__ | agree
+d_set___le__ | agree
+d_set___len__ | agree
+d_set___lt__ | agree
+d_set___ne__ | agree
+d_set___or__ | agree
+d_set___rand__ | agree
+d_set___repr__ | gap | the repr of a set whose order the model doesn't know is not modelled yet
+d_set___ror__ | agree
+d_set___rsub__ | agree
+d_set___rxor__ | agree
+d_set___sub__ | agree
+d_set___xor__ | agree
+d_set_add | agree
+d_set_clear | agree
+d_set_copy | agree
+d_set_difference | agree
+d_set_difference_update | agree
+d_set_discard | agree
+d_set_intersection | agree
+d_set_intersection_update | agree
+d_set_isdisjoint | agree
+d_set_issubset | agree
+d_set_issuperset | agree
+d_set_iterator___iter__ | agree
+d_set_iterator___length_hint__ | agree
+d_set_iterator___next__ | gap | a slot of a set whose layout is inexact
+d_set_pop | gap | set.pop of a set whose order is not CPython's is not modelled yet
+d_set_remove | agree
+d_set_symmetric_difference | agree
+d_set_symmetric_difference_update | agree
+d_set_union | agree
+d_set_update | agree
+d_slice___eq__ | gap | built-in method slice.__new__ is not modelled yet
+d_slice___ge__ | gap | built-in method slice.__new__ is not modelled yet
+d_slice___getattribute__ | gap | built-in method slice.__new__ is not modelled yet
+d_slice___gt__ | gap | built-in method slice.__new__ is not modelled yet
+d_slice___hash__ | gap | built-in method slice.__new__ is not modelled yet
+d_slice___le__ | gap | built-in method slice.__new__ is not modelled yet
+d_slice___lt__ | gap | built-in method slice.__new__ is not modelled yet
+d_slice___ne__ | gap | built-in method slice.__new__ is not modelled yet
+d_slice___repr__ | gap | built-in method slice.__new__ is not modelled yet
+d_slice_indices | gap | built-in method slice.__new__ is not modelled yet
+d_staticmethod___call__ | gap | built-in method staticmethod.__call__ is not modelled yet
+d_staticmethod___get__ | gap | built-in method staticmethod.__get__ is not modelled yet
+d_staticmethod___repr__ | gap | a repr that shows an object's address is not modelled yet
+d_str___add__ | agree
+d_str___contains__ | agree
+d_str___eq__ | agree
+d_str___format__ | agree
+d_str___ge__ | agree
+d_str___getitem__ | agree
+d_str___gt__ | agree
+d_str___hash__ | gap | a hash whose number the model does not know
+d_str___iter__ | agree
+d_str___le__ | agree
+d_str___len__ | agree
+d_str___lt__ | agree
+d_str___mod__ | agree
+d_str___mul__ | agree
+d_str___ne__ | agree
+d_str___repr__ | agree
+d_str___rmod__ | agree
+d_str___rmul__ | agree
+d_str___str__ | agree
+d_str_ascii_iterator___iter__ | agree
+d_str_ascii_iterator___length_hint__ | agree
+d_str_ascii_iterator___next__ | agree
+d_str_capitalize | agree
+d_str_casefold | agree
+d_str_center | agree
+d_str_count | agree
+d_str_encode | agree
+d_str_endswith | agree
+d_str_expandtabs | agree
+d_str_find | agree
+d_str_format | agree
+d_str_format_map | agree
+d_str_index | agree
+d_str_isalnum | agree
+d_str_isalpha | agree
+d_str_isascii | agree
+d_str_isdecimal | agree
+d_str_isdigit | agree
+d_str_isidentifier | agree
+d_str_islower | agree
+d_str_isnumeric | agree
+d_str_isprintable | agree
+d_str_isspace | agree
+d_str_istitle | agree
+d_str_isupper | agree
+d_str_iterator___iter__ | agree
+d_str_iterator___length_hint__ | agree
+d_str_iterator___next__ | agree
+d_str_join | agree
+d_str_ljust | agree
+d_str_lower | agree
+d_str_lstrip | agree
+d_str_maketrans | agree
+d_str_partition | agree
+d_str_removeprefix | agree
+d_str_removesuffix | agree
+d_str_replace | agree
+d_str_rfind | agree
+d_str_rindex | agree
+d_str_rjust | agree
+d_str_rpartition | agree
+d_str_rsplit | agree
+d_str_rstrip | agree
+d_str_split | agree
+d_str_splitlines | agree
+d_str_startswith | agree
+d_str_strip | agree
+d_str_swapcase | agree
+d_str_title | agree
+d_str_translate | agree
+d_str_upper | agree
+d_str_zfill | agree
+d_super___get__ | gap | super.__init__ with other arguments than its own is not modelled yet
+d_super___getattribute__ | gap | super.__init__ with other arguments than its own is not modelled yet
+d_super___repr__ | gap | super.__init__ with other arguments than its own is not modelled yet
+d_tuple___add__ | agree
+d_tuple___contains__ | agree
+d_tuple___eq__ | agree
+d_tuple___ge__ | agree
+d_tuple___getattribute__ | gap | built-in method tuple.__getattribute__ is not modelled yet
+d_tuple___getitem__ | agree
+d_tuple___gt__ | agree
+d_tuple___hash__ | agree
+d_tuple___iter__ | agree
+d_tuple___le__ | agree
+d_tuple___len__ | agree
+d_tuple___lt__ | agree
+d_tuple___mul__ | agree
+d_tuple___ne__ | agree
+d_tuple___repr__ | agree
+d_tuple___rmul__ | agree
+d_tuple_count | agree
+d_tuple_index | agree
+d_tuple_iterator___iter__ | agree
+d_tuple_iterator___length_hint__ | agree
+d_tuple_iterator___next__ | agree
+d_type___call__ | agree
+d_type___delattr__ | gap | built-in method type.__delattr__ is not modelled yet
+d_type___getattribute__ | gap | built-in method type.__getattribute__ is not modelled yet
+d_type___or__ | agree
+d_type___repr__ | agree
+d_type___ror__ | agree
+d_type___setattr__ | gap | built-in method type.__setattr__ is not modelled yet
+d_type_mro | gap | built-in method type.mro is not modelled yet
+d_zip___getattribute__ | gap | built-in method zip.__getattribute__ is not modelled yet
+d_zip___iter__ | agree
+d_zip___next__ | agree
 fast_dict_key_int_sub_eq | agree
 fast_dict_merge_getitem | agree
 fast_extend_tuple_sub_iter | agree
@@ -3702,27 +4350,27 @@ m_dict_values_self_sub-over-other | agree
 m_dict_values_too_many | agree
 m_dict_values_too_many_sub | gap | the message of a wrong call of dict.values depends on how it is called
 m_frozenset_copy_bad_keyword | agree
-m_frozenset_copy_self_exact | gap | a slot of a set whose layout is inexact
-m_frozenset_copy_self_sub | gap | a slot of a set whose layout is inexact
-m_frozenset_copy_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_frozenset_copy_self_exact | agree
+m_frozenset_copy_self_sub | agree
+m_frozenset_copy_self_sub-over-other | agree
 m_frozenset_copy_too_many | agree
 m_frozenset_copy_too_many_sub | gap | the message of a wrong call of frozenset.copy depends on how it is called
-m_frozenset_issubset_arg-sub | gap | a slot of a set whose layout is inexact
-m_frozenset_issubset_arg-user | gap | a slot of a set whose layout is inexact
-m_frozenset_issubset_arg-user-not | gap | a slot of a set whose layout is inexact
+m_frozenset_issubset_arg-sub | agree
+m_frozenset_issubset_arg-user | agree
+m_frozenset_issubset_arg-user-not | agree
 m_frozenset_issubset_bad_keyword | agree
-m_frozenset_issubset_self_exact | gap | a slot of a set whose layout is inexact
-m_frozenset_issubset_self_sub | gap | a slot of a set whose layout is inexact
-m_frozenset_issubset_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_frozenset_issubset_self_exact | agree
+m_frozenset_issubset_self_sub | agree
+m_frozenset_issubset_self_sub-over-other | agree
 m_frozenset_issubset_too_many | agree
 m_frozenset_issubset_too_many_sub | gap | the message of a wrong call of frozenset.issubset depends on how it is called
-m_frozenset_union_arg-sub | gap | a slot of a set whose layout is inexact
-m_frozenset_union_arg-user | gap | a slot of a set whose layout is inexact
-m_frozenset_union_arg-user-not | gap | a slot of a set whose layout is inexact
+m_frozenset_union_arg-sub | agree
+m_frozenset_union_arg-user | agree
+m_frozenset_union_arg-user-not | agree
 m_frozenset_union_bad_keyword | gap | the message of a keyword argument to union depends on how it is called
-m_frozenset_union_self_exact | gap | a slot of a set whose layout is inexact
-m_frozenset_union_self_sub | gap | a slot of a set whose layout is inexact
-m_frozenset_union_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_frozenset_union_self_exact | agree
+m_frozenset_union_self_sub | agree
+m_frozenset_union_self_sub-over-other | agree
 m_frozenset_union_too_many | agree
 m_frozenset_union_too_many_sub | agree
 m_list_append_arg-sub | agree
@@ -3821,13 +4469,13 @@ m_range_index_arg-user-not | agree
 m_range_index_bad_keyword | agree
 m_range_index_self_exact | agree
 m_range_index_too_many | agree
-m_set_add_arg-sub | gap | a slot of a set whose layout is inexact
-m_set_add_arg-user | gap | a slot of a set whose layout is inexact
+m_set_add_arg-sub | agree
+m_set_add_arg-user | agree
 m_set_add_arg-user-not | gap | a slot of a set whose layout is inexact
 m_set_add_bad_keyword | agree
-m_set_add_self_exact | gap | a slot of a set whose layout is inexact
-m_set_add_self_sub | gap | a slot of a set whose layout is inexact
-m_set_add_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_add_self_exact | agree
+m_set_add_self_sub | agree
+m_set_add_self_sub-over-other | agree
 m_set_add_too_many | agree
 m_set_add_too_many_sub | gap | the message of a wrong call of set.add depends on how it is called
 m_set_clear_bad_keyword | agree
@@ -3837,80 +4485,80 @@ m_set_clear_self_sub-over-other | agree
 m_set_clear_too_many | agree
 m_set_clear_too_many_sub | gap | the message of a wrong call of set.clear depends on how it is called
 m_set_copy_bad_keyword | agree
-m_set_copy_self_exact | gap | a slot of a set whose layout is inexact
-m_set_copy_self_sub | gap | a slot of a set whose layout is inexact
-m_set_copy_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_copy_self_exact | agree
+m_set_copy_self_sub | agree
+m_set_copy_self_sub-over-other | agree
 m_set_copy_too_many | agree
 m_set_copy_too_many_sub | gap | the message of a wrong call of set.copy depends on how it is called
-m_set_difference_arg-sub | gap | a slot of a set whose layout is inexact
-m_set_difference_arg-user | gap | a slot of a set whose layout is inexact
-m_set_difference_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_difference_arg-sub | agree
+m_set_difference_arg-user | agree
+m_set_difference_arg-user-not | agree
 m_set_difference_bad_keyword | gap | the message of a keyword argument to difference depends on how it is called
-m_set_difference_self_exact | gap | a slot of a set whose layout is inexact
-m_set_difference_self_sub | gap | a slot of a set whose layout is inexact
-m_set_difference_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_difference_self_exact | agree
+m_set_difference_self_sub | agree
+m_set_difference_self_sub-over-other | agree
 m_set_difference_too_many | agree
 m_set_difference_too_many_sub | agree
-m_set_difference_update_arg-sub | gap | a slot of a set whose layout is inexact
-m_set_difference_update_arg-user | gap | a slot of a set whose layout is inexact
-m_set_difference_update_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_difference_update_arg-sub | agree
+m_set_difference_update_arg-user | agree
+m_set_difference_update_arg-user-not | agree
 m_set_difference_update_bad_keyword | gap | the message of a keyword argument to difference_update depends on how it is called
-m_set_difference_update_self_exact | gap | a slot of a set whose layout is inexact
-m_set_difference_update_self_sub | gap | a slot of a set whose layout is inexact
-m_set_difference_update_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_difference_update_self_exact | agree
+m_set_difference_update_self_sub | agree
+m_set_difference_update_self_sub-over-other | agree
 m_set_difference_update_too_many | agree
 m_set_difference_update_too_many_sub | agree
-m_set_discard_arg-sub | gap | a slot of a set whose layout is inexact
-m_set_discard_arg-user | gap | a slot of a set whose layout is inexact
+m_set_discard_arg-sub | agree
+m_set_discard_arg-user | agree
 m_set_discard_bad_keyword | agree
-m_set_discard_self_exact | gap | a slot of a set whose layout is inexact
-m_set_discard_self_sub | gap | a slot of a set whose layout is inexact
-m_set_discard_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_discard_self_exact | agree
+m_set_discard_self_sub | agree
+m_set_discard_self_sub-over-other | agree
 m_set_discard_too_many | agree
 m_set_discard_too_many_sub | gap | the message of a wrong call of set.discard depends on how it is called
-m_set_intersection_arg-sub | gap | a slot of a set whose layout is inexact
-m_set_intersection_arg-user | gap | a slot of a set whose layout is inexact
-m_set_intersection_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_intersection_arg-sub | agree
+m_set_intersection_arg-user | agree
+m_set_intersection_arg-user-not | agree
 m_set_intersection_bad_keyword | gap | the message of a keyword argument to intersection depends on how it is called
-m_set_intersection_self_exact | gap | a slot of a set whose layout is inexact
-m_set_intersection_self_sub | gap | a slot of a set whose layout is inexact
-m_set_intersection_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_intersection_self_exact | agree
+m_set_intersection_self_sub | agree
+m_set_intersection_self_sub-over-other | agree
 m_set_intersection_too_many | agree
 m_set_intersection_too_many_sub | agree
 m_set_intersection_update_arg-sub | agree
 m_set_intersection_update_arg-user | agree
-m_set_intersection_update_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_intersection_update_arg-user-not | agree
 m_set_intersection_update_bad_keyword | gap | the message of a keyword argument to intersection_update depends on how it is called
 m_set_intersection_update_self_exact | agree
 m_set_intersection_update_self_sub | agree
 m_set_intersection_update_self_sub-over-other | agree
 m_set_intersection_update_too_many | agree
 m_set_intersection_update_too_many_sub | agree
-m_set_isdisjoint_arg-sub | gap | a slot of a set whose layout is inexact
-m_set_isdisjoint_arg-user | gap | a slot of a set whose layout is inexact
-m_set_isdisjoint_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_isdisjoint_arg-sub | agree
+m_set_isdisjoint_arg-user | agree
+m_set_isdisjoint_arg-user-not | agree
 m_set_isdisjoint_bad_keyword | agree
-m_set_isdisjoint_self_exact | gap | a slot of a set whose layout is inexact
-m_set_isdisjoint_self_sub | gap | a slot of a set whose layout is inexact
-m_set_isdisjoint_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_isdisjoint_self_exact | agree
+m_set_isdisjoint_self_sub | agree
+m_set_isdisjoint_self_sub-over-other | agree
 m_set_isdisjoint_too_many | agree
 m_set_isdisjoint_too_many_sub | gap | the message of a wrong call of set.isdisjoint depends on how it is called
-m_set_issubset_arg-sub | gap | a slot of a set whose layout is inexact
-m_set_issubset_arg-user | gap | a slot of a set whose layout is inexact
-m_set_issubset_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_issubset_arg-sub | agree
+m_set_issubset_arg-user | agree
+m_set_issubset_arg-user-not | agree
 m_set_issubset_bad_keyword | agree
-m_set_issubset_self_exact | gap | a slot of a set whose layout is inexact
-m_set_issubset_self_sub | gap | a slot of a set whose layout is inexact
-m_set_issubset_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_issubset_self_exact | agree
+m_set_issubset_self_sub | agree
+m_set_issubset_self_sub-over-other | agree
 m_set_issubset_too_many | agree
 m_set_issubset_too_many_sub | gap | the message of a wrong call of set.issubset depends on how it is called
-m_set_issuperset_arg-sub | gap | a slot of a set whose layout is inexact
-m_set_issuperset_arg-user | gap | a slot of a set whose layout is inexact
-m_set_issuperset_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_issuperset_arg-sub | agree
+m_set_issuperset_arg-user | agree
+m_set_issuperset_arg-user-not | agree
 m_set_issuperset_bad_keyword | agree
-m_set_issuperset_self_exact | gap | a slot of a set whose layout is inexact
-m_set_issuperset_self_sub | gap | a slot of a set whose layout is inexact
-m_set_issuperset_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_issuperset_self_exact | agree
+m_set_issuperset_self_sub | agree
+m_set_issuperset_self_sub-over-other | agree
 m_set_issuperset_too_many | agree
 m_set_issuperset_too_many_sub | gap | the message of a wrong call of set.issuperset depends on how it is called
 m_set_pop_bad_keyword | agree
@@ -3919,40 +4567,40 @@ m_set_pop_self_sub | gap | set.pop of a set whose order is not CPython's is not 
 m_set_pop_self_sub-over-other | gap | set.pop of a set whose order is not CPython's is not modelled yet
 m_set_pop_too_many | agree
 m_set_pop_too_many_sub | gap | the message of a wrong call of set.pop depends on how it is called
-m_set_remove_arg-sub | gap | a slot of a set whose layout is inexact
-m_set_remove_arg-user | gap | a slot of a set whose layout is inexact
-m_set_remove_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_remove_arg-sub | agree
+m_set_remove_arg-user | agree
+m_set_remove_arg-user-not | agree
 m_set_remove_bad_keyword | agree
-m_set_remove_self_exact | gap | a slot of a set whose layout is inexact
-m_set_remove_self_sub | gap | a slot of a set whose layout is inexact
-m_set_remove_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_remove_self_exact | agree
+m_set_remove_self_sub | agree
+m_set_remove_self_sub-over-other | agree
 m_set_remove_too_many | agree
 m_set_remove_too_many_sub | gap | the message of a wrong call of set.remove depends on how it is called
-m_set_symmetric_difference_arg-sub | gap | a slot of a set whose layout is inexact
-m_set_symmetric_difference_arg-user | gap | a slot of a set whose layout is inexact
-m_set_symmetric_difference_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_symmetric_difference_arg-sub | agree
+m_set_symmetric_difference_arg-user | agree
+m_set_symmetric_difference_arg-user-not | agree
 m_set_symmetric_difference_bad_keyword | agree
-m_set_symmetric_difference_self_exact | gap | a slot of a set whose layout is inexact
-m_set_symmetric_difference_self_sub | gap | a slot of a set whose layout is inexact
-m_set_symmetric_difference_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_symmetric_difference_self_exact | agree
+m_set_symmetric_difference_self_sub | agree
+m_set_symmetric_difference_self_sub-over-other | agree
 m_set_symmetric_difference_too_many | agree
 m_set_symmetric_difference_too_many_sub | gap | the message of a wrong call of set.symmetric_difference depends on how it is called
-m_set_union_arg-sub | gap | a slot of a set whose layout is inexact
-m_set_union_arg-user | gap | a slot of a set whose layout is inexact
-m_set_union_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_union_arg-sub | agree
+m_set_union_arg-user | agree
+m_set_union_arg-user-not | agree
 m_set_union_bad_keyword | gap | the message of a keyword argument to union depends on how it is called
-m_set_union_self_exact | gap | a slot of a set whose layout is inexact
-m_set_union_self_sub | gap | a slot of a set whose layout is inexact
-m_set_union_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_union_self_exact | agree
+m_set_union_self_sub | agree
+m_set_union_self_sub-over-other | agree
 m_set_union_too_many | agree
 m_set_union_too_many_sub | agree
-m_set_update_arg-sub | gap | a slot of a set whose layout is inexact
-m_set_update_arg-user | gap | a slot of a set whose layout is inexact
-m_set_update_arg-user-not | gap | a slot of a set whose layout is inexact
+m_set_update_arg-sub | agree
+m_set_update_arg-user | agree
+m_set_update_arg-user-not | agree
 m_set_update_bad_keyword | gap | the message of a keyword argument to update depends on how it is called
-m_set_update_self_exact | gap | a slot of a set whose layout is inexact
-m_set_update_self_sub | gap | a slot of a set whose layout is inexact
-m_set_update_self_sub-over-other | gap | a slot of a set whose layout is inexact
+m_set_update_self_exact | agree
+m_set_update_self_sub | agree
+m_set_update_self_sub-over-other | agree
 m_set_update_too_many | agree
 m_set_update_too_many_sub | agree
 m_str_capitalize_bad_keyword | agree
@@ -4281,3 +4929,40 @@ res_str_sub_add_empty | agree
 res_str_sub_mod_no_spec | gap | a % format that is an instance of a subclass of str is not modelled yet
 res_str_sub_mul_one | agree
 res_tuple_sub_add_empty | agree
+syn_assert | agree
+syn_bare_raise | agree
+syn_comparisons | agree
+syn_del_attr | agree
+syn_dict_comp | agree
+syn_dict_display_long | agree
+syn_displays | agree
+syn_displays_after_star | agree
+syn_except_tuple | agree
+syn_finally_completions | agree
+syn_fstring_conversions | agree
+syn_global_statement | agree
+syn_iand | agree
+syn_idiv | agree
+syn_ifloordiv | agree
+syn_ilshift | agree
+syn_imod | agree
+syn_imul | agree
+syn_ipow | agree
+syn_irshift | agree
+syn_isub | agree
+syn_ixor | agree
+syn_list_comp_nested | agree
+syn_matmul | agree
+syn_matmul_int | agree
+syn_not_in | agree
+syn_raise | agree
+syn_raise_context | agree
+syn_raise_from | agree
+syn_reraise_in_finally | agree
+syn_set_comp | agree
+syn_slice_steps | agree
+syn_try_else_finally | agree
+syn_uadd | agree
+syn_with | agree
+syn_with_in_finally | agree
+syn_with_raises | agree

@@ -116,6 +116,21 @@ operation, and rewrites the verdicts, the known runs (`grid_known/`), the summar
 A difference that its owner doesn't fix yet is pinned as `<id> | known | <reason>` in
 `grid_expected.txt` before the update.
 
+The same test checks coverage: every instruction of `Py.env` and every built-in function and
+method that the model implements must be covered by a case that agrees with CPython and gives a
+result, or be listed in `StrataPythonTest/Dyn/axes/not_covered.txt` with the reason. Two kinds of
+evidence cover a name:
+
+- observed: a call that CPython's run of the case shows (`cpython_calls.py`), or an instruction
+  in the translation of the case's operation;
+- declared: a special method that the catalog says the case's operation reaches without a call
+  (`len` of a `list` reaches `list.__len__`), in the case's `entries`.
+
+No run checks a declared entry, so `grid_summary.txt` lists the names that only declared entries
+cover, each with the first case that declares it, and how many more. A new rule or built-in needs a case in `catalog.py`,
+or an entry in `not_covered.txt`; an entry for something that a case now covers fails too. A case
+also names what it calls by name in `calls`, and CPython's run must show each of those calls.
+
 ## Convention: `open Strata` pattern
 
 Since StrataPython was extracted from the `Strata` package, many files use

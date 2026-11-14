@@ -6,6 +6,8 @@
 module
 
 meta import StrataPythonTest.Util.AxisSource
+meta import StrataPython.Dyn.Sem.Assembly
+meta import StrataDyn.DDM
 
 /-! # The axis grid against CPython
 
@@ -25,6 +27,16 @@ run of each `known` case in `grid_known/`. The test fails:
   CPython under seed 0 only. The digest check makes sure that no program changes without an
   update, and the update compares the eight traces again. An update that fails writes nothing.
 
+The coverage check (`AxisSource.coverage`) then takes what the cases that agree with CPython
+reach: observed, the built-in functions and methods that CPython calls in their operations
+(`StrataPythonTest/Dyn/axes/cpython_calls.py`) and the instructions that their operations'
+translations have (and those of the program around every operation, once any case agrees); and
+declared, the dunder entries that the catalog maps their operations to. It fails on a name of the
+model's tables (every instruction of `Py.env`, every built-in function and method that
+`Assembly.impls` implements) that nothing covers and that
+`StrataPythonTest/Dyn/axes/not_covered.txt` doesn't list with a reason, and on a stale entry
+there. The summary lists the names that only declared entries cover.
+
 `grid_summary.txt` shows the verdicts by group and axis; it is compared like the verdicts, so that
 it stays current. The test needs CPython 3.12, which it finds or fails without (`SKIP_PYTHON_TESTS`
 skips it, as it does every Python test). Set `SEM_UPDATE=1` to compare the eight traces of every
@@ -42,11 +54,50 @@ private meta def outDir : System.FilePath := ".lake" / "build" / "differential" 
 private meta def knownDir : System.FilePath := here / "grid_known"
 private meta def knownSuffix : String := ".known.trace"
 
+open StrataPython.Dyn.Sem in
+open Strata.Dyn in
+open StrataPython.Dyn in
+/-- The names that the grid must cover: the instructions of `Py.env`, and the built-in functions
+and the methods of the built-in types that `Assembly.impls` implements, as `<type>.<name>`. -/
+private meta def requiredNames : Array String :=
+  let insns := Py.names.filterMap fun n =>
+    match Py.env.get? n with
+    | some (.insn ..) => some (ToDDM.nameText n)
+    | _ => none
+  let fns := Builtin.allConstants.toList.filterMap fun b =>
+    if (Assembly.impls.function b).isSome then some b.info.name else none
+  let methods := Builtin.allConstants.toList.flatMap fun t =>
+    ((Builtin.ownNames t).toList.map (·.1)).filterMap fun n =>
+      if (Assembly.impls.method t n).isSome then some s!"{t.info.name}.{n}" else none
+  (insns ++ fns ++ methods).toArray
+
+/-- The names that CPython calls by name in the case `c`'s operation (`cpython_calls.py`). -/
+private meta def calledIn (pythonCmd : System.FilePath) (c : Case) : IO (List String) := do
+  let r ← IO.Process.output {
+    cmd := pythonCmd.toString
+    args := #[(here / "cpython_calls.py").toString, (outDir / s!"{c.id}.py").toString]
+    env := #[("PYTHONHASHSEED", some "0"), ("LC_ALL", some "C.UTF-8"),
+      ("PYTHONIOENCODING", some "utf-8")] }
+  unless r.exitCode == 0 do
+    throw <| .userError s!"{c.id}: cpython_calls.py failed:\n{r.stderr}"
+  return (r.stdout.splitOn "\n").filter (!·.isEmpty)
+
+/-- The translation of `f` by `pydyn dyn`, or none if the translator rejects it. -/
+private meta def dynOf (f : System.FilePath) : IO (Option String) := do
+  let r ← IO.Process.output { cmd := SemDiff.pydynPath.toString, args := #["dyn", f.toString] }
+  return if r.exitCode == 0 then some r.stdout else none
+
+/-- The instructions that the operation of the template `t` adds to its translation, against
+`base`, the instructions of `templates/null.py` (`r = None`); none if the translator rejects it. -/
+private meta def insnsOf (base : List String) (t : String) : IO (List String) := do
+  let some withOp ← dynOf (outDir / "templates" / s!"{t}.py") | return []
+  return (insnNames withOp).filter (!base.contains ·)
+
 /-- The verdict of the case `c` and, for a `known` case in update mode, our run to pin; or why the
 test fails on it. `reasons` maps each case pinned as `known` to its reason. -/
 private meta def runCase (pythonCmd : System.FilePath) (update : Bool)
     (reasons : Std.HashMap String String) (c : Case) :
-    IO (Except String (Entry × Option String)) := do
+    IO (Except String (Entry × Option String × List String × Bool)) := do
   let file := outDir / s!"{c.id}.py"
   let traces ← if update then seeds.toArray.mapM (cpythonTraceSeed pythonCmd file)
     else pure #[← cpythonTraceSeed pythonCmd file 0]
@@ -59,6 +110,11 @@ private meta def runCase (pythonCmd : System.FilePath) (update : Bool)
       return .error s!"{c.id}: generator bug: CPython's trace is the same without the operation"
   let ours ← SemDiff.runOurs file
   if let some bug := generatorBug? c theirs ours then return .error bug
+  let called ← calledIn pythonCmd c
+  -- Whether CPython's run gave a result in the operation (not an exception), for coverage.
+  let result := match SemDiff.splitOutput theirs with
+    | some (out, _) => (caseOutcome c.id out matches .ok .result)
+    | none => false
   let reason := reasons.get? c.id
   let pin := knownDir / s!"{c.id}{knownSuffix}"
   let known ← match reason with
@@ -69,8 +125,9 @@ private meta def runCase (pythonCmd : System.FilePath) (update : Bool)
       else return .error s!"{c.id}: missing {pin}; run with SEM_UPDATE=1"
   match SemDiff.judge c.id ours theirs known, ours with
   | .error e, _ => return .error e
-  | .ok v@(.known _), .trace t => return .ok (⟨c.id, v⟩, if update then some t else none)
-  | .ok v, _ => return .ok (⟨c.id, v⟩, none)
+  | .ok v@(.known _), .trace t =>
+    return .ok (⟨c.id, v⟩, if update then some t else none, called, result)
+  | .ok v, _ => return .ok (⟨c.id, v⟩, none, called, result)
 
 /-- Compare `text` with the file `path`, or write it in update mode. -/
 private meta def checkFile (path : System.FilePath) (text : String) (update : Bool) :
@@ -103,12 +160,40 @@ private meta def checkFile (path : System.FilePath) (text : String) (update : Bo
   let results ← TraceSource.mapBounded 8 cases (runCase pythonCmd update reasons)
   let mut now : Array Entry := #[]
   let mut pins : Array (String × String) := #[]
+  let mut calls : Std.HashMap String (List String × Bool) := {}
   for r in results do
     match r with
-    | .ok (e, pin) =>
+    | .ok (e, pin, called, result) =>
       now := now.push e
+      calls := calls.insert e.path (called, result)
       if let some t := pin then pins := pins.push (e.path, t)
     | .error msg => failures := failures.push msg
+  -- The coverage check, from the runs.
+  let templates := (cases.map (·.template)).toList.eraseDups.toArray
+  let some nullDyn ← dynOf (outDir / "templates" / "null.py")
+    | throw <| .userError "the translator rejects templates/null.py"
+  let insns ← TraceSource.mapBounded 8 templates (insnsOf (insnNames nullDyn))
+  let insnsByTemplate : Std.HashMap String (List String) :=
+    (templates.zip insns).foldl (fun m (t, i) => m.insert t i) {}
+  let verdictOf : Std.HashMap String Verdict := now.foldl (fun m e => m.insert e.path e.verdict) {}
+  let evidence := cases.map fun c =>
+    let (called, result) := calls.getD c.id ([], false)
+    ({ case := c, counted := counts (verdictOf.get? c.id), result, called,
+       insns := insnsByTemplate.getD c.template [] } : Evidence)
+  -- The instructions of the program around every operation count once any case agrees.
+  let scaffoldFile := outDir / "templates" / "scaffold.py"
+  let sc ← IO.Process.output
+    { cmd := SemDiff.pydynPath.toString, args := #["dyn", scaffoldFile.toString] }
+  unless sc.exitCode == 0 do
+    throw <| .userError s!"the translator rejects templates/scaffold.py:\n{sc.stdout}"
+  let scaffoldCase : Case := { id := "scaffold", group := "", axis := "scaffold", expect := .result }
+  let evidence := evidence.push
+    { case := scaffoldCase, counted := evidence.any (·.counted), result := true, called := [],
+      insns := insnNames sc.stdout, cells := false }
+  let notCovered ← IO.ofExcept (parseNotCovered (← IO.FS.readFile (here / "not_covered.txt")))
+  let cov := coverage requiredNames evidence notCovered
+  if failures.isEmpty then
+    failures := failures ++ cov.failures
   unless update do
     for f in ← knownDir.readDir do
       let n := (f.fileName.dropEnd knownSuffix.length).toString
@@ -120,7 +205,12 @@ private meta def checkFile (path : System.FilePath) (text : String) (update : Bo
       failures := failures.push f
     for ch in ← Diff.checkOrUpdate (here / "grid_expected.txt") now update do
       failures := failures.push ch.render
-    if let some f ← checkFile (here / "grid_summary.txt") (summary cases now) update then
+    -- The names that only the catalog's declared entries cover, each with the cases that declare
+    -- it, so that a declaration that no run backs is visible here.
+    let entryOnly := s!"covered only by the catalog's entries | {cov.byEntriesOnly.size} names\n" ++
+      String.join (cov.byEntriesOnly.toList.map fun (n, ids) =>
+        s!"  {n} | declared by {declaredBy ids}\n")
+    if let some f ← checkFile (here / "grid_summary.txt") (summary cases now ++ entryOnly) update then
       failures := failures.push f
     if update then
       for f in ← knownDir.readDir do IO.FS.removeFile f.path

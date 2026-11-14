@@ -33,9 +33,11 @@ private meta instance : BEq Outcome := ⟨fun a b => decide (a = b)⟩
 #guard Expect.parse "any" == .ok .any
 #guard Expect.parse "maybe" == .error "unknown expectation: maybe"
 
-#guard (parseCases "a | operators | A1 | result\n\nb | lookup | A3 | raises:TypeError\n").map
-    (·.map fun c => (c.id, c.group, c.axis)) ==
-  .ok #[("a", "operators", "A1"), ("b", "lookup", "A3")]
+#guard (parseCases ("a | operators | A1 | result | t1 | - | int.__add__\n\n" ++
+    "b | methods | A1 | raises:TypeError | t2 | str.split,len | -\n")).map
+    (·.map fun c => (c.id, c.group, c.axis, c.template, c.calls, c.entries)) ==
+  .ok #[("a", "operators", "A1", "t1", [], ["int.__add__"]),
+        ("b", "methods", "A1", "t2", ["str.split", "len"], [])]
 #guard (parseCases "a | operators\n").map (·.size) == .error "malformed case line: a | operators"
 
 /-- The output of a case `c` with the lines `body` between its markers. -/
@@ -60,7 +62,7 @@ private meta def out (body : List String) : String :=
 private meta def okTrace (o : String) : String :=
   SemDiff.traceOf o "--- outcome\nok\n--- globals\n"
 
-private meta def case (e : Expect) : Case := ⟨"c", "g", "A1", e⟩
+private meta def case (e : Expect) : Case := { id := "c", group := "g", axis := "A1", expect := e }
 
 #guard generatorBug? (case .result) (okTrace (out ["= int 3"])) (.trace "") == none
 #guard generatorBug? (case .any) (okTrace (out ["! KeyError: 1 | x"])) (.trace "") == none
@@ -106,10 +108,122 @@ private meta def case (e : Expect) : Case := ⟨"c", "g", "A1", e⟩
 #guard !seedsAgree #["a", "a", "b"]
 #guard seeds.length == 8
 
-#guard summary #[⟨"x", "ops", "A1", .result⟩, ⟨"y", "ops", "A1", .result⟩,
-    ⟨"z", "lookup", "A3", .result⟩]
+#guard summary #[{ id := "x", group := "ops", axis := "A1", expect := .result },
+    { id := "y", group := "ops", axis := "A1", expect := .result },
+    { id := "z", group := "lookup", axis := "A3", expect := .result }]
     #[⟨"x", .agree⟩, ⟨"y", .gap "m"⟩, ⟨"z", .known "k"⟩] ==
   "lookup | A3 | 0 agree | 0 gap | 1 known\nops | A1 | 1 agree | 1 gap | 0 known\n\
    total | 3 cases | 1 agree | 1 gap | 1 known\n"
+
+-- The instructions of a printed module: bound results and statements, each name once.
+#guard insnNames "func @f() {\n  entry.0():\n    %a : py.Value = py.intLit(1)\n    %b : py.Value = py.add(%a, %a) ^p()\n    %c : py.Value = py.intLit(2)\n    ret(%c)\n" ==
+  ["py.intLit", "py.add"]
+#guard insnNames "  entry.0():\n    branch(%c, a.0(), b.0())\n  a.0():\n    jump b.0()\n  unreachable.0():\n    unreachable\n    py.Completion.case(%x)\n" ==
+  ["base.branch", "base.jump", "base.unreachable", "py.Completion.case"]
+
+#guard (parseNotCovered "# comment\nset.__len__ | a gap\nint.__add__ @ A3 | why\n").map
+    (·.map fun e => (e.name, e.axis, e.reason)) ==
+  .ok #[("set.__len__", none, "a gap"), ("int.__add__", some "A3", "why")]
+#guard (parseNotCovered "x\n").map (·.size) == .error "malformed not-covered entry: x"
+
+/-- A case of the axis `axis` that calls `calls` by name and reaches `entries`. -/
+private meta def cov (id axis : String) (calls entries : List String) : Case :=
+  { id, group := "g", axis, expect := .result, calls, entries }
+
+/-- The evidence of a case that agrees (`counted`), whose CPython run gives a result (`result`),
+and that shows the calls `called` and the instructions `insns`. -/
+private meta def ev (c : Case) (counted : Bool) (called insns : List String) (result := true) :
+    Evidence := { case := c, counted, result, called, insns }
+
+private meta def fails (r : Coverage) : Array String := r.failures
+
+-- Only an agreeing case counts: a known case is a wrong result.
+#guard counts (some .agree)
+#guard !counts (some (.known "a bug"))
+#guard !counts (some (.gap "m"))
+#guard !counts none
+
+-- Covered by a call, an entry and an instruction: nothing fails, and the entry-only name is
+-- reported apart.
+#guard coverage #["len", "list.__len__", "py.add"]
+    #[ev (cov "a" "A1" ["len"] ["list.__len__"]) true ["len"] ["py.add"]] #[] ==
+  ⟨#[], #[("list.__len__", #["a"])]⟩
+-- A case that agrees but doesn't make the call it declares.
+#guard fails (coverage #["len"] #[ev (cov "a" "A1" ["len"] []) true [] []] #[]) ==
+  #["a: the case calls len by name, but CPython's run doesn't show it",
+    "len: no case that agrees with CPython reaches it, and not_covered.txt doesn't list it",
+    "len @ A1: no case of the axis that agrees with CPython reaches it, and not_covered.txt doesn't list the cell"]
+-- A case that gaps covers nothing; the uncovered name passes only if `not_covered.txt` lists it.
+#guard fails (coverage #["len"] #[ev (cov "a" "A1" ["len"] []) false ["len"] []] #[]) ==
+  #["len: no case that agrees with CPython reaches it, and not_covered.txt doesn't list it",
+    "len @ A1: no case of the axis that agrees with CPython reaches it, and not_covered.txt doesn't list the cell"]
+#guard fails (coverage #["len"] #[ev (cov "a" "A1" ["len"] []) false ["len"] []]
+    #[⟨"len", none, "gap"⟩]) == #[]
+-- A case whose CPython run raises covers its cell, not the name.
+#guard fails (coverage #["len"] #[ev (cov "a" "A8" ["len"] []) true ["len"] [] (result := false)]
+    #[]) ==
+  #["len: no case that agrees with CPython reaches it, and not_covered.txt doesn't list it"]
+-- A name of the tables that no case reaches is reported, also with no case declaring it.
+#guard fails (coverage #["len", "hex"] #[ev (cov "a" "A1" ["len"] []) true ["len"] []] #[]) ==
+  #["hex: no case that agrees with CPython reaches it, and not_covered.txt doesn't list it"]
+-- A declared cell of another axis needs its own agreeing case.
+#guard fails (coverage #["len"]
+    #[ev (cov "a" "A1" ["len"] []) true ["len"] [], ev (cov "b" "A3" ["len"] []) false [] []]
+    #[]) ==
+  #["len @ A3: no case of the axis that agrees with CPython reaches it, and not_covered.txt doesn't list the cell"]
+#guard fails (coverage #["len"]
+    #[ev (cov "a" "A1" ["len"] []) true ["len"] [], ev (cov "b" "A3" ["len"] []) false [] []]
+    #[⟨"len", some "A3", "gap"⟩]) == #[]
+-- A name that the model doesn't implement needs no cell: its cases gap by design.
+#guard fails (coverage #["len"]
+    #[ev (cov "a" "A1" ["len"] []) true ["len"] [], ev (cov "b" "direct" ["str.isprintable"] []) false [] []]
+    #[]) == #[]
+-- Evidence with `cells := false` covers the name but no cell.
+#guard fails (coverage #["len"]
+    #[{ case := cov "s" "A1" ["len"] [], counted := true, result := true, called := ["len"],
+        insns := [], cells := false }] #[]) ==
+  #["len @ A1: no case of the axis that agrees with CPython reaches it, and not_covered.txt doesn't list the cell"]
+-- A declared entry of a case whose CPython run raises covers its cell, not the name.
+#guard fails (coverage #["list.__len__"]
+    #[ev (cov "a" "A1" [] ["list.__len__"]) true [] [] (result := false)] #[]) ==
+  #["list.__len__: no case that agrees with CPython reaches it, and not_covered.txt doesn't list it"]
+-- A case whose CPython run raises isn't asked to show the calls it declares.
+#guard fails (coverage #["len"]
+    #[ev (cov "a" "A8" ["len"] []) true [] [] (result := false), ev (cov "b" "A1" ["len"] []) true ["len"] []]
+    #[⟨"len", some "A8", "raises"⟩]) == #[]
+-- An instruction that can never run in an agreeing case doesn't count, though the translation has it.
+#guard fails (coverage #["base.unreachable"] #[ev (cov "a" "A1" [] []) true [] ["base.unreachable"]] #[]) ==
+  #["base.unreachable: no case that agrees with CPython reaches it, and not_covered.txt doesn't list it"]
+-- The program around every operation covers names, never cells.
+#guard fails (coverage #["py.strLit"]
+    #[{ case := cov "s" "scaffold" [] [], counted := true, result := true, called := [],
+        insns := ["py.strLit"], cells := false }] #[]) == #[]
+-- An entry that no table has, and stale entries of `not_covered.txt`: covered, not in the tables,
+-- or a cell that no case declares.
+#guard fails (coverage #["len"] #[ev (cov "a" "A1" ["len"] ["no.such"]) true ["len"] []]
+    #[⟨"len", none, "x"⟩, ⟨"len", some "A1", "y"⟩, ⟨"gone", none, "z"⟩, ⟨"len", some "A5", "w"⟩]) ==
+  #["a: the catalog says the case reaches no.such, which no table of the model has",
+    "not_covered.txt: len is covered; remove its entry",
+    "not_covered.txt: len @ A1 is covered; remove its entry",
+    "not_covered.txt: gone is no name of the model's tables",
+    "not_covered.txt: no case declares len @ A5 for a name of the model's tables"]
+
+-- A name that only declared entries cover is listed with the cases that declare it, in order, and
+-- a stale entry of `not_covered.txt` for it says so: no run of ours shows it.
+private meta def declaredOnly : Array Evidence :=
+  #[ev (cov "a" "A1" [] ["list.__len__"]) true [] [], ev (cov "b" "A1" [] ["list.__len__"]) true [] [],
+    ev (cov "c" "A1" ["len"] []) true ["len"] []]
+#guard (coverage #["len", "list.__len__"] declaredOnly #[]).byEntriesOnly ==
+  #[("list.__len__", #["a", "b"])]
+#guard fails (coverage #["len", "list.__len__"] declaredOnly
+    #[⟨"list.__len__", none, "x"⟩, ⟨"list.__len__", some "A1", "y"⟩, ⟨"len", some "A1", "z"⟩]) ==
+  #["not_covered.txt: list.__len__ is covered only by the declared entries of a and 1 more; remove its entry",
+    "not_covered.txt: list.__len__ @ A1 is covered only by the declared entries of a and 1 more; remove its entry",
+    "not_covered.txt: len @ A1 is covered; remove its entry"]
+-- A name that a run shows is not in the list, even when a case also declares it.
+#guard (coverage #["len"] #[ev (cov "a" "A1" ["len"] ["len"]) true ["len"] []] #[]).byEntriesOnly == #[]
+#guard declaredBy #["a"] == "a"
+#guard declaredBy #["a", "b", "c"] == "a and 2 more"
+#guard declaredBy #[] == "no case"
 
 end StrataPython.AxisSourceTest
