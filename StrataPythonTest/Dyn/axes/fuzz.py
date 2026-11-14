@@ -4,6 +4,8 @@
     python3.12 fuzz.py OUTDIR --seed S --count N
     python3.12 fuzz.py --digest OUTDIR   the SHA-256 of the programs in OUTDIR, of `trace.py`, and
                                          of the string "3.12"
+    python3.12 fuzz.py shrink TREE OUTDIR  write the smaller candidates of the program whose tree
+                                         is the file TREE (`candidates`), and print their lines
 
 writes `OUTDIR/fuzz_<S>_<i>.py` and `fuzz_<S>_<i>.json` (the program's tree) for i < N, and prints
 one line per program: `<id> | <bucket> | <steps> | <classes meant to fail>`, where the bucket is
@@ -24,9 +26,11 @@ re-enters walks `SHARED` meanwhile. A step that uses a class
 whose definition raised prints that it skips.
 """
 
+import copy
 import json
 import pathlib
 import random
+import re
 import sys
 
 if sys.version_info[:2] != (3, 12):
@@ -277,9 +281,143 @@ def digest(outdir):
     print(h.hexdigest())
 
 
+def line(tree):
+    """The line that `main` prints for `tree`."""
+    steps = [f"c:{c['name']}" for c in tree["classes"]] + [f"v:{v['name']}" for v in tree["values"]] + \
+        [o["step"] for o in tree["ops"]] + (["seed"] if tree["seed_step"] else [])
+    fails = [f"c:{c['name']}" for c in tree["classes"] if c["fails"]]
+    return (f"{tree['id']} | {'seed' if tree['seed_step'] else 'plain'} | {','.join(steps)} | "
+            f"{','.join(fails) or '-'}")
+
+
+def without_values(tree, names):
+    """`tree` without the values `names`, and without the values and operations that use them."""
+    gone = set(names)
+    values = []
+    for v in tree["values"]:
+        if v["name"] in gone or gone & set(v["uses"]):
+            gone.add(v["name"])
+        else:
+            values.append(v)
+    tree["values"] = values
+    tree["ops"] = [o for o in tree["ops"] if not gone & set(o["uses"])]
+    return tree
+
+
+def without_classes(tree, names):
+    """`tree` without the classes `names`, the classes based on them, and what uses them."""
+    gone = set(names)
+    classes = []
+    for c in tree["classes"]:
+        if c["name"] in gone or c["base"] in gone:
+            gone.add(c["name"])
+        else:
+            classes.append(c)
+    tree["classes"] = classes
+    return without_values(tree, [v["name"] for v in tree["values"] if gone & set(v["uses"])])
+
+
+def remake_instances(tree):
+    """`tree` with each instance made from the literal of its class's built-in base again, after
+    a base changed."""
+    by_name = {c["name"]: c for c in tree["classes"]}
+    for v in tree["values"]:
+        if v["uses"] and v["uses"][0] in by_name and v["expr"].startswith(v["uses"][0] + "("):
+            c = by_name[v["uses"][0]]
+            v["expr"] = f"{c['name']}({LITERAL[root_base(tree, c)]})"
+    return tree
+
+
+WALK = re.compile(r"^\[(.*) for _ in SHARED\]$")
+
+
+def candidates(tree):
+    """The smaller trees of `tree`, in the order the shrink loop tries them: drop an operation,
+    the seed step, a value (`SHARED`'s step only when no operation uses it), a class or a special
+    method; make a method plain, then of the kind
+    `function`; make a base `object`; make a class's creation succeed; take an operation out of
+    its walk over `SHARED`; make a container hold one value, and a literal `3`. Each candidate
+    differs from `tree`, and appears once."""
+    out = []
+
+    def edit(f):
+        t = f(copy.deepcopy(tree))
+        if t is not None:
+            out.append(t)
+
+    for k in range(len(tree["ops"])):
+        edit(lambda t, k=k: (t["ops"].pop(k), t)[1])
+    if tree["seed_step"]:
+        edit(lambda t: (t.update(seed_step=False), t)[1])
+    for v in tree["values"]:
+        if v["name"] != "SHARED":
+            edit(lambda t, n=v["name"]: without_values(t, [n]))
+        elif not any("SHARED" in o["uses"] for o in tree["ops"]):
+            # Its step only shows the list; the value steps still append to it.
+            edit(lambda t: (t.update(values=[w for w in t["values"] if w["name"] != "SHARED"]), t)[1])
+    for c in tree["classes"]:
+        edit(lambda t, n=c["name"]: without_classes(t, [n]))
+    for ci, c in enumerate(tree["classes"]):
+        for mi in range(len(c["methods"])):
+            edit(lambda t, ci=ci, mi=mi: (t["classes"][ci]["methods"].pop(mi), t)[1])
+    for ci, c in enumerate(tree["classes"]):
+        for mi, m in enumerate(c["methods"]):
+            if m["behaviour"] != "plain":
+                edit(lambda t, ci=ci, mi=mi: (t["classes"][ci]["methods"][mi].update(behaviour="plain"), t)[1])
+            if m["kind"] != "function":
+                edit(lambda t, ci=ci, mi=mi: (t["classes"][ci]["methods"][mi].update(kind="function"), t)[1])
+    for ci, c in enumerate(tree["classes"]):
+        if c["base"] != "object":
+            edit(lambda t, ci=ci: remake_instances((t["classes"][ci].update(base="object"), t)[1]))
+        if c["fails"]:
+            edit(lambda t, ci=ci: (t["classes"][ci].update(fails=False), t)[1])
+    for k, o in enumerate(tree["ops"]):
+        m = WALK.match(o["expr"])
+        if m:
+            def unwalk(t, k=k, inner=m.group(1)):
+                t["ops"][k]["expr"] = inner
+                if "SHARED" not in inner:
+                    t["ops"][k]["uses"] = [u for u in t["ops"][k]["uses"] if u != "SHARED"]
+                return t
+            edit(unwalk)
+    for k, v in enumerate(tree["values"]):
+        if v["uses"] and v["expr"] == f"[{v['uses'][0]}, {v['uses'][0]}]":
+            edit(lambda t, k=k: (t["values"][k].update(expr=f"[{t['values'][k]['uses'][0]}]"), t)[1])
+        elif not v["uses"] and v["name"] != "SHARED" and v["expr"] != "3":
+            edit(lambda t, k=k: (t["values"][k].update(expr="3"), t)[1])
+    seen = {json.dumps(tree, sort_keys=True)}
+    unique = []
+    for t in out:
+        key = json.dumps(t, sort_keys=True)
+        if key not in seen:
+            seen.add(key)
+            unique.append(t)
+    return unique
+
+
+def shrink(tree_file, outdir):
+    """Write the candidates of the tree in `tree_file` into `outdir` (`<root>_k<k>.py` and its
+    tree, where `<root>` is the original program's id), and print one line per candidate, in
+    order, as `main` does."""
+    tree = json.loads(pathlib.Path(tree_file).read_text())
+    root = tree["id"].split("_k")[0]
+    out = pathlib.Path(outdir)
+    out.mkdir(parents=True, exist_ok=True)
+    for old in list(out.glob(f"{root}_k*.py")) + list(out.glob(f"{root}_k*.json")):
+        old.unlink()
+    for k, t in enumerate(candidates(tree)):
+        t["id"] = f"{root}_k{k}"
+        (out / f"{t['id']}.py").write_text(render(t))
+        (out / f"{t['id']}.json").write_text(json.dumps(t, indent=1))
+        print(line(t))
+
+
 def main():
     if len(sys.argv) == 3 and sys.argv[1] == "--digest":
         digest(sys.argv[2])
+        return
+    if len(sys.argv) == 4 and sys.argv[1] == "shrink":
+        shrink(sys.argv[2], sys.argv[3])
         return
     import argparse
     ap = argparse.ArgumentParser()
@@ -295,11 +433,7 @@ def main():
         tree = make(args.seed, i)
         (out / f"{tree['id']}.py").write_text(render(tree))
         (out / f"{tree['id']}.json").write_text(json.dumps(tree, indent=1))
-        steps = [f"c:{c['name']}" for c in tree["classes"]] + [f"v:{v['name']}" for v in tree["values"]] + \
-            [o["step"] for o in tree["ops"]] + (["seed"] if tree["seed_step"] else [])
-        fails = [f"c:{c['name']}" for c in tree["classes"] if c["fails"]]
-        print(f"{tree['id']} | {'seed' if tree['seed_step'] else 'plain'} | {','.join(steps)} | "
-              f"{','.join(fails) or '-'}")
+        print(line(tree))
 
 
 if __name__ == "__main__":

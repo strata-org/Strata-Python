@@ -142,7 +142,11 @@ its own `try`. `StrataPythonTestExtra/AxisFuzzTest.lean` runs the 200 programs o
 program: `fuzz_known/` keeps the program beside our run, and the test fails when the generator
 gives that id another program. To fuzz further, run
 `FUZZ_SEED=S FUZZ_COUNT=N lake env lean StrataPythonTestExtra/AxisFuzzTest.lean`: it runs CPython
-under eight hash seeds, pins nothing, and fails on any difference.
+under eight hash seeds, pins nothing, and fails on any difference. Add `FUZZ_SHRINK=1` to shrink
+each failing program to a small one that fails at the same place (the same step, and the same
+lines where it first differs from CPython). If the shrunk program still fails the same way when it
+runs again, it writes `repro-<id>.py` and both traces to `.lake/build/differential/fuzz-<S>/`, ready
+to send to the owner of the bug.
 
 ## Convention: `open Strata` pattern
 

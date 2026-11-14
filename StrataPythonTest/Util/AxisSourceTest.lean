@@ -24,6 +24,11 @@ private meta instance {α : Type} [BEq α] : BEq (Except String α) where
     | .error a, .error b => a == b
     | _, _ => false
 
+private meta instance {α : Type} [BEq α] : BEq (Except FuzzFail α) where
+  beq
+    | .ok a, .ok b => a == b
+    | .error a, .error b => decide (a = b)
+    | _, _ => false
 private meta instance : BEq Expect := ⟨fun a b => decide (a = b)⟩
 private meta instance : BEq Outcome := ⟨fun a b => decide (a = b)⟩
 
@@ -335,6 +340,13 @@ private meta def wrongGapTrace : String := SemDiff.traceOf (steps ["@op o0", "= 
 #guard knownGap? "f" false wrongGap #[SemDiff.endlessTrace] ⟨"D6", none⟩ == none
 #guard knownGap? "f" false wrongGap #[SemDiff.syntaxTrace] ⟨"D6", none⟩ == none
 
+-- A repro is written only for a shrunk program that fails the same way when it runs again.
+private meta def k1 : FailureKind := .differs ⟨"o1", .value, some "= int 1", some "= int 2"⟩
+#guard reproSeed? k1 (some (k1, 3)) == .ok 3
+#guard reproSeed? k1 none == .error "the shrunk program no longer fails when it runs again"
+#guard reproSeed? k1 (some (.fuel "o1", 0)) ==
+  .error "the shrunk program fails differently when it runs again: out of fuel in step o1"
+
 -- `stalePins` names the files of a pin directory that pin no known id, for every suffix, and
 -- `checkFile` reports a difference only outside update mode.
 #eval show IO Unit from do
@@ -356,4 +368,97 @@ private meta def wrongGapTrace : String := SemDiff.traceOf (steps ["@op o0", "= 
     throw <| .userError "checkFile: update mode didn't write"
   IO.FS.removeDirAll dir.parent.get!
 
+-- Where two outputs first differ: the step, the kind of line, CPython's line and ours.
+#guard firstDiff "@op o0\n= int 2\n" "@op o0\n= int 1\n" == ⟨"o0", .value, some "= int 1", some "= int 2"⟩
+#guard firstDiff "@op o0\n= int 1\n" "@op o0\nev C.__eq__\n= int 1\n" ==
+  ⟨"o0", .event, some "ev C.__eq__", some "= int 1"⟩
+#guard firstDiff "@op o0\n@done o0\n@op o1\n= int 2\n" "@op o0\n@done o0\n@op o1\n= int 1\n" ==
+  ⟨"o1", .value, some "= int 1", some "= int 2"⟩
+-- A missing line of ours and an extra line of ours differ: each side's line is kept.
+#guard firstDiff "@op o0\n" "@op o0\n@done o0\n" == ⟨"o0", .marker, some "@done o0", none⟩
+#guard firstDiff "@op o0\n@done o0\n" "@op o0\n" == ⟨"o0", .marker, none, some "@done o0"⟩
+#guard firstDiff "@op o0\n= int 1\n" "@op o0\n" == ⟨"o0", .value, none, some "= int 1"⟩
+-- Two different wrong lines of ours differ.
+#guard firstDiff "@op o0\n= int 2\n" "@op o0\n= int 1\n" != firstDiff "@op o0\n= int 3\n" "@op o0\n= int 1\n"
+-- Before any step, the step is empty.
+#guard firstDiff "x\n" "y\n" == ⟨"", .value, some "y", some "x"⟩
+-- Equal outputs: the sections after them are compared line by line, with no step.
+#guard firstDiff "@op o0\n" "@op o0\n" "--- outcome\nraised X: y\n" "--- outcome\nok\n" ==
+  ⟨"", .outcome, some "ok", some "raised X: y"⟩
+#guard firstDiff "@op o0\n" "@op o0\n" "--- outcome\nok\n--- globals\nx = 2\n" "--- outcome\nok\n--- globals\nx = 1\n" ==
+  ⟨"", .outcome, some "x = 1", some "x = 2"⟩
+
+-- How a run fails against one of CPython's traces.
+private meta def one : String := steps ["@op o0", "= int 1", "@done o0"]
+private meta def two : String := steps ["@op o0", "= int 2", "@done o0"]
+#guard failureKind? (.trace (okTrace one)) (okTrace one) == none
+#guard failureKind? (.trace (okTrace two)) (okTrace one) ==
+  some (.differs ⟨"o0", .value, some "= int 1", some "= int 2"⟩)
+#guard failureKind? (.trace (okTrace one)) (okTrace (steps ["@op o0", "ev C.__eq__", "= int 1", "@done o0"])) ==
+  some (.differs ⟨"o0", .event, some "ev C.__eq__", some "= int 1"⟩)
+-- Two bugs in different steps have different kinds.
+#guard failureKind? (.trace (okTrace (steps ["@op o0", "= int 1", "@done o0", "@op o1", "= int 3", "@done o1"])))
+    (okTrace (steps ["@op o0", "= int 1", "@done o0", "@op o1", "= int 1", "@done o1"])) !=
+  failureKind? (.trace (okTrace two)) (okTrace one)
+-- Equal outputs, and a different outcome or different globals: different kinds.
+#guard failureKind? (.trace (SemDiff.traceOf one "--- outcome\nraised X: y\n--- globals\n")) (okTrace one) ==
+  some (.differs ⟨"", .outcome, some "ok", some "raised X: y"⟩)
+#guard failureKind? (.trace (SemDiff.traceOf one "--- outcome\nok\n--- globals\nx = 2\n"))
+    (SemDiff.traceOf one "--- outcome\nok\n--- globals\nx = 1\n") ==
+  some (.differs ⟨"", .outcome, some "x = 1", some "x = 2"⟩)
+#guard failureKind? (gapRun (steps ["@op o0", "= int 2"])) (okTrace one) ==
+  some (.beforeGap ⟨"o0", .value, some "= int 1", some "= int 2"⟩)
+#guard failureKind? (gapRun (steps ["@op o0"])) (okTrace one) == none
+-- A model invariant, a fault and a run out of fuel record the step where our run stopped.
+#guard failureKind? (.trace (SemDiff.traceOf one s!"--- gap {StrataPython.Dyn.Sem.modelInvariantPrefix}x\n"))
+  (okTrace one) == some (.invariant "o0" s!"{StrataPython.Dyn.Sem.modelInvariantPrefix}x")
+#guard failureKind? (.trace (SemDiff.traceOf one "--- fault f\n")) (okTrace one) == some (.fault "o0" "--- fault f")
+#guard failureKind? (.trace (SemDiff.traceOf one "--- out of fuel\n")) (okTrace one) == some (.fuel "o0")
+#guard failureKind? (.trace (SemDiff.traceOf (steps ["@op o0", "= int 1", "@done o0", "@op o1"]) "--- out of fuel\n"))
+  (okTrace one) == some (.fuel "o1")
+#guard failureKind? (.trace "no header") (okTrace one) == some .noOutput
+-- CPython's trace that is no plain run, and a rejected program: no failure kind.
+#guard failureKind? (.trace (okTrace two)) SemDiff.syntaxTrace == none
+#guard failureKind? (.trace (okTrace two)) SemDiff.endlessTrace == none
+#guard failureKind? (.trace (SemDiff.traceOf one "--- out of fuel\n")) SemDiff.endlessTrace == none
+#guard failureKind? (.trace (okTrace two)) (SemDiff.twoRunsHeader ++ okTrace one) == none
+#guard failureKind? .syntax (okTrace one) == none
+
+-- How a fuzz program fails, over its eight traces, with the trace that shows it.
+private meta def eight (t : String) : Array String := Array.replicate 8 t
+#guard fuzzFailure? (prog ["o0"]) (eight (okTrace one)) (.trace (okTrace two)) ==
+  some (.differs ⟨"o0", .value, some "= int 1", some "= int 2"⟩, 0)
+#guard fuzzFailure? (prog ["o0"]) (eight (okTrace one)) (.trace (okTrace one)) == none
+#guard fuzzFailure? (prog ["o0"]) (eight (okTrace one)) (gapRun (steps ["@op o0"])) == none
+-- A generator bug isn't a failure: here CPython's run doesn't end with `ok`.
+#guard fuzzFailure? (prog ["o0"]) (eight (SemDiff.traceOf one "--- outcome\nraised X: y\n--- globals\n"))
+  (.trace (okTrace two)) == none
+-- Nor are traces that depend on the seed outside the seed bucket, nor no traces.
+#guard fuzzFailure? (prog ["o0"]) traces (.trace (okTrace two)) == none
+#guard fuzzFailure? (prog ["o0"]) #[] (.trace (okTrace two)) == none
+-- In the seed bucket: a run that prints seed 0's order and then gaps fails against seed 1's trace.
+#guard fuzzFailure? (prog ["o0", "seed"]) traces
+    (gapRun (steps ["@op o0", "= int 1", "@done o0", "@op seed", "= list ['a', 'b']", "@done seed"])) ==
+  some (.beforeGap ⟨"seed", .value, some "= list ['b', 'a']", some "= list ['a', 'b']"⟩, 1)
+-- A result where the seed bucket's traces differ: our run agrees with seed 0's trace, so the
+-- failure shows against seed 1's.
+#guard fuzzFailure? (prog ["o0", "seed"]) traces (.trace (seedTrace "['a', 'b']")) ==
+  some (.differs ⟨"seed", .value, some "= list ['b', 'a']", some "= list ['a', 'b']"⟩, 1)
+#guard fuzzFailure? (prog ["o0", "seed"]) traces (gapRun (steps ["@op o0", "= int 1", "@done o0", "@op seed"])) == none
+
+-- The verdict shared by the test and the shrinker: a generator bug is a `bug`, a wrong run is
+-- `wrong`.
+#guard fuzzVerdict (prog ["o0"]) (eight (okTrace one)) (.trace (okTrace one)) none == .ok .agree
+#guard (fuzzVerdict (prog ["o0"]) (eight (okTrace one)) (.trace (okTrace two)) none) matches .error (.wrong _)
+#guard (fuzzVerdict (prog ["o0"]) traces (.trace (okTrace two)) none) ==
+  .error (.bug "f: generator bug: CPython's trace depends on the hash seed or the machine")
+#guard (fuzzVerdict (prog ["o0"]) #[] (.trace (okTrace two)) none) == .error (.bug "f: no CPython trace")
+#guard fuzzVerdict (prog ["o0"]) (eight (okTrace one)) (.trace (okTrace two)) (some ⟨"D", some (okTrace two)⟩) ==
+  .ok (.known "D")
+
+#guard (FailureKind.differs ⟨"o1", .event, some "ev C.__eq__", none⟩).render ==
+  "a difference, first at a user call in step o1"
+#guard (FailureKind.fuel "o2").render == "out of fuel in step o2"
+#guard (FailureKind.beforeGap ⟨"", .outcome, some "ok", none⟩).render ==
+  "a difference before the gap, first at the outcome or the globals"
 end StrataPython.AxisSourceTest

@@ -29,7 +29,10 @@ need besides the judge:
 * the fuzzer's checks: its programs (`FuzzProgram`, `parseFuzz`), the generator-bug checks of a
   fuzz program (`fuzzBug?`, with `runBug?`), the verdict of a program whose output depends on the
   hash seed (`judgeSeedDependent`), and a pinned program that gaps (`knownGap?`);
-* the files that both tests compare or write (`checkFile`, `stalePins`).
+* the files that both tests compare or write (`checkFile`, `stalePins`);
+* the shrinker's checks: one verdict for a fuzz program (`fuzzVerdict`), how a run fails against
+  CPython (`failureKind?`, `fuzzFailure?`), and whether a shrunk program still fails the same way
+  when it runs again (`reproSeed?`).
 
 A case prints `@op <id>` right before its operation and `@done <id>` after the `try` around it;
 between them, a `= ...` line for a result or a `! <ExcType>: ...` line for an exception, an
@@ -523,5 +526,169 @@ def stalePins (dir : System.FilePath) (suffixes : List String) (known : String �
       (f.fileName.dropEnd sfx.length).toString
     unless id?.any known do out := out.push s!"{f.path}: pinned for no known {what}"
   return out
+
+/-- The kind of a trace line where two runs first differ: a user call (`ev`), a step's marker
+(`@op`, `@done`), another output line (a value, an exception, a skip), or a line after the output
+(the outcome and the globals). -/
+inductive LineKind where
+  | event
+  | marker
+  | value
+  | outcome
+  deriving DecidableEq, Repr
+
+/-- The kind of the output line `l`. -/
+def lineKind (l : String) : LineKind :=
+  if l.startsWith "ev " then .event else if l.startsWith "@" then .marker else .value
+
+/-- Where two runs first differ: the step it is in (the last `@op <step>` line before it; `""`
+before any step and after the output), the kind of line, and the two lines there: CPython's and
+ours, each `none` past the end of its run's part. -/
+structure FirstDiff where
+  step : String
+  kind : LineKind
+  theirs : Option String
+  ours : Option String
+  deriving DecidableEq, Repr
+
+/-- The lines of `s`, without the empty line after a final newline. -/
+private def linesOf (s : String) : List String :=
+  if s.isEmpty then [] else ((if s.endsWith "\n" then (s.dropEnd 1).toString else s).splitOn "\n")
+
+/-- The step of the output lines `ls`: the last `@op <step>` among them, or `""`. -/
+def stepOf (ls : List String) : String :=
+  match ls.reverse.find? (·.startsWith "@op ") with
+  | some l => (l.drop 4).toString
+  | none => ""
+
+/-- The index of the first line where `a` and `b` differ, and their lines there. -/
+private def firstApart (a b : List String) : Nat × Option String × Option String :=
+  let n := ((a.zip b).takeWhile fun (x, y) => x == y).length
+  (n, a[n]?, b[n]?)
+
+/-- Where our run first differs from CPython's: in the outputs `ours` and `theirs`, or, when they
+are equal, in the sections after them, `oursRest` and `theirsRest`, compared line by line (with
+an empty step and the kind `outcome`). The line kind is that of CPython's line, or of ours past the
+end of CPython's output. -/
+def firstDiff (ours theirs : String) (oursRest theirsRest : String := "") : FirstDiff :=
+  let a := linesOf ours
+  let b := linesOf theirs
+  match firstApart a b with
+  | (_, none, none) =>
+    let (_, x, y) := firstApart (linesOf oursRest) (linesOf theirsRest)
+    ⟨"", .outcome, y, x⟩
+  | (n, x, y) => ⟨stepOf (b.take n), lineKind ((y <|> x).getD ""), y, x⟩
+
+/-- How a run fails against CPython's trace: the gap is a model invariant; the run has a fault; it
+is out of fuel; it differs before its gap; it differs and ends without a gap; or its trace has no
+output section. Each kind says where it is: the step our run stopped in for the first three, the
+place of the first difference (`FirstDiff`) for the differences. So two bugs in different steps,
+or with different lines, have different kinds. -/
+inductive FailureKind where
+  | invariant (step msg : String)
+  | fault (step line : String)
+  | fuel (step : String)
+  | beforeGap (place : FirstDiff)
+  | differs (place : FirstDiff)
+  | noOutput
+  deriving DecidableEq, Repr
+
+/-- The line kind in words. -/
+def LineKind.render : LineKind → String
+  | .event => "a user call"
+  | .marker => "a step's marker"
+  | .value => "a value or an exception"
+  | .outcome => "the outcome or the globals"
+
+/-- " in step <step>", or nothing for no step. -/
+private def inStep (step : String) : String := if step.isEmpty then "" else s!" in step {step}"
+
+/-- The place of a difference in words. -/
+def FirstDiff.render (d : FirstDiff) : String := s!"first at {d.kind.render}{inStep d.step}"
+
+/-- The failure kind in words. -/
+def FailureKind.render : FailureKind → String
+  | .invariant st m => s!"the model invariant \"{m}\"{inStep st}"
+  | .fault st l => s!"the fault \"{l}\"{inStep st}"
+  | .fuel st => s!"out of fuel{inStep st}"
+  | .beforeGap d => s!"a difference before the gap, {d.render}"
+  | .differs d => s!"a difference, {d.render}"
+  | .noOutput => "a trace without its output section"
+
+/-- How our run `ours` fails against CPython's trace `theirs`, computed from the traces and not
+from the judge's message. `none` when the run agrees, when it gaps after agreeing, when CPython's
+trace is no plain run (its run doesn't end, it doesn't compile, or it is two runs) unless our run
+breaks a model invariant or has a fault, and when the program is rejected. A failure against a trace that is no plain run is the judge's to report; the
+fuzz test reports such traces as generator bugs anyway. -/
+def failureKind? (ours : SemDiff.Ours) (theirs : String) : Option FailureKind := do
+  let .trace t := ours | none
+  let some (o, r) := SemDiff.splitOutput t | some .noOutput
+  let step := stepOf (linesOf o)
+  if let some m := (SemDiff.gapOf t).filter StrataPython.Dyn.Sem.isModelInvariant then
+    return .invariant step m
+  if let some l := SemDiff.faultOf t then return .fault step l
+  if theirs == SemDiff.endlessTrace || theirs == SemDiff.syntaxTrace ||
+    theirs.startsWith SemDiff.twoRunsHeader then none
+  if ((r.splitOn "\n").contains "--- out of fuel") then return .fuel step
+  let (o', rest') ← SemDiff.splitOutput theirs
+  match SemDiff.splitGap t with
+  | some (out, before, _) =>
+    if SemDiff.agreesBefore out before theirs then none
+    else return .beforeGap (firstDiff out o' before rest')
+  | none =>
+    if t == theirs then none
+    else return .differs (firstDiff o o' r rest')
+
+/-- Why a fuzz program fails the test: it tests nothing (a generator bug), or its run is wrong. -/
+inductive FuzzFail where
+  | bug (msg : String)
+  | wrong (msg : String)
+  deriving DecidableEq, Repr
+
+/-- The message of a failure. -/
+def FuzzFail.msg : FuzzFail → String
+  | .bug m => m
+  | .wrong m => m
+
+/-- The verdict of the fuzz program `p` from CPython's `traces` (one per seed of `seeds` for the
+seed bucket, else at least seed 0's) and our run, with `known` its pinned difference; or why it
+fails. A generator bug comes first (`fuzzBug?`; traces whose agreement doesn't fit the bucket);
+then a pinned run that gaps after its difference (`knownGap?`); then `judgeSeedDependent` for the
+seed bucket and the judge for the others. -/
+def fuzzVerdict (p : FuzzProgram) (traces : Array String) (ours : SemDiff.Ours)
+    (known : Option Diff.Known) : Except FuzzFail Verdict := do
+  let some t0 := traces[0]? | throw (.bug s!"{p.id}: no CPython trace")
+  if let some b := fuzzBug? p t0 ours then throw (.bug b)
+  if p.seedBucket && seedsAgree traces then
+    throw (.bug s!"{p.id}: generator bug: its seed-dependent step shows the same order under every seed")
+  if !p.seedBucket && !seedsAgree traces then
+    throw (.bug s!"{p.id}: generator bug: CPython's trace depends on the hash seed or the machine")
+  if let some k := known then
+    if let some v := knownGap? p.id p.seedBucket ours traces k then
+      return ← v.mapError .wrong
+  let v := if p.seedBucket then judgeSeedDependent p.id ours traces else SemDiff.judge p.id ours t0 known
+  v.mapError .wrong
+
+/-- How the fuzz program `p` fails, with the index in `traces` of the first CPython trace against
+which our run has a failure kind. `none` when `fuzzVerdict` accepts the run or finds a generator
+bug, so that a shrink never keeps a program that tests nothing; also when the run fails, but
+against no single trace. -/
+def fuzzFailure? (p : FuzzProgram) (traces : Array String) (ours : SemDiff.Ours) :
+    Option (FailureKind × Nat) :=
+  match fuzzVerdict p traces ours none with
+  | .ok _ | .error (.bug _) => none
+  | .error (.wrong _) =>
+    ((List.range traces.size).filterMap fun i => (failureKind? ours traces[i]!).map (·, i)).head?
+
+/-- Whether a shrunk program still shows the original failure `kind` when it runs again, from its
+failure on that run (`rerun`, as `fuzzFailure?` gives it): the index of the CPython trace that
+shows it, or why no repro may be written. A flaky failure, or one that changed its kind, has no
+repro. -/
+def reproSeed? (kind : FailureKind) (rerun : Option (FailureKind × Nat)) : Except String Nat :=
+  match rerun with
+  | some (k, seed) =>
+    if k == kind then .ok seed
+    else .error s!"the shrunk program fails differently when it runs again: {k.render}"
+  | none => .error "the shrunk program no longer fails when it runs again"
 
 end StrataPython.AxisSource
