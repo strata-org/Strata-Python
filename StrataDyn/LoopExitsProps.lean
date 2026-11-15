@@ -88,53 +88,12 @@ private theorem ExitOf.block {h x : Label} (hx : ExitOf bs h x) : ∃ xb ∈ bs,
   obtain ⟨_, ⟨v, hj, rfl⟩, -⟩ := hx
   exact ⟨v, hj.mem, rfl⟩
 
-/-- A label that no back edge enters has no loop. -/
-private theorem loopOf_of_not_mem_heads {h : Label} (hh : h ∉ heads bs) : loopOf bs h = [] := by
-  unfold loopOf
-  rw [List.flatMap_eq_nil_iff]
-  intro e he
-  obtain ⟨he, heq⟩ := List.mem_filter.mp he
-  refine absurd ?_ hh
-  simp only [heads, List.mem_eraseDups, List.mem_map]
-  exact ⟨e, he, beq_iff_eq.mp heq⟩
-
-/-- The table of the body's heads and their loops, looked up, is `loopOf`. -/
-theorem lookupLoop_table :
-    lookupLoop (tableOf (backEdges bs) (loopsOf bs (backEdges bs))) = loopOf bs := by
-  funext h
-  rw [tableOf_loopsOf, lookupLoop]
-  by_cases hh : h ∈ heads bs
-  · obtain ⟨p, hp, hpe⟩ : ∃ p ∈ (heads bs).map (fun h => (h, loopOf bs h)), (p.1 == h) = true :=
-      ⟨(h, loopOf bs h), List.mem_map.mpr ⟨h, hh, rfl⟩, beq_self_eq_true h⟩
-    cases hf : ((heads bs).map fun h => (h, loopOf bs h)).find? (·.1 == h) with
-    | none => exact absurd hpe (List.find?_eq_none.mp hf p hp)
-    | some q =>
-      have hq := List.find?_some hf
-      obtain ⟨k, -, rfl⟩ := List.mem_map.mp (List.mem_of_find?_eq_some hf)
-      have hk : k = h := beq_iff_eq.mp hq
-      subst hk
-      rfl
-  · rw [loopOf_of_not_mem_heads hh]
-    have : ((heads bs).map fun h => (h, loopOf bs h)).find? (·.1 == h) = none := by
-      rw [List.find?_eq_none]
-      intro q hq hqe
-      obtain ⟨k, hk, rfl⟩ := List.mem_map.mp hq
-      exact hh (beq_iff_eq.mp hqe ▸ hk)
-    rw [this]
-    rfl
-
-/-- The heads of the table of the body's loops are its heads. -/
-theorem table_heads :
-    (tableOf (backEdges bs) (loopsOf bs (backEdges bs))).map (·.1) = heads bs := by
-  rw [tableOf_loopsOf, List.map_map]
-  exact List.map_id _
-
 /-! ## Reachability from a block -/
 
 /-- In a body with distinct labels, `unreachableB` decides `Unreachable`. -/
 theorem unreachableB_iff (hn : (bs.map (·.label)).Nodup) {l : Label} :
     unreachableB bs l = true ↔ Unreachable bs l := by
-  unfold unreachableB Unreachable
+  unfold unreachableB Block.unreachableB Unreachable
   cases hf : blockAt? bs l with
   | none =>
     simp only [Option.any_none, Bool.false_eq_true, false_iff, not_exists, not_and]
@@ -406,7 +365,7 @@ theorem labelArmB_iff (hn : (bs.map (·.label)).Nodup) {lt : Name} {n : Int}
     {own other : Label → Prop} {ownB otherB : Label → Bool}
     (hown : ∀ l, ownB l = true ↔ own l) (hother : ∀ l, otherB l = true ↔ other l) {t : Label} :
     labelArmB bs lt n ownB otherB t = true ↔ LabelArm bs lt n own other t := by
-  unfold labelArmB LabelArm
+  unfold labelArmB Block.labelArmB LabelArm
   cases hf : blockAt? bs t with
   | none =>
     simp only [Option.any_none, Bool.false_eq_true, false_iff, not_exists, not_and]
@@ -469,7 +428,7 @@ theorem absorbsB_iff (hn : (bs.map (·.label)).Nodup) {s : CompletionShape env} 
     absorbsB bs (loopOf bs) s ro recs r d
         (regionsOf bs (succMap bs) d (exitsIn (transfers bs) (scopeIn (loopOf bs) r.head))) =
       true ↔ Absorbs bs s ro recs r d := by
-  unfold absorbsB Absorbs
+  unfold absorbsB Block.absorbsB Absorbs
   cases hf : blockAt? bs d with
   | none =>
     simp only [Option.any_none, Bool.false_eq_true, false_iff, not_exists, not_and]

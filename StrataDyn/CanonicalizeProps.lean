@@ -28,7 +28,8 @@ set_option autoImplicit false
 
 ## To prove
 
-`Canonicalize.run` checks its result at run time.  These statements are still to prove:
+`Canonicalize.run` checks its result at run time.  These statements are still to prove, about
+the pass as it is written, which reads each body through hash maps:
 
 * `canonicalize_wf`: the result of a well-formed function is well formed;
 * `canonicalize_canonical`: the result of a well-formed function is canonical, if every loop has
@@ -49,203 +50,12 @@ namespace Canonicalize
 
 variable {env : Env Unit} {α : Type}
 
-/-- `loopsInnerFirst` pairs heads of the body's loops with the labels of their loops. -/
-theorem mem_loopsInnerFirst {bs : List (Block env α)} {h : Label} {L : List Label}
-    (hh : (h, L) ∈ loopsInnerFirst (Body.backEdges bs) bs) :
-    h ∈ Body.heads bs ∧ L = Body.loopOf bs h := by
-  simp only [loopsInnerFirst, Body.tableOf_loopsOf, List.map_map, List.mem_map,
-    List.mem_mergeSort] at hh
-  obtain ⟨_, ⟨h', hh', rfl⟩, he⟩ := hh
-  simp only [Function.comp, Prod.mk.injEq] at he
-  obtain ⟨rfl, rfl⟩ := he
-  exact ⟨hh', rfl⟩
-
-/-- On a body whose loops all have dedicated exits, no exit target of a loop needs a block. -/
-theorem exitsToFix_of_exitsB {bs : List (Block env α)} {h : Label}
-    (he : Body.exitsB bs (Body.loopOf bs h) = true) :
-    exitsToFix (Body.transfers bs) (Body.loopOf bs h) = [] := by
-  unfold exitsToFix
-  rw [List.filter_eq_nil_iff]
-  intro x hx
-  simp only [List.mem_eraseDups] at hx
-  simp only [List.any_eq_true, Bool.and_eq_true, beq_iff_eq, Bool.not_eq_true', not_exists,
-    not_and, Bool.eq_false_iff, ne_eq]
-  rintro ⟨w, l⟩ hw rfl hwL
-  simp only [Body.exitsB, Bool.and_eq_true, List.all_eq_true, Bool.or_eq_true,
-    Bool.not_eq_true', Bool.eq_false_iff, ne_eq] at he
-  rcases he.1 (w, l) hw with hne | hin
-  · exact hne (List.contains_iff_mem.mpr hx)
-  · exact hwL hin
-
-/-- If no loop of `loops` needs an exit block, given the transfers `tr₀`, then `addExits`, started
-with nothing added, nothing fixed and no loop fixed, fixes nothing. -/
-theorem addExits_none [base ≼ env] {hs : List Label} {tr₀ : List (Point × Label)} :
-    ∀ (loops : List (Label × List Label)) (bs : List (Block env α)) (st : Fresh),
-      (∀ x ∈ loops, exitsToFix tr₀ x.2 = []) →
-      (addExits hs tr₀ loops (bs, st, [], false, [])).2.2.2.1 = false
-  | [], _, _, _ => rfl
-  | (_, L) :: loops, bs, st, hx => by
-    have hL : exitsToFix tr₀ L = [] := hx _ List.mem_cons_self
-    have hov : (L.any ([] : List Label).contains) = false := by simp
-    simp only [addExits, hov, Bool.false_eq_true, ite_false, hL, List.isEmpty_nil, Bool.true_or,
-      ite_true]
-    exact addExits_none loops bs st (fun x hm => hx x (List.mem_cons_of_mem _ hm))
-
-/-- On a body whose loops all have a preheader, a latch and dedicated exits, `fixRound` finds
-nothing to fix. -/
-theorem fixRound_of_loopsSimplifiedB [base ≼ env] {bs : List (Block env α)}
-    (h : Body.loopsSimplifiedB bs = true) (st : Fresh) : fixRound st bs = none := by
-  have hall : ∀ x ∈ loopsInnerFirst (Body.backEdges bs) bs,
-      x.2 = Body.loopOf bs x.1 ∧ Body.preheaderB bs (Body.loopOf bs x.1) x.1 = true ∧
-        Body.latchB bs x.1 = true ∧ Body.exitsB bs (Body.loopOf bs x.1) = true := by
-    rintro ⟨hd, L⟩ hmem
-    obtain ⟨hhd, rfl⟩ := mem_loopsInnerFirst hmem
-    have h' := h
-    simp only [Body.loopsSimplifiedB, List.all_eq_true, Bool.and_eq_true] at h'
-    obtain ⟨⟨hp, hl⟩, he⟩ := h' hd hhd
-    exact ⟨rfl, hp, hl, he⟩
-  have hex : ∀ x ∈ loopsInnerFirst (Body.backEdges bs) bs,
-      exitsToFix (Body.transfers bs) x.2 = [] := fun x hx => by
-    rw [(hall x hx).1]
-    exact exitsToFix_of_exitsB (hall x hx).2.2.2
-  unfold fixRound
-  dsimp only
-  have hlatch : (List.filter (fun x => !Body.theOneB
-      (((Body.backEdges bs).filter (·.2 == x.1)).map (·.1)) (Body.endsAtB bs · x.1))
-      (loopsInnerFirst (Body.backEdges bs) bs)).isEmpty = true := by
-    rw [List.isEmpty_iff, List.filter_eq_nil_iff]
-    intro x hx
-    simp only [Bool.not_eq_true', Bool.eq_false_iff, ne_eq, Classical.not_not]
-    exact (hall x hx).2.2.1
-  have hpre : (List.filter (fun x => !Body.theOneB (((Body.transfers bs).filter fun (u, l) =>
-      l == x.1 && !x.2.contains u.label).map (·.1)) (Body.endsAtB bs · x.1))
-      (loopsInnerFirst (Body.backEdges bs) bs)).isEmpty = true := by
-    rw [List.isEmpty_iff, List.filter_eq_nil_iff]
-    intro x hx
-    simp only [Bool.not_eq_true', Bool.eq_false_iff, ne_eq, Classical.not_not]
-    rw [(hall x hx).1]
-    exact (hall x hx).2.1
-  simp only [hlatch, hpre, Bool.not_true, Bool.false_eq_true, ite_false]
-  have hany := addExits_none (hs := (loopsInnerFirst (Body.backEdges bs) bs).map (·.1))
-    (loopsInnerFirst (Body.backEdges bs) bs) bs st hex
-  have hnone : ((loopsInnerFirst (Body.backEdges bs) bs).all fun x =>
-      (exitsToFix (Body.transfers bs) x.2).isEmpty) = true := by
-    rw [List.all_eq_true]
-    intro x hx
-    rw [hex x hx]
-    rfl
-  generalize addExits ((loopsInnerFirst (Body.backEdges bs) bs).map (·.1)) (Body.transfers bs)
-    (loopsInnerFirst (Body.backEdges bs) bs) (bs, st, [], false, []) = r at hany ⊢
-  obtain ⟨bs', st', ad, any, tk⟩ := r
-  simp only at hany
-  simp only [hany, Bool.false_eq_true, ite_false, hnone, ite_true]
-
-/-- On a body whose loops all have a preheader, a latch and dedicated exits, step 2 changes
-nothing. -/
-theorem simplifyBody_of_loopsSimplifiedB [base ≼ env] {bs : List (Block env α)}
-    (h : Body.loopsSimplifiedB bs = true) (st : Fresh) : simplifyBody st bs = (bs, st) := by
-  unfold simplifyBody
-  generalize 3 * (Body.transfers bs).length + 3 = n
-  cases n with
-  | zero => rfl
-  | succ n => simp only [simplifyLoops, fixRound_of_loopsSimplifiedB h st]
-
-variable {f : Fresh → List (Block env α) → List (Block env α) × Fresh}
-  {p : List (Block env α) → Bool}
-
-mutual
-
-/-- If `f` changes nothing on a body where `p` holds, and `p` holds of every body nested in the
-instruction, then `Instruction.mapBodies f` changes nothing. -/
-theorem Instruction.mapBodies_of_everyB (hf : ∀ st bs, p bs = true → f st bs = (bs, st)) :
-    ∀ (i : Instruction env α) (st : Fresh), i.everyB p = true →
-      Instruction.mapBodies f st i = (i, st)
-  | .const .., _, _ => rfl
-  | .apply _ _ _ _ _ _ ⟨regions⟩, st, h => by
-    simp only [Instruction.mapBodies, Region.mapBodiesList_of_everyB hf regions st h]
-
-/-- If `f` changes nothing on a body where `p` holds, and `p` holds of every body nested in the
-instructions, then `Instruction.mapBodiesList f` changes nothing. -/
-theorem Instruction.mapBodiesList_of_everyB (hf : ∀ st bs, p bs = true → f st bs = (bs, st)) :
-    ∀ (is : List (Instruction env α)) (st : Fresh), Instruction.everyListB p is = true →
-      Instruction.mapBodiesList f st is = (is, st)
-  | [], _, _ => rfl
-  | i :: is, st, h => by
-    rw [Instruction.everyListB, Bool.and_eq_true] at h
-    simp only [Instruction.mapBodiesList, Instruction.mapBodies_of_everyB hf i st h.1,
-      Instruction.mapBodiesList_of_everyB hf is st h.2]
-
-/-- If `f` changes nothing on a body where `p` holds, and `p` holds of every body nested in the
-terminator, then `Terminator.mapBodies f` changes nothing. -/
-theorem Terminator.mapBodies_of_everyB (hf : ∀ st bs, p bs = true → f st bs = (bs, st)) :
-    ∀ (t : Terminator env α) (st : Fresh), t.everyB p = true → Terminator.mapBodies f st t = (t, st)
-  | .apply _ _ _ _ _ ⟨regions⟩, st, h => by
-    simp only [Terminator.mapBodies, Region.mapBodiesList_of_everyB hf regions st h]
-
-/-- If `f` changes nothing on a body where `p` holds, and `p` holds of every body nested in the
-blocks, then `Block.mapBodiesList f` changes nothing. -/
-theorem Block.mapBodiesList_of_everyB (hf : ∀ st bs, p bs = true → f st bs = (bs, st)) :
-    ∀ (bs : List (Block env α)) (st : Fresh), Block.everyListB p bs = true →
-      Block.mapBodiesList f st bs = (bs, st)
-  | [], _, _ => rfl
-  | ⟨l, ps, ⟨is⟩, t, info⟩ :: bs, st, h => by
-    rw [Block.everyListB, Bool.and_eq_true, Bool.and_eq_true] at h
-    simp only [Block.mapBodiesList, Instruction.mapBodiesList_of_everyB hf is st h.1.1,
-      Terminator.mapBodies_of_everyB hf t st h.1.2, Block.mapBodiesList_of_everyB hf bs st h.2]
-
-/-- If `f` changes nothing on a body where `p` holds, and `p` holds of the region and of every
-body nested in it, then `Region.mapBodies f` changes nothing. -/
-theorem Region.mapBodies_of_everyB (hf : ∀ st bs, p bs = true → f st bs = (bs, st)) :
-    ∀ (r : Region env α) (st : Fresh), r.everyB p = true → Region.mapBodies f st r = (r, st)
-  | ⟨⟨bs⟩⟩, st, h => by
-    rw [Region.everyB, Bool.and_eq_true] at h
-    simp only [Region.mapBodies, Block.mapBodiesList_of_everyB hf bs st h.2, hf st bs h.1]
-
-/-- If `f` changes nothing on a body where `p` holds, and `p` holds of each region and of every
-body nested in them, then `Region.mapBodiesList f` changes nothing. -/
-theorem Region.mapBodiesList_of_everyB (hf : ∀ st bs, p bs = true → f st bs = (bs, st)) :
-    ∀ (rs : List (Region env α)) (st : Fresh), Region.everyListB p rs = true →
-      Region.mapBodiesList f st rs = (rs, st)
-  | [], _, _ => rfl
-  | r :: rs, st, h => by
-    rw [Region.everyListB, Bool.and_eq_true] at h
-    simp only [Region.mapBodiesList, Region.mapBodies_of_everyB hf r st h.1,
-      Region.mapBodiesList_of_everyB hf rs st h.2]
-
-end
-
-/-- A body whose loops all have dedicated exits leaves through no point of a loop, so step 1
-needs only `oneExitB`. -/
-theorem exitDone_of {bs : List (Block env α)} (hl : Body.loopsSimplifiedB bs = true)
-    (ho : Body.oneExitB bs = true) : exitDone bs = true := by
-  simp only [exitDone, ho, Bool.true_and, Body.tableOf_loopsOf, List.all_eq_true]
-  intro u hu
-  rw [Bool.not_eq_true', Bool.eq_false_iff]
-  intro hc
-  obtain ⟨_, hx, hmem⟩ := List.mem_flatMap.mp (List.contains_iff_mem.mp hc)
-  obtain ⟨h, hh, rfl⟩ := List.mem_map.mp hx
-  simp only [Body.loopsSimplifiedB, List.all_eq_true, Bool.and_eq_true] at hl
-  have he := (hl h hh).2
-  simp only [Body.exitsB, Bool.and_eq_true, List.all_eq_true] at he
-  have hn := he.2 u hu
-  rw [List.contains_iff_mem.mpr hmem] at hn
-  exact absurd hn (by decide)
-
 /-- A function that `Func.checkCanonicalCFG` accepts comes back from `canonicalize` unchanged. -/
 public theorem canonicalize_of_check [base ≼ env] {fn : Func env α}
     (h : fn.checkCanonicalCFG = true) :
     canonicalize fn = fn := by
-  rw [Func.checkCanonicalCFG, Bool.and_eq_true] at h
-  have htop : Body.loopsSimplifiedB fn.blocks.toList = true := by
-    have h1 := h.1
-    simp only [Body.everyB, Region.everyB, Bool.and_eq_true] at h1
-    exact h1.1
-  unfold canonicalize oneExit
-  simp only [exitDone_of htop h.2, ite_true]
-  have hr := Region.mapBodies_of_everyB (p := Body.loopsSimplifiedB)
-    (fun st bs hb => simplifyBody_of_loopsSimplifiedB hb st) ⟨fn.blocks.toList.toArray⟩
-    ⟨fn.labels, fn.names⟩ h.1
-  simp only [hr, Array.toArray_toList]
+  unfold canonicalize
+  simp only [h, ite_true]
 
 /-- A well-formed canonical function comes back from `canonicalize` unchanged. -/
 public theorem canonicalize_of_canonical [base ≼ env] {fn : Func env α} (hw : fn.WF)

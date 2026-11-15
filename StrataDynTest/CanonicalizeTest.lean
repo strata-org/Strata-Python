@@ -1324,4 +1324,43 @@ private def withGhost : String := "module m {
 #guard_msgs in
 #eval canonText withGhost
 
+/-! ## A body whose labels are not distinct
+
+A well-formed function has no such body, so `run` never gives one to the pass.  Given one
+directly, the pass leaves it as it is, and the result is not well formed.  Here `a.0` branches to `b.0` or
+`c.0`, `c.0` loops on itself or goes on to `d.0`, and two blocks are labelled `b.0`.  Without
+the second `b.0`, the pass would add a `post` block, a latch and a preheader for the loop of
+`c.0`, and a preheader for the recorded head `d.0`. -/
+
+private def dupLbl (s : String) : Label := ⟨.num (.str .base s) 0⟩
+
+private def dupBody : List (Block base Unit) :=
+  [{ label := dupLbl "a", params := #[], instrs := #[],
+     term := .branch () ⟨0⟩ ⟨dupLbl "b", #[]⟩ ⟨dupLbl "c", #[]⟩, info := () },
+   { label := dupLbl "b", params := #[], instrs := #[], term := .ret () ⟨0⟩, info := () },
+   { label := dupLbl "c", params := #[], instrs := #[],
+     term := .branch () ⟨0⟩ ⟨dupLbl "c", #[]⟩ ⟨dupLbl "d", #[]⟩, info := () },
+   { label := dupLbl "d", params := #[], instrs := #[], term := .ret () ⟨0⟩, info := () },
+   { label := dupLbl "b", params := #[], instrs := #[], term := .ret () ⟨0⟩, info := () }]
+
+private def dupFresh : Canonicalize.Fresh :=
+  Canonicalize.Fresh.ofFunc (dupBody.map (·.label)) #[.str .base "x"]
+
+-- No `post` block, although the body leaves from three blocks.
+#guard Canonicalize.exitDone dupBody
+-- No round of fixes, although the loop of `c.0` has no latch.
+#guard (Canonicalize.fixRound dupFresh dupBody).isNone
+-- No preheader for a recorded head.
+#guard ((Canonicalize.recordPreheaders [dupLbl "d"] dupFresh dupBody).1.map (·.label)) ==
+  dupBody.map (·.label)
+
+-- Without the second `b.0`, the pass does add those blocks: `post`, a latch, and the preheaders
+-- of `c.0` and `d.0`.
+private def distinctFn : Func base Unit :=
+  { name := .str .base "f", params := #[], retType := Base.Int,
+    blocks := (dupBody.take 4).toArray, names := #[.str .base "x"], info := () }
+
+#guard ((Canonicalize.canonicalizeWith [dupLbl "d"] distinctFn).blocks.toList.drop 4).map
+    (ToDDM.nameText ·.label.name) == ["post.0", "latch.0", "pre.0", "pre.1"]
+
 end Strata.Dyn.CanonicalizeTest

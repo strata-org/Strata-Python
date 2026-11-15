@@ -77,7 +77,7 @@ deriving DecidableEq, Hashable
 structure Point where
   label : Label
   count : Nat
-deriving DecidableEq
+deriving DecidableEq, Hashable
 
 end
 

@@ -108,6 +108,9 @@ goldens `NAME.expected.canonical`; `CANON_UPDATE=1` rewrites them.
 the loop's body that cannot come back to its head: an inner loop, a `try`/`finally` or a `with`,
 then a `return`) and checks, by source lines, that in the canonical form each loop holds its loop
 statement and the code that comes back to the head, and none of the tail.
+`StrataPythonTestExtra/DynCanonicalScaleTest.lean` checks that the work of putting a function with
+many loops in canonical form, counted in heartbeats, grows with the size of the function, not with
+the number of loops times that size; `CANON_SCALE_TIME=1` also times it.
 `lake exe pydyn read FILE` reads one golden.
 A new program in `StrataPythonTest/Dyn/dyn_tests/` or in `StrataPythonTest/tests/` also needs
 its CPython trace and its verdict for the Python semantics' differential test: run

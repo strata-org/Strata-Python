@@ -929,35 +929,9 @@ some tree per body scopes it exactly when it is dominance-correct
 (`StrataDyn/DomComplete.lean`) proves it for distinct labels per body, which the distinct
 labels of the whole function give. -/
 
-/-- Folding `ofDistinct?`'s step from a map of the labels `seen` gives distinct labels. -/
-private theorem nodup_of_foldlM : ∀ (ls seen : List Label) (m : LabelMap Unit),
-    (∀ l, (m.find? l).isSome = true ↔ l ∈ seen) → seen.Nodup →
-    (ls.foldlM (fun (m : LabelMap Unit) l =>
-      if (m.find? l).isSome then none else some (m.insert l ())) m).isSome = true →
-        (seen ++ ls).Nodup
-  | [], seen, _, _, hn, _ => by simpa using hn
-  | l :: ls, seen, m, hm, hn, h => by
-    rw [List.foldlM_cons] at h
-    by_cases hl : (m.find? l).isSome = true
-    · rw [ite_eq_left hl] at h
-      simp at h
-    · rw [ite_eq_right hl] at h
-      have hl₁ : l ∉ seen := fun h₁ => hl ((hm l).mpr h₁)
-      have hm₁ : ∀ l₁, ((m.insert l ()).find? l₁).isSome = true ↔ l₁ ∈ seen ++ [l] := by
-        intro l₁
-        rw [LabelMap.find?_insert]
-        by_cases h₂ : l₁ = l
-        · simp [h₂]
-        · simp [h₂, hm l₁]
-      have hn₁ : (seen ++ [l]).Nodup :=
-        List.nodup_append.mpr ⟨hn, List.pairwise_singleton _ l, fun a ha b hb hab => by
-          rw [List.mem_singleton] at hb
-          exact hl₁ (hb ▸ hab ▸ ha)⟩
-      simpa using nodup_of_foldlM ls (seen ++ [l]) _ hm₁ hn₁ (by simpa using h)
-
 /-- Labels that `Label.Distinct` accepts are distinct. -/
-theorem Label.Distinct.nodup {ls : List Label} (h : Label.Distinct ls) : ls.Nodup := by
-  simpa using nodup_of_foldlM ls [] ∅ (fun l => by simp [LabelMap.find?_empty]) List.nodup_nil h
+theorem Label.Distinct.nodup {ls : List Label} (h : Label.Distinct ls) : ls.Nodup :=
+  LabelMap.ofDistinct?_isSome_iff.mp h
 
 section nested
 

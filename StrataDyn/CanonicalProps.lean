@@ -121,7 +121,7 @@ theorem blockAt?_eq_some (hn : (bs.map (·.label)).Nodup) {l : Label} {b : Block
 that ends in a plain jump to `l`. -/
 theorem endsAtB_iff (hn : (bs.map (·.label)).Nodup) {u : Point} {l : Label} :
     endsAtB bs u l = true ↔ ∃ b ∈ bs, u = endOf b ∧ EndsIn b l := by
-  unfold endsAtB
+  unfold endsAtB Block.endsAtB
   cases hf : blockAt? bs u.label with
   | none =>
     simp only [Option.any_none, Bool.false_eq_true, false_iff, not_exists, not_and]
@@ -143,21 +143,6 @@ theorem endsAtB_iff (hn : (bs.map (·.label)).Nodup) {u : Point} {l : Label} :
       have hcb : c = b := eq_of_label_eq hn hc hb hbl.symm
       subst hcb
       exact ⟨⟨⟨rfl, hname⟩, hreg⟩, fun s hs' => by simpa using hend s hs'⟩
-
-/-- `theOneB E p` holds exactly when some point of `E` is the only one, and `p` holds of it. -/
-theorem theOneB_iff {E : List Point} {p : Point → Bool} :
-    theOneB E p = true ↔ ∃ u ∈ E, (∀ w ∈ E, w = u) ∧ p u = true := by
-  unfold theOneB
-  cases E with
-  | nil => simp
-  | cons u us =>
-    simp only [Bool.and_eq_true, List.all_eq_true, beq_iff_eq, List.mem_cons, forall_eq_or_imp]
-    constructor
-    · rintro ⟨hall, hp⟩
-      exact ⟨u, .inl rfl, ⟨rfl, hall⟩, hp⟩
-    · rintro ⟨v, -, ⟨huv, hall⟩, hp⟩
-      subst huv
-      exact ⟨hall, hp⟩
 
 /-! ## The loop properties -/
 

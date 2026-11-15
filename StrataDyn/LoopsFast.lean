@@ -5,6 +5,7 @@
 -/
 module
 public import StrataDyn.Loops
+public import Std.Data.HashSet.Basic
 public import StrataDyn.DomFast
 public import StrataDyn.ContractRegion
 import all StrataDyn.Loops
@@ -18,6 +19,7 @@ import all StrataDyn.DomProps
 import all StrataDyn.Util.List
 -- Instruction values embed the signature representation, needed at code-generation time.
 import StrataDyn.Env.WF
+import Std.Data.HashSet.Lemmas
 
 set_option autoImplicit false
 
@@ -28,6 +30,8 @@ set_option autoImplicit false
 cubic search.  This module computes the same lists faster, and proves them equal, so that
 `@[csimp]` runs the fast versions and every proof stays about the simple ones.
 
+* `eraseDupsHash` is `List.eraseDups` with a hash set of the elements seen, in time linear in the
+  list's length.  `Body.backEdgesFast` removes duplicate back edges with it.
 * `Body.transfersFast` checks each transfer's target against a set of the body's labels, where
   `Body.transfers` scans the body for it.
 * `Body.backEdgesFast` decides dominance with the immediate-dominator tree that `Body.domTree?`
@@ -50,6 +54,7 @@ versions also brings the lemmas that make them run.
 
 ## Main theorems
 
+* `eraseDupsHash_eq`: `eraseDupsHash` is `List.eraseDups`.
 * `Body.transfers_eq_fast`, `Body.backEdges_eq_fast`, `Body.loopBlocks_eq_fast`,
   `Body.loopsOf_eq_fast`: the equalities, all `@[csimp]`.
 * `Body.found_searchFrom_iff`: `Body.searchFrom` finds exactly the blocks reached from a block.
@@ -58,6 +63,45 @@ versions also brings the lemmas that make them run.
 -/
 
 namespace Strata.Dyn
+
+public section
+
+/-- The elements of `l`, keeping the first occurrence of each, as `List.eraseDups` gives them,
+with a hash set of the elements seen so far: `acc` holds them, in reverse. -/
+@[expose] def eraseDupsHash.go {β : Type} [BEq β] [Hashable β] :
+    List β → Std.HashSet β → List β → List β
+  | [], _, acc => acc.reverse
+  | a :: l, s, acc => if s.contains a then go l s acc else go l (s.insert a) (a :: acc)
+
+/-- `List.eraseDups` in time linear in the length of the list, with a hash set. -/
+@[expose] def eraseDupsHash {β : Type} [BEq β] [Hashable β] (l : List β) : List β :=
+  eraseDupsHash.go l ∅ []
+
+end
+
+/-- `eraseDupsHash.go` with a set that holds exactly the elements of `acc` is
+`List.eraseDupsBy.loop` with `acc`, by induction on the list. -/
+private theorem eraseDupsHash_go {β : Type} [BEq β] [LawfulBEq β] [Hashable β] :
+    ∀ (l : List β) (s : Std.HashSet β) (acc : List β),
+      (∀ x, s.contains x = acc.any (x == ·)) →
+      eraseDupsHash.go l s acc = List.eraseDupsBy.loop (· == ·) l acc
+  | [], _, _, _ => by simp [eraseDupsHash.go, List.eraseDupsBy.loop]
+  | a :: l, s, acc, hs => by
+    unfold eraseDupsHash.go List.eraseDupsBy.loop
+    rw [hs a]
+    cases hc : acc.any (a == ·)
+    · simp only [Bool.false_eq_true, ite_false]
+      apply eraseDupsHash_go
+      intro x
+      simp only [Std.HashSet.contains_insert, hs x, List.any_cons]
+      rw [BEq.comm]
+    · simp only [ite_true]
+      exact eraseDupsHash_go l s acc hs
+
+/-- `eraseDupsHash` is `List.eraseDups`. -/
+public theorem eraseDupsHash_eq {β : Type} [BEq β] [LawfulBEq β] [Hashable β] (l : List β) :
+    eraseDupsHash l = l.eraseDups :=
+  eraseDupsHash_go l ∅ [] (by simp)
 
 public section
 
@@ -139,7 +183,7 @@ or else as the search decides. -/
 /-- `backEdges`, deciding dominance with `domWith`. -/
 @[expose] def backEdgesFast : List (Point × Label) :=
   let info := domInfo bs
-  ((transfers bs).filter fun (u, l) => domWith bs info u l).eraseDups
+  eraseDupsHash ((transfers bs).filter fun (u, l) => domWith bs info u l)
 
 /-- For each transfer `t` of the body, `val t` under the label `key t`: a map from labels to the
 labels of their neighbours. -/
@@ -279,6 +323,7 @@ public theorem domWith_start (l' l : Label) :
 @[csimp] public theorem backEdges_eq_fast : @backEdges = @backEdgesFast := by
   funext env α bs
   unfold backEdges backEdgesFast
+  rw [eraseDupsHash_eq]
   congr 1
   exact (List.filter_congr fun p hp => (domWith_eq hp).symm)
 

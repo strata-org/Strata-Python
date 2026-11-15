@@ -6,6 +6,7 @@
 module
 public import StrataDyn.EveryBody
 public import StrataDyn.LoopsFast
+public import StrataDyn.BodyIndexProps
 -- Instruction values embed the signature representation, needed at code-generation time.
 import StrataDyn.Env.WF
 
@@ -56,8 +57,10 @@ bodies have distinct labels, as `Func.WF` asks; `StrataDyn/CanonicalProps.lean` 
 * `Body.loopsCheckB`: the per-body check that `Canonicalize.run` makes, of both;
 * `Body.loopRoles`: each loop's head, preheader and latch, by name.
 
-`Body.loopsSimplifiedFastB` and `Body.loopsCheckFastB` compute each body's loops, transfers and
-back edges once.  `Body.loopsSimplifiedB_eq_fast` and `Body.loopsCheckB_eq_fast`, proved here so
+`Body.loopsSimplifiedFastB` and `Body.loopsCheckFastB` read each loop's blocks and the transfers
+into and out of them from the body's index (`Body.Index`, `StrataDyn/BodyIndex.lean`), computed
+once, so that a check of a loop costs what its blocks and their transfers cost, not what the
+whole body costs.  `Body.loopsSimplifiedB_eq_fast` and `Body.loopsCheckB_eq_fast`, proved here so
 that the code below and `Canonicalize.run` use them, make them run in place of
 `Body.loopsSimplifiedB` and `Body.loopsCheckB`.
 -/
@@ -164,6 +167,15 @@ structure ExitBlock (post : Block env α) : Prop where
 @[expose] def heads : List Label :=
   ((backEdges bs).map (·.2)).eraseDups
 
+/-- A label is among the heads exactly when some back edge enters it. -/
+theorem mem_heads {h : Label} : h ∈ heads bs ↔ ∃ u, (u, h) ∈ backEdges bs := by
+  rw [heads, List.mem_eraseDups, List.mem_map]
+  constructor
+  · rintro ⟨⟨u, l⟩, he, rfl⟩
+    exact ⟨u, he⟩
+  · rintro ⟨u, he⟩
+    exact ⟨(u, h), he, rfl⟩
+
 /-- The labels of the loop of `h`. -/
 @[expose] def loopOf (h : Label) : List Label :=
   ((backEdges bs).filter (·.2 == h)).flatMap fun e => loopBlocks bs e.1 h
@@ -172,11 +184,15 @@ structure ExitBlock (post : Block env α) : Prop where
 @[expose] def blockAt? (l : Label) : Option (Block env α) :=
   bs.find? (·.label == l)
 
+/-- Whether `k` is the number of instructions of the block `b`, and `b` ends in a plain jump to
+`l`. -/
+@[expose] def _root_.Strata.Dyn.Block.endsAtB (b : Block env α) (k : Nat) (l : Label) : Bool :=
+  k == b.instrs.size && b.term.name == bn "jump" && b.term.regions.isEmpty &&
+    b.term.succs.all (·.label == l)
+
 /-- Whether `u` is the end of a block that ends in a plain jump to `l`. -/
 @[expose] def endsAtB (u : Point) (l : Label) : Bool :=
-  (blockAt? bs u.label).any fun b =>
-    u.count == b.instrs.size && b.term.name == bn "jump" && b.term.regions.isEmpty &&
-      b.term.succs.all (·.label == l)
+  (blockAt? bs u.label).any (·.endsAtB u.count l)
 
 /-- Whether `E` holds a single point, perhaps several times, and `p` holds of it. -/
 @[expose] def theOneB (E : List Point) (p : Point → Bool) : Bool :=
@@ -227,22 +243,6 @@ each back edge of `es`. -/
     List (Label × List Label) :=
   (es.map (·.2)).eraseDups.map fun h => (h, ((es.zip ls).filter (·.1.2 == h)).flatMap (·.2))
 
-/-- `loopsSimplifiedB`, given the body's back edges `be`, transfers `tr` and exit points `ep`. -/
-@[expose] def loopsSimplifiedWith (be : List (Point × Label)) (tr : List (Point × Label))
-    (ep : List Point) : Bool :=
-  (tableOf be (loopsOf bs be)).all fun (h, L) =>
-    theOneB ((tr.filter fun (u, l) => l == h && !L.contains u.label).map (·.1))
-        (endsAtB bs · h) &&
-      theOneB ((be.filter (·.2 == h)).map (·.1)) (endsAtB bs · h) &&
-      (let exits := (tr.filter fun (u, l) => L.contains u.label && !L.contains l).map (·.2)
-       (tr.all fun (w, l) => !exits.contains l || L.contains w.label) &&
-         ep.all fun u => !L.contains u.label)
-
-/-- `loopsSimplifiedB`, with the back edges, the transfers, the exit points and every loop
-computed once for the body. -/
-@[expose] def loopsSimplifiedFastB : Bool :=
-  loopsSimplifiedWith bs (backEdges bs) (transfers bs) (exitPoints bs)
-
 /-- `tableOf` of a list `es` and of `f` of each of its elements pairs each second component `h`
 with the union of `f e` over the elements `e` whose second component is `h`. -/
 private theorem tableOf_map (es : List (Point × Label)) (f : Point × Label → List Label) :
@@ -281,15 +281,251 @@ theorem tableOf_loopsOf (bs : List (Block env α)) :
   intro e he
   rw [(beq_iff_eq.mp (List.mem_filter.mp he).2)]
 
+/-! ## The checks with an index
+
+`Body.Index` (`StrataDyn/BodyIndex.lean`) holds, for each label, the transfers into it and out of
+its block, and each loop's labels as a set and as a list.  The checks below read them from it, so
+that the check of a loop reads only its blocks, its head's incoming transfers, and the transfers
+into and out of its blocks, where the simple checks scan the body's transfers for each loop. -/
+
+namespace Index
+
+variable (ix : Index env α)
+
+/-- `endsAtB`, with the index's blocks by label. -/
+@[expose] def endsAtB (u : Point) (l : Label) : Bool :=
+  (ix.blocks.find? u.label).any (·.endsAtB u.count l)
+
+/-- `preheaderB` of the loop of `h`, with the index. -/
+@[expose] def preheaderB (h : Label) : Bool :=
+  theOneB ((LabelMap.listAt ix.into h).filter fun u => !ix.inLoop h u.label) (ix.endsAtB · h)
+
+/-- `latchB`, with the index. -/
+@[expose] def latchB (h : Label) : Bool :=
+  theOneB (LabelMap.listAt ix.backInto h) (ix.endsAtB · h)
+
+/-- The labels, each once, of the blocks that a transfer leaves the labels `F` for, given
+`inF`, which tells the labels of `F`. -/
+@[expose] def exitsOf (F : List Label) (inF : Label → Bool) : List Label :=
+  (LabelMap.dedup (F.flatMap fun x =>
+    ((LabelMap.listAt ix.outOf x).filter fun t => !inF t.2).map (·.2))).2
+
+/-- `exitsB` of the loop of `h`, with the index: every block that a transfer leaves the loop for
+is entered only from the loop, and no block of the loop leaves the body. -/
+@[expose] def exitsB (h : Label) : Bool :=
+  (ix.exitsOf (ix.loopList h) (ix.inLoop h)).all (fun l =>
+    (LabelMap.listAt ix.into l).all fun w => ix.inLoop h w.label) &&
+    (ix.loopList h).all fun x => !(ix.exitAt.find? x).isSome
+
+/-- `loopsSimplifiedB`, with the index. -/
+@[expose] def loopsSimplifiedB : Bool :=
+  ix.heads.all fun h => ix.preheaderB h && ix.latchB h && ix.exitsB h
+
+end Index
+
+/-- `loopsSimplifiedB`, with the body's index if its labels are distinct, and as defined if
+not. -/
+@[expose] def loopsSimplifiedFastB : Bool :=
+  match tree? bs with
+  | some tm => (Index.of bs tm (domInfo bs) (exitPoints bs)).loopsSimplifiedB
+  | none => loopsSimplifiedB bs
+
+end Body
+
+end
+
+namespace Body
+
+variable {env : Env Unit} {α : Type} {bs : List (Block env α)} {ep : List Point}
+  {ix : Index env α}
+
+/-- `theOneB E p` holds exactly when some point of `E` is the only one, and `p` holds of it. -/
+theorem theOneB_iff {E : List Point} {p : Point → Bool} :
+    theOneB E p = true ↔ ∃ u ∈ E, (∀ w ∈ E, w = u) ∧ p u = true := by
+  unfold theOneB
+  cases E with
+  | nil => simp
+  | cons u us =>
+    simp only [Bool.and_eq_true, List.all_eq_true, beq_iff_eq, List.mem_cons, forall_eq_or_imp]
+    constructor
+    · rintro ⟨hall, hp⟩
+      exact ⟨u, .inl rfl, ⟨rfl, hall⟩, hp⟩
+    · rintro ⟨v, -, ⟨huv, hall⟩, hp⟩
+      subst huv
+      exact ⟨hall, hp⟩
+
+/-- `theOneB` gives the same answer on two lists with the same points, and two predicates that
+agree. -/
+private theorem theOneB_congr {E E' : List Point} {p q : Point → Bool}
+    (hE : ∀ u, u ∈ E ↔ u ∈ E') (hp : ∀ u, p u = q u) : theOneB E p = theOneB E' q := by
+  apply Bool.eq_iff_iff.mpr
+  rw [theOneB_iff, theOneB_iff]
+  constructor
+  · rintro ⟨u, hu, hall, hpu⟩
+    exact ⟨u, (hE u).mp hu, fun w hw => hall w ((hE w).mpr hw), hp u ▸ hpu⟩
+  · rintro ⟨u, hu, hall, hpu⟩
+    exact ⟨u, (hE u).mpr hu, fun w hw => hall w ((hE w).mp hw), (hp u).symm ▸ hpu⟩
+
+/-- A label is in the loop of `h` exactly when it is in the natural loop of some back edge to
+`h`. -/
+public theorem mem_loopOf {h x : Label} :
+    x ∈ loopOf bs h ↔ ∃ u, (u, h) ∈ backEdges bs ∧ x ∈ loopBlocks bs u h := by
+  simp only [loopOf, List.mem_flatMap, List.mem_filter, beq_iff_eq]
+  constructor
+  · rintro ⟨⟨u, l⟩, ⟨he, rfl⟩, hx⟩
+    exact ⟨u, he, hx⟩
+  · rintro ⟨u, he, hx⟩
+    exact ⟨(u, h), ⟨he, rfl⟩, hx⟩
+
+/-- The index tells the labels of each loop as `loopOf` lists them. -/
+public theorem Index.inLoop_eq (hs : ix.Spec bs ep) (h x : Label) :
+    ix.inLoop h x = (loopOf bs h).contains x := by
+  apply Bool.eq_iff_iff.mpr
+  rw [hs.inLoop, List.contains_iff_mem, mem_loopOf]
+
+/-- The index lists the labels of each loop as `loopOf` does. -/
+public theorem Index.mem_loopList (hs : ix.Spec bs ep) {h x : Label} :
+    x ∈ ix.loopList h ↔ x ∈ loopOf bs h := by
+  rw [hs.loopList, mem_loopOf]
+
+/-- `exitsOf F inF` lists the labels of the blocks that a transfer from a label of `F` goes to,
+when that label is not one of `F`, given `inF`, which tells the labels of `F`. -/
+public theorem Index.mem_exitsOf (hs : ix.Spec bs ep) {F : List Label} {inF : Label → Bool}
+    (hF : ∀ x, x ∈ F ↔ inF x = true) {l : Label} :
+    l ∈ ix.exitsOf F inF ↔ ∃ u, (u, l) ∈ transfers bs ∧ inF u.label = true ∧ inF l = false := by
+  simp only [Index.exitsOf, LabelMap.mem_dedup, List.mem_flatMap, List.mem_map, List.mem_filter,
+    hs.outOf, Bool.not_eq_true']
+  constructor
+  · rintro ⟨x, hx, ⟨u, l'⟩, ⟨⟨ht, rfl⟩, hl⟩, rfl⟩
+    exact ⟨u, ht, (hF _).mp hx, hl⟩
+  · rintro ⟨u, ht, hu, hl⟩
+    exact ⟨u.label, (hF _).mpr hu, (u, l), ⟨⟨ht, rfl⟩, hl⟩, rfl⟩
+
+/-- The index's `endsAtB` is `endsAtB`. -/
+public theorem Index.endsAtB_eq (hs : ix.Spec bs ep) (u : Point) (l : Label) :
+    ix.endsAtB u l = Body.endsAtB bs u l := by
+  rw [Index.endsAtB, Body.endsAtB, blockAt?, hs.blocks]
+
+/-- The index's `preheaderB` is `preheaderB` of the loop of `h`. -/
+public theorem Index.preheaderB_eq (hs : ix.Spec bs ep) (h : Label) :
+    ix.preheaderB h = Body.preheaderB bs (loopOf bs h) h := by
+  unfold Index.preheaderB Body.preheaderB entriesFrom
+  apply theOneB_congr _ (fun u => Index.endsAtB_eq hs u h)
+  intro u
+  simp only [List.mem_filter, List.mem_map, hs.into, Index.inLoop_eq hs, Bool.and_eq_true,
+    beq_iff_eq]
+  constructor
+  · rintro ⟨ht, hL⟩
+    exact ⟨(u, h), ⟨ht, rfl, hL⟩, rfl⟩
+  · rintro ⟨⟨u', l⟩, ⟨ht, rfl, hL⟩, rfl⟩
+    exact ⟨ht, hL⟩
+
+/-- The index's `latchB` is `latchB`. -/
+public theorem Index.latchB_eq (hs : ix.Spec bs ep) (h : Label) :
+    ix.latchB h = Body.latchB bs h := by
+  unfold Index.latchB Body.latchB backFrom
+  apply theOneB_congr _ (fun u => Index.endsAtB_eq hs u h)
+  intro u
+  simp only [List.mem_map, List.mem_filter, hs.backInto, beq_iff_eq]
+  constructor
+  · exact fun he => ⟨(u, h), ⟨he, rfl⟩, rfl⟩
+  · rintro ⟨⟨u', l⟩, ⟨he, rfl⟩, rfl⟩
+    exact he
+
+/-- The index's `exitsB` is `exitsB` of the loop of `h`, with the points `ep` that leave the
+body. -/
+private theorem Index.exitsB_eq (hs : ix.Spec bs (exitPoints bs)) (h : Label) :
+    ix.exitsB h = Body.exitsB bs (loopOf bs h) := by
+  have hF : ∀ x, x ∈ ix.loopList h ↔ ix.inLoop h x = true := fun x => by
+    rw [Index.mem_loopList hs, Index.inLoop_eq hs, List.contains_iff_mem]
+  have hexits : ∀ l, l ∈ exitTargets bs (loopOf bs h) ↔
+      l ∈ ix.exitsOf (ix.loopList h) (ix.inLoop h) := by
+    intro l
+    rw [Index.mem_exitsOf hs hF]
+    simp only [exitTargets, List.mem_map, List.mem_filter, Bool.and_eq_true, Bool.not_eq_true',
+      Index.inLoop_eq hs]
+    constructor
+    · rintro ⟨⟨u, l'⟩, ⟨ht, hu, hl⟩, rfl⟩
+      exact ⟨u, ht, hu, hl⟩
+    · rintro ⟨u, ht, hu, hl⟩
+      exact ⟨(u, l), ⟨ht, hu, hl⟩, rfl⟩
+  have h₁ : (ix.exitsOf (ix.loopList h) (ix.inLoop h)).all (fun l =>
+      (LabelMap.listAt ix.into l).all fun w => ix.inLoop h w.label) =
+      (transfers bs).all fun p =>
+        !(exitTargets bs (loopOf bs h)).contains p.2 || (loopOf bs h).contains p.1.label := by
+    apply Bool.eq_iff_iff.mpr
+    constructor
+    · intro hall
+      apply List.all_eq_true.mpr
+      intro ⟨w, l⟩ hw
+      cases hc : (exitTargets bs (loopOf bs h)).contains l
+      · rfl
+      · have hl := (hexits l).mp (List.contains_iff_mem.mp hc)
+        have hw' := List.all_eq_true.mp (List.all_eq_true.mp hall l hl) w ((hs.into l w).mpr hw)
+        rw [Index.inLoop_eq hs] at hw'
+        rw [hw']
+        rfl
+    · intro hall
+      apply List.all_eq_true.mpr
+      intro l hl
+      apply List.all_eq_true.mpr
+      intro w hw
+      have hw' := List.all_eq_true.mp hall (w, l) ((hs.into l w).mp hw)
+      have hc : l ∈ exitTargets bs (loopOf bs h) := (hexits l).mpr hl
+      rw [Index.inLoop_eq hs]
+      simpa [hc] using hw'
+  have h₂ : ((ix.loopList h).all fun x => !(ix.exitAt.find? x).isSome) =
+      (exitPoints bs).all fun u => !(loopOf bs h).contains u.label := by
+    apply Bool.eq_iff_iff.mpr
+    constructor
+    · intro hall
+      apply List.all_eq_true.mpr
+      intro u hu
+      cases hc : (loopOf bs h).contains u.label
+      · rfl
+      · have hx := (Index.mem_loopList hs).mpr (List.contains_iff_mem.mp hc)
+        have hu' := List.all_eq_true.mp hall u.label hx
+        have he : (ix.exitAt.find? u.label).isSome = true := (hs.exitAt u.label).mpr ⟨u, hu, rfl⟩
+        simp [he] at hu'
+    · intro hall
+      apply List.all_eq_true.mpr
+      intro x hx
+      cases hc : (ix.exitAt.find? x).isSome
+      · rfl
+      · obtain ⟨u, hu, rfl⟩ := (hs.exitAt _).mp hc
+        have hu' := List.all_eq_true.mp hall u hu
+        exact absurd ((Index.mem_loopList hs).mp hx) (by simpa using hu')
+  unfold Index.exitsB Body.exitsB
+  rw [h₁, h₂]
+
+/-- The index's `loopsSimplifiedB` is `loopsSimplifiedB`. -/
+private theorem Index.loopsSimplifiedB_eq (hs : ix.Spec bs (exitPoints bs)) :
+    ix.loopsSimplifiedB = Body.loopsSimplifiedB bs := by
+  unfold Index.loopsSimplifiedB Body.loopsSimplifiedB
+  refine all_eq_of_mem_iff (fun h => ?_) (fun h => ?_)
+  · rw [hs.heads, Body.mem_heads]
+  · rw [Index.preheaderB_eq hs, Index.latchB_eq hs, Index.exitsB_eq hs]
+
 /-- The fast check gives the same answer as `loopsSimplifiedB` on every body.  It is proved here,
 before `Func.checkCanonicalCFG` uses the check, because a `@[csimp]` lemma replaces a definition
 only in code compiled after it. -/
-@[csimp] theorem loopsSimplifiedB_eq_fast :
+@[csimp] public theorem loopsSimplifiedB_eq_fast :
     @loopsSimplifiedB = @loopsSimplifiedFastB := by
   funext env α bs
-  unfold loopsSimplifiedB loopsSimplifiedFastB loopsSimplifiedWith
-  simp only [tableOf_loopsOf, List.all_map]
-  rfl
+  unfold loopsSimplifiedFastB
+  split
+  next tm ht => exact (Index.loopsSimplifiedB_eq (Index.spec_of ht _)).symm
+  next => rfl
+
+end Body
+
+public section
+
+variable {env : Env Unit} {α : Type}
+
+namespace Body
+
+variable (bs : List (Block env α))
 
 /-- Whether the body never leaves through its exit, or has an exit block. -/
 @[expose] def oneExitB : Bool :=
@@ -379,19 +615,27 @@ the per-body check of `Canonicalize.run`. -/
 @[expose] def loopsCheckB : Bool :=
   loopsSimplifiedB bs && reducibleB bs
 
-/-- `loopsCheckB`, with the back edges and the transfers computed once for both checks. -/
+/-- `loopsCheckB`, with the body's index if its labels are distinct, so that the back edges and
+the transfers are computed once for both checks, and as defined if not. -/
 @[expose] def loopsCheckFastB : Bool :=
-  let be := backEdges bs
-  let tr := transfers bs
-  loopsSimplifiedWith bs be tr (exitPoints bs) && reducibleIn be tr (rpoLabels bs)
+  match tree? bs with
+  | some tm =>
+    let ix := Index.of bs tm (domInfo bs) (exitPoints bs)
+    ix.loopsSimplifiedB && reducibleIn ix.be ix.tr (rpoLabels bs)
+  | none => loopsCheckB bs
 
 /-- The fast check gives the same answer as `loopsCheckB` on every body.  It is proved here, before
 any code uses the check, because a `@[csimp]` lemma replaces a definition only in code compiled
 after it. -/
 @[csimp] theorem loopsCheckB_eq_fast : @loopsCheckB = @loopsCheckFastB := by
   funext env α bs
-  simp only [loopsCheckB, loopsCheckFastB, loopsSimplifiedB_eq_fast, loopsSimplifiedFastB,
-    reducibleB, reducibleWithB]
+  unfold loopsCheckFastB
+  split
+  next tm ht =>
+    have hs := Index.spec_of ht (exitPoints bs)
+    dsimp only
+    rw [loopsCheckB, Index.loopsSimplifiedB_eq hs, reducibleB, reducibleWithB, hs.tr, hs.be]
+  next => rfl
 
 end Body
 

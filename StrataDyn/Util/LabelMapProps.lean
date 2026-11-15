@@ -20,7 +20,11 @@ the scoping checker (`StrataDyn/DomProps.lean`) and the dominator computation
 * `NatTrie.find?_insert`, `LabelMap.find?_insert`: `insert` maps its key to its value and keeps
   every other key;
 * `LabelMap.isSome_find?_foldl_insert`: inserting a key for each element of a list maps exactly
-  those keys and the keys the map had.
+  those keys and the keys the map had;
+* `LabelMap.find?_foldl_insert_fun`: inserting each label of a list with a value that depends on
+  the label maps exactly those labels to those values;
+* `LabelMap.find?_update`: `update` maps its key to the new value and keeps every other key;
+* `LabelMap.ofDistinct?_isSome_iff`: `ofDistinct?` succeeds exactly on labels without duplicates.
 
 Everything here is private: a module that uses it imports it with `import all`.
 -/
@@ -101,6 +105,77 @@ theorem isSome_find?_foldl_insert {γ : Type} (key : γ → Label) (val : γ →
         · exact .inl h
         · exact absurd h.symm hl
         · exact .inr h
+
+/-- Inserting each `x` of `xs` with the value `f x`: the map gives `f x` for the labels of `xs`,
+and what `m` gives for the others. -/
+theorem find?_foldl_insert_fun (f : Label → β) :
+    ∀ (xs : List Label) (m : LabelMap β) (l : Label),
+      (xs.foldl (fun m x => m.insert x (f x)) m).find? l = if l ∈ xs then some (f l) else m.find? l
+  | [], m, l => by simp
+  | x :: xs, m, l => by
+    rw [List.foldl_cons, find?_foldl_insert_fun f xs, find?_insert]
+    by_cases hx : l = x
+    · subst hx; simp
+    · by_cases hl : l ∈ xs
+      · simp [hl]
+      · simp [hl, hx]
+
+/-- Updating maps the key to `f` of its old value and keeps the rest. -/
+theorem find?_update (m : LabelMap β) (l : Label) (f : Option β → β) (l₁ : Label) :
+    (m.update l f).find? l₁ = if l₁ = l then some (f (m.find? l)) else m.find? l₁ := by
+  by_cases hl : l₁ = l
+  · subst hl
+    simp [update, find?, bucket, NatTrie.find?_insert]
+  · rw [ite_eq_right hl]
+    unfold update find? bucket
+    rw [NatTrie.find?_insert]
+    by_cases hk : l₁.key = l.key
+    · rw [ite_eq_left hk, Option.getD_some, List.find?_cons, hk, List.find?_filter]
+      simp only [Ne.symm hl, decide_false]
+      congr 2
+      funext p
+      by_cases hp : p.1 = l₁
+      · simp [hp, hl]
+      · simp [hp]
+    · rw [ite_eq_right hk]
+
+/-- The step of `ofDistinct?` from a set `m` of the labels `seen` succeeds exactly when
+`seen ++ ls` has no duplicates, provided `seen` has none. -/
+private theorem foldlM_distinct_isSome :
+    ∀ (ls seen : List Label) (m : LabelMap Unit),
+      (∀ l, (m.find? l).isSome ↔ l ∈ seen) → seen.Nodup →
+      ((ls.foldlM (fun (m : LabelMap Unit) l =>
+        if (m.find? l).isSome then none else some (m.insert l ())) m).isSome ↔ (seen ++ ls).Nodup)
+  | [], seen, _, _, hn => by simpa using hn
+  | l :: ls, seen, m, hm, hn => by
+    rw [List.foldlM_cons]
+    by_cases hl : (m.find? l).isSome = true
+    · rw [ite_eq_left hl]
+      simp only [Option.bind_eq_bind, Option.bind_none, Option.isSome_none, Bool.false_eq_true,
+        false_iff]
+      intro hd
+      exact (List.nodup_append.mp hd).2.2 l ((hm l).mp hl) l List.mem_cons_self rfl
+    · rw [ite_eq_right hl]
+      simp only [Option.bind_eq_bind, Option.bind_some]
+      have hl₁ : l ∉ seen := fun h₁ => hl ((hm l).mpr h₁)
+      have hm₁ : ∀ l₁, ((m.insert l ()).find? l₁).isSome ↔ l₁ ∈ seen ++ [l] := by
+        intro l₁
+        rw [find?_insert]
+        by_cases h₂ : l₁ = l
+        · simp [h₂]
+        · simp [h₂, hm l₁]
+      have hn₁ : (seen ++ [l]).Nodup :=
+        List.nodup_append.mpr ⟨hn, List.pairwise_singleton _ l, fun a ha b hb hab => by
+          rw [List.mem_singleton] at hb
+          exact hl₁ (hb ▸ hab ▸ ha)⟩
+      rw [foldlM_distinct_isSome ls (seen ++ [l]) _ hm₁ hn₁]
+      simp
+
+/-- `ofDistinct? ls` succeeds exactly when `ls` has no duplicates. -/
+theorem ofDistinct?_isSome_iff {ls : List Label} :
+    (ofDistinct? ls).isSome ↔ ls.Nodup := by
+  have h := foldlM_distinct_isSome ls [] ∅ (fun l => by simp) List.nodup_nil
+  simpa [ofDistinct?] using h
 
 end LabelMap
 

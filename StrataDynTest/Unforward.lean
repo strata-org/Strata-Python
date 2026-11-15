@@ -58,7 +58,7 @@ def unforward (fn g : Func env α) : Option (Func env α) :=
   let labels := fn.labels
   if g.allBlocks.all fun b => labels.contains b.label || (forwardTarget? b).isSome then
     let (r, _) := Canonicalize.Region.mapBodies (fun st bs => (undoBody labels bs, st))
-      ⟨labels, g.names⟩ ⟨g.blocks⟩
+      (Canonicalize.Fresh.ofFunc labels g.names) ⟨g.blocks⟩
     some { g with blocks := r.blocks }
   else none
 
