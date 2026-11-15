@@ -2409,6 +2409,21 @@ That claim trusts these assumptions about the CPython run:
 - the default limit of 4,300 digits for converting an `int` to and from a `str`: no
   `sys.set_int_max_str_digits`, no `PYTHONINTMAXSTRDIGITS` and no `-X int_max_str_digits`;
 - the default recursion limit of 1,000: no `sys.setrecursionlimit`;
+- that outside code calls a root function, or imports the program's module, with at most 97
+  Python frames and at most 94 C recursion levels below it, as measured on CPython 3.12.15, the
+  runtime the package tests against. Outside code is the code that runs the program, and a root
+  function is a function of the program that outside code calls. The claim relies on this bound,
+  and the semantics' own limits leave room for it:
+  - Python frames: the 97 include importlib's frames. The semantics counts the program's frames
+    from its start, the module's included, and stops with a gap past 900. So up to
+    1,000 (CPython's limit) − 900 = 100 frames may run below the program; the bound of 97 leaves the
+    other 3 unused, as a spare margin. Every native function and module must charge at least CPython's
+    Python-frame count, at call time and at import time.
+  - C levels: the 94 are counted beyond the levels of running the program's module as a script,
+    and include importlib's (5 per import), 2 per call from C into Python, and 3 for exec or eval.
+    The semantics counts C levels from the program's start and stops past 9,000, 995 below
+    CPython's limit. Up to 901 of those go to the comparisons of dict and set keys, which it
+    doesn't count (next item), and 94 remain for the levels below the program;
 - that the model counts no fewer C levels than CPython, except for the comparisons of a dict's or
   a set's keys, which the 995-level margin covers: corpus programs check the count for each kind
   of call, but nothing proves it;

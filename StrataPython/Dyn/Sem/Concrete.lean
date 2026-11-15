@@ -269,7 +269,8 @@ def withDepth {e : Level} {fr : Bool} {α : Type} (hnp0 : e ≠ .pure) (n : Nat)
     by intro hfr; unfold StartFree; intro ε E _ hs s s' β k ke
        simp only [body.2.2 hfr hs s s']⟩
 
-/-- The limit of the depth of Python calls, below CPython's 1000. -/
+/-- The limit of the number of the program's Python frames, the module's included, below CPython's
+1000. -/
 def pyDepthLimit : Nat := 900
 
 /-- `body` with `Depth.py` raised by `n`, as `n` Python frames: a gap when the count would pass

@@ -468,6 +468,8 @@ s360_seq_slot_compare | gap | a slot wrapper bound to an object of another type 
 s361_seq_slot_reflected | agree
 s362_seq_slot_subclass_radd | gap | built-in method list.__new__ is not modelled yet
 s363_seq_slot_subclass_alias | gap | built-in method list.__new__ is not modelled yet
+s364_module_frame_depth_runs | agree
+s365_module_frame_depth_stops | gap | Python call depth over 900
 s368_sym_hash_member | gap | arithmetic on a hash whose number the model does not know is not modelled yet
 s369_sym_hash_member_second | gap | arithmetic on a hash whose number the model does not know is not modelled yet
 s36_rich_twice | agree

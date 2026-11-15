@@ -1,0 +1,63 @@
+module s365_module_frame_depth_stops {
+  func @|s365_module_frame_depth_stops.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s365_module_frame_depth_stops")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s365_module_frame_depth_stops", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s365_module_frame_depth_stops", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@s365_module_frame_depth_stops.f, "f", "s365_module_frame_depth_stops")
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("s365_module_frame_depth_stops", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %print.0 : py.Value = py.loadGlobal("s365_module_frame_depth_stops", "print") ^propagate.0()
+      %f.0 : py.Value = py.loadGlobal("s365_module_frame_depth_stops", "f") ^propagate.0()
+      %int.0 : py.Value = py.intLit(899)
+      %tuple.0 : py.Value = py.mkTuple(%int.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%f.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%call.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s365_module_frame_depth_stops.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %n.1 : py.Value = py.undef("n")
+      %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.1)
+      %n.3 : py.Value = py.undef("n")
+      %defaults.0 : py.Value = py.mkTuple(%n.3)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "n") ^propagate.0()
+      %n.4 : py.Value = py.tupleGet(%bound.0, 0)
+      %n.6 : py.Value = py.requireDefined(%n.4, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %eq.0 : py.Value = py.eq(%n.6, %int.0) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%eq.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %int.1 : py.Value = py.intLit(0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.1)
+      ret(%ret.0)
+    else.0():
+      jump ^join.0()
+    join.0():
+      %f.0 : py.Value = py.loadGlobal("s365_module_frame_depth_stops", "f") ^propagate.0()
+      %n.9 : py.Value = py.requireDefined(%n.4, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %int.2 : py.Value = py.intLit(1)
+      %sub.0 : py.Value = py.sub(%n.9, %int.2) ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%sub.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%f.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.1)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

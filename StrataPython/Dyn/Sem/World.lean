@@ -21,7 +21,7 @@ it uses:
 * `ObjStore σ`, the objects;
 * `Modules σ`, each module's object and its global cells by name;
 * `Handled`, the exception being handled;
-* `Depth`, the depth of Python calls and CPython's C recursion count;
+* `Depth`, the number of the program's Python frames and CPython's C recursion count;
 * `ReprGuard`, the objects whose `repr` is being computed;
 * `Output`, what the program wrote to standard output.
 
@@ -57,11 +57,12 @@ structure Handled where
   exc : Value := .none
   deriving Repr, Inhabited
 
-/-- The depth of Python calls (`py`), CPython's C recursion count (`c`), and how many call
-brackets of built-ins that run user code are open (`bracket`).  Only a bracket's own edges (`bracketed`, `callClosureT`) change `bracket`:
+/-- The number of the program's Python frames (`py`), the module's own frame included; CPython's C
+recursion count (`c`); and how many call brackets of built-ins that run user code are open
+(`bracket`).  Only a bracket's own edges (`bracketed`, `callClosureT`) change `bracket`:
 at `calls`, an update whose world is inside a bracket may change anything (`WorldSpec.inCall`). -/
 structure Depth where
-  py : Nat := 0
+  py : Nat := 1
   c : Nat := 0
   bracket : Nat := 0
   deriving Repr, Inhabited, DecidableEq
