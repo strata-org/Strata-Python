@@ -1588,6 +1588,29 @@ def mainTotal (body : String) : String := s!"module m \{
       %l.0 : py.Value = py.mkList(%x.0)
       %v.0 : py.Value = py.in(%x.0, %l.0) ^err.0()")
 
+-- The same NaN one level down, in a tuple: comparing the two tuples skips `is`, and the gap comes
+-- from their members.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "comparing values whose identity is unknown and that are not equal (a NaN)" -/
+#guard_msgs in
+#eval run (main "      %big.0 : py.Value = py.floatLit(1e308)
+      %ten.0 : py.Value = py.floatLit(10.0)
+      %inf.0 : py.Value = py.mult(%big.0, %ten.0) ^err.0()
+      %x.0 : py.Value = py.sub(%inf.0, %inf.0) ^err.0()
+      %t.0 : py.Value = py.mkTuple(%x.0)
+      %l.0 : py.Value = py.mkList(%t.0)
+      %m.0 : py.Value = py.mkList(%t.0)
+      %v.0 : py.Value = py.eq(%l.0, %m.0) ^err.0()")
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "comparing values whose identity is unknown and that are not equal (a NaN)" -/
+#guard_msgs in
+#eval run (main "      %big.0 : py.Value = py.floatLit(1e308)
+      %ten.0 : py.Value = py.floatLit(10.0)
+      %inf.0 : py.Value = py.mult(%big.0, %ten.0) ^err.0()
+      %x.0 : py.Value = py.sub(%inf.0, %inf.0) ^err.0()
+      %t.0 : py.Value = py.mkTuple(%x.0)
+      %l.0 : py.Value = py.mkList(%t.0)
+      %v.0 : py.Value = py.in(%t.0, %l.0) ^err.0()")
+
 /-- info: False -/
 #guard_msgs in
 #eval run (main "      %big.0 : py.Value = py.floatLit(1e308)

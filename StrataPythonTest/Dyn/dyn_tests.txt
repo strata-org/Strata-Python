@@ -509,6 +509,8 @@ s360_seq_slot_compare | yes |
 s361_seq_slot_reflected | yes |
 s362_seq_slot_subclass_radd | yes |
 s363_seq_slot_subclass_alias | yes |
+s368_sym_hash_member | yes |
+s369_sym_hash_member_second | yes |
 s129_iter_builtins | yes |
 s130_iter_loops | yes |
 s131_dict_merge | yes |

@@ -652,6 +652,15 @@ def notOp [PyCalls m V] (v : V) : m Bool := (! ·) <$> truthy v
 `is` is unknown and `==` is false, the two may be one NaN in CPython, which is equal to itself
 there: a gap. -/
 def sameOrEq [PyPure m V] (eq : V → V → m Bool) (x y : V) : m Bool := do
+  -- For two tuples, `is` is never `yes`, and `==` is false only if their sizes differ or a pair
+  -- of members gets false here.  A pair gets false only if it differs
+  -- (`Value.identical_self_ne_no`, and this same argument for two tuples), so the two tuples
+  -- differ, their `is` is `no`, and the gap below can't fire.  So `is` is skipped: it walks the
+  -- tuples, and nested `==` would repeat the walk at each level.
+  -- This check reads `immViewAll`, which doesn't stop on a hash whose number the model doesn't
+  -- know, so such a member goes on to `is` and `==`.
+  if (← PyPure.immViewAll x) matches some (.tuple _) then
+    if (← PyPure.immViewAll y) matches some (.tuple _) then return ← eq x y
   let same ← PyPure.identical x y
   if same matches .yes then return true
   if ← eq x y then return true

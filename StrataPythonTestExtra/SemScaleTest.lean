@@ -15,11 +15,15 @@ writes that grow a dict, a list and a set, deletions that shrink a list, the ite
 non-ASCII `str`, a loop after many iterators of a non-ASCII `str` that stopped early, the walks of
 a tuple of a million members, an empty `str` repeated `2 ** 40` times, indexing and growing a
 non-ASCII `str`, the hash of a tuple of a million members, and the reprs of a tuple, a list and a
-dict of 100,000 members, and `<` of two tuples nested 800 deep (sizes that run within the native
-stack today, docs/PythonToDyn.md §13.6).  Each run takes a few seconds of CPU time, and the test fails if one
-takes more than 30 seconds of it; a store or a container that copied itself on each write would
-take about a minute.  It measures the CPU time of `pydyn`, not the time on the clock, so that a
-busy build host doesn't make it fail.
+dict of 100,000 members, `<` of two tuples nested 800 deep, and `==` of two tuples that share their
+parts 16 levels deep (sizes that currently run within the native stack, and costs that
+docs/PythonToDyn.md §13.6 states).  Each run takes a few seconds of CPU time, and the test fails if
+one takes more than 30 seconds of it; a store or a container that copied itself on each write would
+take about a minute.  It also checks how one cost grows: `<` of two tuples that differ only
+innermost, nested 1,000 deep, may take at most 4.5 times its time at 500 deep, as a cost in the
+square of the depth does (CPython's), where one in its cube took 6.5 to 8.5 times in our runs.
+It measures the CPU time of `pydyn`, not the time on the clock, so that a busy build host doesn't
+make it fail.
 -/
 
 namespace StrataPython.SemScaleTest
@@ -51,7 +55,9 @@ private meta def programs : List (String × String × String) := [
     while i < 100000:\n    d[i] = i\n    i = i + 1\na = len(repr(t))\nb = len(repr(l))\n\
     c = len(repr(d))\ndel t, l, d\n", "c = 1377780"),
   ("deep tuple comparison", "a = 0\nb = 0\ni = 0\nwhile i < 800:\n    a = (a,)\n    b = (b, 1)\n    \
-    i = i + 1\nr = a < b\ndel a, b\n", "r = True")]
+    i = i + 1\nr = a < b\ndel a, b\n", "r = True"),
+  ("shared tuples", "t = ()\ni = 0\nwhile i < 16:\n    t = (t, t)\n    i = i + 1\n\
+    r = (t,) == (t,)\ndel t\n", "r = True")]
 
 /-- A Python program that runs `pydyn run FILE`, then prints its exit code and its CPU time in ms
 (user and system) on a first line, and its output after it. -/
@@ -64,24 +70,42 @@ private meta def cpuTime : String :=
    sys.stdout.buffer.write(r.stdout)\n\
    sys.stderr.buffer.write(r.stderr)\n"
 
+/-- `<` of two tuples nested `d` deep that differ only innermost: CPython compares about `d²/2`
+members. -/
+private meta def sameShape (d : Nat) : String :=
+  s!"a = ()\nb = (1,)\ni = 0\nwhile i < {d}:\n    a = (a,)\n    b = (b,)\n    i = i + 1\n\
+    r = a < b\ndel a, b\n"
+
+/-- The CPU time in ms of `pydyn run` on `program`, which it writes to a file in `dir`.  The run
+must exit with 0, and its output must hold the line `expected`. -/
+private meta def measure (python : System.FilePath) (dir : System.FilePath)
+    (name program expected : String) : IO Nat := do
+  let file := dir / s!"{name.replace " " "_"}.py"
+  IO.FS.writeFile file program
+  let r ← IO.Process.output
+    { cmd := python.toString, args := #["-c", cpuTime, SemDiff.pydynPath.toString, "run", file.toString] }
+  let lines := r.stdout.splitOn "\n"
+  let (code, ms) ← match (lines.headD "").splitOn " " with
+    | [c, t] => match c.toInt?, t.toNat? with
+      | some code, some ms => pure (code, ms)
+      | _, _ => throw <| .userError s!"SemScaleTest: no CPU time for the {name} run:\n{r.stdout}{r.stderr}"
+    | _ => throw <| .userError s!"SemScaleTest: no CPU time for the {name} run:\n{r.stdout}{r.stderr}"
+  unless code == 0 && (lines.drop 1).contains expected do
+    throw <| .userError s!"SemScaleTest: the {name} run failed:\n{r.stderr}"
+  IO.println s!"SemScaleTest: {name} {ms} ms of CPU time"
+  return ms
+
 -- `pydyn run` parses the program with Python, so the test needs it, as the other tests do.
 #eval StrataPython.withPython fun python => do
   IO.FS.withTempDir fun dir => do
     for (name, program, expected) in programs do
-      let file := dir / s!"{name.replace " " "_"}.py"
-      IO.FS.writeFile file program
-      let r ← IO.Process.output
-        { cmd := python.toString, args := #["-c", cpuTime, SemDiff.pydynPath.toString, "run", file.toString] }
-      let lines := r.stdout.splitOn "\n"
-      let (code, ms) ← match (lines.headD "").splitOn " " with
-        | [c, t] => match c.toInt?, t.toNat? with
-          | some code, some ms => pure (code, ms)
-          | _, _ => throw <| .userError s!"SemScaleTest: no CPU time for the {name} run:\n{r.stdout}{r.stderr}"
-        | _ => throw <| .userError s!"SemScaleTest: no CPU time for the {name} run:\n{r.stdout}{r.stderr}"
-      unless code == 0 && (lines.drop 1).contains expected do
-        throw <| .userError s!"SemScaleTest: the {name} run failed:\n{r.stderr}"
-      IO.println s!"SemScaleTest: {name} {ms} ms of CPU time"
+      let ms ← measure python dir name program expected
       if ms > 30000 then
         throw <| .userError s!"SemScaleTest: the {name} run took {ms} ms of CPU time, more than 30000"
+    let half ← measure python dir "same-shape tuples 500 deep" (sameShape 500) "r = True"
+    let full ← measure python dir "same-shape tuples 1000 deep" (sameShape 1000) "r = True"
+    if full * 2 > half * 9 then
+      throw <| .userError s!"SemScaleTest: `<` of same-shape tuples took {full} ms at 1,000 deep and \
+        {half} ms at 500 deep, more than 4.5 times"
 
 end StrataPython.SemScaleTest

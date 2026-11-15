@@ -26,6 +26,7 @@ public import StrataPython.Dyn.Sem.World
 public import StrataPython.Dyn.Sem.WorldProps
 public import StrataPython.Dyn.Sem.Dom
 public import StrataPython.Dyn.Sem.Basics
+public import StrataPython.Dyn.Sem.BasicsProps
 public import StrataPython.Dyn.Sem.Exceptions
 public import StrataPython.Dyn.Sem.Monad
 public import StrataPython.Dyn.Sem.Assembly

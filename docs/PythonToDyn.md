@@ -2675,6 +2675,15 @@ abort, and it gives no result:
   object, a `str` or a tuple (a tuple of numbers hashes within the stack). A loop inside a rule over one value's members takes native stack for each member until
   the rule ends. `StrataPythonTestExtra/SemScaleTest.lean` runs these reprs at 100,000 members.
 
+Two equal tuples that share sub-tuples compare in time proportional to their unfolded size, even
+where CPython's identity shortcut answers at once: with `t = (t, t)` repeated 18 times,
+`(t,) == (t,)` takes 2 to 3 s, where CPython takes under a microsecond; repeated 19 times, it makes
+about a million member comparisons in one operation and exhausts the native stack, as in the second
+case above. The model keeps a tuple as a value without identity, and its `==` isn't reflexive (a
+NaN gaps against itself), so it can't skip a part that is the same on both sides. Either of two
+changes would make this polynomial: a cached bit per tuple saying that every member, at every
+depth, is equal to itself, read with a pointer-equality shortcut; or tuples with identity.
+
 Memory grows with the number of objects that a run makes, not with its live data: every object
 stays in the store until the run ends. A dict or a set of one entry takes about 1.2 to 1.5 KB, an
 instance with one attribute (`self.x = 1`) about 1.9 KB and one without attributes about 0.35 KB,

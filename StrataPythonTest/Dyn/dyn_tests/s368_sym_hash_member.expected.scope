@@ -1,0 +1,3 @@
+module
+  a: local (assigned, referenced)
+  print: global implicit (referenced)

@@ -1,0 +1,20 @@
+--- PYTHONHASHSEED=0
+--- stdout 6
+False
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = 4644417185603328019
+--- PYTHONHASHSEED=1
+--- stdout 6
+False
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = -3012895188637184397
