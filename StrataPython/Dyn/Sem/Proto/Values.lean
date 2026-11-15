@@ -85,6 +85,13 @@ def bytesLit [PyPure m V] (s : String) : m V :=
   | some b => pure (PyPure.imm (m := m) (.bytes b))
   | none => PyPure.modelInvariant "py.bytesLit: operand assumption failed"
 
+/-- `py.isMarker v`: `true` when `v` is pyhard's `loop_invariant` marker. For any other value, the
+guard's false branch stands for CPython's call of that value, which the semantics doesn't model, so
+the run stops with a gap instead of returning `false`. -/
+def isMarker [PyPure m V] (v : V) : m Bool := do
+  if (← PyPure.identical v (PyPure.marker (m := m) "loop_invariant")) == .yes then return true
+  PyPure.gap "a call of a loop_invariant other than PyHard's is not modelled yet"
+
 /-- The gap of a construct that the translator doesn't translate, named by the `str` `name`. -/
 def unsupported [PyPure m V] {α : Type} (name : V) : m α := do
   match ← PyPure.immViewAll name with

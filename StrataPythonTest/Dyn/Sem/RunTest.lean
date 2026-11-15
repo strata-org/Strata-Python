@@ -1976,4 +1976,340 @@ def chainStore : ObjStore Run :=
 #guard_msgs in
 #eval IO.println (outcomeText (excLines { objs := #[excObj .ValueError "x\n--- gap g"] } 100 (.obj 0)))
 
+-- The model of `pyhard`: its `loop_invariant` and `OLD` are marker values. Each import gives the
+-- same `OLD`, and the module's attribute is the value that `from pyhard import` reads.
+/-- info: True -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"OLD\") ^err.0()
+      %b.0 : py.Value = py.importFrom(\"pyhard\", \"OLD\") ^err.0()
+      %v.0 : py.Value = py.is(%a.0, %b.0)")
+
+/-- info: True -/
+#guard_msgs in
+#eval run (main "      %m.0 : py.Value = py.importModule(\"pyhard\") ^err.0()
+      %a.0 : py.Value = py.attr(%m.0, \"loop_invariant\") ^err.0()
+      %b.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %v.0 : py.Value = py.is(%a.0, %b.0)")
+
+/-- A module whose `main` returns `True` when the `base.Bool` `%c.0` of `body` is true, `False` when
+it is false, or the exception that `body` raises. -/
+def mainTest (body : String) : String := s!"module m \{
+  func @m.main() -> py.Value \{
+    entry.0():
+{body}
+      branch(%c.0) ^yes.0() ^no.0()
+    yes.0():
+      %t.0 : py.Value = py.boolLit(true)
+      ret(%t.0)
+    no.0():
+      %f.0 : py.Value = py.boolLit(false)
+      ret(%f.0)
+    err.0(%e.0 : py.Value):
+      ret(%e.0)
+  }
+}"
+
+-- `py.isMarker`, the guard's test before a loop with invariants: true for pyhard's `loop_invariant`;
+-- for any other value, a gap, since the guard's false branch stands for CPython's call of it.
+/-- info: True -/
+#guard_msgs in
+#eval run (mainTest "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %c.0 : base.Bool = py.isMarker(%a.0)")
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a call of a loop_invariant other than PyHard's is not modelled yet" -/
+#guard_msgs in
+#eval run (mainTest "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"OLD\") ^err.0()
+      %c.0 : base.Bool = py.isMarker(%a.0)")
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a call of a loop_invariant other than PyHard's is not modelled yet" -/
+#guard_msgs in
+#eval run (mainTest "      %a.0 : py.Value = py.noneLit
+      %d.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %c.0 : base.Bool = py.isMarker(%a.0)")
+
+-- An object of the store, too. (The unused import keeps `mainTest`'s error block in use.)
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a call of a loop_invariant other than PyHard's is not modelled yet" -/
+#guard_msgs in
+#eval run (mainTest "      %a.0 : py.Value = py.mkList()
+      %d.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %c.0 : base.Bool = py.isMarker(%a.0)")
+
+-- The second import finds the module of the first: the same markers.
+/-- info: True -/
+#guard_msgs in
+#eval run (main "      %m.0 : py.Value = py.importModule(\"pyhard\") ^err.0()
+      %n.0 : py.Value = py.importModule(\"pyhard\") ^err.0()
+      %v.0 : py.Value = py.is(%m.0, %n.0)")
+
+/-- info: 'pyhard' -/
+#guard_msgs in
+#eval run (main "      %m.0 : py.Value = py.importModule(\"pyhard\") ^err.0()
+      %v.0 : py.Value = py.attr(%m.0, \"__name__\") ^err.0()")
+
+-- An attribute that `pyhard` doesn't define raises `AttributeError`, as in CPython.
+/-- info: exception AttributeError("module 'pyhard' has no attribute 'invariant'",), context None, traceback <traceback>, fields [(name, 'invariant'), (obj, <object 3>)] -/
+#guard_msgs in
+#eval run (main "      %m.0 : py.Value = py.importModule(\"pyhard\") ^err.0()
+      %v.0 : py.Value = py.attr(%m.0, \"invariant\") ^err.0()")
+
+-- `from pyhard import invariant` stops with a gap, since CPython's `ImportError` names pyhard's
+-- file, and so does a dunder that the model doesn't hold, such as `__file__`.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "from pyhard import invariant of a name that the module lacks is not modelled yet" -/
+#guard_msgs in
+#eval run (main "      %v.0 : py.Value = py.importFrom(\"pyhard\", \"invariant\") ^err.0()")
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the attribute pyhard.__file__ is not modelled yet" -/
+#guard_msgs in
+#eval run (main "      %m.0 : py.Value = py.importModule(\"pyhard\") ^err.0()
+      %v.0 : py.Value = py.attr(%m.0, \"__file__\") ^err.0()")
+
+-- A write to the module stops with a gap.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "an attribute write to the module pyhard is not modelled yet" -/
+#guard_msgs in
+#eval run (main "      %m.0 : py.Value = py.importModule(\"pyhard\") ^err.0()
+      %n.0 : py.Value = py.noneLit
+      %u.0 : base.Unit = py.setAttr(%m.0, \"loop_invariant\", %n.0) ^err.0()
+      %v.0 : py.Value = py.noneLit")
+
+-- Loop-invariant marker values, from pyhard's model: only identity is modelled.
+-- A loop-invariant marker is the same object at each evaluation, as `pyhard.loop_invariant` is.
+/-- info: True -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %b.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %v.0 : py.Value = py.is(%a.0, %b.0)")
+
+-- The two markers are different objects.
+/-- info: False -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %b.0 : py.Value = py.importFrom(\"pyhard\", \"OLD\") ^err.0()
+      %v.0 : py.Value = py.is(%a.0, %b.0)")
+
+-- A marker isn't any other value.
+/-- info: True -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %b.0 : py.Value = py.noneLit
+      %v.0 : py.Value = py.isNot(%a.0, %b.0)")
+
+-- `in` on a list and on a tuple, and `==` and ordering on containers that hold a marker, stop with a
+-- gap: the comparison of two members first asks whether both are tuples, which a marker can't answer.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %l.0 : py.Value = py.mkList(%a.0)
+      %v.0 : py.Value = py.in(%a.0, %l.0) ^err.0()")
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"OLD\") ^err.0()
+      %t.0 : py.Value = py.mkTuple(%a.0)
+      %v.0 : py.Value = py.in(%a.0, %t.0) ^err.0()")
+
+-- Every other use of a marker stops with a gap: `==` ...
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %v.0 : py.Value = py.eq(%a.0, %a.0) ^err.0()")
+
+-- ... a truth test ...
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %c.0 : base.Bool = py.truthy(%a.0) ^err.0()
+      %v.0 : py.Value = py.noneLit")
+
+-- ... hashing, as a set's member ...
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the hash of this value is not modelled yet" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %v.0 : py.Value = py.mkSet(%a.0) ^err.0()")
+
+-- ... `type()` and `isinstance` ...
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %t.0 : py.Value = py.loadGlobal(\"m\", \"type\") ^err.0()
+      %x.0 : py.Value = py.mkTuple(%a.0)
+      %k.0 : py.Value = py.mkKwargs
+      %v.0 : py.Value = py.call(%t.0, %x.0, %k.0) ^err.0()")
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %f.0 : py.Value = py.loadGlobal(\"m\", \"isinstance\") ^err.0()
+      %t.0 : py.Value = py.loadGlobal(\"m\", \"int\") ^err.0()
+      %x.0 : py.Value = py.mkTuple(%a.0, %t.0)
+      %k.0 : py.Value = py.mkKwargs
+      %v.0 : py.Value = py.call(%f.0, %x.0, %k.0) ^err.0()")
+
+-- ... an attribute read ...
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %v.0 : py.Value = py.attr(%a.0, \"__name__\") ^err.0()")
+
+-- ... and a call.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %x.0 : py.Value = py.mkTuple()
+      %k.0 : py.Value = py.mkKwargs
+      %v.0 : py.Value = py.call(%a.0, %x.0, %k.0) ^err.0()")
+
+
+-- `==` on two lists that hold one marker.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %l.0 : py.Value = py.mkList(%a.0)
+      %m.0 : py.Value = py.mkList(%a.0)
+      %v.0 : py.Value = py.eq(%l.0, %m.0) ^err.0()")
+
+-- Two lists that hold two different markers stop with a gap too.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %b.0 : py.Value = py.importFrom(\"pyhard\", \"OLD\") ^err.0()
+      %l.0 : py.Value = py.mkList(%a.0)
+      %m.0 : py.Value = py.mkList(%b.0)
+      %v.0 : py.Value = py.eq(%l.0, %m.0) ^err.0()")
+
+-- A rule that asks what a marker is, such as `__build_class__` of a marker, stops with a gap: in
+-- CPython the marker is a function of `pyhard`.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %s.0 : py.Value = py.strLit(\"C\")
+      %f.0 : py.Value = py.loadGlobal(\"m\", \"__build_class__\") ^err.0()
+      %x.0 : py.Value = py.mkTuple(%a.0, %s.0)
+      %k.0 : py.Value = py.mkKwargs
+      %v.0 : py.Value = py.call(%f.0, %x.0, %k.0) ^err.0()")
+
+-- A marker that a class holds is a function in CPython, which a read through an instance binds as
+-- a method: the machine stops with a gap.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %t.0 : py.Value = py.loadGlobal(\"m\", \"type\") ^err.0()
+      %n.0 : py.Value = py.strLit(\"C\")
+      %b.0 : py.Value = py.mkTuple()
+      %mk.0 : py.Value = py.strLit(\"__module__\")
+      %mv.0 : py.Value = py.strLit(\"m\")
+      %d.0 : py.Value = py.mkDict(%mk.0, %mv.0) ^err.0()
+      %x.0 : py.Value = py.mkTuple(%n.0, %b.0, %d.0)
+      %k.0 : py.Value = py.mkKwargs
+      %c.0 : py.Value = py.call(%t.0, %x.0, %k.0) ^err.0()
+      %u.0 : base.Unit = py.setAttr(%c.0, \"f\", %a.0) ^err.0()
+      %i.0 : py.Value = py.call(%c.0, %b.0, %k.0) ^err.0()
+      %v.0 : py.Value = py.attr(%i.0, \"f\") ^err.0()")
+
+-- `==` on two tuples and on two dicts that hold one marker.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %l.0 : py.Value = py.mkTuple(%a.0)
+      %m.0 : py.Value = py.mkTuple(%a.0)
+      %v.0 : py.Value = py.eq(%l.0, %m.0) ^err.0()")
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %i.0 : py.Value = py.intLit(1)
+      %d.0 : py.Value = py.mkDict(%i.0, %a.0) ^err.0()
+      %d.1 : py.Value = py.mkDict(%i.0, %a.0) ^err.0()
+      %v.0 : py.Value = py.eq(%d.0, %d.1) ^err.0()")
+
+-- An `except` tuple that holds a marker: CPython checks every element and raises TypeError.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %c.0 : py.Value = py.loadGlobal(\"m\", \"ValueError\") ^err.0()
+      %x.0 : py.Value = py.mkTuple()
+      %k.0 : py.Value = py.mkKwargs
+      %ex.0 : py.Value = py.call(%c.0, %x.0, %k.0) ^err.0()
+      %t.0 : py.Value = py.mkTuple(%c.0, %a.0)
+      %b.0 : base.Bool = py.excMatch(%ex.0, %t.0) ^err.0()
+      %v.0 : py.Value = py.noneLit")
+
+-- `isinstance(1, (int, m))` stops at `int`, as CPython does.
+/-- info: True -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %f.0 : py.Value = py.loadGlobal(\"m\", \"isinstance\") ^err.0()
+      %t.0 : py.Value = py.loadGlobal(\"m\", \"int\") ^err.0()
+      %i.0 : py.Value = py.intLit(1)
+      %p.0 : py.Value = py.mkTuple(%t.0, %a.0)
+      %x.0 : py.Value = py.mkTuple(%i.0, %p.0)
+      %k.0 : py.Value = py.mkKwargs
+      %v.0 : py.Value = py.call(%f.0, %x.0, %k.0) ^err.0()")
+
+-- `isinstance("a", (int, m))` reaches the marker: CPython raises TypeError.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %f.0 : py.Value = py.loadGlobal(\"m\", \"isinstance\") ^err.0()
+      %t.0 : py.Value = py.loadGlobal(\"m\", \"int\") ^err.0()
+      %i.0 : py.Value = py.strLit(\"a\")
+      %p.0 : py.Value = py.mkTuple(%t.0, %a.0)
+      %x.0 : py.Value = py.mkTuple(%i.0, %p.0)
+      %k.0 : py.Value = py.mkKwargs
+      %v.0 : py.Value = py.call(%f.0, %x.0, %k.0) ^err.0()")
+
+-- `(1, m) < (1, m, 0)`.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %i.0 : py.Value = py.intLit(1)
+      %z.0 : py.Value = py.intLit(0)
+      %l.0 : py.Value = py.mkTuple(%i.0, %a.0)
+      %r.0 : py.Value = py.mkTuple(%i.0, %a.0, %z.0)
+      %v.0 : py.Value = py.lt(%l.0, %r.0) ^err.0()")
+
+-- `(1, m) < (1, OLD)` compares two markers: CPython raises TypeError.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %b.0 : py.Value = py.importFrom(\"pyhard\", \"OLD\") ^err.0()
+      %i.0 : py.Value = py.intLit(1)
+      %l.0 : py.Value = py.mkTuple(%i.0, %a.0)
+      %r.0 : py.Value = py.mkTuple(%i.0, %b.0)
+      %v.0 : py.Value = py.lt(%l.0, %r.0) ^err.0()")
+
+-- `m in [1, m]` compares 1 with the marker first, which stops with a gap.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %i.0 : py.Value = py.intLit(1)
+      %l.0 : py.Value = py.mkList(%i.0, %a.0)
+      %v.0 : py.Value = py.in(%a.0, %l.0) ^err.0()")
+
+
+-- `loop_invariant == OLD` and `loop_invariant != loop_invariant` are rich comparisons, not `is`:
+-- both stop with a gap (CPython gives False for each).
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %b.0 : py.Value = py.importFrom(\"pyhard\", \"OLD\") ^err.0()
+      %v.0 : py.Value = py.eq(%a.0, %b.0) ^err.0()")
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a pyhard marker used as a value is not modelled" -/
+#guard_msgs in
+#eval run (main "      %a.0 : py.Value = py.importFrom(\"pyhard\", \"loop_invariant\") ^err.0()
+      %v.0 : py.Value = py.notEq(%a.0, %a.0) ^err.0()")
+
+
+section
+variable {σ : Type} [Strata.Dyn.Exec.Store σ] [Strata.Dyn.Exec.Decode σ]
+-- For every marker: `type()`, the view of an immediate, the view of an object and the hash stop
+-- with a gap.
+example (n : String) : Prim.classOf (σ := σ) (.marker n) = PyM.gap markerGap := rfl
+example (n : String) : Prim.immView (σ := σ) (.marker n) = PyM.gap markerGap := rfl
+example (n : String) : Prim.objView (σ := σ) (.marker n) = PyM.gap markerGap := rfl
+example (n : String) :
+    Prim.immHash (σ := σ) (.marker n) = PyM.gap "the hash of this value is not modelled yet" := by
+  simp [Prim.immHash, Value.deeperThan, Value.immHash]
+end
+
 end StrataPython.Dyn.Sem.RunTest

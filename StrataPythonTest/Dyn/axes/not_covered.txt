@@ -10,6 +10,7 @@ py.objLoc | a contract operation: no Python source reaches it. A Python loop inv
 py.reachLoc | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
 py.instanceState | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
 py.unsupported | emitted only for a construct that the translator rejects, and a rejected program doesn't run
+py.isMarker | the guard's test of a loop-invariant marker statement, and no grid case imports pyhard
 py.argOf | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
 py.extraKwargs | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run
 py.bindsTo | a contract operation: no Python source reaches it. A Python loop invariant's len, isinstance, all and any become contract operations, but inside base.loopInvariant, which the machine skips, so they never run

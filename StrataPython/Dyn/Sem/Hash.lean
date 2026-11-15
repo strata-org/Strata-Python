@@ -235,7 +235,8 @@ def Value.immHash : Value → HashResult
   | .bound .none t name .staticMethod =>
     .hash (.symbolic (.combine "<staticmethod>" [.symbolic (.descr t name)]))
   | .obj _ => .needsStore
-  | .undef _ | .bound .. | .method .. | .traceback => .unknown
+  -- A loop-invariant marker's hash isn't modelled: a use of the marker as a key stops with a gap.
+  | .undef _ | .bound .. | .method .. | .traceback | .marker _ => .unknown
 
 /-- The hashes of `vs` after the hashes `acc` (in reverse), or the result of the first one that
 has no hash here.  Tail-recursive, so that a long tuple doesn't grow the native stack. -/

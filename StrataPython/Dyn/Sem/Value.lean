@@ -395,6 +395,10 @@ inductive Value where
   | traceback
   /-- An object of the store. -/
   | obj (id : ObjId)
+  /-- The loop-invariant marker `pyhard.<name>`, which the model of `pyhard` gives: only its
+  identity is modelled. Two markers of the same name are the same object, and every other use stops
+  with a gap; a verifier must show that no other operation on one is reached. -/
+  | marker (name : String)
   deriving Repr, Inhabited
 
 /-- Structural equality of values, floats by their bits: a total function, so that rules that
@@ -418,6 +422,7 @@ def Value.beq : Value → Value → Bool
   | .method f s, .method f' s' => Value.beq f f' && Value.beq s s'
   | .traceback, .traceback => true
   | .obj a, .obj b => a == b
+  | .marker a, .marker b => a == b
   | _, _ => false
 termination_by a => sizeOf a
 decreasing_by
@@ -450,6 +455,7 @@ def Value.hashV : Value → UInt64
   | .method f s => mixHash 16 (mixHash f.hashV s.hashV)
   | .traceback => 17
   | .obj id => mixHash 18 (hash id)
+  | .marker n => mixHash 19 (hash n)
 termination_by v => sizeOf v
 decreasing_by
   all_goals simp_wf

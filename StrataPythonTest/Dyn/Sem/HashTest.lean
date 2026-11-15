@@ -58,6 +58,8 @@ def hashOf? (v : Value) : Option Hash :=
 #guard exactHash (.ofFloat (1.0 / 3.0)) == some 768614336404564608
 -- A NaN's hash is its object's address: no hash here.
 #guard (Value.ofFloat (0.0 / 0.0)).immHash == .unknown
+-- A loop-invariant marker's hash isn't modelled: using one as a key stops with a gap.
+#guard (Value.marker "loop_invariant").immHash == .unknown
 
 -- `tuple`: CPython 3.12's xxHash mixing.
 #guard exactHash (.tuple #[]) == some 5740354900026072187

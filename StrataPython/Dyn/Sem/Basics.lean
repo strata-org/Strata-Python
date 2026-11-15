@@ -56,7 +56,8 @@ def Value.classOfImm : Value → Option Value
   | .bound _ _ _ k => some (.builtin k.boundType)
   | .method .. => some (.builtin .method)
   | .traceback => some (.builtin .traceback)
-  | .obj _ => Option.none
+  -- A loop-invariant marker's type isn't modelled (`classOf` stops with a gap).
+  | .obj _ | .marker _ => Option.none
 
 /-- Which kind of immediate a value is, for `is` on two equal values: two values of one kind
 are of one type. -/
@@ -76,9 +77,10 @@ def Value.immKind : Value → Option Nat
 
 /-- Whether a value is a singleton or a built-in constant, which `is` compares by value.  A
 static method of a built-in type is one of them: `staticmethod.__get__` gives the one callable
-that the descriptor holds, so `str.maketrans is str.maketrans`. -/
+that the descriptor holds, so `str.maketrans is str.maketrans`. A loop-invariant marker is one
+too: two markers of the same name are the same object. -/
 def Value.isConstant : Value → Bool
-  | .none | .notImplemented | .ellipsis | .bool _ | .builtin _ | .descr .. => true
+  | .none | .notImplemented | .ellipsis | .bool _ | .builtin _ | .descr .. | .marker _ => true
   | .bound .none _ _ .staticMethod => true
   | _ => false
 

@@ -20,6 +20,7 @@ public import StrataPython.Dyn.Sem.Library.DictViewOps
 public import StrataPython.Dyn.Sem.Modules.Types
 public import StrataPython.Dyn.Sem.Modules.Typing
 public import StrataPython.Dyn.Sem.Modules.Dataclasses
+public import StrataPython.Dyn.Sem.Modules.Pyhard
 
 set_option autoImplicit false
 
@@ -151,7 +152,9 @@ one. -/
 def libraryImpls : Impls := libraryParts.foldr Impls.join {}
 
 /-- Each piece's part, in the order the pieces build on each other. -/
-def Assembly.parts : List Impls := [opsImpls, libraryImpls, Modules.typesImpls, Modules.typingImpls, Modules.dataclassesImpls]
+def Assembly.parts : List Impls :=
+  [opsImpls, libraryImpls, Modules.typesImpls, Modules.typingImpls, Modules.dataclassesImpls,
+    Modules.pyhardImpls]
 
 /-- The bodies of every piece, in the order the pieces build on each other. -/
 def Assembly.impls : Impls := (Assembly.parts.foldr Impls.join {}).withNewCheck

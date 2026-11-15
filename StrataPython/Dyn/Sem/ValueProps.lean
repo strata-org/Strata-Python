@@ -59,7 +59,7 @@ theorem Value.beq_of_eq : ∀ {a b : Value}, a = b → Value.beq a b = true := b
     intro i hi
     simp only [Array.getElem_zip, Array.getElem_attach]
     exact ih _ (Array.getElem_mem _) _ rfl
-  case case20 x y _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ =>
+  case case21 x y _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ =>
     subst h
     cases x <;> simp_all
     all_goals (rename_i hx; apply hx <;> rfl)

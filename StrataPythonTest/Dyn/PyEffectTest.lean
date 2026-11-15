@@ -59,9 +59,10 @@ private def notWrites : List (String × Effect) :=
   ("py.gt", .calls), ("py.gtE", .calls), ("py.handledExc", .reads), ("py.in", .calls),
   ("py.instanceState", .reads), ("py.intIsOneOf", .pure), ("py.intLit", .pure),
   ("py.invert", .calls), ("py.is", .pure), ("py.isDefined", .pure), ("py.isImmutableScalar", .pure),
-  ("py.isInstance", .calls), ("py.isNot", .pure), ("py.isStopIteration", .reads),
-  ("py.itemLoc", .pure), ("py.lShift", .calls), ("py.len", .calls), ("py.listToTuple", .reads),
-  ("py.loadGlobal", .calls), ("py.lt", .calls), ("py.ltE", .calls), ("py.matMult", .calls),
+  ("py.isInstance", .calls), ("py.isMarker", .pure), ("py.isNot", .pure),
+  ("py.isStopIteration", .reads), ("py.itemLoc", .pure), ("py.lShift", .calls), ("py.len", .calls),
+  ("py.listToTuple", .reads), ("py.loadGlobal", .calls), ("py.lt", .calls), ("py.ltE", .calls),
+  ("py.matMult", .calls),
   ("py.mkClosure", .reads), ("py.mkDict", .calls), ("py.mkKwargs", .pure), ("py.mkList", .pure),
   ("py.mkSet", .calls), ("py.mkSlice", .pure), ("py.mkTuple", .pure), ("py.mod", .calls),
   ("py.mult", .calls), ("py.noneLit", .pure), ("py.not", .calls), ("py.notEq", .calls),
@@ -99,10 +100,10 @@ private def total : List String :=
   "py.completionBreak", "py.completionContinue", "py.completionNormal", "py.completionRaise",
   "py.completionReturn", "py.dictKeysWithin", "py.ellipsisLit", "py.extraKwargs", "py.floatLit",
   "py.globalCell", "py.instanceState", "py.intIsOneOf", "py.intLit", "py.is", "py.isDefined",
-  "py.isImmutableScalar", "py.isNot", "py.isStopIteration", "py.itemLoc", "py.listAppend",
-  "py.listToTuple", "py.mkClosure", "py.mkKwargs", "py.mkList", "py.mkSlice", "py.mkTuple",
-  "py.noneLit", "py.objLoc", "py.popExcept", "py.pushExcInfo", "py.pushPending", "py.reachLoc",
-  "py.stdClass", "py.strConcat", "py.strIsOneOf", "py.strLit", "py.tupleGet", "py.undef",
-  "py.unsupported"]
+  "py.isImmutableScalar", "py.isMarker", "py.isNot", "py.isStopIteration", "py.itemLoc",
+  "py.listAppend", "py.listToTuple", "py.mkClosure", "py.mkKwargs", "py.mkList", "py.mkSlice",
+  "py.mkTuple", "py.noneLit", "py.objLoc", "py.popExcept", "py.pushExcInfo", "py.pushPending",
+  "py.reachLoc", "py.stdClass", "py.strConcat", "py.strIsOneOf", "py.strLit", "py.tupleGet",
+  "py.undef", "py.unsupported"]
 
 end StrataPython.Dyn.PyEffectTest

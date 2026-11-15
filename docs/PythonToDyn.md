@@ -144,7 +144,8 @@ are in `StrataPython/Dyn/Build.lean`.
 - **Total operations** have no successors. These are the literals, `undef`, `isDefined`,
   `is`/`isNot`, `mkTuple`/`mkList`/`mkKwargs`, `listToTuple`, `mkSlice`, `tupleGet`,
   `listAppend`, `isStopIteration`, `strConcat`, `globalCell`, `mkClosure`, `assertionError`,
-  `pushExcInfo`, `pushPending`, `popExcept`, the `Completion` constructors and `unsupported`.
+  `pushExcInfo`, `pushPending`, `popExcept`, the `Completion` constructors, `isMarker` and
+  `unsupported`.
   `mkSet` and `mkDict` raise, because hashing a key and comparing it with a stored key may run
   `__hash__` and `__eq__`. Of the operations for contracts (below), all are total except
   `isInstance`, `typeIsSubclass`, `len`, `reSearch` and the quantifiers. Some operations assume

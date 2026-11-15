@@ -80,6 +80,9 @@ inductive Imm (V : Type) where
   | traceback
   deriving Repr, Inhabited
 
+/-- The gap of every use of a loop-invariant marker value but identity. -/
+def markerGap : String := "a pyhard marker used as a value is not modelled"
+
 /-- The immediate `i` as a value. -/
 def Imm.toValue : Imm Value → Value
   | .none => .none
@@ -100,10 +103,10 @@ def Imm.toValue : Imm Value → Value
   | .method f s => .method f s
   | .traceback => .traceback
 
-/-- `v` as an immediate: `none` for an object, an unassigned value, and a symbolic hash value
-whose source holds a store object's address. -/
+/-- `v` as an immediate: `none` for an object, an unassigned value, a loop-invariant marker, and a
+symbolic hash value whose source holds a store object's address. -/
 def Value.toImm? : Value → Option (Imm Value)
-  | .undef _ | .obj _ => Option.none
+  | .undef _ | .obj _ | .marker _ => Option.none
   | .none => some .none
   | .notImplemented => some .notImplemented
   | .ellipsis => some .ellipsis

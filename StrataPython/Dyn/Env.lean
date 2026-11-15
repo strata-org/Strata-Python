@@ -302,6 +302,15 @@ public environment Py extends Base where
   `qualifiedRef`, it runs once, at the import, and its result is a snapshot.  Raises
   `ImportError` if neither exists. -/
   insn importFrom (module name : String) (^err (exc : Value)) : Value
+  /-- Whether `v` is the marker `pyhard.loop_invariant`, by identity: the test of the guard that the
+  translator emits for each marker statement, before its loop (`docs/PythonToDyn.md` §6.11).  Every
+  stage after the translator, a pass included, reads it as this exact test, false for every other
+  value.  The Python semantics never gives false: for any other value it stops the run with a gap,
+  since the guard's false branch stands for CPython's call of that value, which the semantics
+  doesn't model.  No stage removes or redirects a guard's false branch, changes its `unreachable`,
+  or merges two guards' reads or tests, for any reason: neither the semantics' gap nor the failure
+  that a correct translation may replace (`Result.Wrong`) justifies it. -/
+  pure insn isMarker (v : Value) : Bool
 
   -- Operators.
 

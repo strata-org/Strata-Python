@@ -43,6 +43,7 @@ instance : PyPure TM Toy where
   imm i := .imm i
   immViewAll v := pure (match v with | .imm i => some i | _ => none)
   undefName? v := pure (if v matches .undef then some "x" else none)
+  marker _ := .obj 3
   identical _ _ := pure .unknown
   addrHash _ := pure (.exact 0)
   gap msg := ⟨.error (.inl msg)⟩

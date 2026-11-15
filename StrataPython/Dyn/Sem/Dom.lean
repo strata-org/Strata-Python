@@ -208,6 +208,9 @@ class PyPure (m : Type → Type 1) (V : outParam Type) extends Monad m, MonadExc
   immViewAll : V → m (Option (Imm V))
   /-- The name of `v` if it is unassigned. -/
   undefName? : V → m (Option String)
+  /-- The loop-invariant marker value `pyhard.<name>`, for the model of `pyhard` and the guard's
+  test. -/
+  marker : String → V
   /-- `is`. -/
   identical : V → V → m IdResult
   /-- The hash of `v`'s address, for `object.__hash__`. -/

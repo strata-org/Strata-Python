@@ -5,6 +5,7 @@
 -/
 module
 import StrataPython.Dyn.Sem.Basics
+import StrataPython.Dyn.Sem.ValueProps
 meta import StrataPython.Dyn.Sem.Basics
 
 set_option autoImplicit false
@@ -54,6 +55,26 @@ def typeName (v : Value) : Option String :=
 #guard Value.identical (.int 1) (.ofFloat 1.0) == .no
 #guard Value.identical (.obj 0) (.int 0) == .no
 #guard Value.identical .none (.int 0) == .no
+
+-- A loop-invariant marker is a constant: the same name is the same object, for every name.
+example (a b : String) : Value.identical (.marker a) (.marker b) = if a = b then .yes else .no := by
+  by_cases h : a = b
+  · subst h; simp [Value.identical, Value.isConstant]
+  · have : (Value.marker a == Value.marker b) = false := by simp [h]
+    simp [Value.identical, Value.isConstant, h, this]
+#guard Value.identical (.marker "loop_invariant") (.obj 0) == .no
+-- `py.isMarker`'s test: a value is identical to the marker `loop_invariant` exactly when it is that
+-- marker, so the guard holds for no other value.
+example (v : Value) :
+    Value.identical v (.marker "loop_invariant") = .yes ↔ v = .marker "loop_invariant" := by
+  constructor
+  · intro h
+    cases v <;> simp_all [Value.identical, Value.isConstant] <;> split at h <;> cases h
+  · rintro rfl
+    simp [Value.identical, Value.isConstant]
+#guard Value.identical (.marker "OLD") (.builtin .len) == .no
+-- `classOfImm` has no type for a marker; `type()` stops with a gap before it, in `classOf`.
+example (n : String) : (Value.marker n).classOfImm = none := rfl
 
 #guard typeName .notImplemented == some "NotImplementedType"
 #guard typeName .ellipsis == some "ellipsis"

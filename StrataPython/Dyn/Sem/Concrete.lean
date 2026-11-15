@@ -487,6 +487,7 @@ def classOf (v : Value) : PyM σ .reads true Value := do
     match ← (objClass id).lift (by decide) with
     | some c => pure c
     | none => PyM.failure s!"object {id} does not exist"
+  | .marker _ => PyM.gap markerGap
   | v =>
     match v.classOfImm with
     | some c => pure c
@@ -496,6 +497,9 @@ def classOf (v : Value) : PyM σ .reads true Value := do
 def immView (v : Value) : PyM σ .pure true (Option (Imm Value)) :=
   match v with
   | .obj _ | .undef _ => pure none
+  -- A rule that looks at a loop-invariant marker as an immediate stops here; `is` and its
+  -- shortcuts compare the value itself, and `type()` and hashing stop in their own arms.
+  | .marker _ => PyM.gap markerGap
   | v => match v.toImm? with
     | some i => pure (some i)
     | none => PyM.failure "a symbolic int whose source holds an object's address"
@@ -1425,6 +1429,9 @@ def objView (v : Value) : PyM σ .reads true (Option (ObjView Value)) :=
       exact ContOK.getThe (fun _ => hk _)
         (fun h => absurd h (Level.ne_pure_up he (by decide))),
       by intro _; unfold StartFree; intros; rfl⟩
+  -- A loop-invariant marker is no object of the store, and a rule that asks what kind of object
+  -- a value is must not answer for it, e.g. as if it weren't a function.
+  | .marker _ => PyM.gap markerGap
   | _ => pure none
 
 /-- The payload of a new instance's built-in part. -/
@@ -1760,6 +1767,7 @@ instance {e : Level} {fr : Bool} : PyPure (PyM σ e fr) Value where
   imm i := i.toValue
   immViewAll v := (Prim.immView v).relax.lift Level.AtLeast.le
   undefName? v := pure (match v with | .undef n => some n | _ => none)
+  marker n := .marker n
   identical a b := match a, b with
     | .bound _ _ _ .tpNew, _ | _, .bound _ _ _ .tpNew =>
       PyM.gap (modelInvariantPrefix ++ "a type's tp_new outside a class call")

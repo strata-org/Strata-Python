@@ -59,6 +59,11 @@ def requireDefined (v : Value) (name excType msg : String) (err : Target E [Valu
     Sem ε E Value :=
   runRuleFree err #[] (Proto.requireDefined (m := PyM σ .reads true) v name excType msg)
 
+/-- The guard's test of a loop-invariant marker statement: `true` for pyhard's `loop_invariant`, a
+gap for any other value (`Proto.isMarker`). -/
+@[dyn_sem Py.isMarker] def isMarker (v : Value) : Sem ε E Bool :=
+  runTotalFree "py.isMarker" #[] (Proto.isMarker (m := PyM σ .pure true) v)
+
 @[dyn_sem Py.is_] def is_ (a b : Value) : Sem ε E Value :=
   runTotalFree "py.is" #[] (Proto.isValue (m := PyM σ .pure true) false a b)
 
