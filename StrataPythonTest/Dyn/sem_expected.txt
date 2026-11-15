@@ -178,6 +178,7 @@ m_lambda | gap | the translator does not support generator function
 m_local_vs_global | agree
 m_loop_dead_after | agree
 m_loop_dropped | agree
+m_loop_exits_run | agree
 m_loop_in_except | agree
 m_loop_records | agree
 m_module_bytes_doc | agree

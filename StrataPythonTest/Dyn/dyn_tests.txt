@@ -693,3 +693,4 @@ m_loop_dropped | yes |
 m_loop_dead_after | yes |
 m_loop_in_except | yes |
 m_finally_returns | yes |
+m_loop_exits_run | yes |

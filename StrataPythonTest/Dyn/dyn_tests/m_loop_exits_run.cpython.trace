@@ -1,0 +1,48 @@
+--- stdout 614
+ret_in_for 2 []
+ret_in_for -1 []
+ret_in_while_finally 3 ['c', 'c', 'c']
+raise_out ('caught', 3) [1, 2]
+raise_out none [1]
+break_finally 2 [1, 'c', 'c']
+break_finally 1 [1, 'c', 'else']
+continue_finally 9 [1, 2, 3, 4, 5]
+nested_ret (2, 3) [1, 3, 5, 'c', 1, 3, 'c']
+nested_ret None [7, 'c']
+exc_through_two_loops 22 [(1, 1), (1, 2), (1, 3), (2, 1)]
+stop_inside 2 [9, 'stop']
+next_raises ('next', 3) [1, 2]
+target_raises unpack [3]
+guard_raises guard ['w', 'w']
+handler_raises 1 ['h']
+with_exits 6 ['in', 'out', 'in', 2, 'out', 'in', 'out', 'in', 'out', 'in', 'out']
+while_break_else 2 []
+while_break_else 5 ['else']
+
+--- outcome
+ok
+--- globals
+Bad = <class 'Bad'>
+Ctx = <class 'Ctx'>
+Flag = <class 'Flag'>
+__doc__ = None
+__name__ = '__main__'
+a = (9,)
+break_finally = <function object>
+cleanup = <function object>
+continue_finally = <function object>
+exc_through_two_loops = <function object>
+f = <function object>
+guard_raises = <function object>
+handler_raises = <function object>
+log = ['else']
+nested_ret = <function object>
+next_raises = <function object>
+r = 5
+raise_out = <function object>
+ret_in_for = <function object>
+ret_in_while_finally = <function object>
+stop_inside = <function object>
+target_raises = <function object>
+while_break_else = <function object>
+with_exits = <function object>

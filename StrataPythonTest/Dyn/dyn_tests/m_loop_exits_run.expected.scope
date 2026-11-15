@@ -1,0 +1,161 @@
+module
+  cleanup: local (assigned)
+  ret_in_for: local (assigned, referenced)
+  ret_in_while_finally: local (assigned, referenced)
+  raise_out: local (assigned, referenced)
+  break_finally: local (assigned, referenced)
+  continue_finally: local (assigned, referenced)
+  nested_ret: local (assigned, referenced)
+  exc_through_two_loops: local (assigned, referenced)
+  stop_inside: local (assigned, referenced)
+  f: local (assigned, referenced)
+  a: local (assigned, referenced)
+  iter: global implicit (referenced)
+  log: local (assigned, referenced)
+  r: local (assigned, referenced)
+  print: global implicit (referenced)
+  Bad: local (assigned)
+  Flag: local (assigned)
+  Ctx: local (assigned)
+  next_raises: local (assigned, referenced)
+  target_raises: local (assigned, referenced)
+  guard_raises: local (assigned, referenced)
+  handler_raises: local (assigned, referenced)
+  with_exits: local (assigned, referenced)
+  while_break_else: local (assigned, referenced)
+  function cleanup
+    params: log
+    log: local (parameter, assigned)
+  function ret_in_for
+    params: xs, log
+    xs: local (parameter, referenced)
+    log: local (parameter)
+    x: local (assigned, referenced)
+  function ret_in_while_finally
+    params: n, log
+    n: local (parameter, referenced)
+    log: local (parameter, referenced)
+    i: local (assigned, referenced)
+    cleanup: global implicit (referenced)
+  function raise_out
+    params: xs, log
+    xs: local (parameter, referenced)
+    log: local (parameter, assigned)
+    x: local (assigned, referenced)
+    ValueError: global implicit (referenced)
+    e: local (assigned, referenced)
+  function break_finally
+    params: xs, log
+    xs: local (parameter, referenced)
+    log: local (parameter, assigned, referenced)
+    x: local (assigned, referenced)
+    cleanup: global implicit (referenced)
+  function continue_finally
+    params: xs, log
+    xs: local (parameter, referenced)
+    log: local (parameter, assigned)
+    t: local (assigned, referenced)
+    x: local (assigned, referenced)
+  function nested_ret
+    params: outer, inner, log
+    outer: local (parameter, referenced)
+    inner: local (parameter, referenced)
+    log: local (parameter, assigned, referenced)
+    p: local (assigned, referenced)
+    q: local (assigned, referenced)
+    cleanup: global implicit (referenced)
+  function exc_through_two_loops
+    params: log
+    log: local (parameter, assigned)
+    i: local (assigned, referenced)
+    j: local (assigned, referenced)
+    KeyError: global implicit (referenced)
+    e: local (assigned, referenced)
+  function stop_inside
+    params: it, log
+    it: local (parameter, referenced)
+    log: local (parameter, assigned)
+    x: local (assigned, referenced)
+    y: local (assigned, referenced)
+    next: global implicit (referenced)
+    StopIteration: global implicit (referenced)
+  class Bad
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function Bad.__init__
+      params: self
+      self: local (parameter, referenced)
+    function Bad.__iter__
+      params: self
+      self: local (parameter, referenced)
+    function Bad.__next__
+      params: self
+      self: local (parameter, referenced)
+      ValueError: global implicit (referenced)
+  class Flag
+    __init__: local (assigned)
+    __bool__: local (assigned)
+    function Flag.__init__
+      params: self, k
+      self: local (parameter, referenced)
+      k: local (parameter, referenced)
+    function Flag.__bool__
+      params: self
+      self: local (parameter, referenced)
+      KeyError: global implicit (referenced)
+  class Ctx
+    __init__: local (assigned)
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    function Ctx.__init__
+      params: self, log
+      self: local (parameter, referenced)
+      log: local (parameter, referenced)
+    function Ctx.__enter__
+      params: self
+      self: local (parameter, referenced)
+    function Ctx.__exit__
+      params: self, t, v, tb
+      self: local (parameter, referenced)
+      t: local (parameter)
+      v: local (parameter)
+      tb: local (parameter)
+  function next_raises
+    params: log
+    log: local (parameter, assigned)
+    x: local (assigned, referenced)
+    Bad: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    e: local (assigned, referenced)
+  function target_raises
+    params: log
+    log: local (parameter, assigned)
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    ValueError: global implicit (referenced)
+  function guard_raises
+    params: log
+    log: local (parameter, assigned)
+    f: local (assigned, referenced)
+    Flag: global implicit (referenced)
+    KeyError: global implicit (referenced)
+    e: local (assigned, referenced)
+  function handler_raises
+    params: log
+    log: local (parameter, assigned)
+    x: local (assigned, referenced)
+    TypeError: global implicit (referenced)
+    IndexError: global implicit (referenced)
+    e: local (assigned, referenced)
+  function with_exits
+    params: log
+    log: local (parameter, assigned, referenced)
+    x: local (assigned, referenced)
+    Ctx: global implicit (referenced)
+    y: local (assigned, referenced)
+  function while_break_else
+    params: n, log
+    n: local (parameter, referenced)
+    log: local (parameter, assigned)
+    i: local (assigned, referenced)
