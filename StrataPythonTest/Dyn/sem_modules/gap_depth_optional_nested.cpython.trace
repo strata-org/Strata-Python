@@ -1,0 +1,14 @@
+--- stdout 3
+ok
+
+--- outcome
+ok
+--- globals
+List = <_SpecialGenericAlias object>
+Optional = <_SpecialForm object>
+X = <_GenericAlias object>
+_ = 59
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+op = <function object>

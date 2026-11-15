@@ -1,0 +1,11 @@
+--- stdout 3
+ok
+
+--- outcome
+ok
+--- globals
+Tuple = <_TupleType object>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+op = <function object>

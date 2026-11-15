@@ -1,0 +1,14 @@
+--- stdout 3
+ok
+
+--- outcome
+ok
+--- globals
+P = <class 'P'>
+X = <P object>
+Y = <P object>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+f = <function object>
+op = <function object>

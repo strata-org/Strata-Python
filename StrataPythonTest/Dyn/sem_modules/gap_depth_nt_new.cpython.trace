@@ -1,0 +1,12 @@
+--- stdout 3
+ok
+
+--- outcome
+ok
+--- globals
+N = <class 'N'>
+NamedTuple = <function object>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+op = <function object>

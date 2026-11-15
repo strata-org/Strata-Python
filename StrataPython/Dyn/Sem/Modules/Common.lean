@@ -9,6 +9,7 @@ public import StrataPython.Dyn.Sem.Proto.Attrs
 public import StrataPython.Dyn.Sem.Builtins.Classes
 public import StrataPython.Dyn.Sem.Proto.Repr
 public import StrataPython.Dyn.Sem.Modules.Names
+public import StrataPython.Dyn.Sem.DictLookup
 
 set_option autoImplicit false
 
@@ -133,7 +134,12 @@ def ClassSpec.names (spec : ClassSpec) : List String :=
   spec.entries.toList.map (·.name) ++ spec.gapped.toList
 
 /-- `body` one Python frame deeper: the frame of a Python function of the ported module that the
-port runs without a native of its own. -/
+port runs without a native of its own.  These frames, and the `withPyDepth`s of the ports, are
+CPython's frames below the program code that a native calls back into (a default's `__repr__`, a
+`default_factory`, a `__post_init__`, an iterator's `__next__`, an operand's own method), which so
+runs at CPython's depth with no margin: each such path has a test in `sem_modules/gap_depth_*.py` at
+the depth where CPython raises with 100 frames below the program, and removing one of
+these frames makes that test fail (`replace`'s frame is one more than CPython's). -/
 def pyFrame [PyReads m V] {α : Type} (body : m α) : m α := PyReads.withPyDepth 1 body
 
 /-- The body of a native that stands for a Python function: CPython's call into Python from C
@@ -141,6 +147,36 @@ costs two C levels (`_PyEval_EvalFrame` and the call's vectorcall). P1's call of
 `function` counts one more level, so a call through P1's `callN` counts three, and a deep run
 stops before CPython's `RecursionError`, never after it. -/
 def pyFunctionCall [PyReads m V] {α : Type} (body : m α) : m α := PyReads.withDepth 2 body
+
+/-- The Python frames above its caller that a call of a native of these modules must have room for
+below the 900-frame limit, checked at the native's entry: at least the deepest that CPython 3.12
+pushes inside one call of one of them on arguments that aren't nested (14, for `dataclass` on a
+class with a `typing` annotation), with room for the natives that weren't measured.  The frames
+that grow with nested arguments (the hashes and reprs of nested aliases) are charged by the ports
+where they run them.  It's a check only: it returns before the body runs. -/
+def nativePeakFrames : Nat := 32
+
+/-- The methods that recurse through their operands' own methods: a dataclass's generated `__eq__`,
+`__hash__`, `__repr__` and order methods, the `__eq__`, `__hash__` and `__repr__` of the generic and
+union aliases, and a named tuple's `__repr__`.  Inside one call, CPython pushes only the frames that
+their call already charges (1, or 2 for a `__repr__` that `dataclasses._recursive_repr` wraps)
+before the operands' methods run, so they skip the entry check, which would stop a call of them
+within `nativePeakFrames` frames of the limit where CPython runs it (`dataclass_eq_near_limit`). -/
+def perLevelMethods : List String :=
+  [generatedEqKey, generatedHashKey, "dataclasses.__repr__", "dataclasses.__lt__", "dataclasses.__le__",
+    "dataclasses.__gt__", "dataclasses.__ge__",
+    "typing._GenericAlias.__eq__", "typing._GenericAlias.__hash__", "typing._GenericAlias.__repr__",
+    "typing._UnionGenericAlias.__eq__", "typing._UnionGenericAlias.__hash__",
+    "typing._UnionGenericAlias.__repr__", "collections.namedtuple.__repr__"]
+
+/-- **The body of the native `key`**, after a check, unless `key` is one of `perLevelMethods`,
+that `nativePeakFrames` more Python frames fit below the limit, since CPython runs the native as
+Python code with frames of its own.  The program code that the body calls back into is at least at
+CPython's depth already: the frames that the body charges on its way there (its call's own frame,
+and the `pyFrame`s and `withPyDepth`s of its helpers) are CPython's frames below that code. -/
+def nativeFrames [PyReads m V] {α : Type} (key : String) (body : m α) : m α := do
+  if !perLevelMethods.contains key then PyReads.withPyDepth nativePeakFrames (pure ())
+  body
 
 /-- The value that the name `name` of `dir(builtins)` is bound to at the start of a run. -/
 def builtinOriginal? (name : String) : Option (Imm V) :=

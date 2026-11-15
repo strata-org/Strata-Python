@@ -250,7 +250,7 @@ def containsKnown [PyCalls m V] (xs : Array V) (x : V) : m Bool :=
 
 /-- **`_remove_dups_flatten(parameters)`**: the arguments of unions spliced in, then the duplicates
 dropped (`dict.fromkeys`), keeping the first of each; known values have equal hashes when `==`
-holds, so a scan with `==` gives the dict's result. -/
+holds, so a scan with `==` gives the dict's result, with the depth of the dict's hashes. -/
 def removeDupsFlatten [PyWrites m V] [PyNew m V] (params : Array V) : m (Array V) := pyFrame do
   useBuiltin "isinstance"
   useBuiltin "tuple"
@@ -263,6 +263,11 @@ def removeDupsFlatten [PyWrites m V] [PyNew m V] (params : Array V) : m (Array V
     else flat := flat.push p
   -- `_deduplicate`, one frame deeper.
   pyFrame do
+    -- `dict.fromkeys` hashes each argument first, a Python frame and `aliasHashLevels` C levels per
+    -- nested alias, and returns (`gap_depth_optional_nested`).
+    let some depth ← knownDepth compareDepth flat |
+      PyPure.modelInvariant "a Union of arguments that the model doesn't know"
+    PyReads.withPyDepth depth (PyReads.withDepth (aliasHashLevels * depth) (pure ()))
     let mut out : Array V := #[]
     for p in flat do
       if !(← containsKnown out p) then out := out.push p
@@ -1152,9 +1157,14 @@ def typingAttrNames : List String :=
     "_namedtuple_mro_entries"] ++
     specialForms
 
+/-- The Python frames above the importing frame that a first import of `typing` reaches in CPython
+3.12 (`-S`); a later import, which finds the module in the table, charges none, as in CPython. -/
+def typingImportFrames : Nat := 38
+
 /-- **`import typing`**: the module, made at its first import after a check that the builtins are
 unchanged, with every name of CPython's `vars(typing)` that the model doesn't bind as a gap. -/
 def importTyping [PyWrites m V] [PyNew m V] (_self _args _kwargs : V) : m V := do
+  PyReads.withPyDepth typingImportFrames (pure ())
   if !(← builtinsUnchanged) then
     PyPure.gap "an import of typing after the program changed the builtins is not modelled yet"
   let sga ← specialGenericAliasCls
@@ -1204,7 +1214,8 @@ def slotExtraLevels (key : String) : Nat :=
 def typingNative (key : String) : Option BuiltinImpl :=
   if key.startsWith "typing." then
     some fun {_} {_} [_] [_] fn args kwargs =>
-      pyFunctionCall (PyReads.withDepth (slotExtraLevels key) (typingBody key fn args kwargs))
+      pyFunctionCall (nativeFrames key
+        (PyReads.withDepth (slotExtraLevels key) (typingBody key fn args kwargs)))
   else namedtupleNative key
 
 /-- **The rules of `typing`**: its import and the bodies of its Python functions. -/

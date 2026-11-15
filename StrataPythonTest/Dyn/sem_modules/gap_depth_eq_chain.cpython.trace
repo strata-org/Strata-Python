@@ -1,0 +1,16 @@
+--- stdout 3
+ok
+
+--- outcome
+ok
+--- globals
+A = <Node object>
+B = <Node object>
+Node = <class 'Node'>
+Optional = <_SpecialForm object>
+__doc__ = None
+__name__ = '__main__'
+chain = <function object>
+dataclass = <function object>
+f = <function object>
+op = <function object>

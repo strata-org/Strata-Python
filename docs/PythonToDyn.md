@@ -2427,6 +2427,14 @@ That claim trusts these assumptions about the CPython run:
 - that the model counts no fewer C levels than CPython, except for the comparisons of a dict's or
   a set's keys, which the 995-level margin covers: corpus programs check the count for each kind
   of call, but nothing proves it;
+- that the natives of `typing`, `dataclasses` and the named tuples, which run as Lean code, charge
+  at least CPython's Python-frame count, as the item on outside code above requires: at every call
+  into program code they count at least CPython's Python frames, the 32-frame check at the entry of
+  each of their functions, other than the methods that recurse through their operands, covers
+  CPython's own frames, and the ports charge the frames that grow with nested arguments where they
+  run them. The `gap_depth_*` programs of `StrataPythonTest/Dyn/sem_modules/` check it, at CPython's
+  own raising depth with 100 frames below, for the natives and callback paths that they cover, but
+  nothing proves it;
 - no `-O` (so `assert` statements run and `__debug__` is `True`);
 - enough memory, so that no `MemoryError` is raised;
 - the platform's `libm` for a float `**`, whose result the model takes from the host's `pow`;
@@ -2786,6 +2794,19 @@ is recorded as caught.
   walks them, `Field[T]`, a dataclass with `__abstractmethods__`, and the annotations of a generated
   method. A write to an attribute of its functions, or of the methods that `dataclass`
   generates, stops with a gap too.
+- The Python frames of `typing`, `dataclasses` and the named tuples, which CPython 3.12 runs as
+  Python code. A call of one of their functions first checks that 32 more frames fit below the
+  semantics' limit of 900 Python frames: on arguments that aren't nested, CPython pushes at most 14
+  frames above the caller inside one such call (for `dataclass` on a class with a `typing`
+  annotation). The frames that grow with nested arguments, such as the hashes and reprs of nested
+  aliases, are charged where the functions run them. The methods that recurse through their operands
+  (the generated `__eq__`, `__hash__`, `__repr__` and order methods, the aliases' `__eq__`,
+  `__hash__` and `__repr__`, a named tuple's `__repr__`) skip that check, since their own call
+  already charges what CPython pushes. Program code that these functions run (a default's
+  `__repr__`, a `default_factory`, a `__post_init__`, an iterator's `__next__`) runs at least at
+  CPython's depth: the ports charge a frame for each of CPython's Python frames below it. A first
+  import of `typing` charges 38 frames above the importing frame and of `dataclasses` 44, as on
+  CPython 3.12 with `-S`; a later import charges none.
 - CPython's recursion limit: nested comparisons, calls into Python and calls of built-in callables
   count toward it, at least as many levels as CPython counts, and a run stops with a gap when its
   count passes 9,000, 995 below CPython's limit, where CPython raises `RecursionError`. A call of a
@@ -2885,7 +2906,7 @@ abort, and it gives no result:
   object, a `str` or a tuple (a tuple of numbers hashes within the stack); or a library rule's
   loop over one long value inside one step, such as `list(range(1000000))`, or a sort through
   CPython's port of about 70,000 built-in values such as tuples, or a `max` or `list.index` over a
-  few hundred thousand of them, whose comparisons run no Python code (a sort of user objects, whose `__lt__` is Python code, doesn't build up native stack). A
+  few hundred thousand of them, or a `Union[...]` of about 500 classes, whose comparisons run no Python code (a sort of user objects, whose `__lt__` is Python code, doesn't build up native stack). A
   loop inside a rule over one value's members takes native stack for each member until the rule
   ends.
   `StrataPythonTestExtra/SemScaleTest.lean` runs these reprs at 100,000 members, and the corpus

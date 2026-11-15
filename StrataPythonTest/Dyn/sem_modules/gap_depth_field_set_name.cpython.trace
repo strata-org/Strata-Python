@@ -1,0 +1,12 @@
+--- stdout 3
+ok
+
+--- outcome
+ok
+--- globals
+SN = <class 'SN'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+field = <function object>
+make = <function object>

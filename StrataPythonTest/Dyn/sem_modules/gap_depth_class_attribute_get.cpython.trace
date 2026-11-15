@@ -1,0 +1,11 @@
+--- stdout 3
+ok
+
+--- outcome
+ok
+--- globals
+Desc = <class 'Desc'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+make = <function object>

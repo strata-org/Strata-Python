@@ -249,7 +249,8 @@ def genFunction [PyWrites m V] [PyNew m V] (info : GenInfo V) (funcModule key na
 def fieldTuple [PyCalls m V] (obj : V) (names : Array String) : m V := do
   return PyPure.imm (m := m) (.tuple (← names.mapM (getAttr obj ·)))
 
-/-- `__repr__`'s body: `self.__class__.__qualname__ + f"(a={self.a!r}, ...)"`. -/
+/-- `__repr__`'s body: `self.__class__.__qualname__ + f"(a={self.a!r}, ...)"`, whose frame keeps the
+fields' own `__repr__` at CPython's depth (`gap_depth_repr_chain`). -/
 def reprBody [PyCalls m V] (info : GenInfo V) (self : V) : m V := pyFrame do
   let qn ← getAttr (← getAttr self "__class__") "__qualname__"
   let some qnText ← str? qn |
@@ -271,6 +272,8 @@ def genBody [PyWrites m V] [PyNew m V] (key : String) (fn args kwargs : V) : m V
   let none := PyPure.imm (m := m) .none
   match key with
   | "dataclasses.__init__" =>
+    -- The native's call charges `__init__`'s frame, CPython's frame below a `default_factory` and a
+    -- `__post_init__` (`gap_depth_default_factory`, `gap_depth_post_init_direct`).
     let some (.native nf) ← PyReads.objView fn | PyPure.modelInvariant "a native"
     let dfl ← match nf.defaults with
       | some d => tupleItems d
@@ -419,7 +422,8 @@ def checkStrAnnotation [PyReads m V] (mod : String) (ann : String) : m Unit := d
 
 /-- **`_get_field(cls, a_name, a_type, default_kw_only)`**: the class attribute as the default (a
 `Field` itself, or a member descriptor meaning none), the name, type and kind, the keyword-only
-flag, and the mutable-default check. -/
+flag, and the mutable-default check. Its frame is CPython's frame below a class attribute's
+`__get__` (`gap_depth_class_attribute_get`). -/
 def getField [PyWrites m V] [PyNew m V] (cls : V) (mod : String) (name : String) (aType kwOnly : V) :
     m V := pyFrame do
   let missing ← modelGlobal "dataclasses" "MISSING"
@@ -456,7 +460,8 @@ def getField [PyWrites m V] [PyNew m V] (cls : V) (mod : String) (name : String)
   pure f
 
 /-- The `__init__` that `_init_fn` generates, for the fields `fields` (name and `Field`), the
-standard and keyword-only init fields, and the class's flags. -/
+standard and keyword-only init fields, and the class's flags. It runs while `dataclass` builds the
+class, and its frame is `_init_fn`'s. -/
 def initFn [PyWrites m V] [PyNew m V] (cls : V) (mod funcModule : String) (fields : Array (String × V))
     (std kw : Array (String × V)) (frozen postInit : Bool) (selfName : String) : m V := pyFrame do
   let hasFactory ← modelGlobal "dataclasses" "_HAS_DEFAULT_FACTORY"
@@ -570,8 +575,11 @@ def docSignature [PyCalls m V] (cls : V) : m String := do
       | some d => PyReads.dictEntries d
       | Option.none => pure #[]
     let fmt (n : String) (t : V) (d : Option V) : m String := do
+      -- CPython's frames below an annotation's `__repr__` (`gap_depth_annotation_repr`).
       let ann ← PyReads.withPyDepth 3 (formatAnnotation t)
       match d with
+      -- `Signature.__str__` and `Parameter.__str__`, CPython's frames below a default's `__repr__`
+      -- (`gap_depth_nested_dataclass`).
       | some v => return s!"{n}: {ann} = {← PyReads.withPyDepth 2 (reprTextOf v)}"
       | Option.none => return s!"{n}: {ann}"
     let mut parts : Array String := #[]
@@ -806,7 +814,9 @@ def dataclassDefaults [PyPure m V] : Array (Option V) :=
   #[t, t, t, f, f, f, t, f, f, f]
 
 /-- **`replace(obj, /, **changes)`**: the fields' current values for the ones not changed, then
-`obj.__class__(**changes)`. -/
+`obj.__class__(**changes)`. Its frame is one more than CPython pushes, since the native's call
+already charges `replace`'s own frame, so `__post_init__` runs one frame deeper per level than in
+CPython (`gap_depth_replace_post_init`). -/
 def replaceBody [PyWrites m V] [PyNew m V] (obj changes : V) : m V := pyFrame do
   useBuiltin "hasattr"
   useBuiltin "type"
@@ -886,6 +896,8 @@ def dataclassesBody [PyWrites m V] [PyNew m V] (key : String) (fn args kwargs : 
       PyPure.modelInvariant "a bound call"
     let d ← getAttr self "default"
     let func ← getAttrOr (← PyReads.classOf d) "__set_name__" none
+    -- The native's call charges `Field.__set_name__`'s frame, CPython's frame below the default's
+    -- `__set_name__` (`gap_depth_field_set_name`).
     if ← truthy func then
       discard <| callN dispatchDepth func (PyPure.imm (m := m) (.tuple #[d, owner, name])) (← PyPure.allocDict)
     pure none
@@ -898,9 +910,14 @@ def dataclassesAttrNames : List String :=
     "_FIELD_CLASSVAR", "_FIELD_INITVAR", "_FIELD_BASE", "_DataclassParams", "_FIELDS", "_PARAMS",
     "_POST_INIT_NAME"]
 
+/-- The Python frames above the importing frame that a first import of `dataclasses` reaches in
+CPython 3.12 (`-S`); a later import charges none, as in CPython. -/
+def dataclassesImportFrames : Nat := 44
+
 /-- **`import dataclasses`**: the module, made at its first import after a check that the builtins
 are unchanged, with every other name of CPython's `vars(dataclasses)` as a gap. -/
 def importDataclasses [PyWrites m V] [PyNew m V] (_self _args _kwargs : V) : m V := do
+  PyReads.withPyDepth dataclassesImportFrames (pure ())
   if !(← builtinsUnchanged) then
     PyPure.gap "an import of dataclasses after the program changed the builtins is not modelled yet"
   let fn (name : String) : m V :=
@@ -936,7 +953,7 @@ def dataclassesImpls : Impls where
     | _, _ => none
   native key :=
     if key.startsWith "dataclasses." then some fun {_} {_} [_] [_] fn args kwargs =>
-      pyFunctionCall (dataclassesBody key fn args kwargs)
+      pyFunctionCall (nativeFrames key (dataclassesBody key fn args kwargs))
     else none
 
 end

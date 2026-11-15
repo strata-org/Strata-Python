@@ -5,6 +5,7 @@ alias_repr_order | agree
 dataclass_basic | gap | the __annotations__ of a function that has none set is not modelled yet
 dataclass_doc_base_init | agree
 dataclass_doc_none | agree
+dataclass_eq_near_limit | agree
 dataclass_errors | agree
 dataclass_exception | agree
 dataclass_foreign_init | agree
@@ -70,6 +71,45 @@ gap_dataclass_slots | gap | dataclass(slots=True) and dataclass(weakref_slot=Tru
 gap_dataclass_str_subclass_ann | gap | a dataclass annotation that is an instance of a str subclass is not modelled yet
 gap_dataclass_unloaded_module | gap | a dataclass whose __module__ is not a loaded module is not modelled yet
 gap_dataclass_weakref_slot | gap | dataclass(slots=True) and dataclass(weakref_slot=True) are not modelled yet
+gap_depth_alias_repr_chain | gap | Python call depth over 900
+gap_depth_annotation_repr | gap | Python call depth over 900
+gap_depth_class_attribute_get | gap | Python call depth over 900
+gap_depth_dataclass | gap | Python call depth over 900
+gap_depth_dataclass_frozen | gap | Python call depth over 900
+gap_depth_dataclass_list_annotation | gap | Python call depth over 900
+gap_depth_default_factory | gap | Python call depth over 900
+gap_depth_dict | gap | Python call depth over 900
+gap_depth_dict_key | gap | Python call depth over 900
+gap_depth_eq | gap | Python call depth over 900
+gap_depth_eq_chain | gap | Python call depth over 900
+gap_depth_field | gap | Python call depth over 900
+gap_depth_field_set_name | gap | Python call depth over 900
+gap_depth_hash | gap | Python call depth over 900
+gap_depth_hash_chain | gap | Python call depth over 900
+gap_depth_import_dataclasses | gap | Python call depth over 900
+gap_depth_import_typing | gap | Python call depth over 900
+gap_depth_init | gap | Python call depth over 900
+gap_depth_list | gap | Python call depth over 900
+gap_depth_namedtuple_class | gap | Python call depth over 900
+gap_depth_nested_dataclass | gap | Python call depth over 900
+gap_depth_nt_asdict | gap | Python call depth over 900
+gap_depth_nt_make_iterator | gap | Python call depth over 900
+gap_depth_nt_make_list | gap | Python call depth over 900
+gap_depth_nt_new | gap | Python call depth over 900
+gap_depth_nt_replace | gap | Python call depth over 900
+gap_depth_nt_repr | gap | Python call depth over 900
+gap_depth_optional | gap | Python call depth over 900
+gap_depth_optional_nested | gap | Python call depth over 900
+gap_depth_order | gap | Python call depth over 900
+gap_depth_order_chain | gap | Python call depth over 900
+gap_depth_post_init_direct | gap | Python call depth over 900
+gap_depth_replace | gap | Python call depth over 900
+gap_depth_replace_post_init | gap | Python call depth over 900
+gap_depth_repr | gap | Python call depth over 900
+gap_depth_repr_chain | gap | Python call depth over 900
+gap_depth_tuple | gap | Python call depth over 900
+gap_depth_typeddict_class | gap | Python call depth over 900
+gap_depth_union | gap | Python call depth over 900
 gap_instance_write | gap | an attribute write to an instance of GenericAlias is not modelled yet
 gap_keyclass_base_property | gap | a dict lookup after a false __eq__ depends on CPython's table layout
 gap_keyclass_budget | gap | a dict lookup after a false __eq__ depends on CPython's table layout

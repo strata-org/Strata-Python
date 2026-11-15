@@ -342,9 +342,11 @@ def makeAfter (fields : Nat) : CallStep S V → m (CallStep S V)
   | .done r => .done <$> makeCheck fields r
   | .suspend fs => pure (.suspend (HasLoopPart.inj (LoopState.make (V := V) fields) :: fs))
 
-/-- A call of `_make`, a Python function: one Python frame, and CPython's C levels of a call from
-C (`pyFunctionCall`). -/
-def makeFrame {α : Type} (body : m α) : m α := pyFrame (pyFunctionCall body)
+/-- A call of `_make`, a Python function: one Python frame, which keeps an iterator's `__next__` at
+CPython's depth (`gap_depth_nt_make_iterator`), and CPython's C levels of a call from C
+(`pyFunctionCall`). -/
+def makeFrame {α : Type} (body : m α) : m α :=
+  pyFrame (pyFunctionCall (nativeFrames "collections.namedtuple._make" body))
 
 /-- **The first step of `_make(cls, iterable)`**, the native `f` called with `args` and `kwargs`:
 `tuple.__new__(cls, iterable)` through `callResumable`, so that an iterable whose `__next__` is
@@ -375,7 +377,8 @@ end
 /-- The native bodies of the model of `collections.namedtuple`. -/
 def namedtupleNative (key : String) : Option BuiltinImpl :=
   if key.startsWith "collections.namedtuple." then
-    some fun {_} {_} [_] [_] fn args kwargs => pyFunctionCall (namedtupleBody key fn args kwargs)
+    some fun {_} {_} [_] [_] fn args kwargs =>
+      pyFunctionCall (nativeFrames key (namedtupleBody key fn args kwargs))
   else if key.startsWith "collections._tuplegetter." then
     let name := (key.drop "collections._tuplegetter.".length).toString
     some fun {_} {_} [_] [_] fn args kwargs => do

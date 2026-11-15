@@ -1,0 +1,12 @@
+--- stdout 3
+ok
+
+--- outcome
+ok
+--- globals
+R = <class 'R'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+make = <function object>
+replace = <function object>

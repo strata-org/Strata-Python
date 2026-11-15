@@ -6,7 +6,7 @@ def mk(d):
     for _ in range(d):
         x = TypeGuard._getitem(TypeGuard, x)
     return x
-A = mk(440)
+A = mk(430)
 def nest(n, leaf):
     t = leaf
     for _ in range(n):

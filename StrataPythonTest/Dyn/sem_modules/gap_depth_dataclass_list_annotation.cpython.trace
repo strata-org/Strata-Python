@@ -1,0 +1,13 @@
+--- stdout 3
+ok
+
+--- outcome
+ok
+--- globals
+L = <_GenericAlias object>
+List = <_SpecialGenericAlias object>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+f = <function object>
+op = <function object>
