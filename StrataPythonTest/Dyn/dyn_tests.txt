@@ -511,6 +511,8 @@ s362_seq_slot_subclass_radd | yes |
 s363_seq_slot_subclass_alias | yes |
 s364_module_frame_depth_runs | yes |
 s365_module_frame_depth_stops | yes |
+s366_utf8_bom | yes |
+s367_coding_line | yes |
 s368_sym_hash_member | yes |
 s369_sym_hash_member_second | yes |
 s129_iter_builtins | yes |

@@ -2507,6 +2507,11 @@ and ends the trace: in place of the outcome, after the outcome's header (and aft
 place of the first global that can't be printed. A text with a line break is such a gap too, since it could forge a
 section's header. A run out of fuel prints `--- out of fuel`.
 
+`pydyn run` refuses a file that isn't UTF-8, even when its coding line makes it valid Python, e.g.
+`# coding: latin-1` followed by a latin-1 byte: it stops with exit code 1 and the message "Tried
+to read file ... containing non UTF-8 data", where CPython runs the program
+(`StrataPythonTestExtra/NonUtf8SourceTest.lean` pins this limitation).
+
 ### 13.2 The differential test
 
 `StrataPythonTestExtra/SemDiffTest.lean` runs every program of two suites with `pydyn run`, and

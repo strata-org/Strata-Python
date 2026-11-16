@@ -1,0 +1,4 @@
+module top
+  print: global implicit (referenced)
+  x: local (assigned, referenced)
+qualnames: 

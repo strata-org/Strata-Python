@@ -88,7 +88,9 @@ def qualnames(code, out, gens):
 
 
 def describe(path):
-    source = path.read_text()
+    # ast.parse, symtable and compile decode the bytes by their byte order mark or coding line, as
+    # the translator's reader does.
+    source = path.read_bytes()
     try:
         tree = ast.parse(source, str(path))
     except SyntaxError as err:

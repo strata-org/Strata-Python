@@ -22,6 +22,7 @@ test runs.  `render` may still run the program's code: a class's `__qualname__` 
 metaclass's `__getattribute__`.  The traces then differ, and the test fails.
 """
 
+import importlib.util
 import io
 import os
 import sys
@@ -86,11 +87,14 @@ def render_or_note(v):
 def main(path):
     if sys.version_info[:2] != (3, 12):
         sys.exit(f"trace.py needs CPython 3.12, not {sys.version.split()[0]}")
-    with open(path, encoding="utf-8") as f:
+    # `python FILE` decodes the bytes by their byte order mark or coding line. compile skips the
+    # bytes of a comment, so decode_source checks that they decode too.
+    with open(path, "rb") as f:
         source = f.read()
     try:
+        importlib.util.decode_source(source)
         code = compile(source, path, "exec")
-    except SyntaxError:
+    except (SyntaxError, UnicodeDecodeError):
         print("--- syntax error")
         return
     os.chdir("/")

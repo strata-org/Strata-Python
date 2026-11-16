@@ -1,0 +1,9 @@
+--- stdout 5
+ÃŠ 2
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+ÃŠ = 'ÃŠ'

@@ -1,0 +1,31 @@
+module s367_coding_line {
+  func @|s367_coding_line.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s367_coding_line")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s367_coding_line", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s367_coding_line", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %str.1 : py.Value = py.strLit("ÃŠ")
+      %|ÃŠ.cell.0| : base.Ref(py.Value) = py.globalCell("s367_coding_line", "ÃŠ")
+      %set.2 : base.Unit = base.refSet[py.Value](%|ÃŠ.cell.0|, %str.1)
+      %print.0 : py.Value = py.loadGlobal("s367_coding_line", "print") ^propagate.0()
+      %|ÃŠ.0| : py.Value = py.loadGlobal("s367_coding_line", "ÃŠ") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("s367_coding_line", "len") ^propagate.0()
+      %|ÃŠ.1| : py.Value = py.loadGlobal("s367_coding_line", "ÃŠ") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%|ÃŠ.1|)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%|ÃŠ.0|, %call.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

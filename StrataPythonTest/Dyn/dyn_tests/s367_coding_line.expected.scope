@@ -1,0 +1,4 @@
+module
+  ÃŠ: local (assigned, referenced)
+  print: global implicit (referenced)
+  len: global implicit (referenced)
