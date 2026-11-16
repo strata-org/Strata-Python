@@ -15,17 +15,21 @@ A pass that lowers a module towards a target with less structure assumes its inp
 shape, and leaves its output in another.  Each shape here is a `Prop` of a function, with a
 `Decidable` instance, and holds of a module when it holds of each of its functions.  A shape
 speaks of a function's top-level blocks: contracts are left out.  The instances are for compiled
-code: the kernel does not reduce the test of an operation's name, so `decide` proves neither.
+code: the kernel does not reduce the test of an operation's name, so `decide` proves none of them
+but `NoBlockParams`.
 
 * `PlainControl`: no instruction has successors or regions, and every terminator is a `jump`, a
   `branch` or `unreachable` (`ret` is a jump to `Label.exit`).  So every edge of a body is an
   edge of a terminator, which `Terminator.plain?` reads, and a body has no nested blocks.
 * `BareBranches`: every arm of every `branch` passes no arguments (`Target.Raw.Bare`).  So only
   a `jump` passes arguments, to a block or to the body's exit.
+* `NoBlockParams`: no block but each function's entry has parameters.
 
-`Terminator.plain?` reads a terminator as data, by name and arity.  `Terminator.isControl`
+`Terminator.plain?` reads a terminator as data.  `Terminator.isControl`
 (`StrataDyn/ContractRegion.lean`) is the weaker test that the contract rules use, which also
-holds of a datatype's case instruction; no lemma links the two yet.
+holds of a datatype's case instruction; no lemma links the two yet. A terminator's shape is
+decided by name and arity (`Terminator.plain?`), the arity first, so that `plain?_jump` needs no
+fact about the base's names beyond `a == a`.
 -/
 
 namespace Strata.Dyn
@@ -71,6 +75,11 @@ with one operand and two successors, or a `base.unreachable` with neither, and n
 
 instance (t : Terminator env α) : Decidable t.PlainControl :=
   inferInstanceAs (Decidable (t.plain?.isSome = true))
+
+/-- Expose the edge of a generated jump when proving a lowering leaves plain control. -/
+theorem Terminator.plain?_jump (info : α) (k : Target.Raw) :
+    (Terminator.jump (env := env) info k).plain? = some (.jump k) := by
+  simp [Terminator.plain?, Terminator.jump]
 
 /-- `i` falls through: it has no successors and no regions. -/
 @[expose] def Instruction.Plain (i : Instruction env α) : Prop :=
@@ -125,6 +134,21 @@ instance (fn : Func env α) : Decidable fn.BareBranches :=
 
 instance (m : Module.Raw env α) : Decidable (BareBranches m) :=
   inferInstanceAs (Decidable (∀ fn ∈ m.funcs, fn.BareBranches))
+
+/-! ## No block parameters -/
+
+/-- No block of the function but its entry, `blocks[0]`, has parameters. -/
+@[expose] def Func.NoBlockParams (fn : Func env α) : Prop :=
+  ∀ b ∈ fn.blocks.toList.drop 1, b.params.size = 0
+
+instance (fn : Func env α) : Decidable fn.NoBlockParams :=
+  inferInstanceAs (Decidable (∀ b ∈ fn.blocks.toList.drop 1, b.params.size = 0))
+
+/-- No block but each function's entry has parameters. -/
+@[expose] def NoBlockParams (m : Module.Raw env α) : Prop := ∀ fn ∈ m.funcs, fn.NoBlockParams
+
+instance (m : Module.Raw env α) : Decidable (NoBlockParams m) :=
+  inferInstanceAs (Decidable (∀ fn ∈ m.funcs, fn.NoBlockParams))
 
 end
 

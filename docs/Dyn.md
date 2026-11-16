@@ -4,8 +4,9 @@ Dyn is a typed intermediate representation for programs, defined in Lean. A fron
 translates a source language into Dyn, and analyses and interpreters work on Dyn
 rather than on the source language. This document is a self-contained reference for Dyn
 itself. §4 shows how a language gives its programs a semantics that runs them, §5 how to
-reason about those runs, §6 how Dyn's types are translated to Core, and §7 how datatype
-cases become ordinary control flow.
+reason about those runs, §6 how Dyn's types are translated to Core, §7 how datatype cases
+become ordinary control flow, and §8 how block parameters become cells for a target whose
+blocks take none.
 [Python to Dyn](./PythonToDyn.md) describes how Python is translated into it.
 
 ## 1. Overview
@@ -1501,3 +1502,84 @@ for the pass itself the evidence remains the tests, which compare the lowered mo
 input on Dyn's engine; the certificate is proved for one hand-linked example
 (`StrataDynTest/CasesSound/SoundTest.lean`), given only that its tester is true exactly on its
 constructor.
+
+## 8. Demotion
+
+A target whose blocks take no parameters needs each block parameter as a variable. `demote`
+(`StrataDyn/Demote.lean`) gives every parameter of every block but a function's entry a cell.
+The entry block makes the cell, each jump to the block writes its argument to it, and the block
+reads it where it starts, under the parameter's own name. So
+
+```
+entry.0(%a.0 : base.Int, %b.0 : base.Int):
+  jump ^head.0(%a.0, %b.0)
+head.0(%a.1 : base.Int, %b.1 : base.Int):
+  %z.0 : base.Bool = while.eq(%b.1, 0)
+  branch(%z.0) ^done.0() ^body.0()
+body.0():
+  %d.0 : base.Int = while.sub(%b.1, 1)
+  jump ^head.0(%d.0, %a.1)
+```
+
+becomes
+
+```
+entry.0(%a.0 : base.Int, %b.0 : base.Int):
+  %a.cell.0 : base.Ref(base.Int) = base.refNew[base.Int](0)
+  %b.cell.0 : base.Ref(base.Int) = base.refNew[base.Int](0)
+  %set.0 : base.Unit = base.refSet[base.Int](%a.cell.0, %a.0)
+  %set.1 : base.Unit = base.refSet[base.Int](%b.cell.0, %b.0)
+  jump ^head.0()
+head.0():
+  %a.1 : base.Int = base.refGet[base.Int](%a.cell.0)
+  %b.1 : base.Int = base.refGet[base.Int](%b.cell.0)
+  %z.0 : base.Bool = while.eq(%b.1, 0)
+  branch(%z.0) ^done.0() ^body.0()
+body.0():
+  %d.0 : base.Int = while.sub(%b.1, 1)
+  %set.2 : base.Unit = base.refSet[base.Int](%a.cell.0, %d.0)
+  %set.3 : base.Unit = base.refSet[base.Int](%b.cell.0, %a.1)
+  jump ^head.0()
+```
+
+The writes pass values, not cells, so they need no temporary: the second write passes `%a.1`,
+which the head read, not what the first write put in the cell. Contracts, extern functions and
+ghosts stay as they are.
+
+**Defaults.** A cell first holds a default value of its type, which the caller supplies
+(`Demote.Defaults`): a literal, or a pure operation applied to defaults, such as `base.error` of
+`0` for `base.Except(base.Int, base.Int)`; `Demote.Defaults.literals` has the literals. No run reads it, since every jump into a block
+writes the block's cells first. The instructions that compute it do run, which is why they are
+pure; that they do not fault is the caller's obligation.
+
+**Result.** `demote` takes a well-formed module in plain control with bare branches (§7), which
+case lowering provides, and takes the proof (`Demotable`). It returns a well-formed module in
+plain control in which no block but an entry takes parameters and every cell is *private*: made
+in its function's entry block, only read and written, and never passed, stored or returned
+(`Demoted`). Otherwise it returns each function it rejects, with the reason: a parameter's type
+has no default, a default is not of its type, or a reference of the function is not a private
+cell, which includes any function, also an extern one, that takes a reference. Private cells and
+well-formedness are decided on the result.
+
+**What is proved.** `StrataDyn/DemoteSound/` relates linked modules, as §3 and §7 do. A linked
+function keeps its values in numbered slots. A *padding* gives each function new slots and
+instructions for the start of its entry block that compute defaults and make cells; it defines
+only new slots and reads only what it defined earlier, so it touches no value of a validated
+input. The *padded original* is the input with its padding. The certificate (`DemotionOK`) is
+such a padding together with ref-to-reg's promotion relation (§3), from the demoted module to
+the padded original. If it holds, the two show the same outputs and end with the same result or
+fault, or both diverge, under every oracle (`demote_sound_eq`) and over all runs
+(`demote_sound_runs`). The theorems are ref-to-reg's, applied, and take its hypotheses: a
+certified model, the demoted module linked by `prepare`, a validated padded original, a start
+from the initial snapshot on arguments that hold no ref, and no rule of the demoted module that
+stops with a bad cell itself.
+
+**What is not proved.** That the padded original runs as the input: a padding that has a
+certificate cannot fault, but each cell it makes renumbers the cells made after it. That the
+pass's output, linked, has the certificate; a default whose operation can fault never has one.
+That a demoted module's rules stop with no bad cell. So for the pass itself the evidence is the
+tests. They compare input and output on Dyn's engine, for hand-written modules and for the
+output of case lowering. The hand-written ones also run side by side on symbols and are
+promoted again by ref-to-reg, which leaves no cell but in one module, where the result of a
+write is used. The certificate is proved for one loop linked by hand
+(`StrataDynTest/DemoteSound/`).
