@@ -80,10 +80,49 @@ public def matchesPattern (pattern output : String) : IO Bool := do
   if ← grepE pattern output then return true
   grepE pattern (collapseWs output)
 
+/-- Did `py_to_strata` fail because Python could not parse the file? `strata_python.gen`
+    reports a `SyntaxError` from the parser as `Parse failure:`; one raised elsewhere
+    surfaces as a traceback naming `SyntaxError`. -/
+private def isSyntaxError (out : String) : Bool :=
+  hasSub out "Parse failure:" || hasSub out "SyntaxError"
+
+/-- The message for a case `py_to_strata` could not lower, from its combined output and
+    the minor version of the Python 3 that ran it (`none` when it could not be read).
+    It always opens with `py_to_strata failed to lower the case to Ion` and always
+    describes a failure: no cause makes the case pass. A missing module is named as a
+    setup problem, since it fails every case alike. A syntax error under a Python older
+    than 3.12 is named as a possible version problem, since some corpus cases use 3.12
+    syntax. Everything else, including any syntax error under 3.12 or later, points at
+    the front end. -/
+public def loweringFailureMessage (stem python : String) (minor : Option Nat)
+    (out : String) : String :=
+  let interp := match minor with
+    | some m => s!"{python} (Python 3.{m})"
+    | none => s!"{python} (version unknown)"
+  let cause :=
+    if hasSub out "ModuleNotFoundError" then
+      "the Python environment lacks a module py_to_strata needs; this is a setup \
+       problem, not a front-end regression"
+    else if isSyntaxError out && minor.any (· < 12) then
+      "Python could not parse the file; this case may need Python 3.12 or later"
+    else
+      s!"fix the front end, or add {stem}.skip with the reason if the case is not \
+         meant to run"
+  s!"py_to_strata failed to lower the case to Ion with {interp}: {cause}"
+
+/-- The minor version of the Python 3 that `python` runs, or `none` if it cannot be
+    read. -/
+private def pythonMinor (python : String) : IO (Option Nat) := do
+  let o ← IO.Process.output {
+    cmd := python, args := #["-c", "import sys; print(sys.version_info.minor)"]
+    inheritEnv := true
+  }
+  return if o.exitCode == 0 then o.stdout.trimAscii.toString.toNat? else none
+
 /-- Compile `tests/<stem>.py` to Ion in a private temp dir and run `pyInterpret` on
     it; return its exit code and combined output. When the Python front end cannot
-    lower the file to Ion, return the compiler's combined output as the error instead,
-    so the caller fails the case: a lowering regression must not pass silently, and a
+    lower the file to Ion, return `loweringFailureMessage` followed by the compiler's
+    combined output as the error instead, so the caller fails the case: a lowering regression must not pass silently, and a
     case that is meant not to run carries a `.skip` sidecar, which callers check before
     calling this. A corpus `.py` that is absent entirely throws (a stale committed
     child). Each case compiles into its own temp dir, so callers
@@ -119,7 +158,8 @@ public def compileAndRun (python : String) (root : System.FilePath) (stem : Stri
       inheritEnv := true
     }
     if compile.exitCode != 0 then
-      return .error (compile.stdout ++ compile.stderr)
+      let out := compile.stdout ++ compile.stderr
+      return .error s!"{loweringFailureMessage stem python (← pythonMinor python) out}\n{out}"
     let runOut ← IO.Process.output {
       cmd := "timeout"
       args := #[timeoutStr, (root / ".lake" / "build" / "bin" / "pyInterpret").toString]

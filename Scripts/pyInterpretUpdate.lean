@@ -117,7 +117,7 @@ private def update (python : String) (root : System.FilePath) (v2 : Bool)
       continue
     let r ← compileAndRun python root stem v2
     if let .error out := r then
-      IO.println s!"ERROR: {stem} — py_to_strata failed to lower the case to Ion\n{out}"
+      IO.println s!"ERROR: {stem} — {out}"
       lowerFailures := lowerFailures + 1
       continue
     let .ok (exitCode, output) := r | continue

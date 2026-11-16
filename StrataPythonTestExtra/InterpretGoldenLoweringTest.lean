@@ -64,3 +64,37 @@ private meta def withUnlowerableCase (stem : String) (skip : Bool)
   withUnlowerableCase "test_unlowerable" (skip := true) fun root => do
     for v2 in [false, true] do
       runOnePass pythonCmd root "test_unlowerable" v2
+
+/-! ## Tests: which cause the lowering-failure message names
+
+A test cannot choose the interpreter, so the message is checked as a function of the
+compiler output and the Python minor version. Every message reports a failure. -/
+
+private meta def parseFailureOut : String :=
+  "Parse failure:\n  invalid syntax (test_x.py, line 1)\n"
+
+private meta def checkCause (minor : Option Nat) (out : String) (want : String) : IO Unit := do
+  let msg := loweringFailureMessage "test_x" "python3" minor out
+  unless hasSub msg "py_to_strata failed to lower" && hasSub msg want do
+    throw <| .userError s!"minor={minor}: expected a message containing {want}, got: {msg}"
+
+-- A syntax error under Python 3.11 names the version.
+#guard_msgs in
+#eval checkCause (some 11) parseFailureOut "may need Python 3.12 or later"
+
+-- The same syntax error under Python 3.12 points at the front end.
+#guard_msgs in
+#eval checkCause (some 12) parseFailureOut "fix the front end"
+
+-- An unreadable version is not taken as an old one.
+#guard_msgs in
+#eval checkCause none parseFailureOut "fix the front end"
+
+-- A missing module is a setup problem, whatever the version.
+#guard_msgs in
+#eval checkCause (some 11) "ModuleNotFoundError: No module named 'strata'\n"
+  "setup problem"
+
+-- The message names the interpreter and its version.
+#guard_msgs in
+#eval checkCause (some 11) parseFailureOut "python3 (Python 3.11)"
