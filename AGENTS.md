@@ -110,9 +110,21 @@ special method that is a property. `catalog.py` holds the operations and the kin
 CPython must do in each case; `grid.py` writes the programs. `StrataPythonTestExtra/AxisGridTest.lean`
 runs them, and fails on a case that doesn't run its operation in CPython (a generator bug), on a
 difference from CPython, and on a change of verdict (`grid_expected.txt`). It needs CPython 3.12.
-After a change to the catalog, `grid.py` or `trace.py`, run it with `SEM_UPDATE=1`: that compares
-CPython's traces under the hash seeds 0 to 7, checks that each case's trace changes without its
-operation, and rewrites the verdicts, the known runs (`grid_known/`), the summary and the digest.
+
+The grid takes about 5 minutes, so every build runs only its quick check, which runs no program:
+it runs the coverage check below on the facts that the grid's last update (`SEM_UPDATE=1`) wrote
+(`grid_coverage.txt`), fails when a source of the grid's or the fuzzer's programs, or the Lean code
+that computes the facts, changed since that test's last update, and checks that every pin file of both tests exists and none is stale. After a change to the
+semantics, the translator or the axes, run both tests with `AXIS_FULL=1`
+(`StrataPythonTestExtra/AxisGridTest.lean` and `StrataPythonTestExtra/AxisFuzzTest.lean`).
+
+Run the grid with `SEM_UPDATE=1` after a change to `catalog.py`, `grid.py`, `cpython_calls.py`,
+`typing/*.py`, `StrataPythonTest/Dyn/trace.py`, `AxisSource.lean` or `AxisGridTest.lean`: that
+compares CPython's traces under the hash seeds 0 to 7, checks that each case's trace changes
+without its operation, and rewrites the verdicts, the known runs (`grid_known/`), the summary, the
+coverage facts and the digest. Run the fuzzer with `SEM_UPDATE=1` after a change to `catalog.py`,
+`grid.py`, `fuzz.py` or `trace.py`, and with `AXIS_FULL=1` after a change to `AxisSource.lean` or
+`AxisFuzzTest.lean`. The quick check names the test whose update is missing.
 A difference that its owner doesn't fix yet is pinned as `<id> | known | <reason>` in
 `grid_expected.txt` before the update.
 
@@ -137,8 +149,8 @@ typing and dataclasses cases that are whole programs are files in
 
 `StrataPythonTest/Dyn/axes/fuzz.py` writes random programs from the same kinds of input: classes
 with special methods of each behaviour and descriptor kind, values and operations, each step in
-its own `try`. `StrataPythonTestExtra/AxisFuzzTest.lean` runs the 200 programs of seed 1 against
-`fuzz_expected.txt` (update with `SEM_UPDATE=1`, as the grid). A `known` pin holds for one
+its own `try`. With `AXIS_FULL=1`, `StrataPythonTestExtra/AxisFuzzTest.lean` runs the 200 programs
+of seed 1 against `fuzz_expected.txt` (update with `SEM_UPDATE=1`, as the grid); a build skips it. A `known` pin holds for one
 program: `fuzz_known/` keeps the program beside our run, and the test fails when the generator
 gives that id another program. To fuzz further, run
 `FUZZ_SEED=S FUZZ_COUNT=N lake env lean StrataPythonTestExtra/AxisFuzzTest.lean`: it runs CPython

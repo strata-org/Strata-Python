@@ -19,7 +19,7 @@ when empty.
 
 Beside each program `<id>.py`, it writes `<id>.null.py`, the same program with the operation
 replaced by `r = None`. CPython's output of the two must differ, or the case observes nothing
-that its operation does (the build test checks this when it updates).
+that its operation does (the grid's test checks this when it updates).
 
 The programs are the same on every run: there is no randomness, and the order is the catalog's.
 Each program defines `_mark`, `ev`, `show` and `_exc` (the prelude), then runs its case inside

@@ -11,21 +11,27 @@ meta import StrataDyn.DDM
 
 /-! # The axis grid against CPython
 
-Runs every program of the axis grid (`StrataPythonTest/Dyn/axes/grid.py`: one operation with one
-kind of input on one axis, e.g. `len` of an instance of a `list` subclass that overrides
-`__iter__`) with CPython 3.12 and with the Python semantics, and judges each pair with
-`SemDiff.judge`. The verdicts are pinned in `StrataPythonTest/Dyn/axes/grid_expected.txt`, and our
-run of each `known` case in `grid_known/`. The test fails:
+Every build runs only the quick check (`quick`), which runs no program: it runs the coverage check
+below on the facts that the grid's last update (`SEM_UPDATE=1`) wrote (`grid_coverage.txt`),
+checks that the sources of the grid's and the fuzzer's programs and the Lean code that computes the
+facts haven't changed since that test's last update (the stamps in `grid_digest.txt` and
+`fuzz_digest.txt`), and checks the pin files of both tests. The full run, with `AXIS_FULL=1` or
+`SEM_UPDATE=1`, runs every program of the axis grid
+(`StrataPythonTest/Dyn/axes/grid.py`: one operation with one kind of input on one axis, e.g. `len`
+of an instance of a `list` subclass that overrides `__iter__`) with CPython 3.12 and with the Python
+semantics, and judges each pair with `SemDiff.judge`. The verdicts are pinned in
+`StrataPythonTest/Dyn/axes/grid_expected.txt`, and our run of each `known` case in `grid_known/`.
+The test fails:
 
 * on a generator bug (`AxisSource.generatorBug?`): a case whose CPython run doesn't run its
   operation, or doesn't end the way the case expects, tests nothing; in update mode also a case
   whose CPython trace doesn't change when its operation is replaced by `r = None`
   (`AxisSource.observes`);
 * on any difference that is not a gap after agreeing with CPython, and on any change of verdict;
-* on a change of `grid_digest.txt`. The digest stands for this property: CPython's traces under
-  the hash seeds 0 to 7 were compared on exactly these programs, and were equal. The build runs
-  CPython under seed 0 only. The digest check makes sure that no program changes without an
-  update, and the update compares the eight traces again. An update that fails writes nothing.
+* on a change of `grid_digest.txt`. The digest stands for this property: CPython's traces under the
+  hash seeds 0 to 7 were compared on exactly these programs, and were equal. A full run without an
+  update runs CPython under seed 0 only. The digest check makes sure that no program changes without
+  an update, and the update compares the eight traces again. An update that fails writes nothing.
 
 The coverage check (`AxisSource.coverage`) then takes what the cases that agree with CPython
 reach: observed, the built-in functions and methods that CPython calls in their operations
@@ -39,10 +45,12 @@ classes, `moduleNatives`) that nothing covers and that
 `StrataPythonTest/Dyn/axes/not_covered.txt` doesn't list with a reason, and on a stale entry
 there. The summary lists the names that only declared entries cover.
 
-`grid_summary.txt` shows the verdicts by group and axis; it is compared like the verdicts, so that
-it stays current. The test needs CPython 3.12, which it finds or fails without (`SKIP_PYTHON_TESTS`
-skips it, as it does every Python test). Set `SEM_UPDATE=1` to compare the eight traces of every
-program and rewrite the verdicts, the known runs, the summary and the digest.
+`grid_summary.txt` shows the verdicts by group and axis, and `grid_coverage.txt` the coverage facts;
+both are compared like the verdicts, so that they stay current. A full run judges the facts as they
+read back from their text, as the quick check judges them. The test needs CPython 3.12, which it
+finds or fails without (`SKIP_PYTHON_TESTS` skips it, as it does every Python test). Set
+`SEM_UPDATE=1` to compare the eight traces of every program and rewrite the verdicts, the known
+runs, the summary, the facts and the digest.
 -/
 
 namespace StrataPython.AxisGridTest
@@ -160,14 +168,50 @@ private meta def runCase (pythonCmd : System.FilePath) (update : Bool)
     return .ok (⟨c.id, v⟩, if update then some t else none, called, result)
   | .ok v, _ => return .ok (⟨c.id, v⟩, none, called, result)
 
+/-- The quick check, which every build runs; it runs no program. It runs the coverage check on
+the facts that the grid's last update wrote (`grid_coverage.txt`), checks that the sources of the
+grid's and the fuzzer's programs and the Lean code that computes the facts haven't changed since
+that test's last update (the stamps in `grid_digest.txt` and `fuzz_digest.txt`), and checks that every pin file of both tests exists and
+none is stale. -/
+private meta def quick : IO Unit := do
+  let start ← IO.monoMsNow
+  let mut failures : Array String := #[]
+  let facts ← IO.ofExcept (parseCoverageFacts (← IO.FS.readFile (here / "grid_coverage.txt")))
+  let notCovered ← IO.ofExcept (parseNotCovered (← IO.FS.readFile (here / "not_covered.txt")))
+  let cov := judgeCoverage requiredNames facts notCovered
+  failures := failures ++ cov.failures
+  -- The facts are those of the grid's last update, which a change to the semantics or the
+  -- translator may have made stale; then a coverage message can be wrong.
+  unless cov.failures.isEmpty do
+    failures := failures.push "these coverage facts come from the grid's last update; after a \
+      change to the semantics or the translator, run AxisGridTest with SEM_UPDATE=1 first"
+  let stamps := [("AxisGridTest", here / "grid_digest.txt", ← gridSources),
+    ("AxisFuzzTest", here / "fuzz_digest.txt", fuzzSources)]
+  for (test, file, sources) in stamps do
+    if let some f := checkStamp test file (← IO.FS.readFile file) (← sourcesStamp sources) then
+      failures := failures.push f
+  failures := failures ++
+    (← pinFailures "AxisGridTest" "case" (here / "grid_expected.txt") knownDir [knownSuffix])
+  failures := failures ++ (← pinFailures "AxisFuzzTest" "program" (here / "fuzz_expected.txt")
+    (here / "fuzz_known") [knownSuffix, ".py"])
+  let title := s!"AxisGridTest (quick, {(← IO.monoMsNow) - start} ms)"
+  IO.println s!"{title}: the coverage of {requiredNames.size} names, the sources and the pins; \
+    set AXIS_FULL=1 to run the grid"
+  unless failures.isEmpty do
+    for f in failures do IO.println f
+    throw <| .userError s!"{title}: {failures.size} failure(s)"
+
 #eval show IO Unit from do
+  let update := (← IO.getEnv "SEM_UPDATE").isSome
+  unless update || (← IO.getEnv "AXIS_FULL").isSome do
+    quick
+    return
   if let some skip ← IO.getEnv "SKIP_PYTHON_TESTS" then
     if !skip.isEmpty then return
   unless ← SemDiff.pydynPath.pathExists do
     throw <| .userError s!"{SemDiff.pydynPath} is missing: build it with `lake build pydyn`"
   let start ← IO.monoMsNow
   let pythonCmd ← StrataPython.findPython3 (minVersion := 12) (maxVersion := 12)
-  let update := (← IO.getEnv "SEM_UPDATE").isSome
   let script := here / "grid.py"
   let lines ← TraceSource.programsOf pythonCmd script #[outDir.toString]
   let cases ← IO.ofExcept (parseCases ("\n".intercalate lines.toList))
@@ -212,13 +256,17 @@ private meta def runCase (pythonCmd : System.FilePath) (update : Bool)
     { case := scaffoldCase, counted := evidence.any (·.counted), result := true, called := [],
       insns := insnNames sc.stdout, cells := false }
   let notCovered ← IO.ofExcept (parseNotCovered (← IO.FS.readFile (here / "not_covered.txt")))
-  let cov := coverage requiredNames evidence notCovered
+  let (cov, factsText) := coverageText requiredNames evidence notCovered
   if failures.isEmpty then
     failures := failures ++ cov.failures
   unless update do
     failures := failures ++ (← stalePins knownDir [knownSuffix] reasons.contains "case")
   -- An update writes its files only when every case passed, so that the digest's property holds.
   if failures.isEmpty then
+    -- The facts first: the stamp in the digest file hashes them.
+    if let some f ← checkFile (here / "grid_coverage.txt") factsText update then
+      failures := failures.push f
+    let digest := digest ++ (← sourcesStamp (← gridSources)) ++ "\n"
     if let some f ← checkFile (here / "grid_digest.txt") digest update then
       failures := failures.push f
     for ch in ← Diff.checkOrUpdate (here / "grid_expected.txt") now update do

@@ -12,9 +12,10 @@ public meta import Std.Data.HashSet
 /-! # Generated differential sources: the shared checks
 
 The axis grid (`StrataPythonTest/Dyn/axes/grid.py`) writes one program per case, and says what
-each case expects of CPython. Its build test runs every program with CPython 3.12 and with the
-Python semantics, and judges each pair with `SemDiff.judge`; the fuzzer's build test
-(`AxisFuzzTest`) does the same for the programs of `fuzz.py`. This module holds what the two tests
+each case expects of CPython. Its test (`AxisGridTest`), in a full run, runs every program with
+CPython 3.12 and with the Python semantics, and judges each pair with `SemDiff.judge`; the
+fuzzer's test (`AxisFuzzTest`) does the same for the programs of `fuzz.py`. Every build runs only
+the grid's quick check, which runs no program. This module holds what the two tests
 need besides the judge:
 
 * the *generator-bug checks*: a case whose CPython run doesn't run its operation, or doesn't end
@@ -26,6 +27,10 @@ need besides the judge:
 * the coverage check (`coverage`): every name of the model's tables is covered by a case that
   agrees with CPython, by observed evidence (a call in CPython's run, an instruction of the
   operation's translation) or by a declared entry of the catalog, or `not_covered.txt` lists it;
+  it is the judgment (`judgeCoverage`) of the facts of the cases' runs (`coverageFacts`), which a
+  full run writes as text (`printCoverageFacts`) and the quick check reads (`parseCoverageFacts`);
+* the stamp of a test's sources (`sourcesStamp`, `gridSources`, `fuzzSources`, `checkStamp`), so
+  that the quick check sees a change to a source without that test's update;
 * the fuzzer's checks: its programs (`FuzzProgram`, `parseFuzz`), the generator-bug checks of a
   fuzz program (`fuzzBug?`, with `runBug?`), the verdict of a program whose output depends on the
   hash seed (`judgeSeedDependent`), and a pinned program that gaps (`knownGap?`);
@@ -324,34 +329,56 @@ def declaredBy (ids : Array String) : String :=
   | [i] => i
   | i :: rest => s!"{i} and {rest.length} more"
 
-/-- The coverage check, for the model's names `required` (its tables), the cases' evidence `evs`
-and the entries `nc` of `not_covered.txt`. -/
-def coverage (required : Array String) (evs : Array Evidence) (nc : Array NotCovered) :
-    Coverage := Id.run do
+/-- What the cases' runs show for the coverage check, without the model's names: the names that a
+run observed, the names that the catalog's entries declare (with the cases that declare them), the
+same for cells (a name with an axis), every declared cell, and the entries of the counted cases.
+`observed` and `byEntries` take only the cases that count (they agree with CPython) and give a
+result; the cells and `caseEntries` take every case that counts; `declared` takes every case. Every
+array but `caseEntries` is sorted, and `caseEntries` and each list of cases are in the cases' order,
+so that the facts print the same way on every run. A full run of the grid writes them
+(`printCoverageFacts`), and the quick check judges them again without running a program. -/
+structure CoverageFacts where
+  observed : Array String
+  byEntries : Array (String × Array String)
+  /-- The observed cells that are also declared: the judgment asks only about those. -/
+  observedCells : Array (String × String)
+  entryCells : Array ((String × String) × Array String)
+  declared : Array (String × String)
+  /-- The (case, name) pairs of the entries of the cases that count, in the cases' order. -/
+  caseEntries : Array (String × String)
+  deriving Repr, BEq, Inhabited
+
+/-- Pairs of strings, ordered by their first string, then by their second. -/
+private instance : Ord (String × String) := lexOrd
+
+/-- The pairs of `m`, sorted by key. -/
+private def sortedPairs {α : Type} [BEq α] [Hashable α] [Ord α] {β : Type}
+    (m : Std.HashMap α β) : Array (α × β) :=
+  m.toArray.qsort fun a b => compare a.1 b.1 == .lt
+
+/-- The elements of `s`, sorted. -/
+private def sortedSet {α : Type} [BEq α] [Hashable α] [Ord α] (s : Std.HashSet α) : Array α :=
+  s.toArray.qsort fun a b => compare a b == .lt
+
+/-- The coverage facts of the cases' evidence `evs`, and the failures that only the runs show: a
+case that names a call that CPython's run doesn't show. -/
+def coverageFacts (evs : Array Evidence) : CoverageFacts × Array String := Id.run do
   let mut fails : Array String := #[]
-  let req : Std.HashSet String := required.foldl (·.insert ·) {}
   let mut observed : Std.HashSet String := {}
-  -- For each name and each cell that a declared entry covers: the cases that declare it.
   let mut byEntries : Std.HashMap String (Array String) := {}
   let mut observedCells : Std.HashSet (String × String) := {}
   let mut entryCells : Std.HashMap (String × String) (Array String) := {}
   let mut declared : Std.HashSet (String × String) := {}
-  let mut declaredList : Array (String × String) := #[]
+  let mut caseEntries : Array (String × String) := #[]
   for ev in evs do
     let c := ev.case
-    for n in c.calls ++ c.entries do
-      unless declared.contains (n, c.axis) do
-        declared := declared.insert (n, c.axis)
-        declaredList := declaredList.push (n, c.axis)
+    for n in c.calls ++ c.entries do declared := declared.insert (n, c.axis)
     unless ev.counted do continue
     if ev.result then
       for n in c.calls do
         unless ev.called.contains n do
           fails := fails.push s!"{c.id}: the case calls {n} by name, but CPython's run doesn't show it"
-    for n in c.entries do
-      unless req.contains n do
-        fails := fails.push s!"{c.id}: the catalog says the case reaches {n}, which no table of \
-          the model has"
+    for n in c.entries do caseEntries := caseEntries.push (c.id, n)
     let insns := ev.insns.filter (!neverRuns.contains ·)
     if ev.result then
       for n in ev.called ++ insns do observed := observed.insert n
@@ -360,6 +387,27 @@ def coverage (required : Array String) (evs : Array Evidence) (nc : Array NotCov
       for n in ev.called ++ insns do observedCells := observedCells.insert (n, c.axis)
       for n in c.entries do
         entryCells := entryCells.insert (n, c.axis) ((entryCells.getD (n, c.axis) #[]).push c.id)
+  let cells := (sortedSet observedCells).filter declared.contains
+  return (⟨sortedSet observed, sortedPairs byEntries, cells, sortedPairs entryCells,
+    sortedSet declared, caseEntries⟩, fails)
+
+/-- The judgment of the coverage check, for the model's names `required` (its tables), the facts
+`f` and the entries `nc` of `not_covered.txt`. -/
+def judgeCoverage (required : Array String) (f : CoverageFacts) (nc : Array NotCovered) :
+    Coverage := Id.run do
+  let mut fails : Array String := #[]
+  let req : Std.HashSet String := required.foldl (·.insert ·) {}
+  let observed : Std.HashSet String := f.observed.foldl (·.insert ·) {}
+  let byEntries : Std.HashMap String (Array String) :=
+    f.byEntries.foldl (fun m (k, v) => m.insert k v) {}
+  let observedCells : Std.HashSet (String × String) := f.observedCells.foldl (·.insert ·) {}
+  let entryCells : Std.HashMap (String × String) (Array String) :=
+    f.entryCells.foldl (fun m (k, v) => m.insert k v) {}
+  let declared : Std.HashSet (String × String) := f.declared.foldl (·.insert ·) {}
+  for (id, n) in f.caseEntries do
+    unless req.contains n do
+      fails := fails.push s!"{id}: the catalog says the case reaches {n}, which no table of \
+        the model has"
   let covered (n : String) := observed.contains n || byEntries.contains n
   let cellCovered (k : String × String) := observedCells.contains k || entryCells.contains k
   -- How an entry of `not_covered.txt` is covered, for its message: by a run, or only by cases
@@ -376,7 +424,7 @@ def coverage (required : Array String) (evs : Array Evidence) (nc : Array NotCov
         doesn't list it"
   -- A cell counts only for a name of the tables: a name that the model doesn't implement gaps by
   -- design.
-  for (n, a) in declaredList do
+  for (n, a) in f.declared do
     unless !req.contains n || cellCovered (n, a) || byCell.contains (n, a) || byName.contains n do
       fails := fails.push s!"{n} @ {a}: no case of the axis that agrees with CPython reaches it, \
         and not_covered.txt doesn't list the cell"
@@ -398,6 +446,104 @@ def coverage (required : Array String) (evs : Array Evidence) (nc : Array NotCov
   let entryOnly := (required.filter fun n => byEntries.contains n && !observed.contains n).map
     fun n => (n, byEntries.getD n #[])
   return ⟨fails, entryOnly⟩
+
+/-- The coverage facts as text, one fact per line: `observed | <name>`, `entries | <name> |
+<cases>`, `cell | <name> @ <axis>`, `entry-cell | <name> @ <axis> | <cases>`, `declared | <name> @
+<axis>` and `case-entry | <case> | <name>`, where `<cases>` is a space-separated list. -/
+def printCoverageFacts (f : CoverageFacts) : String :=
+  let cell (k : String × String) := s!"{k.1} @ {k.2}"
+  let ids (a : Array String) := " ".intercalate a.toList
+  String.join <|
+    (f.observed.map (s!"observed | {·}\n")).toList ++
+    (f.byEntries.map fun (n, is) => s!"entries | {n} | {ids is}\n").toList ++
+    (f.observedCells.map (s!"cell | {cell ·}\n")).toList ++
+    (f.entryCells.map fun (k, is) => s!"entry-cell | {cell k} | {ids is}\n").toList ++
+    (f.declared.map (s!"declared | {cell ·}\n")).toList ++
+    (f.caseEntries.map fun (i, n) => s!"case-entry | {i} | {n}\n").toList
+
+/-- The coverage facts that `printCoverageFacts` printed. -/
+def parseCoverageFacts (text : String) : Except String CoverageFacts := do
+  let cell (line s : String) : Except String (String × String) :=
+    match s.splitOn " @ " with
+    | [n, a] => pure (n, a)
+    | _ => throw s!"malformed cell in the coverage facts: {line}"
+  let ids (s : String) : Array String := ((s.splitOn " ").filter (!·.isEmpty)).toArray
+  let mut f : CoverageFacts := {
+    observed := #[], byEntries := #[], observedCells := #[], entryCells := #[], declared := #[],
+    caseEntries := #[] }
+  for line in text.splitOn "\n" do
+    if line.isEmpty then continue
+    match line.splitOn " | " with
+    | ["observed", n] => f := { f with observed := f.observed.push n }
+    | ["entries", n, is] => f := { f with byEntries := f.byEntries.push (n, ids is) }
+    | ["cell", c] => f := { f with observedCells := f.observedCells.push (← cell line c) }
+    | ["entry-cell", c, is] =>
+      f := { f with entryCells := f.entryCells.push (← cell line c, ids is) }
+    | ["declared", c] => f := { f with declared := f.declared.push (← cell line c) }
+    | ["case-entry", i, n] => f := { f with caseEntries := f.caseEntries.push (i, n) }
+    | _ => throw s!"malformed line in the coverage facts: {line}"
+  return f
+
+/-- The coverage check, for the model's names `required` (its tables), the cases' evidence `evs`
+and the entries `nc` of `not_covered.txt`, and the facts' text, which a full run of the grid writes.
+The check judges the facts as they read back from their text, as the quick check judges them, and
+fails if they don't read back as they were written. The failures that only the runs show come
+first. -/
+def coverageText (required : Array String) (evs : Array Evidence) (nc : Array NotCovered) :
+    Coverage × String :=
+  let (f, fails) := coverageFacts evs
+  let text := printCoverageFacts f
+  match parseCoverageFacts text with
+  | .ok g =>
+    if g == f then
+      let c := judgeCoverage required g nc
+      ({ c with failures := fails ++ c.failures }, text)
+    else (⟨fails.push "the coverage facts don't read back as written", #[]⟩, text)
+  | .error e => (⟨fails.push e, #[]⟩, text)
+
+/-- The coverage check, for the model's names `required` (its tables), the cases' evidence `evs`
+and the entries `nc` of `not_covered.txt`: `coverageText` without the text. -/
+def coverage (required : Array String) (evs : Array Evidence) (nc : Array NotCovered) :
+    Coverage :=
+  (coverageText required evs nc).1
+
+/-- The stamp of the sources `files` of a test's programs: a hash of each file's path and bytes, in
+the order of `files`, as `sources <hex>`. A test's update writes it; the quick check compares it, so
+that a change to a source without that test's update fails. It detects edits; it isn't a security
+hash. It uses Lean's native hash, so that the quick check stays fast; a Lean upgrade that changes
+that hash fails the quick check until the next update. -/
+def sourcesStamp (files : Array System.FilePath) : IO String := do
+  let mut h : UInt64 := 7
+  for f in files do
+    h := mixHash h (hash f.toString)
+    h := mixHash h (hash (← IO.FS.readBinFile f))
+  return s!"sources {String.ofList (Nat.toDigits 16 h.toNat)}"
+
+/-- The directory of the generated tests' sources. -/
+def axesDir : System.FilePath := ("StrataPythonTest" : System.FilePath) / "Dyn" / "axes"
+
+/-- The sources of the fuzzer's programs: `fuzz.py` uses the grid's prelude, and the tracer. -/
+def fuzzSources : Array System.FilePath :=
+  #[axesDir / "catalog.py", axesDir / "fuzz.py", axesDir / "grid.py",
+    ("StrataPythonTest" : System.FilePath) / "Dyn" / "trace.py"]
+
+/-- The sources of the grid's programs and of its coverage facts, then the facts, which a full run
+of the grid writes: the catalog, the generator, the call tracer, the typing programs
+(`typing/*.py`), the tracer, the Lean code that computes the facts (this module and
+`AxisGridTest.lean`), and `grid_coverage.txt`. -/
+def gridSources : IO (Array System.FilePath) := do
+  let typing := ((← (axesDir / "typing").readDir).filter (·.fileName.endsWith ".py")).map (·.path)
+  let typing := typing.qsort fun a b => a.toString < b.toString
+  return #[axesDir / "catalog.py", axesDir / "cpython_calls.py", axesDir / "grid.py"] ++ typing ++
+    #[("StrataPythonTest" : System.FilePath) / "Dyn" / "trace.py",
+      ("StrataPythonTest" : System.FilePath) / "Util" / "AxisSource.lean",
+      ("StrataPythonTestExtra" : System.FilePath) / "AxisGridTest.lean", axesDir / "grid_coverage.txt"]
+
+/-- Whether the digest file's text `digest` holds the stamp `stamp`; or the failure, which names
+the test (`test`) whose update writes the file. -/
+def checkStamp (test : String) (file : System.FilePath) (digest stamp : String) : Option String :=
+  if (digest.splitOn "\n").contains stamp then none
+  else some s!"{file}: the sources changed since {test}'s last update; run {test} with SEM_UPDATE=1"
 
 /-! ## Fuzz programs
 
@@ -525,6 +671,21 @@ def stalePins (dir : System.FilePath) (suffixes : List String) (known : String �
     let id? := (suffixes.find? (f.fileName.endsWith ·)).map fun sfx =>
       (f.fileName.dropEnd sfx.length).toString
     unless id?.any known do out := out.push s!"{f.path}: pinned for no known {what}"
+  return out
+
+/-- The pin files that the verdicts of `verdictFile` need, in `dir`: each `known` id has a file
+`<id><suffix>` for each of `suffixes`, and no other file is there. The messages name what a pin is
+for (`what`) and the test (`test`) whose update writes the pins. -/
+def pinFailures (test what : String) (verdictFile dir : System.FilePath) (suffixes : List String) :
+    IO (Array String) := do
+  let known := (← TraceSource.readPinned verdictFile).filterMap fun e =>
+    match e.verdict with | .known _ => some e.path | _ => none
+  let mut out := #[]
+  for id in known do
+    for sfx in suffixes do
+      unless ← (dir / s!"{id}{sfx}").pathExists do
+        out := out.push s!"{id}: missing {dir / s!"{id}{sfx}"}; run {test} with SEM_UPDATE=1"
+  if ← dir.pathExists then out := out ++ (← stalePins dir suffixes known.contains what)
   return out
 
 /-- The kind of a trace line where two runs first differ: a user call (`ev`), a step's marker

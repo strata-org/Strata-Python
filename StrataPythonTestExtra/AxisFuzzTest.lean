@@ -12,15 +12,19 @@ meta import StrataDynTest.Exec.Shrink
 
 Runs the random programs of `StrataPythonTest/Dyn/axes/fuzz.py` (classes with special methods of
 each behaviour and descriptor kind, values, and operations on them, each step in its own `try`)
-with CPython 3.12 and with the Python semantics, and judges each pair.
+with CPython 3.12 and with the Python semantics, and judges each pair. It runs only on request:
+without `AXIS_FULL=1`, `SEM_UPDATE=1` or `FUZZ_SEED`, it does nothing. The grid's quick check
+(`AxisGridTest`) checks that its programs' sources haven't changed since its last update, and that
+every pin file exists and none is stale.
 
-* **Build seed** (the default): the 200 programs of seed 1, against the verdicts pinned in
-  `StrataPythonTest/Dyn/axes/fuzz_expected.txt`, our runs of the `known` programs and the programs
-  themselves in `fuzz_known/` (a pin holds for one program, not for its id), and `fuzz_digest.txt`
-  (the digest stands for this property: CPython's traces under the hash seeds 0 to 7 were
-  compared on exactly these programs). CPython runs under seed 0, except for
-  the programs of the seed bucket (§ below). It fails on a generator bug
-  (`AxisSource.fuzzBug?`), on any difference, on a change of verdict, if no run of the seed
+* **Seed 1** (with `AXIS_FULL=1` or `SEM_UPDATE=1`): the 200 programs of seed 1, against the
+  verdicts pinned in `StrataPythonTest/Dyn/axes/fuzz_expected.txt`, our runs of the `known` programs
+  and the programs themselves in `fuzz_known/` (a pin holds for one program, not for its id), and
+  `fuzz_digest.txt` (the digest stands for this property: CPython's traces under the hash seeds 0
+  to 7 were compared on exactly these programs; its second line, the stamp of the programs'
+  sources, lets the quick check see a change to a source without an update). CPython
+  runs under seed 0, except for the programs of the seed bucket (§ below). It fails on a generator
+  bug (`AxisSource.fuzzBug?`), on any difference, on a change of verdict, if no run of the seed
   bucket reaches its seed step, and if a shrink candidate of the first 5 programs or of a known
   program tests nothing (`proposerBugs`). `SEM_UPDATE=1` runs CPython under all eight seeds and
   rewrites the files; an update that fails writes nothing.
@@ -172,6 +176,11 @@ private meta def proposerBugs (pythonCmd dir : System.FilePath) (p : FuzzProgram
   return (cs.size, bugs.filterMap id)
 
 #eval show IO Unit from do
+  -- The fuzzer runs only on request; the grid's quick check covers its sources and pins.
+  unless (← IO.getEnv "AXIS_FULL").isSome || (← IO.getEnv "SEM_UPDATE").isSome ||
+      (← IO.getEnv "FUZZ_SEED").isSome do
+    IO.println "AxisFuzzTest: skipped; set AXIS_FULL=1 to run it"
+    return
   if let some skip ← IO.getEnv "SKIP_PYTHON_TESTS" then
     if !skip.isEmpty then return
   unless ← SemDiff.pydynPath.pathExists do
@@ -208,7 +217,7 @@ private meta def proposerBugs (pythonCmd dir : System.FilePath) (p : FuzzProgram
       if let some t := pin then pins := pins.push (e.path, t)
     | .error msg => failures := failures.push msg
   let bucket := (programs.filter (·.seedBucket)).size
-  -- The proposer gives valid candidates of the build seed's first 5 programs and of its known
+  -- The proposer gives valid candidates of seed 1's first 5 programs and of its known
   -- programs, which are programs that a shrink starts from.
   if !live then
     let mut checked := 0
@@ -226,12 +235,12 @@ private meta def proposerBugs (pythonCmd dir : System.FilePath) (p : FuzzProgram
     for (p, r) in programs.zip results do
       if r matches .error _ then
         if let some line ← shrinkOne pythonCmd dir p then IO.println line
-  -- The build seed must check the seed-dependent rule: some run must reach its seed step.
+  -- Seed 1 must check the seed-dependent rule: some run must reach its seed step.
   if !live && reached == 0 then
     failures := failures.push "no run of the seed bucket reaches its seed-dependent step"
   if !live && failures.isEmpty then
     let digest := String.intercalate "" (← TraceSource.programsOf pythonCmd (here / "fuzz.py")
-      #["--digest", dir.toString]).toList ++ "\n"
+      #["--digest", dir.toString]).toList ++ "\n" ++ (← sourcesStamp fuzzSources) ++ "\n"
     if let some f ← checkFile (here / "fuzz_digest.txt") digest update then
       failures := failures.push f
     for ch in ← Diff.checkOrUpdate (here / "fuzz_expected.txt") now update do

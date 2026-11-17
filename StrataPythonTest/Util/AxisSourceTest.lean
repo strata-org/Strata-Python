@@ -227,6 +227,45 @@ private meta def declaredOnly : Array Evidence :=
     "not_covered.txt: len @ A1 is covered; remove its entry"]
 -- A name that a run shows is not in the list, even when a case also declares it.
 #guard (coverage #["len"] #[ev (cov "a" "A1" ["len"] ["len"]) true ["len"] []] #[]).byEntriesOnly == #[]
+-- The coverage facts: sorted names and cells, the cases of each entry in the cases' order, only
+-- the observed cells that a case declares, and the entries of every counted case.
+private meta def factsEvs : Array Evidence :=
+  #[ev (cov "b" "A2" ["len"] ["list.__len__"]) true ["len", "iter"] ["py.add"],
+    ev (cov "a" "A1" [] ["list.__len__"]) true [] [],
+    ev (cov "c" "A1" ["hex"] []) false ["hex"] []]
+#guard (coverageFacts factsEvs).1 ==
+  { observed := #["iter", "len", "py.add"], byEntries := #[("list.__len__", #["b", "a"])],
+    observedCells := #[("len", "A2")],
+    entryCells := #[(("list.__len__", "A1"), #["a"]), (("list.__len__", "A2"), #["b"])],
+    declared := #[("hex", "A1"), ("len", "A2"), ("list.__len__", "A1"), ("list.__len__", "A2")],
+    caseEntries := #[("b", "list.__len__"), ("a", "list.__len__")] }
+-- The failures that only the runs show stay out of the facts.
+#guard (coverageFacts #[ev (cov "a" "A1" ["len"] []) true [] []]).2 ==
+  #["a: the case calls len by name, but CPython's run doesn't show it"]
+-- The facts read back as they were printed, and the judgment of what was read back equals the
+-- coverage check's result.
+#guard parseCoverageFacts (printCoverageFacts (coverageFacts factsEvs).1) == .ok (coverageFacts factsEvs).1
+#guard parseCoverageFacts (printCoverageFacts (coverageFacts declaredOnly).1) ==
+  .ok (coverageFacts declaredOnly).1
+#guard (parseCoverageFacts (printCoverageFacts (coverageFacts factsEvs).1)).map
+    (judgeCoverage #["len", "hex"] · #[⟨"len", none, "x"⟩]) ==
+  .ok (coverage #["len", "hex"] factsEvs #[⟨"len", none, "x"⟩])
+#guard printCoverageFacts (coverageFacts declaredOnly).1 ==
+  "observed | len\nentries | list.__len__ | a b\ncell | len @ A1\nentry-cell | list.__len__ @ A1 | a b\n\
+  declared | len @ A1\ndeclared | list.__len__ @ A1\ncase-entry | a | list.__len__\n\
+  case-entry | b | list.__len__\n"
+#guard parseCoverageFacts "observed | len\nbogus | x\n" ==
+  .error "malformed line in the coverage facts: bogus | x"
+#guard parseCoverageFacts "cell | len\n" == .error "malformed cell in the coverage facts: cell | len"
+-- A case id with a space doesn't read back as it was written, so the check fails instead of
+-- judging other facts.
+#guard (coverageText #["list.__len__"] #[ev (cov "a b" "A1" [] ["list.__len__"]) true [] []] #[]).1 ==
+  ⟨#["the coverage facts don't read back as written"], #[]⟩
+#guard (coverageText #["len"] factsEvs #[]).2 == printCoverageFacts (coverageFacts factsEvs).1
+-- A digest file holds a stamp as one of its lines.
+#guard checkStamp "T" "d.txt" "abc\nsources 1f\n" "sources 1f" == none
+#guard checkStamp "T" "d.txt" "abc\nsources 1f\n" "sources 2f" ==
+  some "d.txt: the sources changed since T's last update; run T with SEM_UPDATE=1"
 #guard declaredBy #["a"] == "a"
 #guard declaredBy #["a", "b", "c"] == "a and 2 more"
 #guard declaredBy #[] == "no case"
@@ -366,6 +405,29 @@ private meta def k1 : FailureKind := .differs ⟨"o1", .value, some "= int 1", s
   unless (← checkFile f "new" false).isSome do throw <| .userError "checkFile: missed a difference"
   unless (← checkFile f "new" true).isNone && (← IO.FS.readFile f) == "new" do
     throw <| .userError "checkFile: update mode didn't write"
+  -- `pinFailures`: a known id needs its pin files, and other files are stale; no directory and no
+  -- known id is fine.
+  let verdicts := dir.parent.get! / "expected.txt"
+  IO.FS.writeFile verdicts "a | known | a bug\nz | agree\n"
+  let pf ← pinFailures "T" "program" verdicts dir [".known.trace", ".py", ".x"]
+  let pf := (pf.map fun m => (m.splitOn "/").getLast!).qsort (· < ·)
+  unless pf == #["a.x; run T with SEM_UPDATE=1", "a: pinned for no known program",
+      "b.known.trace: pinned for no known program", "c.py: pinned for no known program"] do
+    throw <| .userError s!"pinFailures: {pf}"
+  IO.FS.writeFile verdicts "z | agree\n"
+  unless (← pinFailures "T" "case" verdicts (dir / "none") [".py"]).isEmpty do
+    throw <| .userError "pinFailures: a missing directory without known ids fails"
+  unless (← sourcesStamp #[]) == "sources 7" do throw <| .userError "sourcesStamp: no files"
+  -- The stamp of the sources changes with a file's bytes and with its path.
+  let (g, h) := (dir.parent.get! / "g.py", dir.parent.get! / "h.py")
+  IO.FS.writeFile g "x = 1\n"
+  IO.FS.writeFile h "x = 1\n"
+  let s1 ← sourcesStamp #[g]
+  unless s1.startsWith "sources " && s1 == (← sourcesStamp #[g]) do
+    throw <| .userError s!"sourcesStamp: not stable: {s1}"
+  unless s1 != (← sourcesStamp #[h]) do throw <| .userError "sourcesStamp: ignores the path"
+  IO.FS.writeFile g "x = 2\n"
+  unless s1 != (← sourcesStamp #[g]) do throw <| .userError "sourcesStamp: ignores the bytes"
   IO.FS.removeDirAll dir.parent.get!
 
 -- Where two outputs first differ: the step, the kind of line, CPython's line and ours.

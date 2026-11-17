@@ -1,0 +1,3945 @@
+observed | ArithmeticError.__init__
+observed | ArithmeticError.__new__
+observed | AssertionError.__init__
+observed | AssertionError.__new__
+observed | AttributeError.__init__
+observed | AttributeError.__str__
+observed | BaseException.__init__
+observed | BaseException.__new__
+observed | BaseException.__repr__
+observed | BaseException.__str__
+observed | BaseException.add_note
+observed | BaseExceptionGroup.__init__
+observed | BaseExceptionGroup.__new__
+observed | BaseExceptionGroup.__str__
+observed | BlockingIOError.__init__
+observed | BrokenPipeError.__init__
+observed | BufferError.__init__
+observed | BufferError.__new__
+observed | BytesWarning.__init__
+observed | BytesWarning.__new__
+observed | ChildProcessError.__init__
+observed | ConnectionAbortedError.__init__
+observed | ConnectionError.__init__
+observed | ConnectionRefusedError.__init__
+observed | ConnectionResetError.__init__
+observed | DeprecationWarning.__init__
+observed | DeprecationWarning.__new__
+observed | EOFError.__init__
+observed | EOFError.__new__
+observed | EncodingWarning.__init__
+observed | EncodingWarning.__new__
+observed | Exception.__init__
+observed | Exception.__new__
+observed | FileExistsError.__init__
+observed | FileNotFoundError.__init__
+observed | FloatingPointError.__init__
+observed | FloatingPointError.__new__
+observed | FutureWarning.__init__
+observed | FutureWarning.__new__
+observed | GeneratorExit.__init__
+observed | GeneratorExit.__new__
+observed | ImportError.__init__
+observed | ImportError.__str__
+observed | ImportWarning.__init__
+observed | ImportWarning.__new__
+observed | IndexError.__init__
+observed | IndexError.__new__
+observed | InterruptedError.__init__
+observed | IsADirectoryError.__init__
+observed | KeyError.__init__
+observed | KeyError.__str__
+observed | KeyboardInterrupt.__init__
+observed | KeyboardInterrupt.__new__
+observed | LookupError.__init__
+observed | LookupError.__new__
+observed | MemoryError.__init__
+observed | MemoryError.__new__
+observed | ModuleNotFoundError.__init__
+observed | NameError.__init__
+observed | NameError.__str__
+observed | NotADirectoryError.__init__
+observed | NotImplementedError.__init__
+observed | NotImplementedError.__new__
+observed | OSError.__init__
+observed | OSError.__new__
+observed | OSError.__str__
+observed | OverflowError.__init__
+observed | OverflowError.__new__
+observed | PendingDeprecationWarning.__init__
+observed | PendingDeprecationWarning.__new__
+observed | PermissionError.__init__
+observed | ProcessLookupError.__init__
+observed | RecursionError.__init__
+observed | RecursionError.__new__
+observed | ReferenceError.__init__
+observed | ReferenceError.__new__
+observed | ResourceWarning.__init__
+observed | ResourceWarning.__new__
+observed | RuntimeError.__init__
+observed | RuntimeError.__new__
+observed | RuntimeWarning.__init__
+observed | RuntimeWarning.__new__
+observed | StopAsyncIteration.__init__
+observed | StopAsyncIteration.__new__
+observed | StopIteration.__init__
+observed | SyntaxWarning.__init__
+observed | SyntaxWarning.__new__
+observed | SystemError.__init__
+observed | SystemError.__new__
+observed | SystemExit.__init__
+observed | TimeoutError.__init__
+observed | TypeError.__init__
+observed | TypeError.__new__
+observed | UnboundLocalError.__init__
+observed | UnicodeDecodeError.__init__
+observed | UnicodeDecodeError.__new__
+observed | UnicodeDecodeError.__str__
+observed | UnicodeEncodeError.__init__
+observed | UnicodeEncodeError.__new__
+observed | UnicodeEncodeError.__str__
+observed | UnicodeWarning.__init__
+observed | UnicodeWarning.__new__
+observed | UserWarning.__init__
+observed | UserWarning.__new__
+observed | ValueError.__init__
+observed | ValueError.__new__
+observed | Warning.__init__
+observed | Warning.__new__
+observed | ZeroDivisionError.__init__
+observed | ZeroDivisionError.__new__
+observed | __build_class__
+observed | _tuplegetter.__get__
+observed | abs
+observed | all
+observed | any
+observed | base.branch
+observed | base.error
+observed | base.jump
+observed | base.ok
+observed | base.refGet
+observed | base.refNew
+observed | base.refSet
+observed | base.unit
+observed | bool.__and__
+observed | bool.__new__
+observed | bool.__or__
+observed | bool.__rand__
+observed | bool.__repr__
+observed | bool.__ror__
+observed | bool.__rxor__
+observed | bool.__xor__
+observed | bytes.__add__
+observed | bytes.__bytes__
+observed | bytes.__contains__
+observed | bytes.__eq__
+observed | bytes.__ge__
+observed | bytes.__getitem__
+observed | bytes.__gt__
+observed | bytes.__iter__
+observed | bytes.__le__
+observed | bytes.__len__
+observed | bytes.__lt__
+observed | bytes.__mod__
+observed | bytes.__mul__
+observed | bytes.__ne__
+observed | bytes.__new__
+observed | bytes.__repr__
+observed | bytes.__rmod__
+observed | bytes.__rmul__
+observed | bytes.__str__
+observed | bytes_iterator.__iter__
+observed | bytes_iterator.__length_hint__
+observed | bytes_iterator.__next__
+observed | callable
+observed | classmethod.__init__
+observed | classmethod.__new__
+observed | collections.namedtuple.__getnewargs__
+observed | collections.namedtuple.__new__
+observed | collections.namedtuple.__repr__
+observed | collections.namedtuple._asdict
+observed | collections.namedtuple._make
+observed | collections.namedtuple._replace
+observed | dataclasses.Field.__set_name__
+observed | dataclasses._DataclassParams.__repr__
+observed | dataclasses._FIELD_BASE.__repr__
+observed | dataclasses._HAS_DEFAULT_FACTORY_CLASS.__repr__
+observed | dataclasses.__delattr__
+observed | dataclasses.__eq__
+observed | dataclasses.__ge__
+observed | dataclasses.__gt__
+observed | dataclasses.__hash__
+observed | dataclasses.__init__
+observed | dataclasses.__le__
+observed | dataclasses.__lt__
+observed | dataclasses.__repr__
+observed | dataclasses.__setattr__
+observed | dataclasses._recursive_repr.<locals>.wrapper
+observed | dataclasses.dataclass
+observed | dataclasses.dataclass.<locals>.wrap
+observed | dataclasses.field
+observed | dataclasses.replace
+observed | dict.__contains__
+observed | dict.__delitem__
+observed | dict.__eq__
+observed | dict.__ge__
+observed | dict.__getitem__
+observed | dict.__gt__
+observed | dict.__init__
+observed | dict.__ior__
+observed | dict.__iter__
+observed | dict.__le__
+observed | dict.__len__
+observed | dict.__lt__
+observed | dict.__ne__
+observed | dict.__new__
+observed | dict.__or__
+observed | dict.__repr__
+observed | dict.__reversed__
+observed | dict.__ror__
+observed | dict.__setitem__
+observed | dict.clear
+observed | dict.copy
+observed | dict.fromkeys
+observed | dict.get
+observed | dict.items
+observed | dict.keys
+observed | dict.pop
+observed | dict.popitem
+observed | dict.setdefault
+observed | dict.update
+observed | dict.values
+observed | dict_itemiterator.__iter__
+observed | dict_itemiterator.__next__
+observed | dict_items.__and__
+observed | dict_items.__contains__
+observed | dict_items.__eq__
+observed | dict_items.__gt__
+observed | dict_items.__iter__
+observed | dict_items.__le__
+observed | dict_items.__len__
+observed | dict_items.__lt__
+observed | dict_items.__ne__
+observed | dict_items.__or__
+observed | dict_items.__rand__
+observed | dict_items.__repr__
+observed | dict_items.__reversed__
+observed | dict_items.__ror__
+observed | dict_items.__rsub__
+observed | dict_items.__rxor__
+observed | dict_items.__sub__
+observed | dict_items.__xor__
+observed | dict_keyiterator.__iter__
+observed | dict_keyiterator.__next__
+observed | dict_keys.__contains__
+observed | dict_keys.__eq__
+observed | dict_keys.__ge__
+observed | dict_keys.__gt__
+observed | dict_keys.__iter__
+observed | dict_keys.__le__
+observed | dict_keys.__len__
+observed | dict_keys.__lt__
+observed | dict_keys.__ne__
+observed | dict_keys.__repr__
+observed | dict_keys.__reversed__
+observed | dict_keys.__sub__
+observed | dict_keys.isdisjoint
+observed | dict_reverseitemiterator.__iter__
+observed | dict_reverseitemiterator.__length_hint__
+observed | dict_reverseitemiterator.__next__
+observed | dict_reversekeyiterator.__iter__
+observed | dict_reversekeyiterator.__length_hint__
+observed | dict_reversekeyiterator.__next__
+observed | dict_reversevalueiterator.__iter__
+observed | dict_reversevalueiterator.__length_hint__
+observed | dict_reversevalueiterator.__next__
+observed | dict_valueiterator.__iter__
+observed | dict_valueiterator.__next__
+observed | dict_values.__iter__
+observed | dict_values.__len__
+observed | dict_values.__repr__
+observed | dict_values.__reversed__
+observed | divmod
+observed | enumerate.__iter__
+observed | enumerate.__new__
+observed | enumerate.__next__
+observed | float.__abs__
+observed | float.__add__
+observed | float.__bool__
+observed | float.__divmod__
+observed | float.__eq__
+observed | float.__float__
+observed | float.__floordiv__
+observed | float.__format__
+observed | float.__ge__
+observed | float.__gt__
+observed | float.__hash__
+observed | float.__int__
+observed | float.__le__
+observed | float.__lt__
+observed | float.__mod__
+observed | float.__mul__
+observed | float.__ne__
+observed | float.__neg__
+observed | float.__new__
+observed | float.__pos__
+observed | float.__pow__
+observed | float.__radd__
+observed | float.__rdivmod__
+observed | float.__repr__
+observed | float.__rfloordiv__
+observed | float.__rmod__
+observed | float.__rmul__
+observed | float.__rpow__
+observed | float.__rsub__
+observed | float.__rtruediv__
+observed | float.__sub__
+observed | float.__truediv__
+observed | float.__trunc__
+observed | frozenset.__and__
+observed | frozenset.__contains__
+observed | frozenset.__eq__
+observed | frozenset.__ge__
+observed | frozenset.__gt__
+observed | frozenset.__hash__
+observed | frozenset.__iter__
+observed | frozenset.__le__
+observed | frozenset.__len__
+observed | frozenset.__lt__
+observed | frozenset.__ne__
+observed | frozenset.__new__
+observed | frozenset.__or__
+observed | frozenset.__rand__
+observed | frozenset.__ror__
+observed | frozenset.__rsub__
+observed | frozenset.__rxor__
+observed | frozenset.__sub__
+observed | frozenset.__xor__
+observed | frozenset.copy
+observed | frozenset.difference
+observed | frozenset.intersection
+observed | frozenset.isdisjoint
+observed | frozenset.issubset
+observed | frozenset.issuperset
+observed | frozenset.symmetric_difference
+observed | frozenset.union
+observed | getattr
+observed | hasattr
+observed | hash
+observed | hex
+observed | int.__abs__
+observed | int.__add__
+observed | int.__and__
+observed | int.__bool__
+observed | int.__divmod__
+observed | int.__eq__
+observed | int.__float__
+observed | int.__floordiv__
+observed | int.__format__
+observed | int.__ge__
+observed | int.__gt__
+observed | int.__hash__
+observed | int.__index__
+observed | int.__int__
+observed | int.__invert__
+observed | int.__le__
+observed | int.__lshift__
+observed | int.__lt__
+observed | int.__mod__
+observed | int.__mul__
+observed | int.__ne__
+observed | int.__neg__
+observed | int.__new__
+observed | int.__or__
+observed | int.__pos__
+observed | int.__pow__
+observed | int.__radd__
+observed | int.__rand__
+observed | int.__rdivmod__
+observed | int.__repr__
+observed | int.__rfloordiv__
+observed | int.__rlshift__
+observed | int.__rmod__
+observed | int.__rmul__
+observed | int.__ror__
+observed | int.__rpow__
+observed | int.__rrshift__
+observed | int.__rshift__
+observed | int.__rsub__
+observed | int.__rtruediv__
+observed | int.__rxor__
+observed | int.__sub__
+observed | int.__truediv__
+observed | int.__trunc__
+observed | int.__xor__
+observed | isinstance
+observed | issubclass
+observed | iter
+observed | iterator.__length_hint__
+observed | len
+observed | list.__add__
+observed | list.__contains__
+observed | list.__delitem__
+observed | list.__eq__
+observed | list.__ge__
+observed | list.__getitem__
+observed | list.__gt__
+observed | list.__iadd__
+observed | list.__imul__
+observed | list.__init__
+observed | list.__iter__
+observed | list.__le__
+observed | list.__len__
+observed | list.__lt__
+observed | list.__mul__
+observed | list.__ne__
+observed | list.__new__
+observed | list.__repr__
+observed | list.__reversed__
+observed | list.__rmul__
+observed | list.__setitem__
+observed | list.append
+observed | list.clear
+observed | list.copy
+observed | list.count
+observed | list.extend
+observed | list.index
+observed | list.insert
+observed | list.pop
+observed | list.remove
+observed | list.reverse
+observed | list.sort
+observed | list_iterator.__iter__
+observed | list_iterator.__length_hint__
+observed | list_iterator.__next__
+observed | list_reverseiterator.__iter__
+observed | list_reverseiterator.__length_hint__
+observed | list_reverseiterator.__next__
+observed | longrange_iterator.__iter__
+observed | longrange_iterator.__length_hint__
+observed | longrange_iterator.__next__
+observed | max
+observed | min
+observed | next
+observed | object.__delattr__
+observed | object.__eq__
+observed | object.__ge__
+observed | object.__getattribute__
+observed | object.__gt__
+observed | object.__init__
+observed | object.__le__
+observed | object.__lt__
+observed | object.__ne__
+observed | object.__new__
+observed | object.__setattr__
+observed | print
+observed | property.__init__
+observed | property.__new__
+observed | property.deleter
+observed | property.setter
+observed | py.Completion.case
+observed | py.add
+observed | py.argsTuple
+observed | py.ascii
+observed | py.assertionError
+observed | py.attr
+observed | py.bindArgs
+observed | py.bitAnd
+observed | py.bitOr
+observed | py.bitXor
+observed | py.boolLit
+observed | py.bytesLit
+observed | py.call
+observed | py.compAdd
+observed | py.compAppend
+observed | py.compFor
+observed | py.compIf
+observed | py.compStore
+observed | py.completionBreak
+observed | py.completionContinue
+observed | py.completionNormal
+observed | py.completionRaise
+observed | py.completionReturn
+observed | py.constSet
+observed | py.delAttr
+observed | py.delItem
+observed | py.dictComp
+observed | py.dictMerge
+observed | py.dictSet
+observed | py.dictUpdate
+observed | py.div
+observed | py.ellipsisLit
+observed | py.enterMethod
+observed | py.eq
+observed | py.excMatch
+observed | py.exitMethod
+observed | py.exitWithExc
+observed | py.floatLit
+observed | py.floorDiv
+observed | py.fmtValue
+observed | py.getItem
+observed | py.getIter
+observed | py.getOptionalItem
+observed | py.getSlice
+observed | py.globalCell
+observed | py.gt
+observed | py.gtE
+observed | py.handledExc
+observed | py.iAdd
+observed | py.iBitAnd
+observed | py.iBitOr
+observed | py.iBitXor
+observed | py.iDiv
+observed | py.iFloorDiv
+observed | py.iLShift
+observed | py.iMatMult
+observed | py.iMod
+observed | py.iMult
+observed | py.iPow
+observed | py.iRShift
+observed | py.iSub
+observed | py.importFrom
+observed | py.importModule
+observed | py.in
+observed | py.intLit
+observed | py.invert
+observed | py.is
+observed | py.isDefined
+observed | py.isNot
+observed | py.isStopIteration
+observed | py.lShift
+observed | py.listAppend
+observed | py.listComp
+observed | py.listExtend
+observed | py.listToTuple
+observed | py.loadGlobal
+observed | py.lt
+observed | py.ltE
+observed | py.matMult
+observed | py.mkClosure
+observed | py.mkDict
+observed | py.mkKwargs
+observed | py.mkList
+observed | py.mkSet
+observed | py.mkSlice
+observed | py.mkTuple
+observed | py.mod
+observed | py.mult
+observed | py.next
+observed | py.noneLit
+observed | py.not
+observed | py.notEq
+observed | py.notIn
+observed | py.popExcept
+observed | py.pow
+observed | py.pushExcInfo
+observed | py.pushPending
+observed | py.qualifiedRef
+observed | py.rShift
+observed | py.repr
+observed | py.requireDefined
+observed | py.setAdd
+observed | py.setAttr
+observed | py.setCause
+observed | py.setComp
+observed | py.setItem
+observed | py.setUpdate
+observed | py.str
+observed | py.strConcat
+observed | py.strLit
+observed | py.sub
+observed | py.toException
+observed | py.truthy
+observed | py.tupleGet
+observed | py.uAdd
+observed | py.uSub
+observed | py.undef
+observed | py.unpackEx
+observed | py.unpackSeq
+observed | range.__bool__
+observed | range.__contains__
+observed | range.__eq__
+observed | range.__ge__
+observed | range.__getitem__
+observed | range.__gt__
+observed | range.__hash__
+observed | range.__iter__
+observed | range.__le__
+observed | range.__len__
+observed | range.__lt__
+observed | range.__ne__
+observed | range.__new__
+observed | range.__repr__
+observed | range.__reversed__
+observed | range.count
+observed | range.index
+observed | range_iterator.__iter__
+observed | range_iterator.__length_hint__
+observed | range_iterator.__next__
+observed | repr
+observed | reversed.__iter__
+observed | reversed.__length_hint__
+observed | reversed.__new__
+observed | reversed.__next__
+observed | set.__and__
+observed | set.__contains__
+observed | set.__eq__
+observed | set.__ge__
+observed | set.__gt__
+observed | set.__iand__
+observed | set.__init__
+observed | set.__ior__
+observed | set.__isub__
+observed | set.__iter__
+observed | set.__ixor__
+observed | set.__le__
+observed | set.__len__
+observed | set.__lt__
+observed | set.__ne__
+observed | set.__new__
+observed | set.__or__
+observed | set.__rand__
+observed | set.__ror__
+observed | set.__rsub__
+observed | set.__rxor__
+observed | set.__sub__
+observed | set.__xor__
+observed | set.add
+observed | set.clear
+observed | set.copy
+observed | set.difference
+observed | set.difference_update
+observed | set.discard
+observed | set.intersection
+observed | set.intersection_update
+observed | set.isdisjoint
+observed | set.issubset
+observed | set.issuperset
+observed | set.remove
+observed | set.symmetric_difference
+observed | set.symmetric_difference_update
+observed | set.union
+observed | set.update
+observed | set_iterator.__iter__
+observed | set_iterator.__length_hint__
+observed | setattr
+observed | sorted
+observed | staticmethod.__init__
+observed | staticmethod.__new__
+observed | str.__add__
+observed | str.__contains__
+observed | str.__eq__
+observed | str.__format__
+observed | str.__ge__
+observed | str.__getitem__
+observed | str.__gt__
+observed | str.__iter__
+observed | str.__le__
+observed | str.__len__
+observed | str.__lt__
+observed | str.__mod__
+observed | str.__mul__
+observed | str.__ne__
+observed | str.__new__
+observed | str.__repr__
+observed | str.__rmod__
+observed | str.__rmul__
+observed | str.__str__
+observed | str.capitalize
+observed | str.casefold
+observed | str.center
+observed | str.count
+observed | str.encode
+observed | str.endswith
+observed | str.expandtabs
+observed | str.find
+observed | str.format
+observed | str.format_map
+observed | str.index
+observed | str.isalnum
+observed | str.isalpha
+observed | str.isascii
+observed | str.isdecimal
+observed | str.isdigit
+observed | str.isidentifier
+observed | str.islower
+observed | str.isnumeric
+observed | str.isprintable
+observed | str.isspace
+observed | str.istitle
+observed | str.isupper
+observed | str.join
+observed | str.ljust
+observed | str.lower
+observed | str.lstrip
+observed | str.maketrans
+observed | str.partition
+observed | str.removeprefix
+observed | str.removesuffix
+observed | str.replace
+observed | str.rfind
+observed | str.rindex
+observed | str.rjust
+observed | str.rpartition
+observed | str.rsplit
+observed | str.rstrip
+observed | str.split
+observed | str.splitlines
+observed | str.startswith
+observed | str.strip
+observed | str.swapcase
+observed | str.title
+observed | str.translate
+observed | str.upper
+observed | str.zfill
+observed | str_ascii_iterator.__iter__
+observed | str_ascii_iterator.__length_hint__
+observed | str_ascii_iterator.__next__
+observed | str_iterator.__iter__
+observed | str_iterator.__length_hint__
+observed | str_iterator.__next__
+observed | sum
+observed | super.__init__
+observed | super.__new__
+observed | tuple.__add__
+observed | tuple.__contains__
+observed | tuple.__eq__
+observed | tuple.__ge__
+observed | tuple.__getitem__
+observed | tuple.__gt__
+observed | tuple.__hash__
+observed | tuple.__iter__
+observed | tuple.__le__
+observed | tuple.__len__
+observed | tuple.__lt__
+observed | tuple.__mul__
+observed | tuple.__ne__
+observed | tuple.__new__
+observed | tuple.__repr__
+observed | tuple.__rmul__
+observed | tuple.count
+observed | tuple.index
+observed | tuple_iterator.__iter__
+observed | tuple_iterator.__length_hint__
+observed | tuple_iterator.__next__
+observed | type.__call__
+observed | type.__init__
+observed | type.__new__
+observed | type.__or__
+observed | type.__repr__
+observed | type.__ror__
+observed | typing.Any.__new__
+observed | typing.ForwardRef.__eq__
+observed | typing.ForwardRef.__or__
+observed | typing.ForwardRef.__repr__
+observed | typing.ForwardRef.__ror__
+observed | typing.NamedTupleMeta.__new__
+observed | typing.TypedDict.<lambda>
+observed | typing._AnyMeta.__instancecheck__
+observed | typing._AnyMeta.__repr__
+observed | typing._BaseGenericAlias.__call__
+observed | typing._BaseGenericAlias.__getattr__
+observed | typing._BaseGenericAlias.__instancecheck__
+observed | typing._BaseGenericAlias.__setattr__
+observed | typing._BaseGenericAlias.__subclasscheck__
+observed | typing._GenericAlias.__eq__
+observed | typing._GenericAlias.__or__
+observed | typing._GenericAlias.__repr__
+observed | typing._GenericAlias.__ror__
+observed | typing._SpecialForm.__call__
+observed | typing._SpecialForm.__getattr__
+observed | typing._SpecialForm.__getitem__
+observed | typing._SpecialForm.__instancecheck__
+observed | typing._SpecialForm.__mro_entries__
+observed | typing._SpecialForm.__or__
+observed | typing._SpecialForm.__repr__
+observed | typing._SpecialForm.__ror__
+observed | typing._SpecialForm.__subclasscheck__
+observed | typing._SpecialGenericAlias.__getitem__
+observed | typing._SpecialGenericAlias.__or__
+observed | typing._SpecialGenericAlias.__repr__
+observed | typing._SpecialGenericAlias.__ror__
+observed | typing._SpecialGenericAlias.__subclasscheck__
+observed | typing._TupleType.__getitem__
+observed | typing._TypedDictMeta.__new__
+observed | typing._TypedDictMeta.__subclasscheck__
+observed | typing._UnionGenericAlias.__eq__
+observed | typing._UnionGenericAlias.__instancecheck__
+observed | typing._UnionGenericAlias.__repr__
+observed | typing._UnionGenericAlias.__subclasscheck__
+observed | typing._namedtuple_mro_entries
+observed | typing._overload_dummy
+observed | typing._tp_cache.<locals>.decorator.<locals>.inner
+observed | typing.cast
+observed | typing.overload
+observed | zip.__iter__
+observed | zip.__new__
+observed | zip.__next__
+entries | NoneType.__repr__ | call_type_repr
+entries | NotImplementedType.__repr__ | call_type_repr
+entries | bool.__and__ | a1_and_bool_exact
+entries | bool.__or__ | a1_or_bool_exact
+entries | bool.__repr__ | a1_repr_bool_exact
+entries | bool.__xor__ | a1_xor_bool_exact
+entries | bytes.__add__ | a1_add_bytes_exact a1_add_bytes_sub
+entries | bytes.__eq__ | a1_eq_bytes_exact a1_eq_bytes_sub
+entries | bytes.__getitem__ | a1_getitem_bytes_exact a1_getitem_bytes_sub a1_slice_bytes_exact a1_slice_bytes_sub
+entries | bytes.__iter__ | a1_unpack_bytes_exact a1_unpack_bytes_sub
+entries | bytes.__len__ | a1_not_bytes_exact a1_not_bytes_sub a1_truthy_bytes_exact a1_truthy_bytes_sub a1_len_bytes_exact a1_len_bytes_sub a1_bool_bytes_exact a1_bool_bytes_sub
+entries | bytes.__lt__ | a1_lt_bytes_exact a1_lt_bytes_sub
+entries | bytes.__mod__ | a1_mod_bytes_exact a1_mod_bytes_sub
+entries | bytes.__mul__ | a1_mul_bytes_exact a1_mul_bytes_sub
+entries | bytes.__ne__ | a1_ne_bytes_exact a1_ne_bytes_sub
+entries | bytes.__repr__ | a1_repr_bytes_exact a1_repr_bytes_sub
+entries | bytes.__str__ | a1_str_bytes_exact a1_str_bytes_sub a1_print_bytes_exact a1_print_bytes_sub
+entries | callable_iterator.__iter__ | call_callable_iterator
+entries | callable_iterator.__next__ | call_callable_iterator
+entries | collections._tuplegetter.__delete__ | tf_natives_tg_del
+entries | collections._tuplegetter.__get__ | tf_natives_c_types
+entries | collections._tuplegetter.__repr__ | tf_natives_c_types
+entries | collections._tuplegetter.__set__ | tf_natives_tg_set
+entries | dataclasses.Field | t_dataclass_field_object
+entries | dataclasses.FrozenInstanceError | t_dataclass_frozen t_dataclass_frozen_del
+entries | dataclasses.MISSING | t_dataclass_field_object tf_natives_params tf_natives_private_names
+entries | dataclasses._DataclassParams | tf_natives_private_names
+entries | dataclasses._FIELD | tf_natives_private_names
+entries | dataclasses._FIELDS | tf_natives_private_names
+entries | dataclasses._FIELD_BASE | tf_natives_private_names
+entries | dataclasses._FIELD_CLASSVAR | tf_natives_private_names
+entries | dataclasses._FIELD_INITVAR | tf_natives_private_names
+entries | dataclasses._HAS_DEFAULT_FACTORY | tf_natives_private_names
+entries | dataclasses._HAS_DEFAULT_FACTORY_CLASS | tf_natives_private_names
+entries | dataclasses._MISSING_TYPE | tf_natives_private_names
+entries | dataclasses._PARAMS | tf_natives_private_names
+entries | dataclasses._POST_INIT_NAME | tf_natives_private_names
+entries | dataclasses.__name__ | t_module_names
+entries | dataclasses.dataclass | t_dataclass_basic t_dataclass_order t_dataclass_frozen t_dataclass_frozen_del t_dataclass_hash_actions t_dataclass_options t_dataclass_kw_only t_dataclass_post_init t_dataclass_replace t_dataclass_inherit t_dataclass_builtin_sub_fields t_dataclass_on_builtin_sub t_dataclass_field_eq_reenters t_dataclass_recursive_repr t_dataclass_eq_other_class t_factory_function t_factory_lambda t_factory_builtin t_factory_class t_factory_callable_object t_post_init_staticmethod t_post_init_classmethod tf_A1_sub_over_fields tf_A2_eq_mutate tf_A2_eq_recurse tf_A2_eq_replace_class tf_A2_factory_reenters tf_A2_hash_mutate tf_A2_lt_mutate tf_A2_post_init_replace_class tf_A2_repr_field_reenters_repr tf_A2_repr_mutate tf_A3_df_bound_method tf_A3_df_builtin_method tf_A3_df_class_with_new tf_A3_pi_builtin tf_A3_pi_callable_obj tf_A3_pi_inherited tf_A3_pi_none tf_A3_pi_property tf_A4_eq_nonbool tf_A4_hash_nonint tf_A4_post_init_context tf_A4_repr_nonstr tf_natives_field_setname tf_natives_params tf_natives_set_name tf_options_field_compare_hash tf_options_hash_action_rows tf_options_option_errors
+entries | dataclasses.field | t_dataclass_kw_only t_dataclass_post_init t_dataclass_field_object t_factory_function t_factory_lambda t_factory_builtin t_factory_class t_factory_callable_object tf_A2_factory_reenters tf_A3_df_bound_method tf_A3_df_builtin_method tf_A3_df_class_with_new tf_natives_field_setname tf_natives_params tf_options_field_compare_hash
+entries | dataclasses.replace | t_dataclass_replace
+entries | dict.__class_getitem__ | call_class_getitem
+entries | dict.__contains__ | a1_in_dict_exact a1_in_dict_sub
+entries | dict.__eq__ | a1_eq_dict_exact a1_eq_dict_sub
+entries | dict.__getitem__ | a1_getkey_dict_exact a1_getkey_dict_sub
+entries | dict.__ior__ | a1_ior_dict_exact a1_ior_dict_sub
+entries | dict.__iter__ | a1_unpack_dict_exact a1_unpack_dict_sub a1_star_list_dict_exact a1_star_list_dict_sub a1_for_dict_exact a1_for_dict_sub a1_iter_next_dict_exact a1_iter_next_dict_sub a1_list_of_dict_exact a1_list_of_dict_sub
+entries | dict.__len__ | a1_not_dict_exact a1_not_dict_sub a1_truthy_dict_exact a1_truthy_dict_sub a1_len_dict_exact a1_len_dict_sub a1_bool_dict_exact a1_bool_dict_sub
+entries | dict.__ne__ | a1_ne_dict_exact a1_ne_dict_sub
+entries | dict.__or__ | a1_or_dict_exact a1_or_dict_sub
+entries | dict.__repr__ | a1_repr_dict_exact a1_repr_dict_sub
+entries | dict.__setitem__ | a1_setitem_dict_exact a1_setitem_dict_sub
+entries | ellipsis.__repr__ | call_type_repr
+entries | float.__abs__ | a1_abs_float_exact a1_abs_float_sub
+entries | float.__add__ | a1_add_float_exact a1_add_float_sub
+entries | float.__bool__ | a1_not_float_exact a1_not_float_sub a1_truthy_float_exact a1_truthy_float_sub a1_bool_float_exact a1_bool_float_sub
+entries | float.__eq__ | a1_eq_float_exact a1_eq_float_sub
+entries | float.__float__ | a1_float_float_sub
+entries | float.__floordiv__ | a1_floordiv_float_exact a1_floordiv_float_sub
+entries | float.__format__ | a1_fstring_float_exact a1_fstring_float_sub
+entries | float.__ge__ | a1_ge_float_exact a1_ge_float_sub
+entries | float.__hash__ | a1_hash_float_exact a1_hash_float_sub
+entries | float.__int__ | a1_int_float_exact a1_int_float_sub
+entries | float.__lt__ | a1_lt_float_exact a1_lt_float_sub
+entries | float.__mod__ | a1_mod_float_exact a1_mod_float_sub
+entries | float.__mul__ | a1_mul_float_exact a1_mul_float_sub
+entries | float.__ne__ | a1_ne_float_exact a1_ne_float_sub
+entries | float.__neg__ | a1_neg_float_exact a1_neg_float_sub
+entries | float.__pow__ | a1_pow_float_exact a1_pow_float_sub
+entries | float.__repr__ | a1_repr_float_exact a1_repr_float_sub
+entries | float.__sub__ | a1_sub_float_exact a1_sub_float_sub
+entries | float.__truediv__ | a1_truediv_float_exact a1_truediv_float_sub
+entries | frozenset.__and__ | a1_and_frozenset_exact a1_and_frozenset_sub
+entries | frozenset.__class_getitem__ | call_class_getitem
+entries | frozenset.__contains__ | a1_in_frozenset_exact a1_in_frozenset_sub
+entries | frozenset.__eq__ | a1_eq_frozenset_exact a1_eq_frozenset_sub
+entries | frozenset.__ge__ | a1_ge_frozenset_exact a1_ge_frozenset_sub
+entries | frozenset.__hash__ | a1_hash_frozenset_exact a1_hash_frozenset_sub
+entries | frozenset.__len__ | a1_not_frozenset_exact a1_not_frozenset_sub a1_truthy_frozenset_exact a1_truthy_frozenset_sub a1_len_frozenset_exact a1_len_frozenset_sub a1_bool_frozenset_exact a1_bool_frozenset_sub
+entries | frozenset.__lt__ | a1_lt_frozenset_exact a1_lt_frozenset_sub
+entries | frozenset.__ne__ | a1_ne_frozenset_exact a1_ne_frozenset_sub
+entries | frozenset.__or__ | a1_or_frozenset_exact a1_or_frozenset_sub
+entries | frozenset.__sub__ | a1_sub_frozenset_exact a1_sub_frozenset_sub
+entries | frozenset.__xor__ | a1_xor_frozenset_exact a1_xor_frozenset_sub
+entries | int.__abs__ | a1_abs_int_exact a1_abs_int_sub
+entries | int.__add__ | a1_add_int_exact_exact a1_add_int_exact_sub a1_add_int_exact_sub-over a1_add_int_exact_user a1_add_int_sub_exact a1_add_int_sub_sub a1_add_int_sub_sub-over a1_add_int_sub_user a1_add_bool_exact a1_iadd_int_exact_exact a1_iadd_int_exact_sub a1_iadd_int_exact_sub-over a1_iadd_int_exact_user a1_iadd_int_sub_exact a1_iadd_int_sub_sub a1_iadd_int_sub_sub-over a1_iadd_int_sub_user
+entries | int.__and__ | a1_and_int_exact_exact a1_and_int_exact_sub a1_and_int_exact_sub-over a1_and_int_exact_user a1_and_int_sub_exact a1_and_int_sub_sub a1_and_int_sub_sub-over a1_and_int_sub_user
+entries | int.__bool__ | a1_not_int_exact a1_not_int_sub a1_truthy_int_exact a1_truthy_int_sub a1_bool_int_exact a1_bool_int_sub
+entries | int.__eq__ | a1_eq_int_exact_exact a1_eq_int_exact_sub a1_eq_int_exact_sub-over a1_eq_int_exact_user a1_eq_int_exact_user-not a1_eq_int_sub_exact a1_eq_int_sub_sub a1_eq_int_sub_sub-over a1_eq_int_sub_user a1_eq_int_sub_user-not a1_eq_bool_exact
+entries | int.__float__ | a1_float_int_exact a1_float_int_sub
+entries | int.__floordiv__ | a1_floordiv_int_exact_exact a1_floordiv_int_exact_sub a1_floordiv_int_exact_sub-over a1_floordiv_int_exact_user a1_floordiv_int_sub_exact a1_floordiv_int_sub_sub a1_floordiv_int_sub_sub-over a1_floordiv_int_sub_user a1_floordiv_bool_exact
+entries | int.__format__ | a1_fstring_int_sub
+entries | int.__ge__ | a1_ge_int_exact_exact a1_ge_int_exact_sub a1_ge_int_exact_sub-over a1_ge_int_exact_user a1_ge_int_sub_exact a1_ge_int_sub_sub a1_ge_int_sub_sub-over a1_ge_int_sub_user a1_ge_bool_exact
+entries | int.__hash__ | a1_hash_int_exact a1_hash_int_sub a1_hash_bool_exact
+entries | int.__int__ | a1_int_int_sub a1_int_bool_exact
+entries | int.__invert__ | a1_invert_int_exact a1_invert_int_sub
+entries | int.__lshift__ | a1_lshift_int_exact_exact a1_lshift_int_exact_sub a1_lshift_int_exact_sub-over a1_lshift_int_exact_user a1_lshift_int_sub_exact a1_lshift_int_sub_sub a1_lshift_int_sub_sub-over a1_lshift_int_sub_user a1_lshift_bool_exact
+entries | int.__lt__ | a1_lt_int_exact_exact a1_lt_int_exact_sub a1_lt_int_exact_sub-over a1_lt_int_exact_user a1_lt_int_sub_exact a1_lt_int_sub_sub a1_lt_int_sub_sub-over a1_lt_int_sub_user a1_lt_bool_exact
+entries | int.__mod__ | a1_mod_int_exact_exact a1_mod_int_exact_sub a1_mod_int_exact_sub-over a1_mod_int_exact_user a1_mod_int_sub_exact a1_mod_int_sub_sub a1_mod_int_sub_sub-over a1_mod_int_sub_user a1_mod_bool_exact
+entries | int.__mul__ | a1_mul_int_exact_exact a1_mul_int_exact_sub a1_mul_int_exact_sub-over a1_mul_int_exact_user a1_mul_int_sub_exact a1_mul_int_sub_sub a1_mul_int_sub_sub-over a1_mul_int_sub_user a1_mul_bool_exact
+entries | int.__ne__ | a1_ne_int_exact_exact a1_ne_int_exact_sub a1_ne_int_exact_sub-over a1_ne_int_exact_user a1_ne_int_exact_user-not a1_ne_int_sub_exact a1_ne_int_sub_sub a1_ne_int_sub_sub-over a1_ne_int_sub_user a1_ne_int_sub_user-not a1_ne_bool_exact
+entries | int.__neg__ | a1_neg_int_exact a1_neg_int_sub a1_neg_bool_exact
+entries | int.__or__ | a1_or_int_exact_exact a1_or_int_exact_sub a1_or_int_exact_sub-over a1_or_int_exact_user a1_or_int_sub_exact a1_or_int_sub_sub a1_or_int_sub_sub-over a1_or_int_sub_user a1_ior_int_exact_exact a1_ior_int_exact_sub a1_ior_int_exact_sub-over a1_ior_int_exact_user a1_ior_int_sub_exact a1_ior_int_sub_sub a1_ior_int_sub_sub-over a1_ior_int_sub_user
+entries | int.__pow__ | a1_pow_int_exact_exact a1_pow_int_exact_sub a1_pow_int_exact_sub-over a1_pow_int_exact_user a1_pow_int_sub_exact a1_pow_int_sub_sub a1_pow_int_sub_sub-over a1_pow_int_sub_user a1_pow_bool_exact
+entries | int.__repr__ | a1_repr_int_exact a1_repr_int_sub
+entries | int.__rshift__ | a1_rshift_int_exact_exact a1_rshift_int_exact_sub a1_rshift_int_exact_sub-over a1_rshift_int_exact_user a1_rshift_int_sub_exact a1_rshift_int_sub_sub a1_rshift_int_sub_sub-over a1_rshift_int_sub_user a1_rshift_bool_exact
+entries | int.__sub__ | a1_sub_int_exact_exact a1_sub_int_exact_sub a1_sub_int_exact_sub-over a1_sub_int_exact_user a1_sub_int_sub_exact a1_sub_int_sub_sub a1_sub_int_sub_sub-over a1_sub_int_sub_user a1_sub_bool_exact
+entries | int.__truediv__ | a1_truediv_int_exact_exact a1_truediv_int_exact_sub a1_truediv_int_exact_sub-over a1_truediv_int_exact_user a1_truediv_int_sub_exact a1_truediv_int_sub_sub a1_truediv_int_sub_sub-over a1_truediv_int_sub_user a1_truediv_bool_exact
+entries | int.__xor__ | a1_xor_int_exact_exact a1_xor_int_exact_sub a1_xor_int_exact_sub-over a1_xor_int_exact_user a1_xor_int_sub_exact a1_xor_int_sub_sub a1_xor_int_sub_sub-over a1_xor_int_sub_user
+entries | iterator.__iter__ | call_seq_iterator
+entries | iterator.__length_hint__ | call_seq_iterator
+entries | iterator.__next__ | call_seq_iterator
+entries | list.__add__ | a1_add_list_exact a1_add_list_sub
+entries | list.__class_getitem__ | call_class_getitem
+entries | list.__contains__ | a1_in_list_exact a1_in_list_sub
+entries | list.__delitem__ | a1_delitem_list_exact a1_delitem_list_sub
+entries | list.__eq__ | a1_eq_list_exact a1_eq_list_sub
+entries | list.__ge__ | a1_ge_list_exact a1_ge_list_sub
+entries | list.__getitem__ | a1_getitem_list_exact a1_getitem_list_sub a1_slice_list_exact a1_slice_list_sub
+entries | list.__iadd__ | a1_iadd_list_exact
+entries | list.__iter__ | a1_unpack_list_exact a1_unpack_list_sub a1_unpack_ex_list_exact a1_unpack_ex_list_sub a1_star_list_list_sub a1_star_set_list_exact a1_star_set_list_sub a1_star_args_list_sub a1_for_list_exact a1_for_list_sub a1_listcomp_list_exact a1_listcomp_list_sub a1_iter_next_list_exact a1_iter_next_list_sub a1_list_of_list_sub a1_tuple_of_list_sub a1_sorted_list_sub a1_sum_list_exact a1_sum_list_sub a1_max_list_exact a1_max_list_sub a1_any_list_exact a1_any_list_sub a1_set_of_list_exact a1_set_of_list_sub
+entries | list.__len__ | a1_not_list_exact a1_not_list_sub a1_truthy_list_exact a1_truthy_list_sub a1_len_list_exact a1_len_list_sub a1_bool_list_exact a1_bool_list_sub
+entries | list.__lt__ | a1_lt_list_exact a1_lt_list_sub
+entries | list.__mul__ | a1_mul_list_exact a1_mul_list_sub
+entries | list.__ne__ | a1_ne_list_exact a1_ne_list_sub
+entries | list.__repr__ | a1_repr_list_exact a1_repr_list_sub
+entries | list.__setitem__ | a1_setitem_list_exact a1_setitem_list_sub
+entries | object.__init_subclass__ | call_init_subclass
+entries | object.__str__ | a1_str_int_exact a1_str_int_sub a1_str_float_exact a1_str_float_sub a1_str_tuple_exact a1_str_tuple_sub a1_str_list_exact a1_str_list_sub a1_str_dict_exact a1_str_dict_sub a1_str_bool_exact a1_str_range_exact a1_print_int_exact a1_print_int_sub a1_print_float_exact a1_print_float_sub a1_print_tuple_exact a1_print_tuple_sub a1_print_list_exact a1_print_list_sub a1_print_dict_exact a1_print_dict_sub a1_print_bool_exact a1_print_range_exact
+entries | property.__set_name__ | call_property_set_name
+entries | range.__bool__ | a1_not_range_exact a1_truthy_range_exact a1_bool_range_exact
+entries | range.__contains__ | a1_in_range_exact
+entries | range.__eq__ | a1_eq_range_exact
+entries | range.__getitem__ | a1_getitem_range_exact a1_slice_range_exact
+entries | range.__iter__ | a1_unpack_ex_range_exact a1_star_list_range_exact a1_for_range_exact a1_iter_next_range_exact a1_list_of_range_exact a1_tuple_of_range_exact a1_sum_range_exact a1_max_range_exact
+entries | range.__len__ | a1_len_range_exact
+entries | range.__ne__ | a1_ne_range_exact
+entries | range.__repr__ | a1_repr_range_exact
+entries | set.__and__ | a1_and_set_exact_exact a1_and_set_exact_sub a1_and_set_exact_sub-over a1_and_set_exact_user a1_and_set_sub_exact a1_and_set_sub_sub a1_and_set_sub_sub-over a1_and_set_sub_user
+entries | set.__class_getitem__ | call_class_getitem
+entries | set.__contains__ | a1_in_set_exact a1_in_set_sub
+entries | set.__eq__ | a1_eq_set_exact_exact a1_eq_set_exact_sub a1_eq_set_exact_sub-over a1_eq_set_exact_user a1_eq_set_exact_user-not a1_eq_set_sub_exact a1_eq_set_sub_sub a1_eq_set_sub_sub-over a1_eq_set_sub_user a1_eq_set_sub_user-not
+entries | set.__ge__ | a1_ge_set_exact_exact a1_ge_set_exact_sub a1_ge_set_exact_sub-over a1_ge_set_exact_user a1_ge_set_sub_exact a1_ge_set_sub_sub a1_ge_set_sub_sub-over a1_ge_set_sub_user
+entries | set.__ior__ | a1_ior_set_exact_exact a1_ior_set_exact_sub a1_ior_set_exact_sub-over a1_ior_set_exact_user a1_ior_set_sub_user
+entries | set.__iter__ | a1_star_set_set_exact a1_star_set_set_sub a1_sorted_set_exact a1_sum_set_exact a1_set_of_set_exact a1_set_of_set_sub
+entries | set.__len__ | a1_not_set_exact a1_not_set_sub a1_truthy_set_exact a1_truthy_set_sub a1_len_set_exact a1_len_set_sub a1_bool_set_exact a1_bool_set_sub
+entries | set.__lt__ | a1_lt_set_exact_exact a1_lt_set_exact_sub a1_lt_set_exact_sub-over a1_lt_set_exact_user a1_lt_set_sub_exact a1_lt_set_sub_sub a1_lt_set_sub_sub-over a1_lt_set_sub_user
+entries | set.__ne__ | a1_ne_set_exact_exact a1_ne_set_exact_sub a1_ne_set_exact_sub-over a1_ne_set_exact_user a1_ne_set_exact_user-not a1_ne_set_sub_exact a1_ne_set_sub_sub a1_ne_set_sub_sub-over a1_ne_set_sub_user a1_ne_set_sub_user-not
+entries | set.__or__ | a1_or_set_exact_exact a1_or_set_exact_sub a1_or_set_exact_sub-over a1_or_set_exact_user a1_or_set_sub_exact a1_or_set_sub_sub a1_or_set_sub_sub-over a1_or_set_sub_user
+entries | set.__sub__ | a1_sub_set_exact_exact a1_sub_set_exact_sub a1_sub_set_exact_sub-over a1_sub_set_exact_user a1_sub_set_sub_exact a1_sub_set_sub_sub a1_sub_set_sub_sub-over a1_sub_set_sub_user
+entries | set.__xor__ | a1_xor_set_exact_exact a1_xor_set_exact_sub a1_xor_set_exact_sub-over a1_xor_set_exact_user a1_xor_set_sub_exact a1_xor_set_sub_sub a1_xor_set_sub_sub-over a1_xor_set_sub_user
+entries | str.__add__ | a1_add_str_exact_exact a1_add_str_exact_sub a1_add_str_exact_sub-over a1_add_str_exact_user a1_add_str_sub_exact a1_add_str_sub_sub a1_add_str_sub_sub-over a1_add_str_sub_user a1_iadd_str_exact_exact a1_iadd_str_exact_sub a1_iadd_str_exact_sub-over a1_iadd_str_exact_user a1_iadd_str_sub_exact a1_iadd_str_sub_sub a1_iadd_str_sub_sub-over a1_iadd_str_sub_user
+entries | str.__contains__ | a1_str_in_str_exact a1_str_in_str_sub
+entries | str.__eq__ | a1_eq_str_exact_exact a1_eq_str_exact_sub a1_eq_str_exact_sub-over a1_eq_str_exact_user a1_eq_str_exact_user-not a1_eq_str_sub_exact a1_eq_str_sub_sub a1_eq_str_sub_sub-over a1_eq_str_sub_user a1_eq_str_sub_user-not
+entries | str.__format__ | a1_fstring_str_sub
+entries | str.__ge__ | a1_ge_str_exact_exact a1_ge_str_exact_sub a1_ge_str_exact_sub-over a1_ge_str_exact_user a1_ge_str_sub_exact a1_ge_str_sub_sub a1_ge_str_sub_sub-over a1_ge_str_sub_user
+entries | str.__getitem__ | a1_getitem_str_exact a1_getitem_str_sub a1_slice_str_exact a1_slice_str_sub
+entries | str.__iter__ | a1_unpack_str_exact a1_unpack_str_sub a1_unpack_ex_str_exact a1_unpack_ex_str_sub a1_star_list_str_exact a1_star_list_str_sub a1_star_args_str_exact a1_star_args_str_sub a1_for_str_exact a1_for_str_sub a1_listcomp_str_exact a1_listcomp_str_sub a1_iter_next_str_exact a1_iter_next_str_sub a1_list_of_str_exact a1_list_of_str_sub a1_tuple_of_str_exact a1_tuple_of_str_sub a1_sorted_str_exact a1_sorted_str_sub a1_max_str_exact a1_max_str_sub a1_any_str_exact a1_any_str_sub a1_join_str_exact a1_join_str_sub
+entries | str.__len__ | a1_not_str_exact a1_not_str_sub a1_truthy_str_exact a1_truthy_str_sub a1_len_str_exact a1_len_str_sub a1_bool_str_exact a1_bool_str_sub
+entries | str.__lt__ | a1_lt_str_exact_exact a1_lt_str_exact_sub a1_lt_str_exact_sub-over a1_lt_str_exact_user a1_lt_str_sub_exact a1_lt_str_sub_sub a1_lt_str_sub_sub-over a1_lt_str_sub_user
+entries | str.__mod__ | a1_mod_str_exact_exact a1_mod_str_exact_sub a1_mod_str_exact_sub-over
+entries | str.__mul__ | a1_mul_str_exact_exact a1_mul_str_exact_sub a1_mul_str_exact_sub-over a1_mul_str_exact_user a1_mul_str_sub_exact a1_mul_str_sub_sub a1_mul_str_sub_sub-over a1_mul_str_sub_user
+entries | str.__ne__ | a1_ne_str_exact_exact a1_ne_str_exact_sub a1_ne_str_exact_sub-over a1_ne_str_exact_user a1_ne_str_exact_user-not a1_ne_str_sub_exact a1_ne_str_sub_sub a1_ne_str_sub_sub-over a1_ne_str_sub_user a1_ne_str_sub_user-not
+entries | str.__repr__ | a1_repr_str_exact a1_repr_str_sub
+entries | str.__str__ | a1_str_str_sub a1_print_str_sub
+entries | tuple.__add__ | a1_add_tuple_exact a1_add_tuple_sub a1_iadd_tuple_exact a1_iadd_tuple_sub
+entries | tuple.__class_getitem__ | call_class_getitem
+entries | tuple.__contains__ | a1_in_tuple_exact a1_in_tuple_sub
+entries | tuple.__eq__ | a1_eq_tuple_exact a1_eq_tuple_sub
+entries | tuple.__ge__ | a1_ge_tuple_exact a1_ge_tuple_sub
+entries | tuple.__getitem__ | a1_getitem_tuple_exact a1_getitem_tuple_sub a1_slice_tuple_exact a1_slice_tuple_sub
+entries | tuple.__hash__ | a1_hash_tuple_exact a1_hash_tuple_sub
+entries | tuple.__iter__ | a1_unpack_tuple_exact a1_unpack_tuple_sub a1_unpack_ex_tuple_exact a1_unpack_ex_tuple_sub a1_star_list_tuple_sub a1_star_set_tuple_exact a1_star_set_tuple_sub a1_star_args_tuple_sub a1_for_tuple_exact a1_for_tuple_sub a1_listcomp_tuple_exact a1_listcomp_tuple_sub a1_iter_next_tuple_exact a1_iter_next_tuple_sub a1_list_of_tuple_sub a1_sorted_tuple_sub a1_sum_tuple_exact a1_sum_tuple_sub a1_max_tuple_exact a1_max_tuple_sub a1_any_tuple_exact a1_any_tuple_sub a1_set_of_tuple_exact a1_set_of_tuple_sub
+entries | tuple.__len__ | a1_not_tuple_exact a1_not_tuple_sub a1_truthy_tuple_exact a1_truthy_tuple_sub a1_len_tuple_exact a1_len_tuple_sub a1_bool_tuple_exact a1_bool_tuple_sub
+entries | tuple.__lt__ | a1_lt_tuple_exact a1_lt_tuple_sub
+entries | tuple.__mul__ | a1_mul_tuple_exact a1_mul_tuple_sub
+entries | tuple.__ne__ | a1_ne_tuple_exact a1_ne_tuple_sub
+entries | tuple.__repr__ | a1_repr_tuple_exact a1_repr_tuple_sub
+entries | type.__repr__ | call_type_repr
+entries | types.GenericAlias.__call__ | tf_natives_c_types
+entries | types.GenericAlias.__eq__ | tf_natives_c_types
+entries | types.GenericAlias.__ge__ | tf_natives_c_types
+entries | types.GenericAlias.__getattribute__ | tf_natives_c_types
+entries | types.GenericAlias.__gt__ | tf_natives_c_types
+entries | types.GenericAlias.__instancecheck__ | tf_natives_c_types
+entries | types.GenericAlias.__le__ | tf_natives_c_types
+entries | types.GenericAlias.__lt__ | tf_natives_c_types
+entries | types.GenericAlias.__mro_entries__ | tf_natives_c_types
+entries | types.GenericAlias.__ne__ | tf_natives_c_types
+entries | types.GenericAlias.__or__ | tf_natives_c_types
+entries | types.GenericAlias.__repr__ | tf_natives_c_types
+entries | types.GenericAlias.__ror__ | tf_natives_c_types
+entries | types.GenericAlias.__subclasscheck__ | tf_natives_c_types
+entries | types.UnionType.__eq__ | tf_natives_c_types
+entries | types.UnionType.__ge__ | tf_natives_c_types
+entries | types.UnionType.__getattribute__ | tf_natives_c_types
+entries | types.UnionType.__gt__ | tf_natives_c_types
+entries | types.UnionType.__le__ | tf_natives_c_types
+entries | types.UnionType.__lt__ | tf_natives_c_types
+entries | types.UnionType.__ne__ | tf_natives_c_types
+entries | types.UnionType.__or__ | tf_natives_c_types
+entries | types.UnionType.__repr__ | tf_natives_c_types
+entries | types.UnionType.__ror__ | tf_natives_c_types
+entries | typing.Any | t_any tf_natives_alias_call_caught tf_natives_any_new_only tf_natives_private_names
+entries | typing.Dict | t_aliases t_alias_attributes tf_A5_alias_cache_lru tf_A5_identity tf_natives_sga
+entries | typing.ForwardRef | tf_natives_forward_ref_in_alias
+entries | typing.List | t_aliases tf_A5_alias_cache_eviction tf_A5_alias_cache_lru tf_A5_identity tf_natives_alias_call_caught tf_natives_forward_ref_in_alias tf_natives_ga_getattr_ok tf_natives_ga_subclasscheck tf_natives_private_names tf_natives_setattr_fwd tf_natives_sga
+entries | typing.NamedTuple | t_namedtuple t_namedtuple_errors t_namedtuple_sub_fields t_namedtuple_field_eq_reenters tf_A1_sub_over_fields tf_A2_nt_eq_logs tf_A4_nt_repr_raises tf_natives_c_types tf_natives_private_names tf_natives_tg_del tf_natives_tg_set
+entries | typing.NamedTupleMeta | tf_natives_private_names
+entries | typing.NotRequired | t_required_forms t_typeddict_inherit
+entries | typing.Optional | t_optional tf_A5_alias_cache_lru tf_natives_forward_ref_in_alias tf_natives_private_names tf_natives_sf_errors_ok tf_natives_sf_or tf_natives_sf_repr_or
+entries | typing.Required | t_required_forms t_typeddict_total_false
+entries | typing.Set | t_aliases tf_A5_alias_cache_lru
+entries | typing.TYPE_CHECKING | t_type_checking
+entries | typing.Tuple | t_aliases tf_A5_alias_cache_lru tf_natives_private_names tf_natives_sga
+entries | typing.TypeGuard | t_required_forms
+entries | typing.TypedDict | t_typeddict t_typeddict_total_false t_typeddict_inherit t_typeddict_sub_values tf_A1_sub_over_fields tf_natives_private_names tf_natives_td_misc
+entries | typing.Union | t_optional t_union_ops t_union_isinstance tf_A5_alias_cache_lru tf_A5_identity tf_natives_ga_subclasscheck tf_natives_private_names tf_natives_sf_errors_ok tf_natives_sf_mro_entries tf_natives_sf_or tf_natives_sf_repr_or
+entries | typing._AnyMeta | tf_natives_private_names
+entries | typing._BaseGenericAlias | tf_natives_private_names
+entries | typing._Final | tf_natives_private_names
+entries | typing._GenericAlias | tf_natives_private_names
+entries | typing._NamedTuple | tf_natives_private_names
+entries | typing._NotIterable | tf_natives_private_names
+entries | typing._SpecialForm | tf_natives_private_names
+entries | typing._SpecialGenericAlias | tf_natives_private_names
+entries | typing._TupleType | tf_natives_private_names
+entries | typing._TypedDict | tf_natives_private_names
+entries | typing._TypedDictMeta | tf_natives_private_names
+entries | typing._UnionGenericAlias | tf_natives_private_names
+entries | typing.__name__ | t_module_names
+entries | typing._namedtuple_mro_entries | tf_natives_private_names
+entries | typing._overload_dummy | tf_natives_private_names
+entries | typing.cast | t_cast_kinds
+entries | typing.overload | tf_natives_overload
+cell | ArithmeticError.__init__ @ direct
+cell | ArithmeticError.__new__ @ direct
+cell | AssertionError.__init__ @ direct
+cell | AssertionError.__new__ @ direct
+cell | AttributeError.__init__ @ direct
+cell | AttributeError.__str__ @ direct
+cell | BaseException.__init__ @ direct
+cell | BaseException.__new__ @ direct
+cell | BaseException.__repr__ @ direct
+cell | BaseException.__str__ @ direct
+cell | BaseException.add_note @ direct
+cell | BaseExceptionGroup.__init__ @ direct
+cell | BaseExceptionGroup.__new__ @ direct
+cell | BaseExceptionGroup.__str__ @ direct
+cell | BlockingIOError.__init__ @ direct
+cell | BrokenPipeError.__init__ @ direct
+cell | BufferError.__init__ @ direct
+cell | BufferError.__new__ @ direct
+cell | BytesWarning.__init__ @ direct
+cell | BytesWarning.__new__ @ direct
+cell | ChildProcessError.__init__ @ direct
+cell | ConnectionAbortedError.__init__ @ direct
+cell | ConnectionError.__init__ @ direct
+cell | ConnectionRefusedError.__init__ @ direct
+cell | ConnectionResetError.__init__ @ direct
+cell | DeprecationWarning.__init__ @ direct
+cell | DeprecationWarning.__new__ @ direct
+cell | EOFError.__init__ @ direct
+cell | EOFError.__new__ @ direct
+cell | EncodingWarning.__init__ @ direct
+cell | EncodingWarning.__new__ @ direct
+cell | Exception.__init__ @ direct
+cell | Exception.__new__ @ direct
+cell | FileExistsError.__init__ @ direct
+cell | FileNotFoundError.__init__ @ direct
+cell | FloatingPointError.__init__ @ direct
+cell | FloatingPointError.__new__ @ direct
+cell | FutureWarning.__init__ @ direct
+cell | FutureWarning.__new__ @ direct
+cell | GeneratorExit.__init__ @ direct
+cell | GeneratorExit.__new__ @ direct
+cell | ImportError.__init__ @ direct
+cell | ImportError.__str__ @ direct
+cell | ImportWarning.__init__ @ direct
+cell | ImportWarning.__new__ @ direct
+cell | IndexError.__init__ @ direct
+cell | IndexError.__new__ @ direct
+cell | InterruptedError.__init__ @ direct
+cell | IsADirectoryError.__init__ @ direct
+cell | KeyError.__init__ @ direct
+cell | KeyError.__str__ @ direct
+cell | KeyboardInterrupt.__init__ @ direct
+cell | KeyboardInterrupt.__new__ @ direct
+cell | LookupError.__init__ @ direct
+cell | LookupError.__new__ @ direct
+cell | MemoryError.__init__ @ direct
+cell | MemoryError.__new__ @ direct
+cell | ModuleNotFoundError.__init__ @ direct
+cell | NameError.__init__ @ direct
+cell | NameError.__str__ @ direct
+cell | NotADirectoryError.__init__ @ direct
+cell | NotImplementedError.__init__ @ direct
+cell | NotImplementedError.__new__ @ direct
+cell | OSError.__init__ @ direct
+cell | OSError.__new__ @ direct
+cell | OSError.__str__ @ direct
+cell | OverflowError.__init__ @ direct
+cell | OverflowError.__new__ @ direct
+cell | PendingDeprecationWarning.__init__ @ direct
+cell | PendingDeprecationWarning.__new__ @ direct
+cell | PermissionError.__init__ @ direct
+cell | ProcessLookupError.__init__ @ direct
+cell | RecursionError.__init__ @ direct
+cell | RecursionError.__new__ @ direct
+cell | ReferenceError.__init__ @ direct
+cell | ReferenceError.__new__ @ direct
+cell | ResourceWarning.__init__ @ direct
+cell | ResourceWarning.__new__ @ direct
+cell | RuntimeError.__init__ @ direct
+cell | RuntimeError.__new__ @ direct
+cell | RuntimeWarning.__init__ @ direct
+cell | RuntimeWarning.__new__ @ direct
+cell | StopAsyncIteration.__init__ @ direct
+cell | StopAsyncIteration.__new__ @ direct
+cell | StopIteration.__init__ @ direct
+cell | SyntaxWarning.__init__ @ direct
+cell | SyntaxWarning.__new__ @ direct
+cell | SystemError.__init__ @ direct
+cell | SystemError.__new__ @ direct
+cell | SystemExit.__init__ @ direct
+cell | TimeoutError.__init__ @ direct
+cell | TypeError.__init__ @ direct
+cell | TypeError.__new__ @ direct
+cell | UnboundLocalError.__init__ @ direct
+cell | UnicodeDecodeError.__init__ @ direct
+cell | UnicodeDecodeError.__new__ @ direct
+cell | UnicodeDecodeError.__str__ @ direct
+cell | UnicodeEncodeError.__init__ @ direct
+cell | UnicodeEncodeError.__new__ @ direct
+cell | UnicodeEncodeError.__str__ @ direct
+cell | UnicodeWarning.__init__ @ direct
+cell | UnicodeWarning.__new__ @ direct
+cell | UserWarning.__init__ @ direct
+cell | UserWarning.__new__ @ direct
+cell | ValueError.__init__ @ direct
+cell | ValueError.__new__ @ direct
+cell | Warning.__init__ @ direct
+cell | Warning.__new__ @ direct
+cell | ZeroDivisionError.__init__ @ direct
+cell | ZeroDivisionError.__new__ @ direct
+cell | __build_class__ @ direct
+cell | abs @ A1
+cell | all @ direct
+cell | any @ A1
+cell | bool.__and__ @ direct
+cell | bool.__new__ @ A1
+cell | bool.__or__ @ direct
+cell | bool.__rand__ @ direct
+cell | bool.__repr__ @ direct
+cell | bool.__ror__ @ direct
+cell | bool.__rxor__ @ direct
+cell | bool.__xor__ @ direct
+cell | bytes.__add__ @ direct
+cell | bytes.__bytes__ @ direct
+cell | bytes.__contains__ @ direct
+cell | bytes.__eq__ @ direct
+cell | bytes.__ge__ @ direct
+cell | bytes.__getitem__ @ direct
+cell | bytes.__gt__ @ direct
+cell | bytes.__iter__ @ direct
+cell | bytes.__le__ @ direct
+cell | bytes.__len__ @ A1
+cell | bytes.__len__ @ direct
+cell | bytes.__lt__ @ direct
+cell | bytes.__mod__ @ direct
+cell | bytes.__mul__ @ direct
+cell | bytes.__ne__ @ direct
+cell | bytes.__new__ @ direct
+cell | bytes.__repr__ @ direct
+cell | bytes.__rmod__ @ direct
+cell | bytes.__rmul__ @ direct
+cell | bytes.__str__ @ direct
+cell | bytes_iterator.__iter__ @ direct
+cell | bytes_iterator.__length_hint__ @ direct
+cell | bytes_iterator.__next__ @ direct
+cell | callable @ direct
+cell | dataclasses.dataclass @ A1
+cell | dataclasses.dataclass @ A2
+cell | dataclasses.dataclass @ A3
+cell | dataclasses.dataclass @ A4
+cell | dataclasses.dataclass @ natives
+cell | dataclasses.dataclass @ options
+cell | dataclasses.dataclass @ plain
+cell | dataclasses.field @ A2
+cell | dataclasses.field @ A3
+cell | dataclasses.field @ A4
+cell | dataclasses.field @ natives
+cell | dataclasses.field @ options
+cell | dataclasses.field @ plain
+cell | dataclasses.replace @ plain
+cell | dict.__contains__ @ direct
+cell | dict.__delitem__ @ direct
+cell | dict.__eq__ @ direct
+cell | dict.__ge__ @ direct
+cell | dict.__getitem__ @ direct
+cell | dict.__gt__ @ direct
+cell | dict.__ior__ @ direct
+cell | dict.__iter__ @ direct
+cell | dict.__le__ @ direct
+cell | dict.__len__ @ direct
+cell | dict.__lt__ @ direct
+cell | dict.__ne__ @ direct
+cell | dict.__new__ @ A1
+cell | dict.__or__ @ direct
+cell | dict.__repr__ @ direct
+cell | dict.__reversed__ @ direct
+cell | dict.__ror__ @ direct
+cell | dict.__setitem__ @ direct
+cell | dict.clear @ A1
+cell | dict.clear @ direct
+cell | dict.copy @ A1
+cell | dict.copy @ direct
+cell | dict.fromkeys @ direct
+cell | dict.get @ A1
+cell | dict.get @ direct
+cell | dict.items @ A1
+cell | dict.items @ direct
+cell | dict.keys @ A1
+cell | dict.keys @ direct
+cell | dict.pop @ A1
+cell | dict.pop @ direct
+cell | dict.popitem @ A1
+cell | dict.popitem @ direct
+cell | dict.setdefault @ A1
+cell | dict.setdefault @ direct
+cell | dict.update @ A1
+cell | dict.update @ direct
+cell | dict.values @ A1
+cell | dict.values @ direct
+cell | dict_itemiterator.__iter__ @ direct
+cell | dict_itemiterator.__next__ @ direct
+cell | dict_items.__and__ @ direct
+cell | dict_items.__contains__ @ direct
+cell | dict_items.__eq__ @ direct
+cell | dict_items.__gt__ @ direct
+cell | dict_items.__iter__ @ direct
+cell | dict_items.__le__ @ direct
+cell | dict_items.__len__ @ direct
+cell | dict_items.__lt__ @ direct
+cell | dict_items.__ne__ @ direct
+cell | dict_items.__or__ @ direct
+cell | dict_items.__rand__ @ direct
+cell | dict_items.__repr__ @ direct
+cell | dict_items.__reversed__ @ direct
+cell | dict_items.__ror__ @ direct
+cell | dict_items.__rsub__ @ direct
+cell | dict_items.__rxor__ @ direct
+cell | dict_items.__sub__ @ direct
+cell | dict_items.__xor__ @ direct
+cell | dict_keyiterator.__iter__ @ direct
+cell | dict_keyiterator.__next__ @ direct
+cell | dict_keys.__contains__ @ direct
+cell | dict_keys.__eq__ @ direct
+cell | dict_keys.__ge__ @ direct
+cell | dict_keys.__gt__ @ direct
+cell | dict_keys.__iter__ @ direct
+cell | dict_keys.__le__ @ direct
+cell | dict_keys.__len__ @ direct
+cell | dict_keys.__lt__ @ direct
+cell | dict_keys.__ne__ @ direct
+cell | dict_keys.__repr__ @ direct
+cell | dict_keys.__reversed__ @ direct
+cell | dict_keys.__sub__ @ direct
+cell | dict_keys.isdisjoint @ direct
+cell | dict_reverseitemiterator.__iter__ @ direct
+cell | dict_reverseitemiterator.__length_hint__ @ direct
+cell | dict_reverseitemiterator.__next__ @ direct
+cell | dict_reversekeyiterator.__iter__ @ direct
+cell | dict_reversekeyiterator.__length_hint__ @ direct
+cell | dict_reversekeyiterator.__next__ @ direct
+cell | dict_reversevalueiterator.__iter__ @ direct
+cell | dict_reversevalueiterator.__length_hint__ @ direct
+cell | dict_reversevalueiterator.__next__ @ direct
+cell | dict_valueiterator.__iter__ @ direct
+cell | dict_valueiterator.__next__ @ direct
+cell | dict_values.__iter__ @ direct
+cell | dict_values.__len__ @ direct
+cell | dict_values.__repr__ @ direct
+cell | dict_values.__reversed__ @ direct
+cell | divmod @ direct
+cell | enumerate.__iter__ @ direct
+cell | enumerate.__new__ @ direct
+cell | enumerate.__next__ @ direct
+cell | float.__abs__ @ direct
+cell | float.__add__ @ direct
+cell | float.__bool__ @ direct
+cell | float.__divmod__ @ direct
+cell | float.__eq__ @ direct
+cell | float.__float__ @ direct
+cell | float.__floordiv__ @ direct
+cell | float.__format__ @ direct
+cell | float.__ge__ @ direct
+cell | float.__gt__ @ direct
+cell | float.__hash__ @ direct
+cell | float.__int__ @ direct
+cell | float.__le__ @ direct
+cell | float.__lt__ @ direct
+cell | float.__mod__ @ direct
+cell | float.__mul__ @ direct
+cell | float.__ne__ @ direct
+cell | float.__neg__ @ direct
+cell | float.__new__ @ A1
+cell | float.__pos__ @ direct
+cell | float.__pow__ @ direct
+cell | float.__radd__ @ direct
+cell | float.__rdivmod__ @ direct
+cell | float.__repr__ @ direct
+cell | float.__rfloordiv__ @ direct
+cell | float.__rmod__ @ direct
+cell | float.__rmul__ @ direct
+cell | float.__rpow__ @ direct
+cell | float.__rsub__ @ direct
+cell | float.__rtruediv__ @ direct
+cell | float.__sub__ @ direct
+cell | float.__truediv__ @ direct
+cell | float.__trunc__ @ direct
+cell | frozenset.__and__ @ direct
+cell | frozenset.__contains__ @ direct
+cell | frozenset.__eq__ @ direct
+cell | frozenset.__ge__ @ direct
+cell | frozenset.__gt__ @ direct
+cell | frozenset.__hash__ @ direct
+cell | frozenset.__iter__ @ direct
+cell | frozenset.__le__ @ direct
+cell | frozenset.__len__ @ direct
+cell | frozenset.__lt__ @ direct
+cell | frozenset.__ne__ @ direct
+cell | frozenset.__or__ @ direct
+cell | frozenset.__rand__ @ direct
+cell | frozenset.__ror__ @ direct
+cell | frozenset.__rsub__ @ direct
+cell | frozenset.__rxor__ @ direct
+cell | frozenset.__sub__ @ direct
+cell | frozenset.__xor__ @ direct
+cell | frozenset.copy @ A1
+cell | frozenset.copy @ direct
+cell | frozenset.difference @ direct
+cell | frozenset.intersection @ direct
+cell | frozenset.isdisjoint @ direct
+cell | frozenset.issubset @ A1
+cell | frozenset.issubset @ direct
+cell | frozenset.issuperset @ direct
+cell | frozenset.symmetric_difference @ direct
+cell | frozenset.union @ A1
+cell | frozenset.union @ direct
+cell | hash @ A1
+cell | hex @ direct
+cell | int.__abs__ @ direct
+cell | int.__add__ @ direct
+cell | int.__and__ @ direct
+cell | int.__bool__ @ direct
+cell | int.__divmod__ @ direct
+cell | int.__eq__ @ direct
+cell | int.__float__ @ direct
+cell | int.__floordiv__ @ direct
+cell | int.__format__ @ direct
+cell | int.__ge__ @ direct
+cell | int.__gt__ @ direct
+cell | int.__hash__ @ direct
+cell | int.__index__ @ direct
+cell | int.__int__ @ direct
+cell | int.__invert__ @ direct
+cell | int.__le__ @ direct
+cell | int.__lshift__ @ direct
+cell | int.__lt__ @ direct
+cell | int.__mod__ @ direct
+cell | int.__mul__ @ direct
+cell | int.__ne__ @ direct
+cell | int.__neg__ @ direct
+cell | int.__new__ @ A1
+cell | int.__or__ @ direct
+cell | int.__pos__ @ direct
+cell | int.__pow__ @ direct
+cell | int.__radd__ @ direct
+cell | int.__rand__ @ direct
+cell | int.__rdivmod__ @ direct
+cell | int.__repr__ @ direct
+cell | int.__rfloordiv__ @ direct
+cell | int.__rlshift__ @ direct
+cell | int.__rmod__ @ direct
+cell | int.__rmul__ @ direct
+cell | int.__ror__ @ direct
+cell | int.__rpow__ @ direct
+cell | int.__rrshift__ @ direct
+cell | int.__rshift__ @ direct
+cell | int.__rsub__ @ direct
+cell | int.__rtruediv__ @ direct
+cell | int.__rxor__ @ direct
+cell | int.__sub__ @ direct
+cell | int.__truediv__ @ direct
+cell | int.__trunc__ @ direct
+cell | int.__xor__ @ direct
+cell | isinstance @ A1
+cell | issubclass @ direct
+cell | iterator.__length_hint__ @ direct
+cell | len @ A1
+cell | list.__add__ @ direct
+cell | list.__contains__ @ direct
+cell | list.__delitem__ @ direct
+cell | list.__eq__ @ direct
+cell | list.__ge__ @ direct
+cell | list.__getitem__ @ direct
+cell | list.__gt__ @ direct
+cell | list.__iadd__ @ direct
+cell | list.__imul__ @ direct
+cell | list.__iter__ @ direct
+cell | list.__le__ @ direct
+cell | list.__len__ @ A1
+cell | list.__len__ @ direct
+cell | list.__lt__ @ direct
+cell | list.__mul__ @ direct
+cell | list.__ne__ @ direct
+cell | list.__new__ @ A1
+cell | list.__repr__ @ direct
+cell | list.__reversed__ @ direct
+cell | list.__rmul__ @ direct
+cell | list.__setitem__ @ direct
+cell | list.append @ A1
+cell | list.append @ direct
+cell | list.clear @ A1
+cell | list.clear @ direct
+cell | list.copy @ A1
+cell | list.copy @ direct
+cell | list.count @ A1
+cell | list.count @ direct
+cell | list.extend @ A1
+cell | list.extend @ direct
+cell | list.index @ A1
+cell | list.index @ direct
+cell | list.insert @ A1
+cell | list.insert @ direct
+cell | list.pop @ A1
+cell | list.pop @ direct
+cell | list.remove @ A1
+cell | list.remove @ direct
+cell | list.reverse @ A1
+cell | list.reverse @ direct
+cell | list.sort @ A1
+cell | list.sort @ direct
+cell | list_iterator.__iter__ @ direct
+cell | list_iterator.__length_hint__ @ direct
+cell | list_iterator.__next__ @ direct
+cell | list_reverseiterator.__iter__ @ direct
+cell | list_reverseiterator.__length_hint__ @ direct
+cell | list_reverseiterator.__next__ @ direct
+cell | longrange_iterator.__iter__ @ direct
+cell | longrange_iterator.__length_hint__ @ direct
+cell | longrange_iterator.__next__ @ direct
+cell | max @ A1
+cell | next @ A1
+cell | object.__delattr__ @ direct
+cell | object.__eq__ @ direct
+cell | object.__ge__ @ direct
+cell | object.__getattribute__ @ direct
+cell | object.__gt__ @ direct
+cell | object.__le__ @ direct
+cell | object.__lt__ @ direct
+cell | object.__ne__ @ direct
+cell | object.__setattr__ @ direct
+cell | print @ A1
+cell | property.deleter @ direct
+cell | property.setter @ direct
+cell | range.__bool__ @ direct
+cell | range.__contains__ @ direct
+cell | range.__eq__ @ direct
+cell | range.__ge__ @ direct
+cell | range.__getitem__ @ direct
+cell | range.__gt__ @ direct
+cell | range.__hash__ @ direct
+cell | range.__iter__ @ direct
+cell | range.__le__ @ direct
+cell | range.__len__ @ direct
+cell | range.__lt__ @ direct
+cell | range.__ne__ @ direct
+cell | range.__repr__ @ direct
+cell | range.__reversed__ @ direct
+cell | range.count @ A1
+cell | range.count @ direct
+cell | range.index @ A1
+cell | range.index @ direct
+cell | range_iterator.__iter__ @ direct
+cell | range_iterator.__length_hint__ @ direct
+cell | range_iterator.__next__ @ direct
+cell | repr @ A1
+cell | reversed.__iter__ @ direct
+cell | reversed.__length_hint__ @ direct
+cell | reversed.__next__ @ direct
+cell | set.__and__ @ direct
+cell | set.__contains__ @ direct
+cell | set.__eq__ @ direct
+cell | set.__ge__ @ direct
+cell | set.__gt__ @ direct
+cell | set.__iand__ @ direct
+cell | set.__ior__ @ direct
+cell | set.__isub__ @ direct
+cell | set.__iter__ @ direct
+cell | set.__ixor__ @ direct
+cell | set.__le__ @ direct
+cell | set.__len__ @ direct
+cell | set.__lt__ @ direct
+cell | set.__ne__ @ direct
+cell | set.__new__ @ A1
+cell | set.__or__ @ direct
+cell | set.__rand__ @ direct
+cell | set.__ror__ @ direct
+cell | set.__rsub__ @ direct
+cell | set.__rxor__ @ direct
+cell | set.__sub__ @ direct
+cell | set.__xor__ @ direct
+cell | set.add @ A1
+cell | set.add @ direct
+cell | set.clear @ A1
+cell | set.clear @ direct
+cell | set.copy @ A1
+cell | set.copy @ direct
+cell | set.difference @ A1
+cell | set.difference @ direct
+cell | set.difference_update @ A1
+cell | set.difference_update @ direct
+cell | set.discard @ A1
+cell | set.discard @ direct
+cell | set.intersection @ A1
+cell | set.intersection @ direct
+cell | set.intersection_update @ A1
+cell | set.intersection_update @ direct
+cell | set.isdisjoint @ A1
+cell | set.isdisjoint @ direct
+cell | set.issubset @ A1
+cell | set.issubset @ direct
+cell | set.issuperset @ A1
+cell | set.issuperset @ direct
+cell | set.remove @ A1
+cell | set.remove @ direct
+cell | set.symmetric_difference @ A1
+cell | set.symmetric_difference @ direct
+cell | set.symmetric_difference_update @ direct
+cell | set.union @ A1
+cell | set.union @ direct
+cell | set.update @ A1
+cell | set.update @ direct
+cell | set_iterator.__iter__ @ direct
+cell | set_iterator.__length_hint__ @ direct
+cell | setattr @ direct
+cell | sorted @ A1
+cell | str.__add__ @ direct
+cell | str.__contains__ @ direct
+cell | str.__eq__ @ direct
+cell | str.__format__ @ direct
+cell | str.__ge__ @ direct
+cell | str.__getitem__ @ direct
+cell | str.__gt__ @ direct
+cell | str.__iter__ @ direct
+cell | str.__le__ @ direct
+cell | str.__len__ @ direct
+cell | str.__lt__ @ direct
+cell | str.__mod__ @ direct
+cell | str.__mul__ @ direct
+cell | str.__ne__ @ direct
+cell | str.__new__ @ A1
+cell | str.__repr__ @ direct
+cell | str.__rmod__ @ direct
+cell | str.__rmul__ @ direct
+cell | str.__str__ @ direct
+cell | str.capitalize @ A1
+cell | str.capitalize @ direct
+cell | str.casefold @ A1
+cell | str.casefold @ direct
+cell | str.center @ A1
+cell | str.center @ direct
+cell | str.count @ A1
+cell | str.count @ direct
+cell | str.encode @ A1
+cell | str.encode @ direct
+cell | str.endswith @ A1
+cell | str.endswith @ direct
+cell | str.expandtabs @ A1
+cell | str.expandtabs @ direct
+cell | str.find @ A1
+cell | str.find @ direct
+cell | str.format @ A1
+cell | str.format @ direct
+cell | str.format_map @ direct
+cell | str.index @ A1
+cell | str.index @ direct
+cell | str.isalnum @ direct
+cell | str.isalpha @ A1
+cell | str.isalpha @ direct
+cell | str.isascii @ A1
+cell | str.isascii @ direct
+cell | str.isdecimal @ direct
+cell | str.isdigit @ A1
+cell | str.isdigit @ direct
+cell | str.isidentifier @ A1
+cell | str.isidentifier @ direct
+cell | str.islower @ direct
+cell | str.isnumeric @ direct
+cell | str.isprintable @ direct
+cell | str.isspace @ A1
+cell | str.isspace @ direct
+cell | str.istitle @ direct
+cell | str.isupper @ direct
+cell | str.join @ A1
+cell | str.join @ direct
+cell | str.ljust @ A1
+cell | str.ljust @ direct
+cell | str.lower @ A1
+cell | str.lower @ direct
+cell | str.lstrip @ A1
+cell | str.lstrip @ direct
+cell | str.maketrans @ direct
+cell | str.partition @ A1
+cell | str.partition @ direct
+cell | str.removeprefix @ A1
+cell | str.removeprefix @ direct
+cell | str.removesuffix @ A1
+cell | str.removesuffix @ direct
+cell | str.replace @ A1
+cell | str.replace @ direct
+cell | str.rfind @ A1
+cell | str.rfind @ direct
+cell | str.rindex @ direct
+cell | str.rjust @ A1
+cell | str.rjust @ direct
+cell | str.rpartition @ A1
+cell | str.rpartition @ direct
+cell | str.rsplit @ A1
+cell | str.rsplit @ direct
+cell | str.rstrip @ A1
+cell | str.rstrip @ direct
+cell | str.split @ A1
+cell | str.split @ direct
+cell | str.splitlines @ A1
+cell | str.splitlines @ direct
+cell | str.startswith @ A1
+cell | str.startswith @ direct
+cell | str.strip @ A1
+cell | str.strip @ direct
+cell | str.swapcase @ A1
+cell | str.swapcase @ direct
+cell | str.title @ A1
+cell | str.title @ direct
+cell | str.translate @ A1
+cell | str.translate @ direct
+cell | str.upper @ A1
+cell | str.upper @ direct
+cell | str.zfill @ A1
+cell | str.zfill @ direct
+cell | str_ascii_iterator.__iter__ @ direct
+cell | str_ascii_iterator.__length_hint__ @ direct
+cell | str_ascii_iterator.__next__ @ direct
+cell | str_iterator.__iter__ @ direct
+cell | str_iterator.__length_hint__ @ direct
+cell | str_iterator.__next__ @ direct
+cell | sum @ A1
+cell | tuple.__add__ @ direct
+cell | tuple.__contains__ @ direct
+cell | tuple.__eq__ @ direct
+cell | tuple.__ge__ @ direct
+cell | tuple.__getitem__ @ direct
+cell | tuple.__gt__ @ direct
+cell | tuple.__hash__ @ direct
+cell | tuple.__iter__ @ direct
+cell | tuple.__le__ @ direct
+cell | tuple.__len__ @ direct
+cell | tuple.__lt__ @ direct
+cell | tuple.__mul__ @ direct
+cell | tuple.__ne__ @ direct
+cell | tuple.__new__ @ A1
+cell | tuple.__repr__ @ direct
+cell | tuple.__rmul__ @ direct
+cell | tuple.count @ A1
+cell | tuple.count @ direct
+cell | tuple.index @ A1
+cell | tuple.index @ direct
+cell | tuple_iterator.__iter__ @ direct
+cell | tuple_iterator.__length_hint__ @ direct
+cell | tuple_iterator.__next__ @ direct
+cell | type.__call__ @ direct
+cell | type.__init__ @ direct
+cell | type.__new__ @ direct
+cell | type.__or__ @ direct
+cell | type.__repr__ @ direct
+cell | type.__ror__ @ direct
+cell | typing._namedtuple_mro_entries @ natives
+cell | typing._overload_dummy @ natives
+cell | typing.cast @ A1
+cell | typing.overload @ natives
+cell | zip.__iter__ @ direct
+cell | zip.__next__ @ direct
+entry-cell | NoneType.__repr__ @ direct | call_type_repr
+entry-cell | NotImplementedType.__repr__ @ direct | call_type_repr
+entry-cell | bool.__and__ @ A1 | a1_and_bool_exact
+entry-cell | bool.__or__ @ A1 | a1_or_bool_exact
+entry-cell | bool.__repr__ @ A1 | a1_repr_bool_exact
+entry-cell | bool.__xor__ @ A1 | a1_xor_bool_exact
+entry-cell | bytes.__add__ @ A1 | a1_add_bytes_exact a1_add_bytes_sub
+entry-cell | bytes.__eq__ @ A1 | a1_eq_bytes_exact a1_eq_bytes_sub
+entry-cell | bytes.__getitem__ @ A1 | a1_getitem_bytes_exact a1_getitem_bytes_sub a1_slice_bytes_exact a1_slice_bytes_sub
+entry-cell | bytes.__iter__ @ A1 | a1_unpack_bytes_exact a1_unpack_bytes_sub
+entry-cell | bytes.__len__ @ A1 | a1_not_bytes_exact a1_not_bytes_sub a1_truthy_bytes_exact a1_truthy_bytes_sub a1_len_bytes_exact a1_len_bytes_sub a1_bool_bytes_exact a1_bool_bytes_sub
+entry-cell | bytes.__lt__ @ A1 | a1_lt_bytes_exact a1_lt_bytes_sub
+entry-cell | bytes.__mod__ @ A1 | a1_mod_bytes_exact a1_mod_bytes_sub
+entry-cell | bytes.__mul__ @ A1 | a1_mul_bytes_exact a1_mul_bytes_sub
+entry-cell | bytes.__ne__ @ A1 | a1_ne_bytes_exact a1_ne_bytes_sub
+entry-cell | bytes.__repr__ @ A1 | a1_repr_bytes_exact a1_repr_bytes_sub
+entry-cell | bytes.__str__ @ A1 | a1_str_bytes_exact a1_str_bytes_sub a1_print_bytes_exact a1_print_bytes_sub
+entry-cell | callable_iterator.__iter__ @ direct | call_callable_iterator
+entry-cell | callable_iterator.__next__ @ direct | call_callable_iterator
+entry-cell | collections._tuplegetter.__delete__ @ natives | tf_natives_tg_del
+entry-cell | collections._tuplegetter.__get__ @ natives | tf_natives_c_types
+entry-cell | collections._tuplegetter.__repr__ @ natives | tf_natives_c_types
+entry-cell | collections._tuplegetter.__set__ @ natives | tf_natives_tg_set
+entry-cell | dataclasses.Field @ plain | t_dataclass_field_object
+entry-cell | dataclasses.FrozenInstanceError @ plain | t_dataclass_frozen t_dataclass_frozen_del
+entry-cell | dataclasses.MISSING @ natives | tf_natives_params tf_natives_private_names
+entry-cell | dataclasses.MISSING @ plain | t_dataclass_field_object
+entry-cell | dataclasses._DataclassParams @ natives | tf_natives_private_names
+entry-cell | dataclasses._FIELD @ natives | tf_natives_private_names
+entry-cell | dataclasses._FIELDS @ natives | tf_natives_private_names
+entry-cell | dataclasses._FIELD_BASE @ natives | tf_natives_private_names
+entry-cell | dataclasses._FIELD_CLASSVAR @ natives | tf_natives_private_names
+entry-cell | dataclasses._FIELD_INITVAR @ natives | tf_natives_private_names
+entry-cell | dataclasses._HAS_DEFAULT_FACTORY @ natives | tf_natives_private_names
+entry-cell | dataclasses._HAS_DEFAULT_FACTORY_CLASS @ natives | tf_natives_private_names
+entry-cell | dataclasses._MISSING_TYPE @ natives | tf_natives_private_names
+entry-cell | dataclasses._PARAMS @ natives | tf_natives_private_names
+entry-cell | dataclasses._POST_INIT_NAME @ natives | tf_natives_private_names
+entry-cell | dataclasses.__name__ @ plain | t_module_names
+entry-cell | dataclasses.dataclass @ A1 | t_dataclass_builtin_sub_fields t_dataclass_on_builtin_sub tf_A1_sub_over_fields
+entry-cell | dataclasses.dataclass @ A2 | t_dataclass_field_eq_reenters t_dataclass_recursive_repr tf_A2_eq_mutate tf_A2_eq_recurse tf_A2_eq_replace_class tf_A2_factory_reenters tf_A2_hash_mutate tf_A2_lt_mutate tf_A2_post_init_replace_class tf_A2_repr_field_reenters_repr tf_A2_repr_mutate
+entry-cell | dataclasses.dataclass @ A3 | t_dataclass_post_init t_factory_function t_factory_lambda t_factory_builtin t_factory_class t_factory_callable_object t_post_init_staticmethod t_post_init_classmethod tf_A3_df_bound_method tf_A3_df_builtin_method tf_A3_df_class_with_new tf_A3_pi_builtin tf_A3_pi_callable_obj tf_A3_pi_inherited tf_A3_pi_none tf_A3_pi_property
+entry-cell | dataclasses.dataclass @ A4 | t_dataclass_field_eq_raises t_dataclass_field_hash_raises t_dataclass_field_repr_raises t_dataclass_field_lt_notimpl t_factory_raises t_post_init_raises tf_A4_eq_nonbool tf_A4_hash_nonint tf_A4_post_init_context tf_A4_repr_nonstr
+entry-cell | dataclasses.dataclass @ natives | tf_natives_field_setname tf_natives_params tf_natives_set_name
+entry-cell | dataclasses.dataclass @ options | tf_options_field_compare_hash tf_options_hash_action_rows tf_options_option_errors
+entry-cell | dataclasses.dataclass @ plain | t_dataclass_basic t_dataclass_order t_dataclass_order_mixed t_dataclass_frozen t_dataclass_frozen_del t_dataclass_hash_actions t_dataclass_options t_dataclass_kw_only t_dataclass_kw_only_error t_dataclass_mutable_default t_dataclass_field_order_error t_dataclass_replace t_dataclass_replace_error t_dataclass_inherit t_dataclass_eq_other_class
+entry-cell | dataclasses.field @ A2 | tf_A2_factory_reenters
+entry-cell | dataclasses.field @ A3 | t_dataclass_post_init t_factory_function t_factory_lambda t_factory_builtin t_factory_class t_factory_callable_object tf_A3_df_bound_method tf_A3_df_builtin_method tf_A3_df_class_with_new
+entry-cell | dataclasses.field @ A4 | t_factory_raises
+entry-cell | dataclasses.field @ natives | tf_natives_field_setname tf_natives_params
+entry-cell | dataclasses.field @ options | tf_options_field_compare_hash
+entry-cell | dataclasses.field @ plain | t_dataclass_kw_only t_dataclass_field_object
+entry-cell | dataclasses.replace @ plain | t_dataclass_replace t_dataclass_replace_error
+entry-cell | dict.__class_getitem__ @ direct | call_class_getitem
+entry-cell | dict.__contains__ @ A1 | a1_in_dict_exact a1_in_dict_sub
+entry-cell | dict.__eq__ @ A1 | a1_eq_dict_exact a1_eq_dict_sub
+entry-cell | dict.__getitem__ @ A1 | a1_getkey_dict_exact a1_getkey_dict_sub
+entry-cell | dict.__ior__ @ A1 | a1_ior_dict_exact a1_ior_dict_sub
+entry-cell | dict.__iter__ @ A1 | a1_unpack_dict_exact a1_unpack_dict_sub a1_star_list_dict_exact a1_star_list_dict_sub a1_for_dict_exact a1_for_dict_sub a1_iter_next_dict_exact a1_iter_next_dict_sub a1_list_of_dict_exact a1_list_of_dict_sub
+entry-cell | dict.__len__ @ A1 | a1_not_dict_exact a1_not_dict_sub a1_truthy_dict_exact a1_truthy_dict_sub a1_len_dict_exact a1_len_dict_sub a1_bool_dict_exact a1_bool_dict_sub
+entry-cell | dict.__ne__ @ A1 | a1_ne_dict_exact a1_ne_dict_sub
+entry-cell | dict.__or__ @ A1 | a1_or_dict_exact a1_or_dict_sub
+entry-cell | dict.__repr__ @ A1 | a1_repr_dict_exact a1_repr_dict_sub
+entry-cell | dict.__setitem__ @ A1 | a1_setitem_dict_exact a1_setitem_dict_sub
+entry-cell | ellipsis.__repr__ @ direct | call_type_repr
+entry-cell | float.__abs__ @ A1 | a1_abs_float_exact a1_abs_float_sub
+entry-cell | float.__add__ @ A1 | a1_add_float_exact a1_add_float_sub
+entry-cell | float.__bool__ @ A1 | a1_not_float_exact a1_not_float_sub a1_truthy_float_exact a1_truthy_float_sub a1_bool_float_exact a1_bool_float_sub
+entry-cell | float.__eq__ @ A1 | a1_eq_float_exact a1_eq_float_sub
+entry-cell | float.__float__ @ A1 | a1_float_float_sub
+entry-cell | float.__floordiv__ @ A1 | a1_floordiv_float_exact a1_floordiv_float_sub
+entry-cell | float.__format__ @ A1 | a1_fstring_float_exact a1_fstring_float_sub
+entry-cell | float.__ge__ @ A1 | a1_ge_float_exact a1_ge_float_sub
+entry-cell | float.__hash__ @ A1 | a1_hash_float_exact a1_hash_float_sub
+entry-cell | float.__int__ @ A1 | a1_int_float_exact a1_int_float_sub
+entry-cell | float.__lt__ @ A1 | a1_lt_float_exact a1_lt_float_sub
+entry-cell | float.__mod__ @ A1 | a1_mod_float_exact a1_mod_float_sub
+entry-cell | float.__mul__ @ A1 | a1_mul_float_exact a1_mul_float_sub
+entry-cell | float.__ne__ @ A1 | a1_ne_float_exact a1_ne_float_sub
+entry-cell | float.__neg__ @ A1 | a1_neg_float_exact a1_neg_float_sub
+entry-cell | float.__pow__ @ A1 | a1_pow_float_exact a1_pow_float_sub
+entry-cell | float.__repr__ @ A1 | a1_repr_float_exact a1_repr_float_sub
+entry-cell | float.__sub__ @ A1 | a1_sub_float_exact a1_sub_float_sub
+entry-cell | float.__truediv__ @ A1 | a1_truediv_float_exact a1_truediv_float_sub
+entry-cell | frozenset.__and__ @ A1 | a1_and_frozenset_exact a1_and_frozenset_sub
+entry-cell | frozenset.__class_getitem__ @ direct | call_class_getitem
+entry-cell | frozenset.__contains__ @ A1 | a1_in_frozenset_exact a1_in_frozenset_sub
+entry-cell | frozenset.__eq__ @ A1 | a1_eq_frozenset_exact a1_eq_frozenset_sub
+entry-cell | frozenset.__ge__ @ A1 | a1_ge_frozenset_exact a1_ge_frozenset_sub
+entry-cell | frozenset.__hash__ @ A1 | a1_hash_frozenset_exact a1_hash_frozenset_sub
+entry-cell | frozenset.__len__ @ A1 | a1_not_frozenset_exact a1_not_frozenset_sub a1_truthy_frozenset_exact a1_truthy_frozenset_sub a1_len_frozenset_exact a1_len_frozenset_sub a1_bool_frozenset_exact a1_bool_frozenset_sub
+entry-cell | frozenset.__lt__ @ A1 | a1_lt_frozenset_exact a1_lt_frozenset_sub
+entry-cell | frozenset.__ne__ @ A1 | a1_ne_frozenset_exact a1_ne_frozenset_sub
+entry-cell | frozenset.__or__ @ A1 | a1_or_frozenset_exact a1_or_frozenset_sub
+entry-cell | frozenset.__sub__ @ A1 | a1_sub_frozenset_exact a1_sub_frozenset_sub
+entry-cell | frozenset.__xor__ @ A1 | a1_xor_frozenset_exact a1_xor_frozenset_sub
+entry-cell | int.__abs__ @ A1 | a1_abs_int_exact a1_abs_int_sub
+entry-cell | int.__add__ @ A1 | a1_add_int_exact_exact a1_add_int_exact_sub a1_add_int_exact_sub-over a1_add_int_exact_user a1_add_int_exact_user-not a1_add_int_sub_exact a1_add_int_sub_sub a1_add_int_sub_sub-over a1_add_int_sub_user a1_add_int_sub_user-not a1_add_bool_exact a1_iadd_int_exact_exact a1_iadd_int_exact_sub a1_iadd_int_exact_sub-over a1_iadd_int_exact_user a1_iadd_int_exact_user-not a1_iadd_int_sub_exact a1_iadd_int_sub_sub a1_iadd_int_sub_sub-over a1_iadd_int_sub_user a1_iadd_int_sub_user-not
+entry-cell | int.__and__ @ A1 | a1_and_int_exact_exact a1_and_int_exact_sub a1_and_int_exact_sub-over a1_and_int_exact_user a1_and_int_exact_user-not a1_and_int_sub_exact a1_and_int_sub_sub a1_and_int_sub_sub-over a1_and_int_sub_user a1_and_int_sub_user-not
+entry-cell | int.__bool__ @ A1 | a1_not_int_exact a1_not_int_sub a1_truthy_int_exact a1_truthy_int_sub a1_bool_int_exact a1_bool_int_sub
+entry-cell | int.__eq__ @ A1 | a1_eq_int_exact_exact a1_eq_int_exact_sub a1_eq_int_exact_sub-over a1_eq_int_exact_user a1_eq_int_exact_user-not a1_eq_int_sub_exact a1_eq_int_sub_sub a1_eq_int_sub_sub-over a1_eq_int_sub_user a1_eq_int_sub_user-not a1_eq_bool_exact
+entry-cell | int.__float__ @ A1 | a1_float_int_exact a1_float_int_sub
+entry-cell | int.__floordiv__ @ A1 | a1_floordiv_int_exact_exact a1_floordiv_int_exact_sub a1_floordiv_int_exact_sub-over a1_floordiv_int_exact_user a1_floordiv_int_exact_user-not a1_floordiv_int_sub_exact a1_floordiv_int_sub_sub a1_floordiv_int_sub_sub-over a1_floordiv_int_sub_user a1_floordiv_int_sub_user-not a1_floordiv_bool_exact
+entry-cell | int.__format__ @ A1 | a1_fstring_int_sub
+entry-cell | int.__ge__ @ A1 | a1_ge_int_exact_exact a1_ge_int_exact_sub a1_ge_int_exact_sub-over a1_ge_int_exact_user a1_ge_int_exact_user-not a1_ge_int_sub_exact a1_ge_int_sub_sub a1_ge_int_sub_sub-over a1_ge_int_sub_user a1_ge_int_sub_user-not a1_ge_bool_exact
+entry-cell | int.__hash__ @ A1 | a1_hash_int_exact a1_hash_int_sub a1_hash_bool_exact
+entry-cell | int.__int__ @ A1 | a1_int_int_sub a1_int_bool_exact
+entry-cell | int.__invert__ @ A1 | a1_invert_int_exact a1_invert_int_sub
+entry-cell | int.__lshift__ @ A1 | a1_lshift_int_exact_exact a1_lshift_int_exact_sub a1_lshift_int_exact_sub-over a1_lshift_int_exact_user a1_lshift_int_exact_user-not a1_lshift_int_sub_exact a1_lshift_int_sub_sub a1_lshift_int_sub_sub-over a1_lshift_int_sub_user a1_lshift_int_sub_user-not a1_lshift_bool_exact
+entry-cell | int.__lt__ @ A1 | a1_lt_int_exact_exact a1_lt_int_exact_sub a1_lt_int_exact_sub-over a1_lt_int_exact_user a1_lt_int_exact_user-not a1_lt_int_sub_exact a1_lt_int_sub_sub a1_lt_int_sub_sub-over a1_lt_int_sub_user a1_lt_int_sub_user-not a1_lt_bool_exact
+entry-cell | int.__mod__ @ A1 | a1_mod_int_exact_exact a1_mod_int_exact_sub a1_mod_int_exact_sub-over a1_mod_int_exact_user a1_mod_int_exact_user-not a1_mod_int_sub_exact a1_mod_int_sub_sub a1_mod_int_sub_sub-over a1_mod_int_sub_user a1_mod_int_sub_user-not a1_mod_bool_exact
+entry-cell | int.__mul__ @ A1 | a1_mul_int_exact_exact a1_mul_int_exact_sub a1_mul_int_exact_sub-over a1_mul_int_exact_user a1_mul_int_exact_user-not a1_mul_int_sub_exact a1_mul_int_sub_sub a1_mul_int_sub_sub-over a1_mul_int_sub_user a1_mul_int_sub_user-not a1_mul_bool_exact
+entry-cell | int.__ne__ @ A1 | a1_ne_int_exact_exact a1_ne_int_exact_sub a1_ne_int_exact_sub-over a1_ne_int_exact_user a1_ne_int_exact_user-not a1_ne_int_sub_exact a1_ne_int_sub_sub a1_ne_int_sub_sub-over a1_ne_int_sub_user a1_ne_int_sub_user-not a1_ne_bool_exact
+entry-cell | int.__neg__ @ A1 | a1_neg_int_exact a1_neg_int_sub a1_neg_bool_exact
+entry-cell | int.__or__ @ A1 | a1_or_int_exact_exact a1_or_int_exact_sub a1_or_int_exact_sub-over a1_or_int_exact_user a1_or_int_exact_user-not a1_or_int_sub_exact a1_or_int_sub_sub a1_or_int_sub_sub-over a1_or_int_sub_user a1_or_int_sub_user-not a1_ior_int_exact_exact a1_ior_int_exact_sub a1_ior_int_exact_sub-over a1_ior_int_exact_user a1_ior_int_exact_user-not a1_ior_int_sub_exact a1_ior_int_sub_sub a1_ior_int_sub_sub-over a1_ior_int_sub_user a1_ior_int_sub_user-not
+entry-cell | int.__pow__ @ A1 | a1_pow_int_exact_exact a1_pow_int_exact_sub a1_pow_int_exact_sub-over a1_pow_int_exact_user a1_pow_int_exact_user-not a1_pow_int_sub_exact a1_pow_int_sub_sub a1_pow_int_sub_sub-over a1_pow_int_sub_user a1_pow_int_sub_user-not a1_pow_bool_exact
+entry-cell | int.__repr__ @ A1 | a1_repr_int_exact a1_repr_int_sub
+entry-cell | int.__rshift__ @ A1 | a1_rshift_int_exact_exact a1_rshift_int_exact_sub a1_rshift_int_exact_sub-over a1_rshift_int_exact_user a1_rshift_int_exact_user-not a1_rshift_int_sub_exact a1_rshift_int_sub_sub a1_rshift_int_sub_sub-over a1_rshift_int_sub_user a1_rshift_int_sub_user-not a1_rshift_bool_exact
+entry-cell | int.__sub__ @ A1 | a1_sub_int_exact_exact a1_sub_int_exact_sub a1_sub_int_exact_sub-over a1_sub_int_exact_user a1_sub_int_exact_user-not a1_sub_int_sub_exact a1_sub_int_sub_sub a1_sub_int_sub_sub-over a1_sub_int_sub_user a1_sub_int_sub_user-not a1_sub_bool_exact
+entry-cell | int.__truediv__ @ A1 | a1_truediv_int_exact_exact a1_truediv_int_exact_sub a1_truediv_int_exact_sub-over a1_truediv_int_exact_user a1_truediv_int_exact_user-not a1_truediv_int_sub_exact a1_truediv_int_sub_sub a1_truediv_int_sub_sub-over a1_truediv_int_sub_user a1_truediv_int_sub_user-not a1_truediv_bool_exact
+entry-cell | int.__xor__ @ A1 | a1_xor_int_exact_exact a1_xor_int_exact_sub a1_xor_int_exact_sub-over a1_xor_int_exact_user a1_xor_int_exact_user-not a1_xor_int_sub_exact a1_xor_int_sub_sub a1_xor_int_sub_sub-over a1_xor_int_sub_user a1_xor_int_sub_user-not
+entry-cell | iterator.__iter__ @ direct | call_seq_iterator
+entry-cell | iterator.__length_hint__ @ direct | call_seq_iterator
+entry-cell | iterator.__next__ @ direct | call_seq_iterator
+entry-cell | list.__add__ @ A1 | a1_add_list_exact a1_add_list_sub
+entry-cell | list.__class_getitem__ @ direct | call_class_getitem
+entry-cell | list.__contains__ @ A1 | a1_in_list_exact a1_in_list_sub
+entry-cell | list.__delitem__ @ A1 | a1_delitem_list_exact a1_delitem_list_sub
+entry-cell | list.__eq__ @ A1 | a1_eq_list_exact a1_eq_list_sub
+entry-cell | list.__ge__ @ A1 | a1_ge_list_exact a1_ge_list_sub
+entry-cell | list.__getitem__ @ A1 | a1_getitem_list_exact a1_getitem_list_sub a1_slice_list_exact a1_slice_list_sub
+entry-cell | list.__iadd__ @ A1 | a1_iadd_list_exact
+entry-cell | list.__iter__ @ A1 | a1_unpack_list_exact a1_unpack_list_sub a1_unpack_ex_list_exact a1_unpack_ex_list_sub a1_star_list_list_sub a1_star_set_list_exact a1_star_set_list_sub a1_star_args_list_sub a1_for_list_exact a1_for_list_sub a1_listcomp_list_exact a1_listcomp_list_sub a1_iter_next_list_exact a1_iter_next_list_sub a1_list_of_list_sub a1_tuple_of_list_sub a1_sorted_list_sub a1_sum_list_exact a1_sum_list_sub a1_max_list_exact a1_max_list_sub a1_any_list_exact a1_any_list_sub a1_set_of_list_exact a1_set_of_list_sub
+entry-cell | list.__len__ @ A1 | a1_not_list_exact a1_not_list_sub a1_truthy_list_exact a1_truthy_list_sub a1_len_list_exact a1_len_list_sub a1_bool_list_exact a1_bool_list_sub
+entry-cell | list.__lt__ @ A1 | a1_lt_list_exact a1_lt_list_sub
+entry-cell | list.__mul__ @ A1 | a1_mul_list_exact a1_mul_list_sub
+entry-cell | list.__ne__ @ A1 | a1_ne_list_exact a1_ne_list_sub
+entry-cell | list.__repr__ @ A1 | a1_repr_list_exact a1_repr_list_sub
+entry-cell | list.__setitem__ @ A1 | a1_setitem_list_exact a1_setitem_list_sub
+entry-cell | object.__init_subclass__ @ direct | call_init_subclass
+entry-cell | object.__str__ @ A1 | a1_str_int_exact a1_str_int_sub a1_str_float_exact a1_str_float_sub a1_str_tuple_exact a1_str_tuple_sub a1_str_list_exact a1_str_list_sub a1_str_dict_exact a1_str_dict_sub a1_str_bool_exact a1_str_range_exact a1_print_int_exact a1_print_int_sub a1_print_float_exact a1_print_float_sub a1_print_tuple_exact a1_print_tuple_sub a1_print_list_exact a1_print_list_sub a1_print_dict_exact a1_print_dict_sub a1_print_bool_exact a1_print_range_exact
+entry-cell | property.__set_name__ @ direct | call_property_set_name
+entry-cell | range.__bool__ @ A1 | a1_not_range_exact a1_truthy_range_exact a1_bool_range_exact
+entry-cell | range.__contains__ @ A1 | a1_in_range_exact
+entry-cell | range.__eq__ @ A1 | a1_eq_range_exact
+entry-cell | range.__getitem__ @ A1 | a1_getitem_range_exact a1_slice_range_exact
+entry-cell | range.__iter__ @ A1 | a1_unpack_ex_range_exact a1_star_list_range_exact a1_for_range_exact a1_iter_next_range_exact a1_list_of_range_exact a1_tuple_of_range_exact a1_sum_range_exact a1_max_range_exact
+entry-cell | range.__len__ @ A1 | a1_len_range_exact
+entry-cell | range.__ne__ @ A1 | a1_ne_range_exact
+entry-cell | range.__repr__ @ A1 | a1_repr_range_exact
+entry-cell | set.__and__ @ A1 | a1_and_set_exact_exact a1_and_set_exact_sub a1_and_set_exact_sub-over a1_and_set_exact_user a1_and_set_exact_user-not a1_and_set_sub_exact a1_and_set_sub_sub a1_and_set_sub_sub-over a1_and_set_sub_user a1_and_set_sub_user-not
+entry-cell | set.__class_getitem__ @ direct | call_class_getitem
+entry-cell | set.__contains__ @ A1 | a1_in_set_exact a1_in_set_sub
+entry-cell | set.__eq__ @ A1 | a1_eq_set_exact_exact a1_eq_set_exact_sub a1_eq_set_exact_sub-over a1_eq_set_exact_user a1_eq_set_exact_user-not a1_eq_set_sub_exact a1_eq_set_sub_sub a1_eq_set_sub_sub-over a1_eq_set_sub_user a1_eq_set_sub_user-not
+entry-cell | set.__ge__ @ A1 | a1_ge_set_exact_exact a1_ge_set_exact_sub a1_ge_set_exact_sub-over a1_ge_set_exact_user a1_ge_set_exact_user-not a1_ge_set_sub_exact a1_ge_set_sub_sub a1_ge_set_sub_sub-over a1_ge_set_sub_user a1_ge_set_sub_user-not
+entry-cell | set.__ior__ @ A1 | a1_ior_set_exact_exact a1_ior_set_exact_sub a1_ior_set_exact_sub-over a1_ior_set_exact_user a1_ior_set_exact_user-not a1_ior_set_sub_user a1_ior_set_sub_user-not
+entry-cell | set.__iter__ @ A1 | a1_star_set_set_exact a1_star_set_set_sub a1_sorted_set_exact a1_sum_set_exact a1_set_of_set_exact a1_set_of_set_sub
+entry-cell | set.__len__ @ A1 | a1_not_set_exact a1_not_set_sub a1_truthy_set_exact a1_truthy_set_sub a1_len_set_exact a1_len_set_sub a1_bool_set_exact a1_bool_set_sub
+entry-cell | set.__lt__ @ A1 | a1_lt_set_exact_exact a1_lt_set_exact_sub a1_lt_set_exact_sub-over a1_lt_set_exact_user a1_lt_set_exact_user-not a1_lt_set_sub_exact a1_lt_set_sub_sub a1_lt_set_sub_sub-over a1_lt_set_sub_user a1_lt_set_sub_user-not
+entry-cell | set.__ne__ @ A1 | a1_ne_set_exact_exact a1_ne_set_exact_sub a1_ne_set_exact_sub-over a1_ne_set_exact_user a1_ne_set_exact_user-not a1_ne_set_sub_exact a1_ne_set_sub_sub a1_ne_set_sub_sub-over a1_ne_set_sub_user a1_ne_set_sub_user-not
+entry-cell | set.__or__ @ A1 | a1_or_set_exact_exact a1_or_set_exact_sub a1_or_set_exact_sub-over a1_or_set_exact_user a1_or_set_exact_user-not a1_or_set_sub_exact a1_or_set_sub_sub a1_or_set_sub_sub-over a1_or_set_sub_user a1_or_set_sub_user-not
+entry-cell | set.__sub__ @ A1 | a1_sub_set_exact_exact a1_sub_set_exact_sub a1_sub_set_exact_sub-over a1_sub_set_exact_user a1_sub_set_exact_user-not a1_sub_set_sub_exact a1_sub_set_sub_sub a1_sub_set_sub_sub-over a1_sub_set_sub_user a1_sub_set_sub_user-not
+entry-cell | set.__xor__ @ A1 | a1_xor_set_exact_exact a1_xor_set_exact_sub a1_xor_set_exact_sub-over a1_xor_set_exact_user a1_xor_set_exact_user-not a1_xor_set_sub_exact a1_xor_set_sub_sub a1_xor_set_sub_sub-over a1_xor_set_sub_user a1_xor_set_sub_user-not
+entry-cell | str.__add__ @ A1 | a1_add_str_exact_exact a1_add_str_exact_sub a1_add_str_exact_sub-over a1_add_str_exact_user a1_add_str_exact_user-not a1_add_str_sub_exact a1_add_str_sub_sub a1_add_str_sub_sub-over a1_add_str_sub_user a1_add_str_sub_user-not a1_iadd_str_exact_exact a1_iadd_str_exact_sub a1_iadd_str_exact_sub-over a1_iadd_str_exact_user a1_iadd_str_exact_user-not a1_iadd_str_sub_exact a1_iadd_str_sub_sub a1_iadd_str_sub_sub-over a1_iadd_str_sub_user a1_iadd_str_sub_user-not
+entry-cell | str.__contains__ @ A1 | a1_str_in_str_exact a1_str_in_str_sub
+entry-cell | str.__eq__ @ A1 | a1_eq_str_exact_exact a1_eq_str_exact_sub a1_eq_str_exact_sub-over a1_eq_str_exact_user a1_eq_str_exact_user-not a1_eq_str_sub_exact a1_eq_str_sub_sub a1_eq_str_sub_sub-over a1_eq_str_sub_user a1_eq_str_sub_user-not
+entry-cell | str.__format__ @ A1 | a1_fstring_str_sub
+entry-cell | str.__ge__ @ A1 | a1_ge_str_exact_exact a1_ge_str_exact_sub a1_ge_str_exact_sub-over a1_ge_str_exact_user a1_ge_str_exact_user-not a1_ge_str_sub_exact a1_ge_str_sub_sub a1_ge_str_sub_sub-over a1_ge_str_sub_user a1_ge_str_sub_user-not
+entry-cell | str.__getitem__ @ A1 | a1_getitem_str_exact a1_getitem_str_sub a1_slice_str_exact a1_slice_str_sub
+entry-cell | str.__iter__ @ A1 | a1_unpack_str_exact a1_unpack_str_sub a1_unpack_ex_str_exact a1_unpack_ex_str_sub a1_star_list_str_exact a1_star_list_str_sub a1_star_args_str_exact a1_star_args_str_sub a1_for_str_exact a1_for_str_sub a1_listcomp_str_exact a1_listcomp_str_sub a1_iter_next_str_exact a1_iter_next_str_sub a1_list_of_str_exact a1_list_of_str_sub a1_tuple_of_str_exact a1_tuple_of_str_sub a1_sorted_str_exact a1_sorted_str_sub a1_max_str_exact a1_max_str_sub a1_any_str_exact a1_any_str_sub a1_join_str_exact a1_join_str_sub
+entry-cell | str.__len__ @ A1 | a1_not_str_exact a1_not_str_sub a1_truthy_str_exact a1_truthy_str_sub a1_len_str_exact a1_len_str_sub a1_bool_str_exact a1_bool_str_sub
+entry-cell | str.__lt__ @ A1 | a1_lt_str_exact_exact a1_lt_str_exact_sub a1_lt_str_exact_sub-over a1_lt_str_exact_user a1_lt_str_exact_user-not a1_lt_str_sub_exact a1_lt_str_sub_sub a1_lt_str_sub_sub-over a1_lt_str_sub_user a1_lt_str_sub_user-not
+entry-cell | str.__mod__ @ A1 | a1_mod_str_exact_exact a1_mod_str_exact_sub a1_mod_str_exact_sub-over a1_mod_str_exact_user a1_mod_str_exact_user-not
+entry-cell | str.__mul__ @ A1 | a1_mul_str_exact_exact a1_mul_str_exact_sub a1_mul_str_exact_sub-over a1_mul_str_exact_user a1_mul_str_exact_user-not a1_mul_str_sub_exact a1_mul_str_sub_sub a1_mul_str_sub_sub-over a1_mul_str_sub_user a1_mul_str_sub_user-not
+entry-cell | str.__ne__ @ A1 | a1_ne_str_exact_exact a1_ne_str_exact_sub a1_ne_str_exact_sub-over a1_ne_str_exact_user a1_ne_str_exact_user-not a1_ne_str_sub_exact a1_ne_str_sub_sub a1_ne_str_sub_sub-over a1_ne_str_sub_user a1_ne_str_sub_user-not
+entry-cell | str.__repr__ @ A1 | a1_repr_str_exact a1_repr_str_sub
+entry-cell | str.__str__ @ A1 | a1_str_str_sub a1_print_str_sub
+entry-cell | tuple.__add__ @ A1 | a1_add_tuple_exact a1_add_tuple_sub a1_iadd_tuple_exact a1_iadd_tuple_sub
+entry-cell | tuple.__class_getitem__ @ direct | call_class_getitem
+entry-cell | tuple.__contains__ @ A1 | a1_in_tuple_exact a1_in_tuple_sub
+entry-cell | tuple.__eq__ @ A1 | a1_eq_tuple_exact a1_eq_tuple_sub
+entry-cell | tuple.__ge__ @ A1 | a1_ge_tuple_exact a1_ge_tuple_sub
+entry-cell | tuple.__getitem__ @ A1 | a1_getitem_tuple_exact a1_getitem_tuple_sub a1_slice_tuple_exact a1_slice_tuple_sub
+entry-cell | tuple.__hash__ @ A1 | a1_hash_tuple_exact a1_hash_tuple_sub
+entry-cell | tuple.__iter__ @ A1 | a1_unpack_tuple_exact a1_unpack_tuple_sub a1_unpack_ex_tuple_exact a1_unpack_ex_tuple_sub a1_star_list_tuple_sub a1_star_set_tuple_exact a1_star_set_tuple_sub a1_star_args_tuple_sub a1_for_tuple_exact a1_for_tuple_sub a1_listcomp_tuple_exact a1_listcomp_tuple_sub a1_iter_next_tuple_exact a1_iter_next_tuple_sub a1_list_of_tuple_sub a1_sorted_tuple_sub a1_sum_tuple_exact a1_sum_tuple_sub a1_max_tuple_exact a1_max_tuple_sub a1_any_tuple_exact a1_any_tuple_sub a1_set_of_tuple_exact a1_set_of_tuple_sub
+entry-cell | tuple.__len__ @ A1 | a1_not_tuple_exact a1_not_tuple_sub a1_truthy_tuple_exact a1_truthy_tuple_sub a1_len_tuple_exact a1_len_tuple_sub a1_bool_tuple_exact a1_bool_tuple_sub
+entry-cell | tuple.__lt__ @ A1 | a1_lt_tuple_exact a1_lt_tuple_sub
+entry-cell | tuple.__mul__ @ A1 | a1_mul_tuple_exact a1_mul_tuple_sub
+entry-cell | tuple.__ne__ @ A1 | a1_ne_tuple_exact a1_ne_tuple_sub
+entry-cell | tuple.__repr__ @ A1 | a1_repr_tuple_exact a1_repr_tuple_sub
+entry-cell | type.__repr__ @ direct | call_type_repr
+entry-cell | types.GenericAlias.__call__ @ natives | tf_natives_c_types
+entry-cell | types.GenericAlias.__eq__ @ natives | tf_natives_c_types
+entry-cell | types.GenericAlias.__ge__ @ natives | tf_natives_c_types
+entry-cell | types.GenericAlias.__getattribute__ @ natives | tf_natives_c_types
+entry-cell | types.GenericAlias.__gt__ @ natives | tf_natives_c_types
+entry-cell | types.GenericAlias.__instancecheck__ @ natives | tf_natives_c_types
+entry-cell | types.GenericAlias.__le__ @ natives | tf_natives_c_types
+entry-cell | types.GenericAlias.__lt__ @ natives | tf_natives_c_types
+entry-cell | types.GenericAlias.__mro_entries__ @ natives | tf_natives_c_types
+entry-cell | types.GenericAlias.__ne__ @ natives | tf_natives_c_types
+entry-cell | types.GenericAlias.__or__ @ natives | tf_natives_c_types
+entry-cell | types.GenericAlias.__repr__ @ natives | tf_natives_c_types
+entry-cell | types.GenericAlias.__ror__ @ natives | tf_natives_c_types
+entry-cell | types.GenericAlias.__subclasscheck__ @ natives | tf_natives_c_types
+entry-cell | types.UnionType.__eq__ @ natives | tf_natives_c_types
+entry-cell | types.UnionType.__ge__ @ natives | tf_natives_c_types
+entry-cell | types.UnionType.__getattribute__ @ natives | tf_natives_c_types
+entry-cell | types.UnionType.__gt__ @ natives | tf_natives_c_types
+entry-cell | types.UnionType.__le__ @ natives | tf_natives_c_types
+entry-cell | types.UnionType.__lt__ @ natives | tf_natives_c_types
+entry-cell | types.UnionType.__ne__ @ natives | tf_natives_c_types
+entry-cell | types.UnionType.__or__ @ natives | tf_natives_c_types
+entry-cell | types.UnionType.__repr__ @ natives | tf_natives_c_types
+entry-cell | types.UnionType.__ror__ @ natives | tf_natives_c_types
+entry-cell | typing.Any @ natives | tf_natives_alias_call_caught tf_natives_any_new_only tf_natives_private_names
+entry-cell | typing.Any @ plain | t_any t_any_isinstance
+entry-cell | typing.Dict @ A5 | tf_A5_alias_cache_lru tf_A5_identity
+entry-cell | typing.Dict @ natives | tf_natives_sga
+entry-cell | typing.Dict @ plain | t_aliases t_alias_attributes
+entry-cell | typing.ForwardRef @ natives | tf_natives_forward_ref_in_alias
+entry-cell | typing.List @ A5 | tf_A5_alias_cache_eviction tf_A5_alias_cache_lru tf_A5_identity
+entry-cell | typing.List @ natives | tf_natives_alias_call_caught tf_natives_forward_ref_in_alias tf_natives_ga_getattr_ok tf_natives_ga_subclasscheck tf_natives_private_names tf_natives_setattr_fwd tf_natives_sga
+entry-cell | typing.List @ plain | t_aliases t_alias_call t_alias_isinstance
+entry-cell | typing.NamedTuple @ A1 | t_namedtuple_sub_fields tf_A1_sub_over_fields
+entry-cell | typing.NamedTuple @ A2 | t_namedtuple_field_eq_reenters tf_A2_nt_eq_logs
+entry-cell | typing.NamedTuple @ A4 | tf_A4_nt_repr_raises
+entry-cell | typing.NamedTuple @ natives | tf_natives_c_types tf_natives_private_names tf_natives_tg_del tf_natives_tg_set
+entry-cell | typing.NamedTuple @ plain | t_namedtuple t_namedtuple_errors t_namedtuple_other_base
+entry-cell | typing.NamedTupleMeta @ natives | tf_natives_private_names
+entry-cell | typing.NotRequired @ plain | t_required_forms t_typeddict_inherit
+entry-cell | typing.Optional @ A5 | tf_A5_alias_cache_lru
+entry-cell | typing.Optional @ natives | tf_natives_forward_ref_in_alias tf_natives_private_names tf_natives_sf_errors_ok tf_natives_sf_or tf_natives_sf_repr_or
+entry-cell | typing.Optional @ plain | t_optional
+entry-cell | typing.Required @ plain | t_required_forms t_typeddict_total_false
+entry-cell | typing.Set @ A5 | tf_A5_alias_cache_lru
+entry-cell | typing.Set @ plain | t_aliases
+entry-cell | typing.TYPE_CHECKING @ plain | t_type_checking
+entry-cell | typing.Tuple @ A5 | tf_A5_alias_cache_lru
+entry-cell | typing.Tuple @ natives | tf_natives_private_names tf_natives_sga
+entry-cell | typing.Tuple @ plain | t_aliases
+entry-cell | typing.TypeGuard @ plain | t_required_forms
+entry-cell | typing.TypedDict @ A1 | t_typeddict_sub_values tf_A1_sub_over_fields
+entry-cell | typing.TypedDict @ natives | tf_natives_private_names tf_natives_td_misc
+entry-cell | typing.TypedDict @ plain | t_typeddict t_typeddict_total_false t_typeddict_inherit t_typeddict_isinstance
+entry-cell | typing.Union @ A5 | tf_A5_alias_cache_lru tf_A5_identity
+entry-cell | typing.Union @ natives | tf_natives_ga_subclasscheck tf_natives_private_names tf_natives_sf_errors_ok tf_natives_sf_mro_entries tf_natives_sf_or tf_natives_sf_repr_or
+entry-cell | typing.Union @ plain | t_optional t_union_ops t_union_isinstance
+entry-cell | typing._AnyMeta @ natives | tf_natives_private_names
+entry-cell | typing._BaseGenericAlias @ natives | tf_natives_private_names
+entry-cell | typing._Final @ natives | tf_natives_private_names
+entry-cell | typing._GenericAlias @ natives | tf_natives_private_names
+entry-cell | typing._NamedTuple @ natives | tf_natives_private_names
+entry-cell | typing._NotIterable @ natives | tf_natives_private_names
+entry-cell | typing._SpecialForm @ natives | tf_natives_private_names
+entry-cell | typing._SpecialGenericAlias @ natives | tf_natives_private_names
+entry-cell | typing._TupleType @ natives | tf_natives_private_names
+entry-cell | typing._TypedDict @ natives | tf_natives_private_names
+entry-cell | typing._TypedDictMeta @ natives | tf_natives_private_names
+entry-cell | typing._UnionGenericAlias @ natives | tf_natives_private_names
+entry-cell | typing.__name__ @ plain | t_module_names
+entry-cell | typing._namedtuple_mro_entries @ natives | tf_natives_private_names
+entry-cell | typing._overload_dummy @ natives | tf_natives_private_names
+entry-cell | typing.cast @ A1 | t_cast_kinds
+entry-cell | typing.overload @ natives | tf_natives_overload
+declared | ArithmeticError.__init__ @ direct
+declared | ArithmeticError.__new__ @ direct
+declared | AssertionError.__init__ @ direct
+declared | AssertionError.__new__ @ direct
+declared | AttributeError.__init__ @ direct
+declared | AttributeError.__str__ @ direct
+declared | BaseException.__getattribute__ @ direct
+declared | BaseException.__init__ @ direct
+declared | BaseException.__new__ @ direct
+declared | BaseException.__repr__ @ direct
+declared | BaseException.__str__ @ direct
+declared | BaseException.add_note @ direct
+declared | BaseException.with_traceback @ direct
+declared | BaseExceptionGroup.__init__ @ direct
+declared | BaseExceptionGroup.__new__ @ direct
+declared | BaseExceptionGroup.__str__ @ direct
+declared | BaseExceptionGroup.derive @ direct
+declared | BaseExceptionGroup.split @ direct
+declared | BaseExceptionGroup.subgroup @ direct
+declared | BlockingIOError.__init__ @ direct
+declared | BrokenPipeError.__init__ @ direct
+declared | BufferError.__init__ @ direct
+declared | BufferError.__new__ @ direct
+declared | BytesWarning.__init__ @ direct
+declared | BytesWarning.__new__ @ direct
+declared | ChildProcessError.__init__ @ direct
+declared | ConnectionAbortedError.__init__ @ direct
+declared | ConnectionError.__init__ @ direct
+declared | ConnectionRefusedError.__init__ @ direct
+declared | ConnectionResetError.__init__ @ direct
+declared | DeprecationWarning.__init__ @ direct
+declared | DeprecationWarning.__new__ @ direct
+declared | EOFError.__init__ @ direct
+declared | EOFError.__new__ @ direct
+declared | EncodingWarning.__init__ @ direct
+declared | EncodingWarning.__new__ @ direct
+declared | Exception.__init__ @ direct
+declared | Exception.__new__ @ direct
+declared | FileExistsError.__init__ @ direct
+declared | FileNotFoundError.__init__ @ direct
+declared | FloatingPointError.__init__ @ direct
+declared | FloatingPointError.__new__ @ direct
+declared | FutureWarning.__init__ @ direct
+declared | FutureWarning.__new__ @ direct
+declared | GeneratorExit.__init__ @ direct
+declared | GeneratorExit.__new__ @ direct
+declared | ImportError.__init__ @ direct
+declared | ImportError.__str__ @ direct
+declared | ImportWarning.__init__ @ direct
+declared | ImportWarning.__new__ @ direct
+declared | IndentationError.__init__ @ direct
+declared | IndexError.__init__ @ direct
+declared | IndexError.__new__ @ direct
+declared | InterruptedError.__init__ @ direct
+declared | IsADirectoryError.__init__ @ direct
+declared | KeyError.__init__ @ direct
+declared | KeyError.__str__ @ direct
+declared | KeyboardInterrupt.__init__ @ direct
+declared | KeyboardInterrupt.__new__ @ direct
+declared | LookupError.__init__ @ direct
+declared | LookupError.__new__ @ direct
+declared | MemoryError.__init__ @ direct
+declared | MemoryError.__new__ @ direct
+declared | ModuleNotFoundError.__init__ @ direct
+declared | NameError.__init__ @ direct
+declared | NameError.__str__ @ direct
+declared | NoneType.__repr__ @ direct
+declared | NotADirectoryError.__init__ @ direct
+declared | NotImplementedError.__init__ @ direct
+declared | NotImplementedError.__new__ @ direct
+declared | NotImplementedType.__repr__ @ direct
+declared | OSError.__init__ @ direct
+declared | OSError.__new__ @ direct
+declared | OSError.__str__ @ direct
+declared | OverflowError.__init__ @ direct
+declared | OverflowError.__new__ @ direct
+declared | PendingDeprecationWarning.__init__ @ direct
+declared | PendingDeprecationWarning.__new__ @ direct
+declared | PermissionError.__init__ @ direct
+declared | ProcessLookupError.__init__ @ direct
+declared | RecursionError.__init__ @ direct
+declared | RecursionError.__new__ @ direct
+declared | ReferenceError.__init__ @ direct
+declared | ReferenceError.__new__ @ direct
+declared | ResourceWarning.__init__ @ direct
+declared | ResourceWarning.__new__ @ direct
+declared | RuntimeError.__init__ @ direct
+declared | RuntimeError.__new__ @ direct
+declared | RuntimeWarning.__init__ @ direct
+declared | RuntimeWarning.__new__ @ direct
+declared | StopAsyncIteration.__init__ @ direct
+declared | StopAsyncIteration.__new__ @ direct
+declared | StopIteration.__init__ @ direct
+declared | SyntaxError.__init__ @ direct
+declared | SyntaxWarning.__init__ @ direct
+declared | SyntaxWarning.__new__ @ direct
+declared | SystemError.__init__ @ direct
+declared | SystemError.__new__ @ direct
+declared | SystemExit.__init__ @ direct
+declared | TabError.__init__ @ direct
+declared | TimeoutError.__init__ @ direct
+declared | TypeError.__init__ @ direct
+declared | TypeError.__new__ @ direct
+declared | UnboundLocalError.__init__ @ direct
+declared | UnicodeDecodeError.__init__ @ direct
+declared | UnicodeDecodeError.__new__ @ direct
+declared | UnicodeDecodeError.__str__ @ direct
+declared | UnicodeEncodeError.__init__ @ direct
+declared | UnicodeEncodeError.__new__ @ direct
+declared | UnicodeEncodeError.__str__ @ direct
+declared | UnicodeError.__init__ @ direct
+declared | UnicodeError.__new__ @ direct
+declared | UnicodeTranslateError.__init__ @ direct
+declared | UnicodeTranslateError.__new__ @ direct
+declared | UnicodeWarning.__init__ @ direct
+declared | UnicodeWarning.__new__ @ direct
+declared | UserWarning.__init__ @ direct
+declared | UserWarning.__new__ @ direct
+declared | ValueError.__init__ @ direct
+declared | ValueError.__new__ @ direct
+declared | Warning.__init__ @ direct
+declared | Warning.__new__ @ direct
+declared | ZeroDivisionError.__init__ @ direct
+declared | ZeroDivisionError.__new__ @ direct
+declared | __build_class__ @ direct
+declared | abs @ A1
+declared | all @ direct
+declared | any @ A1
+declared | bool.__and__ @ A1
+declared | bool.__and__ @ direct
+declared | bool.__invert__ @ direct
+declared | bool.__new__ @ A1
+declared | bool.__or__ @ A1
+declared | bool.__or__ @ direct
+declared | bool.__rand__ @ direct
+declared | bool.__repr__ @ A1
+declared | bool.__repr__ @ direct
+declared | bool.__ror__ @ direct
+declared | bool.__rxor__ @ direct
+declared | bool.__xor__ @ A1
+declared | bool.__xor__ @ direct
+declared | bytes.__add__ @ A1
+declared | bytes.__add__ @ direct
+declared | bytes.__bytes__ @ direct
+declared | bytes.__contains__ @ direct
+declared | bytes.__eq__ @ A1
+declared | bytes.__eq__ @ direct
+declared | bytes.__ge__ @ direct
+declared | bytes.__getattribute__ @ direct
+declared | bytes.__getitem__ @ A1
+declared | bytes.__getitem__ @ direct
+declared | bytes.__gt__ @ direct
+declared | bytes.__hash__ @ direct
+declared | bytes.__iter__ @ A1
+declared | bytes.__iter__ @ direct
+declared | bytes.__le__ @ direct
+declared | bytes.__len__ @ A1
+declared | bytes.__len__ @ direct
+declared | bytes.__lt__ @ A1
+declared | bytes.__lt__ @ direct
+declared | bytes.__mod__ @ A1
+declared | bytes.__mod__ @ direct
+declared | bytes.__mul__ @ A1
+declared | bytes.__mul__ @ direct
+declared | bytes.__ne__ @ A1
+declared | bytes.__ne__ @ direct
+declared | bytes.__new__ @ direct
+declared | bytes.__repr__ @ A1
+declared | bytes.__repr__ @ direct
+declared | bytes.__rmod__ @ direct
+declared | bytes.__rmul__ @ direct
+declared | bytes.__str__ @ A1
+declared | bytes.__str__ @ direct
+declared | bytes.capitalize @ direct
+declared | bytes.center @ direct
+declared | bytes.count @ direct
+declared | bytes.decode @ direct
+declared | bytes.endswith @ direct
+declared | bytes.expandtabs @ direct
+declared | bytes.find @ direct
+declared | bytes.fromhex @ direct
+declared | bytes.hex @ direct
+declared | bytes.index @ direct
+declared | bytes.isalnum @ direct
+declared | bytes.isalpha @ direct
+declared | bytes.isascii @ direct
+declared | bytes.isdigit @ direct
+declared | bytes.islower @ direct
+declared | bytes.isspace @ direct
+declared | bytes.istitle @ direct
+declared | bytes.isupper @ direct
+declared | bytes.join @ direct
+declared | bytes.ljust @ direct
+declared | bytes.lower @ direct
+declared | bytes.lstrip @ direct
+declared | bytes.maketrans @ direct
+declared | bytes.partition @ direct
+declared | bytes.removeprefix @ direct
+declared | bytes.removesuffix @ direct
+declared | bytes.replace @ direct
+declared | bytes.rfind @ direct
+declared | bytes.rindex @ direct
+declared | bytes.rjust @ direct
+declared | bytes.rpartition @ direct
+declared | bytes.rsplit @ direct
+declared | bytes.rstrip @ direct
+declared | bytes.split @ direct
+declared | bytes.splitlines @ direct
+declared | bytes.startswith @ direct
+declared | bytes.strip @ direct
+declared | bytes.swapcase @ direct
+declared | bytes.title @ direct
+declared | bytes.translate @ direct
+declared | bytes.upper @ direct
+declared | bytes.zfill @ direct
+declared | bytes_iterator.__iter__ @ direct
+declared | bytes_iterator.__length_hint__ @ direct
+declared | bytes_iterator.__next__ @ direct
+declared | callable @ direct
+declared | callable_iterator.__iter__ @ direct
+declared | callable_iterator.__next__ @ direct
+declared | classmethod.__get__ @ direct
+declared | classmethod.__repr__ @ direct
+declared | collections._tuplegetter.__delete__ @ natives
+declared | collections._tuplegetter.__get__ @ natives
+declared | collections._tuplegetter.__repr__ @ natives
+declared | collections._tuplegetter.__set__ @ natives
+declared | dataclasses.Field @ plain
+declared | dataclasses.FrozenInstanceError @ plain
+declared | dataclasses.MISSING @ natives
+declared | dataclasses.MISSING @ plain
+declared | dataclasses._DataclassParams @ natives
+declared | dataclasses._FIELD @ natives
+declared | dataclasses._FIELDS @ natives
+declared | dataclasses._FIELD_BASE @ natives
+declared | dataclasses._FIELD_CLASSVAR @ natives
+declared | dataclasses._FIELD_INITVAR @ natives
+declared | dataclasses._HAS_DEFAULT_FACTORY @ natives
+declared | dataclasses._HAS_DEFAULT_FACTORY_CLASS @ natives
+declared | dataclasses._MISSING_TYPE @ natives
+declared | dataclasses._PARAMS @ natives
+declared | dataclasses._POST_INIT_NAME @ natives
+declared | dataclasses.__name__ @ plain
+declared | dataclasses.dataclass @ A1
+declared | dataclasses.dataclass @ A2
+declared | dataclasses.dataclass @ A3
+declared | dataclasses.dataclass @ A4
+declared | dataclasses.dataclass @ natives
+declared | dataclasses.dataclass @ options
+declared | dataclasses.dataclass @ plain
+declared | dataclasses.field @ A2
+declared | dataclasses.field @ A3
+declared | dataclasses.field @ A4
+declared | dataclasses.field @ natives
+declared | dataclasses.field @ options
+declared | dataclasses.field @ plain
+declared | dataclasses.replace @ plain
+declared | dict.__class_getitem__ @ direct
+declared | dict.__contains__ @ A1
+declared | dict.__contains__ @ direct
+declared | dict.__delitem__ @ direct
+declared | dict.__eq__ @ A1
+declared | dict.__eq__ @ direct
+declared | dict.__ge__ @ direct
+declared | dict.__getattribute__ @ direct
+declared | dict.__getitem__ @ A1
+declared | dict.__getitem__ @ direct
+declared | dict.__gt__ @ direct
+declared | dict.__ior__ @ A1
+declared | dict.__ior__ @ direct
+declared | dict.__iter__ @ A1
+declared | dict.__iter__ @ direct
+declared | dict.__le__ @ direct
+declared | dict.__len__ @ A1
+declared | dict.__len__ @ direct
+declared | dict.__lt__ @ direct
+declared | dict.__ne__ @ A1
+declared | dict.__ne__ @ direct
+declared | dict.__new__ @ A1
+declared | dict.__or__ @ A1
+declared | dict.__or__ @ direct
+declared | dict.__repr__ @ A1
+declared | dict.__repr__ @ direct
+declared | dict.__reversed__ @ direct
+declared | dict.__ror__ @ direct
+declared | dict.__setitem__ @ A1
+declared | dict.__setitem__ @ direct
+declared | dict.clear @ A1
+declared | dict.clear @ direct
+declared | dict.copy @ A1
+declared | dict.copy @ direct
+declared | dict.fromkeys @ direct
+declared | dict.get @ A1
+declared | dict.get @ direct
+declared | dict.items @ A1
+declared | dict.items @ direct
+declared | dict.keys @ A1
+declared | dict.keys @ direct
+declared | dict.pop @ A1
+declared | dict.pop @ direct
+declared | dict.popitem @ A1
+declared | dict.popitem @ direct
+declared | dict.setdefault @ A1
+declared | dict.setdefault @ direct
+declared | dict.update @ A1
+declared | dict.update @ direct
+declared | dict.values @ A1
+declared | dict.values @ direct
+declared | dict_itemiterator.__iter__ @ direct
+declared | dict_itemiterator.__length_hint__ @ direct
+declared | dict_itemiterator.__next__ @ direct
+declared | dict_items.__and__ @ direct
+declared | dict_items.__contains__ @ direct
+declared | dict_items.__eq__ @ direct
+declared | dict_items.__ge__ @ direct
+declared | dict_items.__gt__ @ direct
+declared | dict_items.__iter__ @ direct
+declared | dict_items.__le__ @ direct
+declared | dict_items.__len__ @ direct
+declared | dict_items.__lt__ @ direct
+declared | dict_items.__ne__ @ direct
+declared | dict_items.__or__ @ direct
+declared | dict_items.__rand__ @ direct
+declared | dict_items.__repr__ @ direct
+declared | dict_items.__reversed__ @ direct
+declared | dict_items.__ror__ @ direct
+declared | dict_items.__rsub__ @ direct
+declared | dict_items.__rxor__ @ direct
+declared | dict_items.__sub__ @ direct
+declared | dict_items.__xor__ @ direct
+declared | dict_items.isdisjoint @ direct
+declared | dict_keyiterator.__iter__ @ direct
+declared | dict_keyiterator.__length_hint__ @ direct
+declared | dict_keyiterator.__next__ @ direct
+declared | dict_keys.__and__ @ direct
+declared | dict_keys.__contains__ @ direct
+declared | dict_keys.__eq__ @ direct
+declared | dict_keys.__ge__ @ direct
+declared | dict_keys.__gt__ @ direct
+declared | dict_keys.__iter__ @ direct
+declared | dict_keys.__le__ @ direct
+declared | dict_keys.__len__ @ direct
+declared | dict_keys.__lt__ @ direct
+declared | dict_keys.__ne__ @ direct
+declared | dict_keys.__or__ @ direct
+declared | dict_keys.__rand__ @ direct
+declared | dict_keys.__repr__ @ direct
+declared | dict_keys.__reversed__ @ direct
+declared | dict_keys.__ror__ @ direct
+declared | dict_keys.__rsub__ @ direct
+declared | dict_keys.__rxor__ @ direct
+declared | dict_keys.__sub__ @ direct
+declared | dict_keys.__xor__ @ direct
+declared | dict_keys.isdisjoint @ direct
+declared | dict_reverseitemiterator.__iter__ @ direct
+declared | dict_reverseitemiterator.__length_hint__ @ direct
+declared | dict_reverseitemiterator.__next__ @ direct
+declared | dict_reversekeyiterator.__iter__ @ direct
+declared | dict_reversekeyiterator.__length_hint__ @ direct
+declared | dict_reversekeyiterator.__next__ @ direct
+declared | dict_reversevalueiterator.__iter__ @ direct
+declared | dict_reversevalueiterator.__length_hint__ @ direct
+declared | dict_reversevalueiterator.__next__ @ direct
+declared | dict_valueiterator.__iter__ @ direct
+declared | dict_valueiterator.__length_hint__ @ direct
+declared | dict_valueiterator.__next__ @ direct
+declared | dict_values.__iter__ @ direct
+declared | dict_values.__len__ @ direct
+declared | dict_values.__repr__ @ direct
+declared | dict_values.__reversed__ @ direct
+declared | divmod @ direct
+declared | ellipsis.__repr__ @ direct
+declared | enumerate.__getattribute__ @ direct
+declared | enumerate.__iter__ @ direct
+declared | enumerate.__new__ @ direct
+declared | enumerate.__next__ @ direct
+declared | float.__abs__ @ A1
+declared | float.__abs__ @ direct
+declared | float.__add__ @ A1
+declared | float.__add__ @ direct
+declared | float.__bool__ @ A1
+declared | float.__bool__ @ direct
+declared | float.__ceil__ @ direct
+declared | float.__divmod__ @ direct
+declared | float.__eq__ @ A1
+declared | float.__eq__ @ direct
+declared | float.__float__ @ A1
+declared | float.__float__ @ direct
+declared | float.__floor__ @ direct
+declared | float.__floordiv__ @ A1
+declared | float.__floordiv__ @ direct
+declared | float.__format__ @ A1
+declared | float.__format__ @ direct
+declared | float.__ge__ @ A1
+declared | float.__ge__ @ direct
+declared | float.__getformat__ @ direct
+declared | float.__gt__ @ direct
+declared | float.__hash__ @ A1
+declared | float.__hash__ @ direct
+declared | float.__int__ @ A1
+declared | float.__int__ @ direct
+declared | float.__le__ @ direct
+declared | float.__lt__ @ A1
+declared | float.__lt__ @ direct
+declared | float.__mod__ @ A1
+declared | float.__mod__ @ direct
+declared | float.__mul__ @ A1
+declared | float.__mul__ @ direct
+declared | float.__ne__ @ A1
+declared | float.__ne__ @ direct
+declared | float.__neg__ @ A1
+declared | float.__neg__ @ direct
+declared | float.__new__ @ A1
+declared | float.__pos__ @ direct
+declared | float.__pow__ @ A1
+declared | float.__pow__ @ direct
+declared | float.__radd__ @ direct
+declared | float.__rdivmod__ @ direct
+declared | float.__repr__ @ A1
+declared | float.__repr__ @ direct
+declared | float.__rfloordiv__ @ direct
+declared | float.__rmod__ @ direct
+declared | float.__rmul__ @ direct
+declared | float.__round__ @ direct
+declared | float.__rpow__ @ direct
+declared | float.__rsub__ @ direct
+declared | float.__rtruediv__ @ direct
+declared | float.__sub__ @ A1
+declared | float.__sub__ @ direct
+declared | float.__truediv__ @ A1
+declared | float.__truediv__ @ direct
+declared | float.__trunc__ @ direct
+declared | float.as_integer_ratio @ direct
+declared | float.conjugate @ direct
+declared | float.fromhex @ direct
+declared | float.hex @ direct
+declared | float.is_integer @ direct
+declared | format @ A1
+declared | frozenset.__and__ @ A1
+declared | frozenset.__and__ @ direct
+declared | frozenset.__class_getitem__ @ direct
+declared | frozenset.__contains__ @ A1
+declared | frozenset.__contains__ @ direct
+declared | frozenset.__eq__ @ A1
+declared | frozenset.__eq__ @ direct
+declared | frozenset.__ge__ @ A1
+declared | frozenset.__ge__ @ direct
+declared | frozenset.__gt__ @ direct
+declared | frozenset.__hash__ @ A1
+declared | frozenset.__hash__ @ direct
+declared | frozenset.__iter__ @ A1
+declared | frozenset.__iter__ @ direct
+declared | frozenset.__le__ @ direct
+declared | frozenset.__len__ @ A1
+declared | frozenset.__len__ @ direct
+declared | frozenset.__lt__ @ A1
+declared | frozenset.__lt__ @ direct
+declared | frozenset.__ne__ @ A1
+declared | frozenset.__ne__ @ direct
+declared | frozenset.__or__ @ A1
+declared | frozenset.__or__ @ direct
+declared | frozenset.__rand__ @ direct
+declared | frozenset.__repr__ @ A1
+declared | frozenset.__repr__ @ direct
+declared | frozenset.__ror__ @ direct
+declared | frozenset.__rsub__ @ direct
+declared | frozenset.__rxor__ @ direct
+declared | frozenset.__sub__ @ A1
+declared | frozenset.__sub__ @ direct
+declared | frozenset.__xor__ @ A1
+declared | frozenset.__xor__ @ direct
+declared | frozenset.copy @ A1
+declared | frozenset.copy @ direct
+declared | frozenset.difference @ direct
+declared | frozenset.intersection @ direct
+declared | frozenset.isdisjoint @ direct
+declared | frozenset.issubset @ A1
+declared | frozenset.issubset @ direct
+declared | frozenset.issuperset @ direct
+declared | frozenset.symmetric_difference @ direct
+declared | frozenset.union @ A1
+declared | frozenset.union @ direct
+declared | hash @ A1
+declared | hex @ direct
+declared | int.__abs__ @ A1
+declared | int.__abs__ @ direct
+declared | int.__add__ @ A1
+declared | int.__add__ @ direct
+declared | int.__and__ @ A1
+declared | int.__and__ @ direct
+declared | int.__bool__ @ A1
+declared | int.__bool__ @ direct
+declared | int.__ceil__ @ direct
+declared | int.__divmod__ @ direct
+declared | int.__eq__ @ A1
+declared | int.__eq__ @ direct
+declared | int.__float__ @ A1
+declared | int.__float__ @ direct
+declared | int.__floor__ @ direct
+declared | int.__floordiv__ @ A1
+declared | int.__floordiv__ @ direct
+declared | int.__format__ @ A1
+declared | int.__format__ @ direct
+declared | int.__ge__ @ A1
+declared | int.__ge__ @ direct
+declared | int.__getattribute__ @ direct
+declared | int.__gt__ @ direct
+declared | int.__hash__ @ A1
+declared | int.__hash__ @ direct
+declared | int.__index__ @ direct
+declared | int.__int__ @ A1
+declared | int.__int__ @ direct
+declared | int.__invert__ @ A1
+declared | int.__invert__ @ direct
+declared | int.__le__ @ direct
+declared | int.__lshift__ @ A1
+declared | int.__lshift__ @ direct
+declared | int.__lt__ @ A1
+declared | int.__lt__ @ direct
+declared | int.__mod__ @ A1
+declared | int.__mod__ @ direct
+declared | int.__mul__ @ A1
+declared | int.__mul__ @ direct
+declared | int.__ne__ @ A1
+declared | int.__ne__ @ direct
+declared | int.__neg__ @ A1
+declared | int.__neg__ @ direct
+declared | int.__new__ @ A1
+declared | int.__or__ @ A1
+declared | int.__or__ @ direct
+declared | int.__pos__ @ direct
+declared | int.__pow__ @ A1
+declared | int.__pow__ @ direct
+declared | int.__radd__ @ direct
+declared | int.__rand__ @ direct
+declared | int.__rdivmod__ @ direct
+declared | int.__repr__ @ A1
+declared | int.__repr__ @ direct
+declared | int.__rfloordiv__ @ direct
+declared | int.__rlshift__ @ direct
+declared | int.__rmod__ @ direct
+declared | int.__rmul__ @ direct
+declared | int.__ror__ @ direct
+declared | int.__round__ @ direct
+declared | int.__rpow__ @ direct
+declared | int.__rrshift__ @ direct
+declared | int.__rshift__ @ A1
+declared | int.__rshift__ @ direct
+declared | int.__rsub__ @ direct
+declared | int.__rtruediv__ @ direct
+declared | int.__rxor__ @ direct
+declared | int.__sub__ @ A1
+declared | int.__sub__ @ direct
+declared | int.__truediv__ @ A1
+declared | int.__truediv__ @ direct
+declared | int.__trunc__ @ direct
+declared | int.__xor__ @ A1
+declared | int.__xor__ @ direct
+declared | int.as_integer_ratio @ direct
+declared | int.bit_count @ direct
+declared | int.bit_length @ direct
+declared | int.conjugate @ direct
+declared | int.from_bytes @ direct
+declared | int.is_integer @ direct
+declared | int.to_bytes @ direct
+declared | isinstance @ A1
+declared | issubclass @ direct
+declared | iterator.__iter__ @ direct
+declared | iterator.__length_hint__ @ direct
+declared | iterator.__next__ @ direct
+declared | len @ A1
+declared | list.__add__ @ A1
+declared | list.__add__ @ direct
+declared | list.__class_getitem__ @ direct
+declared | list.__contains__ @ A1
+declared | list.__contains__ @ direct
+declared | list.__delitem__ @ A1
+declared | list.__delitem__ @ direct
+declared | list.__eq__ @ A1
+declared | list.__eq__ @ direct
+declared | list.__ge__ @ A1
+declared | list.__ge__ @ direct
+declared | list.__getattribute__ @ direct
+declared | list.__getitem__ @ A1
+declared | list.__getitem__ @ direct
+declared | list.__gt__ @ direct
+declared | list.__iadd__ @ A1
+declared | list.__iadd__ @ direct
+declared | list.__imul__ @ direct
+declared | list.__iter__ @ A1
+declared | list.__iter__ @ direct
+declared | list.__le__ @ direct
+declared | list.__len__ @ A1
+declared | list.__len__ @ direct
+declared | list.__lt__ @ A1
+declared | list.__lt__ @ direct
+declared | list.__mul__ @ A1
+declared | list.__mul__ @ direct
+declared | list.__ne__ @ A1
+declared | list.__ne__ @ direct
+declared | list.__new__ @ A1
+declared | list.__repr__ @ A1
+declared | list.__repr__ @ direct
+declared | list.__reversed__ @ direct
+declared | list.__rmul__ @ direct
+declared | list.__setitem__ @ A1
+declared | list.__setitem__ @ direct
+declared | list.append @ A1
+declared | list.append @ direct
+declared | list.clear @ A1
+declared | list.clear @ direct
+declared | list.copy @ A1
+declared | list.copy @ direct
+declared | list.count @ A1
+declared | list.count @ direct
+declared | list.extend @ A1
+declared | list.extend @ direct
+declared | list.index @ A1
+declared | list.index @ direct
+declared | list.insert @ A1
+declared | list.insert @ direct
+declared | list.pop @ A1
+declared | list.pop @ direct
+declared | list.remove @ A1
+declared | list.remove @ direct
+declared | list.reverse @ A1
+declared | list.reverse @ direct
+declared | list.sort @ A1
+declared | list.sort @ direct
+declared | list_iterator.__iter__ @ direct
+declared | list_iterator.__length_hint__ @ direct
+declared | list_iterator.__next__ @ direct
+declared | list_reverseiterator.__iter__ @ direct
+declared | list_reverseiterator.__length_hint__ @ direct
+declared | list_reverseiterator.__next__ @ direct
+declared | longrange_iterator.__iter__ @ direct
+declared | longrange_iterator.__length_hint__ @ direct
+declared | longrange_iterator.__next__ @ direct
+declared | max @ A1
+declared | next @ A1
+declared | object.__delattr__ @ direct
+declared | object.__eq__ @ direct
+declared | object.__format__ @ direct
+declared | object.__ge__ @ direct
+declared | object.__getattribute__ @ direct
+declared | object.__gt__ @ direct
+declared | object.__hash__ @ direct
+declared | object.__init_subclass__ @ direct
+declared | object.__le__ @ direct
+declared | object.__lt__ @ direct
+declared | object.__ne__ @ direct
+declared | object.__repr__ @ direct
+declared | object.__setattr__ @ direct
+declared | object.__str__ @ A1
+declared | object.__str__ @ direct
+declared | print @ A1
+declared | property.__delete__ @ direct
+declared | property.__get__ @ direct
+declared | property.__getattribute__ @ direct
+declared | property.__set__ @ direct
+declared | property.__set_name__ @ direct
+declared | property.deleter @ direct
+declared | property.getter @ direct
+declared | property.setter @ direct
+declared | range.__bool__ @ A1
+declared | range.__bool__ @ direct
+declared | range.__contains__ @ A1
+declared | range.__contains__ @ direct
+declared | range.__eq__ @ A1
+declared | range.__eq__ @ direct
+declared | range.__ge__ @ direct
+declared | range.__getattribute__ @ direct
+declared | range.__getitem__ @ A1
+declared | range.__getitem__ @ direct
+declared | range.__gt__ @ direct
+declared | range.__hash__ @ direct
+declared | range.__iter__ @ A1
+declared | range.__iter__ @ direct
+declared | range.__le__ @ direct
+declared | range.__len__ @ A1
+declared | range.__len__ @ direct
+declared | range.__lt__ @ direct
+declared | range.__ne__ @ A1
+declared | range.__ne__ @ direct
+declared | range.__repr__ @ A1
+declared | range.__repr__ @ direct
+declared | range.__reversed__ @ direct
+declared | range.count @ A1
+declared | range.count @ direct
+declared | range.index @ A1
+declared | range.index @ direct
+declared | range_iterator.__iter__ @ direct
+declared | range_iterator.__length_hint__ @ direct
+declared | range_iterator.__next__ @ direct
+declared | repr @ A1
+declared | reversed.__getattribute__ @ direct
+declared | reversed.__iter__ @ direct
+declared | reversed.__length_hint__ @ direct
+declared | reversed.__next__ @ direct
+declared | set.__and__ @ A1
+declared | set.__and__ @ direct
+declared | set.__class_getitem__ @ direct
+declared | set.__contains__ @ A1
+declared | set.__contains__ @ direct
+declared | set.__eq__ @ A1
+declared | set.__eq__ @ direct
+declared | set.__ge__ @ A1
+declared | set.__ge__ @ direct
+declared | set.__getattribute__ @ direct
+declared | set.__gt__ @ direct
+declared | set.__iand__ @ direct
+declared | set.__ior__ @ A1
+declared | set.__ior__ @ direct
+declared | set.__isub__ @ direct
+declared | set.__iter__ @ A1
+declared | set.__iter__ @ direct
+declared | set.__ixor__ @ direct
+declared | set.__le__ @ direct
+declared | set.__len__ @ A1
+declared | set.__len__ @ direct
+declared | set.__lt__ @ A1
+declared | set.__lt__ @ direct
+declared | set.__ne__ @ A1
+declared | set.__ne__ @ direct
+declared | set.__new__ @ A1
+declared | set.__or__ @ A1
+declared | set.__or__ @ direct
+declared | set.__rand__ @ direct
+declared | set.__repr__ @ A1
+declared | set.__repr__ @ direct
+declared | set.__ror__ @ direct
+declared | set.__rsub__ @ direct
+declared | set.__rxor__ @ direct
+declared | set.__sub__ @ A1
+declared | set.__sub__ @ direct
+declared | set.__xor__ @ A1
+declared | set.__xor__ @ direct
+declared | set.add @ A1
+declared | set.add @ direct
+declared | set.clear @ A1
+declared | set.clear @ direct
+declared | set.copy @ A1
+declared | set.copy @ direct
+declared | set.difference @ A1
+declared | set.difference @ direct
+declared | set.difference_update @ A1
+declared | set.difference_update @ direct
+declared | set.discard @ A1
+declared | set.discard @ direct
+declared | set.intersection @ A1
+declared | set.intersection @ direct
+declared | set.intersection_update @ A1
+declared | set.intersection_update @ direct
+declared | set.isdisjoint @ A1
+declared | set.isdisjoint @ direct
+declared | set.issubset @ A1
+declared | set.issubset @ direct
+declared | set.issuperset @ A1
+declared | set.issuperset @ direct
+declared | set.pop @ A1
+declared | set.pop @ direct
+declared | set.remove @ A1
+declared | set.remove @ direct
+declared | set.symmetric_difference @ A1
+declared | set.symmetric_difference @ direct
+declared | set.symmetric_difference_update @ direct
+declared | set.union @ A1
+declared | set.union @ direct
+declared | set.update @ A1
+declared | set.update @ direct
+declared | set_iterator.__iter__ @ direct
+declared | set_iterator.__length_hint__ @ direct
+declared | set_iterator.__next__ @ direct
+declared | setattr @ direct
+declared | slice.__eq__ @ direct
+declared | slice.__ge__ @ direct
+declared | slice.__getattribute__ @ direct
+declared | slice.__gt__ @ direct
+declared | slice.__hash__ @ direct
+declared | slice.__le__ @ direct
+declared | slice.__lt__ @ direct
+declared | slice.__ne__ @ direct
+declared | slice.__repr__ @ direct
+declared | slice.indices @ direct
+declared | sorted @ A1
+declared | staticmethod.__call__ @ direct
+declared | staticmethod.__get__ @ direct
+declared | staticmethod.__repr__ @ direct
+declared | str.__add__ @ A1
+declared | str.__add__ @ direct
+declared | str.__contains__ @ A1
+declared | str.__contains__ @ direct
+declared | str.__eq__ @ A1
+declared | str.__eq__ @ direct
+declared | str.__format__ @ A1
+declared | str.__format__ @ direct
+declared | str.__ge__ @ A1
+declared | str.__ge__ @ direct
+declared | str.__getitem__ @ A1
+declared | str.__getitem__ @ direct
+declared | str.__gt__ @ direct
+declared | str.__hash__ @ direct
+declared | str.__iter__ @ A1
+declared | str.__iter__ @ direct
+declared | str.__le__ @ direct
+declared | str.__len__ @ A1
+declared | str.__len__ @ direct
+declared | str.__lt__ @ A1
+declared | str.__lt__ @ direct
+declared | str.__mod__ @ A1
+declared | str.__mod__ @ direct
+declared | str.__mul__ @ A1
+declared | str.__mul__ @ direct
+declared | str.__ne__ @ A1
+declared | str.__ne__ @ direct
+declared | str.__new__ @ A1
+declared | str.__repr__ @ A1
+declared | str.__repr__ @ direct
+declared | str.__rmod__ @ direct
+declared | str.__rmul__ @ direct
+declared | str.__str__ @ A1
+declared | str.__str__ @ direct
+declared | str.capitalize @ A1
+declared | str.capitalize @ direct
+declared | str.casefold @ A1
+declared | str.casefold @ direct
+declared | str.center @ A1
+declared | str.center @ direct
+declared | str.count @ A1
+declared | str.count @ direct
+declared | str.encode @ A1
+declared | str.encode @ direct
+declared | str.endswith @ A1
+declared | str.endswith @ direct
+declared | str.expandtabs @ A1
+declared | str.expandtabs @ direct
+declared | str.find @ A1
+declared | str.find @ direct
+declared | str.format @ A1
+declared | str.format @ direct
+declared | str.format_map @ direct
+declared | str.index @ A1
+declared | str.index @ direct
+declared | str.isalnum @ direct
+declared | str.isalpha @ A1
+declared | str.isalpha @ direct
+declared | str.isascii @ A1
+declared | str.isascii @ direct
+declared | str.isdecimal @ direct
+declared | str.isdigit @ A1
+declared | str.isdigit @ direct
+declared | str.isidentifier @ A1
+declared | str.isidentifier @ direct
+declared | str.islower @ direct
+declared | str.isnumeric @ direct
+declared | str.isprintable @ direct
+declared | str.isspace @ A1
+declared | str.isspace @ direct
+declared | str.istitle @ direct
+declared | str.isupper @ direct
+declared | str.join @ A1
+declared | str.join @ direct
+declared | str.ljust @ A1
+declared | str.ljust @ direct
+declared | str.lower @ A1
+declared | str.lower @ direct
+declared | str.lstrip @ A1
+declared | str.lstrip @ direct
+declared | str.maketrans @ direct
+declared | str.partition @ A1
+declared | str.partition @ direct
+declared | str.removeprefix @ A1
+declared | str.removeprefix @ direct
+declared | str.removesuffix @ A1
+declared | str.removesuffix @ direct
+declared | str.replace @ A1
+declared | str.replace @ direct
+declared | str.rfind @ A1
+declared | str.rfind @ direct
+declared | str.rindex @ direct
+declared | str.rjust @ A1
+declared | str.rjust @ direct
+declared | str.rpartition @ A1
+declared | str.rpartition @ direct
+declared | str.rsplit @ A1
+declared | str.rsplit @ direct
+declared | str.rstrip @ A1
+declared | str.rstrip @ direct
+declared | str.split @ A1
+declared | str.split @ direct
+declared | str.splitlines @ A1
+declared | str.splitlines @ direct
+declared | str.startswith @ A1
+declared | str.startswith @ direct
+declared | str.strip @ A1
+declared | str.strip @ direct
+declared | str.swapcase @ A1
+declared | str.swapcase @ direct
+declared | str.title @ A1
+declared | str.title @ direct
+declared | str.translate @ A1
+declared | str.translate @ direct
+declared | str.upper @ A1
+declared | str.upper @ direct
+declared | str.zfill @ A1
+declared | str.zfill @ direct
+declared | str_ascii_iterator.__iter__ @ direct
+declared | str_ascii_iterator.__length_hint__ @ direct
+declared | str_ascii_iterator.__next__ @ direct
+declared | str_iterator.__iter__ @ direct
+declared | str_iterator.__length_hint__ @ direct
+declared | str_iterator.__next__ @ direct
+declared | sum @ A1
+declared | super.__get__ @ direct
+declared | super.__getattribute__ @ direct
+declared | super.__repr__ @ direct
+declared | tuple.__add__ @ A1
+declared | tuple.__add__ @ direct
+declared | tuple.__class_getitem__ @ direct
+declared | tuple.__contains__ @ A1
+declared | tuple.__contains__ @ direct
+declared | tuple.__eq__ @ A1
+declared | tuple.__eq__ @ direct
+declared | tuple.__ge__ @ A1
+declared | tuple.__ge__ @ direct
+declared | tuple.__getattribute__ @ direct
+declared | tuple.__getitem__ @ A1
+declared | tuple.__getitem__ @ direct
+declared | tuple.__gt__ @ direct
+declared | tuple.__hash__ @ A1
+declared | tuple.__hash__ @ direct
+declared | tuple.__iter__ @ A1
+declared | tuple.__iter__ @ direct
+declared | tuple.__le__ @ direct
+declared | tuple.__len__ @ A1
+declared | tuple.__len__ @ direct
+declared | tuple.__lt__ @ A1
+declared | tuple.__lt__ @ direct
+declared | tuple.__mul__ @ A1
+declared | tuple.__mul__ @ direct
+declared | tuple.__ne__ @ A1
+declared | tuple.__ne__ @ direct
+declared | tuple.__new__ @ A1
+declared | tuple.__repr__ @ A1
+declared | tuple.__repr__ @ direct
+declared | tuple.__rmul__ @ direct
+declared | tuple.count @ A1
+declared | tuple.count @ direct
+declared | tuple.index @ A1
+declared | tuple.index @ direct
+declared | tuple_iterator.__iter__ @ direct
+declared | tuple_iterator.__length_hint__ @ direct
+declared | tuple_iterator.__next__ @ direct
+declared | type.__call__ @ direct
+declared | type.__delattr__ @ direct
+declared | type.__getattribute__ @ direct
+declared | type.__init__ @ direct
+declared | type.__new__ @ direct
+declared | type.__or__ @ direct
+declared | type.__repr__ @ direct
+declared | type.__ror__ @ direct
+declared | type.__setattr__ @ direct
+declared | type.mro @ direct
+declared | types.GenericAlias.__call__ @ natives
+declared | types.GenericAlias.__eq__ @ natives
+declared | types.GenericAlias.__ge__ @ natives
+declared | types.GenericAlias.__getattribute__ @ natives
+declared | types.GenericAlias.__gt__ @ natives
+declared | types.GenericAlias.__instancecheck__ @ natives
+declared | types.GenericAlias.__le__ @ natives
+declared | types.GenericAlias.__lt__ @ natives
+declared | types.GenericAlias.__mro_entries__ @ natives
+declared | types.GenericAlias.__ne__ @ natives
+declared | types.GenericAlias.__or__ @ natives
+declared | types.GenericAlias.__repr__ @ natives
+declared | types.GenericAlias.__ror__ @ natives
+declared | types.GenericAlias.__subclasscheck__ @ natives
+declared | types.UnionType.__eq__ @ natives
+declared | types.UnionType.__ge__ @ natives
+declared | types.UnionType.__getattribute__ @ natives
+declared | types.UnionType.__gt__ @ natives
+declared | types.UnionType.__le__ @ natives
+declared | types.UnionType.__lt__ @ natives
+declared | types.UnionType.__ne__ @ natives
+declared | types.UnionType.__or__ @ natives
+declared | types.UnionType.__repr__ @ natives
+declared | types.UnionType.__ror__ @ natives
+declared | typing.Any @ natives
+declared | typing.Any @ plain
+declared | typing.Dict @ A5
+declared | typing.Dict @ natives
+declared | typing.Dict @ plain
+declared | typing.ForwardRef @ natives
+declared | typing.ForwardRef @ plain
+declared | typing.List @ A5
+declared | typing.List @ natives
+declared | typing.List @ plain
+declared | typing.NamedTuple @ A1
+declared | typing.NamedTuple @ A2
+declared | typing.NamedTuple @ A4
+declared | typing.NamedTuple @ natives
+declared | typing.NamedTuple @ plain
+declared | typing.NamedTupleMeta @ natives
+declared | typing.NotRequired @ plain
+declared | typing.Optional @ A5
+declared | typing.Optional @ natives
+declared | typing.Optional @ plain
+declared | typing.Required @ plain
+declared | typing.Set @ A5
+declared | typing.Set @ plain
+declared | typing.TYPE_CHECKING @ plain
+declared | typing.Tuple @ A5
+declared | typing.Tuple @ natives
+declared | typing.Tuple @ plain
+declared | typing.TypeGuard @ plain
+declared | typing.TypedDict @ A1
+declared | typing.TypedDict @ A4
+declared | typing.TypedDict @ natives
+declared | typing.TypedDict @ plain
+declared | typing.Union @ A5
+declared | typing.Union @ natives
+declared | typing.Union @ plain
+declared | typing._AnyMeta @ natives
+declared | typing._BaseGenericAlias @ natives
+declared | typing._Final @ natives
+declared | typing._GenericAlias @ natives
+declared | typing._NamedTuple @ natives
+declared | typing._NotIterable @ natives
+declared | typing._SpecialForm @ natives
+declared | typing._SpecialGenericAlias @ natives
+declared | typing._TupleType @ natives
+declared | typing._TypedDict @ natives
+declared | typing._TypedDictMeta @ natives
+declared | typing._UnionGenericAlias @ natives
+declared | typing.__name__ @ plain
+declared | typing._namedtuple_mro_entries @ natives
+declared | typing._overload_dummy @ natives
+declared | typing.cast @ A1
+declared | typing.overload @ natives
+declared | zip.__getattribute__ @ direct
+declared | zip.__iter__ @ direct
+declared | zip.__next__ @ direct
+case-entry | a1_add_int_exact_exact | int.__add__
+case-entry | a1_add_int_exact_sub | int.__add__
+case-entry | a1_add_int_exact_sub-over | int.__add__
+case-entry | a1_add_int_exact_user | int.__add__
+case-entry | a1_add_int_exact_user-not | int.__add__
+case-entry | a1_add_int_sub_exact | int.__add__
+case-entry | a1_add_int_sub_sub | int.__add__
+case-entry | a1_add_int_sub_sub-over | int.__add__
+case-entry | a1_add_int_sub_user | int.__add__
+case-entry | a1_add_int_sub_user-not | int.__add__
+case-entry | a1_add_float_exact | float.__add__
+case-entry | a1_add_float_sub | float.__add__
+case-entry | a1_add_bool_exact | int.__add__
+case-entry | a1_add_str_exact_exact | str.__add__
+case-entry | a1_add_str_exact_sub | str.__add__
+case-entry | a1_add_str_exact_sub-over | str.__add__
+case-entry | a1_add_str_exact_user | str.__add__
+case-entry | a1_add_str_exact_user-not | str.__add__
+case-entry | a1_add_str_sub_exact | str.__add__
+case-entry | a1_add_str_sub_sub | str.__add__
+case-entry | a1_add_str_sub_sub-over | str.__add__
+case-entry | a1_add_str_sub_user | str.__add__
+case-entry | a1_add_str_sub_user-not | str.__add__
+case-entry | a1_add_bytes_exact | bytes.__add__
+case-entry | a1_add_bytes_sub | bytes.__add__
+case-entry | a1_add_tuple_exact | tuple.__add__
+case-entry | a1_add_tuple_sub | tuple.__add__
+case-entry | a1_add_list_exact | list.__add__
+case-entry | a1_add_list_sub | list.__add__
+case-entry | a1_sub_int_exact_exact | int.__sub__
+case-entry | a1_sub_int_exact_sub | int.__sub__
+case-entry | a1_sub_int_exact_sub-over | int.__sub__
+case-entry | a1_sub_int_exact_user | int.__sub__
+case-entry | a1_sub_int_exact_user-not | int.__sub__
+case-entry | a1_sub_int_sub_exact | int.__sub__
+case-entry | a1_sub_int_sub_sub | int.__sub__
+case-entry | a1_sub_int_sub_sub-over | int.__sub__
+case-entry | a1_sub_int_sub_user | int.__sub__
+case-entry | a1_sub_int_sub_user-not | int.__sub__
+case-entry | a1_sub_float_exact | float.__sub__
+case-entry | a1_sub_float_sub | float.__sub__
+case-entry | a1_sub_bool_exact | int.__sub__
+case-entry | a1_sub_set_exact_exact | set.__sub__
+case-entry | a1_sub_set_exact_sub | set.__sub__
+case-entry | a1_sub_set_exact_sub-over | set.__sub__
+case-entry | a1_sub_set_exact_user | set.__sub__
+case-entry | a1_sub_set_exact_user-not | set.__sub__
+case-entry | a1_sub_set_sub_exact | set.__sub__
+case-entry | a1_sub_set_sub_sub | set.__sub__
+case-entry | a1_sub_set_sub_sub-over | set.__sub__
+case-entry | a1_sub_set_sub_user | set.__sub__
+case-entry | a1_sub_set_sub_user-not | set.__sub__
+case-entry | a1_sub_frozenset_exact | frozenset.__sub__
+case-entry | a1_sub_frozenset_sub | frozenset.__sub__
+case-entry | a1_mul_int_exact_exact | int.__mul__
+case-entry | a1_mul_int_exact_sub | int.__mul__
+case-entry | a1_mul_int_exact_sub-over | int.__mul__
+case-entry | a1_mul_int_exact_user | int.__mul__
+case-entry | a1_mul_int_exact_user-not | int.__mul__
+case-entry | a1_mul_int_sub_exact | int.__mul__
+case-entry | a1_mul_int_sub_sub | int.__mul__
+case-entry | a1_mul_int_sub_sub-over | int.__mul__
+case-entry | a1_mul_int_sub_user | int.__mul__
+case-entry | a1_mul_int_sub_user-not | int.__mul__
+case-entry | a1_mul_float_exact | float.__mul__
+case-entry | a1_mul_float_sub | float.__mul__
+case-entry | a1_mul_bool_exact | int.__mul__
+case-entry | a1_mul_str_exact_exact | str.__mul__
+case-entry | a1_mul_str_exact_sub | str.__mul__
+case-entry | a1_mul_str_exact_sub-over | str.__mul__
+case-entry | a1_mul_str_exact_user | str.__mul__
+case-entry | a1_mul_str_exact_user-not | str.__mul__
+case-entry | a1_mul_str_sub_exact | str.__mul__
+case-entry | a1_mul_str_sub_sub | str.__mul__
+case-entry | a1_mul_str_sub_sub-over | str.__mul__
+case-entry | a1_mul_str_sub_user | str.__mul__
+case-entry | a1_mul_str_sub_user-not | str.__mul__
+case-entry | a1_mul_bytes_exact | bytes.__mul__
+case-entry | a1_mul_bytes_sub | bytes.__mul__
+case-entry | a1_mul_tuple_exact | tuple.__mul__
+case-entry | a1_mul_tuple_sub | tuple.__mul__
+case-entry | a1_mul_list_exact | list.__mul__
+case-entry | a1_mul_list_sub | list.__mul__
+case-entry | a1_truediv_int_exact_exact | int.__truediv__
+case-entry | a1_truediv_int_exact_sub | int.__truediv__
+case-entry | a1_truediv_int_exact_sub-over | int.__truediv__
+case-entry | a1_truediv_int_exact_user | int.__truediv__
+case-entry | a1_truediv_int_exact_user-not | int.__truediv__
+case-entry | a1_truediv_int_sub_exact | int.__truediv__
+case-entry | a1_truediv_int_sub_sub | int.__truediv__
+case-entry | a1_truediv_int_sub_sub-over | int.__truediv__
+case-entry | a1_truediv_int_sub_user | int.__truediv__
+case-entry | a1_truediv_int_sub_user-not | int.__truediv__
+case-entry | a1_truediv_float_exact | float.__truediv__
+case-entry | a1_truediv_float_sub | float.__truediv__
+case-entry | a1_truediv_bool_exact | int.__truediv__
+case-entry | a1_floordiv_int_exact_exact | int.__floordiv__
+case-entry | a1_floordiv_int_exact_sub | int.__floordiv__
+case-entry | a1_floordiv_int_exact_sub-over | int.__floordiv__
+case-entry | a1_floordiv_int_exact_user | int.__floordiv__
+case-entry | a1_floordiv_int_exact_user-not | int.__floordiv__
+case-entry | a1_floordiv_int_sub_exact | int.__floordiv__
+case-entry | a1_floordiv_int_sub_sub | int.__floordiv__
+case-entry | a1_floordiv_int_sub_sub-over | int.__floordiv__
+case-entry | a1_floordiv_int_sub_user | int.__floordiv__
+case-entry | a1_floordiv_int_sub_user-not | int.__floordiv__
+case-entry | a1_floordiv_float_exact | float.__floordiv__
+case-entry | a1_floordiv_float_sub | float.__floordiv__
+case-entry | a1_floordiv_bool_exact | int.__floordiv__
+case-entry | a1_mod_int_exact_exact | int.__mod__
+case-entry | a1_mod_int_exact_sub | int.__mod__
+case-entry | a1_mod_int_exact_sub-over | int.__mod__
+case-entry | a1_mod_int_exact_user | int.__mod__
+case-entry | a1_mod_int_exact_user-not | int.__mod__
+case-entry | a1_mod_int_sub_exact | int.__mod__
+case-entry | a1_mod_int_sub_sub | int.__mod__
+case-entry | a1_mod_int_sub_sub-over | int.__mod__
+case-entry | a1_mod_int_sub_user | int.__mod__
+case-entry | a1_mod_int_sub_user-not | int.__mod__
+case-entry | a1_mod_float_exact | float.__mod__
+case-entry | a1_mod_float_sub | float.__mod__
+case-entry | a1_mod_bool_exact | int.__mod__
+case-entry | a1_mod_str_exact_exact | str.__mod__
+case-entry | a1_mod_str_exact_sub | str.__mod__
+case-entry | a1_mod_str_exact_sub-over | str.__mod__
+case-entry | a1_mod_str_exact_user | str.__mod__
+case-entry | a1_mod_str_exact_user-not | str.__mod__
+case-entry | a1_mod_bytes_exact | bytes.__mod__
+case-entry | a1_mod_bytes_sub | bytes.__mod__
+case-entry | a1_pow_int_exact_exact | int.__pow__
+case-entry | a1_pow_int_exact_sub | int.__pow__
+case-entry | a1_pow_int_exact_sub-over | int.__pow__
+case-entry | a1_pow_int_exact_user | int.__pow__
+case-entry | a1_pow_int_exact_user-not | int.__pow__
+case-entry | a1_pow_int_sub_exact | int.__pow__
+case-entry | a1_pow_int_sub_sub | int.__pow__
+case-entry | a1_pow_int_sub_sub-over | int.__pow__
+case-entry | a1_pow_int_sub_user | int.__pow__
+case-entry | a1_pow_int_sub_user-not | int.__pow__
+case-entry | a1_pow_float_exact | float.__pow__
+case-entry | a1_pow_float_sub | float.__pow__
+case-entry | a1_pow_bool_exact | int.__pow__
+case-entry | a1_lshift_int_exact_exact | int.__lshift__
+case-entry | a1_lshift_int_exact_sub | int.__lshift__
+case-entry | a1_lshift_int_exact_sub-over | int.__lshift__
+case-entry | a1_lshift_int_exact_user | int.__lshift__
+case-entry | a1_lshift_int_exact_user-not | int.__lshift__
+case-entry | a1_lshift_int_sub_exact | int.__lshift__
+case-entry | a1_lshift_int_sub_sub | int.__lshift__
+case-entry | a1_lshift_int_sub_sub-over | int.__lshift__
+case-entry | a1_lshift_int_sub_user | int.__lshift__
+case-entry | a1_lshift_int_sub_user-not | int.__lshift__
+case-entry | a1_lshift_bool_exact | int.__lshift__
+case-entry | a1_rshift_int_exact_exact | int.__rshift__
+case-entry | a1_rshift_int_exact_sub | int.__rshift__
+case-entry | a1_rshift_int_exact_sub-over | int.__rshift__
+case-entry | a1_rshift_int_exact_user | int.__rshift__
+case-entry | a1_rshift_int_exact_user-not | int.__rshift__
+case-entry | a1_rshift_int_sub_exact | int.__rshift__
+case-entry | a1_rshift_int_sub_sub | int.__rshift__
+case-entry | a1_rshift_int_sub_sub-over | int.__rshift__
+case-entry | a1_rshift_int_sub_user | int.__rshift__
+case-entry | a1_rshift_int_sub_user-not | int.__rshift__
+case-entry | a1_rshift_bool_exact | int.__rshift__
+case-entry | a1_and_int_exact_exact | int.__and__
+case-entry | a1_and_int_exact_sub | int.__and__
+case-entry | a1_and_int_exact_sub-over | int.__and__
+case-entry | a1_and_int_exact_user | int.__and__
+case-entry | a1_and_int_exact_user-not | int.__and__
+case-entry | a1_and_int_sub_exact | int.__and__
+case-entry | a1_and_int_sub_sub | int.__and__
+case-entry | a1_and_int_sub_sub-over | int.__and__
+case-entry | a1_and_int_sub_user | int.__and__
+case-entry | a1_and_int_sub_user-not | int.__and__
+case-entry | a1_and_bool_exact | bool.__and__
+case-entry | a1_and_set_exact_exact | set.__and__
+case-entry | a1_and_set_exact_sub | set.__and__
+case-entry | a1_and_set_exact_sub-over | set.__and__
+case-entry | a1_and_set_exact_user | set.__and__
+case-entry | a1_and_set_exact_user-not | set.__and__
+case-entry | a1_and_set_sub_exact | set.__and__
+case-entry | a1_and_set_sub_sub | set.__and__
+case-entry | a1_and_set_sub_sub-over | set.__and__
+case-entry | a1_and_set_sub_user | set.__and__
+case-entry | a1_and_set_sub_user-not | set.__and__
+case-entry | a1_and_frozenset_exact | frozenset.__and__
+case-entry | a1_and_frozenset_sub | frozenset.__and__
+case-entry | a1_or_int_exact_exact | int.__or__
+case-entry | a1_or_int_exact_sub | int.__or__
+case-entry | a1_or_int_exact_sub-over | int.__or__
+case-entry | a1_or_int_exact_user | int.__or__
+case-entry | a1_or_int_exact_user-not | int.__or__
+case-entry | a1_or_int_sub_exact | int.__or__
+case-entry | a1_or_int_sub_sub | int.__or__
+case-entry | a1_or_int_sub_sub-over | int.__or__
+case-entry | a1_or_int_sub_user | int.__or__
+case-entry | a1_or_int_sub_user-not | int.__or__
+case-entry | a1_or_bool_exact | bool.__or__
+case-entry | a1_or_set_exact_exact | set.__or__
+case-entry | a1_or_set_exact_sub | set.__or__
+case-entry | a1_or_set_exact_sub-over | set.__or__
+case-entry | a1_or_set_exact_user | set.__or__
+case-entry | a1_or_set_exact_user-not | set.__or__
+case-entry | a1_or_set_sub_exact | set.__or__
+case-entry | a1_or_set_sub_sub | set.__or__
+case-entry | a1_or_set_sub_sub-over | set.__or__
+case-entry | a1_or_set_sub_user | set.__or__
+case-entry | a1_or_set_sub_user-not | set.__or__
+case-entry | a1_or_frozenset_exact | frozenset.__or__
+case-entry | a1_or_frozenset_sub | frozenset.__or__
+case-entry | a1_or_dict_exact | dict.__or__
+case-entry | a1_or_dict_sub | dict.__or__
+case-entry | a1_xor_int_exact_exact | int.__xor__
+case-entry | a1_xor_int_exact_sub | int.__xor__
+case-entry | a1_xor_int_exact_sub-over | int.__xor__
+case-entry | a1_xor_int_exact_user | int.__xor__
+case-entry | a1_xor_int_exact_user-not | int.__xor__
+case-entry | a1_xor_int_sub_exact | int.__xor__
+case-entry | a1_xor_int_sub_sub | int.__xor__
+case-entry | a1_xor_int_sub_sub-over | int.__xor__
+case-entry | a1_xor_int_sub_user | int.__xor__
+case-entry | a1_xor_int_sub_user-not | int.__xor__
+case-entry | a1_xor_bool_exact | bool.__xor__
+case-entry | a1_xor_set_exact_exact | set.__xor__
+case-entry | a1_xor_set_exact_sub | set.__xor__
+case-entry | a1_xor_set_exact_sub-over | set.__xor__
+case-entry | a1_xor_set_exact_user | set.__xor__
+case-entry | a1_xor_set_exact_user-not | set.__xor__
+case-entry | a1_xor_set_sub_exact | set.__xor__
+case-entry | a1_xor_set_sub_sub | set.__xor__
+case-entry | a1_xor_set_sub_sub-over | set.__xor__
+case-entry | a1_xor_set_sub_user | set.__xor__
+case-entry | a1_xor_set_sub_user-not | set.__xor__
+case-entry | a1_xor_frozenset_exact | frozenset.__xor__
+case-entry | a1_xor_frozenset_sub | frozenset.__xor__
+case-entry | a1_eq_int_exact_exact | int.__eq__
+case-entry | a1_eq_int_exact_sub | int.__eq__
+case-entry | a1_eq_int_exact_sub-over | int.__eq__
+case-entry | a1_eq_int_exact_user | int.__eq__
+case-entry | a1_eq_int_exact_user-not | int.__eq__
+case-entry | a1_eq_int_sub_exact | int.__eq__
+case-entry | a1_eq_int_sub_sub | int.__eq__
+case-entry | a1_eq_int_sub_sub-over | int.__eq__
+case-entry | a1_eq_int_sub_user | int.__eq__
+case-entry | a1_eq_int_sub_user-not | int.__eq__
+case-entry | a1_eq_float_exact | float.__eq__
+case-entry | a1_eq_float_sub | float.__eq__
+case-entry | a1_eq_str_exact_exact | str.__eq__
+case-entry | a1_eq_str_exact_sub | str.__eq__
+case-entry | a1_eq_str_exact_sub-over | str.__eq__
+case-entry | a1_eq_str_exact_user | str.__eq__
+case-entry | a1_eq_str_exact_user-not | str.__eq__
+case-entry | a1_eq_str_sub_exact | str.__eq__
+case-entry | a1_eq_str_sub_sub | str.__eq__
+case-entry | a1_eq_str_sub_sub-over | str.__eq__
+case-entry | a1_eq_str_sub_user | str.__eq__
+case-entry | a1_eq_str_sub_user-not | str.__eq__
+case-entry | a1_eq_bytes_exact | bytes.__eq__
+case-entry | a1_eq_bytes_sub | bytes.__eq__
+case-entry | a1_eq_tuple_exact | tuple.__eq__
+case-entry | a1_eq_tuple_sub | tuple.__eq__
+case-entry | a1_eq_list_exact | list.__eq__
+case-entry | a1_eq_list_sub | list.__eq__
+case-entry | a1_eq_dict_exact | dict.__eq__
+case-entry | a1_eq_dict_sub | dict.__eq__
+case-entry | a1_eq_set_exact_exact | set.__eq__
+case-entry | a1_eq_set_exact_sub | set.__eq__
+case-entry | a1_eq_set_exact_sub-over | set.__eq__
+case-entry | a1_eq_set_exact_user | set.__eq__
+case-entry | a1_eq_set_exact_user-not | set.__eq__
+case-entry | a1_eq_set_sub_exact | set.__eq__
+case-entry | a1_eq_set_sub_sub | set.__eq__
+case-entry | a1_eq_set_sub_sub-over | set.__eq__
+case-entry | a1_eq_set_sub_user | set.__eq__
+case-entry | a1_eq_set_sub_user-not | set.__eq__
+case-entry | a1_eq_frozenset_exact | frozenset.__eq__
+case-entry | a1_eq_frozenset_sub | frozenset.__eq__
+case-entry | a1_eq_bool_exact | int.__eq__
+case-entry | a1_eq_range_exact | range.__eq__
+case-entry | a1_ne_int_exact_exact | int.__ne__
+case-entry | a1_ne_int_exact_sub | int.__ne__
+case-entry | a1_ne_int_exact_sub-over | int.__ne__
+case-entry | a1_ne_int_exact_user | int.__ne__
+case-entry | a1_ne_int_exact_user-not | int.__ne__
+case-entry | a1_ne_int_sub_exact | int.__ne__
+case-entry | a1_ne_int_sub_sub | int.__ne__
+case-entry | a1_ne_int_sub_sub-over | int.__ne__
+case-entry | a1_ne_int_sub_user | int.__ne__
+case-entry | a1_ne_int_sub_user-not | int.__ne__
+case-entry | a1_ne_float_exact | float.__ne__
+case-entry | a1_ne_float_sub | float.__ne__
+case-entry | a1_ne_str_exact_exact | str.__ne__
+case-entry | a1_ne_str_exact_sub | str.__ne__
+case-entry | a1_ne_str_exact_sub-over | str.__ne__
+case-entry | a1_ne_str_exact_user | str.__ne__
+case-entry | a1_ne_str_exact_user-not | str.__ne__
+case-entry | a1_ne_str_sub_exact | str.__ne__
+case-entry | a1_ne_str_sub_sub | str.__ne__
+case-entry | a1_ne_str_sub_sub-over | str.__ne__
+case-entry | a1_ne_str_sub_user | str.__ne__
+case-entry | a1_ne_str_sub_user-not | str.__ne__
+case-entry | a1_ne_bytes_exact | bytes.__ne__
+case-entry | a1_ne_bytes_sub | bytes.__ne__
+case-entry | a1_ne_tuple_exact | tuple.__ne__
+case-entry | a1_ne_tuple_sub | tuple.__ne__
+case-entry | a1_ne_list_exact | list.__ne__
+case-entry | a1_ne_list_sub | list.__ne__
+case-entry | a1_ne_dict_exact | dict.__ne__
+case-entry | a1_ne_dict_sub | dict.__ne__
+case-entry | a1_ne_set_exact_exact | set.__ne__
+case-entry | a1_ne_set_exact_sub | set.__ne__
+case-entry | a1_ne_set_exact_sub-over | set.__ne__
+case-entry | a1_ne_set_exact_user | set.__ne__
+case-entry | a1_ne_set_exact_user-not | set.__ne__
+case-entry | a1_ne_set_sub_exact | set.__ne__
+case-entry | a1_ne_set_sub_sub | set.__ne__
+case-entry | a1_ne_set_sub_sub-over | set.__ne__
+case-entry | a1_ne_set_sub_user | set.__ne__
+case-entry | a1_ne_set_sub_user-not | set.__ne__
+case-entry | a1_ne_frozenset_exact | frozenset.__ne__
+case-entry | a1_ne_frozenset_sub | frozenset.__ne__
+case-entry | a1_ne_bool_exact | int.__ne__
+case-entry | a1_ne_range_exact | range.__ne__
+case-entry | a1_lt_int_exact_exact | int.__lt__
+case-entry | a1_lt_int_exact_sub | int.__lt__
+case-entry | a1_lt_int_exact_sub-over | int.__lt__
+case-entry | a1_lt_int_exact_user | int.__lt__
+case-entry | a1_lt_int_exact_user-not | int.__lt__
+case-entry | a1_lt_int_sub_exact | int.__lt__
+case-entry | a1_lt_int_sub_sub | int.__lt__
+case-entry | a1_lt_int_sub_sub-over | int.__lt__
+case-entry | a1_lt_int_sub_user | int.__lt__
+case-entry | a1_lt_int_sub_user-not | int.__lt__
+case-entry | a1_lt_float_exact | float.__lt__
+case-entry | a1_lt_float_sub | float.__lt__
+case-entry | a1_lt_bool_exact | int.__lt__
+case-entry | a1_lt_str_exact_exact | str.__lt__
+case-entry | a1_lt_str_exact_sub | str.__lt__
+case-entry | a1_lt_str_exact_sub-over | str.__lt__
+case-entry | a1_lt_str_exact_user | str.__lt__
+case-entry | a1_lt_str_exact_user-not | str.__lt__
+case-entry | a1_lt_str_sub_exact | str.__lt__
+case-entry | a1_lt_str_sub_sub | str.__lt__
+case-entry | a1_lt_str_sub_sub-over | str.__lt__
+case-entry | a1_lt_str_sub_user | str.__lt__
+case-entry | a1_lt_str_sub_user-not | str.__lt__
+case-entry | a1_lt_bytes_exact | bytes.__lt__
+case-entry | a1_lt_bytes_sub | bytes.__lt__
+case-entry | a1_lt_tuple_exact | tuple.__lt__
+case-entry | a1_lt_tuple_sub | tuple.__lt__
+case-entry | a1_lt_list_exact | list.__lt__
+case-entry | a1_lt_list_sub | list.__lt__
+case-entry | a1_lt_set_exact_exact | set.__lt__
+case-entry | a1_lt_set_exact_sub | set.__lt__
+case-entry | a1_lt_set_exact_sub-over | set.__lt__
+case-entry | a1_lt_set_exact_user | set.__lt__
+case-entry | a1_lt_set_exact_user-not | set.__lt__
+case-entry | a1_lt_set_sub_exact | set.__lt__
+case-entry | a1_lt_set_sub_sub | set.__lt__
+case-entry | a1_lt_set_sub_sub-over | set.__lt__
+case-entry | a1_lt_set_sub_user | set.__lt__
+case-entry | a1_lt_set_sub_user-not | set.__lt__
+case-entry | a1_lt_frozenset_exact | frozenset.__lt__
+case-entry | a1_lt_frozenset_sub | frozenset.__lt__
+case-entry | a1_ge_int_exact_exact | int.__ge__
+case-entry | a1_ge_int_exact_sub | int.__ge__
+case-entry | a1_ge_int_exact_sub-over | int.__ge__
+case-entry | a1_ge_int_exact_user | int.__ge__
+case-entry | a1_ge_int_exact_user-not | int.__ge__
+case-entry | a1_ge_int_sub_exact | int.__ge__
+case-entry | a1_ge_int_sub_sub | int.__ge__
+case-entry | a1_ge_int_sub_sub-over | int.__ge__
+case-entry | a1_ge_int_sub_user | int.__ge__
+case-entry | a1_ge_int_sub_user-not | int.__ge__
+case-entry | a1_ge_float_exact | float.__ge__
+case-entry | a1_ge_float_sub | float.__ge__
+case-entry | a1_ge_bool_exact | int.__ge__
+case-entry | a1_ge_str_exact_exact | str.__ge__
+case-entry | a1_ge_str_exact_sub | str.__ge__
+case-entry | a1_ge_str_exact_sub-over | str.__ge__
+case-entry | a1_ge_str_exact_user | str.__ge__
+case-entry | a1_ge_str_exact_user-not | str.__ge__
+case-entry | a1_ge_str_sub_exact | str.__ge__
+case-entry | a1_ge_str_sub_sub | str.__ge__
+case-entry | a1_ge_str_sub_sub-over | str.__ge__
+case-entry | a1_ge_str_sub_user | str.__ge__
+case-entry | a1_ge_str_sub_user-not | str.__ge__
+case-entry | a1_ge_tuple_exact | tuple.__ge__
+case-entry | a1_ge_tuple_sub | tuple.__ge__
+case-entry | a1_ge_list_exact | list.__ge__
+case-entry | a1_ge_list_sub | list.__ge__
+case-entry | a1_ge_set_exact_exact | set.__ge__
+case-entry | a1_ge_set_exact_sub | set.__ge__
+case-entry | a1_ge_set_exact_sub-over | set.__ge__
+case-entry | a1_ge_set_exact_user | set.__ge__
+case-entry | a1_ge_set_exact_user-not | set.__ge__
+case-entry | a1_ge_set_sub_exact | set.__ge__
+case-entry | a1_ge_set_sub_sub | set.__ge__
+case-entry | a1_ge_set_sub_sub-over | set.__ge__
+case-entry | a1_ge_set_sub_user | set.__ge__
+case-entry | a1_ge_set_sub_user-not | set.__ge__
+case-entry | a1_ge_frozenset_exact | frozenset.__ge__
+case-entry | a1_ge_frozenset_sub | frozenset.__ge__
+case-entry | a1_neg_int_exact | int.__neg__
+case-entry | a1_neg_int_sub | int.__neg__
+case-entry | a1_neg_float_exact | float.__neg__
+case-entry | a1_neg_float_sub | float.__neg__
+case-entry | a1_neg_bool_exact | int.__neg__
+case-entry | a1_invert_int_exact | int.__invert__
+case-entry | a1_invert_int_sub | int.__invert__
+case-entry | a1_not_int_exact | int.__bool__
+case-entry | a1_not_int_sub | int.__bool__
+case-entry | a1_not_float_exact | float.__bool__
+case-entry | a1_not_float_sub | float.__bool__
+case-entry | a1_not_str_exact | str.__len__
+case-entry | a1_not_str_sub | str.__len__
+case-entry | a1_not_bytes_exact | bytes.__len__
+case-entry | a1_not_bytes_sub | bytes.__len__
+case-entry | a1_not_tuple_exact | tuple.__len__
+case-entry | a1_not_tuple_sub | tuple.__len__
+case-entry | a1_not_list_exact | list.__len__
+case-entry | a1_not_list_sub | list.__len__
+case-entry | a1_not_dict_exact | dict.__len__
+case-entry | a1_not_dict_sub | dict.__len__
+case-entry | a1_not_set_exact | set.__len__
+case-entry | a1_not_set_sub | set.__len__
+case-entry | a1_not_frozenset_exact | frozenset.__len__
+case-entry | a1_not_frozenset_sub | frozenset.__len__
+case-entry | a1_not_range_exact | range.__bool__
+case-entry | a1_truthy_int_exact | int.__bool__
+case-entry | a1_truthy_int_sub | int.__bool__
+case-entry | a1_truthy_float_exact | float.__bool__
+case-entry | a1_truthy_float_sub | float.__bool__
+case-entry | a1_truthy_str_exact | str.__len__
+case-entry | a1_truthy_str_sub | str.__len__
+case-entry | a1_truthy_bytes_exact | bytes.__len__
+case-entry | a1_truthy_bytes_sub | bytes.__len__
+case-entry | a1_truthy_tuple_exact | tuple.__len__
+case-entry | a1_truthy_tuple_sub | tuple.__len__
+case-entry | a1_truthy_list_exact | list.__len__
+case-entry | a1_truthy_list_sub | list.__len__
+case-entry | a1_truthy_dict_exact | dict.__len__
+case-entry | a1_truthy_dict_sub | dict.__len__
+case-entry | a1_truthy_set_exact | set.__len__
+case-entry | a1_truthy_set_sub | set.__len__
+case-entry | a1_truthy_frozenset_exact | frozenset.__len__
+case-entry | a1_truthy_frozenset_sub | frozenset.__len__
+case-entry | a1_truthy_range_exact | range.__bool__
+case-entry | a1_iadd_list_exact | list.__iadd__
+case-entry | a1_iadd_int_exact_exact | int.__add__
+case-entry | a1_iadd_int_exact_sub | int.__add__
+case-entry | a1_iadd_int_exact_sub-over | int.__add__
+case-entry | a1_iadd_int_exact_user | int.__add__
+case-entry | a1_iadd_int_exact_user-not | int.__add__
+case-entry | a1_iadd_int_sub_exact | int.__add__
+case-entry | a1_iadd_int_sub_sub | int.__add__
+case-entry | a1_iadd_int_sub_sub-over | int.__add__
+case-entry | a1_iadd_int_sub_user | int.__add__
+case-entry | a1_iadd_int_sub_user-not | int.__add__
+case-entry | a1_iadd_str_exact_exact | str.__add__
+case-entry | a1_iadd_str_exact_sub | str.__add__
+case-entry | a1_iadd_str_exact_sub-over | str.__add__
+case-entry | a1_iadd_str_exact_user | str.__add__
+case-entry | a1_iadd_str_exact_user-not | str.__add__
+case-entry | a1_iadd_str_sub_exact | str.__add__
+case-entry | a1_iadd_str_sub_sub | str.__add__
+case-entry | a1_iadd_str_sub_sub-over | str.__add__
+case-entry | a1_iadd_str_sub_user | str.__add__
+case-entry | a1_iadd_str_sub_user-not | str.__add__
+case-entry | a1_iadd_tuple_exact | tuple.__add__
+case-entry | a1_iadd_tuple_sub | tuple.__add__
+case-entry | a1_ior_set_exact_exact | set.__ior__
+case-entry | a1_ior_set_exact_sub | set.__ior__
+case-entry | a1_ior_set_exact_sub-over | set.__ior__
+case-entry | a1_ior_set_exact_user | set.__ior__
+case-entry | a1_ior_set_exact_user-not | set.__ior__
+case-entry | a1_ior_set_sub_user | set.__ior__
+case-entry | a1_ior_set_sub_user-not | set.__ior__
+case-entry | a1_ior_dict_exact | dict.__ior__
+case-entry | a1_ior_dict_sub | dict.__ior__
+case-entry | a1_ior_int_exact_exact | int.__or__
+case-entry | a1_ior_int_exact_sub | int.__or__
+case-entry | a1_ior_int_exact_sub-over | int.__or__
+case-entry | a1_ior_int_exact_user | int.__or__
+case-entry | a1_ior_int_exact_user-not | int.__or__
+case-entry | a1_ior_int_sub_exact | int.__or__
+case-entry | a1_ior_int_sub_sub | int.__or__
+case-entry | a1_ior_int_sub_sub-over | int.__or__
+case-entry | a1_ior_int_sub_user | int.__or__
+case-entry | a1_ior_int_sub_user-not | int.__or__
+case-entry | a1_in_tuple_exact | tuple.__contains__
+case-entry | a1_in_tuple_sub | tuple.__contains__
+case-entry | a1_in_list_exact | list.__contains__
+case-entry | a1_in_list_sub | list.__contains__
+case-entry | a1_in_dict_exact | dict.__contains__
+case-entry | a1_in_dict_sub | dict.__contains__
+case-entry | a1_in_set_exact | set.__contains__
+case-entry | a1_in_set_sub | set.__contains__
+case-entry | a1_in_frozenset_exact | frozenset.__contains__
+case-entry | a1_in_frozenset_sub | frozenset.__contains__
+case-entry | a1_in_range_exact | range.__contains__
+case-entry | a1_str_in_str_exact | str.__contains__
+case-entry | a1_str_in_str_sub | str.__contains__
+case-entry | a1_getitem_str_exact | str.__getitem__
+case-entry | a1_getitem_str_sub | str.__getitem__
+case-entry | a1_getitem_bytes_exact | bytes.__getitem__
+case-entry | a1_getitem_bytes_sub | bytes.__getitem__
+case-entry | a1_getitem_tuple_exact | tuple.__getitem__
+case-entry | a1_getitem_tuple_sub | tuple.__getitem__
+case-entry | a1_getitem_list_exact | list.__getitem__
+case-entry | a1_getitem_list_sub | list.__getitem__
+case-entry | a1_getitem_range_exact | range.__getitem__
+case-entry | a1_getkey_dict_exact | dict.__getitem__
+case-entry | a1_getkey_dict_sub | dict.__getitem__
+case-entry | a1_slice_str_exact | str.__getitem__
+case-entry | a1_slice_str_sub | str.__getitem__
+case-entry | a1_slice_bytes_exact | bytes.__getitem__
+case-entry | a1_slice_bytes_sub | bytes.__getitem__
+case-entry | a1_slice_tuple_exact | tuple.__getitem__
+case-entry | a1_slice_tuple_sub | tuple.__getitem__
+case-entry | a1_slice_list_exact | list.__getitem__
+case-entry | a1_slice_list_sub | list.__getitem__
+case-entry | a1_slice_range_exact | range.__getitem__
+case-entry | a1_setitem_list_exact | list.__setitem__
+case-entry | a1_setitem_list_sub | list.__setitem__
+case-entry | a1_setitem_dict_exact | dict.__setitem__
+case-entry | a1_setitem_dict_sub | dict.__setitem__
+case-entry | a1_delitem_list_exact | list.__delitem__
+case-entry | a1_delitem_list_sub | list.__delitem__
+case-entry | a1_unpack_tuple_exact | tuple.__iter__
+case-entry | a1_unpack_tuple_sub | tuple.__iter__
+case-entry | a1_unpack_list_exact | list.__iter__
+case-entry | a1_unpack_list_sub | list.__iter__
+case-entry | a1_unpack_str_exact | str.__iter__
+case-entry | a1_unpack_str_sub | str.__iter__
+case-entry | a1_unpack_bytes_exact | bytes.__iter__
+case-entry | a1_unpack_bytes_sub | bytes.__iter__
+case-entry | a1_unpack_dict_exact | dict.__iter__
+case-entry | a1_unpack_dict_sub | dict.__iter__
+case-entry | a1_unpack_ex_tuple_exact | tuple.__iter__
+case-entry | a1_unpack_ex_tuple_sub | tuple.__iter__
+case-entry | a1_unpack_ex_list_exact | list.__iter__
+case-entry | a1_unpack_ex_list_sub | list.__iter__
+case-entry | a1_unpack_ex_str_exact | str.__iter__
+case-entry | a1_unpack_ex_str_sub | str.__iter__
+case-entry | a1_unpack_ex_range_exact | range.__iter__
+case-entry | a1_star_list_tuple_sub | tuple.__iter__
+case-entry | a1_star_list_list_sub | list.__iter__
+case-entry | a1_star_list_str_exact | str.__iter__
+case-entry | a1_star_list_str_sub | str.__iter__
+case-entry | a1_star_list_dict_exact | dict.__iter__
+case-entry | a1_star_list_dict_sub | dict.__iter__
+case-entry | a1_star_list_range_exact | range.__iter__
+case-entry | a1_star_set_tuple_exact | tuple.__iter__
+case-entry | a1_star_set_tuple_sub | tuple.__iter__
+case-entry | a1_star_set_list_exact | list.__iter__
+case-entry | a1_star_set_list_sub | list.__iter__
+case-entry | a1_star_set_set_exact | set.__iter__
+case-entry | a1_star_set_set_sub | set.__iter__
+case-entry | a1_star_args_tuple_sub | tuple.__iter__
+case-entry | a1_star_args_list_sub | list.__iter__
+case-entry | a1_star_args_str_exact | str.__iter__
+case-entry | a1_star_args_str_sub | str.__iter__
+case-entry | a1_for_tuple_exact | tuple.__iter__
+case-entry | a1_for_tuple_sub | tuple.__iter__
+case-entry | a1_for_list_exact | list.__iter__
+case-entry | a1_for_list_sub | list.__iter__
+case-entry | a1_for_str_exact | str.__iter__
+case-entry | a1_for_str_sub | str.__iter__
+case-entry | a1_for_dict_exact | dict.__iter__
+case-entry | a1_for_dict_sub | dict.__iter__
+case-entry | a1_for_range_exact | range.__iter__
+case-entry | a1_listcomp_tuple_exact | tuple.__iter__
+case-entry | a1_listcomp_tuple_sub | tuple.__iter__
+case-entry | a1_listcomp_list_exact | list.__iter__
+case-entry | a1_listcomp_list_sub | list.__iter__
+case-entry | a1_listcomp_str_exact | str.__iter__
+case-entry | a1_listcomp_str_sub | str.__iter__
+case-entry | a1_len_str_exact | str.__len__
+case-entry | a1_len_str_sub | str.__len__
+case-entry | a1_len_bytes_exact | bytes.__len__
+case-entry | a1_len_bytes_sub | bytes.__len__
+case-entry | a1_len_tuple_exact | tuple.__len__
+case-entry | a1_len_tuple_sub | tuple.__len__
+case-entry | a1_len_list_exact | list.__len__
+case-entry | a1_len_list_sub | list.__len__
+case-entry | a1_len_dict_exact | dict.__len__
+case-entry | a1_len_dict_sub | dict.__len__
+case-entry | a1_len_set_exact | set.__len__
+case-entry | a1_len_set_sub | set.__len__
+case-entry | a1_len_frozenset_exact | frozenset.__len__
+case-entry | a1_len_frozenset_sub | frozenset.__len__
+case-entry | a1_len_range_exact | range.__len__
+case-entry | a1_repr_int_exact | int.__repr__
+case-entry | a1_repr_int_sub | int.__repr__
+case-entry | a1_repr_float_exact | float.__repr__
+case-entry | a1_repr_float_sub | float.__repr__
+case-entry | a1_repr_str_exact | str.__repr__
+case-entry | a1_repr_str_sub | str.__repr__
+case-entry | a1_repr_bytes_exact | bytes.__repr__
+case-entry | a1_repr_bytes_sub | bytes.__repr__
+case-entry | a1_repr_tuple_exact | tuple.__repr__
+case-entry | a1_repr_tuple_sub | tuple.__repr__
+case-entry | a1_repr_list_exact | list.__repr__
+case-entry | a1_repr_list_sub | list.__repr__
+case-entry | a1_repr_dict_exact | dict.__repr__
+case-entry | a1_repr_dict_sub | dict.__repr__
+case-entry | a1_repr_bool_exact | bool.__repr__
+case-entry | a1_repr_range_exact | range.__repr__
+case-entry | a1_str_int_exact | object.__str__
+case-entry | a1_str_int_sub | object.__str__
+case-entry | a1_str_float_exact | object.__str__
+case-entry | a1_str_float_sub | object.__str__
+case-entry | a1_str_str_sub | str.__str__
+case-entry | a1_str_bytes_exact | bytes.__str__
+case-entry | a1_str_bytes_sub | bytes.__str__
+case-entry | a1_str_tuple_exact | object.__str__
+case-entry | a1_str_tuple_sub | object.__str__
+case-entry | a1_str_list_exact | object.__str__
+case-entry | a1_str_list_sub | object.__str__
+case-entry | a1_str_dict_exact | object.__str__
+case-entry | a1_str_dict_sub | object.__str__
+case-entry | a1_str_bool_exact | object.__str__
+case-entry | a1_str_range_exact | object.__str__
+case-entry | a1_fstring_int_sub | int.__format__
+case-entry | a1_fstring_float_exact | float.__format__
+case-entry | a1_fstring_float_sub | float.__format__
+case-entry | a1_fstring_str_sub | str.__format__
+case-entry | a1_hash_int_exact | int.__hash__
+case-entry | a1_hash_int_sub | int.__hash__
+case-entry | a1_hash_float_exact | float.__hash__
+case-entry | a1_hash_float_sub | float.__hash__
+case-entry | a1_hash_tuple_exact | tuple.__hash__
+case-entry | a1_hash_tuple_sub | tuple.__hash__
+case-entry | a1_hash_frozenset_exact | frozenset.__hash__
+case-entry | a1_hash_frozenset_sub | frozenset.__hash__
+case-entry | a1_hash_bool_exact | int.__hash__
+case-entry | a1_int_int_sub | int.__int__
+case-entry | a1_int_float_exact | float.__int__
+case-entry | a1_int_float_sub | float.__int__
+case-entry | a1_int_bool_exact | int.__int__
+case-entry | a1_float_int_exact | int.__float__
+case-entry | a1_float_int_sub | int.__float__
+case-entry | a1_float_float_sub | float.__float__
+case-entry | a1_abs_int_exact | int.__abs__
+case-entry | a1_abs_int_sub | int.__abs__
+case-entry | a1_abs_float_exact | float.__abs__
+case-entry | a1_abs_float_sub | float.__abs__
+case-entry | a1_bool_int_exact | int.__bool__
+case-entry | a1_bool_int_sub | int.__bool__
+case-entry | a1_bool_float_exact | float.__bool__
+case-entry | a1_bool_float_sub | float.__bool__
+case-entry | a1_bool_str_exact | str.__len__
+case-entry | a1_bool_str_sub | str.__len__
+case-entry | a1_bool_bytes_exact | bytes.__len__
+case-entry | a1_bool_bytes_sub | bytes.__len__
+case-entry | a1_bool_tuple_exact | tuple.__len__
+case-entry | a1_bool_tuple_sub | tuple.__len__
+case-entry | a1_bool_list_exact | list.__len__
+case-entry | a1_bool_list_sub | list.__len__
+case-entry | a1_bool_dict_exact | dict.__len__
+case-entry | a1_bool_dict_sub | dict.__len__
+case-entry | a1_bool_set_exact | set.__len__
+case-entry | a1_bool_set_sub | set.__len__
+case-entry | a1_bool_frozenset_exact | frozenset.__len__
+case-entry | a1_bool_frozenset_sub | frozenset.__len__
+case-entry | a1_bool_range_exact | range.__bool__
+case-entry | a1_iter_next_str_exact | str.__iter__
+case-entry | a1_iter_next_str_sub | str.__iter__
+case-entry | a1_iter_next_tuple_exact | tuple.__iter__
+case-entry | a1_iter_next_tuple_sub | tuple.__iter__
+case-entry | a1_iter_next_list_exact | list.__iter__
+case-entry | a1_iter_next_list_sub | list.__iter__
+case-entry | a1_iter_next_dict_exact | dict.__iter__
+case-entry | a1_iter_next_dict_sub | dict.__iter__
+case-entry | a1_iter_next_range_exact | range.__iter__
+case-entry | a1_list_of_str_exact | str.__iter__
+case-entry | a1_list_of_str_sub | str.__iter__
+case-entry | a1_list_of_tuple_sub | tuple.__iter__
+case-entry | a1_list_of_list_sub | list.__iter__
+case-entry | a1_list_of_dict_exact | dict.__iter__
+case-entry | a1_list_of_dict_sub | dict.__iter__
+case-entry | a1_list_of_range_exact | range.__iter__
+case-entry | a1_tuple_of_str_exact | str.__iter__
+case-entry | a1_tuple_of_str_sub | str.__iter__
+case-entry | a1_tuple_of_list_sub | list.__iter__
+case-entry | a1_tuple_of_range_exact | range.__iter__
+case-entry | a1_sorted_str_exact | str.__iter__
+case-entry | a1_sorted_str_sub | str.__iter__
+case-entry | a1_sorted_tuple_sub | tuple.__iter__
+case-entry | a1_sorted_list_sub | list.__iter__
+case-entry | a1_sorted_set_exact | set.__iter__
+case-entry | a1_sum_tuple_exact | tuple.__iter__
+case-entry | a1_sum_tuple_sub | tuple.__iter__
+case-entry | a1_sum_list_exact | list.__iter__
+case-entry | a1_sum_list_sub | list.__iter__
+case-entry | a1_sum_set_exact | set.__iter__
+case-entry | a1_sum_range_exact | range.__iter__
+case-entry | a1_max_str_exact | str.__iter__
+case-entry | a1_max_str_sub | str.__iter__
+case-entry | a1_max_tuple_exact | tuple.__iter__
+case-entry | a1_max_tuple_sub | tuple.__iter__
+case-entry | a1_max_list_exact | list.__iter__
+case-entry | a1_max_list_sub | list.__iter__
+case-entry | a1_max_range_exact | range.__iter__
+case-entry | a1_any_tuple_exact | tuple.__iter__
+case-entry | a1_any_tuple_sub | tuple.__iter__
+case-entry | a1_any_list_exact | list.__iter__
+case-entry | a1_any_list_sub | list.__iter__
+case-entry | a1_any_str_exact | str.__iter__
+case-entry | a1_any_str_sub | str.__iter__
+case-entry | a1_set_of_tuple_exact | tuple.__iter__
+case-entry | a1_set_of_tuple_sub | tuple.__iter__
+case-entry | a1_set_of_list_exact | list.__iter__
+case-entry | a1_set_of_list_sub | list.__iter__
+case-entry | a1_set_of_set_exact | set.__iter__
+case-entry | a1_set_of_set_sub | set.__iter__
+case-entry | a1_join_str_exact | str.__iter__
+case-entry | a1_join_str_sub | str.__iter__
+case-entry | a1_print_int_exact | object.__str__
+case-entry | a1_print_int_sub | object.__str__
+case-entry | a1_print_float_exact | object.__str__
+case-entry | a1_print_float_sub | object.__str__
+case-entry | a1_print_str_sub | str.__str__
+case-entry | a1_print_bytes_exact | bytes.__str__
+case-entry | a1_print_bytes_sub | bytes.__str__
+case-entry | a1_print_tuple_exact | object.__str__
+case-entry | a1_print_tuple_sub | object.__str__
+case-entry | a1_print_list_exact | object.__str__
+case-entry | a1_print_list_sub | object.__str__
+case-entry | a1_print_dict_exact | object.__str__
+case-entry | a1_print_dict_sub | object.__str__
+case-entry | a1_print_bool_exact | object.__str__
+case-entry | a1_print_range_exact | object.__str__
+case-entry | call_type_repr | type.__repr__
+case-entry | call_type_repr | NoneType.__repr__
+case-entry | call_type_repr | ellipsis.__repr__
+case-entry | call_type_repr | NotImplementedType.__repr__
+case-entry | call_class_getitem | list.__class_getitem__
+case-entry | call_class_getitem | dict.__class_getitem__
+case-entry | call_class_getitem | tuple.__class_getitem__
+case-entry | call_class_getitem | set.__class_getitem__
+case-entry | call_class_getitem | frozenset.__class_getitem__
+case-entry | call_callable_iterator | callable_iterator.__iter__
+case-entry | call_callable_iterator | callable_iterator.__next__
+case-entry | call_seq_iterator | iterator.__iter__
+case-entry | call_seq_iterator | iterator.__next__
+case-entry | call_seq_iterator | iterator.__length_hint__
+case-entry | call_init_subclass | object.__init_subclass__
+case-entry | call_property_set_name | property.__set_name__
+case-entry | t_type_checking | typing.TYPE_CHECKING
+case-entry | t_module_names | dataclasses.__name__
+case-entry | t_module_names | typing.__name__
+case-entry | t_cast_kinds | typing.cast
+case-entry | t_any | typing.Any
+case-entry | t_any_isinstance | typing.Any
+case-entry | t_optional | typing.Optional
+case-entry | t_optional | typing.Union
+case-entry | t_union_ops | typing.Union
+case-entry | t_union_isinstance | typing.Union
+case-entry | t_required_forms | typing.NotRequired
+case-entry | t_required_forms | typing.Required
+case-entry | t_required_forms | typing.TypeGuard
+case-entry | t_aliases | typing.Dict
+case-entry | t_aliases | typing.List
+case-entry | t_aliases | typing.Set
+case-entry | t_aliases | typing.Tuple
+case-entry | t_alias_call | typing.List
+case-entry | t_alias_isinstance | typing.List
+case-entry | t_alias_attributes | typing.Dict
+case-entry | t_typeddict | typing.TypedDict
+case-entry | t_typeddict_total_false | typing.Required
+case-entry | t_typeddict_total_false | typing.TypedDict
+case-entry | t_typeddict_inherit | typing.NotRequired
+case-entry | t_typeddict_inherit | typing.TypedDict
+case-entry | t_typeddict_isinstance | typing.TypedDict
+case-entry | t_typeddict_sub_values | typing.TypedDict
+case-entry | t_namedtuple | typing.NamedTuple
+case-entry | t_namedtuple_errors | typing.NamedTuple
+case-entry | t_namedtuple_other_base | typing.NamedTuple
+case-entry | t_namedtuple_sub_fields | typing.NamedTuple
+case-entry | t_namedtuple_field_eq_reenters | typing.NamedTuple
+case-entry | t_dataclass_basic | dataclasses.dataclass
+case-entry | t_dataclass_order | dataclasses.dataclass
+case-entry | t_dataclass_order_mixed | dataclasses.dataclass
+case-entry | t_dataclass_frozen | dataclasses.FrozenInstanceError
+case-entry | t_dataclass_frozen | dataclasses.dataclass
+case-entry | t_dataclass_frozen_del | dataclasses.FrozenInstanceError
+case-entry | t_dataclass_frozen_del | dataclasses.dataclass
+case-entry | t_dataclass_hash_actions | dataclasses.dataclass
+case-entry | t_dataclass_options | dataclasses.dataclass
+case-entry | t_dataclass_kw_only | dataclasses.dataclass
+case-entry | t_dataclass_kw_only | dataclasses.field
+case-entry | t_dataclass_kw_only_error | dataclasses.dataclass
+case-entry | t_dataclass_mutable_default | dataclasses.dataclass
+case-entry | t_dataclass_field_order_error | dataclasses.dataclass
+case-entry | t_dataclass_post_init | dataclasses.dataclass
+case-entry | t_dataclass_post_init | dataclasses.field
+case-entry | t_dataclass_replace | dataclasses.dataclass
+case-entry | t_dataclass_replace | dataclasses.replace
+case-entry | t_dataclass_replace_error | dataclasses.dataclass
+case-entry | t_dataclass_replace_error | dataclasses.replace
+case-entry | t_dataclass_field_object | dataclasses.Field
+case-entry | t_dataclass_field_object | dataclasses.MISSING
+case-entry | t_dataclass_field_object | dataclasses.field
+case-entry | t_dataclass_inherit | dataclasses.dataclass
+case-entry | t_dataclass_builtin_sub_fields | dataclasses.dataclass
+case-entry | t_dataclass_on_builtin_sub | dataclasses.dataclass
+case-entry | t_dataclass_field_eq_reenters | dataclasses.dataclass
+case-entry | t_dataclass_field_eq_raises | dataclasses.dataclass
+case-entry | t_dataclass_field_hash_raises | dataclasses.dataclass
+case-entry | t_dataclass_field_repr_raises | dataclasses.dataclass
+case-entry | t_dataclass_field_lt_notimpl | dataclasses.dataclass
+case-entry | t_dataclass_recursive_repr | dataclasses.dataclass
+case-entry | t_dataclass_eq_other_class | dataclasses.dataclass
+case-entry | t_factory_function | dataclasses.dataclass
+case-entry | t_factory_function | dataclasses.field
+case-entry | t_factory_lambda | dataclasses.dataclass
+case-entry | t_factory_lambda | dataclasses.field
+case-entry | t_factory_builtin | dataclasses.dataclass
+case-entry | t_factory_builtin | dataclasses.field
+case-entry | t_factory_class | dataclasses.dataclass
+case-entry | t_factory_class | dataclasses.field
+case-entry | t_factory_callable_object | dataclasses.dataclass
+case-entry | t_factory_callable_object | dataclasses.field
+case-entry | t_factory_raises | dataclasses.dataclass
+case-entry | t_factory_raises | dataclasses.field
+case-entry | t_post_init_staticmethod | dataclasses.dataclass
+case-entry | t_post_init_classmethod | dataclasses.dataclass
+case-entry | t_post_init_raises | dataclasses.dataclass
+case-entry | tf_A1_sub_over_fields | dataclasses.dataclass
+case-entry | tf_A1_sub_over_fields | typing.NamedTuple
+case-entry | tf_A1_sub_over_fields | typing.TypedDict
+case-entry | tf_A2_eq_mutate | dataclasses.dataclass
+case-entry | tf_A2_eq_recurse | dataclasses.dataclass
+case-entry | tf_A2_eq_replace_class | dataclasses.dataclass
+case-entry | tf_A2_factory_reenters | dataclasses.dataclass
+case-entry | tf_A2_factory_reenters | dataclasses.field
+case-entry | tf_A2_hash_mutate | dataclasses.dataclass
+case-entry | tf_A2_lt_mutate | dataclasses.dataclass
+case-entry | tf_A2_nt_eq_logs | typing.NamedTuple
+case-entry | tf_A2_post_init_replace_class | dataclasses.dataclass
+case-entry | tf_A2_repr_field_reenters_repr | dataclasses.dataclass
+case-entry | tf_A2_repr_mutate | dataclasses.dataclass
+case-entry | tf_A3_df_bound_method | dataclasses.dataclass
+case-entry | tf_A3_df_bound_method | dataclasses.field
+case-entry | tf_A3_df_builtin_method | dataclasses.dataclass
+case-entry | tf_A3_df_builtin_method | dataclasses.field
+case-entry | tf_A3_df_class_with_new | dataclasses.dataclass
+case-entry | tf_A3_df_class_with_new | dataclasses.field
+case-entry | tf_A3_pi_builtin | dataclasses.dataclass
+case-entry | tf_A3_pi_callable_obj | dataclasses.dataclass
+case-entry | tf_A3_pi_inherited | dataclasses.dataclass
+case-entry | tf_A3_pi_none | dataclasses.dataclass
+case-entry | tf_A3_pi_property | dataclasses.dataclass
+case-entry | tf_A4_eq_nonbool | dataclasses.dataclass
+case-entry | tf_A4_hash_nonint | dataclasses.dataclass
+case-entry | tf_A4_nt_repr_raises | typing.NamedTuple
+case-entry | tf_A4_post_init_context | dataclasses.dataclass
+case-entry | tf_A4_repr_nonstr | dataclasses.dataclass
+case-entry | tf_A5_alias_cache_eviction | typing.List
+case-entry | tf_A5_alias_cache_lru | typing.Dict
+case-entry | tf_A5_alias_cache_lru | typing.List
+case-entry | tf_A5_alias_cache_lru | typing.Optional
+case-entry | tf_A5_alias_cache_lru | typing.Set
+case-entry | tf_A5_alias_cache_lru | typing.Tuple
+case-entry | tf_A5_alias_cache_lru | typing.Union
+case-entry | tf_A5_identity | typing.Dict
+case-entry | tf_A5_identity | typing.List
+case-entry | tf_A5_identity | typing.Union
+case-entry | tf_natives_alias_call_caught | typing.Any
+case-entry | tf_natives_alias_call_caught | typing.List
+case-entry | tf_natives_any_new_only | typing.Any
+case-entry | tf_natives_c_types | typing.NamedTuple
+case-entry | tf_natives_c_types | types.GenericAlias.__repr__
+case-entry | tf_natives_c_types | types.GenericAlias.__call__
+case-entry | tf_natives_c_types | types.GenericAlias.__getattribute__
+case-entry | tf_natives_c_types | types.GenericAlias.__lt__
+case-entry | tf_natives_c_types | types.GenericAlias.__le__
+case-entry | tf_natives_c_types | types.GenericAlias.__eq__
+case-entry | tf_natives_c_types | types.GenericAlias.__ne__
+case-entry | tf_natives_c_types | types.GenericAlias.__gt__
+case-entry | tf_natives_c_types | types.GenericAlias.__ge__
+case-entry | tf_natives_c_types | types.GenericAlias.__or__
+case-entry | tf_natives_c_types | types.GenericAlias.__ror__
+case-entry | tf_natives_c_types | types.GenericAlias.__mro_entries__
+case-entry | tf_natives_c_types | types.GenericAlias.__instancecheck__
+case-entry | tf_natives_c_types | types.GenericAlias.__subclasscheck__
+case-entry | tf_natives_c_types | types.UnionType.__repr__
+case-entry | tf_natives_c_types | types.UnionType.__getattribute__
+case-entry | tf_natives_c_types | types.UnionType.__lt__
+case-entry | tf_natives_c_types | types.UnionType.__le__
+case-entry | tf_natives_c_types | types.UnionType.__eq__
+case-entry | tf_natives_c_types | types.UnionType.__ne__
+case-entry | tf_natives_c_types | types.UnionType.__gt__
+case-entry | tf_natives_c_types | types.UnionType.__ge__
+case-entry | tf_natives_c_types | types.UnionType.__or__
+case-entry | tf_natives_c_types | types.UnionType.__ror__
+case-entry | tf_natives_c_types | collections._tuplegetter.__get__
+case-entry | tf_natives_c_types | collections._tuplegetter.__repr__
+case-entry | tf_natives_field_setname | dataclasses.dataclass
+case-entry | tf_natives_field_setname | dataclasses.field
+case-entry | tf_natives_forward_ref_in_alias | typing.ForwardRef
+case-entry | tf_natives_forward_ref_in_alias | typing.List
+case-entry | tf_natives_forward_ref_in_alias | typing.Optional
+case-entry | tf_natives_ga_getattr_ok | typing.List
+case-entry | tf_natives_ga_subclasscheck | typing.List
+case-entry | tf_natives_ga_subclasscheck | typing.Union
+case-entry | tf_natives_overload | typing.overload
+case-entry | tf_natives_params | dataclasses.MISSING
+case-entry | tf_natives_params | dataclasses.dataclass
+case-entry | tf_natives_params | dataclasses.field
+case-entry | tf_natives_private_names | dataclasses.MISSING
+case-entry | tf_natives_private_names | dataclasses._DataclassParams
+case-entry | tf_natives_private_names | dataclasses._FIELD
+case-entry | tf_natives_private_names | dataclasses._FIELDS
+case-entry | tf_natives_private_names | dataclasses._FIELD_BASE
+case-entry | tf_natives_private_names | dataclasses._FIELD_CLASSVAR
+case-entry | tf_natives_private_names | dataclasses._FIELD_INITVAR
+case-entry | tf_natives_private_names | dataclasses._HAS_DEFAULT_FACTORY
+case-entry | tf_natives_private_names | dataclasses._HAS_DEFAULT_FACTORY_CLASS
+case-entry | tf_natives_private_names | dataclasses._MISSING_TYPE
+case-entry | tf_natives_private_names | dataclasses._PARAMS
+case-entry | tf_natives_private_names | dataclasses._POST_INIT_NAME
+case-entry | tf_natives_private_names | typing.Any
+case-entry | tf_natives_private_names | typing.List
+case-entry | tf_natives_private_names | typing.NamedTuple
+case-entry | tf_natives_private_names | typing.NamedTupleMeta
+case-entry | tf_natives_private_names | typing.Optional
+case-entry | tf_natives_private_names | typing.Tuple
+case-entry | tf_natives_private_names | typing.TypedDict
+case-entry | tf_natives_private_names | typing.Union
+case-entry | tf_natives_private_names | typing._AnyMeta
+case-entry | tf_natives_private_names | typing._BaseGenericAlias
+case-entry | tf_natives_private_names | typing._Final
+case-entry | tf_natives_private_names | typing._GenericAlias
+case-entry | tf_natives_private_names | typing._NamedTuple
+case-entry | tf_natives_private_names | typing._NotIterable
+case-entry | tf_natives_private_names | typing._SpecialForm
+case-entry | tf_natives_private_names | typing._SpecialGenericAlias
+case-entry | tf_natives_private_names | typing._TupleType
+case-entry | tf_natives_private_names | typing._TypedDict
+case-entry | tf_natives_private_names | typing._TypedDictMeta
+case-entry | tf_natives_private_names | typing._UnionGenericAlias
+case-entry | tf_natives_private_names | typing._namedtuple_mro_entries
+case-entry | tf_natives_private_names | typing._overload_dummy
+case-entry | tf_natives_set_name | dataclasses.dataclass
+case-entry | tf_natives_setattr_fwd | typing.List
+case-entry | tf_natives_sf_errors_ok | typing.Optional
+case-entry | tf_natives_sf_errors_ok | typing.Union
+case-entry | tf_natives_sf_mro_entries | typing.Union
+case-entry | tf_natives_sf_or | typing.Optional
+case-entry | tf_natives_sf_or | typing.Union
+case-entry | tf_natives_sf_repr_or | typing.Optional
+case-entry | tf_natives_sf_repr_or | typing.Union
+case-entry | tf_natives_sga | typing.Dict
+case-entry | tf_natives_sga | typing.List
+case-entry | tf_natives_sga | typing.Tuple
+case-entry | tf_natives_td_misc | typing.TypedDict
+case-entry | tf_natives_tg_del | typing.NamedTuple
+case-entry | tf_natives_tg_del | collections._tuplegetter.__delete__
+case-entry | tf_natives_tg_set | typing.NamedTuple
+case-entry | tf_natives_tg_set | collections._tuplegetter.__set__
+case-entry | tf_options_field_compare_hash | dataclasses.dataclass
+case-entry | tf_options_field_compare_hash | dataclasses.field
+case-entry | tf_options_hash_action_rows | dataclasses.dataclass
+case-entry | tf_options_option_errors | dataclasses.dataclass

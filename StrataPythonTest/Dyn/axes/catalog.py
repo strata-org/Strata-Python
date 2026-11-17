@@ -1028,7 +1028,7 @@ REGRESSIONS = {
     "lib_dict_copy_iter": (["class D(dict):\n    def __iter__(self):\n        ev('D.__iter__')\n        return iter(['zz'])\n    def __repr__(self):\n        return 'D()'\n"],
                            ["r = sorted(D(a=1).copy().items())"], "result"),
     "lib_huge_width": ([], ["r = 'x'.zfill(-5) + 'y'.ljust(0)"], "result"),
-    # Found by the fuzzer, outside its build seed.
+    # Found by the fuzzer, outside seed 1.
     "fuzz_str_sub_in_str": (["class S(str):\n    pass\n"], ["r = S('a') in 'ab'"], "result"),
     "fuzz_list_sub_radd_other": (["class L(list):\n    def __radd__(self, o):\n        ev('L.__radd__')\n        return 'L.radd'\n    def __repr__(self):\n        return 'L()'\n",
                                   "class U:\n    def __radd__(self, o):\n        ev('U.__radd__')\n        return 'U.radd'\n"],
