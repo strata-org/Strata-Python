@@ -1,9 +1,9 @@
 test_datetime.py(13, 31): ✅ pass - global 'now' is bound
-test_datetime.py(13, 0): ✅ pass - (Origin_datetime_date_Requires)d_type
-test_datetime.py(14, 0): ✅ pass - (Origin_timedelta_Requires)
-test_datetime.py(14, 0): ✅ pass - (Origin_timedelta_Requires)hours_type
-test_datetime.py(14, 0): ✅ pass - (Origin_timedelta_Requires)days_pos
-test_datetime.py(14, 0): ✅ pass - (Origin_timedelta_Requires)hours_pos
+test_datetime.py(13, 17): ✅ pass - (Origin_datetime_date_Requires)d_type
+test_datetime.py(14, 20): ✅ pass - (Origin_timedelta_Requires)
+test_datetime.py(14, 20): ✅ pass - (Origin_timedelta_Requires)hours_type
+test_datetime.py(14, 20): ✅ pass - (Origin_timedelta_Requires)days_pos
+test_datetime.py(14, 20): ✅ pass - (Origin_timedelta_Requires)hours_pos
 test_datetime.py(15, 19): ✅ pass - global 'end' is bound
 test_datetime.py(15, 25): ✅ pass - global 'delta' is bound
 test_datetime.py(15, 19): ✅ pass - Check PSub exception

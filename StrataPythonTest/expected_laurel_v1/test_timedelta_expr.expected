@@ -1,7 +1,7 @@
-test_timedelta_expr.py(4, 0): ✅ pass - (Origin_timedelta_Requires)
-test_timedelta_expr.py(4, 0): ✅ pass - (Origin_timedelta_Requires)hours_type
-test_timedelta_expr.py(4, 0): ✅ pass - (Origin_timedelta_Requires)days_pos
-test_timedelta_expr.py(4, 0): ✅ pass - (Origin_timedelta_Requires)hours_pos
+test_timedelta_expr.py(4, 19): ✅ pass - (Origin_timedelta_Requires)
+test_timedelta_expr.py(4, 19): ✅ pass - (Origin_timedelta_Requires)hours_type
+test_timedelta_expr.py(4, 19): ✅ pass - (Origin_timedelta_Requires)days_pos
+test_timedelta_expr.py(4, 19): ✅ pass - (Origin_timedelta_Requires)hours_pos
 test_timedelta_expr.py(5, 18): ✅ pass - global 'now' is bound
 test_timedelta_expr.py(5, 24): ✅ pass - global 'delta' is bound
 test_timedelta_expr.py(5, 18): ✅ pass - Check PSub exception

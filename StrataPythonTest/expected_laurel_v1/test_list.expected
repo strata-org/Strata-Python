@@ -2,7 +2,7 @@ test_list.py(3, 13): ✅ pass - global 'numbers' is bound
 test_list.py(3, 7): ✅ pass - precondition
 test_list.py(3, 0): ✅ pass - assert(…)
 test_list.py(5, 4): ✅ pass - global 'numbers' is bound
-test_list.py(5, 0): ✅ pass - precondition
+test_list.py(5, 4): ✅ pass - precondition
 test_list.py(7, 7): ✅ pass - global 'n' is bound
 test_list.py(7, 0): ✅ pass - assert(…)
 test_list.py(9, 7): ✅ pass - global 'numbers' is bound

@@ -1,7 +1,7 @@
 test_bubble_sort_step.py(3, 7): ✅ pass - precondition
 test_bubble_sort_step.py(3, 15): ✅ pass - precondition
 test_bubble_sort_step.py(3, 7): ✅ pass - Check PGt exception
-test_bubble_sort_step.py(4, 8): ✅ pass - precondition
+test_bubble_sort_step.py(4, 17): ✅ pass - precondition
 test_bubble_sort_step.py(4, 8): ✅ pass - assert(…)
 test_bubble_sort_step.py(5, 16): ✅ pass - precondition
 test_bubble_sort_step.py(5, 8): ✅ pass - Check Any_sets! exception
@@ -9,7 +9,7 @@ test_bubble_sort_step.py(6, 8): ✅ pass - Check Any_sets! exception
 test_bubble_sort_step.py(7, 7): ✅ pass - precondition
 test_bubble_sort_step.py(7, 15): ✅ pass - precondition
 test_bubble_sort_step.py(7, 7): ✅ pass - Check PGt exception
-test_bubble_sort_step.py(8, 8): ✅ pass - precondition
+test_bubble_sort_step.py(8, 18): ✅ pass - precondition
 test_bubble_sort_step.py(8, 8): ✅ pass - assert(…)
 test_bubble_sort_step.py(9, 16): ✅ pass - precondition
 test_bubble_sort_step.py(9, 8): ✅ pass - Check Any_sets! exception
@@ -17,7 +17,7 @@ test_bubble_sort_step.py(10, 8): ✅ pass - Check Any_sets! exception
 test_bubble_sort_step.py(11, 7): ✅ pass - precondition
 test_bubble_sort_step.py(11, 15): ✅ pass - precondition
 test_bubble_sort_step.py(11, 7): ✅ pass - Check PGt exception
-test_bubble_sort_step.py(12, 8): ✅ pass - precondition
+test_bubble_sort_step.py(12, 18): ✅ pass - precondition
 test_bubble_sort_step.py(12, 8): ✅ pass - assert(…)
 test_bubble_sort_step.py(13, 16): ✅ pass - precondition
 test_bubble_sort_step.py(13, 8): ✅ pass - Check Any_sets! exception

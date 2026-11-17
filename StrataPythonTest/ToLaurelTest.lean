@@ -66,6 +66,7 @@ private def fmtHighType : HighType → String
   | .TFloat64 => "TFloat64"
   | .TString => "TString"
   | .TSet _ => "TSet"
+  | .TArray _ => "TArray"
   | .TMap _ _ => "TMap"
   | .UserDefined name => s!"UserDefined({name})"
   | .Applied _ _ => "Applied"
@@ -1993,6 +1994,9 @@ private def udBase (n : String) : Strata.Laurel.HighTypeMd := ⟨.UserDefined (m
 
 -- Totality guard for `fmtHighType`'s `.TVar` arm (no SPFE path constructs a `.TVar`).
 #guard fmtHighType (.TVar (mkId "T")) == "TVar(T)"
+
+-- Totality guard for `fmtHighType`'s `.TArray` arm (Python programs have no arrays).
+#guard fmtHighType (.TArray ⟨.TInt, default⟩) == "TArray"
 
 /-! ## `OLD(expr)` two-state lowering
 

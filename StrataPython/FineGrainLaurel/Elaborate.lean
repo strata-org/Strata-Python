@@ -289,7 +289,7 @@ def eraseType : HighType → LowType
     | _ => .TUser id.text
   | .TReal => .TCore "real"
   | .TSet _ | .TMap _ _ | .Applied _ _ | .Intersection _ | .Unknown
-  | .TVar _ | .TBv _ | .MultiValuedExpr _ => .TCore "Any"
+  | .TVar _ | .TBv _ | .MultiValuedExpr _ | .TArray _ => .TCore "Any"
 
 /-- Inverse of erasure (partial): lifts a LowType back to HighType for env extension. -/
 def liftType : LowType → HighType
@@ -1092,6 +1092,7 @@ partial def checkAssign (target : VariableMd) (value : StmtExprMd) (rest : List 
     | .New classId => checkAssignNew md id.text targetTy classId rest retTy grade
     | _ => checkAssignVar md id.text targetTy value rest retTy grade
   | .Stack _ => throw "checkAssign: a stack target should have been turned into a local"
+  | .ArrayElement .. => throw "checkAssign: Python programs have no array elements"
 
 /-- ⟦·⟧⇐ₚ (assign, generic RHS):
 ```
