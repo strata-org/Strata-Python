@@ -1,1 +1,1 @@
-Core type checking failed: Impossible to unify Any with int\.
+Core type checking failed: Procedure 'test_oop_field_write': Impossible to unify Any with int\.

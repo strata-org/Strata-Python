@@ -1,1 +1,1 @@
-Core type checking failed: Impossible to unify Any with int\.
+Core type checking failed: Procedure 'reset': Impossible to unify Any with int\.
