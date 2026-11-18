@@ -608,12 +608,6 @@ def resolveArgBinders (rc : ResolveCtx) (ctx : Ctx) (known : Std.HashMap Name Kn
   for b in bs do
     match b with
     | `(dynBinder| ( $xs:ident* : $t )) =>
-      -- A stopgap. Cases names the value it reads from a field after the field, as one segment
-      -- of a `Name`, and a segment with a `.` prints like two segments, so the lowered module
-      -- would not read back. Nothing in Dyn yet says which strings a name's segment may be.
-      for x in xs do
-        if (x.getId.toString (escape := false)).contains '.' then
-          err x s!"field `{x.getId.toString (escape := false)}`: a field's name has no `.`"
       seen ← checkDistinct seen (xs.map fun x => (x.getId.toString (escape := false), x.raw))
       if let some r ← resolveTy rc ctx known vars t then
         for x in xs do out := out.push (x.getId.toString (escape := false), r, t.raw)

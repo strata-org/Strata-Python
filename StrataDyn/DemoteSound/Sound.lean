@@ -34,8 +34,9 @@ The observation is of the world, not of step counts or choices. No fixed-fuel co
 claimed. Neither that `demote`'s linked output satisfies `DemotionOK`, nor that the padded
 original runs as the original, is proved here. A padding that the certificate accepts cannot
 fault: it is constants, total functions and allocations. What separates the padded original
-from the original is that an allocation renumbers the cells made after it. A default whose
-operation links to a rule tree, which may fault, has no certificate.
+from the original is that an allocation renumbers the cells made after it. `demote`'s
+defaults are literals and constructors; in the execution table generated for the environment,
+they link to constants and total functions.
 -/
 
 namespace Strata.Dyn.DemoteSound

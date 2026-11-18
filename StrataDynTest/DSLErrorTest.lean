@@ -705,22 +705,4 @@ example : OkCtorNames.T.toRaw_ty.name = .str (.str .base "x") "toRaw_ty" := rfl
 example : (OkCtorNames.T.case.sig (e := OkCtorNames.env)).succs.size = 5 := rfl
 example : OkCtorNames.T.val.name = .str (.str .base "x") "Val" := rfl
 
-/-- error: field `a.b`: a field's name has no `.`
----
-error: field `c.d`: a field's name has no `.`
--/
-#guard_msgs in
-public environment ErrFieldDot extends Base where
-  open base
-  data D where
-    | parts (a.b : Int)
-    | quoted («c.d» : Int)
-
-/-- The same fields, each one segment, are accepted. -/
-public environment OkFieldDot extends Base where
-  open base
-  data D where
-    | parts (a_b : Int)
-    | quoted (cd : Int)
-
 end Strata.Dyn.DSLErrorTest

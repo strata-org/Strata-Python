@@ -305,13 +305,22 @@ function `@inc` has no block parameter and stays as it is. -/
 
 /-- The literals, and `nil` for `while.IntList`. -/
 private def withNil : Demote.Defaults While.env := fun τ =>
-  if τ = While.IntList then some (.apply While.IntList.nil.ref ⟨#[], rfl⟩ rfl [])
+  if τ = While.IntList then Demote.Default.ctor? While.IntList.nil.ref ⟨#[], rfl⟩ []
   else Demote.Defaults.literals τ
 
-/-! An operation with an effect is no default: `Demote.Default.apply` takes the proof that the
-operation is pure, and `while.tick`, which counts how often it ran, has none. -/
+/-! `Demote.Default.ctor?` makes a default only of a datatype's constructor, such as `nil`.
+`while.tick` counts how often it ran, so it is not even pure.  `test.getHead` is pure, but its
+rule stops with a gap on `nil`, so `test.getHead(nil)` as a default would fault in the entry
+block; it is no constructor, and `ctor?` refuses it. -/
 
-example : (While.tick.sig (e := While.env)).effect ≠ .pure := by decide
+#guard (Demote.Default.ctor? (While.IntList.nil.ref (e := While.env)) ⟨#[], rfl⟩ []).isSome
+#guard (Demote.Default.ctor? (While.tick.ref (e := While.env)) ⟨#[], rfl⟩ []).isNone
+open CasesTest in
+#guard match Demote.Default.ctor? (While.IntList.nil.ref (e := CaseEnv.env)) ⟨#[], rfl⟩ [] with
+  | some nil =>
+    (Demote.Default.ctor? (CaseEnv.getHead.ref (e := CaseEnv.env)) ⟨#[], rfl⟩
+      [(While.IntList, nil)]).isNone
+  | none => false
 
 private def range := "module m {
   func @inc(%x.0 : base.Int) -> base.Int {
@@ -384,8 +393,8 @@ form folds a constant into its use. -/
 /-- The literals, and `error 0` for `base.Except(base.Int, base.Int)`. -/
 private def withError : Demote.Defaults While.env := fun τ =>
   if τ = Base.Except Base.Int Base.Int then
-    some (.apply Base.Except.error.ref ⟨#[.ty Base.Int, .ty Base.Int], rfl⟩ rfl
-      [(Base.Int, .const (.int 0))])
+    Demote.Default.ctor? Base.Except.error.ref ⟨#[.ty Base.Int, .ty Base.Int], rfl⟩
+      [(Base.Int, .const (.int 0))]
   else Demote.Defaults.literals τ
 
 /--

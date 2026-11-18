@@ -21,9 +21,10 @@ one and a mutually recursive pair. Every operation has a rule, so its modules ru
 engine (`CaseSem`).
 
 `StaticEnv` extends it with what is only lowered and never run: accessors whose signatures
-Cases refuses, and two datatypes that the engine's type rules do not take. One has no
-constructors. The other is a mutually recursive pair of which only the first takes a type
-parameter; Lean's mutual inductives share their parameters.
+Cases refuses, two datatypes that the engine's type rules do not take, and a third whose fields'
+names are mostly not ASCII identifiers. Of the two, one has no constructors. The other is a
+mutually recursive pair of which only the first takes a type parameter; Lean's mutual inductives
+share their parameters.
 
 The accessors are declared by hand; nothing generates them yet.
 -/
@@ -191,6 +192,11 @@ public environment StaticEnv extends CaseEnv where
   pure insn isStop (v : Untagged) : Bool
   pure insn getCount (v : Untagged) : Int
   pure insn getNext (v : Untagged) : Tagged Bool
+  /-- Four fields whose names are not ASCII identifiers, and `n`, whose name is one; the one
+  selector `getAny` reads them all. -/
+  data Odd where
+    | odd («0» : Int) («a.b» : Int) («007» : Int) («a b» : Int) (n : Int)
+  pure insn getAny (v : Odd) : Int
   end still
 
 public section
@@ -203,7 +209,7 @@ private def testers : Std.HashMap Name Name := .ofList [
     (While.IntList.nil.name, CaseEnv.isNil.name),
     (StaticEnv.Untagged.stop.name, StaticEnv.isStop.name)]
 
-private def selectors : Std.HashMap (Name × String) Name := .ofList [
+private def selectors : Std.HashMap (Name × String) Name := .ofList <| [
     ((CaseEnv.Choice.one.name, "value"), CaseEnv.getOne.name),
     ((CaseEnv.Choice.pair.name, "lhs"), CaseEnv.getLeft.name),
     ((CaseEnv.Choice.pair.name, "rhs"), CaseEnv.getRight.name),
@@ -219,7 +225,9 @@ private def selectors : Std.HashMap (Name × String) Name := .ofList [
     ((StaticEnv.Tagged.tagged.name, "tag"), StaticEnv.getTag.name),
     ((StaticEnv.Tagged.tagged.name, "inner"), StaticEnv.getInner.name),
     ((StaticEnv.Untagged.step.name, "count"), StaticEnv.getCount.name),
-    ((StaticEnv.Untagged.step.name, "next"), StaticEnv.getNext.name)]
+    ((StaticEnv.Untagged.step.name, "next"), StaticEnv.getNext.name)] ++
+  (["0", "a.b", "007", "a b", "n"].map fun f =>
+    ((StaticEnv.Odd.odd.name, f), StaticEnv.getAny.name))
 
 /-- Accessors keyed by full constructor identities, not by their last components. -/
 def ops : CaseOps where

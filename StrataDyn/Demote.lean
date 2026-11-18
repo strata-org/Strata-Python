@@ -19,9 +19,12 @@ passes nothing; and the block reads the cell where it starts, as `%p`, so the pa
 stay as they are.  The writes of a jump pass values, not cells, so a jump that permutes
 parameters needs no temporary.  Contracts, extern functions and ghosts stay as they are.
 
-A default (`Demote.Default`) is a literal or a pure operation applied to defaults.  No run
-reads it, but the instructions that compute it run in the entry block; that they do not fault
-is the caller's obligation.
+A default (`Demote.Default`) is a literal or a datatype's constructor applied to defaults.  No
+run reads it, but the instructions that compute it run in the entry block, so they must not
+fault: in the execution table generated for the environment, a constructor takes no rule and
+links to a total function, which is what the certificate admits there.  A type with neither a
+literal nor a constructor, such as an opaque type, has no default yet, so `demote` rejects a
+function with a block parameter of that type.
 
 The input shape (`Demotable`) is plain control with bare branches, which case lowering
 provides (`demotable_cased`).  The pass takes the proof and does not decide it: with it, the
@@ -49,16 +52,25 @@ public section
 
 namespace Demote
 
-/-- A value that reads no state: a literal, or a `pure` operation applied to defaults, each with
-its type, such as a datatype's constructor applied to defaults of its fields:
-`base.error[e, a]` of a default of `e` for `base.Except(e, a)`.  The instructions that compute
-it run in the entry block of each function that needs it, so they must not be seen to run:
-the constructor takes the proof that the operation is `pure`, and the caller answers for an
-operation that can fault. -/
+/-- A literal, or a datatype's constructor applied to defaults of its fields, each with its
+type, such as `base.error[e, a]` of a default of `e` for `base.Except(e, a)`.  The instructions
+that compute it run in the entry block of each function that needs it, so they must not be seen
+to run.  A `pure` operation may still stop with a gap, while in the execution table generated
+for the environment a constructor takes no rule and links to a total function; so `ctor` takes
+the proof that `r` is a datatype's constructor, and `Default.ctor?` decides it. -/
 inductive Default (env : Env Unit) where
   | const (c : Const)
-  | apply {isig : InsnSig env} (r : InsnRef env isig) (typeArgs : TypeArgs env isig.scope)
-      (pure : isig.effect = .pure) (args : List (TypeExpr env × Default env))
+  | ctor {isig : InsnSig env} (r : InsnRef env isig) (typeArgs : TypeArgs env isig.scope)
+      (isCtor : r.ctorAddr?.isSome) (args : List (TypeExpr env × Default env))
+
+/-- The default `r[typeArgs](args)`, if `r` is a datatype's constructor.  A `Defaults` that
+gives `none` for a type, for example because `ctor?` refused an operation that is not a
+constructor, makes `demote` reject a function with a block parameter of that type
+(`Error.noDefault`). -/
+def Default.ctor? {env : Env Unit} {isig : InsnSig env} (r : InsnRef env isig)
+    (typeArgs : TypeArgs env isig.scope) (args : List (TypeExpr env × Default env)) :
+    Option (Default env) :=
+  if h : r.ctorAddr?.isSome then some (.ctor r typeArgs h args) else none
 
 /-- A default value for each type that has one: what a cell of that type holds until its first
 write.  The value given for a type must be of that type; `demote` rejects a function that gets
@@ -182,7 +194,7 @@ then `d`'s own, preserving the evaluation and fresh-name order. -/
 private def defaultOf (info : α) (d : ValDecl env) (pre : Array (Plain env α)) :
     Default env → M (Array (Plain env α))
   | .const c => return pre.push ⟨.const info d c, rfl, rfl⟩
-  | .apply r typeArgs _ args => do
+  | .ctor r typeArgs _ args => do
     let (pre, operands) ← defaultsOf info pre #[] args
     return pre.push ⟨.apply info d r typeArgs operands #[] #[], rfl, rfl⟩
 

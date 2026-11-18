@@ -75,8 +75,9 @@ both printed forms.  `Module.ofDDM` does the same from a DDM term.
   the ghosts declared before its own, and an invariant names none.  A ghost's regions refer to no
   function.  An attribute may name a ghost of the module too.
 
-A name reads back as printed unless one of its string segments is empty, is all digits or
-contains `.`.  A name spelled like one of the dialect's keywords is written pipe-delimited:
+A name reads back as printed unless one of its string segments contains `.` or is a nonempty
+run of digits, it is the one segment `_`, which is how the root prints, or it is printed inside
+the module and has a line break, since the printer indents the next line.  A name spelled like one of the dialect's keywords is written pipe-delimited:
 `module |ret| {`.
 -/
 

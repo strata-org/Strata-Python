@@ -96,6 +96,17 @@ private def freshVal (stem : String) : M env Reason ValId :=
     let (v, values) := s.values.fresh (.str .base stem)
     (v, { s with values })
 
+/-- The stem of the value read from the field `f`: `f` if it is an ASCII identifier, and `sel`
+otherwise. A field's name is any string, and not every one reads back as the stem of `f.k`: one
+with a `.` reads back as several segments, one of only digits as a number, and a line break
+gains the printer's indentation. ASCII identifiers are a deliberately narrow subset that reads
+back; other names that would, such as `a b`, get `sel` too. -/
+private def fieldStem (f : String) : String :=
+  let ident (c : Char) := c.isAlphanum || c == '_'
+  match f.toList with
+  | c :: cs => if (c.isAlpha || c == '_') && cs.all ident then f else "sel"
+  | [] => "sel"
+
 private def freshLabel : M env Reason Label :=
   modifyGet fun s =>
     let (n, labels) := s.labels.fresh (.str .base "cases")
@@ -162,7 +173,7 @@ private def arm (c : Case env) (info : α) (a : Arm env) : M env Reason (Tail en
   let selected ← a.fields.mapM fun (f, ty) => do
     let some name := (← read).ops.selector a.ctor f
       | throw (.noSelector a.ctor f)
-    accessor c name ty f info
+    accessor c name ty (fieldStem f) info
   return ⟨selected.map (·.1), .jump ⟨a.target.label, a.target.args ++ selected.map (·.2)⟩⟩
 
 /-- Test the constructors in order: the tail that dispatches on `arms`, and the blocks it

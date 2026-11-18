@@ -29,23 +29,23 @@ namespace Strata.Dyn.CasesDemoteTest
 open Strata.Dyn.CasesTest Strata.Dyn.While
 
 /-- The empty forest, the default of `test.Forest(base.Int)`. -/
-private def bare : Demote.Default CaseEnv.env :=
-  .apply CaseEnv.Forest.bare.ref ⟨#[.ty Base.Int], rfl⟩ rfl []
+private def bare : Option (Demote.Default CaseEnv.env) :=
+  Demote.Default.ctor? CaseEnv.Forest.bare.ref ⟨#[.ty Base.Int], rfl⟩ []
 
 /-- The literals; `nil` for a list and the constructor without fields for `test.Choice` and for
 `test.Forest`; and, each built from another default, `error 0` for `base.Except` and a tree
 labelled `0` without children for `test.Rose`. -/
 private def defaults : Demote.Defaults CaseEnv.env := fun τ =>
-  if τ = While.IntList then some (.apply While.IntList.nil.ref ⟨#[], rfl⟩ rfl [])
+  if τ = While.IntList then Demote.Default.ctor? While.IntList.nil.ref ⟨#[], rfl⟩ []
   else if τ = CaseEnv.Choice Base.Int then
-    some (.apply CaseEnv.Choice.empty.ref ⟨#[.ty Base.Int], rfl⟩ rfl [])
+    Demote.Default.ctor? CaseEnv.Choice.empty.ref ⟨#[.ty Base.Int], rfl⟩ []
   else if τ = Base.Except Base.Int Base.Int then
-    some (.apply Base.Except.error.ref ⟨#[.ty Base.Int, .ty Base.Int], rfl⟩ rfl
-      [(Base.Int, .const (.int 0))])
-  else if τ = CaseEnv.Forest Base.Int then some bare
-  else if τ = CaseEnv.Rose Base.Int then
-    some (.apply CaseEnv.Rose.rose.ref ⟨#[.ty Base.Int], rfl⟩ rfl
-      [(Base.Int, .const (.int 0)), (CaseEnv.Forest Base.Int, bare)])
+    Demote.Default.ctor? Base.Except.error.ref ⟨#[.ty Base.Int, .ty Base.Int], rfl⟩
+      [(Base.Int, .const (.int 0))]
+  else if τ = CaseEnv.Forest Base.Int then bare
+  else if τ = CaseEnv.Rose Base.Int then do
+    Demote.Default.ctor? CaseEnv.Rose.rose.ref ⟨#[.ty Base.Int], rfl⟩
+      [(Base.Int, .const (.int 0)), (CaseEnv.Forest Base.Int, ← bare)]
   else Demote.Defaults.literals τ
 
 /-- The block parameters of `m`'s bodies, entry blocks aside. -/

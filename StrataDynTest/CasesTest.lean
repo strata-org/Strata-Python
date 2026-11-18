@@ -30,7 +30,8 @@ The tests use hand-declared accessors (`StrataDynTest/Cases/Env.lean`).
   instruction and block is annotated as the terminator it replaces.
 * Printed results pin argument order, fresh names and which arms get a block: a
   three-constructor case in a body, the specification fixture, a mutually recursive pair of which
-  only the first takes a type parameter, and a datatype without constructors.
+  only the first takes a type parameter, a datatype without constructors, and fields whose names
+  are not ASCII identifiers.
 * Eight modules run on Dyn's engine before and after lowering, and must end the same, print the
   same, tick as often and draw as many choices. Each of their ten functions runs on the
   thirteen arguments -6 to 6, or on its one input if it takes none: 118 inputs, each under
@@ -527,6 +528,35 @@ private def still := "module m {
 } -/
 #guard_msgs in
 #eval do IO.print (toString (← lowered StaticEnv.env still).2)
+
+/-! A field's name is any string. A value read from a field whose name is not an ASCII identifier
+is named `sel.k`, not after the field: `«0»` would print `0.k`, which reads back as two numeric
+segments, the name of `%|0.0|` here. `lowered` reads each result back. -/
+
+private def oddFields := "module m {
+  func @odd(%o.0 : still.Odd, %|0.0| : base.Int, %sel.0 : base.Int) -> base.Int {
+    entry.0(%o.0 : still.Odd, %|0.0| : base.Int, %sel.0 : base.Int):
+      still.Odd.case(%o.0) ^arm.0(%|0.0|)
+    arm.0(%x.0 : base.Int, %a.0 : base.Int, %b.0 : base.Int, %c.0 : base.Int, %d.0 : base.Int, %e.0 : base.Int):
+      ret(%x.0)
+  }
+}"
+
+/-- info: module m {
+  func @odd(%o.0 : still.Odd, %|0.0| : base.Int, %sel.0 : base.Int) -> base.Int {
+    entry.0(%o.0 : still.Odd, %|0.0| : base.Int, %sel.0 : base.Int):
+      %sel.1 : base.Int = still.getAny(%o.0)
+      %sel.2 : base.Int = still.getAny(%o.0)
+      %sel.3 : base.Int = still.getAny(%o.0)
+      %sel.4 : base.Int = still.getAny(%o.0)
+      %n.0 : base.Int = still.getAny(%o.0)
+      jump ^arm.0(%|0.0|, %sel.1, %sel.2, %sel.3, %sel.4, %n.0)
+    arm.0(%x.0 : base.Int, %a.0 : base.Int, %b.0 : base.Int, %c.0 : base.Int, %d.0 : base.Int, %e.0 : base.Int):
+      ret(%x.0)
+  }
+} -/
+#guard_msgs in
+#eval do IO.print (toString (← lowered StaticEnv.env oddFields).2)
 
 /-! ## Specifications
 

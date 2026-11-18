@@ -162,7 +162,9 @@ By default each constant a function or a ghost uses is written at its uses, and 
 dropped: `%int.0 : py.Value = py.intLit(1)` rather than `%c.0 : base.Int = const 1` and
 `%int.0 : py.Value = py.intLit(%c.0)`.  The folded form is in the same dialect.
 
-A name whose string segment is empty, all digits or contains `.` does not read back as printed.
+A name does not read back as printed if one of its string segments contains `.` or is a nonempty
+run of digits, if it is the one segment `_`, which is how the root prints, or if it is printed
+inside the module and has a line break, since the printer indents the next line.
 A name spelled like a keyword of the dialect, such as `ret` or `unit`, prints pipe-delimited:
 `module |ret| {`.
 -/

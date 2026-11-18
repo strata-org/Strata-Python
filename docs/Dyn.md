@@ -1464,9 +1464,11 @@ cases.1():
   jump ^pair.0(%bound.0, %lhs.0, %rhs.0)
 ```
 
-The last constructor needs no test, and an arm that passes nothing is branched to directly. The
-pass also moves the arguments of every existing branch arm onto a jump in a new block, and
-rewrites clauses, frames and ghosts in the same way, at any depth.
+The last constructor needs no test, and an arm that passes nothing is branched to directly. A
+value read from a field is named after the field, as `%value.0` is, or `sel.k` if the field's
+name is not an ASCII identifier. The pass also moves the arguments of every existing branch arm
+onto a jump in a new block, and rewrites clauses, frames and ghosts in the same way, at any
+depth.
 
 **Accessors.** The tests and field reads are instructions of the module's own environment, which
 the caller names (`CaseOps`): a tester for each constructor and a selector for each field. The
@@ -1501,7 +1503,9 @@ linked, satisfies `LoweringOK` is not proved, nor that a model's accessors satis
 for the pass itself the evidence remains the tests, which compare the lowered module with its
 input on Dyn's engine; the certificate is proved for one hand-linked example
 (`StrataDynTest/CasesSound/SoundTest.lean`), given only that its tester is true exactly on its
-constructor.
+constructor. Neither the theorems nor the tests cover specifications: linking and the engine skip
+contracts and ghosts, so a rewritten clause, frame or ghost region is checked to be well formed
+and its printed form pinned, but nothing compares what it means with the original.
 
 ## 8. Demotion
 
@@ -1547,10 +1551,17 @@ which the head read, not what the first write put in the cell. Contracts, extern
 ghosts stay as they are.
 
 **Defaults.** A cell first holds a default value of its type, which the caller supplies
-(`Demote.Defaults`): a literal, or a pure operation applied to defaults, such as `base.error` of
-`0` for `base.Except(base.Int, base.Int)`; `Demote.Defaults.literals` has the literals. No run reads it, since every jump into a block
-writes the block's cells first. The instructions that compute it do run, which is why they are
-pure; that they do not fault is the caller's obligation.
+(`Demote.Defaults`): a literal, or a datatype's constructor applied to defaults, such as
+`base.error` of `0` for `base.Except(base.Int, base.Int)`; `Demote.Defaults.literals` has the
+literals, and `Demote.Default.ctor?` makes a constructor's default. No run reads it, since every
+jump into a block writes the block's cells first. The instructions that compute it do run, so
+they must not fault: a `pure` operation may still stop with a gap, but in the execution table
+generated for the environment a constructor takes no rule and links to a total function. If the
+caller's `Defaults` gives no default for a type, for example because `ctor?` refused an
+operation that is not a constructor, `demote` rejects each function with a block parameter of
+that type (`noDefault`). So a type with neither a literal nor a constructor, such as
+`py.Value`, `base.Sequence` or `base.Loc`, has no default yet, and no function with a block
+parameter of that type can be demoted.
 
 **Result.** `demote` takes a well-formed module in plain control with bare branches (§7), which
 case lowering provides, and takes the proof (`Demotable`). It returns a well-formed module in
@@ -1576,10 +1587,9 @@ stops with a bad cell itself.
 
 **What is not proved.** That the padded original runs as the input: a padding that has a
 certificate cannot fault, but each cell it makes renumbers the cells made after it. That the
-pass's output, linked, has the certificate; a default whose operation can fault never has one.
-That a demoted module's rules stop with no bad cell. So for the pass itself the evidence is the
-tests. They compare input and output on Dyn's engine, for hand-written modules and for the
-output of case lowering. The hand-written ones also run side by side on symbols and are
-promoted again by ref-to-reg, which leaves no cell but in one module, where the result of a
-write is used. The certificate is proved for one loop linked by hand
-(`StrataDynTest/DemoteSound/`).
+pass's output, linked, has the certificate. That a demoted module's rules stop with no bad
+cell. So for the pass itself the evidence is the tests. They compare input and output on Dyn's
+engine, for hand-written modules and for the output of case lowering. The hand-written ones
+also run side by side on symbols and are promoted again by ref-to-reg, which leaves no cell but
+in one module, where the result of a write is used. The certificate is proved for one loop
+linked by hand (`StrataDynTest/DemoteSound/`).

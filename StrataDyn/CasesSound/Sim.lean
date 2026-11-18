@@ -88,8 +88,8 @@ variable {bound : Nat → Nat} {m m₁ : LModule M} {B B₁ : Ty} (hwf : WF m) (
 
 omit hwf in
 /-- Transfers whose pending transitions the target matches silently. -/
-theorem transfer_lock {s s₁ : State M} {c c₁ : Core M} {x x₁ : Next M} (hn : NextOK m c.top x)
-    (hK : ContsOK m B c.top.func.ret c.conts) (hn₁ : NextOK m₁ c₁.top x₁)
+private theorem transfer_lock {s s₁ : State M} {c c₁ : Core M} {x x₁ : Next M}
+    (hn : NextOK m c.top x) (hK : ContsOK m B c.top.func.ret c.conts) (hn₁ : NextOK m₁ c₁.top x₁)
     (hK₁ : ContsOK m₁ B₁ c₁.top.func.ret c₁.conts) {d : Nat} {ev ev₁ : Event}
     (hr : ∀ h₁ : StateOK m₁ B₁ ⟨c₁, modeOf x₁, d, ()⟩,
       SilentRel hwf₁ oracle (Match bound) ⟨c, modeOf x, d, ()⟩ ⟨⟨c₁, modeOf x₁, d, ()⟩, h₁⟩) :
