@@ -655,7 +655,7 @@ partial def initTmpParam (translation_ctx: TranslationContext) (p: expr SourceRa
     | .Name _ n _ =>
       match n.val with
       | "json_dumps" => [(.init p.snd t[string] (.det (.strConst pySynthLoc "")) md), .call
-          "json_dumps" ([.inArg (.app pySynthLoc (.op pySynthLoc "DictStrAny_mk" none) (.strConst
+          "json_dumps" none ([.inArg (.app pySynthLoc (.op pySynthLoc "DictStrAny_mk" none) (.strConst
           pySynthLoc "DefaultDict")), .inArg (TypeStrToCoreExpr "IntOrNone")] ++
           [.outArg p.snd, .outArg "maybe_except"]) md]
       | "str" =>
@@ -726,7 +726,7 @@ partial def handleFunctionCall (lhs: List Core.Expression.Ident)
   let res := argsAndKWordsToCanonicalList translation_ctx fname args.val kwords.val substitution_records
   args_calls_to_tmps.toList.flatMap (initTmpParam translation_ctx) ++
     kwords_calls_to_tmps.toList.flatMap (initTmpParam translation_ctx) ++
-    res.snd ++ [.call fname (res.fst.map .inArg ++ lhs.map .outArg) md]
+    res.snd ++ [.call fname none (res.fst.map .inArg ++ lhs.map .outArg) md]
 
 partial def handleComprehension (translation_ctx: TranslationContext) (lhs: expr SourceRange) (gen: Array (comprehension SourceRange)) : List Core.Statement :=
   assert! gen.size == 1
@@ -747,7 +747,7 @@ partial def PyStmtToCore (jmp_targets: List String) (translation_ctx : Translati
   let md := sourceRangeToMetaData translation_ctx.filePath s.toAst.ann
   let non_throw : List Core.Statement × Option (String × Lambda.LMonoTy) := match s with
     | .Import _ names =>
-      ([.call "import" [.inArg (PyListStrToCore names.val)] md], none)
+      ([.call "import" none [.inArg (PyListStrToCore names.val)] md], none)
     | .ImportFrom _ s names i =>
       let n := match s.val with
       | some s => [strToCoreExpr s.val]
@@ -755,7 +755,7 @@ partial def PyStmtToCore (jmp_targets: List String) (translation_ctx : Translati
       let i := match i.val with
       | some i => [intToCoreExpr (PyIntToInt i)]
       | none => []
-      ([.call "importFrom" ((n ++ [PyListStrToCore names.val] ++ i).map .inArg) md], none)
+      ([.call "importFrom" none ((n ++ [PyListStrToCore names.val] ++ i).map .inArg) md], none)
     | .Expr _ (.Call _ func args kwords) =>
       let fname := PyExprToString func
       if callCanThrow translation_ctx.func_infos s then
