@@ -120,9 +120,12 @@ def cpythonTrace (pythonCmd pyFile : System.FilePath) : IO String := do
   let traceWith (seed : String) : IO (Option String) := do
     let r ← IO.Process.output {
       cmd := "timeout"
-      args := #[toString cpythonSeconds, pythonCmd.toString, traceScript.toString, pyFile.toString]
-      env := #[("PYTHONHASHSEED", some seed)] }
-    if r.exitCode == 124 then return none
+      args := #["-k", "5", toString cpythonSeconds, pythonCmd.toString, traceScript.toString,
+        pyFile.toString]
+      env := #[("PYTHONHASHSEED", some seed), ("PYTHONDONTWRITEBYTECODE", some "1")] }
+    -- `timeout` exits 124 when it stopped the run with SIGTERM at the limit, and 137 when the run
+    -- ignored SIGTERM and `timeout` killed it 5 s later.
+    if r.exitCode == 124 || r.exitCode == 137 then return none
     unless r.exitCode == 0 do
       throw <| .userError s!"{pyFile}: trace.py failed:\n{r.stderr}"
     return some r.stdout

@@ -4,11 +4,13 @@ trace, in the text that `StrataPython.Dyn.Sem.runModuleThen` prints for the mode
     python3.12 trace.py FILE.py
 
 The file runs in a fresh module named `__main__`, which has no `__file__`, and which is
-`sys.modules["__main__"]` while it runs.  The trace has
+`sys.modules["__main__"]` while it runs, with `python FILE.py`'s `sys.argv` and `sys.path[0]`.
+The trace has
 three sections: `--- stdout <n>`, the n characters that the program printed, exactly;
 `--- outcome`, `ok` or `raised <ExcType>: <str(exc)>` with a line `  cause <ExcType>` or
 `  context <ExcType>` per link of the exception's chain; and `--- globals`, `<name> = <render>`
-for each global, sorted by name, the dunder names left out but `__name__`, `__doc__` and
+for each global, sorted by name (a key that isn't a `str` comes last, as its `repr`), the dunder
+names left out but `__name__`, `__doc__` and
 `__annotations__`.  `render` is the model's (`Run.lean`): `repr` for `None`, `bool`, `int`,
 `float`, `str`, `bytes`, `range`, `slice`, `Ellipsis` and `NotImplemented`; containers in full, a
 set's members sorted by their render; `<class 'Q'>` for a class; `<T object>` for any other
@@ -19,7 +21,9 @@ Run it twice, with `PYTHONHASHSEED` 0 and 1, to see whether the trace depends on
 
 The program runs with `/` as its working directory, so that its trace doesn't depend on where the
 test runs.  `render` may still run the program's code: a class's `__qualname__` goes through its
-metaclass's `__getattribute__`.  The traces then differ, and the test fails.
+metaclass's `__getattribute__`.  The traces then differ, and the test fails.  A program that
+writes to file descriptor 1 without `sys.stdout` makes this script fail, since the trace can't
+hold that output.
 """
 
 import importlib.util
@@ -60,7 +64,11 @@ def render(v, seen):
 
 
 def exc_lines(e):
-    lines = [f"raised {type(e).__qualname__}: {e}"]
+    try:
+        text = str(e)
+    except BaseException:  # CPython's traceback printer shows the same note
+        text = "<exception str() failed>"
+    lines = [f"raised {type(e).__qualname__}: {text}"]
     seen = {id(e)}
     while True:
         if e.__cause__ is not None:
@@ -74,6 +82,14 @@ def exc_lines(e):
         seen.add(id(e))
         lines.append(f"  {kind} {type(e).__qualname__}")
     return lines
+
+
+def key_text(k):
+    """The `repr` of a global's key that isn't a `str`, or a note if that `repr` raises."""
+    try:
+        return repr(k)
+    except Exception as e:
+        return f"<no repr: {type(e).__qualname__}>"
 
 
 def render_or_note(v):
@@ -97,15 +113,29 @@ def main(path):
     except (SyntaxError, UnicodeDecodeError):
         print("--- syntax error")
         return
+    program_dir = os.path.dirname(os.path.realpath(path))
     os.chdir("/")
     module = types.ModuleType("__main__")
     globs = module.__dict__
     out = io.StringIO()
     real = sys.stdout
     # The module is `sys.modules["__main__"]` while it runs, as in `python FILE.py`, so that a
-    # lookup through `sys.modules` (pickle, for one) finds the program's own names.
-    real_main = sys.modules["__main__"]
+    # lookup through `sys.modules` (pickle, for one) finds the program's own names. The program
+    # also sees `python FILE.py`'s `sys.argv` and `sys.path[0]`, so that it imports its own
+    # sibling modules and not this script's.
+    real_main, real_argv, real_path0 = sys.modules["__main__"], sys.argv, sys.path[0]
+    # Output that bypasses `sys.stdout` (`os.write(1, ...)`, `sys.__stdout__`, a subprocess)
+    # goes to a file in place of this script's stdout, since the trace can't hold it.
+    real_dunder = sys.__stdout__
+    real_dunder.flush()
+    real_fd1 = os.dup(1)
+    # A file that is unlinked at once, made without an import, unlike tempfile.
+    stray_path = os.path.join(os.environ.get("TMPDIR", "/tmp"), f"trace-stray-{os.getpid()}")
+    stray = os.open(stray_path, os.O_RDWR | os.O_CREAT | os.O_EXCL, 0o600)
+    os.unlink(stray_path)
+    os.dup2(stray, 1)
     sys.modules["__main__"] = module
+    sys.argv, sys.path[0] = [path], program_dir
     sys.stdout = out
     try:
         exec(code, globs)
@@ -115,9 +145,20 @@ def main(path):
     finally:
         sys.stdout = real
         sys.modules["__main__"] = real_main
+        sys.argv, sys.path[0] = real_argv, real_path0
+        sys.__stdout__ = real_dunder
+        real_dunder.flush()
+        os.dup2(real_fd1, 1)
+        os.close(real_fd1)
+    if os.lseek(stray, 0, os.SEEK_END) > 0:
+        sys.exit(f"trace.py: {path} wrote to file descriptor 1 outside sys.stdout")
     text = out.getvalue()
     lines = [f"--- stdout {len(text)}\n" + text, "--- outcome", *outcome, "--- globals"]
-    for name in sorted(globs):
+    # A program may store a global under a key that isn't a `str`; such keys come last.
+    for name in sorted(globs, key=lambda k: (0, k) if isinstance(k, str) else (1, key_text(k))):
+        if not isinstance(name, str):
+            lines.append(f"{key_text(name)} = {render_or_note(globs[name])}")
+            continue
         if name.startswith("__") and name.endswith("__") and \
                 name not in ("__name__", "__doc__", "__annotations__"):
             continue

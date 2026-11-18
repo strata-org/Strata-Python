@@ -1,7 +1,9 @@
 --- stdout 0
 
 --- outcome
-raised ModuleNotFoundError: No module named 'param_reassign_helper'
+ok
 --- globals
 __doc__ = None
 __name__ = '__main__'
+param_reassign_helper = <module object>
+test_cross_module = <function object>
