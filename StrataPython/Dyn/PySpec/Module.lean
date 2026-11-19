@@ -225,6 +225,7 @@ def translateOverloads (t : Table) (module name : String) (stubs : Array Functio
   let common := stubs.all (sameParams first)
   let mut requires : Array ClausePlan := #[]
   let mut ensures : Array ClausePlan := #[]
+  let mut raises : Array ClausePlan := #[]
   -- Without a base, the frame is the model frame plus the stubs' targets (§12.1).
   let mut writes : Array FrameLoc := #[.instanceState, .args, .kwargs]
   match base with
@@ -232,6 +233,7 @@ def translateOverloads (t : Table) (module name : String) (stubs : Array Functio
     let plan ← ModM.check { table := t, module, display := name, decl := b } planFunction
     requires := requires ++ plan.requires
     ensures := ensures ++ plan.ensures
+    raises := raises ++ plan.raises
     writes := plan.writes
   | none =>
     if common then
@@ -256,17 +258,19 @@ def translateOverloads (t : Table) (module name : String) (stubs : Array Functio
     if let some test := returnTypeTest t s.returnType .result then
       ensures := ensures.push { message := s!"overload of '{name}' for '{lit}'"
                                 body := .implies (.enum v #[lit]) test }
-    -- A stub's schema and `@admit` describe only the calls that select it (§12.1, §12.13).
+    -- A stub's schema, `@admit` and `@admit_raise` describe only the calls that select it (§12.1,
+    -- §12.13).
     ensures := ensures ++ (guarded v lit
       (plan.ensures.filter (·.kind == .returnSchema)))
     ensures := ensures ++ (guarded v lit
       (plan.ensures.filter (·.kind == .admitted)))
+    raises := raises ++ guarded v lit plan.raises
     -- A stub's targets apply only where `v == lit`, as its clauses do: elsewhere they read
     -- parameters that the call may lack.
     writes := writes ++ (plan.writes.filterMap fun
       | .instanceState | .args | .kwargs => none
       | l => some (.guarded (.enum v #[lit]) l))
-  ModM.addFunc module (emitExtern (qualified module [name]) { requires, ensures, writes }
+  ModM.addFunc module (emitExtern (qualified module [name]) { requires, ensures, raises, writes }
     { range := first.loc })
 
 /-! ## Classes -/
@@ -422,7 +426,8 @@ def translateClass (t : Table) (globals : Array String) (c : ModelClass) : ModM 
                     message := s!"'{c.qualName}' declares __init_subclass__, which runs library code when a subclass is defined" }
   for m in d.methods.filter (·.isOverload) do
     let hasContract := !m.preconditions.isEmpty || !m.postconditions.isEmpty ||
-      !m.admittedPostconditions.isEmpty || !m.modifies.isEmpty || !m.ghosts.isEmpty ||
+      !m.admittedPostconditions.isEmpty || !m.raisedPostconditions.isEmpty ||
+      !m.modifies.isEmpty || !m.ghosts.isEmpty ||
       !m.dropped.isEmpty
     if hasContract then
       ModM.reject

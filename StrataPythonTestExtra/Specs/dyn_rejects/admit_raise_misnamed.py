@@ -1,0 +1,3 @@
+@admit_raise(lambda e: isinstance(e, Exception))
+def f() -> None:
+    ...

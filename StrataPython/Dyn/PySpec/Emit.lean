@@ -35,6 +35,8 @@ structure EmitCtx where
   kwargs : ValId
   /-- The `ok` value of a post-state clause's result. -/
   result : Option ValId := none
+  /-- The exception of a raising-exit clause's `error` result. -/
+  raised : Option ValId := none
   /-- The binders in scope, and a predicate's parameters. -/
   binders : List (String × ValId) := []
   /-- The ghosts that an invariant predicate receives as parameters, by module and name. -/
@@ -232,6 +234,10 @@ def value (e : CExpr) : EM ValId := do
     match ctx.result with
     | some v => return v
     | none => unbound "result"
+  | .raised =>
+    match ctx.raised with
+    | some v => return v
+    | none => unbound "exc"
   | .int i => liftPy (intLit i)
   | .float f => liftPy (floatLit f)
   | .bool b => liftPy (boolLit b)

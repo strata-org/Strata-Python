@@ -1,0 +1,1 @@
+[reserved-binder] admit_raise_ghost_exc: 'f' has an @admit_raise in a module with a ghost named 'exc', the name of the raised exception

@@ -1,0 +1,3 @@
+@admit_raise(lambda exc: OLD(exc) is None)
+def f() -> int:
+    ...

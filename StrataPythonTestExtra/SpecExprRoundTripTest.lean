@@ -210,7 +210,8 @@ private def misplacedEntryReadErrorTest : IO Unit := do
 /-- Every `DroppedKind`, a dropped entry's source text, and both `**kwargs` forms survive the
     round trip; an invariant entry among the postconditions is a read error. -/
 private def droppedAndKwargsRoundTripTest : IO Unit := do
-  let kinds : Array DroppedKind := #[.assert, .requires, .ensures, .admit, .modifies, .ghostInit]
+  let kinds : Array DroppedKind :=
+    #[.assert, .requires, .ensures, .admit, .admitRaise, .modifies, .ghostInit]
   let any := SpecType.ident rtLoc .typingAny
   for unpacked in [false, true] do
     let kwargs := some ("kw", if unpacked then KwargsType.unpacked any else .each any)

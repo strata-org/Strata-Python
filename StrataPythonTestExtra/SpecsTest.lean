@@ -388,6 +388,36 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
   expect f.postconditions.isEmpty
     "@admit must not populate the verified `postconditions` store"
 
+-- `@admit_raise` populates its own store, with `exc` bound to the raised exception, in source
+-- order, and reads parameters as `@admit` does.
+#guard_msgs in
+#eval runNativeCase "admit_raise_basic" fun sigs warnings => do
+  let f ← findFn sigs "f"
+  expect (f.raisedPostconditions.size == 2)
+    s!"expected 2 raised postconditions, got {f.raisedPostconditions.size}"
+  expect (f.raisedPostconditions[0]!.softBEq
+      (.isInstanceOf (.var "exc" .none) "Exception" .none))
+    s!"first raised postcondition is not isinstance(exc, Exception): {f.raisedPostconditions[0]!}"
+  expect (f.raisedPostconditions[1]!.softBEq (.intGe (.var "n" .none) (.intLit 0 .none) .none))
+    s!"second raised postcondition is not n >= 0: {f.raisedPostconditions[1]!}"
+  expect f.admittedPostconditions.isEmpty "@admit_raise must not populate the @admit store"
+  let g ← findFn sigs "g"
+  expect (g.raisedPostconditions.size == 1 && g.raisedPostconditions[0]!.softBEq (.boolLit false .none))
+    s!"never raises: {g.raisedPostconditions}"
+  -- A misnamed binder is unbound at the use site, as for `@admit`.
+  expect (warnings.any (·.contains "@admit_raise: lambda parameter 'e' is unbound at the use site"))
+    s!"expected the unbound binder warning, got {warnings}"
+
+-- An `@admit_raise` that PySpec can't read faithfully is left out with a warning, as an `@admit`
+-- is: a missing free postcondition only weakens the model.
+#guard_msgs in
+#eval runNativeCase "admit_raise_unfaithful" fun sigs warnings => do
+  let f ← findFn sigs "f"
+  expect f.raisedPostconditions.isEmpty s!"the unfaithful clause was stored: {f.raisedPostconditions}"
+  expect (warnings.any (·.contains "@admit_raise dropped: PySpec can't read it faithfully"))
+    s!"expected the dropped-clause warning, got {warnings}"
+  expect (f.dropped.any (·.kind == .admitRaise)) "the unfaithful clause was not recorded as dropped"
+
 -- `@ensures` and `@admit` on one function populate their own stores with no
 -- cross-wiring.
 #guard_msgs in
@@ -1881,6 +1911,7 @@ meta def serdeRoundTripTest : IO Unit := do
     admittedPostconditions := #[
       .intGe (.var "result" .none) (.old (.var "x" .none) .none) .none
     ]
+    raisedPostconditions := #[.intGe (.var "exc" .none) (.old (.var "x" .none) .none) .none]
     modifies := #[.var "self_x" .none]
     ghosts := #[{ name := "g", type := some (SpecType.ident .none .builtinsInt),
                   init := some (.intLit 7 .none), loc := .none }]
@@ -1923,6 +1954,11 @@ meta def serdeRoundTripTest : IO Unit := do
   expect (fd'.admittedPostconditions[0]!.softBEq
             (.intGe (.var "result" .none) (.old (.var "x" .none) .none) .none))
     "round-trip corrupted admitted postcondition formula (old wrapping must survive)"
+  expect (fd'.raisedPostconditions.size == 1)
+    s!"round-trip dropped raised postconditions: got {fd'.raisedPostconditions.size}"
+  expect (fd'.raisedPostconditions[0]!.softBEq
+            (.intGe (.var "exc" .none) (.old (.var "x" .none) .none) .none))
+    "round-trip corrupted raised postcondition formula"
   expect (fd'.modifies.size == 1) s!"round-trip dropped modifies: got {fd'.modifies.size}"
   expect (fd'.modifies[0]!.softBEq (.var "self_x" .none)) "round-trip corrupted modifies target"
   expect (fd'.ghosts.size == 1) s!"round-trip dropped ghosts: got {fd'.ghosts.size}"

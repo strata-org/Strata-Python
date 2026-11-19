@@ -1,0 +1,3 @@
+[reserved-binder] admit_raise_param_exc: 'f' has an @admit_raise and a parameter named 'exc', the name of the raised exception
+[reserved-binder] admit_raise_param_exc: 'g' has an @admit_raise and a parameter named 'exc', the name of the raised exception
+[reserved-binder] admit_raise_param_exc: 'h' has an @admit_raise and a parameter named 'exc', the name of the raised exception

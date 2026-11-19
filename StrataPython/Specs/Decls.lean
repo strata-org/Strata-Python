@@ -968,6 +968,8 @@ inductive DroppedKind where
   | requires
   | ensures
   | admit
+  /-- An `@admit_raise`, a postcondition of the raising exit. -/
+  | admitRaise
   | modifies
   /-- The `init=` of a function's `@ghost`, other than a constant: CPython evaluates it when it
       imports the model. -/
@@ -980,6 +982,7 @@ deriving Inhabited, Repr, DecidableEq, BEq
   | .requires => "requires"
   | .ensures => "ensures"
   | .admit => "admit"
+  | .admitRaise => "admit_raise"
   | .modifies => "modifies"
   | .ghostInit => "ghost init="
 
@@ -989,9 +992,15 @@ deriving Inhabited, Repr, DecidableEq, BEq
   | "requires" => some .requires
   | "ensures" => some .ensures
   | "admit" => some .admit
+  | "admit_raise" => some .admitRaise
   | "modifies" => some .modifies
   | "ghost init=" => some .ghostInit
   | _ => none
+
+/-- Whether a clause of kind `k` is a free postcondition, `@admit` or `@admit_raise`: a consumer
+    assumes it after a call, so leaving it out, when PySpec can't read it faithfully, only weakens
+    the model. -/
+@[expose] def DroppedKind.isFree (k : DroppedKind) : Bool := k == .admit || k == .admitRaise
 
 /-- A clause that PySpec could not read faithfully, with its source text as written: one that
     it couldn't translate, which it drops; an `assert` whose meaning depends on something
@@ -1019,6 +1028,9 @@ deriving Inhabited
 /-- Contract lambdas' return binder; reserved. -/
 def resultBinder : String := "result"
 
+/-- The name that an `@admit_raise` binds to the raised exception. -/
+def raisedBinder : String := "exc"
+
 structure FunctionDecl where
   loc : SourceRange
   nameLoc : SourceRange
@@ -1032,6 +1044,9 @@ structure FunctionDecl where
       modeling assumptions. Lowered as free (assume-only) postconditions
       rather than verified contracts. -/
   admittedPostconditions : Array SpecExpr := #[]
+  /-- Postconditions from `@admit_raise`: unverified modeling assumptions about the raising exit,
+      with `exc` bound to the raised exception. -/
+  raisedPostconditions : Array SpecExpr := #[]
   /-- Frame condition from `@modifies`: the lvalue targets (e.g. `self.x`, a
       global name) this procedure is permitted to modify. Recognized +
       round-tripped; lowering is deferred. -/

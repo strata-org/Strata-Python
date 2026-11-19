@@ -54,8 +54,11 @@ deriving Inhabited
 /-- An extern's contract, checked. -/
 structure ContractPlan where
   requires : Array ClausePlan := #[]
-  /-- The `free ensures` clauses. A clause holds on a raise. -/
+  /-- The `free ensures` clauses of the ok exit. Each is `true` on a raise. -/
   ensures : Array ClausePlan := #[]
+  /-- The `free ensures` clauses of the raising exit, from `@admit_raise`. Each is `true` on `ok`;
+  on `error`, it states its body with `exc` bound to the exception. -/
+  raises : Array ClausePlan := #[]
   writes : Array FrameLoc := #[]
   /-- Whether the extern has no frame at all, so that a call may change any location. -/
   anyWrites : Bool := false
@@ -420,7 +423,7 @@ def planFunction : CheckM ContractPlan := do
   let d := ctx.decl
   for dropped in d.dropped do
     -- `checkGhostInits` rejects a ghost's `init=` for every definition.
-    if dropped.kind != .admit && dropped.kind != .ghostInit then
+    if !dropped.kind.isFree && dropped.kind != .ghostInit then
       let _ ← reject "dropped-clause" s!"PySpec dropped the {dropped.kind.tag} clause '{dropped.source}' of '{ctx.display}'" dropped.loc
   for e in d.postconditions do
     let _ ← reject "ensures" s!"'{ctx.display}' has an @ensures, which a model can't verify; use @admit" e.loc
@@ -457,7 +460,27 @@ def planFunction : CheckM ContractPlan := do
       withRole .post (checkOldPart covered part e.loc)
     post := post.push { message := s!"admitted postcondition of '{ctx.display}'", body := c
                         kind := .admitted }
-  return { requires := sig ++ pre, ensures := post, writes }
+  -- In a raise clause, `exc` names the exception, so neither a parameter nor a ghost may have
+  -- that name (§12.3, *`@admit_raise`*).
+  if !d.raisedPostconditions.isEmpty then
+    if (d.args.args ++ d.args.kwonly).any (·.name == raisedBinder) ||
+        (d.args.kwargs.any (·.1 == raisedBinder)) then
+      let _ ← reject "reserved-binder" s!"'{ctx.display}' has an @admit_raise and a parameter named '{raisedBinder}', the name of the raised exception" d.loc
+    if (ctx.table.ghosts ctx.module).any (·.name == raisedBinder) then
+      let _ ← reject "reserved-binder" s!"'{ctx.display}' has an @admit_raise in a module with a ghost named '{raisedBinder}', the name of the raised exception" d.loc
+  let mut raises : Array ClausePlan := #[]
+  for e in d.raisedPostconditions do
+    let c ← withRole .raise (checkExpr e)
+    checkNoCondValue c e.loc
+    -- "Never raises" is exactly the literal `False`, so that a consumer can recognize it.
+    let c := match c with
+      | .bool false => .const false
+      | c => c.splitOld
+    for part in c.oldContents do
+      withRole .raise (checkOldPart covered part e.loc)
+    raises := raises.push { message := s!"admitted postcondition of '{ctx.display}' on a raise"
+                            body := c, kind := .admitted }
+  return { requires := sig ++ pre, ensures := post, raises, writes }
 
 /-! ## Emission -/
 
@@ -500,6 +523,24 @@ def emitLoc (l : FrameLoc) : EM ValId := do
   | .reach e => do
     buildPy (Build.emitApply (env := Py.env) (nm "l") Base.Loc Py.reachLoc.ref #[← value e])
 
+/-- A `free ensures` clause that is `c`'s body on one exit of the call and `true` on the other.
+With `onRaise`, the body is on the raising exit, with `exc` bound; otherwise it is on the normal
+exit, with `result` bound. -/
+def exitClause (base : EmitCtx) (c : ClausePlan) (onRaise : Bool) : BuildM Py.env Info Unit :=
+  Build.ensures (nm "r") (Py.raising Py.Value) (free := true) (message := some c.message)
+    fun r => inClause { base with requires := false, post := true } true do
+      let okL ← liftPy (freshLabel [Py.Value] "ok")
+      let raisedL ← liftPy (freshLabel [Py.Value] "raised")
+      buildPy (Base.Except.case (Val.ofId (Py.raising Py.Value) r) okL.goto raisedL.goto)
+      let res ← liftPy (startBlockWith okL (nm "result"))
+      let b ← if onRaise then boolC true
+        else withReader ({ · with result := some res.id }) (cond c.body false)
+      buildPy (Build.Raw.ret (env := Py.env) (α := Info) b)
+      let exc ← liftPy (startBlockWith raisedL (nm "exc"))
+      let b ← if onRaise then withReader ({ · with raised := some exc.id }) (cond c.body false)
+        else boolC true
+      buildPy (Build.Raw.ret (env := Py.env) (α := Info) b)
+
 /-- Emit the extern `name` with the contract `plan`. -/
 def emitExtern (name : Name) (plan : ContractPlan) (info : Info) :
     Except String {fn : Func Py.env Info // fn.WF} :=
@@ -511,18 +552,8 @@ def emitExtern (name : Name) (plan : ContractPlan) (info : Info) :
         (inClause base false do
           let b ← cond c.body true
           buildPy (Build.Raw.ret (env := Py.env) (α := Info) b))
-    for c in plan.ensures do
-      Build.ensures (nm "r") (Py.raising Py.Value) (free := true) (message := some c.message)
-        fun r => inClause { base with requires := false, post := true } true do
-          let okL ← liftPy (freshLabel [Py.Value] "ok")
-          let raisedL ← liftPy (freshLabel [Py.Value] "raised")
-          buildPy (Base.Except.case (Val.ofId (Py.raising Py.Value) r) okL.goto raisedL.goto)
-          let res ← liftPy (startBlockWith okL (nm "result"))
-          let b ← withReader ({ · with result := some res.id }) (cond c.body false)
-          buildPy (Build.Raw.ret (env := Py.env) (α := Info) b)
-          let _ ← liftPy (startBlockWith raisedL (nm "exc"))
-          let t ← boolC true
-          buildPy (Build.Raw.ret (env := Py.env) (α := Info) t)
+    for c in plan.ensures do exitClause base c (onRaise := false)
+    for c in plan.raises do exitClause base c (onRaise := true)
     unless plan.anyWrites do
       Build.writes (plan.writes.map fun l => .region do
         Emit.withFailureBlock [Py.Value] none fun fail => do

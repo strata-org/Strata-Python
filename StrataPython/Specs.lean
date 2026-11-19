@@ -962,6 +962,8 @@ structure SpecAssertionState where
   postconditions : Array SpecExpr := #[]
   /-- Postconditions from `@admit`, translated to `SpecExpr`. -/
   admittedPostconditions : Array SpecExpr := #[]
+  /-- Postconditions from `@admit_raise`, translated to `SpecExpr`. -/
+  raisedPostconditions : Array SpecExpr := #[]
   /-- Frame targets from `@modifies`, translated to `SpecExpr`. -/
   modifies : Array SpecExpr := #[]
   /-- Spec-only ghost variables from `@ghost`, with their (optional) initializer
@@ -1421,7 +1423,7 @@ partial def transExpr (e : expr SourceRange)
       let role := (←read).role
       if !role.allowsOld then
         specError loc
-          s!"OLD(...) is only allowed in post-state predicates (@ensures or @admit), not {role.description}"
+          s!"OLD(...) is only allowed in post-state predicates (@ensures, @admit or @admit_raise), not {role.description}"
         return placeholder
       else if h : args.size = 1 then
         let (innerExpr, innerTp) ← transExpr args[0]
@@ -1880,18 +1882,18 @@ def translateContractValue? (role : SpecExprRole) (e : expr SourceRange)
 
 /-- Translate a contract body. When it translates faithfully, pass the result to `store`.
     Otherwise record it as a dropped clause of kind `kind`. An unfaithful clause is still
-    stored, except an `@admit`, which is left out with a warning; for a clause that doesn't
-    translate, `transExpr` already emitted a diagnostic. -/
+    stored, except an `@admit` or an `@admit_raise`, which is left out with a warning; for a
+    clause that doesn't translate, `transExpr` already emitted a diagnostic. -/
 def translateContractBody (role : SpecExprRole) (kind : DroppedKind) (e : expr SourceRange)
     (store : SpecExpr → SpecAssertionM Unit) : SpecAssertionM Unit := do
   modify ({ · with unfaithful := false })
   if let some formula ← translateContractValue? role e then
     -- A clause whose meaning differs from the source is recorded. It is still passed on, so
-    -- that ToLaurel's input doesn't change, unless it is an `@admit`: an admit is assumed
+    -- that ToLaurel's input doesn't change, unless it is a free postcondition: it is assumed
     -- after each call, and leaving it out only weakens the model.
-    if (← get).unfaithful && kind == .admit then
+    if (← get).unfaithful && kind.isFree then
       specWarningOfKind .pySpecDroppedAssertion e.ann
-        "@admit dropped: PySpec can't read it faithfully, and leaving it out is sound"
+        s!"@{kind.tag} dropped: PySpec can't read it faithfully, and leaving it out is sound"
     else store formula
     if (← get).unfaithful then recordDropped kind e.ann
   else
@@ -2091,6 +2093,12 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
         { s with postconditions := s.postconditions.push f }
       pushBodies .postState .admit nativeBundle.admitted fun f s =>
         { s with admittedPostconditions := s.admittedPostconditions.push f }
+    -- A raising exit has no result; its clauses bind the raised exception instead.
+    withReader (fun ctx => { ctx with
+        localTypes := ctx.localTypes.insert Native.raisedBinder
+          (.ident .none .builtinsException) }) <| do
+      pushBodies .postState .admitRaise nativeBundle.raised fun f s =>
+        { s with raisedPostconditions := s.raisedPostconditions.push f }
     pushBodies .frame .modifies nativeBundle.modifies fun f s =>
       { s with modifies := s.modifies.push f }
     for (kind, loc) in nativeBundle.extra do
@@ -2119,6 +2127,7 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
     preconditions := as.assertions
     postconditions := as.postconditions
     admittedPostconditions := as.admittedPostconditions
+    raisedPostconditions := as.raisedPostconditions
     modifies := as.modifies
     ghosts := as.ghosts
     dropped := as.dropped
@@ -2127,7 +2136,7 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
 /-- The names of PySpec's own forms, such as `@requires(...)` and `ghost(...)`, which PySpec
 recognizes by name. -/
 def nativeFormNames : Array String :=
-  #["requires", "ensures", "admit", "modifies", "ghost", "invariant", "exhaustive"]
+  #["requires", "ensures", "admit", "admit_raise", "modifies", "ghost", "invariant", "exhaustive"]
 
 /-- Reject a binding of one of `nativeFormNames`, or of `Exception`, which a class base reads as
 the builtin: PySpec would still read the name its own way, although CPython would use the

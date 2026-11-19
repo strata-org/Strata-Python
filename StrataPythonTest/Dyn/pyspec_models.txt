@@ -191,3 +191,13 @@ StrataPythonTestExtra/Specs/dyn_cases | return_schema | ok
 StrataPythonTestExtra/Specs/dyn_cases | return_schema_overload | ok
 StrataPythonTestExtra/Specs/dyn_cases | return_schema_aws | ok
 StrataPythonTestExtra/Specs/dyn_cases | param_imported_typeddict | ok
+StrataPythonTestExtra/Specs/dyn_cases | admit_raise | ok
+StrataPythonTestExtra/Specs | native_cases.admit_raise_unfaithful | ok
+StrataPythonTestExtra/Specs/dyn_rejects | admit_raise_result | result-outside-post
+StrataPythonTestExtra/Specs/dyn_rejects | admit_raise_old_exc | old-result
+StrataPythonTestExtra/Specs/dyn_rejects | admit_raise_param_exc | reserved-binder
+StrataPythonTestExtra/Specs/dyn_rejects | admit_raise_ghost_exc | reserved-binder
+StrataPythonTestExtra/Specs/dyn_rejects | admit_raise_elsewhere | frame-target,unknown-name
+StrataPythonTestExtra/Specs/dyn_rejects | admit_raise_misnamed | unknown-name
+StrataPythonTestExtra/Specs/dyn_rejects | admit_raise_overload_method | overload-method-contract
+StrataPythonTestExtra/Specs/dyn_rejects | admit_raise_exc_shadowed | old-uncovered

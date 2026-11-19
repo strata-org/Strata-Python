@@ -1620,9 +1620,9 @@ a diagnostic.
 
 ## 12. Contracts and PySpec models
 
-PySpec (`StrataPython/Specs/`) describes a library without its code. A PySpec model is a
-Python module whose functions have no body. A function's contract is made of `assert`
-statements and the decorators `@requires`, `@admit`, `@ensures` and `@modifies`. A class may
+PySpec (`StrataPython/Specs/`) describes a library without its code. A PySpec model is a Python
+module whose functions have no body. A function's contract is made of `assert` statements and
+the decorators `@requires`, `@admit`, `@admit_raise`, `@ensures` and `@modifies`. A class may
 have the decorators `@invariant` and `@exhaustive`. A module may declare ghosts with
 `ghost(...)`. `Specs.lean` reads a model into an array of `Signature`s. This section gives the
 rules by which a translation from PySpec represents each construct of that array in Dyn. It
@@ -1821,9 +1821,13 @@ The exceptions are the trusted modeling assumptions of §12.9.
      ToLaurel drops a stub's preconditions; keeping them is stronger, so it is sound;
   5. for each stub, `free ensures "overload of 'connect' for 'litᵢ'"`: on `ok r`, if `v ==
      litᵢ`, then `r` passes the test of a return type for `Cᵢ` (§12.3), with `Cᵢ` read as
-     *Class identity* says. Then the stub's schema clauses (§12.3, *Return schema*), each
-     applying only when `v == litᵢ`, with " for 'litᵢ'" after its message;
-  6. the frame: the three regions that start the model frame (§12.5), `py.instanceState`,
+     *Class identity* says. Then the stub's schema clauses (§12.3, *Return schema*) and its
+     `@admit` clauses, each applying only when `v == litᵢ`, with " for 'litᵢ'" after its
+     message;
+  6. after every other `free ensures` clause, the `@admit_raise` clauses (§12.3): the base's,
+     when there is one (below), with no condition, then each stub's, applying only when `v ==
+     litᵢ`, with " for 'litᵢ'" after its message;
+  7. the frame: the three regions that start the model frame (§12.5), `py.instanceState`,
      `py.reachLoc(%args.0)` and `py.reachLoc(%kwargs.0)`, then every stub's `@modifies`
      targets. Each target applies only when `v == litᵢ`, as the stub's clauses do, and gives
      `py.instanceState` otherwise, which the frame already holds. So at a call that another stub
@@ -1834,8 +1838,8 @@ The exceptions are the trusted modeling assumptions of §12.9.
   comes first. The extern then has the base's `requires` clauses, in the order of §12.2 and with
   no condition; then steps 2 to 4, where a stub's binding clause is left out when the stub's
   parameters are the base's; then the base's `free ensures` clauses, with no condition; then
-  step 5. Its frame is the base's frame (§12.5) plus every stub's `@modifies` targets, each
-  applying only when `v == litᵢ`, as in step 6.
+  steps 5 and 6. Its frame is the base's frame (§12.5) plus every stub's `@modifies` targets,
+  each applying only when `v == litᵢ`, as in step 7.
 
   Nothing says whether the result is a new object.
 * **Type alias or imported name.** It has no declaration. It resolves names in declared types
@@ -1907,6 +1911,19 @@ The exceptions are the trusted modeling assumptions of §12.9.
   `error`, the clause is `true`, so the model may raise. This differs from ToLaurel, where a
   model never raises. It relies on the program keeping the model's declared types and
   changing the library's state only through model calls (§12.9).
+* **`@admit_raise`.** `@admit_raise(lambda exc, p₁, …: P)` states what holds when a call raises,
+  with `exc` bound to the raised exception, such as `isinstance(exc, Exception)`. It is `free
+  ensures "admitted postcondition of 'f' on a raise"`: on `ok`, the clause is `true`; on
+  `error(e)`, it is `P` with `exc` bound to `e`. It may read parameters, ghosts and `OLD`, as
+  `@admit` may. The extern lists these clauses after all its other `free ensures` clauses, in
+  source order; in an overload set, the base's come first, then each stub's (§12.1, step 6). The
+  model is rejected when the clause reads `result` or applies `OLD` to `exc`, when the function
+  has a parameter named `exc`, or when its module has a ghost named `exc`. A body that is the
+  literal `False` says that the call never raises; its clause's `error` arm is `false` and runs
+  no operation, a form that a consumer can recognize. Any other body that is false, such as `not
+  True`, is not that form, and neither is a stub's `False`, which applies only under `v ==
+  litᵢ`. As for `@admit`, a body that PySpec can't read faithfully is left out with a warning.
+  The clause is trusted (§12.9).
 * **`@ensures` on a model.** It is rejected, as ToLaurel does.
 * **Return type.** It is `free ensures "return type of 'f'"`, before the `@admit` clauses, so
   that they may rely on it. It relies on the program keeping the model's declared types (§12.9,
@@ -2032,10 +2049,11 @@ The exceptions are the trusted modeling assumptions of §12.9.
 
 ### 12.4 Expressions
 
-* **Names.** A name is a quantifier's binder, else a parameter, else a module ghost. A
-  parameter with the name of a ghost that the contract mentions rejects the model, as ToLaurel's
-  `ghostShadowedByParam` does. A parameter is read as §12.2 says, a ghost is `base.refGet` of
-  its cell `ghost @|m.<ghost>.g|`, and a binder is its region's parameter.
+* **Names.** A name is a quantifier's binder, else `result` or `exc` in a clause that binds them,
+  else a parameter, else a module ghost. A parameter with the name of a ghost that the contract
+  mentions rejects the model, as ToLaurel's `ghostShadowedByParam` does. A parameter is read as
+  §12.2 says, a ghost is `base.refGet` of its cell `ghost @|m.<ghost>.g|`, and a binder is its
+  region's parameter.
 * **Literals.** They are `py.intLit`, `py.boolLit`, `py.noneLit` and `py.floatLit`.
 * **Operators.**
   * `d[k]` is `py.getItem`, and `"k" in c` is `py.in(py.strLit("k"), c)`.
@@ -2058,7 +2076,8 @@ The exceptions are the trusted modeling assumptions of §12.9.
 * **`result`.** It is the `ok` value of the clause's argument. The translation rejects a model
   that uses `result` in any clause other than an `@ensures` or an `@admit`.
 * **`OLD(e)`.** `base.old` covers the old part: the largest subexpression around `OLD(e)` that
-  uses neither `result` nor a value that the clause reads after the call, outside `OLD`. A
+  uses neither `result`, nor the raised exception `exc` (§12.3, *`@admit_raise`*), nor a value
+  that the clause reads after the call, outside `OLD`. A
   quantifier's binder may be used in the old part ([Dyn](./Dyn.md#1-overview), *`old` in
   `ensures` clauses*). For example:
   * `len(OLD(xs)) == len(xs) + 1` compares `old { len(xs) }` with `len(xs) + 1`;
@@ -2271,7 +2290,8 @@ condition that it cannot translate can be recorded as text.
   excluded. For example, `Specs.lean` has no form for a string literal in an ordering, so it drops
   `assert x > "a"`, and the model is rejected. `Specs.lean` records each dropped clause in
   `FunctionDecl.dropped` (§12.13).
-* **A dropped `@admit`.** It only weakens the model, so the model is not rejected.
+* **A dropped `@admit` or `@admit_raise`.** It only weakens the model, so the model is not
+  rejected.
 * **A clause that the translation cannot represent.** It rejects the model. The translation
   never drops a clause, as ToLaurel does not drop an `@admit`. An invariant that the translation
   cannot represent is recorded as its source text instead (§12.6).
@@ -2484,9 +2504,9 @@ some of them.
   generator writes from a service's API description, such as an AWS Smithy model, this is the
   trust that the service answers in the shape that its description declares, as the client
   delivers the answer: for a client that delivers JSON, timestamps and blobs are strings, every
-  part is an exact `dict`, `list`, `str`, `int`, `float`, `bool` or `None`, and a member that
-  the description marks required, and marks neither with a default nor as client-optional, is
-  present, although the client doesn't check it.
+  part of an answer is an exact `dict`, `list`, `str`, `int`, `float`, `bool` or `None`, and a
+  member that the description marks required, and marks neither with a default nor as
+  client-optional, is present, although the client doesn't check it.
 * *Model returns.* Whatever the program passed to the library before, each value that a model
   call returns, and each value that a declared model field holds before and after each model
   call, and when the program reads it, has its declared type at every position, except the parts
@@ -2499,12 +2519,12 @@ some of them.
   `first() -> int` returns `xs[0]`. Then `add` must declare `x: int`.
 * *The program keeps the declared types.* The following rely on the program keeping the model's
   declared types: the return types of the model's functions (§12.3) and overloads (§12.1), their
-  return schemas (§12.3), the `@admit` clauses (§12.3), the fields' `trustedType` facts
-  (§12.10), and the frames and the check of `OLD`, which use the fields' types (§12.4, §12.5).
-  Here a value has its declared type when it passes the test of a parameter of that type that
-  §12.3 describes, also where the clauses that PySpec writes test less (see below). So for a
-  model class `C`, `type(v)` is `C` or a subclass of `C`, and `Mock(spec=C)` is not one. The
-  program keeps the declared types when:
+  return schemas (§12.3), the `@admit` and `@admit_raise` clauses (§12.3), the fields'
+  `trustedType` facts (§12.10), and the frames and the check of `OLD`, which use the fields'
+  types (§12.4, §12.5). Here a value has its declared type when it passes the test of a
+  parameter of that type that §12.3 describes, also where the clauses that PySpec writes test
+  less (see below). So for a model class `C`, `type(v)` is `C` or a subclass of `C`, and
+  `Mock(spec=C)` is not one. The program keeps the declared types when:
   * it writes a model object's fields only with values of their declared types, by any means,
     such as `setattr`, `__dict__` or `vars()`;
   * it binds or deletes no attribute of a model class, methods included, by any means, such as
@@ -2556,6 +2576,19 @@ some of them.
   write to the library state that a ghost stands for does the same to a clause that reads the
   ghost. So an `@admit` clause relies on the program writing no field of a model object, and no
   other state that the library keeps, other than through model calls. No stage checks this yet.
+* *Raising exits.* An `@admit_raise` clause (§12.3) is a trusted claim about the library's
+  raising exits, as an `@admit` clause is about its returns. It relies on the same two
+  assumptions about the program as an `@admit` clause: *The program keeps the declared types*
+  and *The program changes the library's state only through model calls*. The trust of *Return schemas* that each part of an answer has
+  an exact class doesn't cover a raised exception: it may be an instance of a subclass, such as
+  botocore's `ClientError`, so a clause tests its class by `isinstance`. A claim about what a
+  call raises holds only when nothing interrupts the run, such as a signal; the call stays
+  within CPython's recursion limits, which CPython checks at the call itself, before the
+  callee's code runs; memory doesn't run out; nothing that the program's runner installs, such
+  as a trace, profile or audit hook, raises at an arbitrary point; and, for a function that
+  prints, printing works: its output stream is open and writable, and its encoding can write the
+  text. A clause that says a call never raises, `lambda exc: False`, is the modeler's claim
+  that, under these assumptions, the call returns.
 * The IR's semantics never frees an object, so it never runs a finalizer. A library class's
   finalizer (`__del__`) is assumed to have no effect that the program can observe.
 
@@ -2730,8 +2763,9 @@ clause with a call that means something else in CPython, such as `len(s, x=1)`, 
 `len` is a parameter, or `compile(p)` without `from re import compile`. After a skipped
 statement that can bind a name or change an object, every later assert is recorded. If a loop
 body holds such a statement, every assert of that body is recorded too. A recorded assert,
-`@requires`, `@ensures` or `@modifies` rejects the model. A recorded `@admit` only weakens it:
-PySpec leaves it out, even where it translates, so that ToLaurel doesn't assume it either.
+`@requires`, `@ensures` or `@modifies` rejects the model. A recorded `@admit` or `@admit_raise`
+only weakens it: PySpec leaves it out, even where it translates, so that ToLaurel doesn't assume
+it either.
 
 PySpec reads the names of the `typing` module in annotations by syntax only, with no other name
 resolution:

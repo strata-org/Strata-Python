@@ -1,0 +1,3 @@
+@admit_raise(lambda exc, result: result >= 0)
+def f() -> int:
+    ...

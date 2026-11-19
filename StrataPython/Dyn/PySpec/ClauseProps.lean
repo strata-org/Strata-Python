@@ -12,9 +12,10 @@ set_option autoImplicit false
 /-! # Properties of checked clauses
 
 Key result:
-- `CExpr.splitOld_oldContents_no_result`: when no `OLD` of a clause mentions `result`, no old part
-  that `CExpr.splitOld` makes mentions it either. So `base.old` never reads the call's result,
-  which does not exist in the state at the call (§12.4, *`OLD(e)`*).
+- `CExpr.splitOld_oldContents_no_result`: when no `OLD` of a clause mentions `result` or the
+  raised exception `exc`, no old part that `CExpr.splitOld` makes mentions them either. So
+  `base.old` never reads the call's outcome, which does not exist in the state at the call
+  (§12.4, *`OLD(e)`*).
 
 Definitions a reader needs: `CExpr.splitOld`, `CExpr.oldsWithoutResult`, `CExpr.oldContents`
 (`Clause.lean`).
@@ -24,14 +25,15 @@ namespace StrataPython.Dyn.PySpec
 
 public section
 
-/-- Removing the `old` markers changes nothing about whether `e` mentions `result`. -/
+/-- Removing the `old` markers changes nothing about whether `e` mentions `result` or the raised
+exception `exc`. -/
 private theorem CExpr.mentionsResult_unOld (e : CExpr) : e.unOld.mentionsResult = e.mentionsResult := by
   unfold CExpr.unOld
   induction e <;> rw [OldSplit.unOld_eq] <;>
     simp_all [OldSyntax.oldArg?, OldSyntax.mapChildren, CExpr.mapOldChildren, CExpr.mentionsResult]
 
 /-- An expression that reads only the state at the call, and none of whose `OLD`s mentions
-`result`, does not mention `result`: `result` is not state at the call. -/
+`result` or `exc`, mentions neither: neither is state at the call. -/
 private theorem CExpr.mentionsResult_of_readsOnlyOld (e : CExpr) (h₁ : e.readsOnlyOld = true)
     (h₂ : e.oldsWithoutResult = true) : e.mentionsResult = false := by
   unfold CExpr.readsOnlyOld at h₁
@@ -39,9 +41,9 @@ private theorem CExpr.mentionsResult_of_readsOnlyOld (e : CExpr) (h₁ : e.reads
     simp_all [OldSyntax.oldArg?, OldSyntax.readsState, OldSyntax.children, CExpr.oldChildren,
       CExpr.oldsWithoutResult, CExpr.mentionsResult]
 
-/-- No old part that `splitOld` makes mentions `result`, when no `OLD` of the clause does. By
-induction on the clause: a part that `splitOld` moves into `base.old` reads only the state at
-the call, which has no result. -/
+/-- No old part that `splitOld` makes mentions `result` or the raised exception, when no `OLD`
+of the clause does. By induction on the clause: a part that `splitOld` moves into `base.old`
+reads only the state at the call, which has no outcome. -/
 theorem CExpr.splitOld_oldContents_no_result (e : CExpr) (h : e.oldsWithoutResult = true) :
     ∀ p ∈ e.splitOld.oldContents, p.mentionsResult = false := by
   unfold CExpr.splitOld

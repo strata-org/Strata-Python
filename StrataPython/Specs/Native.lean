@@ -49,6 +49,9 @@ public structure MethodBundle where
   /-- `@admit` lambda bodies: postconditions the spec author explicitly
       acknowledges as unverified modeling assumptions. -/
   admitted : Array (expr SourceRange) := #[]
+  /-- `@admit_raise` lambda bodies: what holds when a call raises, with `exc` bound to the
+      exception. -/
+  raised : Array (expr SourceRange) := #[]
   /-- `@modifies` lambda bodies (frame targets — lvalue expressions). -/
   modifies : Array (expr SourceRange) := #[]
   /-- `@ghost(name="g", …)` declarations. -/
@@ -63,6 +66,9 @@ deriving Inhabited
 /-- Binder naming the procedure's return value inside an `@ensures` or `@admit`
     lambda. -/
 public def resultBinder : String := StrataPython.Specs.resultBinder
+
+/-- Binder naming the raised exception inside an `@admit_raise` lambda. -/
+public def raisedBinder : String := StrataPython.Specs.raisedBinder
 
 /-- Recognize `@label(lambda <params>: <body>)`, warning about any keyword and any
     lambda binder outside `allowed`, then hand the body to `push`. Common shape of
@@ -134,6 +140,9 @@ public def methodScheme {m : Type → Type} [Monad m] [PySpecMClass m]
     | "admit" =>
       absorbLambda "@admit" .admit (validParams.push resultBinder) form args bundle fun body =>
         { bundle with admitted := bundle.admitted.push body }
+    | "admit_raise" =>
+      absorbLambda "@admit_raise" .admitRaise (validParams.push raisedBinder) form args bundle
+        fun body => { bundle with raised := bundle.raised.push body }
     | "modifies" =>
       absorbLambda "@modifies" .modifies validParams form args bundle fun body =>
         { bundle with modifies := bundle.modifies.push body }

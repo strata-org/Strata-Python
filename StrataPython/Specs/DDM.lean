@@ -162,6 +162,8 @@ op mkPostconditionEntry(expr : SpecExprDecl) : PostconditionEntry =>
   expr "\n";
 op mkAdmittedPostconditionEntry(expr : SpecExprDecl) : PostconditionEntry =>
   "admitted " expr "\n";
+op mkRaisedPostconditionEntry(expr : SpecExprDecl) : PostconditionEntry =>
+  "admitted_raise " expr "\n";
 op mkDroppedEntry(kind : Str, source : Str) : PostconditionEntry =>
   "dropped " kind " " source "\n";
 op mkInvariantEntry(source : Str, binder : Str, formula : Option SpecExprDecl) :
@@ -465,6 +467,8 @@ def FunctionDecl.toDDM (d : FunctionDecl) : DDM.FunDecl SourceRange :=
         (.mkPostconditionEntry .none e.toDDM : DDM.PostconditionEntry SourceRange))
       ++ d.admittedPostconditions.map (fun e =>
         .mkAdmittedPostconditionEntry .none e.toDDM)
+      ++ d.raisedPostconditions.map (fun e =>
+        .mkRaisedPostconditionEntry .none e.toDDM)
       ++ d.dropped.map fun c =>
         .mkDroppedEntry c.loc ⟨.none, c.kind.tag⟩ ⟨.none, c.source⟩⟩)
     (snapshots := ⟨.none, none⟩)
@@ -651,20 +655,24 @@ def DDM.FunDecl.fromDDM (d : DDM.FunDecl SourceRange) : FromDDM Specs.FunctionDe
       pure (some (kn, .unpacked (← tp.fromDDM)))
     | none =>
       pure none
-  -- Split the postconditions sequence by entry op: verified `@ensures` entries
-  -- vs `@admit` entries. Encoding admitted entries as a PostconditionEntry
-  -- variant (instead of a new FunDecl clause) keeps `mkFunDecl`'s shape — and
-  -- therefore previously serialized spec Ion — parseable by this frontend.
+  -- Split the postconditions sequence by entry op into verified `@ensures`
+  -- entries, `@admit` entries and `@admit_raise` entries. Encoding both kinds
+  -- of admitted entries as PostconditionEntry variants (instead of new FunDecl
+  -- clauses) keeps `mkFunDecl`'s shape — and therefore previously serialized
+  -- spec Ion — parseable by this frontend.
   -- Dropped clauses are entries of the same sequence. An entry that belongs to another
   -- clause, such as an invariant, is a read error.
   let mut verifiedPostconditions : Array Specs.SpecExpr := #[]
   let mut admittedPostconditions : Array Specs.SpecExpr := #[]
+  let mut raisedPostconditions : Array Specs.SpecExpr := #[]
   let mut dropped : Array Specs.DroppedClause := #[]
   for entry in postconditions do
     match entry with
     | .mkPostconditionEntry _ e => verifiedPostconditions := verifiedPostconditions.push e.fromDDM
     | .mkAdmittedPostconditionEntry _ e =>
       admittedPostconditions := admittedPostconditions.push e.fromDDM
+    | .mkRaisedPostconditionEntry _ e =>
+      raisedPostconditions := raisedPostconditions.push e.fromDDM
     | .mkDroppedEntry dLoc ⟨_, tag⟩ ⟨_, source⟩ =>
       let some kind := Specs.DroppedKind.ofTag? tag
         | FromDDM.throw dLoc s!"Unknown kind of dropped clause: '{tag}'"
@@ -699,6 +707,7 @@ def DDM.FunDecl.fromDDM (d : DDM.FunDecl SourceRange) : FromDDM Specs.FunctionDe
     preconditions := preconditions.map (·.fromDDM)
     postconditions := verifiedPostconditions
     admittedPostconditions := admittedPostconditions
+    raisedPostconditions := raisedPostconditions
     modifies := modifies
     ghosts := ghosts
     dropped := dropped
@@ -775,8 +784,9 @@ def DDM.Command.fromDDM (cmd : DDM.Command SourceRange) : FromDDM Specs.Signatur
     that an older PySpec wrote. Version 1 records the clauses that PySpec could not read
     faithfully, invariant sources, the source text of f-string parts, and `Unpack`. Version 2
     also records the values of class fields, and comes from a PySpec that rejects the model code
-    that it reads differently from CPython. -/
-public def formatVersion : Nat := 2
+    that it reads differently from CPython. Version 3 also records the `@admit_raise`
+    postconditions, and comes from a PySpec that reads TypedDict members as CPython does. -/
+public def formatVersion : Nat := 3
 
 /-- Reads Python spec signatures from a DDM Ion file, with the format version that the file
     states, if any. -/

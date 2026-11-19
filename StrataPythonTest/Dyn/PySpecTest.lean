@@ -35,6 +35,7 @@ def txt : CExpr → String
   | .ghost _ n => s!"ghost {n}"
   | .binder n => n
   | .result => "result"
+  | .raised => "exc"
   | .int i => toString i
   | .none => "None"
   | .str s => s!"\"{s}\""
@@ -77,6 +78,10 @@ def xs : CExpr := .param { name := "xs", pos := 0, noneDefault := false }
 
 -- `OLD(xs) == xs`: the `xs` outside `OLD` is the list after the call, so only `OLD(xs)` moves.
 #guard txt (CExpr.cmp "eq" (.old xs) xs).splitOld == "eq(old(xs), xs)"
+
+-- The raised exception, like `result`, doesn't exist at the call, so no `OLD` may read it.
+#guard CExpr.raised.mentionsResult && !(CExpr.old .raised).oldsWithoutResult
+#guard txt (CExpr.cmp "eq" .raised (.old xs)).splitOld == "eq(exc, old(xs))"
 
 -- A part that reads `result` never moves.
 #guard txt (CExpr.cmp "eq" .result (.old xs)).splitOld == "eq(result, old(xs))"

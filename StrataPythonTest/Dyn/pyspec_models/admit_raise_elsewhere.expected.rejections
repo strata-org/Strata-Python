@@ -1,0 +1,3 @@
+[unknown-name] admit_raise_elsewhere: a clause of 'f' names 'exc', which is neither a parameter, a binder nor a ghost
+[unknown-name] admit_raise_elsewhere: a clause of 'g' names 'exc', which is neither a parameter, a binder nor a ghost
+[frame-target] admit_raise_elsewhere: @modifies of 'h' names 'exc', which is neither a parameter nor a ghost

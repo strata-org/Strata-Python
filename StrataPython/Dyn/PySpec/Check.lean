@@ -32,6 +32,9 @@ inductive Role where
   | pre
   /-- A `free ensures` clause, which may read `result` and apply `OLD`. -/
   | post
+  /-- A `free ensures` clause of the raising exit, which may read the raised exception `exc`
+  and apply `OLD`. -/
+  | raise
   /-- A frame target of `@modifies`. -/
   | frame
   /-- A class invariant, whose parameter `binder` stands for the instance. -/
@@ -615,6 +618,7 @@ def checkExpr (e : SpecExpr) : CheckM CExpr := do
     if n == resultBinder && ctx.role == .post then return .result
     if n == resultBinder then
       return ← reject "result-outside-post" s!"'{ctx.display}' reads result outside @ensures or @admit" loc
+    if n == raisedBinder && ctx.role == .raise then return .raised
     let ghosts := ctx.table.ghosts ctx.module
     let isGhost := ghosts.any (·.name == n)
     if let some (kn, _) := ctx.decl.args.kwargs then
@@ -702,11 +706,12 @@ def checkExpr (e : SpecExpr) : CheckM CExpr := do
   | .and a b _ => return .and (← checkExpr a) (← checkExpr b)
   | .or a b _ => return .or (← checkExpr a) (← checkExpr b)
   | .old inner loc =>
-    if ctx.role != .post then
-      return ← reject "old-outside-post" s!"'{ctx.display}' applies OLD outside @ensures or @admit" loc
+    if ctx.role != .post && ctx.role != .raise then
+      return ← reject "old-outside-post" s!"'{ctx.display}' applies OLD outside @ensures, @admit or @admit_raise" loc
     let c ← checkExpr inner
     if c.mentionsResult then
-      return ← reject "old-result" s!"'{ctx.display}' applies OLD to result" loc
+      let what := if ctx.role == .raise then "exc" else "result"
+      return ← reject "old-result" s!"'{ctx.display}' applies OLD to {what}" loc
     return .old c
   | .quantifier kind domain coll body loc =>
     shadowedBuiltin (if kind == .forall then "all" else "any") loc

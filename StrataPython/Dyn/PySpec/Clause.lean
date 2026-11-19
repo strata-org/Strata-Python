@@ -65,6 +65,8 @@ inductive CExpr where
   | binder (name : String)
   /-- The `ok` value of a post-state clause's result. -/
   | result
+  /-- The exception of a raising-exit clause's `error` result, bound as `exc`. -/
+  | raised
   | int (i : Int)
   | float (f : Float)
   | bool (b : Bool)
@@ -123,9 +125,10 @@ inductive CExpr where
   | const (b : Bool)
 deriving Inhabited
 
-/-- Whether `e` mentions `result`. -/
+/-- Whether `e` mentions the call's outcome: `result`, or the raised exception `exc`. Neither
+exists in the state at the call. -/
 @[expose] def CExpr.mentionsResult : CExpr → Bool
-  | .result => true
+  | .result | .raised => true
   | .attr e _ | .len e | .neg e | .isNone e _ | .contains _ e | .reSearch _ e | .enum e _
   | .notEnum e _ | .isInstance e _ | .typeTest e _ | .subclassOf e _ | .strIsOneOf e _
   | .intIsOneOf e _ | .isDefined e | .not e | .old e => e.mentionsResult
@@ -183,16 +186,17 @@ def CExpr.ghostsRead : CExpr → List String
   | e, _ => e
 
 /-- A clause's syntax for the old-part rule (§12.4, *`OLD(e)`*). A parameter, a quantifier's
-binder, `**kw`, `result`, a ghost, `py.bindsTo` and `py.dictKeysWithin` read state at the call:
-a parameter or a binder outside `OLD` is an object after the call, and `len(xs)` reads its
-contents then. So `len(OLD(xs))` can move into `base.old`, and `OLD(xs) == xs` can't. -/
+binder, `**kw`, `result`, `exc`, a ghost, `py.bindsTo` and `py.dictKeysWithin` read state after
+the call: a parameter or a binder outside `OLD` is an object after the call, and `len(xs)` reads
+its contents then. `result` and `exc` don't exist before the call. So `len(OLD(xs))` can move into
+`base.old`, and `OLD(xs) == xs` can't. -/
 instance : OldSyntax CExpr where
   oldArg? | .old e => some e | _ => none
   mkOld := .old
   wrappable _ := true
   readsState
-    | .param _ | .binder _ | .extraKwargs _ | .result | .ghost .. | .bindsTo .. | .kwargsWithin _ =>
-      true
+    | .param _ | .binder _ | .extraKwargs _ | .result | .raised | .ghost .. | .bindsTo .. |
+      .kwargsWithin _ => true
     | _ => false
   children := CExpr.oldChildren
   children_lt e c h := by
@@ -274,8 +278,8 @@ exact only if `x == "A" or x == "B"` and `x != "A"` have one reading, which they
   | .item a b | .arith _ a b | .cmp _ a b => a.condAsValue true || b.condAsValue true
   | _ => false
 
-/-- Whether no `OLD` part of `e` mentions `result`. The checker rejects `OLD(result)`, so
-every checked clause has this property. -/
+/-- Whether no `OLD` part of `e` mentions `result` or the raised exception. The checker rejects
+`OLD(result)` and `OLD(exc)`, so every checked clause has this property. -/
 @[expose] def CExpr.oldsWithoutResult : CExpr → Bool
   | .old e => !e.mentionsResult
   | .attr e _ | .len e | .neg e | .isNone e _ | .contains _ e | .reSearch _ e | .enum e _
