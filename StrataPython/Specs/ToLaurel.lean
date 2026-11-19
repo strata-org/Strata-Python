@@ -970,13 +970,6 @@ private def orAll (conditions : List (TypedStmtExpr .TBool))
     (source : FileRange) : TypedStmtExpr .TBool :=
   conditions.foldl (·.or · source) (.literalBool false source)
 
-private def singletonSpecType (loc : SourceRange) : SpecAtomType → SpecType
-  | .ident name args => .ident loc name args
-  | .intLiteral value => .intLiteral loc value
-  | .stringLiteral value => .stringLiteral loc value
-  | .typedDict fields fieldTypes required =>
-    .typedDict loc fields fieldTypes required
-
 private inductive TypedDictSchemaMode where
   | openKeys
   | closedKeys
@@ -1003,7 +996,7 @@ private partial def schemaValueAssertion? (typedDictMode : TypedDictSchemaMode)
   if tp.atoms.size > 1 && tp.hasContainerAtom then
     let mut arms : List (TypedStmtExpr .TBool) := []
     for atom in tp.atoms do
-      let atomType := singletonSpecType tp.loc atom
+      let atomType := SpecType.ofAtom tp.loc atom
       match ← schemaValueAssertion? typedDictMode path atomType value source with
       | some condition =>
         arms := arms ++ [(⟨condition⟩ : TypedStmtExpr .TBool)]

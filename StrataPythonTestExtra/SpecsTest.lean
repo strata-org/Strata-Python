@@ -2420,6 +2420,18 @@ meta def cpythonMembers (pythonCmd : System.FilePath) (file : System.FilePath) :
     let cpython ← cpythonMembers pythonCmd (testDir / "native_cases" / "typeddict_total.py")
     expect (got == cpython) s!"PySpec reads {got}, CPython {cpython}"
 
+-- The fixtures of return schemas (`docs/PythonToDyn.md` §12.3, *Return schema*) read their
+-- members as CPython does, so their presence clauses state what CPython's TypedDicts say.
+#guard_msgs in
+#eval for stem in ["return_schema", "return_schema_overload", "return_schema_aws"] do
+  runNativeCase stem (dir := testDir / "dyn_cases") (searchPath := testDir / "dyn_cases")
+      (modulePrefix := "") fun sigs _ => do
+    let got := (membersOfAliases sigs).qsort (·.1 < ·.1)
+    expect (!got.isEmpty) s!"{stem}: no TypedDicts"
+    withPython fun pythonCmd => do
+      let cpython ← cpythonMembers pythonCmd (testDir / "dyn_cases" / s!"{stem}.py")
+      expect (got == cpython) s!"{stem}: PySpec reads {got}, CPython {cpython}"
+
 -- A wrapper inside another type, or around a parameter, is rejected, as PEP 655 requires of type
 -- checkers. CPython 3.12 reads line 3's member as not required, since a Union of two equal types
 -- collapses to NotRequired[int].

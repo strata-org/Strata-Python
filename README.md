@@ -65,9 +65,12 @@ Spec constructs the dictionary map model cannot express are rejected with
 fatal diagnostics rather than lowered approximately: dict quantifiers over
 non-string keys ("dict quantifier requires str keys") and `**kwargs` without
 `Unpack[TypedDict]` (`kwargsExpansionError`, which would otherwise silently
-drop any `@requires` mentioning it). A return annotation's dict schema is
-likewise never assumed at call sites, only the coarse type tag is; schema
-claims require `@admit`, same as `@ensures`.
+drop any `@requires` mentioning it). On the Laurel path, a return
+annotation's dict schema is likewise never assumed at call sites, only the
+coarse type tag is; schema claims require `@admit`, same as `@ensures`. The
+Dyn path assumes the schema of a PySpec model's return type at call sites,
+without an `@admit`. This is a trusted assumption, which `docs/PythonToDyn.md`
+§12.9 (*Return schemas*) states.
 
 Diagnostic strings are not a stable interface; consumers classify runs by
 exit code and the `RESULT:`/`DETAIL:` lines. Known completeness limitation

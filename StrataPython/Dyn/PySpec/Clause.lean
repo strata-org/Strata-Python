@@ -231,6 +231,27 @@ reads only state at the call, outside its `OLD`s, becomes one `old` part (§12.4
 OLD(allocated) + 1` gives `allocated == old(allocated + 1)`. -/
 @[expose] def CExpr.splitOld (e : CExpr) : CExpr := OldSplit.splitOld e
 
+/-- Whether `e` contains `false`: the constant, or the literal `False`, which lowers to it. -/
+@[expose] def CExpr.hasFalse : CExpr → Bool
+  | .const b | .bool b => !b
+  | .attr e _ | .len e | .neg e | .isNone e _ | .contains _ e | .reSearch _ e | .enum e _
+  | .notEnum e _ | .isInstance e _ | .typeTest e _ | .subclassOf e _ | .strIsOneOf e _
+  | .intIsOneOf e _ | .isDefined e | .not e | .old e => e.hasFalse
+  | .item a b | .arith _ a b | .cmp _ a b | .and a b | .or a b | .implies a b
+  | .quant _ a b => a.hasFalse || b.hasFalse
+  | _ => false
+
+/-- Whether `e` reads the call's arguments, a ghost or the state at the call: a parameter, the
+`**kw` dict, the binding or keyword test of the arguments, a ghost, or an `OLD`. -/
+@[expose] def CExpr.readsCallState : CExpr → Bool
+  | .param _ | .extraKwargs _ | .ghost .. | .old _ | .bindsTo .. | .kwargsWithin _ => true
+  | .attr e _ | .len e | .neg e | .isNone e _ | .contains _ e | .reSearch _ e | .enum e _
+  | .notEnum e _ | .isInstance e _ | .typeTest e _ | .subclassOf e _ | .strIsOneOf e _
+  | .intIsOneOf e _ | .isDefined e | .not e => e.readsCallState
+  | .item a b | .arith _ a b | .cmp _ a b | .and a b | .or a b | .implies a b
+  | .quant _ a b => a.readsCallState || b.readsCallState
+  | _ => false
+
 /-- Whether `e` uses an `and`, an `or`, an implication, a regex search, `x == "A" or x == "B"`
 or `x != "A"` where a value is needed, as in `(x or 3) == result` or
 `compile(p).search(s) == False`: CPython gives an operand, a match object or the result of

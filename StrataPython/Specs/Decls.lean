@@ -361,6 +361,13 @@ def typedDict (loc : SourceRange) (fields : Array String)
     (fieldTypes : Array SpecType) (fieldRequired : Array Bool) : SpecType :=
   { empty loc with typedDicts := #[{ fields, fieldTypes, fieldRequired }] }
 
+/-- The type whose only atom is `a`. -/
+def ofAtom (loc : SourceRange) : SpecAtomType → SpecType
+  | .ident name args => ident loc name args
+  | .intLiteral value => intLiteral loc value
+  | .stringLiteral value => stringLiteral loc value
+  | .typedDict fields fieldTypes required => typedDict loc fields fieldTypes required
+
 def unionArray (loc : SourceRange) (elts : Array SpecType) : SpecType :=
   elts.foldl (init := empty loc) (union loc · ·)
 

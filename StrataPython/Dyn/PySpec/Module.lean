@@ -256,7 +256,9 @@ def translateOverloads (t : Table) (module name : String) (stubs : Array Functio
     if let some test := returnTypeTest t s.returnType .result then
       ensures := ensures.push { message := s!"overload of '{name}' for '{lit}'"
                                 body := .implies (.enum v #[lit]) test }
-    -- A stub's `@admit` describes only the calls that select it (§12.13).
+    -- A stub's schema and `@admit` describe only the calls that select it (§12.1, §12.13).
+    ensures := ensures ++ (guarded v lit
+      (plan.ensures.filter (·.kind == .returnSchema)))
     ensures := ensures ++ (guarded v lit
       (plan.ensures.filter (·.kind == .admitted)))
     -- A stub's targets apply only where `v == lit`, as its clauses do: elsewhere they read

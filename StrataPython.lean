@@ -27,6 +27,7 @@ public import StrataPython.Dyn.OldSplitProps
 public import StrataPython.Dyn.Markers
 public import StrataPython.Dyn.Translate
 public import StrataPython.Dyn.TranslateProps
+public import StrataPython.Dyn.PySpec.CheckProps
 public import StrataPython.Dyn.PySpec.ClauseProps
 public import StrataPython.Dyn.PySpec.Load
 

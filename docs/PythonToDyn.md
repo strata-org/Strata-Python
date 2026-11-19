@@ -1821,7 +1821,8 @@ The exceptions are the trusted modeling assumptions of §12.9.
      ToLaurel drops a stub's preconditions; keeping them is stronger, so it is sound;
   5. for each stub, `free ensures "overload of 'connect' for 'litᵢ'"`: on `ok r`, if `v ==
      litᵢ`, then `r` passes the test of a return type for `Cᵢ` (§12.3), with `Cᵢ` read as
-     *Class identity* says;
+     *Class identity* says. Then the stub's schema clauses (§12.3, *Return schema*), each
+     applying only when `v == litᵢ`, with " for 'litᵢ'" after its message;
   6. the frame: the three regions that start the model frame (§12.5), `py.instanceState`,
      `py.reachLoc(%args.0)` and `py.reachLoc(%kwargs.0)`, then every stub's `@modifies`
      targets. Each target applies only when `v == litᵢ`, as the stub's clauses do, and gives
@@ -1910,7 +1911,8 @@ The exceptions are the trusted modeling assumptions of §12.9.
 * **Return type.** It is `free ensures "return type of 'f'"`, before the `@admit` clauses, so
   that they may rely on it. It relies on the program keeping the model's declared types (§12.9,
   *The program keeps the declared types*). ToLaurel puts it after them. On `ok`, it is the
-  coarse test of the declared type (below), never its schema. There is no clause for `-> None`.
+  coarse test of the declared type (below); the type's schema follows in separate clauses
+  (*Return schema*). There is no clause for `-> None`.
   An atom without a test makes the whole union `true`, which is weaker, so it is sound. A
   Literal atom is tested as its class: `py.isInstance(v, py.stdClass("builtins", "str"))`, or
   `"int"`. A `bytes` atom accepts `bytes`, `bytearray` or `memoryview`, as PEP 484 promotes
@@ -1925,6 +1927,50 @@ The exceptions are the trusted modeling assumptions of §12.9.
   `py.isInstance(result, py.stdClass("types", "NotImplementedType"))`. Such a method may return
   it whatever its declared type: an operator's method for an operand that it doesn't handle,
   after which CPython tries the other operand's method, and `__length_hint__` for no hint.
+* **Return schema.** After the clause of the return type come `free ensures "schema of return
+  type of 'f': PATH"` clauses, one for each member of a TypedDict, element of a sequence and
+  entries of a mapping in the result, at every level, before the `@admit` clauses. Each states
+  the coarse test of the declared type at its position, as the return type's clause does, under
+  the presence tests, class tests and quantifiers on its path; a required member's clause also
+  states that it is present. A position whose type has no test, such as `Any` or `None`, gets no
+  clause, except a required member, whose clause states only its presence. `PATH` names
+  the position: `Regions` is the result's member `Regions`, `Regions[]` each of its elements,
+  `Regions[].RegionName` that member of each element, and `Tags{}` the entries of a mapping. For
+  `-> Out` with `Out = TypedDict("Out", {"Regions": NotRequired[List["Region"]]})` and `Region
+  = TypedDict("Region", {"RegionName": NotRequired[str]})`, the clauses are:
+
+  | `PATH` | Clause, in Python's notation |
+  |---|---|
+  | `Regions` | `"Regions" in result` implies `isinstance(result["Regions"], list)` |
+  | `Regions[]` | `"Regions" in result` implies `all(isinstance(x, dict) for x in result["Regions"])` |
+  | `Regions[].RegionName` | `"Regions" in result` implies `all(("RegionName" in x` implies `isinstance(x["RegionName"], str)) for x in result["Regions"])` |
+
+  A clause repeats the presence tests and the quantifiers of its path. Of its ancestors' type
+  tests, it repeats only the class tests that the first two rules below add, where an ancestor
+  may also be `None` or `NotImplemented`. It needs no other: by *Model values* (§12.9), the
+  ancestors have their types. One clause per position keeps
+  each assumption small for a verifier, where one clause over n optional members has up to 2ⁿ
+  cases. These rules bound the clauses:
+  * Every alias at a position is followed first. A position has children only when its type has
+    exactly one atom other than `None`. When it has other atoms, as an `Optional` does, the
+    children hold only where that atom's class test holds. Any other union has no children: a
+    value that passes the class tests of two atoms may be of either.
+  * For a special method that may return `NotImplemented` (above), every clause holds only where
+    the class test of the type's atom holds.
+  * An alias that its own path already followed has no children there, so a recursive type gives
+    finitely many clauses.
+  * A position whose type is behind more than 16 aliases gets no class test, since the declared
+    type's test follows at most 16 aliases, and it gets no children.
+  * The levels stop at 8, and the clauses at 256 per return type. The positions are expanded
+    level by level, and a level stops as soon as the bound is reached.
+  * A member counts as required only when PySpec reads it so.
+
+  Each stop gives fewer clauses, and past 16 aliases a clause may also lose a class test. A stop
+  never gives `false`. Both are weaker, so they are sound. A clause reads
+  only the result, its own binders and, for a model class, the class's global cell (*Class
+  identity*), never a parameter, a ghost or `OLD` (an overload stub's guard reads the dispatch
+  argument, §12.1). `CheckProps.lean` proves both facts. The clauses rely on *Model values*,
+  *Model returns* and *Return schemas*, and on the program keeping the declared types (§12.9).
 * **Declared parameter type.** Each atom gives a test:
 
   | Atom | Test |
@@ -1971,6 +2017,9 @@ The exceptions are the trusted modeling assumptions of §12.9.
     rejects these wrappers anywhere else, as PEP 655 requires of type checkers, and rejects a dict that gives a key
     twice instead of choosing one of its values.
   * Element types nest: `Dict[str, List[str]]` tests each value as a list of `str`s.
+  * The clauses that PySpec writes test less for a part of the type that PySpec keeps as a name,
+    such as an imported TypedDict: they test it only by its class (§12.9, *The program keeps the
+    declared types*).
   * For a `str`, a `range` or a mapping that is not a dict, the quantifier raises, so the clause
     is `false`, which is stronger, so it is sound.
 * **Class identity.** A clause reads a model class from its module's global cell when it runs,
@@ -2413,9 +2462,9 @@ some of them.
   `float` or an `int`, a `bytes` a `bytearray` or a `memoryview`, and a `Literal` any value of
   its class. So every element of a `List[int]` is an `int`, `True` included; every element of a
   `List[float]` is a `float` or an `int`, as botocore gives a JSON `1` for a double; every value
-  of a `dict[str, list[int]]` is a `list` of `int`s, although the IR's return test checks only
-  the `dict`; and an element of a `List[Literal["A", "B"]]` may be any `str`, as botocore gives
-  an enum value that the model doesn't list. The trust says nothing about a part that the
+  of a `Dict[str, List[int]]` is a `list` of `int`s, as the return schema states (§12.3); and an
+  element of a `List[Literal["A", "B"]]` may be any `str`, as botocore gives an enum value that
+  the model doesn't list. The trust says nothing about a part that the
   program wrote or passed to the library, through any alias: such a part keeps the type that the
   program gave it. Positions typed `Any`, a type variable, or a lazy type (`Iterator`,
   `Generator`, `Iterable`, dict views) stay open. A TypedDict has every required key, and each
@@ -2423,6 +2472,21 @@ some of them.
   present, and their values are open. The trust says nothing about a value after the program or
   the library changes it. After a later model call, a part that the call's frame doesn't hold
   keeps its value; the trust says nothing about a part that the frame holds.
+* *Return schemas.* The schema clauses of a return type (§12.3) state *Model values* and *Model
+  returns* at every position of the result, at the moment the call returns: a TypedDict part has
+  every required key, and each declared key that it has holds a value of the key's declared
+  type; each element of a list part, and each key and value of a dict part, has its declared
+  type. A part whose declared type is a TypedDict, a `List`, `Sequence`, `MutableSequence`,
+  `Dict`, `Mapping` or `MutableMapping`, and that is a dict or a list, answers `in`, `[]`,
+  `.get` and iteration from its own storage, as an exact `dict` or `list` does, so that what the
+  clauses state through `in` and `[]` is what the program reads through `.get` or a loop. Keys
+  that the TypedDict doesn't declare may be present, with any value. For a model that a
+  generator writes from a service's API description, such as an AWS Smithy model, this is the
+  trust that the service answers in the shape that its description declares, as the client
+  delivers the answer: for a client that delivers JSON, timestamps and blobs are strings, every
+  part is an exact `dict`, `list`, `str`, `int`, `float`, `bool` or `None`, and a member that
+  the description marks required, and marks neither with a default nor as client-optional, is
+  present, although the client doesn't check it.
 * *Model returns.* Whatever the program passed to the library before, each value that a model
   call returns, and each value that a declared model field holds before and after each model
   call, and when the program reads it, has its declared type at every position, except the parts
@@ -2434,12 +2498,13 @@ some of them.
   class `Box` has a field `xs: List[int]`, its `add(x: Any)` appends `x` to `xs`, and its
   `first() -> int` returns `xs[0]`. Then `add` must declare `x: int`.
 * *The program keeps the declared types.* The following rely on the program keeping the model's
-  declared types: the return types of the model's functions (§12.3) and overloads (§12.1), the
-  `@admit` clauses (§12.3), the fields' `trustedType` facts (§12.10), and the frames and the
-  check of `OLD`, which use the fields' types (§12.4, §12.5). Here a value has its declared type
-  when it passes the test of a parameter of that type (§12.3). So for a model class `C`,
-  `type(v)` is `C` or a subclass of `C`, and `Mock(spec=C)` is not one. The program keeps the
-  declared types when:
+  declared types: the return types of the model's functions (§12.3) and overloads (§12.1), their
+  return schemas (§12.3), the `@admit` clauses (§12.3), the fields' `trustedType` facts
+  (§12.10), and the frames and the check of `OLD`, which use the fields' types (§12.4, §12.5).
+  Here a value has its declared type when it passes the test of a parameter of that type that
+  §12.3 describes, also where the clauses that PySpec writes test less (see below). So for a
+  model class `C`, `type(v)` is `C` or a subclass of `C`, and `Mock(spec=C)` is not one. The
+  program keeps the declared types when:
   * it writes a model object's fields only with values of their declared types, by any means,
     such as `setattr`, `__dict__` or `vars()`;
   * it binds or deletes no attribute of a model class, methods included, by any means, such as
@@ -2458,8 +2523,16 @@ some of them.
   * no program code that touches the library's state or a value that crosses the library
     boundary runs concurrently with a model call, in another thread or in a signal handler;
   * the arguments that it passes have their declared types at every depth. The parameter's
-    clauses test this at the call (§12.2), but not the fields of a model object, the
-    receiver's included, nor the elements of a generator;
+    clauses test this at the call (§12.2), but not:
+    * the fields of a model object, the receiver's included;
+    * the elements of a generator;
+    * the parts of a type that PySpec keeps as a name: a name that the model imports or reads
+      from an imported module (such as `shapes.Inner`), a quoted name that the module defines
+      only below the place that quotes it (a function's annotation, an alias or a TypedDict, the
+      TypedDict's own name included), and an alias of these. The clauses test such a part only by its class, such as `dict` or `list`, and not
+      its members, elements or entries. For example, when the module `shapes`
+      defines `Inner = TypedDict("Inner", {"Name": str})`, a model with `from shapes import
+      Inner` and `def put(item: Inner) -> None` lets the call `put({})` pass the clauses;
   * it writes into a value that it passed to the library, or that the library returned or
     holds, through any alias, only values of the declared types. For example, after
     `c.set_xs(xs)` and `xs.insert(0, "s")`, `c.first() -> int` returns `"s"`;

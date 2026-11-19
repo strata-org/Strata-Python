@@ -38,7 +38,9 @@ inductive ClauseKind where
   | paramType (param : String)
   /-- An `@admit` clause. -/
   | admitted
-  /-- Any other clause: a schema, a precondition, a return type. -/
+  /-- A clause of a return type's schema (§12.3, *Return schema*). -/
+  | returnSchema
+  /-- Any other clause: a parameter's schema, a precondition, a return type. -/
   | other
 deriving Inhabited, BEq
 
@@ -435,13 +437,18 @@ def planFunction : CheckM ContractPlan := do
   let writes ← frameOf
   let covered := coveredBy writes
   let mut post : Array ClausePlan := #[]
+  -- A binary or comparison special method may return `NotImplemented`, whatever its declared
+  -- type, so that CPython tries the other operand (§12.3).
+  let mayNotImplement := ctx.owner.isSome && notImplementedMethods.contains d.name
   if let some test := returnTypeTest ctx.table d.returnType .result then
-    -- A binary or comparison special method may return `NotImplemented`, whatever its declared
-    -- type, so that CPython tries the other operand (§12.3).
-    let test := if ctx.owner.isSome && notImplementedMethods.contains d.name then
+    let test := if mayNotImplement then
         .or test (.isInstance .result (.std "types" "NotImplementedType"))
       else test
     post := post.push { message := s!"return type of '{ctx.display}'", body := test }
+  -- Such a method has its schema under its type's class test.
+  for (path, body) in returnSchema ctx.table d.returnType mayNotImplement do
+    post := post.push { message := s!"schema of return type of '{ctx.display}': {path}", body
+                        kind := .returnSchema }
   for e in d.admittedPostconditions do
     let c ← withRole .post (checkExpr e)
     checkNoCondValue c e.loc

@@ -187,3 +187,7 @@ StrataPythonTestExtra/Specs/dyn_cases | overload_frame_reach | ok
 StrataPythonTestExtra/Specs/dyn_cases | overload_frame_item | ok
 StrataPythonTestExtra/Specs/dyn_cases | overload_frame_base | ok
 StrataPythonTestExtra/Specs/dyn_rejects | overload_base_name | overload-dispatch
+StrataPythonTestExtra/Specs/dyn_cases | return_schema | ok
+StrataPythonTestExtra/Specs/dyn_cases | return_schema_overload | ok
+StrataPythonTestExtra/Specs/dyn_cases | return_schema_aws | ok
+StrataPythonTestExtra/Specs/dyn_cases | param_imported_typeddict | ok

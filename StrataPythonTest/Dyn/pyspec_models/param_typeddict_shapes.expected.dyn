@@ -1,0 +1,18 @@
+module param_typeddict_shapes {
+  func @|param_typeddict_shapes.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      jump ^start.0()
+    start.0():
+      %str.0 : py.Value = py.strLit("param_typeddict_shapes")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("param_typeddict_shapes", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@param_typeddict_shapes.__getattr__, "__getattr__", "param_typeddict_shapes")
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("param_typeddict_shapes", "__getattr__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @param_typeddict_shapes.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

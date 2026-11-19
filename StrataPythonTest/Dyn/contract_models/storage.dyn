@@ -61,6 +61,8 @@
 -- `@exhaustive` is not a decorator that the class statement applies: it gives the class's
 -- `__getattr__` its requires clause (§12.1). The class declares no field. It gets a synthesized
 -- `__init__`, since the stub has none (§12.1).
+-- `get_item`'s return type `GetItemResponse` gives, after its class test, one free ensures per
+-- member, each stating the member's type when the member is present (§12.3, *Return schema*).
 -- Compared with ToLaurel:
 -- * The binding and the presence of each parameter are requires clauses. ToLaurel binds a call
 --   statically, and so does V1.
@@ -70,6 +72,8 @@
 --   (§12.3). ToLaurel tests the tag of its value encoding.
 -- * The schema of `Dict[str, Any]` tests that each key is a `str`. ToLaurel's dictionaries have
 --   only `str` keys, so its schema of `Dict[str, Any]` is `true`.
+-- * After a call of `get_item`, the schema of its return type is assumed (§12.3, *Return
+--   schema*). ToLaurel assumes only the tag of the result's value encoding.
 -- * ToLaurel orders the schemas first, then the declared types, then the preconditions. Here
 --   the declared types come before the schemas that rely on them (§12.2).
 -- * The frame lets a call change only `py.instanceState` (the attributes of every object that is
@@ -412,6 +416,46 @@ module servicelib.Storage {
       raised.0(%exc.0 : py.Value):
         ret(true)
       fail.4(%e.4 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of 'Storage.get_item': Data" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %str.4 : py.Value = py.strLit("Data")
+        %in.2 : py.Value = py.in(%str.4, %result.1) ^fail.5()
+        %has.0 : base.Bool = py.truthy(%in.2) ^fail.5()
+        branch(%has.0) ^present.2() ^absent.0()
+      present.2():
+        %member.0 : py.Value = py.getItem(%result.1, %str.4) ^fail.5()
+        %cls.2 : py.Value = py.stdClass("builtins", "str")
+        %ok.9 : base.Bool = py.isInstance(%member.0, %cls.2) ^fail.5()
+        ret(%ok.9)
+      absent.0():
+        ret(true)
+      raised.1(%exc.1 : py.Value):
+        ret(true)
+      fail.5(%e.5 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of 'Storage.get_item': Found" {
+      post.2(%r.2 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.2) ^ok.2() ^raised.2()
+      ok.2(%result.2 : py.Value):
+        %str.5 : py.Value = py.strLit("Found")
+        %in.3 : py.Value = py.in(%str.5, %result.2) ^fail.6()
+        %has.1 : base.Bool = py.truthy(%in.3) ^fail.6()
+        branch(%has.1) ^present.3() ^absent.1()
+      present.3():
+        %member.1 : py.Value = py.getItem(%result.2, %str.5) ^fail.6()
+        %cls.3 : py.Value = py.stdClass("builtins", "bool")
+        %ok.10 : base.Bool = py.isInstance(%member.1, %cls.3) ^fail.6()
+        ret(%ok.10)
+      absent.1():
+        ret(true)
+      raised.2(%exc.2 : py.Value):
+        ret(true)
+      fail.6(%e.6 : py.Value):
         ret(true)
     }
     writes({

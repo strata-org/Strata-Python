@@ -140,6 +140,99 @@ def td : SpecType := .typedDict .none #["a", "b"] #[tp "builtins.int", tp "typin
 -- Past its nesting bound, a schema is `false`, which is stronger.
 #guard (schema emptyTable (.ident .none .typingList #[tp "builtins.str"]) xs 0 0).map txt == some "false"
 
+/-! ## Return schemas (§12.3, *Return schema*) -/
+
+/-- The paths and conditions of `tp`'s return schema, printed. -/
+def rs (t : Table) (tp : SpecType) (forceGuard : Bool := false) : List String :=
+  (returnSchema t tp forceGuard).map fun (p, c) => s!"{p}: {txt c}"
+
+def listOf (e : SpecType) : SpecType := .ident .none .typingList #[e]
+def dictOf (k v : SpecType) : SpecType := .ident .none .typingDict #[k, v]
+def tdOf (fs : List (String × SpecType × Bool)) : SpecType :=
+  .typedDict .none (fs.map (·.1)).toArray (fs.map (·.2.1)).toArray (fs.map (·.2.2)).toArray
+def ref (n : String) : SpecType := tp s!"m.{n}"
+/-- A table of the module `m` with the aliases `as`. -/
+def aliasTable (as : List (String × SpecType)) : Table :=
+  { index := as.foldl (init := {}) fun i (n, d) => i.insert ("m", n) (.alias d) }
+
+-- A required member states its presence and its type; a member that isn't required, its type
+-- if present; `Any` gives no clause unless the member is required.
+#guard rs emptyTable (tdOf [("a", tp "builtins.str", true), ("b", tp "builtins.int", false),
+    ("c", tp "typing.Any", false), ("d", tp "typing.Any", true)]) ==
+  ["a: and(contains(result, a), isinstance(result[\"a\"], builtins.str))",
+   "b: implies(contains(result, b), isinstance(result[\"b\"], builtins.int))",
+   "d: contains(result, d)"]
+
+-- A list's elements and a dict's entries, with the presence of their member on the way.
+#guard rs emptyTable (tdOf [("xs", listOf (tdOf [("n", tp "builtins.str", false)]), false),
+    ("tags", dictOf (tp "builtins.str") (tp "builtins.int"), false)]) ==
+  ["xs: implies(contains(result, xs), isinstance(result[\"xs\"], builtins.list))",
+   "tags: implies(contains(result, tags), isinstance(result[\"tags\"], builtins.dict))",
+   "xs[]: implies(contains(result, xs), all(item.1 in result[\"xs\"]: isinstance(item.1, builtins.dict)))",
+   "tags{}: implies(contains(result, tags), allItems(key.1, value.1 in result[\"tags\"]: and(isinstance(key.1, builtins.str), isinstance(value.1, builtins.int))))",
+   "xs[].n: implies(contains(result, xs), all(item.1 in result[\"xs\"]: implies(contains(item.1, n), isinstance(item.1[\"n\"], builtins.str))))"]
+
+-- An `Optional` has children under its one atom's class test.
+#guard rs emptyTable (.union .none (tdOf [("a", tp "builtins.int", true)]) (.noneType .none)) ==
+  ["a: implies(isinstance(result, builtins.dict), and(contains(result, a), isinstance(result[\"a\"], builtins.int)))"]
+
+-- Any other union has no children, also through an alias.
+#guard rs emptyTable (.union .none (listOf (tp "builtins.int")) (listOf (tp "builtins.str"))) == []
+#guard rs (aliasTable [("U", .union .none (listOf (tp "builtins.int")) (dictOf (tp "builtins.str") (tp "builtins.int")))])
+  (ref "U") == []
+
+-- A recursive alias stops at its second appearance on a path.
+#guard rs (aliasTable [("Tree", listOf (ref "Tree"))]) (ref "Tree") ==
+  ["[]: all(item.0 in result: isinstance(item.0, builtins.list))"]
+
+/-- A table with a chain of `n` aliases, `A0` to `A{n-1}`, whose last is `List[int]`. -/
+def aliasChain (n : Nat) : Table :=
+  aliasTable (((List.range (n - 1)).map fun i => (s!"A{i}", ref s!"A{i+1}")) ++
+    [(s!"A{n-1}", listOf (tp "builtins.int"))])
+
+-- A chain of `aliasChainBound` aliases has both the type's test and the children; a chain one
+-- longer has neither.
+#guard aliasChainBound == 16
+#guard (returnTypeTest (aliasChain 16) (ref "A0") .result).map txt ==
+  some "isinstance(result, builtins.list)"
+#guard rs (aliasChain 16) (ref "A0") == ["[]: all(item.0 in result: isinstance(item.0, builtins.int))"]
+#guard (returnTypeTest (aliasChain 17) (ref "A0") .result).isNone
+#guard rs (aliasChain 17) (ref "A0") == []
+
+-- `hasFalse`, which `returnSchema_no_false` is about, finds the literal `False` as well as the
+-- constant `false`.
+#guard (CExpr.and .result (.bool false)).hasFalse
+#guard (CExpr.const false).hasFalse
+#guard !(CExpr.and .result (.bool true)).hasFalse
+
+-- A special method's result may be `NotImplemented`, so its clauses hold under the class test.
+#guard rs emptyTable (tdOf [("a", tp "builtins.int", true)]) (forceGuard := true) ==
+  ["a: implies(isinstance(result, builtins.dict), and(contains(result, a), isinstance(result[\"a\"], builtins.int)))"]
+
+-- The levels stop at `returnSchemaDepth`: a chain of 9 nested lists gives 8 clauses.
+#guard (returnSchema emptyTable ((List.range 9).foldl (fun e _ => listOf e) (tp "builtins.int"))).map (·.1) ==
+  ["[]", "[][]", "[][][]", "[][][][]", "[][][][][]", "[][][][][][]", "[][][][][][][]", "[][][][][][][][]"]
+
+-- The clauses stop at `returnSchemaBudget`, in level order: 300 members give the first 256.
+#guard (returnSchema emptyTable (tdOf ((List.range 300).map fun i => (s!"m{i}", tp "builtins.int", false)))).map (·.1) ==
+  (List.range 256).map (s!"m{·}")
+
+-- The next level gets only the capacity that the first left: 250 members, each a list, give the
+-- 250 members and the elements of the first 6.
+#guard (returnSchema emptyTable (tdOf ((List.range 250).map fun i => (s!"m{i}", listOf (tp "builtins.int"), false)))).map (·.1) ==
+  (List.range 250).map (s!"m{·}") ++ (List.range 6).map (s!"m{·}[]")
+
+-- A missing required flag counts as not required.
+#guard rs emptyTable (.typedDict .none #["a"] #[tp "builtins.int"] #[]) ==
+  ["a: implies(contains(result, a), isinstance(result[\"a\"], builtins.int))"]
+
+-- A known gap of parameter schemas: the schema doesn't follow a TypedDict named by a quoted
+-- forward reference, so it tests each element of `List["Inner"]` only as a dict, not `Inner`'s
+-- required member `Name`. The `requires` is weaker than the model says.
+#guard (schema (aliasTable [("Inner", tdOf [("Name", tp "builtins.str", true)])]) (listOf (ref "Inner"))
+    xs 0 8).map txt ==
+  some "all(item.0 in xs: typeTest(item.0, #[builtins.dict]))"
+
 /-! ## Float literals -/
 
 #guard (floatOfText? "1.5") == some 1.5 && (floatOfText? "-2.5e-07") == some (-2.5e-07)

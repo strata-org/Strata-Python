@@ -92,7 +92,7 @@ def Table.ghosts (t : Table) (module : String) : Array Ghost :=
 /-! ## Types -/
 
 /-- The class `n` of `builtins`. -/
-def builtin (n : String) : ClassRef := .std "builtins" n
+@[expose] def builtin (n : String) : ClassRef := .std "builtins" n
 
 /-- What a declared type's atom tests, as §12.3's table gives it: the classes it accepts,
 whether it accepts `None`, its literals, and whether it accepts anything. An atom without a
@@ -132,9 +132,13 @@ def identTest (t : Table) (id : PythonIdent) : AtomTest :=
     | some (.cls c) => { classes := #[.model c] }
     | _ => { untestable := true }
 
+/-- The longest chain of type aliases that a declared-type test, and a return type's schema,
+follow. -/
+def aliasChainBound : Nat := 16
+
 /-- The test of a declared type, its atoms combined. `aliasFuel` bounds how many type aliases
 an atom follows. -/
-def typeAtoms (t : Table) (tp : SpecType) (aliasFuel : Nat := 16) : AtomTest :=
+def typeAtoms (t : Table) (tp : SpecType) (aliasFuel : Nat := aliasChainBound) : AtomTest :=
   let one (acc : AtomTest) (a : AtomTest) : AtomTest :=
     { classes := acc.classes ++ a.classes, none := acc.none || a.none
       strs := acc.strs ++ a.strs, ints := acc.ints ++ a.ints, any := acc.any || a.any
@@ -151,7 +155,7 @@ def typeAtoms (t : Table) (tp : SpecType) (aliasFuel : Nat := 16) : AtomTest :=
 termination_by aliasFuel
 
 /-- The disjunction of `cs`, or `false` for none. -/
-def disj (cs : Array CExpr) : CExpr :=
+@[expose] def disj (cs : Array CExpr) : CExpr :=
   match cs.toList with
   | [] => .const false
   | c :: rest => rest.foldl .or c
@@ -174,7 +178,7 @@ def paramTypeTest (t : Table) (tp : SpecType) (v : CExpr) : Option CExpr :=
 its class, `bytes` as `bytes`, `bytearray` or `memoryview`, and a model class as the pair of
 `py.typeIsSubclass` and `py.isInstance`. `none` when there is no test: for `Any`, for `-> None`,
 or when an atom has no test, since the whole union is then weaker, and `true`. -/
-def returnTypeTest (t : Table) (tp : SpecType) (v : CExpr) : Option CExpr :=
+@[expose] def returnTypeTest (t : Table) (tp : SpecType) (v : CExpr) : Option CExpr :=
   let a := typeAtoms t tp
   if a.any || a.untestable then none
   else if a.classes.isEmpty && a.strs.isEmpty && a.ints.isEmpty then none
@@ -193,7 +197,7 @@ def returnTypeTest (t : Table) (tp : SpecType) (v : CExpr) : Option CExpr :=
     some (disj parts)
 
 /-- The element type of a `List[T]`, `Sequence[T]` or `MutableSequence[T]` (§12.3). -/
-def sequenceElement? (tp : SpecType) : Option SpecType :=
+@[expose] def sequenceElement? (tp : SpecType) : Option SpecType :=
   match tp.atoms with
   | #[.ident id #[e]] =>
     if ["typing.List", "typing.Sequence", "typing.MutableSequence"].contains (toString id) then
@@ -202,7 +206,7 @@ def sequenceElement? (tp : SpecType) : Option SpecType :=
 
 /-- The key and value types of a `Dict[K, V]`, `Mapping[K, V]` or `MutableMapping[K, V]`
 (§12.3). -/
-def mappingItems? (tp : SpecType) : Option (SpecType × SpecType) :=
+@[expose] def mappingItems? (tp : SpecType) : Option (SpecType × SpecType) :=
   match tp.atoms with
   | #[.ident id #[k, v]] =>
     if ["typing.Dict", "typing.Mapping", "typing.MutableMapping"].contains (toString id) then
@@ -236,8 +240,7 @@ def schema (t : Table) (tp : SpecType) (v : CExpr) (depth : Nat) (fuel : Nat) : 
       -- type test, an earlier clause, makes one atom's pair hold, so it doesn't.
       let parts := tp.atoms.filterMap fun atom => do
         let single ← match atom with
-          | .ident n args => some (SpecType.ident tp.loc n args)
-          | .typedDict fs fts frs => some (SpecType.typedDict tp.loc fs fts frs)
+          | .ident .. | .typedDict .. => some (SpecType.ofAtom tp.loc atom)
           | _ => none
         let s ← schema t single v depth fuel
         match paramTypeTest t single v with
@@ -280,6 +283,174 @@ def elementTest (t : Table) (tp : SpecType) (v : CExpr) (depth : Nat) (fuel : Na
   | some a, some b => some (.and a b)
 
 end
+
+/-! ## Return schemas -/
+
+/-- A step on the way from `result` to a position of a return type's schema (§12.3, *Return
+schema*). A clause holds under the presence tests, class tests and quantifiers of its path. -/
+inductive Guard where
+  /-- `"key" in of` implies what follows: the member `key` is not required. -/
+  | present (key : String) (of : CExpr)
+  /-- `test` implies what follows: the class test of a union's one atom that isn't `None`. -/
+  | isA (test : CExpr)
+  /-- What follows holds for each member `binder` of `coll`, with `py.allIn`. -/
+  | each (binder : String) (coll : CExpr)
+  /-- What follows holds for each entry, `key` and `value`, of the dict `d`, with `py.allItems`. -/
+  | entries (key value : String) (d : CExpr)
+deriving Inhabited
+
+/-- `body` past the steps `gs`, the first step outermost. -/
+@[expose] def Guard.wrapAll (gs : List Guard) (body : CExpr) : CExpr :=
+  gs.foldr (init := body) fun g b =>
+    match g with
+    | .present k v => .implies (.contains k v) b
+    | .isA t => .implies t b
+    | .each x c => .quant (.members true x) c b
+    | .entries k v d => .quant (.entries true (some k) (some v)) d b
+
+/-- A position of a return type's schema: the value there, read from `result`, its declared type,
+the steps on its way, its level (`result` is level 0, and each member, element or entry adds one),
+and the aliases that the way followed. -/
+structure SchemaPosition where
+  path : String
+  value : CExpr
+  type : SpecType
+  guards : List Guard
+  level : Nat
+  aliases : List String
+  /-- Whether the position's atom gets its class test as a guard although its type is not a
+  union: the result of a special method that may return `NotImplemented` (§12.3). -/
+  forceGuard : Bool := false
+deriving Inhabited
+
+/-- One clause of a return type's schema: the path of its position, the steps on its way, and
+the test at the position. Its condition is `Guard.wrapAll guards test`. -/
+structure SchemaClause where
+  path : String
+  guards : List Guard
+  test : CExpr
+deriving Inhabited
+
+/-- The atoms of `tp`, with every alias replaced by its definition's atoms, and the names of the
+aliases followed. `fuel` counts `tp` and each alias on a chain, so `resolvedAtoms t tp (n + 1)`
+follows chains of at most `n` aliases, and gives `none` on a longer one. -/
+@[expose] def resolvedAtoms (t : Table) (tp : SpecType) : Nat → Option (Array SpecAtomType × List String)
+  | 0 => none
+  | fuel + 1 =>
+    tp.atoms.foldlM (init := (#[], [])) fun (acc, names) atom =>
+      match atom with
+      | .ident id #[] =>
+        match t.resolve id with
+        | some (.alias d) => do
+          let (as, ns) ← resolvedAtoms t d fuel
+          pure (acc ++ as, names ++ toString id :: ns)
+        | _ => pure (acc.push atom, names)
+      | _ => pure (acc.push atom, names)
+
+/-- Whether `a` is `None`'s type. -/
+@[expose] def isNoneAtom : SpecAtomType → Bool
+  | .ident id _ => toString id == "_types.NoneType"
+  | _ => false
+
+/-- `m` after the path `p`: a member's path. -/
+@[expose] def joinPath (p m : String) : String := if p.isEmpty then m else s!"{p}.{m}"
+
+/-- The clauses of the children of `p`, whose atom is `a`, with the children's positions: one
+per member of a TypedDict, the element of a sequence, or the entries of a mapping. A child
+without a test gives no clause and no position, except a required member, whose clause states its
+presence. -/
+@[expose] def atomChildren (t : Table) (p : SchemaPosition) (a : SpecAtomType) :
+    List (SchemaClause × SchemaPosition) :=
+  let next (path : String) (value : CExpr) (type : SpecType) (guards : List Guard) :
+      SchemaPosition :=
+    { path, value, type, guards, level := p.level + 1, aliases := p.aliases }
+  match a with
+  | .typedDict fs fts frs =>
+    (fs.zip fts).toList.zipIdx.filterMap fun ((m, ft), i) =>
+      let v := CExpr.item p.value (.str m)
+      let present := CExpr.contains m p.value
+      -- A member counts as required only when PySpec says so; a missing flag is the weaker reading.
+      if frs.getD i false then
+        let test := match returnTypeTest t ft v with
+          | some x => CExpr.and present x
+          | none => present
+        some ({ path := joinPath p.path m, guards := p.guards, test },
+          next (joinPath p.path m) v ft p.guards)
+      else
+        (returnTypeTest t ft v).map fun x =>
+          ({ path := joinPath p.path m, guards := p.guards, test := .implies present x },
+            next (joinPath p.path m) v ft (p.guards ++ [.present m p.value]))
+  | .ident _ _ =>
+    match sequenceElement? (SpecType.ofAtom .none a), mappingItems? (SpecType.ofAtom .none a) with
+    | some e, _ =>
+      let x := schemaBinder p.level "item"
+      let gs := p.guards ++ [.each x p.value]
+      match returnTypeTest t e (.binder x) with
+      | some test => [({ path := p.path ++ "[]", guards := gs, test }, next (p.path ++ "[]") (.binder x) e gs)]
+      | none => []
+    | none, some (k, val) =>
+      let kb := schemaBinder p.level "key"
+      let vb := schemaBinder p.level "value"
+      let gs := p.guards ++ [.entries kb vb p.value]
+      let test := match returnTypeTest t k (.binder kb), returnTypeTest t val (.binder vb) with
+        | some a, some b => some (CExpr.and a b)
+        | some a, none => some a
+        | none, some b => some b
+        | none, none => none
+      match test with
+      | some test => [({ path := p.path ++ "{}", guards := gs, test }, next (p.path ++ "{}") (.binder vb) val gs)]
+      | none => []
+    | none, none => []
+  | _ => []
+
+/-- The clauses of the children of `p`, with their positions. Every alias of `p`'s type is
+followed first. Only a type with exactly one atom that isn't `None` has children; when it has
+other atoms, or `forceGuard` holds, the children hold under that atom's class test. An alias
+that the way to `p` already followed stops there, and so does a chain of more than
+`aliasChainBound` aliases, where `typeAtoms` stops too. -/
+@[expose] def schemaChildren (t : Table) (p : SchemaPosition) : List (SchemaClause × SchemaPosition) :=
+  match resolvedAtoms t p.type (aliasChainBound + 1) with
+  | none => []
+  | some (atoms, names) =>
+    if names.any (p.aliases.contains ·) then []
+    else
+      let p := { p with aliases := p.aliases ++ names }
+      match (atoms.filter (!isNoneAtom ·)).toList with
+      | [a] =>
+        if atoms.size > 1 || p.forceGuard then
+          match returnTypeTest t (SpecType.ofAtom p.type.loc a) p.value with
+          | some test => atomChildren t { p with guards := p.guards ++ [.isA test] } a
+          | none => []
+        else atomChildren t p a
+      | _ => []
+
+/-- The bound on the levels of a return type's schema. -/
+def returnSchemaDepth : Nat := 8
+
+/-- The bound on the number of a return type's schema clauses. -/
+def returnSchemaBudget : Nat := 256
+
+/-- The clauses of the positions below `ps`, level by level, at most `cap` of them, for at most
+`fuel` levels. A level stops as soon as `cap` clauses are made, and only the capacity left goes
+to the next level. -/
+@[expose] def schemaLevels (t : Table) : Nat → List SchemaPosition → Nat → List SchemaClause
+  | 0, _, _ => []
+  | fuel + 1, ps, cap =>
+    if cap = 0 then []
+    else
+      let step := (ps.flatMap (schemaChildren t)).take cap
+      step.map (·.1) ++ schemaLevels t fuel (step.map (·.2)) (cap - step.length)
+
+/-- The schema of the return type `tp` (§12.3, *Return schema*): one condition per member, element
+or entries of the result, at every level up to `returnSchemaDepth`, at most `returnSchemaBudget`
+of them, each with the path of its position. `forceGuard` puts every clause under the class test
+of the type's atom. -/
+@[expose] def returnSchema (t : Table) (tp : SpecType) (forceGuard : Bool := false) :
+    List (String × CExpr) :=
+  let root : SchemaPosition :=
+    { path := "", value := .result, type := tp, guards := [], level := 0, aliases := [], forceGuard }
+  (schemaLevels t returnSchemaDepth [root] returnSchemaBudget).map fun c =>
+    (c.path, Guard.wrapAll c.guards c.test)
 
 /-! ## Expressions -/
 

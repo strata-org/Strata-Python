@@ -1,0 +1,543 @@
+module param_imported_typeddict {
+  func @|param_imported_typeddict.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      jump ^start.0()
+    start.0():
+      %str.0 : py.Value = py.strLit("param_imported_typeddict")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("param_imported_typeddict", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %Inner.0 : py.Value = py.importFrom("param_typeddict_shapes", "Inner") ^propagate.0()
+      %Inner.cell.0 : base.Ref(py.Value) = py.globalCell("param_imported_typeddict", "Inner")
+      %set.1 : base.Unit = base.refSet[py.Value](%Inner.cell.0, %Inner.0)
+      %Names.0 : py.Value = py.importFrom("param_typeddict_shapes", "Names") ^propagate.0()
+      %Names.cell.0 : base.Ref(py.Value) = py.globalCell("param_imported_typeddict", "Names")
+      %set.2 : base.Unit = base.refSet[py.Value](%Names.cell.0, %Names.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@param_imported_typeddict.put, "put", "param_imported_typeddict")
+      %put.cell.0 : base.Ref(py.Value) = py.globalCell("param_imported_typeddict", "put")
+      %set.3 : base.Unit = base.refSet[py.Value](%put.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@param_imported_typeddict.put_all, "put_all", "param_imported_typeddict")
+      %put_all.cell.0 : base.Ref(py.Value) = py.globalCell("param_imported_typeddict", "put_all")
+      %set.4 : base.Unit = base.refSet[py.Value](%put_all.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure[[]](@param_imported_typeddict.put_qualified, "put_qualified", "param_imported_typeddict")
+      %put_qualified.cell.0 : base.Ref(py.Value) = py.globalCell("param_imported_typeddict", "put_qualified")
+      %set.5 : base.Unit = base.refSet[py.Value](%put_qualified.cell.0, %clo.2)
+      %clo.3 : py.Value = py.mkClosure[[]](@param_imported_typeddict.put_outer, "put_outer", "param_imported_typeddict")
+      %put_outer.cell.0 : base.Ref(py.Value) = py.globalCell("param_imported_typeddict", "put_outer")
+      %set.6 : base.Unit = base.refSet[py.Value](%put_outer.cell.0, %clo.3)
+      %clo.4 : py.Value = py.mkClosure[[]](@param_imported_typeddict.put_names, "put_names", "param_imported_typeddict")
+      %put_names.cell.0 : base.Ref(py.Value) = py.globalCell("param_imported_typeddict", "put_names")
+      %set.7 : base.Unit = base.refSet[py.Value](%put_names.cell.0, %clo.4)
+      %clo.5 : py.Value = py.mkClosure[[]](@param_imported_typeddict.put_node, "put_node", "param_imported_typeddict")
+      %put_node.cell.0 : base.Ref(py.Value) = py.globalCell("param_imported_typeddict", "put_node")
+      %set.8 : base.Unit = base.refSet[py.Value](%put_node.cell.0, %clo.5)
+      %clo.6 : py.Value = py.mkClosure[[]](@param_imported_typeddict.put_pending, "put_pending", "param_imported_typeddict")
+      %put_pending.cell.0 : base.Ref(py.Value) = py.globalCell("param_imported_typeddict", "put_pending")
+      %set.9 : base.Unit = base.refSet[py.Value](%put_pending.cell.0, %clo.6)
+      %clo.7 : py.Value = py.mkClosure[[]](@param_imported_typeddict.__getattr__, "__getattr__", "param_imported_typeddict")
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("param_imported_typeddict", "__getattr__")
+      %set.10 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.7)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  extern func @param_imported_typeddict.put(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'put'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "item")
+        ret(%binds.0)
+    }
+    requires "'item' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("item")
+        %item.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "item", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%item.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'item'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("item")
+        %item.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "item", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "dict")
+        %sub.0 : base.Bool = py.typeIsSubclass(%item.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%item.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @param_imported_typeddict.put_all(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'put_all'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "items")
+        ret(%binds.0)
+    }
+    requires "'items' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("items")
+        %items.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "items", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%items.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'items'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("items")
+        %items.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "items", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "list")
+        %sub.0 : base.Bool = py.typeIsSubclass(%items.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%items.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'items'" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("items")
+        %items.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "items", %undef.2)
+        %all.0 : base.Bool = py.allIn(%items.2) ^fail.3() {
+          body.0(%item.0.0 : py.Value):
+            %cls.1 : py.Value = py.stdClass("builtins", "dict")
+            %sub.1 : base.Bool = py.typeIsSubclass(%item.0.0, %cls.1) ^propagate.0()
+            branch(%sub.1) ^then.1() ^else.1()
+          then.1():
+            %inst.1 : base.Bool = py.isInstance(%item.0.0, %cls.1) ^propagate.0()
+            jump ^join.1(%inst.1)
+          else.1():
+            jump ^join.1(false)
+          join.1(%b.4 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.4)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        ret(%all.0)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @param_imported_typeddict.put_qualified(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'put_qualified'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "item")
+        ret(%binds.0)
+    }
+    requires "'item' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("item")
+        %item.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "item", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%item.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'item'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("item")
+        %item.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "item", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "dict")
+        %sub.0 : base.Bool = py.typeIsSubclass(%item.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%item.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @param_imported_typeddict.put_outer(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'put_outer'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "o")
+        ret(%binds.0)
+    }
+    requires "'o' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("o")
+        %o.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "o", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%o.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'o'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("o")
+        %o.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "o", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "dict")
+        %sub.0 : base.Bool = py.typeIsSubclass(%o.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%o.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'o'" {
+      pre.3():
+        %str.0 : py.Value = py.strLit("Items")
+        %undef.2 : py.Value = py.undef("o")
+        %o.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "o", %undef.2)
+        %in.0 : py.Value = py.in(%str.0, %o.2) ^fail.3()
+        %cond.0 : base.Bool = py.truthy(%in.0) ^fail.3()
+        branch(%cond.0) ^then.1() ^else.1()
+      then.1():
+        %undef.3 : py.Value = py.undef("o")
+        %o.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "o", %undef.3)
+        %str.1 : py.Value = py.strLit("Items")
+        %item.0 : py.Value = py.getItem(%o.3, %str.1) ^fail.3()
+        %cls.1 : py.Value = py.stdClass("builtins", "list")
+        %sub.1 : base.Bool = py.typeIsSubclass(%item.0, %cls.1) ^fail.3()
+        branch(%sub.1) ^then.2() ^else.2()
+      then.2():
+        %inst.1 : base.Bool = py.isInstance(%item.0, %cls.1) ^fail.3()
+        jump ^join.2(%inst.1)
+      else.2():
+        jump ^join.2(false)
+      join.2(%b.4 : base.Bool):
+        branch(%b.4) ^then.3() ^else.3()
+      then.3():
+        %undef.4 : py.Value = py.undef("o")
+        %o.4 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "o", %undef.4)
+        %str.2 : py.Value = py.strLit("Items")
+        %item.1 : py.Value = py.getItem(%o.4, %str.2) ^fail.3()
+        %all.0 : base.Bool = py.allIn(%item.1) ^fail.3() {
+          body.0(%item.1.0 : py.Value):
+            %cls.2 : py.Value = py.stdClass("builtins", "dict")
+            %sub.2 : base.Bool = py.typeIsSubclass(%item.1.0, %cls.2) ^propagate.0()
+            branch(%sub.2) ^then.4() ^else.4()
+          then.4():
+            %inst.2 : base.Bool = py.isInstance(%item.1.0, %cls.2) ^propagate.0()
+            jump ^join.4(%inst.2)
+          else.4():
+            jump ^join.4(false)
+          join.4(%b.6 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.6)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        jump ^join.3(%all.0)
+      else.3():
+        jump ^join.3(false)
+      join.3(%b.8 : base.Bool):
+        jump ^join.1(%b.8)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.10 : base.Bool):
+        ret(%b.10)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @param_imported_typeddict.put_names(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'put_names'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "xs")
+        ret(%binds.0)
+    }
+    requires "'xs' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("xs")
+        %xs.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%xs.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'xs'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("xs")
+        %xs.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "list")
+        %sub.0 : base.Bool = py.typeIsSubclass(%xs.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%xs.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @param_imported_typeddict.put_node(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'put_node'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "n")
+        ret(%binds.0)
+    }
+    requires "'n' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("n")
+        %n.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "n", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%n.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'n'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("n")
+        %n.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "n", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "dict")
+        %sub.0 : base.Bool = py.typeIsSubclass(%n.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%n.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'n'" {
+      pre.3():
+        %str.0 : py.Value = py.strLit("Name")
+        %undef.2 : py.Value = py.undef("n")
+        %n.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "n", %undef.2)
+        %in.0 : py.Value = py.in(%str.0, %n.2) ^fail.3()
+        %cond.0 : base.Bool = py.truthy(%in.0) ^fail.3()
+        branch(%cond.0) ^then.1() ^else.1()
+      then.1():
+        %undef.3 : py.Value = py.undef("n")
+        %n.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "n", %undef.3)
+        %str.1 : py.Value = py.strLit("Name")
+        %item.0 : py.Value = py.getItem(%n.3, %str.1) ^fail.3()
+        %cls.1 : py.Value = py.stdClass("builtins", "str")
+        %sub.1 : base.Bool = py.typeIsSubclass(%item.0, %cls.1) ^fail.3()
+        branch(%sub.1) ^then.2() ^else.2()
+      then.2():
+        %inst.1 : base.Bool = py.isInstance(%item.0, %cls.1) ^fail.3()
+        jump ^join.2(%inst.1)
+      else.2():
+        jump ^join.2(false)
+      join.2(%b.4 : base.Bool):
+        jump ^join.1(%b.4)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.6 : base.Bool):
+        branch(%b.6) ^then.3() ^else.3()
+      then.3():
+        %str.2 : py.Value = py.strLit("Children")
+        %undef.4 : py.Value = py.undef("n")
+        %n.4 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "n", %undef.4)
+        %in.1 : py.Value = py.in(%str.2, %n.4) ^fail.3()
+        %cond.1 : base.Bool = py.truthy(%in.1) ^fail.3()
+        branch(%cond.1) ^then.4() ^else.4()
+      then.4():
+        %undef.5 : py.Value = py.undef("n")
+        %n.5 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "n", %undef.5)
+        %str.3 : py.Value = py.strLit("Children")
+        %item.1 : py.Value = py.getItem(%n.5, %str.3) ^fail.3()
+        %cls.2 : py.Value = py.stdClass("builtins", "list")
+        %sub.2 : base.Bool = py.typeIsSubclass(%item.1, %cls.2) ^fail.3()
+        branch(%sub.2) ^then.5() ^else.5()
+      then.5():
+        %inst.2 : base.Bool = py.isInstance(%item.1, %cls.2) ^fail.3()
+        jump ^join.5(%inst.2)
+      else.5():
+        jump ^join.5(false)
+      join.5(%b.8 : base.Bool):
+        branch(%b.8) ^then.6() ^else.6()
+      then.6():
+        %undef.6 : py.Value = py.undef("n")
+        %n.6 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "n", %undef.6)
+        %str.4 : py.Value = py.strLit("Children")
+        %item.2 : py.Value = py.getItem(%n.6, %str.4) ^fail.3()
+        %all.0 : base.Bool = py.allIn(%item.2) ^fail.3() {
+          body.0(%item.1.0 : py.Value):
+            %cls.3 : py.Value = py.stdClass("builtins", "dict")
+            %sub.3 : base.Bool = py.typeIsSubclass(%item.1.0, %cls.3) ^propagate.0()
+            branch(%sub.3) ^then.7() ^else.7()
+          then.7():
+            %inst.3 : base.Bool = py.isInstance(%item.1.0, %cls.3) ^propagate.0()
+            jump ^join.7(%inst.3)
+          else.7():
+            jump ^join.7(false)
+          join.7(%b.10 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.10)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        jump ^join.6(%all.0)
+      else.6():
+        jump ^join.6(false)
+      join.6(%b.12 : base.Bool):
+        jump ^join.4(%b.12)
+      else.4():
+        jump ^join.4(false)
+      join.4(%b.14 : base.Bool):
+        jump ^join.3(%b.14)
+      else.3():
+        jump ^join.3(false)
+      join.3(%b.16 : base.Bool):
+        ret(%b.16)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @param_imported_typeddict.put_pending(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'put_pending'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "xs")
+        ret(%binds.0)
+    }
+    requires "'xs' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("xs")
+        %xs.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%xs.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'xs'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("xs")
+        %xs.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "list")
+        %sub.0 : base.Bool = py.typeIsSubclass(%xs.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%xs.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'xs'" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("xs")
+        %xs.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.2)
+        %all.0 : base.Bool = py.allIn(%xs.2) ^fail.3() {
+          body.0(%item.0.0 : py.Value):
+            %cls.1 : py.Value = py.stdClass("builtins", "dict")
+            %sub.1 : base.Bool = py.typeIsSubclass(%item.0.0, %cls.1) ^propagate.0()
+            branch(%sub.1) ^then.1() ^else.1()
+          then.1():
+            %inst.1 : base.Bool = py.isInstance(%item.0.0, %cls.1) ^propagate.0()
+            jump ^join.1(%inst.1)
+          else.1():
+            jump ^join.1(false)
+          join.1(%b.4 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.4)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        ret(%all.0)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @param_imported_typeddict.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

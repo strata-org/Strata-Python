@@ -1,0 +1,1412 @@
+module return_schema_aws {
+  func @|return_schema_aws.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      jump ^start.0()
+    start.0():
+      %str.0 : py.Value = py.strLit("return_schema_aws")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("return_schema_aws", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@return_schema_aws._pyhard_call_ec2_DescribeRegions, "_pyhard_call_ec2_DescribeRegions", "return_schema_aws")
+      %_pyhard_call_ec2_DescribeRegions.cell.0 : base.Ref(py.Value) = py.globalCell("return_schema_aws", "_pyhard_call_ec2_DescribeRegions")
+      %set.1 : base.Unit = base.refSet[py.Value](%_pyhard_call_ec2_DescribeRegions.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@return_schema_aws._pyhard_call_dynamodb_ListTables, "_pyhard_call_dynamodb_ListTables", "return_schema_aws")
+      %_pyhard_call_dynamodb_ListTables.cell.0 : base.Ref(py.Value) = py.globalCell("return_schema_aws", "_pyhard_call_dynamodb_ListTables")
+      %set.2 : base.Unit = base.refSet[py.Value](%_pyhard_call_dynamodb_ListTables.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure[[]](@return_schema_aws._pyhard_call_dynamodb_DescribeKinesisStreamingDestination, "_pyhard_call_dynamodb_DescribeKinesisStreamingDestination", "return_schema_aws")
+      %_pyhard_call_dynamodb_DescribeKinesisStreamingDestination.cell.0 : base.Ref(py.Value) = py.globalCell("return_schema_aws", "_pyhard_call_dynamodb_DescribeKinesisStreamingDestination")
+      %set.3 : base.Unit = base.refSet[py.Value](%_pyhard_call_dynamodb_DescribeKinesisStreamingDestination.cell.0, %clo.2)
+      %clo.3 : py.Value = py.mkClosure[[]](@return_schema_aws._pyhard_call_dynamodb_GetItem, "_pyhard_call_dynamodb_GetItem", "return_schema_aws")
+      %_pyhard_call_dynamodb_GetItem.cell.0 : base.Ref(py.Value) = py.globalCell("return_schema_aws", "_pyhard_call_dynamodb_GetItem")
+      %set.4 : base.Unit = base.refSet[py.Value](%_pyhard_call_dynamodb_GetItem.cell.0, %clo.3)
+      %clo.4 : py.Value = py.mkClosure[[]](@return_schema_aws.__getattr__, "__getattr__", "return_schema_aws")
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("return_schema_aws", "__getattr__")
+      %set.5 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.4)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @return_schema_aws._pyhard_call_ec2_DescribeRegions(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to '_pyhard_call_ec2_DescribeRegions'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, false, "region_name", "params")
+        ret(%binds.0)
+    }
+    requires "'region_name' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("region_name")
+        %region_name.0 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "region_name", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%region_name.0)
+        ret(%defined.0)
+    }
+    requires "'params' is required" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("params")
+        %params.0 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "params", %undef.1)
+        %defined.1 : base.Bool = py.isDefined(%params.0)
+        ret(%defined.1)
+    }
+    requires "declared type of parameter 'region_name'" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("region_name")
+        %region_name.1 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "region_name", %undef.2)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%region_name.1, %cls.0) ^fail.3()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%region_name.1, %cls.0) ^fail.3()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.3(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'params'" {
+      pre.4():
+        %undef.3 : py.Value = py.undef("params")
+        %params.1 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "params", %undef.3)
+        %cls.1 : py.Value = py.stdClass("builtins", "dict")
+        %sub.1 : base.Bool = py.typeIsSubclass(%params.1, %cls.1) ^fail.4()
+        branch(%sub.1) ^then.1() ^else.1()
+      then.1():
+        %inst.1 : base.Bool = py.isInstance(%params.1, %cls.1) ^fail.4()
+        jump ^join.1(%inst.1)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.4 : base.Bool):
+        ret(%b.4)
+      fail.4(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'params'" {
+      pre.5():
+        %undef.4 : py.Value = py.undef("params")
+        %params.2 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "params", %undef.4)
+        %all.0 : base.Bool = py.allItems(%params.2) ^fail.5() {
+          body.0(%key.0.0 : py.Value, %value.2 : py.Value):
+            %cls.2 : py.Value = py.stdClass("builtins", "str")
+            %sub.2 : base.Bool = py.typeIsSubclass(%key.0.0, %cls.2) ^propagate.0()
+            branch(%sub.2) ^then.2() ^else.2()
+          then.2():
+            %inst.2 : base.Bool = py.isInstance(%key.0.0, %cls.2) ^propagate.0()
+            jump ^join.2(%inst.2)
+          else.2():
+            jump ^join.2(false)
+          join.2(%b.6 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.6)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        ret(%all.0)
+      fail.5(%e.2 : py.Value):
+        ret(false)
+    }
+    free ensures "return type of '_pyhard_call_ec2_DescribeRegions'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.3 : py.Value = py.stdClass("builtins", "dict")
+        %inst.3 : base.Bool = py.isInstance(%result.0, %cls.3) ^fail.6()
+        ret(%inst.3)
+      raised.0(%exc.1 : py.Value):
+        ret(true)
+      fail.6(%e.3 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_ec2_DescribeRegions': Regions" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %str.0 : py.Value = py.strLit("Regions")
+        %in.0 : py.Value = py.in(%str.0, %result.1) ^fail.7()
+        %cond.0 : base.Bool = py.truthy(%in.0) ^fail.7()
+        branch(%cond.0) ^then.3() ^else.3()
+      then.3():
+        %str.1 : py.Value = py.strLit("Regions")
+        %item.0 : py.Value = py.getItem(%result.1, %str.1) ^fail.7()
+        %cls.4 : py.Value = py.stdClass("builtins", "list")
+        %inst.4 : base.Bool = py.isInstance(%item.0, %cls.4) ^fail.7()
+        jump ^join.3(%inst.4)
+      else.3():
+        jump ^join.3(true)
+      join.3(%b.9 : base.Bool):
+        ret(%b.9)
+      raised.1(%exc.2 : py.Value):
+        ret(true)
+      fail.7(%e.4 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_ec2_DescribeRegions': Regions[]" {
+      post.2(%r.2 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.2) ^ok.2() ^raised.2()
+      ok.2(%result.2 : py.Value):
+        %str.2 : py.Value = py.strLit("Regions")
+        %in.1 : py.Value = py.in(%str.2, %result.2) ^fail.8()
+        %cond.1 : base.Bool = py.truthy(%in.1) ^fail.8()
+        branch(%cond.1) ^then.4() ^else.4()
+      then.4():
+        %str.3 : py.Value = py.strLit("Regions")
+        %item.1 : py.Value = py.getItem(%result.2, %str.3) ^fail.8()
+        %all.1 : base.Bool = py.allIn(%item.1) ^fail.8() {
+          body.1(%item.1.0 : py.Value):
+            %cls.5 : py.Value = py.stdClass("builtins", "dict")
+            %inst.5 : base.Bool = py.isInstance(%item.1.0, %cls.5) ^propagate.1()
+            %res.1 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%inst.5)
+            ret(%res.1)
+          propagate.1(%exc.3 : py.Value):
+            %err.1 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.3)
+            ret(%err.1)
+        }
+        jump ^join.4(%all.1)
+      else.4():
+        jump ^join.4(true)
+      join.4(%b.12 : base.Bool):
+        ret(%b.12)
+      raised.2(%exc.4 : py.Value):
+        ret(true)
+      fail.8(%e.5 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_ec2_DescribeRegions': Regions[].OptInStatus" {
+      post.3(%r.3 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.3) ^ok.3() ^raised.3()
+      ok.3(%result.3 : py.Value):
+        %str.4 : py.Value = py.strLit("Regions")
+        %in.2 : py.Value = py.in(%str.4, %result.3) ^fail.9()
+        %cond.2 : base.Bool = py.truthy(%in.2) ^fail.9()
+        branch(%cond.2) ^then.5() ^else.5()
+      then.5():
+        %str.5 : py.Value = py.strLit("Regions")
+        %item.2 : py.Value = py.getItem(%result.3, %str.5) ^fail.9()
+        %all.2 : base.Bool = py.allIn(%item.2) ^fail.9() {
+          body.2(%item.1.1 : py.Value):
+            %str.6 : py.Value = py.strLit("OptInStatus")
+            %in.3 : py.Value = py.in(%str.6, %item.1.1) ^propagate.2()
+            %cond.3 : base.Bool = py.truthy(%in.3) ^propagate.2()
+            branch(%cond.3) ^then.6() ^else.6()
+          then.6():
+            %str.7 : py.Value = py.strLit("OptInStatus")
+            %item.3 : py.Value = py.getItem(%item.1.1, %str.7) ^propagate.2()
+            %cls.6 : py.Value = py.stdClass("builtins", "str")
+            %inst.6 : base.Bool = py.isInstance(%item.3, %cls.6) ^propagate.2()
+            jump ^join.6(%inst.6)
+          else.6():
+            jump ^join.6(true)
+          join.6(%b.15 : base.Bool):
+            %res.2 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.15)
+            ret(%res.2)
+          propagate.2(%exc.5 : py.Value):
+            %err.2 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.5)
+            ret(%err.2)
+        }
+        jump ^join.5(%all.2)
+      else.5():
+        jump ^join.5(true)
+      join.5(%b.17 : base.Bool):
+        ret(%b.17)
+      raised.3(%exc.6 : py.Value):
+        ret(true)
+      fail.9(%e.6 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_ec2_DescribeRegions': Regions[].RegionName" {
+      post.4(%r.4 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.4) ^ok.4() ^raised.4()
+      ok.4(%result.4 : py.Value):
+        %str.8 : py.Value = py.strLit("Regions")
+        %in.4 : py.Value = py.in(%str.8, %result.4) ^fail.10()
+        %cond.4 : base.Bool = py.truthy(%in.4) ^fail.10()
+        branch(%cond.4) ^then.7() ^else.7()
+      then.7():
+        %str.9 : py.Value = py.strLit("Regions")
+        %item.4 : py.Value = py.getItem(%result.4, %str.9) ^fail.10()
+        %all.3 : base.Bool = py.allIn(%item.4) ^fail.10() {
+          body.3(%item.1.2 : py.Value):
+            %str.10 : py.Value = py.strLit("RegionName")
+            %in.5 : py.Value = py.in(%str.10, %item.1.2) ^propagate.3()
+            %cond.5 : base.Bool = py.truthy(%in.5) ^propagate.3()
+            branch(%cond.5) ^then.8() ^else.8()
+          then.8():
+            %str.11 : py.Value = py.strLit("RegionName")
+            %item.5 : py.Value = py.getItem(%item.1.2, %str.11) ^propagate.3()
+            %cls.7 : py.Value = py.stdClass("builtins", "str")
+            %inst.7 : base.Bool = py.isInstance(%item.5, %cls.7) ^propagate.3()
+            jump ^join.8(%inst.7)
+          else.8():
+            jump ^join.8(true)
+          join.8(%b.20 : base.Bool):
+            %res.3 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.20)
+            ret(%res.3)
+          propagate.3(%exc.7 : py.Value):
+            %err.3 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.7)
+            ret(%err.3)
+        }
+        jump ^join.7(%all.3)
+      else.7():
+        jump ^join.7(true)
+      join.7(%b.22 : base.Bool):
+        ret(%b.22)
+      raised.4(%exc.8 : py.Value):
+        ret(true)
+      fail.10(%e.7 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_ec2_DescribeRegions': Regions[].Endpoint" {
+      post.5(%r.5 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.5) ^ok.5() ^raised.5()
+      ok.5(%result.5 : py.Value):
+        %str.12 : py.Value = py.strLit("Regions")
+        %in.6 : py.Value = py.in(%str.12, %result.5) ^fail.11()
+        %cond.6 : base.Bool = py.truthy(%in.6) ^fail.11()
+        branch(%cond.6) ^then.9() ^else.9()
+      then.9():
+        %str.13 : py.Value = py.strLit("Regions")
+        %item.6 : py.Value = py.getItem(%result.5, %str.13) ^fail.11()
+        %all.4 : base.Bool = py.allIn(%item.6) ^fail.11() {
+          body.4(%item.1.3 : py.Value):
+            %str.14 : py.Value = py.strLit("Endpoint")
+            %in.7 : py.Value = py.in(%str.14, %item.1.3) ^propagate.4()
+            %cond.7 : base.Bool = py.truthy(%in.7) ^propagate.4()
+            branch(%cond.7) ^then.10() ^else.10()
+          then.10():
+            %str.15 : py.Value = py.strLit("Endpoint")
+            %item.7 : py.Value = py.getItem(%item.1.3, %str.15) ^propagate.4()
+            %cls.8 : py.Value = py.stdClass("builtins", "str")
+            %inst.8 : base.Bool = py.isInstance(%item.7, %cls.8) ^propagate.4()
+            jump ^join.10(%inst.8)
+          else.10():
+            jump ^join.10(true)
+          join.10(%b.25 : base.Bool):
+            %res.4 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.25)
+            ret(%res.4)
+          propagate.4(%exc.9 : py.Value):
+            %err.4 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.9)
+            ret(%err.4)
+        }
+        jump ^join.9(%all.4)
+      else.9():
+        jump ^join.9(true)
+      join.9(%b.27 : base.Bool):
+        ret(%b.27)
+      raised.5(%exc.10 : py.Value):
+        ret(true)
+      fail.11(%e.8 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @return_schema_aws._pyhard_call_dynamodb_ListTables(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to '_pyhard_call_dynamodb_ListTables'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, false, "region_name", "params")
+        ret(%binds.0)
+    }
+    requires "'region_name' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("region_name")
+        %region_name.0 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "region_name", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%region_name.0)
+        ret(%defined.0)
+    }
+    requires "'params' is required" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("params")
+        %params.0 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "params", %undef.1)
+        %defined.1 : base.Bool = py.isDefined(%params.0)
+        ret(%defined.1)
+    }
+    requires "declared type of parameter 'region_name'" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("region_name")
+        %region_name.1 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "region_name", %undef.2)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%region_name.1, %cls.0) ^fail.3()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%region_name.1, %cls.0) ^fail.3()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.3(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'params'" {
+      pre.4():
+        %undef.3 : py.Value = py.undef("params")
+        %params.1 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "params", %undef.3)
+        %cls.1 : py.Value = py.stdClass("builtins", "dict")
+        %sub.1 : base.Bool = py.typeIsSubclass(%params.1, %cls.1) ^fail.4()
+        branch(%sub.1) ^then.1() ^else.1()
+      then.1():
+        %inst.1 : base.Bool = py.isInstance(%params.1, %cls.1) ^fail.4()
+        jump ^join.1(%inst.1)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.4 : base.Bool):
+        ret(%b.4)
+      fail.4(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'params'" {
+      pre.5():
+        %undef.4 : py.Value = py.undef("params")
+        %params.2 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "params", %undef.4)
+        %all.0 : base.Bool = py.allItems(%params.2) ^fail.5() {
+          body.0(%key.0.0 : py.Value, %value.2 : py.Value):
+            %cls.2 : py.Value = py.stdClass("builtins", "str")
+            %sub.2 : base.Bool = py.typeIsSubclass(%key.0.0, %cls.2) ^propagate.0()
+            branch(%sub.2) ^then.2() ^else.2()
+          then.2():
+            %inst.2 : base.Bool = py.isInstance(%key.0.0, %cls.2) ^propagate.0()
+            jump ^join.2(%inst.2)
+          else.2():
+            jump ^join.2(false)
+          join.2(%b.6 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.6)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        ret(%all.0)
+      fail.5(%e.2 : py.Value):
+        ret(false)
+    }
+    free ensures "return type of '_pyhard_call_dynamodb_ListTables'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.3 : py.Value = py.stdClass("builtins", "dict")
+        %inst.3 : base.Bool = py.isInstance(%result.0, %cls.3) ^fail.6()
+        ret(%inst.3)
+      raised.0(%exc.1 : py.Value):
+        ret(true)
+      fail.6(%e.3 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_ListTables': TableNames" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %str.0 : py.Value = py.strLit("TableNames")
+        %in.0 : py.Value = py.in(%str.0, %result.1) ^fail.7()
+        %cond.0 : base.Bool = py.truthy(%in.0) ^fail.7()
+        branch(%cond.0) ^then.3() ^else.3()
+      then.3():
+        %str.1 : py.Value = py.strLit("TableNames")
+        %item.0 : py.Value = py.getItem(%result.1, %str.1) ^fail.7()
+        %cls.4 : py.Value = py.stdClass("builtins", "list")
+        %inst.4 : base.Bool = py.isInstance(%item.0, %cls.4) ^fail.7()
+        jump ^join.3(%inst.4)
+      else.3():
+        jump ^join.3(true)
+      join.3(%b.9 : base.Bool):
+        ret(%b.9)
+      raised.1(%exc.2 : py.Value):
+        ret(true)
+      fail.7(%e.4 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_ListTables': LastEvaluatedTableName" {
+      post.2(%r.2 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.2) ^ok.2() ^raised.2()
+      ok.2(%result.2 : py.Value):
+        %str.2 : py.Value = py.strLit("LastEvaluatedTableName")
+        %in.1 : py.Value = py.in(%str.2, %result.2) ^fail.8()
+        %cond.1 : base.Bool = py.truthy(%in.1) ^fail.8()
+        branch(%cond.1) ^then.4() ^else.4()
+      then.4():
+        %str.3 : py.Value = py.strLit("LastEvaluatedTableName")
+        %item.1 : py.Value = py.getItem(%result.2, %str.3) ^fail.8()
+        %cls.5 : py.Value = py.stdClass("builtins", "str")
+        %inst.5 : base.Bool = py.isInstance(%item.1, %cls.5) ^fail.8()
+        jump ^join.4(%inst.5)
+      else.4():
+        jump ^join.4(true)
+      join.4(%b.12 : base.Bool):
+        ret(%b.12)
+      raised.2(%exc.3 : py.Value):
+        ret(true)
+      fail.8(%e.5 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_ListTables': TableNames[]" {
+      post.3(%r.3 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.3) ^ok.3() ^raised.3()
+      ok.3(%result.3 : py.Value):
+        %str.4 : py.Value = py.strLit("TableNames")
+        %in.2 : py.Value = py.in(%str.4, %result.3) ^fail.9()
+        %cond.2 : base.Bool = py.truthy(%in.2) ^fail.9()
+        branch(%cond.2) ^then.5() ^else.5()
+      then.5():
+        %str.5 : py.Value = py.strLit("TableNames")
+        %item.2 : py.Value = py.getItem(%result.3, %str.5) ^fail.9()
+        %all.1 : base.Bool = py.allIn(%item.2) ^fail.9() {
+          body.1(%item.1.0 : py.Value):
+            %cls.6 : py.Value = py.stdClass("builtins", "str")
+            %inst.6 : base.Bool = py.isInstance(%item.1.0, %cls.6) ^propagate.1()
+            %res.1 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%inst.6)
+            ret(%res.1)
+          propagate.1(%exc.4 : py.Value):
+            %err.1 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.4)
+            ret(%err.1)
+        }
+        jump ^join.5(%all.1)
+      else.5():
+        jump ^join.5(true)
+      join.5(%b.15 : base.Bool):
+        ret(%b.15)
+      raised.3(%exc.5 : py.Value):
+        ret(true)
+      fail.9(%e.6 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @return_schema_aws._pyhard_call_dynamodb_DescribeKinesisStreamingDestination(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to '_pyhard_call_dynamodb_DescribeKinesisStreamingDestination'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, false, "region_name", "params")
+        ret(%binds.0)
+    }
+    requires "'region_name' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("region_name")
+        %region_name.0 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "region_name", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%region_name.0)
+        ret(%defined.0)
+    }
+    requires "'params' is required" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("params")
+        %params.0 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "params", %undef.1)
+        %defined.1 : base.Bool = py.isDefined(%params.0)
+        ret(%defined.1)
+    }
+    requires "declared type of parameter 'region_name'" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("region_name")
+        %region_name.1 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "region_name", %undef.2)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%region_name.1, %cls.0) ^fail.3()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%region_name.1, %cls.0) ^fail.3()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.3(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'params'" {
+      pre.4():
+        %undef.3 : py.Value = py.undef("params")
+        %params.1 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "params", %undef.3)
+        %cls.1 : py.Value = py.stdClass("builtins", "dict")
+        %sub.1 : base.Bool = py.typeIsSubclass(%params.1, %cls.1) ^fail.4()
+        branch(%sub.1) ^then.1() ^else.1()
+      then.1():
+        %inst.1 : base.Bool = py.isInstance(%params.1, %cls.1) ^fail.4()
+        jump ^join.1(%inst.1)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.4 : base.Bool):
+        ret(%b.4)
+      fail.4(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'params'" {
+      pre.5():
+        %undef.4 : py.Value = py.undef("params")
+        %params.2 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "params", %undef.4)
+        %all.0 : base.Bool = py.allItems(%params.2) ^fail.5() {
+          body.0(%key.0.0 : py.Value, %value.2 : py.Value):
+            %cls.2 : py.Value = py.stdClass("builtins", "str")
+            %sub.2 : base.Bool = py.typeIsSubclass(%key.0.0, %cls.2) ^propagate.0()
+            branch(%sub.2) ^then.2() ^else.2()
+          then.2():
+            %inst.2 : base.Bool = py.isInstance(%key.0.0, %cls.2) ^propagate.0()
+            jump ^join.2(%inst.2)
+          else.2():
+            jump ^join.2(false)
+          join.2(%b.6 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.6)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        ret(%all.0)
+      fail.5(%e.2 : py.Value):
+        ret(false)
+    }
+    free ensures "return type of '_pyhard_call_dynamodb_DescribeKinesisStreamingDestination'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.3 : py.Value = py.stdClass("builtins", "dict")
+        %inst.3 : base.Bool = py.isInstance(%result.0, %cls.3) ^fail.6()
+        ret(%inst.3)
+      raised.0(%exc.1 : py.Value):
+        ret(true)
+      fail.6(%e.3 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_DescribeKinesisStreamingDestination': TableName" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %str.0 : py.Value = py.strLit("TableName")
+        %in.0 : py.Value = py.in(%str.0, %result.1) ^fail.7()
+        %cond.0 : base.Bool = py.truthy(%in.0) ^fail.7()
+        branch(%cond.0) ^then.3() ^else.3()
+      then.3():
+        %str.1 : py.Value = py.strLit("TableName")
+        %item.0 : py.Value = py.getItem(%result.1, %str.1) ^fail.7()
+        %cls.4 : py.Value = py.stdClass("builtins", "str")
+        %inst.4 : base.Bool = py.isInstance(%item.0, %cls.4) ^fail.7()
+        jump ^join.3(%inst.4)
+      else.3():
+        jump ^join.3(true)
+      join.3(%b.9 : base.Bool):
+        ret(%b.9)
+      raised.1(%exc.2 : py.Value):
+        ret(true)
+      fail.7(%e.4 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_DescribeKinesisStreamingDestination': KinesisDataStreamDestinations" {
+      post.2(%r.2 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.2) ^ok.2() ^raised.2()
+      ok.2(%result.2 : py.Value):
+        %str.2 : py.Value = py.strLit("KinesisDataStreamDestinations")
+        %in.1 : py.Value = py.in(%str.2, %result.2) ^fail.8()
+        %cond.1 : base.Bool = py.truthy(%in.1) ^fail.8()
+        branch(%cond.1) ^then.4() ^else.4()
+      then.4():
+        %str.3 : py.Value = py.strLit("KinesisDataStreamDestinations")
+        %item.1 : py.Value = py.getItem(%result.2, %str.3) ^fail.8()
+        %cls.5 : py.Value = py.stdClass("builtins", "list")
+        %inst.5 : base.Bool = py.isInstance(%item.1, %cls.5) ^fail.8()
+        jump ^join.4(%inst.5)
+      else.4():
+        jump ^join.4(true)
+      join.4(%b.12 : base.Bool):
+        ret(%b.12)
+      raised.2(%exc.3 : py.Value):
+        ret(true)
+      fail.8(%e.5 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_DescribeKinesisStreamingDestination': KinesisDataStreamDestinations[]" {
+      post.3(%r.3 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.3) ^ok.3() ^raised.3()
+      ok.3(%result.3 : py.Value):
+        %str.4 : py.Value = py.strLit("KinesisDataStreamDestinations")
+        %in.2 : py.Value = py.in(%str.4, %result.3) ^fail.9()
+        %cond.2 : base.Bool = py.truthy(%in.2) ^fail.9()
+        branch(%cond.2) ^then.5() ^else.5()
+      then.5():
+        %str.5 : py.Value = py.strLit("KinesisDataStreamDestinations")
+        %item.2 : py.Value = py.getItem(%result.3, %str.5) ^fail.9()
+        %all.1 : base.Bool = py.allIn(%item.2) ^fail.9() {
+          body.1(%item.1.0 : py.Value):
+            %cls.6 : py.Value = py.stdClass("builtins", "dict")
+            %inst.6 : base.Bool = py.isInstance(%item.1.0, %cls.6) ^propagate.1()
+            %res.1 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%inst.6)
+            ret(%res.1)
+          propagate.1(%exc.4 : py.Value):
+            %err.1 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.4)
+            ret(%err.1)
+        }
+        jump ^join.5(%all.1)
+      else.5():
+        jump ^join.5(true)
+      join.5(%b.15 : base.Bool):
+        ret(%b.15)
+      raised.3(%exc.5 : py.Value):
+        ret(true)
+      fail.9(%e.6 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_DescribeKinesisStreamingDestination': KinesisDataStreamDestinations[].StreamArn" {
+      post.4(%r.4 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.4) ^ok.4() ^raised.4()
+      ok.4(%result.4 : py.Value):
+        %str.6 : py.Value = py.strLit("KinesisDataStreamDestinations")
+        %in.3 : py.Value = py.in(%str.6, %result.4) ^fail.10()
+        %cond.3 : base.Bool = py.truthy(%in.3) ^fail.10()
+        branch(%cond.3) ^then.6() ^else.6()
+      then.6():
+        %str.7 : py.Value = py.strLit("KinesisDataStreamDestinations")
+        %item.3 : py.Value = py.getItem(%result.4, %str.7) ^fail.10()
+        %all.2 : base.Bool = py.allIn(%item.3) ^fail.10() {
+          body.2(%item.1.1 : py.Value):
+            %str.8 : py.Value = py.strLit("StreamArn")
+            %in.4 : py.Value = py.in(%str.8, %item.1.1) ^propagate.2()
+            %cond.4 : base.Bool = py.truthy(%in.4) ^propagate.2()
+            branch(%cond.4) ^then.7() ^else.7()
+          then.7():
+            %str.9 : py.Value = py.strLit("StreamArn")
+            %item.4 : py.Value = py.getItem(%item.1.1, %str.9) ^propagate.2()
+            %cls.7 : py.Value = py.stdClass("builtins", "str")
+            %inst.7 : base.Bool = py.isInstance(%item.4, %cls.7) ^propagate.2()
+            jump ^join.7(%inst.7)
+          else.7():
+            jump ^join.7(true)
+          join.7(%b.18 : base.Bool):
+            %res.2 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.18)
+            ret(%res.2)
+          propagate.2(%exc.6 : py.Value):
+            %err.2 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.6)
+            ret(%err.2)
+        }
+        jump ^join.6(%all.2)
+      else.6():
+        jump ^join.6(true)
+      join.6(%b.20 : base.Bool):
+        ret(%b.20)
+      raised.4(%exc.7 : py.Value):
+        ret(true)
+      fail.10(%e.7 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_DescribeKinesisStreamingDestination': KinesisDataStreamDestinations[].DestinationStatus" {
+      post.5(%r.5 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.5) ^ok.5() ^raised.5()
+      ok.5(%result.5 : py.Value):
+        %str.10 : py.Value = py.strLit("KinesisDataStreamDestinations")
+        %in.5 : py.Value = py.in(%str.10, %result.5) ^fail.11()
+        %cond.5 : base.Bool = py.truthy(%in.5) ^fail.11()
+        branch(%cond.5) ^then.8() ^else.8()
+      then.8():
+        %str.11 : py.Value = py.strLit("KinesisDataStreamDestinations")
+        %item.5 : py.Value = py.getItem(%result.5, %str.11) ^fail.11()
+        %all.3 : base.Bool = py.allIn(%item.5) ^fail.11() {
+          body.3(%item.1.2 : py.Value):
+            %str.12 : py.Value = py.strLit("DestinationStatus")
+            %in.6 : py.Value = py.in(%str.12, %item.1.2) ^propagate.3()
+            %cond.6 : base.Bool = py.truthy(%in.6) ^propagate.3()
+            branch(%cond.6) ^then.9() ^else.9()
+          then.9():
+            %str.13 : py.Value = py.strLit("DestinationStatus")
+            %item.6 : py.Value = py.getItem(%item.1.2, %str.13) ^propagate.3()
+            %cls.8 : py.Value = py.stdClass("builtins", "str")
+            %inst.8 : base.Bool = py.isInstance(%item.6, %cls.8) ^propagate.3()
+            jump ^join.9(%inst.8)
+          else.9():
+            jump ^join.9(true)
+          join.9(%b.23 : base.Bool):
+            %res.3 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.23)
+            ret(%res.3)
+          propagate.3(%exc.8 : py.Value):
+            %err.3 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.8)
+            ret(%err.3)
+        }
+        jump ^join.8(%all.3)
+      else.8():
+        jump ^join.8(true)
+      join.8(%b.25 : base.Bool):
+        ret(%b.25)
+      raised.5(%exc.9 : py.Value):
+        ret(true)
+      fail.11(%e.8 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_DescribeKinesisStreamingDestination': KinesisDataStreamDestinations[].DestinationStatusDescription" {
+      post.6(%r.6 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.6) ^ok.6() ^raised.6()
+      ok.6(%result.6 : py.Value):
+        %str.14 : py.Value = py.strLit("KinesisDataStreamDestinations")
+        %in.7 : py.Value = py.in(%str.14, %result.6) ^fail.12()
+        %cond.7 : base.Bool = py.truthy(%in.7) ^fail.12()
+        branch(%cond.7) ^then.10() ^else.10()
+      then.10():
+        %str.15 : py.Value = py.strLit("KinesisDataStreamDestinations")
+        %item.7 : py.Value = py.getItem(%result.6, %str.15) ^fail.12()
+        %all.4 : base.Bool = py.allIn(%item.7) ^fail.12() {
+          body.4(%item.1.3 : py.Value):
+            %str.16 : py.Value = py.strLit("DestinationStatusDescription")
+            %in.8 : py.Value = py.in(%str.16, %item.1.3) ^propagate.4()
+            %cond.8 : base.Bool = py.truthy(%in.8) ^propagate.4()
+            branch(%cond.8) ^then.11() ^else.11()
+          then.11():
+            %str.17 : py.Value = py.strLit("DestinationStatusDescription")
+            %item.8 : py.Value = py.getItem(%item.1.3, %str.17) ^propagate.4()
+            %cls.9 : py.Value = py.stdClass("builtins", "str")
+            %inst.9 : base.Bool = py.isInstance(%item.8, %cls.9) ^propagate.4()
+            jump ^join.11(%inst.9)
+          else.11():
+            jump ^join.11(true)
+          join.11(%b.28 : base.Bool):
+            %res.4 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.28)
+            ret(%res.4)
+          propagate.4(%exc.10 : py.Value):
+            %err.4 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.10)
+            ret(%err.4)
+        }
+        jump ^join.10(%all.4)
+      else.10():
+        jump ^join.10(true)
+      join.10(%b.30 : base.Bool):
+        ret(%b.30)
+      raised.6(%exc.11 : py.Value):
+        ret(true)
+      fail.12(%e.9 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_DescribeKinesisStreamingDestination': KinesisDataStreamDestinations[].ApproximateCreationDateTimePrecision" {
+      post.7(%r.7 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.7) ^ok.7() ^raised.7()
+      ok.7(%result.7 : py.Value):
+        %str.18 : py.Value = py.strLit("KinesisDataStreamDestinations")
+        %in.9 : py.Value = py.in(%str.18, %result.7) ^fail.13()
+        %cond.9 : base.Bool = py.truthy(%in.9) ^fail.13()
+        branch(%cond.9) ^then.12() ^else.12()
+      then.12():
+        %str.19 : py.Value = py.strLit("KinesisDataStreamDestinations")
+        %item.9 : py.Value = py.getItem(%result.7, %str.19) ^fail.13()
+        %all.5 : base.Bool = py.allIn(%item.9) ^fail.13() {
+          body.5(%item.1.4 : py.Value):
+            %str.20 : py.Value = py.strLit("ApproximateCreationDateTimePrecision")
+            %in.10 : py.Value = py.in(%str.20, %item.1.4) ^propagate.5()
+            %cond.10 : base.Bool = py.truthy(%in.10) ^propagate.5()
+            branch(%cond.10) ^then.13() ^else.13()
+          then.13():
+            %str.21 : py.Value = py.strLit("ApproximateCreationDateTimePrecision")
+            %item.10 : py.Value = py.getItem(%item.1.4, %str.21) ^propagate.5()
+            %cls.10 : py.Value = py.stdClass("builtins", "str")
+            %inst.10 : base.Bool = py.isInstance(%item.10, %cls.10) ^propagate.5()
+            jump ^join.13(%inst.10)
+          else.13():
+            jump ^join.13(true)
+          join.13(%b.33 : base.Bool):
+            %res.5 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.33)
+            ret(%res.5)
+          propagate.5(%exc.12 : py.Value):
+            %err.5 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.12)
+            ret(%err.5)
+        }
+        jump ^join.12(%all.5)
+      else.12():
+        jump ^join.12(true)
+      join.12(%b.35 : base.Bool):
+        ret(%b.35)
+      raised.7(%exc.13 : py.Value):
+        ret(true)
+      fail.13(%e.10 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @return_schema_aws._pyhard_call_dynamodb_GetItem(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to '_pyhard_call_dynamodb_GetItem'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, false, "region_name", "params")
+        ret(%binds.0)
+    }
+    requires "'region_name' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("region_name")
+        %region_name.0 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "region_name", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%region_name.0)
+        ret(%defined.0)
+    }
+    requires "'params' is required" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("params")
+        %params.0 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "params", %undef.1)
+        %defined.1 : base.Bool = py.isDefined(%params.0)
+        ret(%defined.1)
+    }
+    requires "declared type of parameter 'region_name'" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("region_name")
+        %region_name.1 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "region_name", %undef.2)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%region_name.1, %cls.0) ^fail.3()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%region_name.1, %cls.0) ^fail.3()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.3(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'params'" {
+      pre.4():
+        %undef.3 : py.Value = py.undef("params")
+        %params.1 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "params", %undef.3)
+        %cls.1 : py.Value = py.stdClass("builtins", "dict")
+        %sub.1 : base.Bool = py.typeIsSubclass(%params.1, %cls.1) ^fail.4()
+        branch(%sub.1) ^then.1() ^else.1()
+      then.1():
+        %inst.1 : base.Bool = py.isInstance(%params.1, %cls.1) ^fail.4()
+        jump ^join.1(%inst.1)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.4 : base.Bool):
+        ret(%b.4)
+      fail.4(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'params'" {
+      pre.5():
+        %undef.4 : py.Value = py.undef("params")
+        %params.2 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "params", %undef.4)
+        %all.0 : base.Bool = py.allItems(%params.2) ^fail.5() {
+          body.0(%key.0.0 : py.Value, %value.2 : py.Value):
+            %cls.2 : py.Value = py.stdClass("builtins", "str")
+            %sub.2 : base.Bool = py.typeIsSubclass(%key.0.0, %cls.2) ^propagate.0()
+            branch(%sub.2) ^then.2() ^else.2()
+          then.2():
+            %inst.2 : base.Bool = py.isInstance(%key.0.0, %cls.2) ^propagate.0()
+            jump ^join.2(%inst.2)
+          else.2():
+            jump ^join.2(false)
+          join.2(%b.6 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.6)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        ret(%all.0)
+      fail.5(%e.2 : py.Value):
+        ret(false)
+    }
+    free ensures "return type of '_pyhard_call_dynamodb_GetItem'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.3 : py.Value = py.stdClass("builtins", "dict")
+        %inst.3 : base.Bool = py.isInstance(%result.0, %cls.3) ^fail.6()
+        ret(%inst.3)
+      raised.0(%exc.1 : py.Value):
+        ret(true)
+      fail.6(%e.3 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_GetItem': Item" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %str.0 : py.Value = py.strLit("Item")
+        %in.0 : py.Value = py.in(%str.0, %result.1) ^fail.7()
+        %cond.0 : base.Bool = py.truthy(%in.0) ^fail.7()
+        branch(%cond.0) ^then.3() ^else.3()
+      then.3():
+        %str.1 : py.Value = py.strLit("Item")
+        %item.0 : py.Value = py.getItem(%result.1, %str.1) ^fail.7()
+        %cls.4 : py.Value = py.stdClass("builtins", "dict")
+        %inst.4 : base.Bool = py.isInstance(%item.0, %cls.4) ^fail.7()
+        jump ^join.3(%inst.4)
+      else.3():
+        jump ^join.3(true)
+      join.3(%b.9 : base.Bool):
+        ret(%b.9)
+      raised.1(%exc.2 : py.Value):
+        ret(true)
+      fail.7(%e.4 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_GetItem': Item{}" {
+      post.2(%r.2 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.2) ^ok.2() ^raised.2()
+      ok.2(%result.2 : py.Value):
+        %str.2 : py.Value = py.strLit("Item")
+        %in.1 : py.Value = py.in(%str.2, %result.2) ^fail.8()
+        %cond.1 : base.Bool = py.truthy(%in.1) ^fail.8()
+        branch(%cond.1) ^then.4() ^else.4()
+      then.4():
+        %str.3 : py.Value = py.strLit("Item")
+        %item.1 : py.Value = py.getItem(%result.2, %str.3) ^fail.8()
+        %all.1 : base.Bool = py.allItems(%item.1) ^fail.8() {
+          body.1(%key.1.0 : py.Value, %value.1.0 : py.Value):
+            %cls.5 : py.Value = py.stdClass("builtins", "str")
+            %inst.5 : base.Bool = py.isInstance(%key.1.0, %cls.5) ^propagate.1()
+            branch(%inst.5) ^then.5() ^else.5()
+          then.5():
+            %cls.6 : py.Value = py.stdClass("builtins", "dict")
+            %inst.6 : base.Bool = py.isInstance(%value.1.0, %cls.6) ^propagate.1()
+            jump ^join.5(%inst.6)
+          else.5():
+            jump ^join.5(false)
+          join.5(%b.12 : base.Bool):
+            %res.1 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.12)
+            ret(%res.1)
+          propagate.1(%exc.3 : py.Value):
+            %err.1 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.3)
+            ret(%err.1)
+        }
+        jump ^join.4(%all.1)
+      else.4():
+        jump ^join.4(true)
+      join.4(%b.14 : base.Bool):
+        ret(%b.14)
+      raised.2(%exc.4 : py.Value):
+        ret(true)
+      fail.8(%e.5 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_GetItem': Item{}.S" {
+      post.3(%r.3 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.3) ^ok.3() ^raised.3()
+      ok.3(%result.3 : py.Value):
+        %str.4 : py.Value = py.strLit("Item")
+        %in.2 : py.Value = py.in(%str.4, %result.3) ^fail.9()
+        %cond.2 : base.Bool = py.truthy(%in.2) ^fail.9()
+        branch(%cond.2) ^then.6() ^else.6()
+      then.6():
+        %str.5 : py.Value = py.strLit("Item")
+        %item.2 : py.Value = py.getItem(%result.3, %str.5) ^fail.9()
+        %all.2 : base.Bool = py.allItems(%item.2) ^fail.9() {
+          body.2(%key.1.1 : py.Value, %value.1.1 : py.Value):
+            %str.6 : py.Value = py.strLit("S")
+            %in.3 : py.Value = py.in(%str.6, %value.1.1) ^propagate.2()
+            %cond.3 : base.Bool = py.truthy(%in.3) ^propagate.2()
+            branch(%cond.3) ^then.7() ^else.7()
+          then.7():
+            %str.7 : py.Value = py.strLit("S")
+            %item.3 : py.Value = py.getItem(%value.1.1, %str.7) ^propagate.2()
+            %cls.7 : py.Value = py.stdClass("builtins", "str")
+            %inst.7 : base.Bool = py.isInstance(%item.3, %cls.7) ^propagate.2()
+            jump ^join.7(%inst.7)
+          else.7():
+            jump ^join.7(true)
+          join.7(%b.17 : base.Bool):
+            %res.2 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.17)
+            ret(%res.2)
+          propagate.2(%exc.5 : py.Value):
+            %err.2 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.5)
+            ret(%err.2)
+        }
+        jump ^join.6(%all.2)
+      else.6():
+        jump ^join.6(true)
+      join.6(%b.19 : base.Bool):
+        ret(%b.19)
+      raised.3(%exc.6 : py.Value):
+        ret(true)
+      fail.9(%e.6 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_GetItem': Item{}.N" {
+      post.4(%r.4 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.4) ^ok.4() ^raised.4()
+      ok.4(%result.4 : py.Value):
+        %str.8 : py.Value = py.strLit("Item")
+        %in.4 : py.Value = py.in(%str.8, %result.4) ^fail.10()
+        %cond.4 : base.Bool = py.truthy(%in.4) ^fail.10()
+        branch(%cond.4) ^then.8() ^else.8()
+      then.8():
+        %str.9 : py.Value = py.strLit("Item")
+        %item.4 : py.Value = py.getItem(%result.4, %str.9) ^fail.10()
+        %all.3 : base.Bool = py.allItems(%item.4) ^fail.10() {
+          body.3(%key.1.2 : py.Value, %value.1.2 : py.Value):
+            %str.10 : py.Value = py.strLit("N")
+            %in.5 : py.Value = py.in(%str.10, %value.1.2) ^propagate.3()
+            %cond.5 : base.Bool = py.truthy(%in.5) ^propagate.3()
+            branch(%cond.5) ^then.9() ^else.9()
+          then.9():
+            %str.11 : py.Value = py.strLit("N")
+            %item.5 : py.Value = py.getItem(%value.1.2, %str.11) ^propagate.3()
+            %cls.8 : py.Value = py.stdClass("builtins", "str")
+            %inst.8 : base.Bool = py.isInstance(%item.5, %cls.8) ^propagate.3()
+            jump ^join.9(%inst.8)
+          else.9():
+            jump ^join.9(true)
+          join.9(%b.22 : base.Bool):
+            %res.3 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.22)
+            ret(%res.3)
+          propagate.3(%exc.7 : py.Value):
+            %err.3 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.7)
+            ret(%err.3)
+        }
+        jump ^join.8(%all.3)
+      else.8():
+        jump ^join.8(true)
+      join.8(%b.24 : base.Bool):
+        ret(%b.24)
+      raised.4(%exc.8 : py.Value):
+        ret(true)
+      fail.10(%e.7 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_GetItem': Item{}.B" {
+      post.5(%r.5 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.5) ^ok.5() ^raised.5()
+      ok.5(%result.5 : py.Value):
+        %str.12 : py.Value = py.strLit("Item")
+        %in.6 : py.Value = py.in(%str.12, %result.5) ^fail.11()
+        %cond.6 : base.Bool = py.truthy(%in.6) ^fail.11()
+        branch(%cond.6) ^then.10() ^else.10()
+      then.10():
+        %str.13 : py.Value = py.strLit("Item")
+        %item.6 : py.Value = py.getItem(%result.5, %str.13) ^fail.11()
+        %all.4 : base.Bool = py.allItems(%item.6) ^fail.11() {
+          body.4(%key.1.3 : py.Value, %value.1.3 : py.Value):
+            %str.14 : py.Value = py.strLit("B")
+            %in.7 : py.Value = py.in(%str.14, %value.1.3) ^propagate.4()
+            %cond.7 : base.Bool = py.truthy(%in.7) ^propagate.4()
+            branch(%cond.7) ^then.11() ^else.11()
+          then.11():
+            %str.15 : py.Value = py.strLit("B")
+            %item.7 : py.Value = py.getItem(%value.1.3, %str.15) ^propagate.4()
+            %cls.9 : py.Value = py.stdClass("builtins", "str")
+            %inst.9 : base.Bool = py.isInstance(%item.7, %cls.9) ^propagate.4()
+            jump ^join.11(%inst.9)
+          else.11():
+            jump ^join.11(true)
+          join.11(%b.27 : base.Bool):
+            %res.4 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.27)
+            ret(%res.4)
+          propagate.4(%exc.9 : py.Value):
+            %err.4 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.9)
+            ret(%err.4)
+        }
+        jump ^join.10(%all.4)
+      else.10():
+        jump ^join.10(true)
+      join.10(%b.29 : base.Bool):
+        ret(%b.29)
+      raised.5(%exc.10 : py.Value):
+        ret(true)
+      fail.11(%e.8 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_GetItem': Item{}.BOOL" {
+      post.6(%r.6 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.6) ^ok.6() ^raised.6()
+      ok.6(%result.6 : py.Value):
+        %str.16 : py.Value = py.strLit("Item")
+        %in.8 : py.Value = py.in(%str.16, %result.6) ^fail.12()
+        %cond.8 : base.Bool = py.truthy(%in.8) ^fail.12()
+        branch(%cond.8) ^then.12() ^else.12()
+      then.12():
+        %str.17 : py.Value = py.strLit("Item")
+        %item.8 : py.Value = py.getItem(%result.6, %str.17) ^fail.12()
+        %all.5 : base.Bool = py.allItems(%item.8) ^fail.12() {
+          body.5(%key.1.4 : py.Value, %value.1.4 : py.Value):
+            %str.18 : py.Value = py.strLit("BOOL")
+            %in.9 : py.Value = py.in(%str.18, %value.1.4) ^propagate.5()
+            %cond.9 : base.Bool = py.truthy(%in.9) ^propagate.5()
+            branch(%cond.9) ^then.13() ^else.13()
+          then.13():
+            %str.19 : py.Value = py.strLit("BOOL")
+            %item.9 : py.Value = py.getItem(%value.1.4, %str.19) ^propagate.5()
+            %cls.10 : py.Value = py.stdClass("builtins", "bool")
+            %inst.10 : base.Bool = py.isInstance(%item.9, %cls.10) ^propagate.5()
+            jump ^join.13(%inst.10)
+          else.13():
+            jump ^join.13(true)
+          join.13(%b.32 : base.Bool):
+            %res.5 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.32)
+            ret(%res.5)
+          propagate.5(%exc.11 : py.Value):
+            %err.5 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.11)
+            ret(%err.5)
+        }
+        jump ^join.12(%all.5)
+      else.12():
+        jump ^join.12(true)
+      join.12(%b.34 : base.Bool):
+        ret(%b.34)
+      raised.6(%exc.12 : py.Value):
+        ret(true)
+      fail.12(%e.9 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_GetItem': Item{}.NULL" {
+      post.7(%r.7 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.7) ^ok.7() ^raised.7()
+      ok.7(%result.7 : py.Value):
+        %str.20 : py.Value = py.strLit("Item")
+        %in.10 : py.Value = py.in(%str.20, %result.7) ^fail.13()
+        %cond.10 : base.Bool = py.truthy(%in.10) ^fail.13()
+        branch(%cond.10) ^then.14() ^else.14()
+      then.14():
+        %str.21 : py.Value = py.strLit("Item")
+        %item.10 : py.Value = py.getItem(%result.7, %str.21) ^fail.13()
+        %all.6 : base.Bool = py.allItems(%item.10) ^fail.13() {
+          body.6(%key.1.5 : py.Value, %value.1.5 : py.Value):
+            %str.22 : py.Value = py.strLit("NULL")
+            %in.11 : py.Value = py.in(%str.22, %value.1.5) ^propagate.6()
+            %cond.11 : base.Bool = py.truthy(%in.11) ^propagate.6()
+            branch(%cond.11) ^then.15() ^else.15()
+          then.15():
+            %str.23 : py.Value = py.strLit("NULL")
+            %item.11 : py.Value = py.getItem(%value.1.5, %str.23) ^propagate.6()
+            %cls.11 : py.Value = py.stdClass("builtins", "bool")
+            %inst.11 : base.Bool = py.isInstance(%item.11, %cls.11) ^propagate.6()
+            jump ^join.15(%inst.11)
+          else.15():
+            jump ^join.15(true)
+          join.15(%b.37 : base.Bool):
+            %res.6 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.37)
+            ret(%res.6)
+          propagate.6(%exc.13 : py.Value):
+            %err.6 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.13)
+            ret(%err.6)
+        }
+        jump ^join.14(%all.6)
+      else.14():
+        jump ^join.14(true)
+      join.14(%b.39 : base.Bool):
+        ret(%b.39)
+      raised.7(%exc.14 : py.Value):
+        ret(true)
+      fail.13(%e.10 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_GetItem': Item{}.M" {
+      post.8(%r.8 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.8) ^ok.8() ^raised.8()
+      ok.8(%result.8 : py.Value):
+        %str.24 : py.Value = py.strLit("Item")
+        %in.12 : py.Value = py.in(%str.24, %result.8) ^fail.14()
+        %cond.12 : base.Bool = py.truthy(%in.12) ^fail.14()
+        branch(%cond.12) ^then.16() ^else.16()
+      then.16():
+        %str.25 : py.Value = py.strLit("Item")
+        %item.12 : py.Value = py.getItem(%result.8, %str.25) ^fail.14()
+        %all.7 : base.Bool = py.allItems(%item.12) ^fail.14() {
+          body.7(%key.1.6 : py.Value, %value.1.6 : py.Value):
+            %str.26 : py.Value = py.strLit("M")
+            %in.13 : py.Value = py.in(%str.26, %value.1.6) ^propagate.7()
+            %cond.13 : base.Bool = py.truthy(%in.13) ^propagate.7()
+            branch(%cond.13) ^then.17() ^else.17()
+          then.17():
+            %str.27 : py.Value = py.strLit("M")
+            %item.13 : py.Value = py.getItem(%value.1.6, %str.27) ^propagate.7()
+            %cls.12 : py.Value = py.stdClass("builtins", "dict")
+            %inst.12 : base.Bool = py.isInstance(%item.13, %cls.12) ^propagate.7()
+            jump ^join.17(%inst.12)
+          else.17():
+            jump ^join.17(true)
+          join.17(%b.42 : base.Bool):
+            %res.7 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.42)
+            ret(%res.7)
+          propagate.7(%exc.15 : py.Value):
+            %err.7 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.15)
+            ret(%err.7)
+        }
+        jump ^join.16(%all.7)
+      else.16():
+        jump ^join.16(true)
+      join.16(%b.44 : base.Bool):
+        ret(%b.44)
+      raised.8(%exc.16 : py.Value):
+        ret(true)
+      fail.14(%e.11 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_GetItem': Item{}.L" {
+      post.9(%r.9 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.9) ^ok.9() ^raised.9()
+      ok.9(%result.9 : py.Value):
+        %str.28 : py.Value = py.strLit("Item")
+        %in.14 : py.Value = py.in(%str.28, %result.9) ^fail.15()
+        %cond.14 : base.Bool = py.truthy(%in.14) ^fail.15()
+        branch(%cond.14) ^then.18() ^else.18()
+      then.18():
+        %str.29 : py.Value = py.strLit("Item")
+        %item.14 : py.Value = py.getItem(%result.9, %str.29) ^fail.15()
+        %all.8 : base.Bool = py.allItems(%item.14) ^fail.15() {
+          body.8(%key.1.7 : py.Value, %value.1.7 : py.Value):
+            %str.30 : py.Value = py.strLit("L")
+            %in.15 : py.Value = py.in(%str.30, %value.1.7) ^propagate.8()
+            %cond.15 : base.Bool = py.truthy(%in.15) ^propagate.8()
+            branch(%cond.15) ^then.19() ^else.19()
+          then.19():
+            %str.31 : py.Value = py.strLit("L")
+            %item.15 : py.Value = py.getItem(%value.1.7, %str.31) ^propagate.8()
+            %cls.13 : py.Value = py.stdClass("builtins", "list")
+            %inst.13 : base.Bool = py.isInstance(%item.15, %cls.13) ^propagate.8()
+            jump ^join.19(%inst.13)
+          else.19():
+            jump ^join.19(true)
+          join.19(%b.47 : base.Bool):
+            %res.8 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.47)
+            ret(%res.8)
+          propagate.8(%exc.17 : py.Value):
+            %err.8 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.17)
+            ret(%err.8)
+        }
+        jump ^join.18(%all.8)
+      else.18():
+        jump ^join.18(true)
+      join.18(%b.49 : base.Bool):
+        ret(%b.49)
+      raised.9(%exc.18 : py.Value):
+        ret(true)
+      fail.15(%e.12 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_GetItem': Item{}.M{}" {
+      post.10(%r.10 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.10) ^ok.10() ^raised.10()
+      ok.10(%result.10 : py.Value):
+        %str.32 : py.Value = py.strLit("Item")
+        %in.16 : py.Value = py.in(%str.32, %result.10) ^fail.16()
+        %cond.16 : base.Bool = py.truthy(%in.16) ^fail.16()
+        branch(%cond.16) ^then.20() ^else.20()
+      then.20():
+        %str.33 : py.Value = py.strLit("Item")
+        %item.16 : py.Value = py.getItem(%result.10, %str.33) ^fail.16()
+        %all.10 : base.Bool = py.allItems(%item.16) ^fail.16() {
+          body.9(%key.1.8 : py.Value, %value.1.8 : py.Value):
+            %str.34 : py.Value = py.strLit("M")
+            %in.17 : py.Value = py.in(%str.34, %value.1.8) ^propagate.9()
+            %cond.17 : base.Bool = py.truthy(%in.17) ^propagate.9()
+            branch(%cond.17) ^then.21() ^else.21()
+          then.21():
+            %str.35 : py.Value = py.strLit("M")
+            %item.17 : py.Value = py.getItem(%value.1.8, %str.35) ^propagate.9()
+            %all.9 : base.Bool = py.allItems(%item.17) ^propagate.9() {
+              body.10(%key.3.0 : py.Value, %value.3.0 : py.Value):
+                %cls.14 : py.Value = py.stdClass("builtins", "str")
+                %inst.14 : base.Bool = py.isInstance(%key.3.0, %cls.14) ^propagate.10()
+                branch(%inst.14) ^then.22() ^else.22()
+              then.22():
+                %cls.15 : py.Value = py.stdClass("builtins", "dict")
+                %inst.15 : base.Bool = py.isInstance(%value.3.0, %cls.15) ^propagate.10()
+                jump ^join.22(%inst.15)
+              else.22():
+                jump ^join.22(false)
+              join.22(%b.52 : base.Bool):
+                %res.9 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.52)
+                ret(%res.9)
+              propagate.10(%exc.19 : py.Value):
+                %err.9 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.19)
+                ret(%err.9)
+            }
+            jump ^join.21(%all.9)
+          else.21():
+            jump ^join.21(true)
+          join.21(%b.54 : base.Bool):
+            %res.10 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.54)
+            ret(%res.10)
+          propagate.9(%exc.20 : py.Value):
+            %err.10 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.20)
+            ret(%err.10)
+        }
+        jump ^join.20(%all.10)
+      else.20():
+        jump ^join.20(true)
+      join.20(%b.56 : base.Bool):
+        ret(%b.56)
+      raised.10(%exc.21 : py.Value):
+        ret(true)
+      fail.16(%e.13 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of '_pyhard_call_dynamodb_GetItem': Item{}.L[]" {
+      post.11(%r.11 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.11) ^ok.11() ^raised.11()
+      ok.11(%result.11 : py.Value):
+        %str.36 : py.Value = py.strLit("Item")
+        %in.18 : py.Value = py.in(%str.36, %result.11) ^fail.17()
+        %cond.18 : base.Bool = py.truthy(%in.18) ^fail.17()
+        branch(%cond.18) ^then.23() ^else.23()
+      then.23():
+        %str.37 : py.Value = py.strLit("Item")
+        %item.18 : py.Value = py.getItem(%result.11, %str.37) ^fail.17()
+        %all.12 : base.Bool = py.allItems(%item.18) ^fail.17() {
+          body.11(%key.1.9 : py.Value, %value.1.9 : py.Value):
+            %str.38 : py.Value = py.strLit("L")
+            %in.19 : py.Value = py.in(%str.38, %value.1.9) ^propagate.11()
+            %cond.19 : base.Bool = py.truthy(%in.19) ^propagate.11()
+            branch(%cond.19) ^then.24() ^else.24()
+          then.24():
+            %str.39 : py.Value = py.strLit("L")
+            %item.19 : py.Value = py.getItem(%value.1.9, %str.39) ^propagate.11()
+            %all.11 : base.Bool = py.allIn(%item.19) ^propagate.11() {
+              body.12(%item.3.0 : py.Value):
+                %cls.16 : py.Value = py.stdClass("builtins", "dict")
+                %inst.16 : base.Bool = py.isInstance(%item.3.0, %cls.16) ^propagate.12()
+                %res.11 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%inst.16)
+                ret(%res.11)
+              propagate.12(%exc.22 : py.Value):
+                %err.11 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.22)
+                ret(%err.11)
+            }
+            jump ^join.24(%all.11)
+          else.24():
+            jump ^join.24(true)
+          join.24(%b.59 : base.Bool):
+            %res.12 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.59)
+            ret(%res.12)
+          propagate.11(%exc.23 : py.Value):
+            %err.12 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.23)
+            ret(%err.12)
+        }
+        jump ^join.23(%all.12)
+      else.23():
+        jump ^join.23(true)
+      join.23(%b.61 : base.Bool):
+        ret(%b.61)
+      raised.11(%exc.24 : py.Value):
+        ret(true)
+      fail.17(%e.14 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @return_schema_aws.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

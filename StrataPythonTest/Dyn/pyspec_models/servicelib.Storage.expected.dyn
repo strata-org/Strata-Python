@@ -311,6 +311,52 @@ module servicelib.Storage {
       fail.7(%e.5 : py.Value):
         ret(true)
     }
+    free ensures "schema of return type of 'Storage.get_item': Data" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %str.6 : py.Value = py.strLit("Data")
+        %in.2 : py.Value = py.in(%str.6, %result.1) ^fail.8()
+        %cond.4 : base.Bool = py.truthy(%in.2) ^fail.8()
+        branch(%cond.4) ^then.5() ^else.5()
+      then.5():
+        %str.7 : py.Value = py.strLit("Data")
+        %item.4 : py.Value = py.getItem(%result.1, %str.7) ^fail.8()
+        %cls.3 : py.Value = py.stdClass("builtins", "str")
+        %inst.3 : base.Bool = py.isInstance(%item.4, %cls.3) ^fail.8()
+        jump ^join.5(%inst.3)
+      else.5():
+        jump ^join.5(true)
+      join.5(%b.13 : base.Bool):
+        ret(%b.13)
+      raised.1(%exc.1 : py.Value):
+        ret(true)
+      fail.8(%e.6 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of 'Storage.get_item': Found" {
+      post.2(%r.2 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.2) ^ok.2() ^raised.2()
+      ok.2(%result.2 : py.Value):
+        %str.8 : py.Value = py.strLit("Found")
+        %in.3 : py.Value = py.in(%str.8, %result.2) ^fail.9()
+        %cond.5 : base.Bool = py.truthy(%in.3) ^fail.9()
+        branch(%cond.5) ^then.6() ^else.6()
+      then.6():
+        %str.9 : py.Value = py.strLit("Found")
+        %item.5 : py.Value = py.getItem(%result.2, %str.9) ^fail.9()
+        %cls.4 : py.Value = py.stdClass("builtins", "bool")
+        %inst.4 : base.Bool = py.isInstance(%item.5, %cls.4) ^fail.9()
+        jump ^join.6(%inst.4)
+      else.6():
+        jump ^join.6(true)
+      join.6(%b.16 : base.Bool):
+        ret(%b.16)
+      raised.2(%exc.2 : py.Value):
+        ret(true)
+      fail.9(%e.7 : py.Value):
+        ret(true)
+    }
     writes({
       loc.0():
         %l.0 : base.Loc = py.instanceState

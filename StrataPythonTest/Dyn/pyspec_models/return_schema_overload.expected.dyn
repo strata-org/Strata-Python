@@ -1,0 +1,384 @@
+module return_schema_overload {
+  func @|return_schema_overload.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      jump ^start.0()
+    start.0():
+      %str.0 : py.Value = py.strLit("return_schema_overload")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("return_schema_overload", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@return_schema_overload.fetch, "fetch", "return_schema_overload")
+      %fetch.cell.0 : base.Ref(py.Value) = py.globalCell("return_schema_overload", "fetch")
+      %set.1 : base.Unit = base.refSet[py.Value](%fetch.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@return_schema_overload.fetch, "fetch", "return_schema_overload")
+      %fetch.cell.1 : base.Ref(py.Value) = py.globalCell("return_schema_overload", "fetch")
+      %set.2 : base.Unit = base.refSet[py.Value](%fetch.cell.1, %clo.1)
+      %clo.2 : py.Value = py.mkClosure[[]](@return_schema_overload.fetch, "fetch", "return_schema_overload")
+      %fetch.cell.2 : base.Ref(py.Value) = py.globalCell("return_schema_overload", "fetch")
+      %set.3 : base.Unit = base.refSet[py.Value](%fetch.cell.2, %clo.2)
+      %clo.3 : py.Value = py.mkClosure[[]](@return_schema_overload.__getattr__, "__getattr__", "return_schema_overload")
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("return_schema_overload", "__getattr__")
+      %set.4 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.3)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @return_schema_overload.fetch(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'fetch'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "kind")
+        ret(%binds.0)
+    }
+    requires "'kind' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("kind")
+        %kind.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%kind.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'kind'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("kind")
+        %kind.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%kind.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%kind.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "'kind' is required" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("kind")
+        %kind.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.2)
+        %defined.1 : base.Bool = py.isDefined(%kind.2)
+        ret(%defined.1)
+    }
+    requires "'fetch' called with unknown string" {
+      pre.4():
+        %undef.3 : py.Value = py.undef("kind")
+        %kind.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.3)
+        %oneOf.0 : base.Bool = py.strIsOneOf(%kind.3, "a", "b")
+        ret(%oneOf.0)
+    }
+    free ensures "return type of 'fetch'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.1 : py.Value = py.stdClass("builtins", "dict")
+        %inst.1 : base.Bool = py.isInstance(%result.0, %cls.1) ^fail.5()
+        ret(%inst.1)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.5(%e.1 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of 'fetch': Kind" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %str.0 : py.Value = py.strLit("Kind")
+        %in.0 : py.Value = py.in(%str.0, %result.1) ^fail.6()
+        %cond.0 : base.Bool = py.truthy(%in.0) ^fail.6()
+        branch(%cond.0) ^then.1() ^else.1()
+      then.1():
+        %str.1 : py.Value = py.strLit("Kind")
+        %item.0 : py.Value = py.getItem(%result.1, %str.1) ^fail.6()
+        %cls.2 : py.Value = py.stdClass("builtins", "str")
+        %inst.2 : base.Bool = py.isInstance(%item.0, %cls.2) ^fail.6()
+        jump ^join.1(%inst.2)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.5 : base.Bool):
+        ret(%b.5)
+      raised.1(%exc.1 : py.Value):
+        ret(true)
+      fail.6(%e.2 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of 'fetch': Ids" {
+      post.2(%r.2 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.2) ^ok.2() ^raised.2()
+      ok.2(%result.2 : py.Value):
+        %str.2 : py.Value = py.strLit("Ids")
+        %in.1 : py.Value = py.in(%str.2, %result.2) ^fail.7()
+        %cond.1 : base.Bool = py.truthy(%in.1) ^fail.7()
+        branch(%cond.1) ^then.2() ^else.2()
+      then.2():
+        %str.3 : py.Value = py.strLit("Ids")
+        %item.1 : py.Value = py.getItem(%result.2, %str.3) ^fail.7()
+        %cls.3 : py.Value = py.stdClass("builtins", "list")
+        %inst.3 : base.Bool = py.isInstance(%item.1, %cls.3) ^fail.7()
+        jump ^join.2(%inst.3)
+      else.2():
+        jump ^join.2(true)
+      join.2(%b.8 : base.Bool):
+        ret(%b.8)
+      raised.2(%exc.2 : py.Value):
+        ret(true)
+      fail.7(%e.3 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of 'fetch': Ids[]" {
+      post.3(%r.3 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.3) ^ok.3() ^raised.3()
+      ok.3(%result.3 : py.Value):
+        %str.4 : py.Value = py.strLit("Ids")
+        %in.2 : py.Value = py.in(%str.4, %result.3) ^fail.8()
+        %cond.2 : base.Bool = py.truthy(%in.2) ^fail.8()
+        branch(%cond.2) ^then.3() ^else.3()
+      then.3():
+        %str.5 : py.Value = py.strLit("Ids")
+        %item.2 : py.Value = py.getItem(%result.3, %str.5) ^fail.8()
+        %all.0 : base.Bool = py.allIn(%item.2) ^fail.8() {
+          body.0(%item.1.0 : py.Value):
+            %cls.4 : py.Value = py.stdClass("builtins", "int")
+            %inst.4 : base.Bool = py.isInstance(%item.1.0, %cls.4) ^propagate.0()
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%inst.4)
+            ret(%res.0)
+          propagate.0(%exc.3 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.3)
+            ret(%err.0)
+        }
+        jump ^join.3(%all.0)
+      else.3():
+        jump ^join.3(true)
+      join.3(%b.11 : base.Bool):
+        ret(%b.11)
+      raised.3(%exc.4 : py.Value):
+        ret(true)
+      fail.8(%e.4 : py.Value):
+        ret(true)
+    }
+    free ensures "overload of 'fetch' for 'a'" {
+      post.4(%r.4 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.4) ^ok.4() ^raised.4()
+      ok.4(%result.4 : py.Value):
+        %old.0 : py.Value = base.old[py.Value, py.Value] ^fail.9() {
+          body.1():
+            %undef.4 : py.Value = py.undef("kind")
+            %kind.4 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.4)
+            %res.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%kind.4)
+            ret(%res.1)
+        }
+        %str.6 : py.Value = py.strLit("a")
+        %eq.0 : py.Value = py.eq(%old.0, %str.6) ^fail.9()
+        %cond.3 : base.Bool = py.truthy(%eq.0) ^fail.9()
+        branch(%cond.3) ^then.4() ^else.4()
+      then.4():
+        jump ^join.4(true)
+      else.4():
+        jump ^join.4(false)
+      join.4(%b.15 : base.Bool):
+        branch(%b.15) ^then.5() ^else.5()
+      then.5():
+        %cls.5 : py.Value = py.stdClass("builtins", "dict")
+        %inst.5 : base.Bool = py.isInstance(%result.4, %cls.5) ^fail.9()
+        jump ^join.5(%inst.5)
+      else.5():
+        jump ^join.5(true)
+      join.5(%b.17 : base.Bool):
+        ret(%b.17)
+      raised.4(%exc.6 : py.Value):
+        ret(true)
+      fail.9(%e.5 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of 'fetch': Name for 'a'" {
+      post.5(%r.5 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.5) ^ok.5() ^raised.5()
+      ok.5(%result.5 : py.Value):
+        %old.1 : py.Value = base.old[py.Value, py.Value] ^fail.10() {
+          body.2():
+            %undef.5 : py.Value = py.undef("kind")
+            %kind.5 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.5)
+            %res.2 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%kind.5)
+            ret(%res.2)
+        }
+        %str.7 : py.Value = py.strLit("a")
+        %eq.1 : py.Value = py.eq(%old.1, %str.7) ^fail.10()
+        %cond.4 : base.Bool = py.truthy(%eq.1) ^fail.10()
+        branch(%cond.4) ^then.6() ^else.6()
+      then.6():
+        jump ^join.6(true)
+      else.6():
+        jump ^join.6(false)
+      join.6(%b.21 : base.Bool):
+        branch(%b.21) ^then.7() ^else.7()
+      then.7():
+        %str.8 : py.Value = py.strLit("Name")
+        %in.3 : py.Value = py.in(%str.8, %result.5) ^fail.10()
+        %cond.5 : base.Bool = py.truthy(%in.3) ^fail.10()
+        branch(%cond.5) ^then.8() ^else.8()
+      then.8():
+        %str.9 : py.Value = py.strLit("Name")
+        %item.3 : py.Value = py.getItem(%result.5, %str.9) ^fail.10()
+        %cls.6 : py.Value = py.stdClass("builtins", "str")
+        %inst.6 : base.Bool = py.isInstance(%item.3, %cls.6) ^fail.10()
+        jump ^join.8(%inst.6)
+      else.8():
+        jump ^join.8(false)
+      join.8(%b.23 : base.Bool):
+        jump ^join.7(%b.23)
+      else.7():
+        jump ^join.7(true)
+      join.7(%b.25 : base.Bool):
+        ret(%b.25)
+      raised.5(%exc.8 : py.Value):
+        ret(true)
+      fail.10(%e.6 : py.Value):
+        ret(true)
+    }
+    free ensures "overload of 'fetch' for 'b'" {
+      post.6(%r.6 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.6) ^ok.6() ^raised.6()
+      ok.6(%result.6 : py.Value):
+        %old.2 : py.Value = base.old[py.Value, py.Value] ^fail.11() {
+          body.3():
+            %undef.6 : py.Value = py.undef("kind")
+            %kind.6 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.6)
+            %res.3 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%kind.6)
+            ret(%res.3)
+        }
+        %str.10 : py.Value = py.strLit("b")
+        %eq.2 : py.Value = py.eq(%old.2, %str.10) ^fail.11()
+        %cond.6 : base.Bool = py.truthy(%eq.2) ^fail.11()
+        branch(%cond.6) ^then.9() ^else.9()
+      then.9():
+        jump ^join.9(true)
+      else.9():
+        jump ^join.9(false)
+      join.9(%b.29 : base.Bool):
+        branch(%b.29) ^then.10() ^else.10()
+      then.10():
+        %cls.7 : py.Value = py.stdClass("builtins", "dict")
+        %inst.7 : base.Bool = py.isInstance(%result.6, %cls.7) ^fail.11()
+        jump ^join.10(%inst.7)
+      else.10():
+        jump ^join.10(true)
+      join.10(%b.31 : base.Bool):
+        ret(%b.31)
+      raised.6(%exc.10 : py.Value):
+        ret(true)
+      fail.11(%e.7 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of 'fetch': Ids for 'b'" {
+      post.7(%r.7 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.7) ^ok.7() ^raised.7()
+      ok.7(%result.7 : py.Value):
+        %old.3 : py.Value = base.old[py.Value, py.Value] ^fail.12() {
+          body.4():
+            %undef.7 : py.Value = py.undef("kind")
+            %kind.7 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.7)
+            %res.4 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%kind.7)
+            ret(%res.4)
+        }
+        %str.11 : py.Value = py.strLit("b")
+        %eq.3 : py.Value = py.eq(%old.3, %str.11) ^fail.12()
+        %cond.7 : base.Bool = py.truthy(%eq.3) ^fail.12()
+        branch(%cond.7) ^then.11() ^else.11()
+      then.11():
+        jump ^join.11(true)
+      else.11():
+        jump ^join.11(false)
+      join.11(%b.35 : base.Bool):
+        branch(%b.35) ^then.12() ^else.12()
+      then.12():
+        %str.12 : py.Value = py.strLit("Ids")
+        %in.4 : py.Value = py.in(%str.12, %result.7) ^fail.12()
+        %cond.8 : base.Bool = py.truthy(%in.4) ^fail.12()
+        branch(%cond.8) ^then.13() ^else.13()
+      then.13():
+        %str.13 : py.Value = py.strLit("Ids")
+        %item.4 : py.Value = py.getItem(%result.7, %str.13) ^fail.12()
+        %cls.8 : py.Value = py.stdClass("builtins", "list")
+        %inst.8 : base.Bool = py.isInstance(%item.4, %cls.8) ^fail.12()
+        jump ^join.13(%inst.8)
+      else.13():
+        jump ^join.13(true)
+      join.13(%b.37 : base.Bool):
+        jump ^join.12(%b.37)
+      else.12():
+        jump ^join.12(true)
+      join.12(%b.39 : base.Bool):
+        ret(%b.39)
+      raised.7(%exc.12 : py.Value):
+        ret(true)
+      fail.12(%e.8 : py.Value):
+        ret(true)
+    }
+    free ensures "schema of return type of 'fetch': Ids[] for 'b'" {
+      post.8(%r.8 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.8) ^ok.8() ^raised.8()
+      ok.8(%result.8 : py.Value):
+        %old.4 : py.Value = base.old[py.Value, py.Value] ^fail.13() {
+          body.5():
+            %undef.8 : py.Value = py.undef("kind")
+            %kind.8 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.8)
+            %res.5 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%kind.8)
+            ret(%res.5)
+        }
+        %str.14 : py.Value = py.strLit("b")
+        %eq.4 : py.Value = py.eq(%old.4, %str.14) ^fail.13()
+        %cond.9 : base.Bool = py.truthy(%eq.4) ^fail.13()
+        branch(%cond.9) ^then.14() ^else.14()
+      then.14():
+        jump ^join.14(true)
+      else.14():
+        jump ^join.14(false)
+      join.14(%b.43 : base.Bool):
+        branch(%b.43) ^then.15() ^else.15()
+      then.15():
+        %str.15 : py.Value = py.strLit("Ids")
+        %in.5 : py.Value = py.in(%str.15, %result.8) ^fail.13()
+        %cond.10 : base.Bool = py.truthy(%in.5) ^fail.13()
+        branch(%cond.10) ^then.16() ^else.16()
+      then.16():
+        %str.16 : py.Value = py.strLit("Ids")
+        %item.5 : py.Value = py.getItem(%result.8, %str.16) ^fail.13()
+        %all.1 : base.Bool = py.allIn(%item.5) ^fail.13() {
+          body.6(%item.1.1 : py.Value):
+            %cls.9 : py.Value = py.stdClass("builtins", "int")
+            %inst.9 : base.Bool = py.isInstance(%item.1.1, %cls.9) ^propagate.6()
+            %res.6 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%inst.9)
+            ret(%res.6)
+          propagate.6(%exc.14 : py.Value):
+            %err.6 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.14)
+            ret(%err.6)
+        }
+        jump ^join.16(%all.1)
+      else.16():
+        jump ^join.16(true)
+      join.16(%b.45 : base.Bool):
+        jump ^join.15(%b.45)
+      else.15():
+        jump ^join.15(true)
+      join.15(%b.47 : base.Bool):
+        ret(%b.47)
+      raised.8(%exc.15 : py.Value):
+        ret(true)
+      fail.13(%e.9 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @return_schema_overload.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}
