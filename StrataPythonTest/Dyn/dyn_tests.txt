@@ -778,6 +778,12 @@ li_docstring_future | yes |
 li_only_loop_invariant | yes |
 li_no_import | yes |
 li_user_function | yes |
+li_e_false_entries | yes |
+li_e_raising_bool | yes |
+li_e_head_shapes | yes |
+li_e_bool_once | yes |
+li_e_isinstance | yes |
+li_e_old_state | yes |
 li_other_module | yes |
 li_other_module_helper | yes |
 li_p_names | yes |

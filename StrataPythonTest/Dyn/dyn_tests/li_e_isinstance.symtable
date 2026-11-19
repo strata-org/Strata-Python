@@ -1,0 +1,28 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  f: local (assigned, referenced)
+  loop_invariant: local (imported)
+  print: global implicit (referenced)
+  class A
+  class B
+  function f
+    i: cell (assigned, referenced)
+    len: global implicit (referenced)
+    loop_invariant: global implicit (referenced)
+    xs: cell (parameter, referenced)
+    function lambda
+      bool: global implicit (referenced)
+      i: free (referenced)
+      int: global implicit (referenced)
+      isinstance: global implicit (referenced)
+    function lambda
+      A: global implicit (referenced)
+      isinstance: global implicit (referenced)
+      list: global implicit (referenced)
+      xs: free (referenced)
+    function lambda
+      isinstance: global implicit (referenced)
+      tuple: global implicit (referenced)
+      xs: free (referenced)
+qualnames: A, B, f, f.<locals>.<lambda>, f.<locals>.<lambda>, f.<locals>.<lambda>

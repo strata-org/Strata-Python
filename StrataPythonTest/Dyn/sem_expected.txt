@@ -64,6 +64,12 @@ i11_constant_default | gap | is on two equal immediates depends on CPython's cac
 li_break_continue | agree
 li_closure_cell | agree
 li_docstring_future | gap | import of module __future__ is not modelled yet
+li_e_bool_once | agree
+li_e_false_entries | agree
+li_e_head_shapes | agree
+li_e_isinstance | agree
+li_e_old_state | agree
+li_e_raising_bool | agree
 li_except_in_body | agree
 li_finally_continue | agree
 li_for_attr_target | agree

@@ -1,0 +1,21 @@
+module
+  import loop_invariant: member loop_invariant of pyhard
+  loop_invariant: local (imported)
+  B: local (assigned)
+  f: local (assigned, referenced)
+  print: global implicit (referenced)
+  class B
+    __bool__: local (assigned)
+    function B.__bool__
+      params: self
+      self: local (parameter)
+      ValueError: global implicit (referenced)
+  function f
+    params: n
+    n: local (parameter, referenced)
+    b: cell (assigned)
+    B: global implicit (referenced)
+    i: local (assigned, referenced)
+    loop_invariant: global implicit (referenced)
+    lambda f.<locals>.<lambda>
+      b: free (referenced)

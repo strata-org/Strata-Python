@@ -92,7 +92,9 @@ without both scope files, and the ref-to-reg test on any translator golden witho
 A test whose name starts with `li_` and that expects no rejection is a loop-invariant program
 (`docs/PythonToDyn.md` §6.11): also write its run golden `NAME.expected.out` by running
 `StrataPythonTestExtra/DynInvariantRunTest.lean` with `DYN_UPDATE=1`, which runs it on CPython
-with the marker module `Python/pyhard/pyhard.py`.
+with the marker module `Python/pyhard/pyhard.py`, and rewrite
+`StrataPythonTest/Dyn/invariant_runs.expected` by running
+`StrataPythonTestExtra/DynInvariantEvalTest.lean` with `INV_UPDATE=1`.
 `lake exe pydyn dyn FILE.py` prints the diagnostics and the module for one file, and
 `lake exe pydyn canonical FILE.py` prints it with every function in canonical form.
 

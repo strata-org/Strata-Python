@@ -1,0 +1,13 @@
+--- stdout 5
+12 2
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+count = 10
+f = <function object>
+items = <function object>
+loop_invariant = <marker loop_invariant>

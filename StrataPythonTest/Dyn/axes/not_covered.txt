@@ -28,7 +28,7 @@ py.anyIn | a contract operation: it appears only in contract clauses, such as th
 base.callCode | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.cellLoc | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.old | it appears only in ensures clauses, such as those of PySpec models, and in loop invariants' regions, and no grid case loads a PySpec model or states a loop invariant
-base.loopInvariant | the machine skips it without running its region, and no grid case states a loop invariant
+base.loopInvariant | the machine skips it without running its region, and no grid case states a loop invariant (DynInvariantEvalTest runs most of the corpus's invariants against CPython)
 base.Except.case | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.Unit.case | the translator doesn't emit it for Python source (no golden of the corpus has it)
 base.unreachable | the operation's translation has it, but it stops the run with a failure, so no run that agrees with CPython executes it

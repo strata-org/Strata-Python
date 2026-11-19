@@ -1,0 +1,58 @@
+module
+  import loop_invariant: member loop_invariant of pyhard
+  loop_invariant: local (imported)
+  count: global explicit (assigned, declared_global)
+  items: local (assigned)
+  f: local (assigned, referenced)
+  C: local (assigned, referenced)
+  print: global implicit (referenced)
+  function items
+    params: n
+    n: local (parameter)
+    count: global explicit (assigned, declared_global)
+  function f
+    params: n
+    n: cell (parameter, referenced)
+    i: cell (assigned, referenced)
+    loop_invariant: global implicit (referenced)
+    j: cell (assigned, referenced)
+    total: local (assigned, referenced)
+    x: local (assigned, referenced)
+    items: global implicit (referenced)
+    pairs: cell (assigned, referenced)
+    a: local (assigned)
+    b: local (assigned)
+    lambda f.<locals>.<lambda>
+      i: free (referenced)
+      n: free (referenced)
+    lambda f.<locals>.<lambda>
+      j: free (referenced)
+      n: free (referenced)
+    lambda f.<locals>.<lambda>
+      count: global implicit (referenced)
+    lambda f.<locals>.<lambda>
+      pairs: free (referenced)
+  class C
+    size: local (assigned)
+    property: global implicit (referenced)
+    m: local (assigned)
+    function C.size
+      params: self
+      self: local (parameter)
+      s: cell (assigned, referenced)
+      loop_invariant: global implicit (referenced)
+      lambda C.size.<locals>.<lambda>
+        s: free (referenced)
+    function C.m
+      params: self, n
+      self: cell (parameter)
+      n: cell (parameter, referenced)
+      k: cell (assigned, referenced)
+      loop_invariant: global implicit (referenced)
+      _: local (assigned)
+      range: global implicit (referenced)
+      lambda C.m.<locals>.<lambda>
+        k: free (referenced)
+        n: free (referenced)
+      lambda C.m.<locals>.<lambda>
+        self: free (referenced)

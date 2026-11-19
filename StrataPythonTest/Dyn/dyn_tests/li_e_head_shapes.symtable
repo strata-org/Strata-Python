@@ -1,0 +1,54 @@
+module top
+  C: local (assigned, referenced)
+  count: global explicit (assigned, declared_global)
+  f: local (assigned, referenced)
+  items: local (assigned)
+  loop_invariant: local (imported)
+  print: global implicit (referenced)
+  function items
+    count: global explicit (assigned, declared_global)
+    n: local (parameter)
+  function f
+    a: local (assigned)
+    b: local (assigned)
+    i: cell (assigned, referenced)
+    items: global implicit (referenced)
+    j: cell (assigned, referenced)
+    loop_invariant: global implicit (referenced)
+    n: cell (parameter, referenced)
+    pairs: cell (assigned, referenced)
+    total: local (assigned, referenced)
+    x: local (assigned, referenced)
+    function lambda
+      i: free (referenced)
+      n: free (referenced)
+    function lambda
+      j: free (referenced)
+      n: free (referenced)
+    function lambda
+      count: global implicit (referenced)
+    function lambda
+      pairs: free (referenced)
+  class C
+    m: local (assigned)
+    property: global implicit (referenced)
+    size: local (assigned)
+    function size
+      loop_invariant: global implicit (referenced)
+      s: cell (assigned, referenced)
+      self: local (parameter)
+      function lambda
+        s: free (referenced)
+    function m
+      _: local (assigned)
+      k: cell (assigned, referenced)
+      loop_invariant: global implicit (referenced)
+      n: cell (parameter, referenced)
+      range: global implicit (referenced)
+      self: cell (parameter)
+      function lambda
+        k: free (referenced)
+        n: free (referenced)
+      function lambda
+        self: free (referenced)
+qualnames: C, C.m, C.m.<locals>.<lambda>, C.m.<locals>.<lambda>, C.size, C.size.<locals>.<lambda>, f, f.<locals>.<lambda>, f.<locals>.<lambda>, f.<locals>.<lambda>, f.<locals>.<lambda>, items

@@ -1,0 +1,32 @@
+module top
+  OLD: local (imported)
+  g: global explicit (assigned, declared_global)
+  loop_invariant: local (imported)
+  outer: local (assigned, referenced)
+  print: global implicit (referenced)
+  function outer
+    c: cell (parameter)
+    f: local (assigned, referenced)
+    function f
+      a: cell (parameter, assigned, referenced)
+      c: free (assigned, referenced, nonlocal)
+      g: global explicit (assigned, referenced, declared_global)
+      i: cell (assigned, referenced)
+      loop_invariant: global implicit (referenced)
+      xs: cell (parameter, referenced)
+      function lambda
+        OLD: global implicit (referenced)
+        a: free (referenced)
+      function lambda
+        OLD: global implicit (referenced)
+        len: global implicit (referenced)
+        xs: free (referenced)
+      function lambda
+        OLD: global implicit (referenced)
+        c: free (referenced)
+        g: global implicit (referenced)
+      function lambda
+        OLD: global implicit (referenced)
+        a: free (referenced)
+        i: free (referenced)
+qualnames: outer, outer.<locals>.f, outer.<locals>.f.<locals>.<lambda>, outer.<locals>.f.<locals>.<lambda>, outer.<locals>.f.<locals>.<lambda>, outer.<locals>.f.<locals>.<lambda>

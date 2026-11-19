@@ -1,0 +1,22 @@
+module top
+  Flip: local (assigned, referenced)
+  f: local (assigned, referenced)
+  loop_invariant: local (imported)
+  print: global implicit (referenced)
+  class Flip
+    __bool__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+    function __bool__
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+  function f
+    a: cell (parameter)
+    i: cell (assigned, referenced)
+    loop_invariant: global implicit (referenced)
+    n: local (parameter, referenced)
+    function lambda
+      a: free (referenced)
+      i: free (referenced)
+qualnames: Flip, Flip.__bool__, Flip.__init__, f, f.<locals>.<lambda>

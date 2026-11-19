@@ -1,0 +1,19 @@
+module top
+  B: local (assigned)
+  f: local (assigned, referenced)
+  loop_invariant: local (imported)
+  print: global implicit (referenced)
+  class B
+    __bool__: local (assigned)
+    function __bool__
+      ValueError: global implicit (referenced)
+      self: local (parameter)
+  function f
+    B: global implicit (referenced)
+    b: cell (assigned)
+    i: local (assigned, referenced)
+    loop_invariant: global implicit (referenced)
+    n: local (parameter, referenced)
+    function lambda
+      b: free (referenced)
+qualnames: B, B.__bool__, f, f.<locals>.<lambda>

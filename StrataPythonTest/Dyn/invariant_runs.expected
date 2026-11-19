@@ -1,0 +1,117 @@
+li_m_globals_write 0 compared, 0 evaluations, 0 True, up to a gap
+li_m_outside_target 0 compared, 3 evaluations, 3 True
+li_while 0 compared, 4 evaluations, 4 True
+li_while 1 compared, 4 evaluations, 4 True
+li_while_else 0 compared, 3 evaluations, 3 True
+li_while_true_break 0 compared, 4 evaluations, 4 True
+li_while_guard_raises 0 compared, 3 evaluations, 3 True
+li_for_list 0 compared, 4 evaluations, 4 True
+li_for_range 0 compared, 5 evaluations, 5 True
+li_for_dict 0 compared, 3 evaluations, 3 True
+li_for_items 0 compared, 3 evaluations, 3 True
+li_for_str 0 compared, 4 evaluations, 4 True
+li_for_iter 0 compared, 3 evaluations, 3 True
+li_for_custom_iter 0 compared, 4 evaluations, 4 True
+li_for_attr_target 0 compared, 3 evaluations, 3 True
+li_for_target_before 0 compared, 4 evaluations, 4 True
+li_for_target_unbound 0 compared, 3 evaluations, 3 True
+li_for_target_current 0 compared, 3 evaluations, 2 True
+li_nested_both 0 compared, 5 evaluations, 5 True
+li_nested_both 1 compared, 10 evaluations, 10 True
+li_nested_outer 0 compared, 5 evaluations, 5 True
+li_inner_first 0 compared, 6 evaluations, 6 True
+li_break_continue 0 compared, 4 evaluations, 4 True
+li_return_in_loop 0 compared, 2 evaluations, 2 True
+li_raise_out 0 compared, 2 evaluations, 2 True
+li_except_in_body 0 compared, 4 evaluations, 4 True
+li_finally_continue 0 compared, 4 evaluations, 4 True
+li_with_break 0 compared, 1 evaluations, 1 True
+li_several_exits 0 compared, 7 evaluations, 7 True
+li_module_level 0 compared, 4 evaluations, 4 True
+li_method 0 compared, 3 evaluations, 3 True
+li_nested_function 0 compared, 4 evaluations, 4 True
+li_closure_cell 0 compared, 4 evaluations, 4 True
+li_in_if_try_with 0 compared, 3 evaluations, 3 True
+li_in_if_try_with 1 compared, 3 evaluations, 3 True
+li_in_if_try_with 2 compared, 3 evaluations, 3 True
+li_in_if_try_with 3 compared, 1 evaluations, 1 True
+li_docstring_future 0 compared, 0 evaluations, 0 True, up to a gap
+li_only_loop_invariant 0 compared, 3 evaluations, 3 True
+li_e_false_entries 0 compared, 4 evaluations, 2 True
+li_e_false_entries 1 compared, 4 evaluations, 0 True
+li_e_false_entries 2 compared, 4 evaluations, 0 True
+li_e_false_entries 3 compared, 4 evaluations, 2 True
+li_e_false_entries 4 compared, 4 evaluations, 2 True
+li_e_false_entries 5 compared, 4 evaluations, 1 True
+li_e_false_entries 6 compared, 4 evaluations, 1 True
+li_e_false_entries 7 compared, 4 evaluations, 3 True
+li_e_raising_bool 0 compared, 3 evaluations, 0 True
+li_e_head_shapes 0 compared, 4 evaluations, 4 True
+li_e_head_shapes 1 compared, 4 evaluations, 4 True
+li_e_head_shapes 2 compared, 4 evaluations, 4 True
+li_e_head_shapes 3 compared, 4 evaluations, 4 True
+li_e_head_shapes 4 compared, 9 evaluations, 9 True
+li_e_head_shapes 5 compared, 3 evaluations, 3 True
+li_e_head_shapes 6 compared, 3 evaluations, 3 True
+li_e_bool_once 0 compared, 3 evaluations, 1 True
+li_e_isinstance 0 compared, 4 evaluations, 4 True
+li_e_isinstance 1 compared, 4 evaluations, 4 True
+li_e_isinstance 2 compared, 4 evaluations, 0 True
+li_e_old_state 0 compared, 4 evaluations, 4 True
+li_e_old_state 1 compared, 4 evaluations, 4 True
+li_e_old_state 2 compared, 4 evaluations, 4 True
+li_e_old_state 3 compared, 4 evaluations, 2 True
+li_p_names 0 compared, 4 evaluations, 4 True
+li_p_unbound 0 compared, 3 evaluations, 2 True
+li_p_operators 0 compared, 3 evaluations, 3 True
+li_p_operators 1 compared, 3 evaluations, 3 True
+li_p_comparisons 0 compared, 3 evaluations, 3 True
+li_p_comparisons 1 compared, 3 evaluations, 3 True
+li_p_bool_values 0 compared, 3 evaluations, 3 True
+li_p_attr_item_slice 0 compared, 4 evaluations, 4 True
+li_p_isinstance 0 compared, 3 evaluations, 3 True
+li_p_isinstance 1 compared, 3 evaluations, 3 True
+li_p_quantifiers 0 compared, 3 evaluations, 3 True
+li_p_quantifiers 1 compared, 3 evaluations, 3 True
+li_p_quantifiers 2 compared, 3 evaluations, 3 True
+li_p_shadow 0 compared, 3 evaluations, 3 True
+li_p_iterable_scope 0 compared, 3 evaluations, 3 True
+li_q_kinds 0 by side: machine 3 evaluations, 0 True; CPython 3 evaluations, 3 True
+li_q_kinds 1 by side: machine 3 evaluations, 0 True; CPython 3 evaluations, 3 True
+li_q_kinds 2 by side: machine 3 evaluations, 0 True; CPython 3 evaluations, 3 True
+li_q_kinds 3 by side: machine 3 evaluations, 0 True; CPython 3 evaluations, 3 True
+li_q_kinds 4 by side: machine 3 evaluations, 0 True; CPython 3 evaluations, 3 True
+li_q_kinds 5 by side: machine 3 evaluations, 3 True; CPython 3 evaluations, 3 True
+li_q_kinds 6 by side: machine 3 evaluations, 0 True; CPython 3 evaluations, 0 True
+li_q_kinds 7 by side: machine 3 evaluations, 0 True; CPython 3 evaluations, 3 True
+li_p_mangled_binder 0 compared, 3 evaluations, 3 True
+li_p_items_mangled_pair 0 compared, 2 evaluations, 2 True
+li_module_comprehension 0 compared, 2 evaluations, 2 True
+li_p_mangled_mixed 0 compared, 2 evaluations, 2 True
+li_o_callee_split 0 compared, 3 evaluations, 3 True
+li_o_callee_split 1 compared, 3 evaluations, 3 True
+li_o_callee_split 2 compared, 3 evaluations, 3 True
+li_o_quant_whole 0 compared, 3 evaluations, 3 True
+li_o_quant_whole 1 compared, 3 evaluations, 3 True
+li_o_quant_whole 2 compared, 3 evaluations, 0 True
+li_o_quant_whole 3 compared, 3 evaluations, 0 True
+li_o_params 0 compared, 3 evaluations, 0 True
+li_o_params 1 compared, 3 evaluations, 3 True
+li_o_params 2 compared, 3 evaluations, 3 True
+li_o_global_free 0 compared, 3 evaluations, 3 True
+li_o_pyspec_examples 0 compared, 3 evaluations, 3 True
+li_o_pyspec_examples 1 compared, 3 evaluations, 3 True
+li_o_pyspec_examples 2 compared, 3 evaluations, 3 True
+li_o_mutable 0 compared, 3 evaluations, 0 True
+li_o_binder 0 skipped: an OLD whose region reads %k.0, a value of its invariant
+li_o_binder 1 compared, 3 evaluations, 3 True
+li_o_quantifier_in_old 0 compared, 3 evaluations, 3 True
+li_o_forms 0 compared, 3 evaluations, 3 True, up to a gap
+li_o_forms 1 compared, 3 evaluations, 3 True, up to a gap
+li_o_forms 2 compared, 3 evaluations, 3 True, up to a gap
+li_o_forms 3 compared, 0 evaluations, 0 True, up to a gap
+li_o_split 0 compared, 3 evaluations, 3 True
+li_o_split 1 compared, 3 evaluations, 3 True
+li_o_split 2 compared, 3 evaluations, 3 True
+li_o_split 3 compared, 3 evaluations, 3 True
+li_o_split 4 compared, 3 evaluations, 3 True
