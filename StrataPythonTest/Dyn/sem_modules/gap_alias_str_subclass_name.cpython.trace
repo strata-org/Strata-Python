@@ -9,3 +9,4 @@ GA = <class 'GenericAlias'>
 S = <class 'S'>
 __doc__ = None
 __name__ = '__main__'
+--- teardown after 51

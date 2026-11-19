@@ -8,3 +8,4 @@ A = <class 'A'>
 __doc__ = None
 __name__ = '__main__'
 a = <A object>
+--- teardown after 76

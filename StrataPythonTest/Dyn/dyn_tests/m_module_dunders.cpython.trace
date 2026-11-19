@@ -8,3 +8,4 @@ __name__ = '__main__'
 doc = 'The module docstring.'
 f = <function object>
 g = <function object>
+--- teardown after 0

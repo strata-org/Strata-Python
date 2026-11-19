@@ -10,3 +10,4 @@ __name__ = '__main__'
 dataclass = <function object>
 hash = <function object>
 myhash = <function object>
+--- teardown after 5

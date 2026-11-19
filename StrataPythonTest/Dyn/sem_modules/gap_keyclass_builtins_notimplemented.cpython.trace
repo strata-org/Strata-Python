@@ -13,3 +13,4 @@ builtins = <module object>
 calls = [1, 1]
 d = {<K object>: 'k'}
 dataclass = <function object>
+--- teardown after 4

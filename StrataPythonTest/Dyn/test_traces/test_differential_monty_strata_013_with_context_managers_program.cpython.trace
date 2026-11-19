@@ -5,3 +5,4 @@ raised FileNotFoundError: [Errno 2] No such file or directory: 'data.txt'
 --- globals
 __doc__ = None
 __name__ = '__main__'
+--- teardown after 0

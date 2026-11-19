@@ -111,3 +111,4 @@ name = 'isascii'
 s = 'Hello World\tab'
 show = <function object>
 t = <S object>
+--- teardown after 2999

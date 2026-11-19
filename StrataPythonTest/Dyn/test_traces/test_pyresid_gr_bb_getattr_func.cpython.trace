@@ -7,3 +7,4 @@ __doc__ = None
 __name__ = '__main__'
 r = 1
 wrapper = <function object>
+--- teardown after 0

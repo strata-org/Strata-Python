@@ -10,3 +10,4 @@ builtins = <module object>
 f = <function object>
 g = <function object>
 later = 1
+--- teardown after 3

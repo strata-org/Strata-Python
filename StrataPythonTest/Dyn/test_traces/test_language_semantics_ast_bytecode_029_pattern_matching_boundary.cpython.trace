@@ -10,3 +10,4 @@ __name__ = '__main__'
 result = 'other'
 sys = <module object>
 t = <Tricky object>
+--- teardown after 75

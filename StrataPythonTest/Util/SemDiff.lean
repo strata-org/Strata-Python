@@ -43,6 +43,23 @@ def twoRunsHeader : String := "--- PYTHONHASHSEED=0\n"
 /-- CPython's trace says that CPython does not compile the program. -/
 def syntaxTrace : String := "--- syntax error\n"
 
+/-- The start of the line that ends CPython's trace when the run can't agree, and only the first `n`
+characters of its output are compared: the rest may differ, since something runs at its teardown (a
+finalizer, a thread, a hook) that the tracer doesn't reproduce, or the program reaches the
+interpreter's runtime.  The output of a program that reaches the runtime may differ before `n` too;
+that can only turn its gap into a failure. -/
+def teardownHeader : String := "--- teardown after "
+
+/-- CPython's trace without its last line `--- teardown after <n>`, and `n`; `none` for a trace
+without that line.  The line can't come from the program's output, whose length is in its header,
+nor from a global, whose line holds " = ". -/
+def splitTeardown (trace : String) : Option (Nat × String) :=
+  match (trace.splitOn "\n").reverse with
+  | "" :: last :: rest => do
+    let n ← (last.dropPrefix? teardownHeader).bind (·.toString.toNat?)
+    pure (n, "\n".intercalate (rest.reverse ++ [""]))
+  | _ => none
+
 /-- `text` with each address `0x` followed by hex digits replaced by `0x?`. -/
 def maskAddresses (text : String) : String := Id.run do
   let cs := text.toList.toArray
@@ -115,19 +132,25 @@ def endlessFuel : Nat := 1000000
 def endlessTrace : String := s!"--- does not end within {cpythonSeconds} s\n"
 
 /-- CPython's text for `pyFile`: its trace, or both traces if its runs with `PYTHONHASHSEED` 0
-and 1 differ, or `endlessTrace` if a run doesn't end within `cpythonSeconds`. -/
-def cpythonTrace (pythonCmd pyFile : System.FilePath) : IO String := do
+and 1 differ, or `endlessTrace` if a run doesn't end within `seconds`. -/
+def cpythonTrace (pythonCmd pyFile : System.FilePath) (seconds : Nat := cpythonSeconds) :
+    IO String := do
   let traceWith (seed : String) : IO (Option String) := do
+    let start ← IO.monoMsNow
     let r ← IO.Process.output {
       cmd := "timeout"
-      args := #["-k", "5", toString cpythonSeconds, pythonCmd.toString, traceScript.toString,
+      args := #["-k", "5", toString seconds, pythonCmd.toString, traceScript.toString,
         pyFile.toString]
       env := #[("PYTHONHASHSEED", some seed), ("PYTHONDONTWRITEBYTECODE", some "1")] }
     -- `timeout` exits 124 when it stopped the run with SIGTERM at the limit, and 137 when the run
-    -- ignored SIGTERM and `timeout` killed it 5 s later.
-    if r.exitCode == 124 || r.exitCode == 137 then return none
+    -- ignored SIGTERM and `timeout` killed it 5 s later.  A run also exits 137 when anything else
+    -- kills it with SIGKILL, so a run counts as endless only if it lasted until the limit; one
+    -- killed by anything else after the limit (the OOM killer, a SIGKILL during the 5 s grace) also
+    -- counts as endless, since it did last that long.
+    let lasted := (← IO.monoMsNow) - start ≥ seconds * 1000
+    if (r.exitCode == 124 || r.exitCode == 137) && lasted then return none
     unless r.exitCode == 0 do
-      throw <| .userError s!"{pyFile}: trace.py failed:\n{r.stderr}"
+      throw <| .userError s!"{pyFile}: trace.py failed with exit code {r.exitCode}:\n{r.stderr}"
     return some r.stdout
   let some t0 ← traceWith "0" | return endlessTrace
   let some t1 ← traceWith "1" | return endlessTrace
@@ -154,11 +177,14 @@ right after the output needs only a prefix of CPython's output, and a later gap 
 and the sections before it.  A gap in the outcome after the line `raised <ExcType>` needs CPython's
 outcome to raise that type. Every check on CPython's sections is a prefix test, which a longer
 text also passes: `splitRuns` may cut a run's sections early, and that is sound only while this
-holds. -/
-def agreesBefore (out before theirs : String) : Bool :=
+holds.  With `upTo` some `n`, only the first `n` characters of each output are compared. -/
+def agreesBefore (out before theirs : String) (upTo : Option Nat := none) : Bool :=
   match splitOutput theirs with
   | none => false
   | some (out', rest') =>
+    let (out, out') := match upTo with
+      | some n => (out.take n, out'.take n)
+      | none => (out, out')
     if before.isEmpty then out'.startsWith out
     -- A gap in the outcome after `raised <ExcType>`: CPython's line goes on with `: <str>`.  Only
     -- the line right after the outcome's header is that line; a global may start with "raised ".
@@ -167,6 +193,14 @@ def agreesBefore (out before theirs : String) : Bool :=
         | _ => false) then
       out == out' && rest'.startsWith (before ++ ": ")
     else out == out' && rest'.startsWith (before ++ "\n")
+
+/-- `agreesBefore` against CPython's trace `theirs`, whose line `--- teardown after <n>`, if it
+has one, limits the comparison of the outputs to their first `n` characters: only those are
+`python FILE`'s. -/
+def agreesBeforeTrace (out before theirs : String) : Bool :=
+  match splitTeardown theirs with
+  | some (n, theirs') => agreesBefore out before theirs' (some n)
+  | none => agreesBefore out before theirs
 
 /-- What `pydyn run` gave. -/
 inductive Ours where
@@ -243,13 +277,28 @@ def judge (name : String) (ours : Ours) (theirs : String) (known : Option Diff.K
       -- Up to the gap, our trace is CPython's.  With two different runs, it is the trace of each
       -- run, so the gap comes before the first point where the runs differ.  Our trace stays
       -- unmasked: CPython's masked `0x?` can't tell `0x1f` from `0x20`, so a printed hex number
-      -- before such a gap fails, visibly, rather than pass unchecked.
-      let runs := if twoRuns then splitRuns theirs else [theirs]
-      if runs.all (agreesBefore out before) then .ok (.gap msg)
+      -- before such a gap fails, visibly, rather than pass unchecked.  Two runs are compared in
+      -- full, without their teardown lines: `splitRuns` may end the first run at a line that the
+      -- program printed, so a teardown line before it may be the program's.
+      let ok := if twoRuns then
+          (splitRuns theirs).all fun r => agreesBefore out before (((splitTeardown r).map (·.2)).getD r)
+        else agreesBeforeTrace out before theirs
+      if ok then .ok (.gap msg)
       else .error s!"{name}: the run differs from CPython's before its gap\n--- ours\n{ours}\
         --- CPython\n{theirs}"
     else if twoRuns then
       .error s!"{name}: CPython's two runs differ, but the run doesn't stop with a gap"
+    else if let some (n, theirs') := splitTeardown theirs then
+      -- Only CPython's first `n` characters of output are in `python FILE`'s order, so the run
+      -- can't agree: it gets a gap if it agrees with CPython up to there, and in its outcome and
+      -- its globals.
+      match splitOutput ours, splitOutput theirs' with
+      | some (out, rest), some (out', rest') =>
+        if n ≤ out.length && out.take n == out'.take n && rest == rest' then
+          .ok (.gap s!"CPython's output is compared only up to its first {n} characters")
+        else .error s!"{name}: the run differs from CPython's before CPython's teardown\n\
+          --- ours\n{ours}--- CPython\n{theirs}"
+      | _, _ => .error s!"{name}: a trace has no output section"
     else match Diff.classify ours theirs known with
       | .ok v => .ok v
       | .error e => .error s!"{name}: {e}\n--- ours\n{ours}--- CPython\n{theirs}"

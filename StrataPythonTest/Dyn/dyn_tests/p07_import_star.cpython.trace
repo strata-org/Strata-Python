@@ -47,3 +47,4 @@ splitext = <function object>
 splitroot = <function object>
 supports_unicode_filenames = False
 x = 'a/b'
+--- teardown after 0

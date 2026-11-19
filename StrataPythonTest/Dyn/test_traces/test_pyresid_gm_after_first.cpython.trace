@@ -6,3 +6,4 @@ raised TypeError: unsupported operand type(s) for @: 'int' and 'int'
 __doc__ = None
 __name__ = '__main__'
 os = <module object>
+--- teardown after 0

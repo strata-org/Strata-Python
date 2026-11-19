@@ -17,3 +17,4 @@ parameter_shadow = <function object>
 read_counter = <function object>
 tuple_left = 40
 tuple_right = 50
+--- teardown after 0

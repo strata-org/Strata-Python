@@ -11,3 +11,4 @@ d = {<K object>: 'first', <K object>: 'second'}
 dataclass = <function object>
 field = <function object>
 n = [6]
+--- teardown after 11

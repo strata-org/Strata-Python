@@ -7,3 +7,4 @@ ok
 __doc__ = None
 __name__ = '__main__'
 os = <module object>
+--- teardown after 71

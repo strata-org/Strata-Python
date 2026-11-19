@@ -106,13 +106,17 @@ output's length. These are errors, so that a recorded `<python>` always comes fr
 - a text that already holds `<python>`;
 - a text that names a directory other than at the start of a path, which the mask leaves alone;
 - the text of two runs that differ and name a directory, since the program can print the line
-  that separates the runs, so the second run's header can't be found for sure. -/
+  that separates the runs, so the second run's header can't be found for sure;
+- a text that ends with `--- teardown after <n>` and names a directory, since the mask would
+  change the length that `n` counts. -/
 def maskInterpreter (dirs : List String) (trace : String) : Except String String := do
   let dirs := (dirs.filter (!·.isEmpty)).mergeSort (·.length ≥ ·.length)
   if mentions trace "<python>" then throw "CPython's text already holds <python>"
   if !dirs.any (mentions trace) then return trace
   if trace.startsWith SemDiff.twoRunsHeader then
     throw "CPython's two runs differ and name the interpreter's directory"
+  if (SemDiff.splitTeardown trace).isSome then
+    throw "CPython's text ends at a teardown and names the interpreter's directory"
   let mask (s : String) := dirs.foldl (fun t d => t.replace (d ++ "/") "<python>/") s
   let masked := match SemDiff.splitOutput trace with
     | some (out, rest) => SemDiff.traceOf (mask out) (mask rest)

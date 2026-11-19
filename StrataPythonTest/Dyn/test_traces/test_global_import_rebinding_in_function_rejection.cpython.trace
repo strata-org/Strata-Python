@@ -8,3 +8,4 @@ __doc__ = None
 __name__ = '__main__'
 rebind_state = <function object>
 state = 0
+--- teardown after 0

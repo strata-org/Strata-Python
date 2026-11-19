@@ -8,3 +8,4 @@ __name__ = '__main__'
 asyncio = <module object>
 fetch_data = <function object>
 sync_helper = <function object>
+--- teardown after 0

@@ -7,3 +7,4 @@ __doc__ = None
 __name__ = '__main__'
 bind_os = <function object>
 os = <module object>
+--- teardown after 0

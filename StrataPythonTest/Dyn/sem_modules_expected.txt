@@ -1,5 +1,5 @@
 alias_descriptors | gap | built-in method wrapper_descriptor.__get__ is not modelled yet
-alias_receiver_order | agree
+alias_receiver_order | gap | CPython's output is compared only up to its first 973 characters
 alias_repr_list | gap | a list argument that shrinks while its repr is written
 alias_repr_order | agree
 dataclass_basic | gap | the __annotations__ of a function that has none set is not modelled yet
@@ -9,7 +9,7 @@ dataclass_eq_near_limit | agree
 dataclass_errors | agree
 dataclass_exception | agree
 dataclass_foreign_init | agree
-dataclass_hash_global_order | agree
+dataclass_hash_global_order | gap | CPython's output is compared only up to its first 5 characters
 dataclass_hash_table | agree
 dataclass_many_kw_only | agree
 dataclass_module_name | agree
@@ -18,7 +18,7 @@ dataclass_options | agree
 dataclass_order_deep | agree
 dataclass_posonly_keyword | agree
 dataclass_post_init_replace | agree
-dataclass_replace_live | agree
+dataclass_replace_live | gap | CPython's output is compared only up to its first 54 characters
 dataclass_shared_field | agree
 dataclass_user_globals | agree
 depth_dataclass_default_get | gap | Python call depth over 900

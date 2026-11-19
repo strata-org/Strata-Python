@@ -8,3 +8,4 @@ __name__ = '__main__'
 f = <function object>
 json = <module object>
 path = <module object>
+--- teardown after 0

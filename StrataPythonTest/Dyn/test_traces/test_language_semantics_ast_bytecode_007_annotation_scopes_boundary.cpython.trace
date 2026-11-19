@@ -10,3 +10,4 @@ __doc__ = None
 __name__ = '__main__'
 calls = [1]
 sys = <module object>
+--- teardown after 80

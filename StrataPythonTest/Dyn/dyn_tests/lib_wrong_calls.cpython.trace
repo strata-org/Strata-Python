@@ -34,3 +34,4 @@ S = <class 'S'>
 __doc__ = None
 __name__ = '__main__'
 wrong = <function object>
+--- teardown after 1073

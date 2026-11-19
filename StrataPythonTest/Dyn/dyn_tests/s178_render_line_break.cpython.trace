@@ -6,5 +6,4 @@ ok
 __doc__ = None
 __name__ = '__main__'
 a = 1
-z = <class 'x
-y'>
+z = <a render with a line break>

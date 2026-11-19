@@ -66,10 +66,10 @@ lib_bytes | agree
 lib_collections | agree
 lib_constructors_more | agree
 lib_ctor_errors | agree
-lib_dict_copy_subclass | agree
+lib_dict_copy_subclass | gap | CPython's output is compared only up to its first 108 characters
 lib_dict_methods | agree
 lib_dict_views | agree
-lib_functions | agree
+lib_functions | gap | CPython's output is compared only up to its first 1604 characters
 lib_gap_attr_strsub | gap | an attribute name that is an instance of a subclass of str is not modelled yet
 lib_gap_bytes_buffer | gap | bytes() of an object with __buffer__ is not modelled yet
 lib_gap_ctor_midstep | gap | a looping built-in was reached inside an operation
@@ -129,14 +129,14 @@ lib_scalars | agree
 lib_set_methods | agree
 lib_set_order | agree
 lib_set_subclass_in_set | agree
-lib_signatures | agree
+lib_signatures | gap | CPython's output is compared only up to its first 4553 characters
 lib_sizes | agree
 lib_sort | agree
 lib_str_encode_args | agree
 lib_str_format | agree
 lib_str_join | agree
 lib_str_maketrans | agree
-lib_str_methods | agree
+lib_str_methods | gap | CPython's output is compared only up to its first 2999 characters
 lib_str_subclass_results | agree
 lib_str_translate | agree
 lib_sum | agree
@@ -145,7 +145,7 @@ lib_unicode_error_members | agree
 lib_unicode_errors | gap | not modelled: the codec nope is not modelled
 lib_view_dispatch | agree
 lib_view_mapping | agree
-lib_wrong_calls | agree
+lib_wrong_calls | gap | CPython's output is compared only up to its first 1073 characters
 lib_zip_enumerate | gap | the message of this wrong call of enumerate depends on how it is called
 m_annotations | gap | the translator does not support generator function
 m_annotations_nested | gap | the translator does not support match, try/except*
@@ -225,7 +225,7 @@ n08_mixed | gap | the translator does not support async def
 p01_import_dotted | gap | import of module os is not modelled yet
 p02_import_as | gap | import of module os is not modelled yet
 p03_from_import | gap | import of module os is not modelled yet
-p04_import_in_function | agree
+p04_import_in_function | gap | CPython's output is compared only up to its first 0 characters
 p05_import_try | gap | import of module simplejson is not modelled yet
 p06_import_relative | gap | the translator does not support relative import
 p07_import_star | gap | the translator does not support import *
@@ -239,7 +239,7 @@ p14_class_body | agree
 p15_global | agree
 p16_closures | agree
 p17_conditional_def | gap | import of module sys is not modelled yet
-p18_builtins | agree
+p18_builtins | gap | CPython's output is compared only up to its first 0 characters
 p19_builtin_shadowed | gap | import of module sys is not modelled yet
 p20_global_mutated | agree
 p21_closure_three_levels | agree
@@ -254,7 +254,7 @@ p29_mangling | agree
 p30_super | agree
 p31_free_class | agree
 p32_class_comprehension | agree
-p33_with_for_targets | agree
+p33_with_for_targets | gap | CPython's output is compared only up to its first 0 characters
 p34_match | gap | the translator does not support match
 p35_async | gap | the translator does not support async def
 p36_decorators | agree
@@ -275,7 +275,7 @@ p50_free_nested_comp | agree
 p51_comp_clauses | agree
 rr01_handler_param | agree
 rr02_merges | agree
-rr03_frame_lambda | agree
+rr03_frame_lambda | gap | CPython's output is compared only up to its first 0 characters
 s01_print | agree
 s02_print_bad_sep | agree
 s03_call_args | agree
@@ -283,8 +283,8 @@ s04_not_callable | agree
 s05_star_not_iterable | agree
 s06_kwargs_not_str | gap | a call of a built-in with a keyword that is not a str is not modelled yet
 s07_kwargs_duplicate | agree
-s08_import_builtins | agree
-s09_import_missing | agree
+s08_import_builtins | gap | CPython's output is compared only up to its first 9 characters
+s09_import_missing | gap | CPython's output is compared only up to its first 0 characters
 s100_iadd_user_radd | agree
 s101_meta_annotations_property | gap | a class attribute write through the metaclass's data descriptor is not modelled yet
 s102_type_annotations_write | agree
@@ -300,7 +300,7 @@ s110_exception_classes | agree
 s111_exception_errors | agree
 s112_exception_attrs | agree
 s113_oserror_fields | agree
-s114_exception_inits | agree
+s114_exception_inits | gap | CPython's output is compared only up to its first 621 characters
 s115_exception_new_checks | agree
 s116_context_cycles | agree
 s117_raise_from_class | gap | a cause that is a class or not an exception is not modelled yet
@@ -314,7 +314,7 @@ s123_exception_user_str_outcome | gap | the str() of an uncaught E
 s124_new_static_base | agree
 s125_new_other_base | gap | a class whose __new__ comes from another built-in base than its tp_new is not modelled yet
 s126_super_metaclass | agree
-s127_super_class_attr_error | agree
+s127_super_class_attr_error | gap | CPython's output is compared only up to its first 0 characters
 s128_class_doc_descriptor | agree
 s129_iter_builtins | agree
 s12_positional_only_keyword | gap | a keyword that names a positional-only parameter
@@ -420,7 +420,7 @@ s220_none_in_arg_messages | agree
 s221_set_name_note | agree
 s222_build_class_attr_lookups | agree
 s223_super_type_keywords | agree
-s224_object_setattr_messages | agree
+s224_object_setattr_messages | gap | CPython's output is compared only up to its first 237 characters
 s225_set_replace_during_lookup | gap | a set that changes during a lookup is not modelled yet
 s226_type_one_arg_keywords | agree
 s227_list_index_changes_list | agree
@@ -626,7 +626,7 @@ s81_plain_property | agree
 s82_classmethod_static | agree
 s83_descr_check | gap | a slot wrapper bound to an object of another type is not modelled yet
 s84_member_other_class | agree
-s85_getattribute_side_isinstance | agree
+s85_getattribute_side_isinstance | gap | CPython's output is compared only up to its first 8 characters
 s86_get_callable_instance | agree
 s87_list_eq_shrink_both | agree
 s88_init_subclass_assigned | agree

@@ -8,3 +8,4 @@ ok
 I = <class 'I'>
 __doc__ = None
 __name__ = '__main__'
+--- teardown after 8

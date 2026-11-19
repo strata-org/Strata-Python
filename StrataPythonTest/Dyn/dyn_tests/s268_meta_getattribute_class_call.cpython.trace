@@ -11,3 +11,4 @@ MM = <class 'MM'>
 __doc__ = None
 __name__ = '__main__'
 x = <C object>
+--- teardown after 23

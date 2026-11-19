@@ -9,3 +9,4 @@ __name__ = '__main__'
 i = 1
 os = <module object>
 output_dir = 'output'
+--- teardown after 2

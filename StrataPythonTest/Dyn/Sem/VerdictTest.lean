@@ -347,4 +347,55 @@ ok
 /-- info: fails: p: the run ends, but CPython's doesn't -/
 #guard_msgs in #eval IO.println (verdictText (judge "p" (.trace cpy) endlessTrace none))
 
+-- CPython's trace ends with `--- teardown after 2` when only its first 2 characters of output are
+-- in `python FILE`'s order.  A run never agrees with such a trace, nor gets its documented
+-- difference: it gets a gap if it agrees with the first 2 characters, the outcome and the globals.
+meta def cpyTeardown : String :=
+  tr "a\nb\n" "--- outcome\nok\n--- globals\nx = 1\n--- teardown after 2\n"
+
+meta def teardownGap : String :=
+  "p | gap | CPython's output is compared only up to its first 2 characters"
+
+#guard verdictText (judge "p" (.trace cpy) cpyTeardown none) == teardownGap
+#guard verdictText (judge "p" (.trace (tr "a\nc\n" "--- outcome\nok\n--- globals\nx = 1\n"))
+  cpyTeardown none) == teardownGap
+#guard verdictText (judge "p" (.trace cpy) cpyTeardown (some ⟨"r", none⟩)) == teardownGap
+
+/-- info: fails: p: the run differs from CPython's before CPython's teardown -/
+#guard_msgs in #eval IO.println (verdictText (judge "p"
+  (.trace (tr "z\nb\n" "--- outcome\nok\n--- globals\nx = 1\n")) cpyTeardown none))
+
+/-- info: fails: p: the run differs from CPython's before CPython's teardown -/
+#guard_msgs in #eval IO.println (verdictText (judge "p"
+  (.trace (tr "a\nb\n" "--- outcome\nok\n--- globals\nx = 2\n")) cpyTeardown none))
+
+/-- info: fails: p: the run differs from CPython's before CPython's teardown -/
+#guard_msgs in #eval IO.println (verdictText (judge "p"
+  (.trace (tr "a" "--- outcome\nok\n--- globals\nx = 1\n")) cpyTeardown none))
+
+-- A gap is checked against only the first 2 characters of CPython's output, which are
+-- `python FILE`'s: a run that prints "X" after them still gets its gap, and one that differs in
+-- them doesn't.
+/-- info: p | gap | g -/
+#guard_msgs in #eval IO.println (verdictText (judge "p" (.trace (tr "a\nX\n" "--- gap g\n")) cpyTeardown none))
+#guard match judge "p" (.trace (tr "b\n" "--- gap g\n")) cpyTeardown none with
+  | .error e => e.startsWith "p: the run differs from CPython's before its gap"
+  | .ok _ => false
+
+-- A global named like the line is a global, not the line: every global's line holds " = ".
+/-- info: p | agree -/
+#guard_msgs in
+#eval IO.println (verdictText (judge "p"
+  (.trace (tr "a\n" "--- outcome\nok\n--- globals\n--- teardown after 0 = 1\n"))
+  (tr "a\n" "--- outcome\nok\n--- globals\n--- teardown after 0 = 1\n") none))
+
+-- Two runs are compared in full: the first run's text ends at a separator line that the program
+-- can print, so the teardown line before it may be the program's, and doesn't limit the check.
+#guard
+  let run (out : String) := tr out ("--- outcome\nraised ValueError: x\n--- teardown after 0\n" ++
+    "--- PYTHONHASHSEED=1\ny\n--- globals\n")
+  match judge "p" (.trace (tr "b\n" "--- gap g\n")) (joinRuns (run "a\n") (run "b\n")) none with
+  | .error e => e.startsWith "p: the run differs from CPython's before its gap"
+  | .ok _ => false
+
 end StrataPython.SemDiff.VerdictTest

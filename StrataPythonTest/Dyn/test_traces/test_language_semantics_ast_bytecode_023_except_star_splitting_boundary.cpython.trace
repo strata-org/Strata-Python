@@ -8,3 +8,4 @@ __doc__ = None
 __name__ = '__main__'
 handled = ['V', 'T']
 sys = <module object>
+--- teardown after 68

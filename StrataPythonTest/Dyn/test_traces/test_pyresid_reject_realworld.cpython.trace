@@ -10,3 +10,4 @@ fetch = <_lru_cache_wrapper object>
 list = [1, 2, 3]
 lru_cache = <function object>
 os = <module object>
+--- teardown after 0

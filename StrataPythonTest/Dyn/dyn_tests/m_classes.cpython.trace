@@ -11,3 +11,4 @@ __name__ = '__main__'
 deco = <function object>
 g = 1
 outer = <function object>
+--- teardown after 0

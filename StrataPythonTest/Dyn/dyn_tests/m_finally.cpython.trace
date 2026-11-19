@@ -20,3 +20,4 @@ return_drops = <function object>
 return_in_handler = <function object>
 superseded = <function object>
 sys = <module object>
+--- teardown after 0

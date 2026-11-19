@@ -8,3 +8,4 @@ __doc__ = None
 __name__ = '__main__'
 make = <function object>
 os = <module object>
+--- teardown after 0

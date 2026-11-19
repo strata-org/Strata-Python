@@ -8,3 +8,4 @@ M = <class 'M'>
 __doc__ = None
 __name__ = '__main__'
 r = <classmethod object>
+--- teardown after 12

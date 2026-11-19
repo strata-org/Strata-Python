@@ -9,3 +9,4 @@ __name__ = '__main__'
 builtins = <module object>
 length = <builtin_function_or_method object>
 p = <builtin_function_or_method object>
+--- teardown after 9

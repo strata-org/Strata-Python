@@ -6,3 +6,4 @@ ok
 --- globals
 __doc__ = 'Boundary: also prohibited in class body (3.x).'
 __name__ = '__main__'
+--- teardown after 44

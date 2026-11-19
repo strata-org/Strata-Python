@@ -8,3 +8,4 @@ S = <class 'S'>
 U = <class 'UnionType'>
 __doc__ = None
 __name__ = '__main__'
+--- teardown after 31

@@ -9,3 +9,4 @@ call_helper = <function object>
 declare_import = <function object>
 helper = <function object>
 sys = <module object>
+--- teardown after 0

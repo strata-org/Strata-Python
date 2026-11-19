@@ -26,7 +26,8 @@ it, and checks that its root is then the default. The tracer needs CPython 3.12,
 
 namespace StrataPython.TraceCleanupTest
 
-/-- The trace of `trace_cleanup_modes.py`, the same under every hash seed. -/
+/-- The trace of `trace_cleanup_modes.py`, the same under every hash seed.  It imports `os`, which
+reaches the interpreter's runtime, so the trace is cut at the program's end. -/
 meta def modesTrace : String := "--- stdout 5
 done
 
@@ -40,6 +41,7 @@ f = 'nr/inner/f'
 mode = 0
 os = <module object>
 out = <TextIOWrapper object>
+--- teardown after 5
 "
 
 /-- The trace of `trace_cleanup_swap.py`, whose directory shows as `<cwd>`. -/
@@ -53,6 +55,7 @@ __doc__ = None
 __name__ = '__main__'
 d = '<cwd>'
 os = <module object>
+--- teardown after 5
 "
 
 /-- Run the tracer on `program` with the hash seed `seed`, in the root `root`, under the umask

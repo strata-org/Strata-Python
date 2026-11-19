@@ -10,3 +10,4 @@ __doc__ = None
 __name__ = '__main__'
 builtins = <module object>
 s = <ModuleSpec object>
+--- teardown after 12

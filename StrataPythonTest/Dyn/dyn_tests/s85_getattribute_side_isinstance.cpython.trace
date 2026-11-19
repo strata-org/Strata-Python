@@ -8,3 +8,4 @@ B = <class 'B'>
 __doc__ = None
 __name__ = '__main__'
 n = 1
+--- teardown after 8

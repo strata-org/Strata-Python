@@ -30,3 +30,4 @@ __name__ = '__main__'
 g = <BaseExceptionGroup object>
 g2 = <ExceptionGroup object>
 t = <function object>
+--- teardown after 621

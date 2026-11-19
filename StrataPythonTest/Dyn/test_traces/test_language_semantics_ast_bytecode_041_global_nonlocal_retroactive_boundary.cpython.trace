@@ -6,3 +6,4 @@ ok
 --- globals
 __doc__ = 'Boundary: assignment before nonlocal is SyntaxError.'
 __name__ = '__main__'
+--- teardown after 45

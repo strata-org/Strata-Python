@@ -16,3 +16,4 @@ mixed_imports_and_vars = <function object>
 param_shadows_module_var = <function object>
 threshold = 0.5
 use_module_vars = <function object>
+--- teardown after 0

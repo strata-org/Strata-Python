@@ -6,3 +6,4 @@ ok
 --- globals
 __doc__ = 'Boundary: await outside async function is SyntaxError.'
 __name__ = '__main__'
+--- teardown after 45

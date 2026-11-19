@@ -52,3 +52,4 @@ g = <function object>
 make_base = <function object>
 opts = {'metaclass': <class 'Meta'>}
 overload = <function object>
+--- teardown after 0

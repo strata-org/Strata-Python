@@ -7,3 +7,4 @@ ok
 __doc__ = 'Star import at module level is fine.'
 __name__ = '__main__'
 code = <code object>
+--- teardown after 5

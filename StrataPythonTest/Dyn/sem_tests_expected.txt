@@ -215,7 +215,7 @@ test_global_function_binding_forms | agree
 test_global_function_import | gap | import of module os is not modelled yet
 test_global_function_with_binding | agree
 test_global_import_rebinding_in_control_flow_rejection | gap | import of module sys is not modelled yet
-test_global_import_rebinding_in_function_rejection | agree
+test_global_import_rebinding_in_function_rejection | gap | CPython's output is compared only up to its first 0 characters
 test_global_import_rebinding_rejection | gap | import of module sys is not modelled yet
 test_global_inherited_method_rejection | agree
 test_global_inherited_nested_rejection | agree
@@ -1167,7 +1167,7 @@ test_pyresid_generator_close_cleanup | gap | the translator does not support gen
 test_pyresid_gm_after_first | gap | import of module os is not modelled yet
 test_pyresid_gm_both_branches | gap | import of module os is not modelled yet
 test_pyresid_gm_class_soup | gap | the translator does not support async def
-test_pyresid_gm_lambda_holding_eval | agree
+test_pyresid_gm_lambda_holding_eval | gap | CPython's output is compared only up to its first 0 characters
 test_pyresid_gm_nested_in_rejected | gap | built-in eval is not modelled yet
 test_pyresid_gp_binop_matrix | agree
 test_pyresid_gp_builtin_calls | agree
@@ -1176,8 +1176,8 @@ test_pyresid_gp_threeway | agree
 test_pyresid_gr_as_def | gap | the translator does not support async def
 test_pyresid_gr_as_inner | gap | the translator does not support async def
 test_pyresid_gr_as_method | gap | the translator does not support async def
-test_pyresid_gr_bb_getattr | agree
-test_pyresid_gr_bb_getattr_func | agree
+test_pyresid_gr_bb_getattr | gap | CPython's output is compared only up to its first 0 characters
+test_pyresid_gr_bb_getattr_func | gap | CPython's output is compared only up to its first 0 characters
 test_pyresid_gr_bb_globals | gap | built-in globals is not modelled yet
 test_pyresid_gr_bb_super | agree
 test_pyresid_gr_bb_type | agree
@@ -1439,7 +1439,7 @@ test_type_checker_differentials_mypy_c2_typeddict_del_program | agree
 test_type_checker_differentials_mypy_c3_property_side_effect_program | agree
 test_type_checker_differentials_mypy_c4_getattr_fallback_program | agree
 test_type_checker_differentials_mypy_c5_setattr_override_program | agree
-test_type_checker_differentials_mypy_c6_getattribute_override_program | agree
+test_type_checker_differentials_mypy_c6_getattribute_override_program | gap | CPython's output is compared only up to its first 0 characters
 test_type_checker_differentials_mypy_d1_numeric_tower_float_method_program | agree
 test_type_checker_differentials_mypy_misc_test_list_insert | agree
 test_type_checker_differentials_mypy_misc_test_list_slice | agree

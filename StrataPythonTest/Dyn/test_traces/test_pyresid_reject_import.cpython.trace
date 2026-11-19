@@ -9,3 +9,4 @@ __doc__ = None
 __name__ = '__main__'
 os = <module object>
 path = <module object>
+--- teardown after 0

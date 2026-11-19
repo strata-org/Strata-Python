@@ -7,3 +7,4 @@ __annotations__ = {'state': <class 'int'>}
 __doc__ = None
 __name__ = '__main__'
 state = <module object>
+--- teardown after 0

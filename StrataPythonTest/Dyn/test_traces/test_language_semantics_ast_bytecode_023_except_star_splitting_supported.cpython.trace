@@ -8,3 +8,4 @@ __doc__ = None
 __name__ = '__main__'
 errors = [<ValueError object>, <TypeError object>]
 sys = <module object>
+--- teardown after 44

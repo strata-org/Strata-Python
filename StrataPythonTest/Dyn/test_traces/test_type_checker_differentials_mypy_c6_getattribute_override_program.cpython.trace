@@ -7,3 +7,4 @@ Intercepted = <class 'Intercepted'>
 __doc__ = '\nc6_getattribute_override.py — __getattribute__ returns wrong type based on internal state.\n\nmypy trusts the declared field type (x: int). But __getattribute__ intercepts\nALL attribute access and can return anything. After calling corrupt(), the\noverride returns str instead of int.\n\nNo narrowing involved. No union types on the field. The field is declared as\nplain `int` but __getattribute__ subverts the access.\n\nmypy --strict: Success (0 errors)\nRuntime: TypeError — str - int\n'
 __name__ = '__main__'
 main = <function object>
+--- teardown after 0

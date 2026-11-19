@@ -13,3 +13,4 @@ E = <class 'E'>
 __doc__ = None
 __name__ = '__main__'
 c = {'a': 0}
+--- teardown after 108

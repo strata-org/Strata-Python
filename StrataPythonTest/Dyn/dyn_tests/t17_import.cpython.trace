@@ -12,3 +12,4 @@ exists = <function object>
 full_path = '/tmp/file.txt'
 join = <function object>
 os = <module object>
+--- teardown after 0

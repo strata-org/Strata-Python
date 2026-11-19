@@ -7,3 +7,4 @@ __doc__ = None
 __name__ = '__main__'
 f = <function object>
 os = None
+--- teardown after 0

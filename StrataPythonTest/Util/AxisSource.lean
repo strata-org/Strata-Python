@@ -622,7 +622,7 @@ def knownGap? (name : String) (seedBucket : Bool) (ours : SemDiff.Ours) (traces 
   guard (!StrataPython.Dyn.Sem.isModelInvariant msg && (SemDiff.faultOf t).isNone && !outOfFuel)
   guard (traces.all fun th => th != SemDiff.syntaxTrace && th != SemDiff.endlessTrace &&
     !th.startsWith SemDiff.twoRunsHeader)
-  guard (traces.any fun th => !SemDiff.agreesBefore out before th)
+  guard (traces.any fun th => !SemDiff.agreesBeforeTrace out before th)
   pure <| match k with
     | ⟨r, none⟩ => .ok (.known r)
     | ⟨r, some pin⟩ =>
@@ -643,7 +643,7 @@ def judgeSeedDependent (name : String) (ours : SemDiff.Ours) (traces : Array Str
     | throw s!"{name}: the run gives a result where CPython's runs depend on the hash seed\n\
         --- ours\n{t}"
   for h : i in [:traces.size] do
-    unless SemDiff.agreesBefore out before traces[i] do
+    unless SemDiff.agreesBeforeTrace out before traces[i] do
       throw s!"{name}: the run differs before its gap from CPython's run under PYTHONHASHSEED={i}\n\
         --- ours\n{t}--- CPython\n{traces[i]}"
   match SemDiff.judge name ours traces[0]! none with
@@ -794,11 +794,18 @@ def failureKind? (ours : SemDiff.Ours) (theirs : String) : Option FailureKind :=
   let (o', rest') ← SemDiff.splitOutput theirs
   match SemDiff.splitGap t with
   | some (out, before, _) =>
-    if SemDiff.agreesBefore out before theirs then none
+    if SemDiff.agreesBeforeTrace out before theirs then none
     else return .beforeGap (firstDiff out o' before rest')
   | none =>
-    if t == theirs then none
-    else return .differs (firstDiff o o' r rest')
+    -- As in `SemDiff.judge`: against a cut trace, only the first `n` characters of the outputs.
+    match SemDiff.splitTeardown theirs with
+    | some (n, theirs') =>
+      let (o'', rest'') ← SemDiff.splitOutput theirs'
+      if o.take n == o''.take n && r == rest'' then none
+      else return .differs (firstDiff (o.take n).toString (o''.take n).toString r rest'')
+    | none =>
+      if t == theirs then none
+      else return .differs (firstDiff o o' r rest')
 
 /-- Why a fuzz program fails the test: it tests nothing (a generator bug), or its run is wrong. -/
 inductive FuzzFail where

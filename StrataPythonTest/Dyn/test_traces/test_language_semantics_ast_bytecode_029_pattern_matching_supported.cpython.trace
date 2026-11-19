@@ -8,3 +8,4 @@ __doc__ = None
 __name__ = '__main__'
 classify = <function object>
 sys = <module object>
+--- teardown after 48

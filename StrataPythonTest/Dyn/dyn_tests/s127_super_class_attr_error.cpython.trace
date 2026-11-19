@@ -7,3 +7,4 @@ A = <class 'A'>
 B = <class 'B'>
 __doc__ = None
 __name__ = '__main__'
+--- teardown after 0

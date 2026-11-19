@@ -11,3 +11,4 @@ doubled = [2, 4, 6]
 items = [1, 2, 3]
 result = 3
 sync_add = <function object>
+--- teardown after 0

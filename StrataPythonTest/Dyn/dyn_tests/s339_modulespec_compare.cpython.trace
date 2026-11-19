@@ -16,3 +16,4 @@ __name__ = '__main__'
 builtins = <module object>
 f = <function object>
 s = <ModuleSpec object>
+--- teardown after 39

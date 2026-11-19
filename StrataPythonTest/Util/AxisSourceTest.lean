@@ -458,6 +458,13 @@ private meta def two : String := steps ["@op o0", "= int 2", "@done o0"]
   some (.differs ⟨"o0", .value, some "= int 1", some "= int 2"⟩)
 #guard failureKind? (.trace (okTrace one)) (okTrace (steps ["@op o0", "ev C.__eq__", "= int 1", "@done o0"])) ==
   some (.differs ⟨"o0", .event, some "ev C.__eq__", some "= int 1"⟩)
+-- Against a cut trace, only the first 2 characters of the outputs count: a run that differs after
+-- them, and in its globals, differs in its globals.
+#guard failureKind? (.trace (SemDiff.traceOf "a\nX\n" "--- outcome\nok\n--- globals\nx = 2\n"))
+    (SemDiff.traceOf "a\nb\n" "--- outcome\nok\n--- globals\nx = 1\n--- teardown after 2\n") ==
+  some (.differs ⟨"", .outcome, some "x = 1", some "x = 2"⟩)
+#guard failureKind? (.trace (SemDiff.traceOf "a\nX\n" "--- outcome\nok\n--- globals\nx = 1\n"))
+    (SemDiff.traceOf "a\nb\n" "--- outcome\nok\n--- globals\nx = 1\n--- teardown after 2\n") == none
 -- Two bugs in different steps have different kinds.
 #guard failureKind? (.trace (okTrace (steps ["@op o0", "= int 1", "@done o0", "@op o1", "= int 3", "@done o1"])))
     (okTrace (steps ["@op o0", "= int 1", "@done o0", "@op o1", "= int 1", "@done o1"])) !=
