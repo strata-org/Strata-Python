@@ -412,8 +412,12 @@ def valueAsType (loc : SourceRange) (v : SpecValue) : PySpecM SpecType := do
     pure itp
   | .noneConst =>
     return .noneType loc
-  | .requiredType tp => return tp
-  | .notRequiredType tp => return tp
+  | .requiredType _ | .notRequiredType _ =>
+    -- PEP 655 forbids such a wrapper inside another type, and CPython 3.12 reads it unevenly:
+    -- `Union[NotRequired[int], NotRequired[int]]` collapses to `NotRequired[int]`, so its member
+    -- is not required.
+    specError loc "Required[...] and NotRequired[...] may only be the whole type of a TypedDict member"
+    return default
   | .stringConst loc val =>
     -- Check if this is a known built-in type first
     match ← getNameValue? val with
@@ -498,35 +502,40 @@ def translateCall (loc : SourceRange) (func : SpecValue)
     let .dictValue fieldsPairs := args[1]
       | specError loc "TypedDict expects dictionary fields"; return default
     let fields := fieldsPairs |>.map (·.fst)
-    -- Determine per-field required status
-    if kwargs.size = 0 then
-      -- New style: Required[T] / NotRequired[T] per field
-      let mut fieldTypes : Array SpecType := #[]
-      let mut fieldRequired : Array Bool := #[]
-      for (_, v) in fieldsPairs do
-        match v with
-        | .requiredType tp =>
-          fieldTypes := fieldTypes.push tp
-          fieldRequired := fieldRequired.push true
-        | .notRequiredType tp =>
-          fieldTypes := fieldTypes.push tp
-          fieldRequired := fieldRequired.push false
-        | _ =>
-          -- Bare type (no Required/NotRequired wrapper) — treat as required
-          fieldTypes := fieldTypes.push (← valueAsType loc v)
-          fieldRequired := fieldRequired.push true
-      return .typeValue <| .typedDict loc fields fieldTypes fieldRequired
-    else
-      let .isTrue kwargsSizep := decideProp (kwargs.size = 1)
+    -- CPython keeps only the last value of a key that the dict gives twice. PySpec rejects the dict
+    -- instead of reading both values.
+    let mut keys : Std.HashSet String := {}
+    for k in fields do
+      if keys.contains k then
+        specError loc s!"TypedDict '{name}' gives the key '{k}' twice"
+        return default
+      keys := keys.insert k
+    -- A bare member is required when `total` is, which is `True` by default.
+    let mut total := true
+    if h : kwargs.size > 0 then
+      let .isTrue _ := decideProp (kwargs.size = 1)
         | specError loc "TypedDict expects 0 or 1 keywords"; return default
-      -- Old style: total= keyword
       let (some "total", totalValue) := kwargs[0]
         | specError loc "TypedDict expects total"; return default
-      let .boolConst total := totalValue
+      let .boolConst t := totalValue
         | specError loc "TypedDict expects total bool"; return default
-      let values ← fieldsPairs |>.mapM fun (_name, v) => valueAsType loc v
-      let fieldRequired := values.map fun _ => total
-      return .typeValue <| .typedDict loc fields values fieldRequired
+      total := t
+    -- A member written `Required[T]` is required, one written `NotRequired[T]` is not, and any
+    -- other member is required when `total` is, as CPython 3.12's `__required_keys__` says.
+    let mut fieldTypes : Array SpecType := #[]
+    let mut fieldRequired : Array Bool := #[]
+    for (_, v) in fieldsPairs do
+      match v with
+      | .requiredType tp =>
+        fieldTypes := fieldTypes.push tp
+        fieldRequired := fieldRequired.push true
+      | .notRequiredType tp =>
+        fieldTypes := fieldTypes.push tp
+        fieldRequired := fieldRequired.push false
+      | _ =>
+        fieldTypes := fieldTypes.push (← valueAsType loc v)
+        fieldRequired := fieldRequired.push total
+    return .typeValue <| .typedDict loc fields fieldTypes fieldRequired
   | _ =>
     specError loc s!"Unknown call {repr func}."
     return default

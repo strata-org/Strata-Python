@@ -2367,4 +2367,79 @@ meta def findModuleGhost (sigs : Array Signature) (name : String) : IO Specs.Gho
 #guard_msgs in
 #eval expectNativeCaseError "module_ghost_dotted_import_shadows_class"
   "Unknown identifier import_test"
+
+/-! ## Required members of a TypedDict
+
+PySpec reads which members of a TypedDict are required as CPython 3.12's `__required_keys__` does
+(PEP 655): a member written `Required[T]` is required, one written `NotRequired[T]` is not, and any
+other member is required when `total=` is `True`, its default. Each case below is checked against
+a fixed table and against CPython's own `__required_keys__` and `__optional_keys__`. -/
+
+/-- The required and the optional members of each TypedDict alias in `sigs`, by alias name,
+sorted. -/
+meta def membersOfAliases (sigs : Array Signature) : Array (String × Array String × Array String) :=
+  sigs.filterMap fun
+    | .typeDef d => (d.definition.asTypedDict).map fun fields =>
+        (d.name, ((fields.filter (·.required)).map (·.name)).qsort (· < ·),
+          ((fields.filter (!·.required)).map (·.name)).qsort (· < ·))
+    | _ => none
+
+/-- CPython's `__required_keys__` and `__optional_keys__` of each TypedDict of `file`, by name,
+sorted. -/
+meta def cpythonMembers (pythonCmd : System.FilePath) (file : System.FilePath) :
+    IO (Array (String × Array String × Array String)) := do
+  let script := "import importlib.util, sys\n\
+    spec = importlib.util.spec_from_file_location('fixture', sys.argv[1])\n\
+    m = importlib.util.module_from_spec(spec)\n\
+    spec.loader.exec_module(m)\n\
+    for n, v in sorted(vars(m).items()):\n\
+    \x20   if hasattr(v, '__required_keys__'):\n\
+    \x20       print(n + ':' + ','.join(sorted(v.__required_keys__)) + ':' + ','.join(sorted(v.__optional_keys__)))\n"
+  let out ← IO.Process.output
+    { cmd := toString pythonCmd, args := #["-I", "-B", "-c", script, file.toString] }
+  unless out.exitCode == 0 do throw <| IO.userError s!"CPython failed on {file}: {out.stderr}"
+  let keys (ks : String) : Array String := ((ks.splitOn ",").filter (!·.isEmpty)).toArray
+  ((out.stdout.splitOn "\n").filter (!·.isEmpty)).toArray.mapM fun line =>
+    match line.splitOn ":" with
+    | [n, req, opt] => pure (n, keys req, keys opt)
+    | _ => throw <| IO.userError s!"unexpected line from CPython: {line}"
+
+#guard_msgs in
+#eval runNativeCase "typeddict_total" fun sigs warnings => do
+  -- `Opt = NotRequired[int]` is not a type alias; the member that names it reads the wrapper.
+  expect (warnings.size == 1 && warnings.all (·.contains "skipped non-type Assign (Opt)"))
+    s!"expected one warning on Opt, got {warnings}"
+  let got := (membersOfAliases sigs).qsort (·.1 < ·.1)
+  let expected : Array (String × Array String × Array String) := #[
+    ("Named", #["bare"], #["opt"]),
+    ("Plain", #["bare", "req"], #["opt"]),
+    ("TotalFalse", #["req"], #["bare", "opt"]),
+    ("TotalTrue", #["bare", "req"], #["opt", "quoted"])]
+  expect (got == expected) s!"members: {got}"
+  withPython fun pythonCmd => do
+    let cpython ← cpythonMembers pythonCmd (testDir / "native_cases" / "typeddict_total.py")
+    expect (got == cpython) s!"PySpec reads {got}, CPython {cpython}"
+
+-- A wrapper inside another type, or around a parameter, is rejected, as PEP 655 requires of type
+-- checkers. CPython 3.12 reads line 3's member as not required, since a Union of two equal types
+-- collapses to NotRequired[int].
+#guard_msgs in
+#eval expectNativeCaseErrorsAt "typeddict_nested_wrapper" <|
+  #[3, 4, 5, 6, 7, 8, 9, 11].map fun l =>
+    (l, "Required[...] and NotRequired[...] may only be the whole type of a TypedDict member")
+
+-- A key that the dict gives twice rejects the model: CPython keeps the last one, and two
+-- readings of one key would make a contract state the wrong one.
+#guard_msgs in
+#eval expectNativeCaseError "typeddict_duplicate_key" "TypedDict 'Out' gives the key 'a' twice"
+
+-- `Annotated` around a wrapper is rejected (CPython reads `b` as optional).
+#guard_msgs in
+#eval expectNativeCaseError "typeddict_annotated_wrapper" "Annotated is not defined in module typing"
+
+-- A wrapper inside a string is rejected: PySpec reads the string as a class name. CPython reads
+-- `b` as required, since it doesn't look inside the string, although the author meant it to be
+-- optional.
+#guard_msgs in
+#eval expectNativeCaseError "typeddict_quoted_wrapper" "Class NotRequired[int] not defined"
 end

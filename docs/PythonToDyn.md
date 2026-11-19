@@ -1965,7 +1965,11 @@ The exceptions are the trusted modeling assumptions of §12.9.
     tests `K` on the key and then `V` on the value. `Any` has no test, so the schema of
     `Dict[str, Any]` tests only that each key is a `str`.
   * A TypedDict: each required key is in it, and the value of each key that is present passes
-    its type.
+    its type. A member written `Required[T]` is required, and one written `NotRequired[T]` is not.
+    Any other member is required when `total=` is `True`, its default. This is CPython 3.12's
+    `__required_keys__`. PySpec reads only the functional form, `TypedDict("X", {...})`. It
+    rejects these wrappers anywhere else, as PEP 655 requires of type checkers, and rejects a dict that gives a key
+    twice instead of choosing one of its values.
   * Element types nest: `Dict[str, List[str]]` tests each value as a list of `str`s.
   * For a `str`, a `range` or a mapping that is not a dict, the quantifier raises, so the clause
     is `false`, which is stronger, so it is sound.
