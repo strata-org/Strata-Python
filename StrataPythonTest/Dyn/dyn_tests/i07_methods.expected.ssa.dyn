@@ -1,6 +1,8 @@
 module i07_methods {
   func @|i07_methods.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("i07_methods")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i07_methods", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -113,6 +115,8 @@ module i07_methods {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "show", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -147,6 +151,8 @@ module i07_methods {
     #[py.bindings = [{name = "greet", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -178,6 +184,8 @@ module i07_methods {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -216,6 +224,8 @@ module i07_methods {
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %n.7 : py.Value = py.tupleGet(%bound.0, 1)
       %opts.1 : py.Value = py.tupleGet(%bound.0, 2)
+      jump ^start.0()
+    start.0():
       %n.9 : py.Value = py.requireDefined(%n.7, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %n.10 : base.Unit = py.setAttr(%self.4, "n", %n.9) ^propagate.0()
@@ -247,6 +257,8 @@ module i07_methods {
       %tag.2 : py.Value = py.tupleGet(%bound.0, 1)
       %extra.1 : py.Value = py.tupleGet(%bound.0, 2)
       %kw.1 : py.Value = py.tupleGet(%bound.0, 3)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i07_methods", "print") ^propagate.0()
       %tag.4 : py.Value = py.requireDefined(%tag.2, "tag", "UnboundLocalError", "cannot access local variable 'tag' where it is not associated with a value") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -281,6 +293,8 @@ module i07_methods {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Base.greet", 0, 2, false, false, "self", "who") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %who.1 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i07_methods", "print") ^propagate.0()
       %str.1 : py.Value = py.strLit("hello")
       %who.3 : py.Value = py.requireDefined(%who.1, "who", "UnboundLocalError", "cannot access local variable 'who' where it is not associated with a value") ^propagate.0()

@@ -1,6 +1,8 @@
 module rr03_frame_lambda {
   func @|rr03_frame_lambda.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("rr03_frame_lambda")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("rr03_frame_lambda", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -22,6 +24,8 @@ module rr03_frame_lambda {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %locals.0 : py.Value = py.loadGlobal("rr03_frame_lambda", "locals") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs

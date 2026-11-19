@@ -1,6 +1,8 @@
 module m_global_decl {
   func @|m_global_decl.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_global_decl")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_global_decl", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -21,6 +23,8 @@ module m_global_decl {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "set_counter", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %counter.cell.0 : base.Ref(py.Value) = py.globalCell("m_global_decl", "counter")
       %set.0 : base.Unit = base.refSet[py.Value](%counter.cell.0, %int.0)
@@ -35,6 +39,8 @@ module m_global_decl {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "get_counter", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %counter.0 : py.Value = py.loadGlobal("m_global_decl", "counter") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%counter.0)
       ret(%ret.0)

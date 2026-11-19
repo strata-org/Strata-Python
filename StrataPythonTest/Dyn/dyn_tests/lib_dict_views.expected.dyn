@@ -1,6 +1,10 @@
 module lib_dict_views {
   func @|lib_dict_views.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_dict_views")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_dict_views", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -589,18 +593,32 @@ module lib_dict_views {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %p.cell.0 : base.Ref(py.Value) = py.globalCell("lib_dict_views", "p")
       %set.27 : base.Unit = base.refSet[py.Value](%p.cell.0, %item.0)
-      %keys.2 : py.Value = py.loadGlobal("lib_dict_views", "keys") ^propagate.0()
-      %append.0 : py.Value = py.attr(%keys.2, "append") ^propagate.0()
-      %p.0 : py.Value = py.loadGlobal("lib_dict_views", "p") ^propagate.0()
+      %keys.2 : py.Value = py.loadGlobal("lib_dict_views", "keys") ^raised.0()
+      %append.0 : py.Value = py.attr(%keys.2, "append") ^raised.0()
+      %p.0 : py.Value = py.loadGlobal("lib_dict_views", "p") ^raised.0()
       %int.73 : py.Value = py.intLit(0)
-      %item.1 : py.Value = py.getItem(%p.0, %int.73) ^propagate.0()
+      %item.1 : py.Value = py.getItem(%p.0, %int.73) ^raised.0()
       %tuple.104 : py.Value = py.mkTuple(%item.1)
       %kwargs.93 : py.Value = py.mkKwargs
-      %call.92 : py.Value = py.call(%append.0, %tuple.104, %kwargs.93) ^propagate.0()
+      %call.92 : py.Value = py.call(%append.0, %tuple.104, %kwargs.93) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %print.9 : py.Value = py.loadGlobal("lib_dict_views", "print") ^propagate.0()
       %len.0 : py.Value = py.loadGlobal("lib_dict_views", "len") ^propagate.0()
@@ -675,11 +693,13 @@ module lib_dict_views {
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @lib_dict_views.L(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %view.0 : py.Value = py.undef("view")
       %view.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%view.0)
@@ -692,6 +712,8 @@ module lib_dict_views {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "L", 0, 1, false, false, "view") ^propagate.0()
       %view.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%view.cell.0, %view.2)
+      jump ^start.0()
+    start.0():
       %list.0 : py.Value = py.mkList
       %set.1 : base.Unit = base.refSet[py.Value](%out.cell.0, %list.0)
       %view.3 : py.Value = base.refGet[py.Value](%view.cell.0)
@@ -702,31 +724,47 @@ module lib_dict_views {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
       %out.1 : py.Value = base.refGet[py.Value](%out.cell.0)
-      %out.2 : py.Value = py.requireDefined(%out.1, "out", "UnboundLocalError", "cannot access local variable 'out' where it is not associated with a value") ^propagate.0()
-      %append.0 : py.Value = py.attr(%out.2, "append") ^propagate.0()
+      %out.2 : py.Value = py.requireDefined(%out.1, "out", "UnboundLocalError", "cannot access local variable 'out' where it is not associated with a value") ^raised.0()
+      %append.0 : py.Value = py.attr(%out.2, "append") ^raised.0()
       %x.1 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.2 : py.Value = py.requireDefined(%x.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.2 : py.Value = py.requireDefined(%x.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^raised.0()
       %tuple.0 : py.Value = py.mkTuple(%x.2)
       %kwargs.1 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%append.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %call.0 : py.Value = py.call(%append.0, %tuple.0, %kwargs.1) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %out.3 : py.Value = base.refGet[py.Value](%out.cell.0)
       %out.4 : py.Value = py.requireDefined(%out.3, "out", "UnboundLocalError", "cannot access local variable 'out' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%out.4)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @|lib_dict_views.A.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__eq__", binding = "def"}, {name = "__hash__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -773,6 +811,8 @@ module lib_dict_views {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %v.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%v.cell.0, %v.2)
+      jump ^start.0()
+    start.0():
       %v.3 : py.Value = base.refGet[py.Value](%v.cell.0)
       %v.4 : py.Value = py.requireDefined(%v.3, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -799,6 +839,8 @@ module lib_dict_views {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %d2.0 : py.Value = py.loadGlobal("lib_dict_views", "d2") ^propagate.0()
       %int.1 : py.Value = py.intLit(5)
@@ -825,6 +867,8 @@ module lib_dict_views {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.__hash__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)

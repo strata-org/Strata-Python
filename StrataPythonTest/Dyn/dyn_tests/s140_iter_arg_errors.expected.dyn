@@ -1,6 +1,10 @@
 module s140_iter_arg_errors {
   func @|s140_iter_arg_errors.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s140_iter_arg_errors")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s140_iter_arg_errors", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -94,24 +98,40 @@ module s140_iter_arg_errors {
       jump ^unwind.0(%exc.0)
     unwind.0(%exc.2 : py.Value):
       %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.2)
+      jump ^raised.0(%exc.2)
     join.0():
       jump ^head.0()
     stop.0(%exc.3 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.3)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.3)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.3)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.4 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.4)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.4 : py.Value):
-      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
-      ret(%exc.5)
+    propagate.0(%exc.5 : py.Value):
+      %exc.6 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.5)
+      ret(%exc.6)
   }
   func @|s140_iter_arg_errors.<lambda>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -126,6 +146,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -144,6 +166,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %tuple.0 : py.Value = py.mkTuple(%int.0)
@@ -161,6 +185,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
       %str.0 : py.Value = py.strLit("a")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -176,6 +202,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %str.0 : py.Value = py.strLit("b")
@@ -192,6 +220,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -209,6 +239,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -226,6 +258,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %len.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "len") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -240,6 +274,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %len.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "len") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -256,6 +292,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %len.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "len") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %str.0 : py.Value = py.strLit("x")
@@ -272,6 +310,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %iter.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "iter") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -286,6 +326,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %iter.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "iter") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -303,6 +345,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %iter.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "iter") ^propagate.0()
       %list.0 : py.Value = py.mkList
       %tuple.0 : py.Value = py.mkTuple(%list.0)
@@ -320,6 +364,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %next.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "next") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -334,6 +380,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %next.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "next") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -351,6 +399,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %next.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "next") ^propagate.0()
       %iter.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "iter") ^propagate.0()
       %list.0 : py.Value = py.mkList
@@ -372,6 +422,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %next.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "next") ^propagate.0()
       %iter.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "iter") ^propagate.0()
       %list.0 : py.Value = py.mkList
@@ -391,6 +443,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %next.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "next") ^propagate.0()
       %int.0 : py.Value = py.intLit(5)
       %tuple.0 : py.Value = py.mkTuple(%int.0)
@@ -406,6 +460,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %next.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "next") ^propagate.0()
       %int.0 : py.Value = py.intLit(5)
       %int.1 : py.Value = py.intLit(6)
@@ -422,6 +478,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %iter.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "iter") ^propagate.0()
       %int.0 : py.Value = py.intLit(5)
       %int.1 : py.Value = py.intLit(6)
@@ -438,6 +496,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %len.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "len") ^propagate.0()
       %iter.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "iter") ^propagate.0()
       %list.0 : py.Value = py.mkList
@@ -457,6 +517,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
       %float.0 : py.Value = py.floatLit(1.0)
       %tuple.0 : py.Value = py.mkTuple(%float.0)
@@ -472,6 +534,8 @@ module s140_iter_arg_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
       %bool.0 : py.Value = py.boolLit(true)
       %int.0 : py.Value = py.intLit(3)

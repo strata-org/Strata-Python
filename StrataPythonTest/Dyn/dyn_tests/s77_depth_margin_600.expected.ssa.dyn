@@ -1,6 +1,8 @@
 module s77_depth_margin_600 {
   func @|s77_depth_margin_600.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s77_depth_margin_600")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s77_depth_margin_600", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -79,6 +81,8 @@ module s77_depth_margin_600 {
       ret(%exc.1)
   }
   func @s77_depth_margin_600.nest_list(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %n.1 : py.Value = py.undef("n")
       %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.1)
@@ -94,31 +98,49 @@ module s77_depth_margin_600 {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "nest_list", 0, 2, false, false, "n", "inner") ^propagate.0()
       %n.8 : py.Value = py.tupleGet(%bound.0, 0)
       %inner.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %inner.4 : py.Value = py.requireDefined(%inner.2, "inner", "UnboundLocalError", "cannot access local variable 'inner' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
       jump ^head.0(%inner.4, %int.0)
     head.0(%x.5 : py.Value, %i.5 : py.Value):
-      %i.2 : py.Value = py.requireDefined(%i.5, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
-      %n.10 : py.Value = py.requireDefined(%n.8, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
-      %lt.0 : py.Value = py.lt(%i.2, %n.10) ^propagate.0()
-      %cond.0 : base.Bool = py.truthy(%lt.0) ^propagate.0()
-      branch(%cond.0) ^body.0() ^exit.0()
+      %i.2 : py.Value = py.requireDefined(%i.5, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0(%x.5)
+      %n.10 : py.Value = py.requireDefined(%n.8, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^raised.0(%x.5)
+      %lt.0 : py.Value = py.lt(%i.2, %n.10) ^raised.0(%x.5)
+      %cond.0 : base.Bool = py.truthy(%lt.0) ^raised.0(%x.5)
+      branch(%cond.0) ^body.0() ^normal.0()
     body.0():
-      %x.2 : py.Value = py.requireDefined(%x.5, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.2 : py.Value = py.requireDefined(%x.5, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^raised.0(%x.5)
       %list.0 : py.Value = py.mkList(%x.2)
-      %i.4 : py.Value = py.requireDefined(%i.5, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %i.4 : py.Value = py.requireDefined(%i.5, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0(%list.0)
       %int.1 : py.Value = py.intLit(1)
-      %add.0 : py.Value = py.add(%i.4, %int.1) ^propagate.0()
+      %add.0 : py.Value = py.add(%i.4, %int.1) ^raised.0(%list.0)
       jump ^head.0(%list.0, %add.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0, %x.5)
+    raised.0(%x.6 : py.Value, %exc.0 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.0)
+      jump ^done.0(%comp.1, %x.6)
+    done.0(%comp.2 : py.Completion, %x.7 : py.Value):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
-      %x.4 : py.Value = py.requireDefined(%x.5, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%x.7, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.4)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
   }
   func @s77_depth_margin_600.nest_tuple(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %n.1 : py.Value = py.undef("n")
       %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.1)
@@ -130,35 +152,53 @@ module s77_depth_margin_600 {
       %defaults.0 : py.Value = py.mkTuple(%n.5)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "nest_tuple", 0, 1, false, false, "n") ^propagate.0()
       %n.6 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %tuple.0 : py.Value = py.mkTuple
       %int.0 : py.Value = py.intLit(0)
       jump ^head.0(%tuple.0, %int.0)
     head.0(%x.5 : py.Value, %i.5 : py.Value):
-      %i.2 : py.Value = py.requireDefined(%i.5, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
-      %n.8 : py.Value = py.requireDefined(%n.6, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
-      %lt.0 : py.Value = py.lt(%i.2, %n.8) ^propagate.0()
-      %cond.0 : base.Bool = py.truthy(%lt.0) ^propagate.0()
-      branch(%cond.0) ^body.0() ^exit.0()
+      %i.2 : py.Value = py.requireDefined(%i.5, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0(%x.5)
+      %n.8 : py.Value = py.requireDefined(%n.6, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^raised.0(%x.5)
+      %lt.0 : py.Value = py.lt(%i.2, %n.8) ^raised.0(%x.5)
+      %cond.0 : base.Bool = py.truthy(%lt.0) ^raised.0(%x.5)
+      branch(%cond.0) ^body.0() ^normal.0()
     body.0():
-      %x.2 : py.Value = py.requireDefined(%x.5, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.2 : py.Value = py.requireDefined(%x.5, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^raised.0(%x.5)
       %tuple.1 : py.Value = py.mkTuple(%x.2)
-      %i.4 : py.Value = py.requireDefined(%i.5, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %i.4 : py.Value = py.requireDefined(%i.5, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0(%tuple.1)
       %int.1 : py.Value = py.intLit(1)
-      %add.0 : py.Value = py.add(%i.4, %int.1) ^propagate.0()
+      %add.0 : py.Value = py.add(%i.4, %int.1) ^raised.0(%tuple.1)
       jump ^head.0(%tuple.1, %add.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0, %x.5)
+    raised.0(%x.6 : py.Value, %exc.0 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.0)
+      jump ^done.0(%comp.1, %x.6)
+    done.0(%comp.2 : py.Completion, %x.7 : py.Value):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
-      %x.4 : py.Value = py.requireDefined(%x.5, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%x.7, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.4)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
   }
   func @|s77_depth_margin_600.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -197,6 +237,8 @@ module s77_depth_margin_600 {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "C.__init__", 0, 2, false, false, "self", "k") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %k.4 : py.Value = py.requireDefined(%k.2, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
       %gt.0 : py.Value = py.gt(%k.4, %int.0) ^propagate.0()

@@ -288,12 +288,12 @@ def freshVals (stem : Name) : (ts : List (TypeExpr env)) →
     return (#[d] ++ ds, .cons ⟨d.id⟩ vs)
 
 /-- Open the block `l`, taking fresh values of its parameters' types, each named after
-`stem`, and return them. -/
-def startBlock {ps : List (TypeExpr env)} (l : BlockRef env ps) (stem : Name := .str .base "v") :
-    m (Vals env ps) :=
+`stem`, and return them.  With `info`, the block carries that annotation. -/
+def startBlock {ps : List (TypeExpr env)} (l : BlockRef env ps) (stem : Name := .str .base "v")
+    (info : Option α := none) : m (Vals env ps) :=
   liftBuild do
     let (ds, vs) ← freshVals stem ps
-    Raw.startBlock l.label ds
+    Raw.startBlock l.label ds info
     return vs
 
 /-- Open the block `l`, which takes one value, and return it.  The value is named after `stem`

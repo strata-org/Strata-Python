@@ -1,6 +1,8 @@
 module p31_free_class {
   func @|p31_free_class.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p31_free_class")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p31_free_class", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -22,6 +24,8 @@ module p31_free_class {
       %C.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%C.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
@@ -44,6 +48,8 @@ module p31_free_class {
     #[py.bindings = [{name = "x", value = 2}, {name = "m", binding = "def"}]]
 
     entry.0(%x.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -82,6 +88,8 @@ module p31_free_class {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f.<locals>.C.m", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.1 : py.Value = py.requireDefined(%x.0, "x", "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.1)

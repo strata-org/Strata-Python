@@ -1,6 +1,8 @@
 module m_func_annotations {
   func @|m_func_annotations.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_func_annotations")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_func_annotations", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -140,6 +142,8 @@ module m_func_annotations {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "note", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %log.0 : py.Value = py.loadGlobal("m_func_annotations", "log") ^propagate.0()
       %append.0 : py.Value = py.attr(%log.0, "append") ^propagate.0()
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
@@ -161,6 +165,8 @@ module m_func_annotations {
       %defaults.0 : py.Value = py.mkTuple(%f.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "keys", 0, 1, false, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %note.0 : py.Value = py.loadGlobal("m_func_annotations", "note") ^propagate.0()
       %list.0 : py.Value = py.loadGlobal("m_func_annotations", "list") ^propagate.0()
       %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^propagate.0()
@@ -200,6 +206,8 @@ module m_func_annotations {
       %k.2 : py.Value = py.tupleGet(%bound.0, 2)
       %v.1 : py.Value = py.tupleGet(%bound.0, 3)
       %kw.1 : py.Value = py.tupleGet(%bound.0, 4)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -219,6 +227,8 @@ module m_func_annotations {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "plain", 0, 2, false, false, "x", "y") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %y.1 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.4)
       ret(%ret.0)
@@ -234,6 +244,8 @@ module m_func_annotations {
       %f.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%f.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "enclosing", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.loadGlobal("m_func_annotations", "int") ^propagate.0()
       %str.0 : py.Value = py.strLit("x")
       %T.2 : py.Value = py.requireDefined(%int.0, "T", "UnboundLocalError", "cannot access local variable 'T' where it is not associated with a value") ^propagate.0()
@@ -254,6 +266,8 @@ module m_func_annotations {
     #[py.bindings = [{name = "m", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -312,6 +326,8 @@ module m_func_annotations {
       %mid.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%mid.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.loadGlobal("m_func_annotations", "int") ^propagate.0()
       %set.0 : base.Unit = base.refSet[py.Value](%T.cell.0, %int.0)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_func_annotations.outer.mid, "mid", "m_func_annotations", %T.cell.0)
@@ -327,6 +343,8 @@ module m_func_annotations {
     #[py.bindings = [{name = "_C__T", value = "int"}, {name = "m", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -384,6 +402,8 @@ module m_func_annotations {
       %defaults.0 : py.Value = py.mkTuple(%a.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "a") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%a.4)
       ret(%ret.0)
@@ -399,6 +419,8 @@ module m_func_annotations {
       %defaults.0 : py.Value = py.mkTuple(%b.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "b") ^propagate.0()
       %b.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %b.4 : py.Value = py.requireDefined(%b.2, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%b.4)
       ret(%ret.0)
@@ -414,6 +436,8 @@ module m_func_annotations {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "scopes", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -429,6 +453,8 @@ module m_func_annotations {
       %defaults.0 : py.Value = py.mkTuple(%d.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "d") ^propagate.0()
       %d.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %d.4 : py.Value = py.requireDefined(%d.2, "d", "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%d.4)
       ret(%ret.0)
@@ -444,6 +470,8 @@ module m_func_annotations {
       %defaults.0 : py.Value = py.mkTuple(%c.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "c") ^propagate.0()
       %c.9 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %c.11 : py.Value = py.requireDefined(%c.9, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%c.11)
       ret(%ret.0)
@@ -463,6 +491,8 @@ module m_func_annotations {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "scopes_positional", 1, 2, false, false, "p", "q") ^propagate.0()
       %p.2 : py.Value = py.tupleGet(%bound.0, 0)
       %q.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -478,6 +508,8 @@ module m_func_annotations {
       %defaults.0 : py.Value = py.mkTuple(%e.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "e") ^propagate.0()
       %e.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %e.5 : py.Value = py.requireDefined(%e.2, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%e.5)
       ret(%ret.0)
@@ -493,6 +525,8 @@ module m_func_annotations {
       %defaults.0 : py.Value = py.mkTuple(%f.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%f.4)
       ret(%ret.0)
@@ -511,6 +545,8 @@ module m_func_annotations {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "scopes_keyword", 0, 0, false, true, "k") ^propagate.0()
       %k.2 : py.Value = py.tupleGet(%bound.0, 0)
       %kw.1 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -526,6 +562,8 @@ module m_func_annotations {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "enclosing.<locals>.f", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.4)
       ret(%ret.0)
@@ -549,6 +587,8 @@ module m_func_annotations {
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %_K__x.2 : py.Value = py.tupleGet(%bound.0, 1)
       %_K__y.2 : py.Value = py.tupleGet(%bound.0, 2)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -562,6 +602,8 @@ module m_func_annotations {
       %inner.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%inner.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer.<locals>.mid", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("x")
       %T.0 : py.Value = base.refGet[py.Value](%T.cell.0)
       %T.1 : py.Value = py.requireDefined(%T.0, "T", "NameError", "cannot access free variable 'T' where it is not associated with a value in enclosing scope") ^propagate.0()
@@ -587,6 +629,8 @@ module m_func_annotations {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "C.m", 0, 2, false, false, "self", "x") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %x.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -602,6 +646,8 @@ module m_func_annotations {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer.<locals>.mid.<locals>.inner", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)

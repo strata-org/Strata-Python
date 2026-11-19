@@ -1,0 +1,10 @@
+module
+  c: local (assigned)
+  function c
+    params: it
+    it: local (parameter, referenced)
+    n: local (assigned, referenced)
+    next: global implicit (referenced)
+    x: local (assigned, referenced)
+    ok: global implicit (referenced)
+    handle: global implicit (referenced)

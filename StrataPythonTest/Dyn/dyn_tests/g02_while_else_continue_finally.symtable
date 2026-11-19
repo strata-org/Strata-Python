@@ -1,0 +1,12 @@
+module top
+  b: local (assigned)
+  function b
+    KeyError: global implicit (referenced)
+    i: local (assigned, referenced)
+    log: global implicit (referenced)
+    n: local (parameter, referenced)
+    p: global implicit (referenced)
+    q: global implicit (referenced)
+    r: global implicit (referenced)
+    work: global implicit (referenced)
+qualnames: b

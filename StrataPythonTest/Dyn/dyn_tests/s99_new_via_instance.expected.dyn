@@ -1,6 +1,8 @@
 module s99_new_via_instance {
   func @|s99_new_via_instance.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s99_new_via_instance")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s99_new_via_instance", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -55,6 +57,8 @@ module s99_new_via_instance {
     #[py.bindings = [{name = "__new__", binding = "def"}, {name = "__init_subclass__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -89,6 +93,8 @@ module s99_new_via_instance {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -121,6 +127,8 @@ module s99_new_via_instance {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "C.__new__", 0, 1, false, false, "cls") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
+      jump ^start.0()
+    start.0():
       %object.0 : py.Value = py.loadGlobal("s99_new_via_instance", "object") ^propagate.0()
       %__new__.0 : py.Value = py.attr(%object.0, "__new__") ^propagate.0()
       %cls.3 : py.Value = base.refGet[py.Value](%cls.cell.0)
@@ -143,6 +151,8 @@ module s99_new_via_instance {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "C.__init_subclass__", 0, 1, false, false, "cls") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s99_new_via_instance", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("isc")
       %cls.3 : py.Value = base.refGet[py.Value](%cls.cell.0)

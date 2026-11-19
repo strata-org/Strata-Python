@@ -11,11 +11,13 @@ import StrataPython.ReadPython
 import StrataPython.Dyn.Translate
 import StrataDyn.DDM
 import StrataDyn.DDMRead
+import StrataDyn.Canonicalize
+import StrataPython.Dyn.Canonical
 import StrataDyn.Env.WF
 import StrataPython.Dyn.PySpec.Load
 import StrataPython.Dyn.Sem.Run
 
-/-! # The `dyn`, `pyspec` and `read` commands
+/-! # The `dyn`, `pyspec`, `run`, `canonical` and `read` commands
 
 `dyn FILE` translates a Python program with `PyTranslate.translate` and prints its
 diagnostics, then its module, with constants folded into their uses, or with `--full` each
@@ -39,6 +41,12 @@ Exit status: 0 if the set translated, 1 if it is rejected, 2 if PySpec fails.
 
 `run FILE [--fuel N]` translates `FILE` as module `__main__`, runs it with the Python semantics,
 and prints its trace (`StrataPython.Dyn.Sem.runModuleThen`).
+
+`canonical FILE` translates as `dyn FILE` does, puts every function in canonical form with
+`PyCanonical.runModule`, and prints the diagnostics and the module.  If some functions cannot
+be put in canonical form, the command prints one comment line for each of them, which says why.
+Then it prints the module as translated.  Exit status: 3 if a function cannot be put in
+canonical form, even if there are diagnostics; otherwise as for `dyn`.
 
 `read FILE` reads a printed Dyn module, such as a translator golden, against the Python
 environment with `Module.read`, and prints it again: folded, or with `--full` in full.  Exit
@@ -185,6 +193,42 @@ def runCommand : _root_.Command where
   callback := fun v flags => do
     let fuel := ((flags.getString "fuel").bind String.toNat?).getD 1000000000
     let code ← runRun v[0] fuel
+    unless code == 0 do IO.Process.exit code.toUInt8
+
+/-- Translate `path`, put every function in canonical form, and print the module with `opts`,
+returning the exit status. -/
+private def runCanonical (path : String) (opts : Strata.Dyn.PrintOptions) : IO UInt32 := do
+  let moduleName :=
+    if path.endsWith ".py" then (System.FilePath.mk path).fileStem.getD "main"
+    else (System.FilePath.mk (ionStem path)).fileName.getD "main"
+  let (stmts, src) ← match ← load path with
+    | .ok r => pure r
+    | .error m => IO.eprintln s!"pydyn canonical: {m}"; return 2
+  let fileMap := src.map Lean.FileMap.ofString
+  let r := translate moduleName stmts
+  for d in r.diagnostics do IO.println (formatDiagnostic fileMap d)
+  match PyCanonical.runModule r.module with
+  | .ok cm =>
+    IO.println (cm.module.format opts)
+    return if r.ok then 0 else 1
+  | .error fs =>
+    for f in fs do IO.println s!"-- not canonical: {f}"
+    IO.println (r.module.format opts)
+    return 3
+
+/-- The `canonical` subcommand. -/
+def canonicalCommand : _root_.Command where
+  name := "canonical"
+  args := [ "file" ]
+  flags := [fullFlag]
+  help := "Translate a Python program (a .py file, or a Python Ion file), put every function \
+    in canonical form, and print the diagnostics and the module. If a function cannot be put in \
+    canonical form, print why as a comment, and the module as translated. Exit status: 0 if it \
+    translated and every function was put in canonical form, 1 if there are diagnostics, 2 on a \
+    parse error, 3 if a function cannot be put in canonical form (even with diagnostics). \
+    PYTHON selects the interpreter that parses a .py file (default python3)."
+  callback := fun v flags => do
+    let code ← runCanonical v[0] (printOptions flags)
     unless code == 0 do IO.Process.exit code.toUInt8
 
 /-- Read and print the module in `path` with `opts`, returning the exit status. -/

@@ -1,6 +1,8 @@
 module s316_comprehension_order {
   func @|s316_comprehension_order.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s316_comprehension_order")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s316_comprehension_order", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -519,6 +521,8 @@ module s316_comprehension_order {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "note", 0, 1, false, false, "s") ^propagate.0()
       %s.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%s.cell.0, %s.2)
+      jump ^start.0()
+    start.0():
       %log.0 : py.Value = py.loadGlobal("s316_comprehension_order", "log") ^propagate.0()
       %s.3 : py.Value = base.refGet[py.Value](%s.cell.0)
       %s.4 : py.Value = py.requireDefined(%s.3, "s", "UnboundLocalError", "cannot access local variable 's' where it is not associated with a value") ^propagate.0()
@@ -538,6 +542,8 @@ module s316_comprehension_order {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -575,6 +581,8 @@ module s316_comprehension_order {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__hash__", binding = "def"}, {name = "__eq__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -616,6 +624,8 @@ module s316_comprehension_order {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "key", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %note.0 : py.Value = py.loadGlobal("s316_comprehension_order", "note") ^propagate.0()
       %str.0 : py.Value = py.strLit("key")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -644,6 +654,8 @@ module s316_comprehension_order {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "val", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %note.0 : py.Value = py.loadGlobal("s316_comprehension_order", "note") ^propagate.0()
       %str.0 : py.Value = py.strLit("val")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -661,6 +673,8 @@ module s316_comprehension_order {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "stop", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %StopIteration.0 : py.Value = py.loadGlobal("s316_comprehension_order", "StopIteration") ^propagate.0()
       %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
       jump ^propagate.0(%exc.0)
@@ -673,6 +687,8 @@ module s316_comprehension_order {
     #[py.bindings = [{name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -716,6 +732,8 @@ module s316_comprehension_order {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %n.6 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.6)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -741,6 +759,8 @@ module s316_comprehension_order {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %note.0 : py.Value = py.loadGlobal("s316_comprehension_order", "note") ^propagate.0()
       %str.0 : py.Value = py.strLit("iter")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -763,6 +783,8 @@ module s316_comprehension_order {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %i.0 : py.Value = py.attr(%self.4, "i") ^propagate.0()
@@ -813,6 +835,8 @@ module s316_comprehension_order {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %v.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%v.cell.0, %v.2)
+      jump ^start.0()
+    start.0():
       %v.3 : py.Value = base.refGet[py.Value](%v.cell.0)
       %v.4 : py.Value = py.requireDefined(%v.3, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -834,6 +858,8 @@ module s316_comprehension_order {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.__hash__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %note.0 : py.Value = py.loadGlobal("s316_comprehension_order", "note") ^propagate.0()
       %str.0 : py.Value = py.strLit("hash")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -862,6 +888,8 @@ module s316_comprehension_order {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %note.0 : py.Value = py.loadGlobal("s316_comprehension_order", "note") ^propagate.0()
       %str.0 : py.Value = py.strLit("eq")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -889,6 +917,8 @@ module s316_comprehension_order {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "BadIter.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
@@ -906,6 +936,8 @@ module s316_comprehension_order {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "BadIter.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %ValueError.0 : py.Value = py.loadGlobal("s316_comprehension_order", "ValueError") ^propagate.0()
       %str.0 : py.Value = py.strLit("next")
       %tuple.0 : py.Value = py.mkTuple(%str.0)

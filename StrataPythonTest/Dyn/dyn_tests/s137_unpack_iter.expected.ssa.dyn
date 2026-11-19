@@ -1,6 +1,8 @@
 module s137_unpack_iter {
   func @|s137_unpack_iter.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s137_unpack_iter")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -957,6 +959,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -994,6 +998,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1025,6 +1031,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "keys", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1056,6 +1064,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "keys", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1087,6 +1097,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__iter__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1118,6 +1130,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__getitem__", binding = "def"}, {name = "keys", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1152,6 +1166,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1189,6 +1205,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "keys", binding = "def"}, {name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1223,6 +1241,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__hash__", binding = "def"}, {name = "__eq__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1260,6 +1280,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "keys", binding = "def"}, {name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1298,6 +1320,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__call__", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1331,6 +1355,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1362,6 +1388,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__new__", binding = "def"}, {name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1396,6 +1424,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1427,6 +1457,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__call__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1458,6 +1490,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__call__", value = unit}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1489,6 +1523,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "s", binding = "def"}, {name = "c", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1547,6 +1583,8 @@ module s137_unpack_iter {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1576,6 +1614,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1607,6 +1647,8 @@ module s137_unpack_iter {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1635,6 +1677,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__new__", binding = "def"}, {name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1670,6 +1714,8 @@ module s137_unpack_iter {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1700,6 +1746,8 @@ module s137_unpack_iter {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1735,6 +1783,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__init__", 0, 2, false, false, "self", "n") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %n.6 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %i.0 : base.Unit = py.setAttr(%self.4, "i", %int.0) ^propagate.0()
@@ -1756,6 +1806,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
       ret(%ret.0)
@@ -1771,6 +1823,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %i.0 : py.Value = py.attr(%self.4, "i") ^propagate.0()
       %self.6 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -1810,6 +1864,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "G.__getitem__", 0, 2, false, false, "self", "i") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %i.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %i.4 : py.Value = py.requireDefined(%i.2, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(2)
       %gtE.0 : py.Value = py.gtE(%i.4, %int.0) ^propagate.0()
@@ -1837,6 +1893,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Bad.keys", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %AttributeError.0 : py.Value = py.loadGlobal("s137_unpack_iter", "AttributeError") ^propagate.0()
       %str.0 : py.Value = py.strLit("x")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1856,6 +1914,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.keys", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(5)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -1871,6 +1931,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "NI.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %TypeError.0 : py.Value = py.loadGlobal("s137_unpack_iter", "TypeError") ^propagate.0()
       %str.0 : py.Value = py.strLit("inner")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1894,6 +1956,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "G.__getitem__", 0, 2, false, false, "self", "k") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %KeyError.0 : py.Value = py.loadGlobal("s137_unpack_iter", "KeyError") ^propagate.0()
       %str.0 : py.Value = py.strLit("zz")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1913,6 +1977,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "G.keys", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("a")
       %list.0 : py.Value = py.mkList(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%list.0)
@@ -1929,6 +1995,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "KI.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %i.0 : base.Unit = py.setAttr(%self.4, "i", %int.0) ^propagate.0()
@@ -1947,6 +2015,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "KI.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
       ret(%ret.0)
@@ -1962,6 +2032,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "KI.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %i.0 : py.Value = py.attr(%self.4, "i") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
@@ -2003,6 +2075,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.keys", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %KI.0 : py.Value = py.loadGlobal("s137_unpack_iter", "KI") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -2025,6 +2099,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.__getitem__", 0, 2, false, false, "self", "k") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("get")
       %k.4 : py.Value = py.requireDefined(%k.2, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
@@ -2050,6 +2126,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "H.__init__", 0, 2, false, false, "self", "n") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %n.6 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %n.8 : py.Value = py.requireDefined(%n.6, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %n.9 : base.Unit = py.setAttr(%self.4, "n", %n.8) ^propagate.0()
@@ -2068,6 +2146,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "H.__hash__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("hash")
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -2095,6 +2175,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "H.__eq__", 0, 2, false, false, "self", "o") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("eq")
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -2123,6 +2205,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.__init__", 0, 2, false, false, "self", "ks") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %ks.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %ks.4 : py.Value = py.requireDefined(%ks.2, "ks", "UnboundLocalError", "cannot access local variable 'ks' where it is not associated with a value") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ks.5 : base.Unit = py.setAttr(%self.4, "ks", %ks.4) ^propagate.0()
@@ -2141,6 +2225,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.keys", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ks.0 : py.Value = py.attr(%self.4, "ks") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%ks.0)
@@ -2161,6 +2247,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.__getitem__", 0, 2, false, false, "self", "k") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("get")
       %k.4 : py.Value = py.requireDefined(%k.2, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
@@ -2186,6 +2274,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Meta.__call__", 0, 1, true, false, "cls") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
       %a.1 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("meta call")
       %len.0 : py.Value = py.loadGlobal("s137_unpack_iter", "len") ^propagate.0()
@@ -2226,6 +2316,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.__init__", 0, 2, false, false, "self", "x") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %x.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("init")
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
@@ -2251,6 +2343,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.__new__", 0, 2, false, false, "cls", "x") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
       %x.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("new")
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
@@ -2276,6 +2370,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.__init__", 0, 2, false, false, "self", "x") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %x.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("never")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -2296,6 +2392,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "C.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(3)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -2315,6 +2413,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "D.__call__", 0, 2, false, false, "self", "y") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %y.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %y.4 : py.Value = py.requireDefined(%y.2, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %add.0 : py.Value = py.add(%y.4, %int.0) ^propagate.0()
@@ -2332,6 +2432,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "F.s", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(2)
       %mult.0 : py.Value = py.mult(%x.4, %int.0) ^propagate.0()
@@ -2353,6 +2455,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "F.c", 0, 2, false, false, "cls", "x") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
       %x.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %cls.4 : py.Value = py.requireDefined(%cls.2, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()
       %__name__.0 : py.Value = py.attr(%cls.4, "__name__") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__name__.0)
@@ -2373,6 +2477,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "G.__init__", 0, 2, false, false, "self", "q") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %q.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %q.4 : py.Value = py.requireDefined(%q.2, "q", "UnboundLocalError", "cannot access local variable 'q' where it is not associated with a value") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %q.5 : base.Unit = py.setAttr(%self.4, "q", %q.4) ^propagate.0()
@@ -2391,6 +2497,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%cls.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "I.__new__", 0, 1, false, false, "cls") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %object.0 : py.Value = py.loadGlobal("s137_unpack_iter", "object") ^propagate.0()
       %__new__.0 : py.Value = py.attr(%object.0, "__new__") ^propagate.0()
       %D.0 : py.Value = py.loadGlobal("s137_unpack_iter", "D") ^propagate.0()
@@ -2411,6 +2519,8 @@ module s137_unpack_iter {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "I.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("I init never")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -2435,6 +2545,8 @@ module s137_unpack_iter {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "J.__init__", 0, 2, false, false, "self", "a") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %a.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("J init")
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()

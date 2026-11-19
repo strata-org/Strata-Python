@@ -1,6 +1,8 @@
 module tc02_arithmetic {
   func @|tc02_arithmetic.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("tc02_arithmetic")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("tc02_arithmetic", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -28,6 +30,8 @@ module tc02_arithmetic {
       %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
       %add.0 : py.Value = py.add(%int.0, %int.1) ^propagate.0()

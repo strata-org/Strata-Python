@@ -1,6 +1,8 @@
 module m_class_namespace {
   func @|m_class_namespace.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_class_namespace")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_class_namespace", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -54,6 +56,8 @@ module m_class_namespace {
     #[py.bindings = [{name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -86,6 +90,8 @@ module m_class_namespace {
     #[py.bindings = [{name = "__prepare__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -130,6 +136,8 @@ module m_class_namespace {
     #[py.bindings = [{name = "y", value = "x"}, {name = "z", value = "y"}, {name = "z", binding = "del"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -225,6 +233,8 @@ module m_class_namespace {
       %D.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%D.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(2)
       %set.0 : base.Unit = base.refSet[py.Value](%v.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
@@ -258,6 +268,8 @@ module m_class_namespace {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %key.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%key.cell.0, %key.2)
+      jump ^start.0()
+    start.0():
       %dict.0 : py.Value = py.loadGlobal("m_class_namespace", "dict") ^propagate.0()
       %__getitem__.0 : py.Value = py.attr(%dict.0, "__getitem__") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -292,6 +304,8 @@ module m_class_namespace {
       %set.1 : base.Unit = base.refSet[py.Value](%name.cell.0, %name.2)
       %bases.2 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%bases.cell.0, %bases.2)
+      jump ^start.0()
+    start.0():
       %Ns.0 : py.Value = py.loadGlobal("m_class_namespace", "Ns") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -308,6 +322,8 @@ module m_class_namespace {
     #[py.bindings = [{name = "w", value = "v"}]]
 
     entry.0(%v.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")

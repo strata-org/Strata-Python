@@ -1,6 +1,8 @@
 module lib_max_min_key {
   func @|lib_max_min_key.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_max_min_key")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_max_min_key", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -171,6 +173,8 @@ module lib_max_min_key {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -205,6 +209,8 @@ module lib_max_min_key {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -242,6 +248,8 @@ module lib_max_min_key {
     #[py.bindings = [{name = "__call__", value = {call = "staticmethod", args = ["sum"], keywords = []}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -293,6 +301,8 @@ module lib_max_min_key {
     #[py.bindings = [{name = "total", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -333,6 +343,8 @@ module lib_max_min_key {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %n.6 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.6)
+      jump ^start.0()
+    start.0():
       %n.7 : py.Value = base.refGet[py.Value](%n.cell.0)
       %n.8 : py.Value = py.requireDefined(%n.7, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -354,6 +366,8 @@ module lib_max_min_key {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Countdown.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %Down.0 : py.Value = py.loadGlobal("lib_max_min_key", "Down") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -381,6 +395,8 @@ module lib_max_min_key {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %n.6 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.6)
+      jump ^start.0()
+    start.0():
       %n.7 : py.Value = base.refGet[py.Value](%n.cell.0)
       %n.8 : py.Value = py.requireDefined(%n.7, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -402,6 +418,8 @@ module lib_max_min_key {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Down.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
@@ -419,6 +437,8 @@ module lib_max_min_key {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Down.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %n.2 : py.Value = py.attr(%self.4, "n") ^propagate.0()
@@ -462,6 +482,8 @@ module lib_max_min_key {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %x.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %sum.0 : py.Value = py.loadGlobal("lib_max_min_key", "sum") ^propagate.0()
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()

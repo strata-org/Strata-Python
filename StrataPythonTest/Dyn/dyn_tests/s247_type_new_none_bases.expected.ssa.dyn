@@ -1,6 +1,8 @@
 module s247_type_new_none_bases {
   func @|s247_type_new_none_bases.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s247_type_new_none_bases")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s247_type_new_none_bases", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)

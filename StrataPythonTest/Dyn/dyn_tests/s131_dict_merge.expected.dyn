@@ -1,6 +1,10 @@
 module s131_dict_merge {
   func @|s131_dict_merge.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s131_dict_merge")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s131_dict_merge", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -184,12 +188,26 @@ module s131_dict_merge {
       jump ^unwind.0(%exc.0)
     unwind.0(%exc.2 : py.Value):
       %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.2)
+      jump ^raised.0(%exc.2)
     join.0():
       jump ^head.0()
     stop.0(%exc.3 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.3)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.3)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.3)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.4 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.4)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %print.5 : py.Value = py.loadGlobal("s131_dict_merge", "print") ^catch.1()
       %tuple.19 : py.Value = py.mkTuple
@@ -205,14 +223,14 @@ module s131_dict_merge {
       %merge.3 : py.Value = py.dictMerge(%print.5, %merge.2, %call.15) ^catch.1()
       %call.16 : py.Value = py.call(%print.5, %tuple.19, %merge.3) ^catch.1()
       jump ^join.1()
-    catch.1(%exc.4 : py.Value):
-      %prev.1 : py.Value = py.pushExcInfo(%exc.4)
+    catch.1(%exc.5 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.5)
       %TypeError.1 : py.Value = py.loadGlobal("s131_dict_merge", "TypeError") ^unwind.1()
-      %match.1 : base.Bool = py.excMatch(%exc.4, %TypeError.1) ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.5, %TypeError.1) ^unwind.1()
       branch(%match.1) ^except.1() ^next.1()
     except.1():
       %e.cell.3 : base.Ref(py.Value) = py.globalCell("s131_dict_merge", "e")
-      %set.15 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.4)
+      %set.15 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.5)
       %print.6 : py.Value = py.loadGlobal("s131_dict_merge", "print") ^clear.1()
       %e.3 : py.Value = py.loadGlobal("s131_dict_merge", "e") ^clear.1()
       %args.1 : py.Value = py.attr(%e.3, "args") ^clear.1()
@@ -226,29 +244,31 @@ module s131_dict_merge {
       %e.cell.4 : base.Ref(py.Value) = py.globalCell("s131_dict_merge", "e")
       %set.16 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.4)
       jump ^join.1()
-    clear.1(%exc.5 : py.Value):
+    clear.1(%exc.6 : py.Value):
       %e.5 : py.Value = py.undef("e")
       %e.cell.5 : base.Ref(py.Value) = py.globalCell("s131_dict_merge", "e")
       %set.17 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
-      jump ^unwind.1(%exc.5)
+      jump ^unwind.1(%exc.6)
     next.1():
-      jump ^unwind.1(%exc.4)
-    unwind.1(%exc.6 : py.Value):
+      jump ^unwind.1(%exc.5)
+    unwind.1(%exc.7 : py.Value):
       %pop.3 : base.Unit = py.popExcept(%prev.1)
-      jump ^propagate.0(%exc.6)
+      jump ^propagate.0(%exc.7)
     join.1():
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.7 : py.Value):
-      %exc.8 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.7)
-      ret(%exc.8)
+    propagate.0(%exc.8 : py.Value):
+      %exc.9 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.8)
+      ret(%exc.9)
   }
   func @|s131_dict_merge.M.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
     #[py.bindings = [{name = "keys", binding = "def"}, {name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -283,6 +303,8 @@ module s131_dict_merge {
     #[py.bindings = [{name = "__iter__", binding = "def"}, {name = "__init__", binding = "def"}, {name = "__next__", binding = "def"}, {name = "__length_hint__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -323,6 +345,8 @@ module s131_dict_merge {
     #[py.bindings = [{name = "keys", binding = "def"}, {name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -360,6 +384,8 @@ module s131_dict_merge {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 0, false, true) ^propagate.0()
       %kw.1 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%kw.cell.0, %kw.1)
+      jump ^start.0()
+    start.0():
       %kw.2 : py.Value = base.refGet[py.Value](%kw.cell.0)
       %kw.3 : py.Value = py.requireDefined(%kw.2, "kw", "UnboundLocalError", "cannot access local variable 'kw' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%kw.3)
@@ -373,6 +399,8 @@ module s131_dict_merge {
     #[py.bindings = [{name = "keys", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -403,6 +431,8 @@ module s131_dict_merge {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s131_dict_merge", "print") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -419,6 +449,8 @@ module s131_dict_merge {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %dict.0 : py.Value = py.mkDict ^propagate.0()
       %int.0 : py.Value = py.intLit(5)
       %update.0 : py.Value = py.dictUpdate(%dict.0, %int.0) ^propagate.0()
@@ -432,6 +464,8 @@ module s131_dict_merge {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s131_dict_merge", "print") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -451,6 +485,8 @@ module s131_dict_merge {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s131_dict_merge", "print") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -479,6 +515,8 @@ module s131_dict_merge {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.keys", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s131_dict_merge", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("keys")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -507,6 +545,8 @@ module s131_dict_merge {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s131_dict_merge", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("getitem")
       %k.3 : py.Value = base.refGet[py.Value](%k.cell.0)
@@ -533,6 +573,8 @@ module s131_dict_merge {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "KI.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s131_dict_merge", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("KI.iter")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -555,6 +597,8 @@ module s131_dict_merge {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "KI.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -575,6 +619,8 @@ module s131_dict_merge {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "KI.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %i.0 : py.Value = py.attr(%self.4, "i") ^propagate.0()
@@ -627,6 +673,8 @@ module s131_dict_merge {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "KI.__length_hint__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s131_dict_merge", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("KI.hint")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -648,6 +696,8 @@ module s131_dict_merge {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M2.keys", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s131_dict_merge", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("keys2")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -677,6 +727,8 @@ module s131_dict_merge {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s131_dict_merge", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("getitem")
       %k.3 : py.Value = base.refGet[py.Value](%k.cell.0)
@@ -700,6 +752,8 @@ module s131_dict_merge {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Bad.keys", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(5)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)

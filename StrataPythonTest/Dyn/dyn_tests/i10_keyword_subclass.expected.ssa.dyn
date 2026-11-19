@@ -1,6 +1,8 @@
 module i10_keyword_subclass {
   func @|i10_keyword_subclass.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("i10_keyword_subclass")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i10_keyword_subclass", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -104,6 +106,8 @@ module i10_keyword_subclass {
     #[py.bindings = [{name = "__hash__", value = "str.__hash__"}, {name = "__eq__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -148,6 +152,8 @@ module i10_keyword_subclass {
     #[py.bindings = [{name = "__hash__", binding = "def"}, {name = "__eq__", value = "str.__eq__"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -194,6 +200,8 @@ module i10_keyword_subclass {
       %defaults.0 : py.Value = py.mkTuple(%p.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "p") ^propagate.0()
       %p.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %p.4 : py.Value = py.requireDefined(%p.2, "p", "UnboundLocalError", "cannot access local variable 'p' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%p.4)
       ret(%ret.0)
@@ -213,6 +221,8 @@ module i10_keyword_subclass {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "RaisingEq.__eq__", 0, 2, false, false, "self", "other") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %RuntimeError.0 : py.Value = py.loadGlobal("i10_keyword_subclass", "RuntimeError") ^propagate.0()
       %str.0 : py.Value = py.strLit("raised by __eq__ during argument binding")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -232,6 +242,8 @@ module i10_keyword_subclass {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "OtherHash.__hash__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(12345)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)

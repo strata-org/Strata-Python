@@ -1,6 +1,8 @@
 module m_decorators {
   func @|m_decorators.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_decorators")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_decorators", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -57,6 +59,8 @@ module m_decorators {
       %defaults.0 : py.Value = py.mkTuple(%fn.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "trace", 0, 1, false, false, "fn") ^propagate.0()
       %fn.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %fn.4 : py.Value = py.requireDefined(%fn.2, "fn", "UnboundLocalError", "cannot access local variable 'fn' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%fn.4)
       ret(%ret.0)
@@ -72,6 +76,8 @@ module m_decorators {
       %defaults.0 : py.Value = py.mkTuple(%name.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "tag", 0, 1, false, false, "name") ^propagate.0()
       %name.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %trace.0 : py.Value = py.loadGlobal("m_decorators", "trace") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%trace.0)
       ret(%ret.0)
@@ -99,6 +105,8 @@ module m_decorators {
       %b.1 : py.Value = py.tupleGet(%bound.0, 1)
       %c.14 : py.Value = py.tupleGet(%bound.0, 2)
       %d.1 : py.Value = py.tupleGet(%bound.0, 3)
+      jump ^start.0()
+    start.0():
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.3 : py.Value = py.requireDefined(%b.1, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %c.17 : py.Value = py.requireDefined(%c.14, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
@@ -121,6 +129,8 @@ module m_decorators {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer", 0, 1, false, false, "n") ^propagate.0()
       %n.5 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.5)
+      jump ^start.0()
+    start.0():
       %n.6 : py.Value = base.refGet[py.Value](%n.cell.0)
       %n.7 : py.Value = py.requireDefined(%n.6, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
@@ -144,6 +154,8 @@ module m_decorators {
       %defaults.0 : py.Value = py.mkTuple(%log.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "order", 0, 1, false, false, "log") ^propagate.0()
       %log.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %log.4 : py.Value = py.requireDefined(%log.2, "log", "UnboundLocalError", "cannot access local variable 'log' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %tuple.0 : py.Value = py.mkTuple(%int.0)
@@ -188,6 +200,8 @@ module m_decorators {
       %defaults.0 : py.Value = py.mkTuple(%x.default.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer.<locals>.g", 0, 1, false, false, "x") ^propagate.0()
       %x.1 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %x.3 : py.Value = py.requireDefined(%x.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %n.1 : py.Value = base.refGet[py.Value](%n.cell.0)
       %n.2 : py.Value = py.requireDefined(%n.1, "n", "NameError", "cannot access free variable 'n' where it is not associated with a value in enclosing scope") ^propagate.0()
@@ -214,6 +228,8 @@ module m_decorators {
       %a.1 : py.Value = py.tupleGet(%bound.0, 0)
       %b.1 : py.Value = py.tupleGet(%bound.0, 1)
       %c.13 : py.Value = py.tupleGet(%bound.0, 2)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)

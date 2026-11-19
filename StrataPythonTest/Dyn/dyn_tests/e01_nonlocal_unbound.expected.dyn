@@ -2,6 +2,8 @@
 module e01_nonlocal_unbound {
   func @|e01_nonlocal_unbound.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("e01_nonlocal_unbound")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e01_nonlocal_unbound", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -21,6 +23,8 @@ module e01_nonlocal_unbound {
       %g.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%g.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %g.1 : py.Value = base.refGet[py.Value](%g.cell.0)
       %g.2 : py.Value = py.requireDefined(%g.1, "g", "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%g.2)

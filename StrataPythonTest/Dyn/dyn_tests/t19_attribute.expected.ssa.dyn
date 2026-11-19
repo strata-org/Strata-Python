@@ -1,6 +1,8 @@
 module t19_attribute {
   func @|t19_attribute.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("t19_attribute")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t19_attribute", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -70,6 +72,8 @@ module t19_attribute {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -101,6 +105,8 @@ module t19_attribute {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -132,6 +138,8 @@ module t19_attribute {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -166,6 +174,8 @@ module t19_attribute {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Config.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %bool.0 : py.Value = py.boolLit(false)
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %debug.0 : base.Unit = py.setAttr(%self.4, "debug", %bool.0) ^propagate.0()
@@ -187,6 +197,8 @@ module t19_attribute {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Inner.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(42)
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %value.0 : base.Unit = py.setAttr(%self.4, "value", %int.0) ^propagate.0()
@@ -205,6 +217,8 @@ module t19_attribute {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Outer.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %Inner.0 : py.Value = py.loadGlobal("t19_attribute", "Inner") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs

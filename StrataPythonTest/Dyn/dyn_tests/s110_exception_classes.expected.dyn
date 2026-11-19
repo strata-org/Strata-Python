@@ -1,6 +1,8 @@
 module s110_exception_classes {
   func @|s110_exception_classes.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s110_exception_classes")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s110_exception_classes", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -440,6 +442,8 @@ module s110_exception_classes {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -468,6 +472,8 @@ module s110_exception_classes {
     #[py.bindings = [{name = "__enter__", binding = "def"}, {name = "__exit__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -506,6 +512,8 @@ module s110_exception_classes {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "C.__enter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s110_exception_classes", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("enter")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -542,6 +550,8 @@ module s110_exception_classes {
       %set.2 : base.Unit = base.refSet[py.Value](%v.cell.0, %v.2)
       %tb.2 : py.Value = py.tupleGet(%bound.0, 3)
       %set.3 : base.Unit = base.refSet[py.Value](%tb.cell.0, %tb.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s110_exception_classes", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("exit")
       %t.3 : py.Value = base.refGet[py.Value](%t.cell.0)

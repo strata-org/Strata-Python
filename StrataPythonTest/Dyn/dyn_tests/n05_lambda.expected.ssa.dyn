@@ -1,6 +1,8 @@
 module n05_lambda {
   func @|n05_lambda.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("n05_lambda")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("n05_lambda", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -37,6 +39,8 @@ module n05_lambda {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 2, false, false, "x", "y") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %y.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %y.4 : py.Value = py.requireDefined(%y.2, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
       %add.0 : py.Value = py.add(%x.4, %y.4) ^propagate.0()

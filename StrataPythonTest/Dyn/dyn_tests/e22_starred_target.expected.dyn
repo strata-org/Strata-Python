@@ -5,6 +5,8 @@
 module e22_starred_target {
   func @|e22_starred_target.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("e22_starred_target")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e22_starred_target", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)

@@ -1,6 +1,8 @@
 module e13_walrus_comprehension_iterable {
   func @|e13_walrus_comprehension_iterable.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("e13_walrus_comprehension_iterable")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e13_walrus_comprehension_iterable", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -22,6 +24,8 @@ module e13_walrus_comprehension_iterable {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
       %list.0 : py.Value = py.mkList(%int.0, %int.1)

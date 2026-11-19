@@ -1,6 +1,8 @@
 module tc11_class_field {
   func @|tc11_class_field.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("tc11_class_field")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("tc11_class_field", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -28,6 +30,8 @@ module tc11_class_field {
       %name.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%name.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %myservice.0 : py.Value = py.loadGlobal("tc11_class_field", "myservice") ^propagate.0()
       %Client.0 : py.Value = py.attr(%myservice.0, "Client") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple

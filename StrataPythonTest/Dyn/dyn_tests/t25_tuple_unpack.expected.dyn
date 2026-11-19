@@ -1,6 +1,8 @@
 module t25_tuple_unpack {
   func @|t25_tuple_unpack.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("t25_tuple_unpack")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t25_tuple_unpack", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -49,6 +51,8 @@ module t25_tuple_unpack {
       ret(%exc.1)
   }
   func @t25_tuple_unpack.process_pairs(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %items.0 : py.Value = py.undef("items")
       %items.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%items.0)
@@ -61,38 +65,56 @@ module t25_tuple_unpack {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "process_pairs", 0, 1, false, false, "items") ^propagate.0()
       %items.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%items.cell.0, %items.2)
+      jump ^start.0()
+    start.0():
       %items.3 : py.Value = base.refGet[py.Value](%items.cell.0)
       %items.4 : py.Value = py.requireDefined(%items.3, "items", "UnboundLocalError", "cannot access local variable 'items' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%items.4) ^propagate.0()
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
-      %unpack.0 : py.Value = py.unpackSeq(%item.0, 2) ^propagate.0()
+      %unpack.0 : py.Value = py.unpackSeq(%item.0, 2) ^raised.0()
       %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
       %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %elem.0)
       %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
       %set.2 : base.Unit = base.refSet[py.Value](%v.cell.0, %elem.1)
-      %print.0 : py.Value = py.loadGlobal("t25_tuple_unpack", "print") ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("t25_tuple_unpack", "print") ^raised.0()
       %k.1 : py.Value = base.refGet[py.Value](%k.cell.0)
-      %k.2 : py.Value = py.requireDefined(%k.1, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
+      %k.2 : py.Value = py.requireDefined(%k.1, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^raised.0()
       %v.1 : py.Value = base.refGet[py.Value](%v.cell.0)
-      %v.2 : py.Value = py.requireDefined(%v.1, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
+      %v.2 : py.Value = py.requireDefined(%v.1, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^raised.0()
       %tuple.0 : py.Value = py.mkTuple(%k.2, %v.2)
       %kwargs.1 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @t25_tuple_unpack.use_enumerate(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %names.0 : py.Value = py.undef("names")
       %names.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%names.0)
@@ -105,6 +127,8 @@ module t25_tuple_unpack {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "use_enumerate", 0, 1, false, false, "names") ^propagate.0()
       %names.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%names.cell.0, %names.2)
+      jump ^start.0()
+    start.0():
       %enumerate.0 : py.Value = py.loadGlobal("t25_tuple_unpack", "enumerate") ^propagate.0()
       %names.3 : py.Value = base.refGet[py.Value](%names.cell.0)
       %names.4 : py.Value = py.requireDefined(%names.3, "names", "UnboundLocalError", "cannot access local variable 'names' where it is not associated with a value") ^propagate.0()
@@ -115,32 +139,48 @@ module t25_tuple_unpack {
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
-      %unpack.0 : py.Value = py.unpackSeq(%item.0, 2) ^propagate.0()
+      %unpack.0 : py.Value = py.unpackSeq(%item.0, 2) ^raised.0()
       %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
       %set.1 : base.Unit = base.refSet[py.Value](%i.cell.0, %elem.0)
       %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
       %set.2 : base.Unit = base.refSet[py.Value](%name.cell.0, %elem.1)
-      %print.0 : py.Value = py.loadGlobal("t25_tuple_unpack", "print") ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("t25_tuple_unpack", "print") ^raised.0()
       %i.3 : py.Value = base.refGet[py.Value](%i.cell.0)
-      %i.4 : py.Value = py.requireDefined(%i.3, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %i.4 : py.Value = py.requireDefined(%i.3, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0()
       %name.3 : py.Value = base.refGet[py.Value](%name.cell.0)
-      %name.5 : py.Value = py.requireDefined(%name.3, "name", "UnboundLocalError", "cannot access local variable 'name' where it is not associated with a value") ^propagate.0()
+      %name.5 : py.Value = py.requireDefined(%name.3, "name", "UnboundLocalError", "cannot access local variable 'name' where it is not associated with a value") ^raised.0()
       %tuple.1 : py.Value = py.mkTuple(%i.4, %name.5)
       %kwargs.2 : py.Value = py.mkKwargs
-      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.2) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @t25_tuple_unpack.dict_iteration(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %d.0 : py.Value = py.undef("d")
       %d.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%d.0)
@@ -153,6 +193,8 @@ module t25_tuple_unpack {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "dict_iteration", 0, 1, false, false, "d") ^propagate.0()
       %d.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%d.cell.0, %d.2)
+      jump ^start.0()
+    start.0():
       %d.3 : py.Value = base.refGet[py.Value](%d.cell.0)
       %d.4 : py.Value = py.requireDefined(%d.3, "d", "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
       %items.0 : py.Value = py.attr(%d.4, "items") ^propagate.0()
@@ -163,30 +205,44 @@ module t25_tuple_unpack {
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
-      %unpack.0 : py.Value = py.unpackSeq(%item.0, 2) ^propagate.0()
+      %unpack.0 : py.Value = py.unpackSeq(%item.0, 2) ^raised.0()
       %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
       %set.1 : base.Unit = base.refSet[py.Value](%key.cell.0, %elem.0)
       %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
       %set.2 : base.Unit = base.refSet[py.Value](%value.cell.0, %elem.1)
-      %print.0 : py.Value = py.loadGlobal("t25_tuple_unpack", "print") ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("t25_tuple_unpack", "print") ^raised.0()
       %key.1 : py.Value = base.refGet[py.Value](%key.cell.0)
-      %key.2 : py.Value = py.requireDefined(%key.1, "key", "UnboundLocalError", "cannot access local variable 'key' where it is not associated with a value") ^propagate.0()
+      %key.2 : py.Value = py.requireDefined(%key.1, "key", "UnboundLocalError", "cannot access local variable 'key' where it is not associated with a value") ^raised.0()
       %value.1 : py.Value = base.refGet[py.Value](%value.cell.0)
-      %value.2 : py.Value = py.requireDefined(%value.1, "value", "UnboundLocalError", "cannot access local variable 'value' where it is not associated with a value") ^propagate.0()
+      %value.2 : py.Value = py.requireDefined(%value.1, "value", "UnboundLocalError", "cannot access local variable 'value' where it is not associated with a value") ^raised.0()
       %tuple.1 : py.Value = py.mkTuple(%key.2, %value.2)
       %kwargs.2 : py.Value = py.mkKwargs
-      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.2) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @t25_tuple_unpack.tuple_assign(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -202,6 +258,8 @@ module t25_tuple_unpack {
       %z.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%z.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "tuple_assign", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
       %tuple.0 : py.Value = py.mkTuple(%int.0, %int.1)

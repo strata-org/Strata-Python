@@ -1,6 +1,8 @@
 module fw03_with_in_except {
   func @|fw03_with_in_except.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("fw03_with_in_except")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("fw03_with_in_except", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -48,6 +50,8 @@ module fw03_with_in_except {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "note", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %log.0 : py.Value = py.loadGlobal("fw03_with_in_except", "log") ^propagate.0()
       %append.0 : py.Value = py.attr(%log.0, "append") ^propagate.0()
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
@@ -66,6 +70,8 @@ module fw03_with_in_except {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__enter__", binding = "def"}, {name = "__exit__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -102,6 +108,8 @@ module fw03_with_in_except {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "return_in_clause", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %KeyError.0 : py.Value = py.loadGlobal("fw03_with_in_except", "KeyError") ^catch.0()
       %str.0 : py.Value = py.strLit("clause")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -162,6 +170,8 @@ module fw03_with_in_except {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "after_suppress", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %KeyError.0 : py.Value = py.loadGlobal("fw03_with_in_except", "KeyError") ^catch.0()
       %str.0 : py.Value = py.strLit("clause")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -235,6 +245,8 @@ module fw03_with_in_except {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "bare_raise_in_with", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %KeyError.0 : py.Value = py.loadGlobal("fw03_with_in_except", "KeyError") ^catch.0()
       %str.0 : py.Value = py.strLit("clause")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -300,6 +312,8 @@ module fw03_with_in_except {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Ctx.__init__", 0, 2, false, false, "self", "suppress") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %suppress.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %suppress.4 : py.Value = py.requireDefined(%suppress.2, "suppress", "UnboundLocalError", "cannot access local variable 'suppress' where it is not associated with a value") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %suppress.5 : base.Unit = py.setAttr(%self.4, "suppress", %suppress.4) ^propagate.0()
@@ -318,6 +332,8 @@ module fw03_with_in_except {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Ctx.__enter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
       ret(%ret.0)
@@ -345,6 +361,8 @@ module fw03_with_in_except {
       %t.2 : py.Value = py.tupleGet(%bound.0, 1)
       %v.2 : py.Value = py.tupleGet(%bound.0, 2)
       %tb.2 : py.Value = py.tupleGet(%bound.0, 3)
+      jump ^start.0()
+    start.0():
       %note.0 : py.Value = py.loadGlobal("fw03_with_in_except", "note") ^propagate.0()
       %v.4 : py.Value = py.requireDefined(%v.2, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%v.4)

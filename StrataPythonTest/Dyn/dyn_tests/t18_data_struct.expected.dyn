@@ -1,6 +1,8 @@
 module t18_data_struct {
   func @|t18_data_struct.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("t18_data_struct")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t18_data_struct", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)

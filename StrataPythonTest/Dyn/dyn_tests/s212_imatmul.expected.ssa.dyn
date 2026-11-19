@@ -1,6 +1,8 @@
 module s212_imatmul {
   func @|s212_imatmul.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s212_imatmul")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s212_imatmul", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -83,6 +85,8 @@ module s212_imatmul {
     #[py.bindings = [{name = "__imatmul__", binding = "def"}, {name = "__matmul__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -117,6 +121,8 @@ module s212_imatmul {
     #[py.bindings = [{name = "__imatmul__", binding = "def"}, {name = "__matmul__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -151,6 +157,8 @@ module s212_imatmul {
     #[py.bindings = [{name = "__imatmul__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -189,6 +197,8 @@ module s212_imatmul {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.__imatmul__", 0, 2, false, false, "self", "o") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("imm")
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
       ret(%ret.0)
@@ -208,6 +218,8 @@ module s212_imatmul {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.__matmul__", 0, 2, false, false, "self", "o") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("mm")
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
       ret(%ret.0)
@@ -227,6 +239,8 @@ module s212_imatmul {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "N.__imatmul__", 0, 2, false, false, "self", "o") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %NotImplemented.0 : py.Value = py.loadGlobal("s212_imatmul", "NotImplemented") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%NotImplemented.0)
       ret(%ret.0)
@@ -246,6 +260,8 @@ module s212_imatmul {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "N.__matmul__", 0, 2, false, false, "self", "o") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("mm")
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
       ret(%ret.0)
@@ -265,6 +281,8 @@ module s212_imatmul {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "O.__imatmul__", 0, 2, false, false, "self", "o") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("only imm")
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
       ret(%ret.0)

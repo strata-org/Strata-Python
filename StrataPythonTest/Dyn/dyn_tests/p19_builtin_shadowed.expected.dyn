@@ -1,6 +1,8 @@
 module p19_builtin_shadowed {
   func @|p19_builtin_shadowed.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p19_builtin_shadowed")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p19_builtin_shadowed", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -41,6 +43,8 @@ module p19_builtin_shadowed {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -57,6 +61,8 @@ module p19_builtin_shadowed {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %len.0 : py.Value = py.loadGlobal("p19_builtin_shadowed", "len") ^propagate.0()
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()

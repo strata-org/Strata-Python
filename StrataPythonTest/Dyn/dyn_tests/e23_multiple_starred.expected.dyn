@@ -4,6 +4,8 @@
 module e23_multiple_starred {
   func @|e23_multiple_starred.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("e23_multiple_starred")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e23_multiple_starred", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)

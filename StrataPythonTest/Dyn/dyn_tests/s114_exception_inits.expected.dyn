@@ -1,6 +1,8 @@
 module s114_exception_inits {
   func @|s114_exception_inits.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s114_exception_inits")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s114_exception_inits", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -647,6 +649,8 @@ module s114_exception_inits {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -675,6 +679,8 @@ module s114_exception_inits {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -703,6 +709,8 @@ module s114_exception_inits {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -732,6 +740,8 @@ module s114_exception_inits {
     #[py.bindings = [{name = "__setattr__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -764,6 +774,8 @@ module s114_exception_inits {
       %B.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%B.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "t", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|s114_exception_inits.t.B.<body>|, "<body>", "s114_exception_inits")
       %str.0 : py.Value = py.strLit("B")
@@ -799,6 +811,8 @@ module s114_exception_inits {
       %set.1 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.8)
       %v.2 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%v.cell.0, %v.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s114_exception_inits", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("setattr")
       %n.10 : py.Value = base.refGet[py.Value](%n.cell.0)
@@ -830,6 +844,8 @@ module s114_exception_inits {
     #[py.bindings = [{name = "__module__", value = {str = "builtins"}}, {name = "__new__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -868,6 +884,8 @@ module s114_exception_inits {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "t.<locals>.B.__new__", 0, 1, false, false, "cls") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(5)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)

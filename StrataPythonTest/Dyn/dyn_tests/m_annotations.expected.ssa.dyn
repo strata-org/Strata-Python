@@ -1,6 +1,8 @@
 module m_annotations {
   func @|m_annotations.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_annotations")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_annotations", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -86,6 +88,8 @@ module m_annotations {
     #[py.fields = [{name = "x", type = "int"}, {name = "y", type = "int", default = 0}, {name = "_P__z", type = "str", default = {str = ""}}, {name = "w", type = "float", default = 0.0, conditional = true}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -228,8 +232,11 @@ module m_annotations {
   func @|m_annotations.R.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = [{name = "a", type = "int", default = "i", conditional = true}]]
     #[py.bindings = [{name = "i", binding = "for", conditional = true}]]
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -278,55 +285,71 @@ module m_annotations {
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %str.9 : py.Value = py.strLit("i")
-      %store.4 : base.Unit = py.setItem(%ns.0, %str.9, %item.0) ^propagate.0()
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.9, %item.0) ^raised.0()
       %str.10 : py.Value = py.strLit("i")
       %i.0 : py.Value = py.undef("i")
-      %i.1 : py.Value = py.getOptionalItem(%ns.0, %str.10, %i.0) ^propagate.0()
+      %i.1 : py.Value = py.getOptionalItem(%ns.0, %str.10, %i.0) ^raised.0()
       %found.3 : base.Bool = py.isDefined(%i.1)
       branch(%found.3) ^join.2(%i.1) ^absent.2()
     absent.2():
-      %i.2 : py.Value = py.loadGlobal("m_annotations", "i") ^propagate.0()
+      %i.2 : py.Value = py.loadGlobal("m_annotations", "i") ^raised.0()
       jump ^join.2(%i.2)
     join.2(%i.3 : py.Value):
       %str.11 : py.Value = py.strLit("a")
-      %store.5 : base.Unit = py.setItem(%ns.0, %str.11, %i.3) ^propagate.0()
+      %store.5 : base.Unit = py.setItem(%ns.0, %str.11, %i.3) ^raised.0()
       %str.12 : py.Value = py.strLit("int")
       %int.2 : py.Value = py.undef("int")
-      %int.3 : py.Value = py.getOptionalItem(%ns.0, %str.12, %int.2) ^propagate.0()
+      %int.3 : py.Value = py.getOptionalItem(%ns.0, %str.12, %int.2) ^raised.0()
       %found.4 : base.Bool = py.isDefined(%int.3)
       branch(%found.4) ^join.3(%int.3) ^absent.3()
     absent.3():
-      %int.4 : py.Value = py.loadGlobal("m_annotations", "int") ^propagate.0()
+      %int.4 : py.Value = py.loadGlobal("m_annotations", "int") ^raised.0()
       jump ^join.3(%int.4)
     join.3(%int.5 : py.Value):
       %str.13 : py.Value = py.strLit("__annotations__")
       %__annotations__.2 : py.Value = py.undef("__annotations__")
-      %__annotations__.3 : py.Value = py.getOptionalItem(%ns.0, %str.13, %__annotations__.2) ^propagate.0()
+      %__annotations__.3 : py.Value = py.getOptionalItem(%ns.0, %str.13, %__annotations__.2) ^raised.0()
       %found.5 : base.Bool = py.isDefined(%__annotations__.3)
       branch(%found.5) ^join.4(%__annotations__.3) ^absent.4()
     absent.4():
-      %__annotations__.4 : py.Value = py.loadGlobal("m_annotations", "__annotations__") ^propagate.0()
+      %__annotations__.4 : py.Value = py.loadGlobal("m_annotations", "__annotations__") ^raised.0()
       jump ^join.4(%__annotations__.4)
     join.4(%__annotations__.5 : py.Value):
       %str.14 : py.Value = py.strLit("a")
-      %store.6 : base.Unit = py.setItem(%__annotations__.5, %str.14, %int.5) ^propagate.0()
+      %store.6 : base.Unit = py.setItem(%__annotations__.5, %str.14, %int.5) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @|m_annotations.S.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
     #[py.bindings = [{name = "m", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -368,6 +391,8 @@ module m_annotations {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "o") ^propagate.0()
       %o.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%o.cell.0, %o.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(3)
       %int.1 : py.Value = py.intLit(4)
       %o.3 : py.Value = base.refGet[py.Value](%o.cell.0)
@@ -398,6 +423,8 @@ module m_annotations {
       %C.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%C.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(5)
       %set.0 : base.Unit = base.refSet[py.Value](%__annotations__.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
@@ -415,6 +442,8 @@ module m_annotations {
   }
   func @m_annotations.gen(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("generator function")
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
@@ -424,6 +453,8 @@ module m_annotations {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "anns", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__annotations__.0 : py.Value = py.loadGlobal("m_annotations", "__annotations__") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__annotations__.0)
       ret(%ret.0)
@@ -441,6 +472,8 @@ module m_annotations {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "S.m", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %b.2 : py.Value = py.requireDefined(%int.0, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%b.2)
@@ -453,6 +486,8 @@ module m_annotations {
     #[py.fields = [{name = "v", type = "o"}]]
 
     entry.0(%o.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -514,6 +549,8 @@ module m_annotations {
       %j.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%j.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f.<locals>.h", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %j.2 : py.Value = py.requireDefined(%int.0, "j", "UnboundLocalError", "cannot access local variable 'j' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%j.2)
@@ -527,6 +564,8 @@ module m_annotations {
     #[py.bindings = [{name = "y", value = "__annotations__"}]]
 
     entry.0(%__annotations__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")

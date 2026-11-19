@@ -1,6 +1,8 @@
 module s09_import_missing {
   func @|s09_import_missing.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s09_import_missing")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s09_import_missing", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)

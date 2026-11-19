@@ -2,6 +2,8 @@
 module e02_global_param {
   func @|e02_global_param.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("e02_global_param")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e02_global_param", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -23,6 +25,8 @@ module e02_global_param {
       %x.1 : py.Value = py.tupleGet(%bound.0, 0)
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("e02_global_param", "x")
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.1)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)

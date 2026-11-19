@@ -1,6 +1,8 @@
 module fw09_try_else_finally {
   func @|fw09_try_else_finally.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("fw09_try_else_finally")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("fw09_try_else_finally", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -40,6 +42,8 @@ module fw09_try_else_finally {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "note", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %log.0 : py.Value = py.loadGlobal("fw09_try_else_finally", "log") ^propagate.0()
       %append.0 : py.Value = py.attr(%log.0, "append") ^propagate.0()
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
@@ -57,6 +61,8 @@ module fw09_try_else_finally {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "else_raises", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %note.0 : py.Value = py.loadGlobal("fw09_try_else_finally", "note") ^catch.0()
       %str.0 : py.Value = py.strLit("body")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -130,6 +136,8 @@ module fw09_try_else_finally {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "clause_raises", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %KeyError.0 : py.Value = py.loadGlobal("fw09_try_else_finally", "KeyError") ^catch.0()
       %str.0 : py.Value = py.strLit("body")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -192,6 +200,8 @@ module fw09_try_else_finally {
       ret(%exc.7)
   }
   func @fw09_try_else_finally.leaves_early(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %xs.0 : py.Value = py.undef("xs")
       %xs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%xs.0)
@@ -201,6 +211,8 @@ module fw09_try_else_finally {
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "leaves_early", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%xs.4) ^propagate.0()
       jump ^head.0()
@@ -262,25 +274,43 @@ module fw09_try_else_finally {
       %kwargs.2 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%note.1, %tuple.1, %kwargs.2) ^superseded.0()
       %pop.2 : base.Unit = py.popExcept(%prev.1)
-      py.Completion.case(%pending.0) ^join.0() ^ret.0() ^propagate.0() ^exit.0() ^head.0()
+      py.Completion.case(%pending.0) ^join.0() ^ret.0() ^raised.0() ^brk.0() ^unreachable.0()
     ret.0(%val.0 : py.Value):
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%val.0)
-      ret(%ret.0)
+      %comp.4 : py.Completion = py.completionReturn(%val.0)
+      jump ^done.0(%comp.4)
+    unreachable.0():
+      unreachable
     superseded.0(%exc.3 : py.Value):
       %pop.3 : base.Unit = py.popExcept(%prev.1)
-      jump ^propagate.0(%exc.3)
+      jump ^raised.0(%exc.3)
     join.0():
       jump ^head.0()
     stop.0(%exc.4 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.4)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.4)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.4)
+    normal.0():
+      %comp.5 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.5)
+    brk.0():
+      %comp.6 : py.Completion = py.completionBreak
+      jump ^done.0(%comp.6)
+    raised.0(%exc.5 : py.Value):
+      %comp.7 : py.Completion = py.completionRaise(%exc.5)
+      jump ^done.0(%comp.7)
+    done.0(%comp.8 : py.Completion):
+      py.Completion.case(%comp.8) ^exit.0() ^ret.1() ^propagate.0() ^exit.0() ^unreachable.1()
+    ret.1(%val.1 : py.Value):
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%val.1)
+      ret(%ret.0)
+    unreachable.1():
+      unreachable
     exit.0():
       %str.2 : py.Value = py.strLit("after")
       %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.2)
       ret(%ret.1)
-    propagate.0(%exc.5 : py.Value):
-      %exc.6 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.5)
-      ret(%exc.6)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
   }
 }
 

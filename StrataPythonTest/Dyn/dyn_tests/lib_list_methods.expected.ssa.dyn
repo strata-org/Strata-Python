@@ -1,6 +1,8 @@
 module lib_list_methods {
   func @|lib_list_methods.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_list_methods")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_list_methods", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -772,6 +774,8 @@ module lib_list_methods {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__eq__", binding = "def"}, {name = "__repr__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -809,6 +813,8 @@ module lib_list_methods {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -840,6 +846,8 @@ module lib_list_methods {
     #[py.bindings = [{name = "__iter__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -879,6 +887,8 @@ module lib_list_methods {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "show", 0, 1, true, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
       %args.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_list_methods", "print") ^catch.0()
       %repr.0 : py.Value = py.loadGlobal("lib_list_methods", "repr") ^catch.0()
       %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
@@ -941,6 +951,8 @@ module lib_list_methods {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -972,6 +984,8 @@ module lib_list_methods {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1004,6 +1018,8 @@ module lib_list_methods {
     #[py.bindings = [{name = "__iter__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1035,6 +1051,8 @@ module lib_list_methods {
     #[py.bindings = [{name = "__eq__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1066,6 +1084,8 @@ module lib_list_methods {
     #[py.bindings = [{name = "__eq__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1108,6 +1128,8 @@ module lib_list_methods {
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %v.2 : py.Value = py.tupleGet(%bound.0, 1)
       %log.2 : py.Value = py.tupleGet(%bound.0, 2)
+      jump ^start.0()
+    start.0():
       %v.4 : py.Value = py.requireDefined(%v.2, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %v.5 : base.Unit = py.setAttr(%self.4, "v", %v.4) ^propagate.0()
@@ -1133,6 +1155,8 @@ module lib_list_methods {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "E.__eq__", 0, 2, false, false, "self", "other") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_list_methods", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("eq")
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -1187,6 +1211,8 @@ module lib_list_methods {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "E.__repr__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("E(")
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %v.0 : py.Value = py.attr(%self.4, "v") ^propagate.0()
@@ -1208,6 +1234,8 @@ module lib_list_methods {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "I.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_list_methods", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("index")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1228,6 +1256,8 @@ module lib_list_methods {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_list_methods", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("iter")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1254,6 +1284,8 @@ module lib_list_methods {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Refill.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(7)
       %int.1 : py.Value = py.intLit(8)
       %int.2 : py.Value = py.intLit(9)
@@ -1281,6 +1313,8 @@ module lib_list_methods {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Grow.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %lg.0 : py.Value = py.loadGlobal("lib_list_methods", "lg") ^propagate.0()
       %append.0 : py.Value = py.attr(%lg.0, "append") ^propagate.0()
       %int.0 : py.Value = py.intLit(4)
@@ -1302,6 +1336,8 @@ module lib_list_methods {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "L.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %iter.0 : py.Value = py.loadGlobal("lib_list_methods", "iter") ^propagate.0()
       %int.0 : py.Value = py.intLit(9)
       %list.0 : py.Value = py.mkList(%int.0)
@@ -1326,6 +1362,8 @@ module lib_list_methods {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "R.__eq__", 0, 2, false, false, "self", "other") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %lr.0 : py.Value = py.loadGlobal("lib_list_methods", "lr") ^propagate.0()
       %clear.0 : py.Value = py.attr(%lr.0, "clear") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
@@ -1350,6 +1388,8 @@ module lib_list_methods {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "T.__eq__", 0, 2, false, false, "self", "other") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %lt.0 : py.Value = py.loadGlobal("lib_list_methods", "lt") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
       %del.0 : base.Unit = py.delItem(%lt.0, %int.0) ^propagate.0()

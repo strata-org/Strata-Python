@@ -1,6 +1,8 @@
 module lib_str_maketrans {
   func @|lib_str_maketrans.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_str_maketrans")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_str_maketrans", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -149,6 +151,8 @@ module lib_str_maketrans {
       %set.0 : base.Unit = base.refSet[py.Value](%f.cell.0, %f.2)
       %args.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_str_maketrans", "print") ^catch.0()
       %repr.0 : py.Value = py.loadGlobal("lib_str_maketrans", "repr") ^catch.0()
       %f.3 : py.Value = base.refGet[py.Value](%f.cell.0)

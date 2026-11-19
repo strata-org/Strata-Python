@@ -1,6 +1,8 @@
 module s171_set_lookup_revisit {
   func @|s171_set_lookup_revisit.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s171_set_lookup_revisit")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s171_set_lookup_revisit", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -49,6 +51,8 @@ module s171_set_lookup_revisit {
     #[py.bindings = [{name = "__hash__", binding = "def"}, {name = "__eq__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -87,6 +91,8 @@ module s171_set_lookup_revisit {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.__hash__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(2)
       %neg.0 : py.Value = py.uSub(%int.0) ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%neg.0)
@@ -109,6 +115,8 @@ module s171_set_lookup_revisit {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %o.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%o.cell.0, %o.2)
+      jump ^start.0()
+    start.0():
       %n.5 : py.Value = py.loadGlobal("s171_set_lookup_revisit", "n") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %iAdd.0 : py.Value = py.iAdd(%n.5, %int.0) ^propagate.0()

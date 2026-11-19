@@ -1,6 +1,8 @@
 module p25_shadow_builtin {
   func @|p25_shadow_builtin.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p25_shadow_builtin")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p25_shadow_builtin", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -25,6 +27,8 @@ module p25_shadow_builtin {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "len", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -42,6 +46,8 @@ module p25_shadow_builtin {
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %list.1 : py.Value = py.mkList(%int.0)
       %len.0 : py.Value = py.loadGlobal("p25_shadow_builtin", "len") ^propagate.0()

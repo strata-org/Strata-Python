@@ -1,6 +1,8 @@
 module s197_metaclass_skips_type_new {
   func @|s197_metaclass_skips_type_new.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s197_metaclass_skips_type_new")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s197_metaclass_skips_type_new", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -59,6 +61,8 @@ module s197_metaclass_skips_type_new {
     #[py.bindings = [{name = "__new__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -91,6 +95,8 @@ module s197_metaclass_skips_type_new {
     #[py.bindings = [{name = "f", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -142,6 +148,8 @@ module s197_metaclass_skips_type_new {
       %set.2 : base.Unit = base.refSet[py.Value](%bases.cell.0, %bases.2)
       %ns.2 : py.Value = py.tupleGet(%bound.0, 3)
       %set.3 : base.Unit = base.refSet[py.Value](%ns.cell.0, %ns.2)
+      jump ^start.0()
+    start.0():
       %ns.3 : py.Value = base.refGet[py.Value](%ns.cell.0)
       %ns.4 : py.Value = py.requireDefined(%ns.3, "ns", "UnboundLocalError", "cannot access local variable 'ns' where it is not associated with a value") ^propagate.0()
       %str.0 : py.Value = py.strLit("f")
@@ -164,6 +172,8 @@ module s197_metaclass_skips_type_new {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.f", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
       %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__class__.1)

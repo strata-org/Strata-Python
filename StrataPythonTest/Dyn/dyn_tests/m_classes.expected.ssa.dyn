@@ -1,6 +1,8 @@
 module m_classes {
   func @|m_classes.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_classes")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_classes", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -59,6 +61,8 @@ module m_classes {
       %defaults.0 : py.Value = py.mkTuple(%cls.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "deco", 0, 1, false, false, "cls") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %cls.4 : py.Value = py.requireDefined(%cls.2, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%cls.4)
       ret(%ret.0)
@@ -72,6 +76,8 @@ module m_classes {
     #[py.bindings = [{name = "a", value = "g"}, {name = "b", value = {op = "+", args = ["a", {call = "len", args = [{str = "x"}], keywords = []}]}}, {name = "b", value = 1, augmented = true}, {name = "os", binding = "import"}, {name = "a", binding = "del"}, {name = "m", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -177,6 +183,8 @@ module m_classes {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer", 0, 2, false, false, "bases", "kws") ^propagate.0()
       %bases.2 : py.Value = py.tupleGet(%bound.0, 0)
       %kws.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %set.2 : base.Unit = base.refSet[py.Value](%n.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
@@ -205,6 +213,8 @@ module m_classes {
     #[py.bindings = [{name = "m", binding = "def"}, {name = "outer", binding = "def"}, {name = "f", value = {expr = "Lambda"}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -252,6 +262,8 @@ module m_classes {
     #[py.bindings = [{name = "fields", value = {call = "list", args = ["__annotations__"], keywords = []}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -340,6 +352,8 @@ module m_classes {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.m", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %b.0 : py.Value = py.attr(%self.4, "b") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%b.0)
@@ -354,6 +368,8 @@ module m_classes {
     #[py.fields = []]
 
     entry.0(%n.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -417,6 +433,8 @@ module m_classes {
       %_Priv__x.2 : py.Value = py.tupleGet(%bound.0, 1)
       %_Priv__d.1 : py.Value = py.tupleGet(%bound.0, 2)
       %_Priv__k.1 : py.Value = py.tupleGet(%bound.0, 3)
+      jump ^start.0()
+    start.0():
       %_Priv__x.4 : py.Value = py.requireDefined(%_Priv__x.2, "_Priv__x", "UnboundLocalError", "cannot access local variable '_Priv__x' where it is not associated with a value") ^propagate.0()
       %_Priv__d.3 : py.Value = py.requireDefined(%_Priv__d.1, "_Priv__d", "UnboundLocalError", "cannot access local variable '_Priv__d' where it is not associated with a value") ^propagate.0()
       %_Priv__k.3 : py.Value = py.requireDefined(%_Priv__k.1, "_Priv__k", "UnboundLocalError", "cannot access local variable '_Priv__k' where it is not associated with a value") ^propagate.0()
@@ -437,6 +455,8 @@ module m_classes {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Priv.outer", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[]](@m_classes.Priv.outer.inner, "inner", "m_classes")
       %inner.2 : py.Value = py.requireDefined(%clo.0, "inner", "UnboundLocalError", "cannot access local variable 'inner' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
@@ -462,6 +482,8 @@ module m_classes {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Priv.<lambda>", 0, 1, false, false, "self", "_Priv__y") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %_Priv__y.1 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %_Priv__y.3 : py.Value = py.requireDefined(%_Priv__y.1, "_Priv__y", "UnboundLocalError", "cannot access local variable '_Priv__y' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%_Priv__y.3)
       ret(%ret.0)
@@ -477,6 +499,8 @@ module m_classes {
       %defaults.0 : py.Value = py.mkTuple(%_Priv__z.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Priv.outer.<locals>.inner", 0, 1, false, false, "_Priv__z") ^propagate.0()
       %_Priv__z.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %_Priv__z.4 : py.Value = py.requireDefined(%_Priv__z.2, "_Priv__z", "UnboundLocalError", "cannot access local variable '_Priv__z' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%_Priv__z.4)
       ret(%ret.0)

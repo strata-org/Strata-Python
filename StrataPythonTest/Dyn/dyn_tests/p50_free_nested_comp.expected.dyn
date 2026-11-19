@@ -1,6 +1,8 @@
 module p50_free_nested_comp {
   func @|p50_free_nested_comp.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p50_free_nested_comp")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p50_free_nested_comp", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -34,6 +36,8 @@ module p50_free_nested_comp {
       %set.0 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.2)
       %a.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.2)
+      jump ^start.0()
+    start.0():
       %a.3 : py.Value = base.refGet[py.Value](%a.cell.0)
       %a.4 : py.Value = py.requireDefined(%a.3, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.1 : py.Value = py.undef("b")

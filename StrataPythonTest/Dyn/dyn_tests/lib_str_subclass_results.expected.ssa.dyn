@@ -1,6 +1,10 @@
 module lib_str_subclass_results {
   func @|lib_str_subclass_results.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}, {head = "head.1", done = "done.1"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_str_subclass_results")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_str_subclass_results", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -148,21 +152,35 @@ module lib_str_subclass_results {
       %item.10 : py.Value = py.next(%iter.0) ^stop.0()
       %r.cell.0 : base.Ref(py.Value) = py.globalCell("lib_str_subclass_results", "r")
       %set.5 : base.Unit = base.refSet[py.Value](%r.cell.0, %item.10)
-      %print.0 : py.Value = py.loadGlobal("lib_str_subclass_results", "print") ^propagate.0()
-      %type.0 : py.Value = py.loadGlobal("lib_str_subclass_results", "type") ^propagate.0()
-      %r.0 : py.Value = py.loadGlobal("lib_str_subclass_results", "r") ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("lib_str_subclass_results", "print") ^raised.0()
+      %type.0 : py.Value = py.loadGlobal("lib_str_subclass_results", "type") ^raised.0()
+      %r.0 : py.Value = py.loadGlobal("lib_str_subclass_results", "r") ^raised.0()
       %tuple.19 : py.Value = py.mkTuple(%r.0)
       %kwargs.19 : py.Value = py.mkKwargs
-      %call.17 : py.Value = py.call(%type.0, %tuple.19, %kwargs.19) ^propagate.0()
-      %__name__.0 : py.Value = py.attr(%call.17, "__name__") ^propagate.0()
-      %r.1 : py.Value = py.loadGlobal("lib_str_subclass_results", "r") ^propagate.0()
+      %call.17 : py.Value = py.call(%type.0, %tuple.19, %kwargs.19) ^raised.0()
+      %__name__.0 : py.Value = py.attr(%call.17, "__name__") ^raised.0()
+      %r.1 : py.Value = py.loadGlobal("lib_str_subclass_results", "r") ^raised.0()
       %tuple.20 : py.Value = py.mkTuple(%__name__.0, %r.1)
       %kwargs.20 : py.Value = py.mkKwargs
-      %call.18 : py.Value = py.call(%print.0, %tuple.20, %kwargs.20) ^propagate.0()
+      %call.18 : py.Value = py.call(%print.0, %tuple.20, %kwargs.20) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %str.17 : py.Value = py.strLit("{}")
       %F.1 : py.Value = py.loadGlobal("lib_str_subclass_results", "F") ^propagate.0()
@@ -210,44 +228,58 @@ module lib_str_subclass_results {
       jump ^head.1()
     head.1():
       %item.11 : py.Value = py.next(%iter.1) ^stop.1()
-      %unpack.0 : py.Value = py.unpackSeq(%item.11, 2) ^propagate.0()
+      %unpack.0 : py.Value = py.unpackSeq(%item.11, 2) ^raised.1()
       %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
       %t.cell.0 : base.Ref(py.Value) = py.globalCell("lib_str_subclass_results", "t")
       %set.6 : base.Unit = base.refSet[py.Value](%t.cell.0, %elem.0)
       %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
       %a.cell.0 : base.Ref(py.Value) = py.globalCell("lib_str_subclass_results", "a")
       %set.7 : base.Unit = base.refSet[py.Value](%a.cell.0, %elem.1)
-      %t.0 : py.Value = py.loadGlobal("lib_str_subclass_results", "t") ^propagate.0()
-      %format.3 : py.Value = py.attr(%t.0, "format") ^propagate.0()
-      %a.0 : py.Value = py.loadGlobal("lib_str_subclass_results", "a") ^propagate.0()
+      %t.0 : py.Value = py.loadGlobal("lib_str_subclass_results", "t") ^raised.1()
+      %format.3 : py.Value = py.attr(%t.0, "format") ^raised.1()
+      %a.0 : py.Value = py.loadGlobal("lib_str_subclass_results", "a") ^raised.1()
       %kwargs.26 : py.Value = py.mkKwargs
-      %args.0 : py.Value = py.argsTuple(%format.3, %a.0) ^propagate.0()
-      %call.24 : py.Value = py.call(%format.3, %args.0, %kwargs.26) ^propagate.0()
+      %args.0 : py.Value = py.argsTuple(%format.3, %a.0) ^raised.1()
+      %call.24 : py.Value = py.call(%format.3, %args.0, %kwargs.26) ^raised.1()
       %r.cell.1 : base.Ref(py.Value) = py.globalCell("lib_str_subclass_results", "r")
       %set.8 : base.Unit = base.refSet[py.Value](%r.cell.1, %call.24)
-      %print.1 : py.Value = py.loadGlobal("lib_str_subclass_results", "print") ^propagate.0()
-      %t.1 : py.Value = py.loadGlobal("lib_str_subclass_results", "t") ^propagate.0()
-      %type.1 : py.Value = py.loadGlobal("lib_str_subclass_results", "type") ^propagate.0()
-      %r.2 : py.Value = py.loadGlobal("lib_str_subclass_results", "r") ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("lib_str_subclass_results", "print") ^raised.1()
+      %t.1 : py.Value = py.loadGlobal("lib_str_subclass_results", "t") ^raised.1()
+      %type.1 : py.Value = py.loadGlobal("lib_str_subclass_results", "type") ^raised.1()
+      %r.2 : py.Value = py.loadGlobal("lib_str_subclass_results", "r") ^raised.1()
       %tuple.38 : py.Value = py.mkTuple(%r.2)
       %kwargs.27 : py.Value = py.mkKwargs
-      %call.25 : py.Value = py.call(%type.1, %tuple.38, %kwargs.27) ^propagate.0()
-      %__name__.1 : py.Value = py.attr(%call.25, "__name__") ^propagate.0()
-      %r.3 : py.Value = py.loadGlobal("lib_str_subclass_results", "r") ^propagate.0()
+      %call.25 : py.Value = py.call(%type.1, %tuple.38, %kwargs.27) ^raised.1()
+      %__name__.1 : py.Value = py.attr(%call.25, "__name__") ^raised.1()
+      %r.3 : py.Value = py.loadGlobal("lib_str_subclass_results", "r") ^raised.1()
       %tuple.39 : py.Value = py.mkTuple(%t.1, %__name__.1, %r.3)
       %kwargs.28 : py.Value = py.mkKwargs
-      %call.26 : py.Value = py.call(%print.1, %tuple.39, %kwargs.28) ^propagate.0()
+      %call.26 : py.Value = py.call(%print.1, %tuple.39, %kwargs.28) ^raised.1()
       jump ^head.1()
-    stop.1(%exc.1 : py.Value):
-      %done.1 : base.Bool = py.isStopIteration(%exc.1)
-      branch(%done.1) ^exit.1() ^propagate.0(%exc.1)
+    stop.1(%exc.2 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.2)
+      branch(%done.1) ^normal.1() ^raised.1(%exc.2)
+    normal.1():
+      %comp.3 : py.Completion = py.completionNormal
+      jump ^done.1(%comp.3)
+    raised.1(%exc.3 : py.Value):
+      %comp.4 : py.Completion = py.completionRaise(%exc.3)
+      jump ^done.1(%comp.4)
+    done.1(%comp.5 : py.Completion):
+      py.Completion.case(%comp.5) ^exit.1() ^unreachable.3() ^propagate.0() ^unreachable.4() ^unreachable.5()
+    unreachable.3(%val.1 : py.Value):
+      unreachable
+    unreachable.4():
+      unreachable
+    unreachable.5():
+      unreachable
     exit.1():
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.2 : py.Value):
-      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
-      ret(%exc.3)
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
   }
   func @|lib_str_subclass_results.S.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.bases = ["str"]]
@@ -255,6 +287,8 @@ module lib_str_subclass_results {
     #[py.bindings = [{name = "__str__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -286,6 +320,8 @@ module lib_str_subclass_results {
     #[py.bindings = [{name = "__format__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -320,6 +356,8 @@ module lib_str_subclass_results {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "S.__str__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("STR")
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
       ret(%ret.0)
@@ -339,6 +377,8 @@ module lib_str_subclass_results {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "F.__format__", 0, 2, false, false, "self", "spec") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %spec.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %S.0 : py.Value = py.loadGlobal("lib_str_subclass_results", "S") ^propagate.0()
       %str.0 : py.Value = py.strLit("q")
       %spec.4 : py.Value = py.requireDefined(%spec.2, "spec", "UnboundLocalError", "cannot access local variable 'spec' where it is not associated with a value") ^propagate.0()

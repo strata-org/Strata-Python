@@ -1,6 +1,8 @@
 module s150_list_index_after_index {
   func @|s150_list_index_after_index.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s150_list_index_after_index")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -381,6 +383,8 @@ module s150_list_index_after_index {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -412,6 +416,8 @@ module s150_list_index_after_index {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -443,6 +449,8 @@ module s150_list_index_after_index {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -474,6 +482,8 @@ module s150_list_index_after_index {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -505,6 +515,8 @@ module s150_list_index_after_index {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -536,6 +548,8 @@ module s150_list_index_after_index {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -570,6 +584,8 @@ module s150_list_index_after_index {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Clear.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %xs.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
       %int.1 : py.Value = py.intLit(2)
@@ -591,6 +607,8 @@ module s150_list_index_after_index {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "ClearAll.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %xs.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^propagate.0()
       %none.0 : py.Value = py.noneLit
       %none.1 : py.Value = py.noneLit
@@ -612,6 +630,8 @@ module s150_list_index_after_index {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Last.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %xs.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
       %int.1 : py.Value = py.intLit(3)
@@ -634,6 +654,8 @@ module s150_list_index_after_index {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Grow.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(9)
       %list.0 : py.Value = py.mkList(%int.0)
       %xs.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^propagate.0()
@@ -662,6 +684,8 @@ module s150_list_index_after_index {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Shrink.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %xs.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^propagate.0()
       %none.0 : py.Value = py.noneLit
       %none.1 : py.Value = py.noneLit
@@ -683,6 +707,8 @@ module s150_list_index_after_index {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Boom.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %KeyError.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "KeyError") ^propagate.0()
       %exc.0 : py.Value = py.toException(%KeyError.0) ^propagate.0()
       jump ^propagate.0(%exc.0)

@@ -225,10 +225,10 @@ def freshLabel (ps : List (TypeExpr Py.env) := []) (base : String := Build.block
     PyM α (BlockRef Py.env ps) :=
   Emit.freshLabel ps base
 
-/-- Open the block `l`, which takes nothing.  Opening a block while another is open is an
-error. -/
-def startBlock (l : BlockRef Py.env []) : PyM α Unit :=
-  discard <| Emit.startBlock l
+/-- Open the block `l`, which takes nothing.  With `info`, the block carries that annotation.
+Opening a block while another is open is an error. -/
+def startBlock (l : BlockRef Py.env []) (info : Option α := none) : PyM α Unit :=
+  discard <| Emit.startBlock l (info := info)
 
 /-- Open the block `l`, which takes one value, named after `name`, and hand back that value: a
 handler's exception, a join's result. -/
@@ -563,8 +563,8 @@ inductive Arm (m : Type → Type) (ps : List (TypeExpr Py.env)) (β : Type) wher
   /-- A fresh block labelled `base.n`, taking the payload.  `emit` emits its body, given the
   payload, and must finish the block: leaving it open is an error. -/
   | block (base : String) (emit : β → m Unit)
-  /-- A fresh block labelled `unreachable.n` that is `unreachable`: a `break` or `continue`
-  with no enclosing loop. -/
+  /-- A fresh block labelled `unreachable.n` that is `unreachable`: a successor that no
+  completion reaches. -/
   | unreachable
 
 /-- The successors of a dispatch, one per constructor of `py.Completion`.  `break` and
@@ -643,12 +643,12 @@ one handled before, which every way out of `final` restores with `popExcept`.
   then raises to the handler around the `try`.
 * A `return`, `break` or `continue` in `final` is its own, and must restore `prev` itself.
 * If `final` finishes normally, `prev` is restored and the pending completion is dispatched
-  to the arms `arms` gives, which do from outside the `try` what the completion would have
+  to the arms `arms fin` gives, which do from outside the `try` what the completion would have
   done.
 
 Returns whether `final` finished normally, so the dispatch was emitted. -/
 def tryFinally [Monad m] [MonadPy α m] (body : BlockRef Py.env [Py.Completion] → m Unit)
-    (final : ValId → m Unit) (arms : m (Arms m)) : m Bool := do
+    (final : ValId → m Unit) (arms : BlockRef Py.env [Py.Completion] → m (Arms m)) : m Bool := do
   let outer ← liftPy (handler (α := α))
   let fin ← liftPy (freshLabel (α := α) [Py.Completion] "fin")
   protect fin (body fin) "finRaise"
@@ -661,7 +661,7 @@ def tryFinally [Monad m] [MonadPy α m] (body : BlockRef Py.env [Py.Completion] 
   let finished ← liftPy (isOpen (α := α))
   if finished then
     pop
-    dispatchArms pending (← arms)
+    dispatchArms pending (← arms fin)
   let e ← liftPy (startBlockWith (α := α) superseded (.str .base "exc"))
   pop
   liftPy (jump (α := α) (outer.bind e))

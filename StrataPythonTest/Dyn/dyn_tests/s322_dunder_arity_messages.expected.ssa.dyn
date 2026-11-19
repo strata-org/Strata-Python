@@ -1,6 +1,10 @@
 module s322_dunder_arity_messages {
   func @|s322_dunder_arity_messages.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s322_dunder_arity_messages")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s322_dunder_arity_messages", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -825,24 +829,40 @@ module s322_dunder_arity_messages {
       jump ^unwind.16(%exc.48)
     unwind.16(%exc.50 : py.Value):
       %pop.33 : base.Unit = py.popExcept(%prev.16)
-      jump ^propagate.0(%exc.50)
+      jump ^raised.0(%exc.50)
     join.16():
       jump ^head.0()
     stop.0(%exc.51 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.51)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.51)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.51)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.52 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.52)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.52 : py.Value):
-      %exc.53 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.52)
-      ret(%exc.53)
+    propagate.0(%exc.53 : py.Value):
+      %exc.54 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.53)
+      ret(%exc.54)
   }
   func @|s322_dunder_arity_messages.<lambda>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %list.0 : py.Value = py.mkList(%int.0)
       %__mul__.0 : py.Value = py.attr(%list.0, "__mul__") ^propagate.0()
@@ -859,6 +879,8 @@ module s322_dunder_arity_messages {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("a")
       %__rmul__.0 : py.Value = py.attr(%str.0, "__rmul__") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
@@ -876,6 +898,8 @@ module s322_dunder_arity_messages {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %list.0 : py.Value = py.mkList
       %__imul__.0 : py.Value = py.attr(%list.0, "__imul__") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
@@ -891,6 +915,8 @@ module s322_dunder_arity_messages {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %tuple.0 : py.Value = py.mkTuple(%int.0)
       %__mul__.0 : py.Value = py.attr(%tuple.0, "__mul__") ^propagate.0()

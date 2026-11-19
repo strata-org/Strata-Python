@@ -1,0 +1,161 @@
+module g04_return_through_with {
+  func @|g04_return_through_with.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      jump ^start.0()
+    start.0():
+      %str.0 : py.Value = py.strLit("g04_return_through_with")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("g04_return_through_with", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("g04_return_through_with", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@g04_return_through_with.d, "d", "g04_return_through_with")
+      %d.cell.0 : base.Ref(py.Value) = py.globalCell("g04_return_through_with", "d")
+      %set.2 : base.Unit = base.refSet[py.Value](%d.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+  }
+  func @g04_return_through_with.d(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.1", done = "done.1"}, {head = "head.0", done = "done.0"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %rows.0 : py.Value = py.undef("rows")
+      %rows.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%rows.0)
+      %r.0 : py.Value = py.undef("r")
+      %r.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%r.0)
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %rows.1 : py.Value = py.undef("rows")
+      %defaults.0 : py.Value = py.mkTuple(%rows.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "d", 0, 1, false, false, "rows") ^propagate.0()
+      %rows.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
+      %rows.4 : py.Value = py.requireDefined(%rows.2, "rows", "UnboundLocalError", "cannot access local variable 'rows' where it is not associated with a value") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%rows.4) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %lock.0 : py.Value = py.loadGlobal("g04_return_through_with", "lock") ^raised.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%lock.0, %tuple.0, %kwargs.1) ^raised.0()
+      %enter.0 : py.Value = py.enterMethod(%call.0) ^raised.0()
+      %exit.0 : py.Value = py.exitMethod(%call.0) ^raised.0()
+      %args.1 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %entered.0 : py.Value = py.call(%enter.0, %args.1, %kwargs.2) ^raised.0()
+      %r.2 : py.Value = py.requireDefined(%item.0, "r", "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^wexc.0()
+      %iter.1 : py.Value = py.getIter(%r.2) ^wexc.0()
+      jump ^head.1()
+    head.1():
+      %item.1 : py.Value = py.next(%iter.1) ^stop.1()
+      %bad.0 : py.Value = py.loadGlobal("g04_return_through_with", "bad") ^raised.1()
+      %x.2 : py.Value = py.requireDefined(%item.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^raised.1()
+      %tuple.1 : py.Value = py.mkTuple(%x.2)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%bad.0, %tuple.1, %kwargs.3) ^raised.1()
+      %cond.0 : base.Bool = py.truthy(%call.1) ^raised.1()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %x.4 : py.Value = py.requireDefined(%item.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^raised.1()
+      %comp.0 : py.Completion = py.completionReturn(%x.4)
+      jump ^done.1(%comp.0)
+    else.0():
+      jump ^join.1()
+    join.1():
+      %skip.0 : py.Value = py.loadGlobal("g04_return_through_with", "skip") ^raised.1()
+      %x.6 : py.Value = py.requireDefined(%item.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^raised.1()
+      %tuple.2 : py.Value = py.mkTuple(%x.6)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%skip.0, %tuple.2, %kwargs.4) ^raised.1()
+      %cond.1 : base.Bool = py.truthy(%call.2) ^raised.1()
+      branch(%cond.1) ^then.1() ^else.1()
+    then.1():
+      jump ^brk.1()
+    else.1():
+      jump ^join.2()
+    join.2():
+      jump ^head.1()
+    stop.1(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^normal.1() ^raised.1(%exc.0)
+    normal.1():
+      %comp.1 : py.Completion = py.completionNormal
+      jump ^done.1(%comp.1)
+    brk.1():
+      %comp.2 : py.Completion = py.completionBreak
+      jump ^done.1(%comp.2)
+    raised.1(%exc.1 : py.Value):
+      %comp.3 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.1(%comp.3)
+    done.1(%comp.4 : py.Completion):
+      py.Completion.case(%comp.4) ^exit.1() ^ret.0() ^wexc.0() ^exit.1() ^unreachable.0()
+    ret.0(%val.0 : py.Value):
+      %comp.5 : py.Completion = py.completionReturn(%val.0)
+      jump ^fin.0(%comp.5)
+    unreachable.0():
+      unreachable
+    exit.1():
+      %comp.6 : py.Completion = py.completionNormal
+      jump ^fin.0(%comp.6)
+    wexc.0(%exc.2 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.2)
+      %exited.0 : py.Value = py.exitWithExc(%exit.0, %exc.2) ^unwind.0()
+      %cond.2 : base.Bool = py.truthy(%exited.0) ^unwind.0()
+      branch(%cond.2) ^suppress.0() ^unwind.0(%exc.2)
+    suppress.0():
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^join.0()
+    unwind.0(%exc.3 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^raised.0(%exc.3)
+    fin.0(%pending.0 : py.Completion):
+      %none.0 : py.Value = py.noneLit
+      %args.2 : py.Value = py.mkTuple(%none.0, %none.0, %none.0)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %exited.1 : py.Value = py.call(%exit.0, %args.2, %kwargs.5) ^raised.0()
+      py.Completion.case(%pending.0) ^join.0() ^ret.1() ^raised.0() ^unreachable.1() ^unreachable.2()
+    ret.1(%val.1 : py.Value):
+      %comp.7 : py.Completion = py.completionReturn(%val.1)
+      jump ^done.0(%comp.7)
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
+    join.0():
+      %tidy.0 : py.Value = py.loadGlobal("g04_return_through_with", "tidy") ^raised.0()
+      %r.4 : py.Value = py.requireDefined(%item.0, "r", "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^raised.0()
+      %tuple.3 : py.Value = py.mkTuple(%r.4)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%tidy.0, %tuple.3, %kwargs.6) ^raised.0()
+      jump ^head.0()
+    stop.0(%exc.4 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.4)
+      branch(%done.1) ^normal.0() ^raised.0(%exc.4)
+    normal.0():
+      %comp.8 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.8)
+    raised.0(%exc.5 : py.Value):
+      %comp.9 : py.Completion = py.completionRaise(%exc.5)
+      jump ^done.0(%comp.9)
+    done.0(%comp.10 : py.Completion):
+      py.Completion.case(%comp.10) ^exit.0() ^ret.2() ^propagate.0() ^unreachable.3() ^unreachable.4()
+    ret.2(%val.2 : py.Value):
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%val.2)
+      ret(%ret.0)
+    unreachable.3():
+      unreachable
+    unreachable.4():
+      unreachable
+    exit.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.1)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
+  }
+}
+

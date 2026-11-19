@@ -1,6 +1,8 @@
 module lib_ctor_errors {
   func @|lib_ctor_errors.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_ctor_errors")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_ctor_errors", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -311,6 +313,8 @@ module lib_ctor_errors {
     #[py.bindings = [{name = "__repr__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -343,6 +347,8 @@ module lib_ctor_errors {
     #[py.bindings = [{name = "__repr__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -375,6 +381,8 @@ module lib_ctor_errors {
     #[py.bindings = [{name = "__repr__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -412,6 +420,8 @@ module lib_ctor_errors {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "show", 0, 1, false, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%f.cell.0, %f.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_ctor_errors", "print") ^catch.0()
       %repr.0 : py.Value = py.loadGlobal("lib_ctor_errors", "repr") ^catch.0()
       %f.3 : py.Value = base.refGet[py.Value](%f.cell.0)
@@ -471,6 +481,8 @@ module lib_ctor_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.loadGlobal("lib_ctor_errors", "int") ^propagate.0()
       %S.0 : py.Value = py.loadGlobal("lib_ctor_errors", "S") ^propagate.0()
       %str.0 : py.Value = py.strLit("abc")
@@ -490,6 +502,8 @@ module lib_ctor_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.loadGlobal("lib_ctor_errors", "int") ^propagate.0()
       %S.0 : py.Value = py.loadGlobal("lib_ctor_errors", "S") ^propagate.0()
       %str.0 : py.Value = py.strLit("xyz")
@@ -510,6 +524,8 @@ module lib_ctor_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %float.0 : py.Value = py.loadGlobal("lib_ctor_errors", "float") ^propagate.0()
       %S.0 : py.Value = py.loadGlobal("lib_ctor_errors", "S") ^propagate.0()
       %str.0 : py.Value = py.strLit("abc")
@@ -529,6 +545,8 @@ module lib_ctor_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %float.0 : py.Value = py.loadGlobal("lib_ctor_errors", "float") ^propagate.0()
       %B.0 : py.Value = py.loadGlobal("lib_ctor_errors", "B") ^propagate.0()
       %bytes.0 : py.Value = py.bytesLit("xyz")
@@ -548,6 +566,8 @@ module lib_ctor_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.loadGlobal("lib_ctor_errors", "int") ^propagate.0()
       %B.0 : py.Value = py.loadGlobal("lib_ctor_errors", "B") ^propagate.0()
       %bytes.0 : py.Value = py.bytesLit("xyz")
@@ -567,6 +587,8 @@ module lib_ctor_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.loadGlobal("lib_ctor_errors", "int") ^propagate.0()
       %R.0 : py.Value = py.loadGlobal("lib_ctor_errors", "R") ^propagate.0()
       %str.0 : py.Value = py.strLit("abc")
@@ -586,6 +608,8 @@ module lib_ctor_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.loadGlobal("lib_ctor_errors", "int") ^propagate.0()
       %S.0 : py.Value = py.loadGlobal("lib_ctor_errors", "S") ^propagate.0()
       %str.0 : py.Value = py.strLit("12")
@@ -615,6 +639,8 @@ module lib_ctor_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.loadGlobal("lib_ctor_errors", "str") ^propagate.0()
       %str.1 : py.Value = py.strLit("a")
       %str.2 : py.Value = py.strLit("utf\x008")
@@ -631,6 +657,8 @@ module lib_ctor_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.loadGlobal("lib_ctor_errors", "str") ^propagate.0()
       %int.0 : py.Value = py.intLit(5)
       %str.1 : py.Value = py.strLit("utf-8")
@@ -648,6 +676,8 @@ module lib_ctor_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %bytes.0 : py.Value = py.loadGlobal("lib_ctor_errors", "bytes") ^propagate.0()
       %int.0 : py.Value = py.intLit(5)
       %str.0 : py.Value = py.strLit("utf\x008")
@@ -664,6 +694,8 @@ module lib_ctor_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %bytes.0 : py.Value = py.loadGlobal("lib_ctor_errors", "bytes") ^propagate.0()
       %str.0 : py.Value = py.strLit("a")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -681,6 +713,8 @@ module lib_ctor_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %set.0 : py.Value = py.loadGlobal("lib_ctor_errors", "set") ^propagate.0()
       %__new__.0 : py.Value = py.attr(%set.0, "__new__") ^propagate.0()
       %set.1 : py.Value = py.loadGlobal("lib_ctor_errors", "set") ^propagate.0()
@@ -699,6 +733,8 @@ module lib_ctor_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %set.0 : py.Value = py.loadGlobal("lib_ctor_errors", "set") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %str.0 : py.Value = py.strLit("x")
@@ -720,6 +756,8 @@ module lib_ctor_errors {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "S.__repr__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_ctor_errors", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("S.__repr__")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -741,6 +779,8 @@ module lib_ctor_errors {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.__repr__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_ctor_errors", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("B.__repr__")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -762,6 +802,8 @@ module lib_ctor_errors {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "R.__repr__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %KeyError.0 : py.Value = py.loadGlobal("lib_ctor_errors", "KeyError") ^propagate.0()
       %str.0 : py.Value = py.strLit("repr")
       %tuple.0 : py.Value = py.mkTuple(%str.0)

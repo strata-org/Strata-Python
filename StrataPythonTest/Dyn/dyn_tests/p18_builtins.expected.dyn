@@ -1,6 +1,8 @@
 module p18_builtins {
   func @|p18_builtins.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p18_builtins")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p18_builtins", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -23,6 +25,8 @@ module p18_builtins {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %sorted.0 : py.Value = py.loadGlobal("p18_builtins", "sorted") ^propagate.0()
       %reversed.0 : py.Value = py.loadGlobal("p18_builtins", "reversed") ^propagate.0()
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)

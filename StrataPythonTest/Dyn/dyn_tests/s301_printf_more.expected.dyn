@@ -1,6 +1,8 @@
 module s301_printf_more {
   func @|s301_printf_more.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s301_printf_more")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s301_printf_more", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -187,6 +189,8 @@ module s301_printf_more {
       %set.0 : base.Unit = base.refSet[py.Value](%fmt.cell.0, %fmt.2)
       %args.3 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.3)
+      jump ^start.0()
+    start.0():
       %fmt.3 : py.Value = base.refGet[py.Value](%fmt.cell.0)
       %fmt.4 : py.Value = py.requireDefined(%fmt.3, "fmt", "UnboundLocalError", "cannot access local variable 'fmt' where it is not associated with a value") ^catch.0()
       %args.4 : py.Value = base.refGet[py.Value](%args.cell.0)
@@ -250,6 +254,8 @@ module s301_printf_more {
     #[py.bindings = [{name = "__repr__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -285,6 +291,8 @@ module s301_printf_more {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "R.__repr__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("R!")
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
       ret(%ret.0)

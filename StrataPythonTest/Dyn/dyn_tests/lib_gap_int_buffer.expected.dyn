@@ -1,6 +1,8 @@
 module lib_gap_int_buffer {
   func @|lib_gap_int_buffer.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_gap_int_buffer")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_int_buffer", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -39,6 +41,8 @@ module lib_gap_int_buffer {
     #[py.bindings = [{name = "__buffer__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -79,6 +83,8 @@ module lib_gap_int_buffer {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %flags.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%flags.cell.0, %flags.2)
+      jump ^start.0()
+    start.0():
       %memoryview.0 : py.Value = py.loadGlobal("lib_gap_int_buffer", "memoryview") ^propagate.0()
       %bytes.0 : py.Value = py.bytesLit("12")
       %tuple.0 : py.Value = py.mkTuple(%bytes.0)

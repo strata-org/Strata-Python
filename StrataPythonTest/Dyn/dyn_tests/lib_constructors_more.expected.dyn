@@ -1,6 +1,8 @@
 module lib_constructors_more {
   func @|lib_constructors_more.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_constructors_more")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_constructors_more", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -662,6 +664,8 @@ module lib_constructors_more {
     #[py.bindings = [{name = "keys", binding = "def"}, {name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -697,6 +701,8 @@ module lib_constructors_more {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -729,6 +735,8 @@ module lib_constructors_more {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -761,6 +769,8 @@ module lib_constructors_more {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -793,6 +803,8 @@ module lib_constructors_more {
     #[py.bindings = [{name = "__new__", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -825,6 +837,8 @@ module lib_constructors_more {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -853,6 +867,8 @@ module lib_constructors_more {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -881,6 +897,8 @@ module lib_constructors_more {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "keys", binding = "def"}, {name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -918,6 +936,8 @@ module lib_constructors_more {
     #[py.bindings = [{name = "__iter__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -949,6 +969,8 @@ module lib_constructors_more {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -986,6 +1008,8 @@ module lib_constructors_more {
     #[py.bindings = [{name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}, {name = "__length_hint__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1023,6 +1047,8 @@ module lib_constructors_more {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1051,6 +1077,8 @@ module lib_constructors_more {
     #[py.bindings = [{name = "__bytes__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1096,6 +1124,8 @@ module lib_constructors_more {
       %set.1 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %kwargs.2)
+      jump ^start.0()
+    start.0():
       %f.3 : py.Value = base.refGet[py.Value](%f.cell.0)
       %f.4 : py.Value = py.requireDefined(%f.3, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
       %args.3 : py.Value = base.refGet[py.Value](%args.cell.0)
@@ -1159,6 +1189,8 @@ module lib_constructors_more {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1188,6 +1220,8 @@ module lib_constructors_more {
     #[py.bindings = [{name = "__new__", value = "list.__new__"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1228,6 +1262,8 @@ module lib_constructors_more {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1256,6 +1292,8 @@ module lib_constructors_more {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1284,6 +1322,8 @@ module lib_constructors_more {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1312,6 +1352,8 @@ module lib_constructors_more {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1343,6 +1385,8 @@ module lib_constructors_more {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1371,6 +1415,8 @@ module lib_constructors_more {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1399,6 +1445,8 @@ module lib_constructors_more {
     #[py.bindings = [{name = "keys", binding = "def"}, {name = "__getitem__", binding = "def"}, {name = "p", value = {call = "property", args = ["dict"], keywords = []}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1456,6 +1504,8 @@ module lib_constructors_more {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1484,6 +1534,8 @@ module lib_constructors_more {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1512,6 +1564,8 @@ module lib_constructors_more {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1544,6 +1598,8 @@ module lib_constructors_more {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "D.keys", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("keys")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1572,6 +1628,8 @@ module lib_constructors_more {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("gi")
       %k.3 : py.Value = base.refGet[py.Value](%k.cell.0)
@@ -1605,6 +1663,8 @@ module lib_constructors_more {
       %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %tag.1 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%tag.cell.0, %tag.1)
+      jump ^start.0()
+    start.0():
       %tag.2 : py.Value = base.refGet[py.Value](%tag.cell.0)
       %tag.3 : py.Value = py.requireDefined(%tag.2, "tag", "UnboundLocalError", "cannot access local variable 'tag' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -1636,6 +1696,8 @@ module lib_constructors_more {
       %set.1 : base.Unit = base.refSet[py.Value](%it.cell.0, %it.2)
       %tag.1 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%tag.cell.0, %tag.1)
+      jump ^start.0()
+    start.0():
       %tag.2 : py.Value = base.refGet[py.Value](%tag.cell.0)
       %tag.3 : py.Value = py.requireDefined(%tag.2, "tag", "UnboundLocalError", "cannot access local variable 'tag' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -1667,6 +1729,8 @@ module lib_constructors_more {
       %set.1 : base.Unit = base.refSet[py.Value](%it.cell.0, %it.2)
       %tag.1 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%tag.cell.0, %tag.1)
+      jump ^start.0()
+    start.0():
       %tag.2 : py.Value = base.refGet[py.Value](%tag.cell.0)
       %tag.3 : py.Value = py.requireDefined(%tag.2, "tag", "UnboundLocalError", "cannot access local variable 'tag' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -1696,6 +1760,8 @@ module lib_constructors_more {
       %set.1 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %kwargs.2)
+      jump ^start.0()
+    start.0():
       %super.0 : py.Value = py.loadGlobal("lib_constructors_more", "super") ^propagate.0()
       %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
       %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
@@ -1725,6 +1791,8 @@ module lib_constructors_more {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Grow.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
       %list.0 : py.Value = py.mkList(%int.0, %int.1)
@@ -1747,6 +1815,8 @@ module lib_constructors_more {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Grow.keys", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ks.0 : py.Value = py.attr(%self.4, "ks") ^propagate.0()
@@ -1770,6 +1840,8 @@ module lib_constructors_more {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.2)
+      jump ^start.0()
+    start.0():
       %k.3 : py.Value = base.refGet[py.Value](%k.cell.0)
       %k.4 : py.Value = py.requireDefined(%k.3, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
@@ -1816,6 +1888,8 @@ module lib_constructors_more {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "P.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("iter")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1840,6 +1914,8 @@ module lib_constructors_more {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "PI.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -1860,6 +1936,8 @@ module lib_constructors_more {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "PI.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_constructors_more", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("iter")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1882,6 +1960,8 @@ module lib_constructors_more {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "PI.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %i.0 : py.Value = py.attr(%self.4, "i") ^propagate.0()
@@ -1920,6 +2000,8 @@ module lib_constructors_more {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "NegHint.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
@@ -1937,6 +2019,8 @@ module lib_constructors_more {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "NegHint.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %StopIteration.0 : py.Value = py.loadGlobal("lib_constructors_more", "StopIteration") ^propagate.0()
       %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
       jump ^propagate.0(%exc.0)
@@ -1953,6 +2037,8 @@ module lib_constructors_more {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "NegHint.__length_hint__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %neg.0 : py.Value = py.uSub(%int.0) ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%neg.0)
@@ -1970,6 +2056,8 @@ module lib_constructors_more {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "X.__bytes__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %BS.0 : py.Value = py.loadGlobal("lib_constructors_more", "BS") ^propagate.0()
       %bytes.0 : py.Value = py.bytesLit("x")
       %tuple.0 : py.Value = py.mkTuple(%bytes.0)
@@ -1990,6 +2078,8 @@ module lib_constructors_more {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Idx.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(10)
       %int.1 : py.Value = py.intLit(30)
       %pow.0 : py.Value = py.pow(%int.0, %int.1) ^propagate.0()
@@ -2008,6 +2098,8 @@ module lib_constructors_more {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.keys", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("a")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
@@ -2030,6 +2122,8 @@ module lib_constructors_more {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)

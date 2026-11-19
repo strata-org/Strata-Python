@@ -1,6 +1,10 @@
 module lib_any_all {
   func @|lib_any_all.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_any_all")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_any_all", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -329,12 +333,26 @@ module lib_any_all {
       jump ^unwind.0(%exc.0)
     unwind.0(%exc.2 : py.Value):
       %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.2)
+      jump ^raised.0(%exc.2)
     join.0():
       jump ^head.0()
     stop.0(%exc.3 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.3)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.3)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.3)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.4 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.4)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %all.9 : py.Value = py.loadGlobal("lib_any_all", "all") ^catch.1()
       %int.23 : py.Value = py.intLit(5)
@@ -342,14 +360,14 @@ module lib_any_all {
       %kwargs.54 : py.Value = py.mkKwargs
       %call.49 : py.Value = py.call(%all.9, %tuple.56, %kwargs.54) ^catch.1()
       jump ^join.1()
-    catch.1(%exc.4 : py.Value):
-      %prev.1 : py.Value = py.pushExcInfo(%exc.4)
+    catch.1(%exc.5 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.5)
       %TypeError.1 : py.Value = py.loadGlobal("lib_any_all", "TypeError") ^unwind.1()
-      %match.1 : base.Bool = py.excMatch(%exc.4, %TypeError.1) ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.5, %TypeError.1) ^unwind.1()
       branch(%match.1) ^except.1() ^next.1()
     except.1():
       %e.cell.3 : base.Ref(py.Value) = py.globalCell("lib_any_all", "e")
-      %set.12 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.4)
+      %set.12 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.5)
       %print.12 : py.Value = py.loadGlobal("lib_any_all", "print") ^clear.1()
       %e.3 : py.Value = py.loadGlobal("lib_any_all", "e") ^clear.1()
       %args.3 : py.Value = py.attr(%e.3, "args") ^clear.1()
@@ -363,16 +381,16 @@ module lib_any_all {
       %e.cell.4 : base.Ref(py.Value) = py.globalCell("lib_any_all", "e")
       %set.13 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.4)
       jump ^join.1()
-    clear.1(%exc.5 : py.Value):
+    clear.1(%exc.6 : py.Value):
       %e.5 : py.Value = py.undef("e")
       %e.cell.5 : base.Ref(py.Value) = py.globalCell("lib_any_all", "e")
       %set.14 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
-      jump ^unwind.1(%exc.5)
+      jump ^unwind.1(%exc.6)
     next.1():
-      jump ^unwind.1(%exc.4)
-    unwind.1(%exc.6 : py.Value):
+      jump ^unwind.1(%exc.5)
+    unwind.1(%exc.7 : py.Value):
       %pop.3 : base.Unit = py.popExcept(%prev.1)
-      jump ^propagate.0(%exc.6)
+      jump ^propagate.0(%exc.7)
     join.1():
       %any.12 : py.Value = py.loadGlobal("lib_any_all", "any") ^catch.2()
       %tuple.58 : py.Value = py.mkTuple
@@ -382,14 +400,14 @@ module lib_any_all {
       %kwargs.56 : py.Value = py.mkKwargs(%str.10, %list.9)
       %call.51 : py.Value = py.call(%any.12, %tuple.58, %kwargs.56) ^catch.2()
       jump ^join.2()
-    catch.2(%exc.7 : py.Value):
-      %prev.2 : py.Value = py.pushExcInfo(%exc.7)
+    catch.2(%exc.8 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.8)
       %TypeError.2 : py.Value = py.loadGlobal("lib_any_all", "TypeError") ^unwind.2()
-      %match.2 : base.Bool = py.excMatch(%exc.7, %TypeError.2) ^unwind.2()
+      %match.2 : base.Bool = py.excMatch(%exc.8, %TypeError.2) ^unwind.2()
       branch(%match.2) ^except.2() ^next.2()
     except.2():
       %e.cell.6 : base.Ref(py.Value) = py.globalCell("lib_any_all", "e")
-      %set.15 : base.Unit = base.refSet[py.Value](%e.cell.6, %exc.7)
+      %set.15 : base.Unit = base.refSet[py.Value](%e.cell.6, %exc.8)
       %print.13 : py.Value = py.loadGlobal("lib_any_all", "print") ^clear.2()
       %e.6 : py.Value = py.loadGlobal("lib_any_all", "e") ^clear.2()
       %args.4 : py.Value = py.attr(%e.6, "args") ^clear.2()
@@ -403,16 +421,16 @@ module lib_any_all {
       %e.cell.7 : base.Ref(py.Value) = py.globalCell("lib_any_all", "e")
       %set.16 : base.Unit = base.refSet[py.Value](%e.cell.7, %e.7)
       jump ^join.2()
-    clear.2(%exc.8 : py.Value):
+    clear.2(%exc.9 : py.Value):
       %e.8 : py.Value = py.undef("e")
       %e.cell.8 : base.Ref(py.Value) = py.globalCell("lib_any_all", "e")
       %set.17 : base.Unit = base.refSet[py.Value](%e.cell.8, %e.8)
-      jump ^unwind.2(%exc.8)
+      jump ^unwind.2(%exc.9)
     next.2():
-      jump ^unwind.2(%exc.7)
-    unwind.2(%exc.9 : py.Value):
+      jump ^unwind.2(%exc.8)
+    unwind.2(%exc.10 : py.Value):
       %pop.5 : base.Unit = py.popExcept(%prev.2)
-      jump ^propagate.0(%exc.9)
+      jump ^propagate.0(%exc.10)
     join.2():
       %any.13 : py.Value = py.loadGlobal("lib_any_all", "any") ^catch.3()
       %Bad.1 : py.Value = py.loadGlobal("lib_any_all", "Bad") ^catch.3()
@@ -424,14 +442,14 @@ module lib_any_all {
       %kwargs.59 : py.Value = py.mkKwargs
       %call.54 : py.Value = py.call(%any.13, %tuple.61, %kwargs.59) ^catch.3()
       jump ^join.3()
-    catch.3(%exc.10 : py.Value):
-      %prev.3 : py.Value = py.pushExcInfo(%exc.10)
+    catch.3(%exc.11 : py.Value):
+      %prev.3 : py.Value = py.pushExcInfo(%exc.11)
       %TypeError.3 : py.Value = py.loadGlobal("lib_any_all", "TypeError") ^unwind.3()
-      %match.3 : base.Bool = py.excMatch(%exc.10, %TypeError.3) ^unwind.3()
+      %match.3 : base.Bool = py.excMatch(%exc.11, %TypeError.3) ^unwind.3()
       branch(%match.3) ^except.3() ^next.3()
     except.3():
       %e.cell.9 : base.Ref(py.Value) = py.globalCell("lib_any_all", "e")
-      %set.18 : base.Unit = base.refSet[py.Value](%e.cell.9, %exc.10)
+      %set.18 : base.Unit = base.refSet[py.Value](%e.cell.9, %exc.11)
       %print.14 : py.Value = py.loadGlobal("lib_any_all", "print") ^clear.3()
       %e.9 : py.Value = py.loadGlobal("lib_any_all", "e") ^clear.3()
       %args.5 : py.Value = py.attr(%e.9, "args") ^clear.3()
@@ -445,16 +463,16 @@ module lib_any_all {
       %e.cell.10 : base.Ref(py.Value) = py.globalCell("lib_any_all", "e")
       %set.19 : base.Unit = base.refSet[py.Value](%e.cell.10, %e.10)
       jump ^join.3()
-    clear.3(%exc.11 : py.Value):
+    clear.3(%exc.12 : py.Value):
       %e.11 : py.Value = py.undef("e")
       %e.cell.11 : base.Ref(py.Value) = py.globalCell("lib_any_all", "e")
       %set.20 : base.Unit = base.refSet[py.Value](%e.cell.11, %e.11)
-      jump ^unwind.3(%exc.11)
+      jump ^unwind.3(%exc.12)
     next.3():
-      jump ^unwind.3(%exc.10)
-    unwind.3(%exc.12 : py.Value):
+      jump ^unwind.3(%exc.11)
+    unwind.3(%exc.13 : py.Value):
       %pop.7 : base.Unit = py.popExcept(%prev.3)
-      jump ^propagate.0(%exc.12)
+      jump ^propagate.0(%exc.13)
     join.3():
       %all.10 : py.Value = py.loadGlobal("lib_any_all", "all") ^catch.4()
       %Raises.1 : py.Value = py.loadGlobal("lib_any_all", "Raises") ^catch.4()
@@ -465,14 +483,14 @@ module lib_any_all {
       %kwargs.62 : py.Value = py.mkKwargs
       %call.57 : py.Value = py.call(%all.10, %tuple.64, %kwargs.62) ^catch.4()
       jump ^join.4()
-    catch.4(%exc.13 : py.Value):
-      %prev.4 : py.Value = py.pushExcInfo(%exc.13)
+    catch.4(%exc.14 : py.Value):
+      %prev.4 : py.Value = py.pushExcInfo(%exc.14)
       %ValueError.0 : py.Value = py.loadGlobal("lib_any_all", "ValueError") ^unwind.4()
-      %match.4 : base.Bool = py.excMatch(%exc.13, %ValueError.0) ^unwind.4()
+      %match.4 : base.Bool = py.excMatch(%exc.14, %ValueError.0) ^unwind.4()
       branch(%match.4) ^except.4() ^next.4()
     except.4():
       %e.cell.12 : base.Ref(py.Value) = py.globalCell("lib_any_all", "e")
-      %set.21 : base.Unit = base.refSet[py.Value](%e.cell.12, %exc.13)
+      %set.21 : base.Unit = base.refSet[py.Value](%e.cell.12, %exc.14)
       %print.15 : py.Value = py.loadGlobal("lib_any_all", "print") ^clear.4()
       %e.12 : py.Value = py.loadGlobal("lib_any_all", "e") ^clear.4()
       %args.6 : py.Value = py.attr(%e.12, "args") ^clear.4()
@@ -486,29 +504,31 @@ module lib_any_all {
       %e.cell.13 : base.Ref(py.Value) = py.globalCell("lib_any_all", "e")
       %set.22 : base.Unit = base.refSet[py.Value](%e.cell.13, %e.13)
       jump ^join.4()
-    clear.4(%exc.14 : py.Value):
+    clear.4(%exc.15 : py.Value):
       %e.14 : py.Value = py.undef("e")
       %e.cell.14 : base.Ref(py.Value) = py.globalCell("lib_any_all", "e")
       %set.23 : base.Unit = base.refSet[py.Value](%e.cell.14, %e.14)
-      jump ^unwind.4(%exc.14)
+      jump ^unwind.4(%exc.15)
     next.4():
-      jump ^unwind.4(%exc.13)
-    unwind.4(%exc.15 : py.Value):
+      jump ^unwind.4(%exc.14)
+    unwind.4(%exc.16 : py.Value):
       %pop.9 : base.Unit = py.popExcept(%prev.4)
-      jump ^propagate.0(%exc.15)
+      jump ^propagate.0(%exc.16)
     join.4():
       %none.2 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.2)
       ret(%ret.0)
-    propagate.0(%exc.16 : py.Value):
-      %exc.17 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.16)
-      ret(%exc.17)
+    propagate.0(%exc.17 : py.Value):
+      %exc.18 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.17)
+      ret(%exc.18)
   }
   func @|lib_any_all.Loud.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__bool__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -543,6 +563,8 @@ module lib_any_all {
     #[py.bindings = [{name = "__len__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -574,6 +596,8 @@ module lib_any_all {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -611,6 +635,8 @@ module lib_any_all {
     #[py.bindings = [{name = "__bool__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -642,6 +668,8 @@ module lib_any_all {
     #[py.bindings = [{name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -685,6 +713,8 @@ module lib_any_all {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %v.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%v.cell.0, %v.2)
+      jump ^start.0()
+    start.0():
       %v.3 : py.Value = base.refGet[py.Value](%v.cell.0)
       %v.4 : py.Value = py.requireDefined(%v.3, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -706,6 +736,8 @@ module lib_any_all {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Loud.__bool__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_any_all", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("bool")
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -732,6 +764,8 @@ module lib_any_all {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Sized.__len__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -753,6 +787,8 @@ module lib_any_all {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %n.6 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.6)
+      jump ^start.0()
+    start.0():
       %n.7 : py.Value = base.refGet[py.Value](%n.cell.0)
       %n.8 : py.Value = py.requireDefined(%n.7, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -774,6 +810,8 @@ module lib_any_all {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Countdown.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
@@ -791,6 +829,8 @@ module lib_any_all {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Countdown.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %n.2 : py.Value = py.attr(%self.4, "n") ^propagate.0()
@@ -837,6 +877,8 @@ module lib_any_all {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Bad.__bool__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -853,6 +895,8 @@ module lib_any_all {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Raises.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
@@ -870,6 +914,8 @@ module lib_any_all {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Raises.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %ValueError.0 : py.Value = py.loadGlobal("lib_any_all", "ValueError") ^propagate.0()
       %str.0 : py.Value = py.strLit("boom")
       %tuple.0 : py.Value = py.mkTuple(%str.0)

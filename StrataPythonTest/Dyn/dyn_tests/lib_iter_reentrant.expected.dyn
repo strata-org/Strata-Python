@@ -1,6 +1,8 @@
 module lib_iter_reentrant {
   func @|lib_iter_reentrant.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_iter_reentrant")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_reentrant", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -207,6 +209,8 @@ module lib_iter_reentrant {
       ret(%exc.1)
   }
   func @lib_iter_reentrant.rest(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %it.0 : py.Value = py.undef("it")
       %it.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%it.0)
@@ -219,6 +223,8 @@ module lib_iter_reentrant {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "rest", 0, 1, false, false, "it") ^propagate.0()
       %it.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%it.cell.0, %it.2)
+      jump ^start.0()
+    start.0():
       %list.0 : py.Value = py.mkList
       %set.1 : base.Unit = base.refSet[py.Value](%out.cell.0, %list.0)
       %it.3 : py.Value = base.refGet[py.Value](%it.cell.0)
@@ -229,30 +235,46 @@ module lib_iter_reentrant {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
       %out.1 : py.Value = base.refGet[py.Value](%out.cell.0)
-      %out.2 : py.Value = py.requireDefined(%out.1, "out", "UnboundLocalError", "cannot access local variable 'out' where it is not associated with a value") ^propagate.0()
+      %out.2 : py.Value = py.requireDefined(%out.1, "out", "UnboundLocalError", "cannot access local variable 'out' where it is not associated with a value") ^raised.0()
       %x.1 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.2 : py.Value = py.requireDefined(%x.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.2 : py.Value = py.requireDefined(%x.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^raised.0()
       %list.1 : py.Value = py.mkList(%x.2)
-      %iAdd.0 : py.Value = py.iAdd(%out.2, %list.1) ^propagate.0()
+      %iAdd.0 : py.Value = py.iAdd(%out.2, %list.1) ^raised.0()
       %set.3 : base.Unit = base.refSet[py.Value](%out.cell.0, %iAdd.0)
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %out.3 : py.Value = base.refGet[py.Value](%out.cell.0)
       %out.4 : py.Value = py.requireDefined(%out.3, "out", "UnboundLocalError", "cannot access local variable 'out' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%out.4)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @|lib_iter_reentrant.It.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -290,6 +312,8 @@ module lib_iter_reentrant {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__len__", binding = "def"}, {name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -327,6 +351,8 @@ module lib_iter_reentrant {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__len__", binding = "def"}, {name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -364,6 +390,8 @@ module lib_iter_reentrant {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__len__", binding = "def"}, {name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -405,6 +433,8 @@ module lib_iter_reentrant {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -429,6 +459,8 @@ module lib_iter_reentrant {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
@@ -446,6 +478,8 @@ module lib_iter_reentrant {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %n.2 : py.Value = py.attr(%self.4, "n") ^propagate.0()
@@ -507,6 +541,8 @@ module lib_iter_reentrant {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Steps.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -531,6 +567,8 @@ module lib_iter_reentrant {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Steps.__len__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(4)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -552,6 +590,8 @@ module lib_iter_reentrant {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %i.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%i.cell.0, %i.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %calls.0 : py.Value = py.attr(%self.4, "calls") ^propagate.0()
@@ -599,6 +639,8 @@ module lib_iter_reentrant {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Ends.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -623,6 +665,8 @@ module lib_iter_reentrant {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Ends.__len__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(3)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -644,6 +688,8 @@ module lib_iter_reentrant {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %i.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%i.cell.0, %i.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %calls.0 : py.Value = py.attr(%self.4, "calls") ^propagate.0()
@@ -691,6 +737,8 @@ module lib_iter_reentrant {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "HintSteps.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -719,6 +767,8 @@ module lib_iter_reentrant {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "HintSteps.__len__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %lens.0 : py.Value = py.attr(%self.4, "lens") ^propagate.0()
@@ -786,6 +836,8 @@ module lib_iter_reentrant {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %i.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%i.cell.0, %i.2)
+      jump ^start.0()
+    start.0():
       %i.3 : py.Value = base.refGet[py.Value](%i.cell.0)
       %i.4 : py.Value = py.requireDefined(%i.3, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.4)

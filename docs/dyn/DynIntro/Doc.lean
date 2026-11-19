@@ -1010,24 +1010,28 @@ tag := "tr-cf"
 * `break` and `continue` keep a stack of exit blocks.
 
 ```leantext "Python's `while` (StrataPython/Dyn/Translate.lean, whileStmt)"
+  let outer ← build handler
   let head ← build (freshLabel [] "head")
   let bodyL ← build (freshLabel [] "body")
   let elseL? ← if orelse.isEmpty then pure none else some <$> build (freshLabel [] "else")
   let exit ← build (freshLabel [] "exit")
+  let ex ← loopLabels
   jump head.goto
-  build (startBlock head)
-  transCond test bodyL.goto (elseL?.getD exit).goto
+  build (startBlock head (info := some { range := sr }))
+  withHandler ex.raised (transCond test bodyL.goto ex.normal.goto)
   build (startBlock bodyL)
-  withExit (.loop exit head) (transStmts body)
+  withHandler ex.raised (withExit (.loop ex.brk head ex.done) (transStmts body))
   if ← isOpen then jump head.goto
+  loopDone sr head ex (elseL?.getD exit) exit outer
   if let some l := elseL? then
-    build (startBlock l)
-    transStmts orelse
-    if ← isOpen then jump exit.goto
+    if ← targeted l then
+      build (startBlock l)
+      transStmts orelse
+      if ← isOpen then jump exit.goto
   if ← targeted exit then build (startBlock exit)
 ```
 
-In Python's translator, each block is a typed `BlockRef`, and here each takes no values. A transfer to a block is a `Target` made from it, such as `head.goto`, so Lean checks what a jump passes against what its block takes. `isOpen` says whether a block is still open: a body that ends in `break`, `return` or `raise` has closed its last block. `targeted exit` says whether a transfer names the exit block, which is opened only then.
+In Python's translator, each block is a typed `BlockRef`, and here each takes no values. A transfer to a block is a `Target` made from it, such as `head.goto`, so Lean checks what a jump passes against what its block takes. `isOpen` says whether a block is still open: a body that ends in `break`, `return` or `raise` has closed its last block. `targeted exit` says whether a transfer names the exit block, which is opened only then. Every way out of the loop meets at its `done` block (`loopLabels`, `loopDone`), with a completion that says why the loop ended, and the head block carries the loop statement's source range.
 
 ## 5. Exceptions
 %%%

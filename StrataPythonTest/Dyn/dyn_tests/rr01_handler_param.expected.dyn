@@ -1,6 +1,8 @@
 module rr01_handler_param {
   func @|rr01_handler_param.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("rr01_handler_param")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("rr01_handler_param", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -30,6 +32,8 @@ module rr01_handler_param {
       %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.2)
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%b.cell.0, %b.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       %g.0 : py.Value = py.loadGlobal("rr01_handler_param", "g") ^catch.0()

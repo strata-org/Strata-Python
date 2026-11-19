@@ -1,6 +1,8 @@
 module lib_bytes {
   func @|lib_bytes.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_bytes")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_bytes", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -277,6 +279,8 @@ module lib_bytes {
     #[py.bindings = [{name = "__bytes__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -308,6 +312,8 @@ module lib_bytes {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -339,6 +345,8 @@ module lib_bytes {
     #[py.bindings = [{name = "__index__", binding = "def"}, {name = "__iter__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -373,6 +381,8 @@ module lib_bytes {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -410,6 +420,8 @@ module lib_bytes {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -452,6 +464,8 @@ module lib_bytes {
       %set.1 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %kwargs.2)
+      jump ^start.0()
+    start.0():
       %f.3 : py.Value = base.refGet[py.Value](%f.cell.0)
       %f.4 : py.Value = py.requireDefined(%f.3, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
       %args.3 : py.Value = base.refGet[py.Value](%args.cell.0)
@@ -519,6 +533,8 @@ module lib_bytes {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.__bytes__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %bytes.0 : py.Value = py.bytesLit("from bytes")
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%bytes.0)
       ret(%ret.0)
@@ -535,6 +551,8 @@ module lib_bytes {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Idx.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(3)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -551,6 +569,8 @@ module lib_bytes {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "BadIdx.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %TypeError.0 : py.Value = py.loadGlobal("lib_bytes", "TypeError") ^propagate.0()
       %str.0 : py.Value = py.strLit("no")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -571,6 +591,8 @@ module lib_bytes {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "BadIdx.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %iter.0 : py.Value = py.loadGlobal("lib_bytes", "iter") ^propagate.0()
       %int.0 : py.Value = py.intLit(65)
       %list.0 : py.Value = py.mkList(%int.0)
@@ -597,6 +619,8 @@ module lib_bytes {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %n.6 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.6)
+      jump ^start.0()
+    start.0():
       %n.7 : py.Value = base.refGet[py.Value](%n.cell.0)
       %n.8 : py.Value = py.requireDefined(%n.7, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -618,6 +642,8 @@ module lib_bytes {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Down.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
@@ -635,6 +661,8 @@ module lib_bytes {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Down.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %n.2 : py.Value = py.attr(%self.4, "n") ^propagate.0()

@@ -1,0 +1,11 @@
+module top
+  f1: local (assigned)
+  function f1
+    ValueError: global implicit (referenced)
+    e: local (assigned)
+    g: global implicit (referenced)
+    h: global implicit (referenced)
+    x: local (assigned, referenced)
+    xs: local (parameter, referenced)
+    y: global implicit (referenced)
+qualnames: f1

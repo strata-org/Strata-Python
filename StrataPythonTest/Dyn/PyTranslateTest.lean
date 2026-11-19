@@ -7,6 +7,7 @@ module
 public import StrataDyn.DDM
 public import StrataDyn.WF
 public import StrataPython.Dyn.Translate
+public import StrataPython.Dyn.Canonical
 import all StrataPython.Dyn.Translate
 import all StrataPython.Dyn.Scope
 import StrataDyn.Env.WF
@@ -14,6 +15,7 @@ import StrataDyn.Env.WF
 meta import StrataDyn.DDM
 meta import StrataDyn.WF
 meta import StrataPython.Dyn.Translate
+meta import StrataPython.Dyn.Canonical
 meta import StrataPythonTest.Dyn.TestUtil
 
 set_option autoImplicit false
@@ -104,6 +106,39 @@ private def ranges (fn : Func Py.env Info) : Array SourceRange :=
 #guard ((ranged.module.raw.funcs[0]?.map ranges).getD #[]).filter (· != rangeAt 0 11) ==
   #[rangeAt 4 5, rangeAt 0 5, rangeAt 0 5, rangeAt 10 11, rangeAt 6 11, rangeAt 6 11]
 
+/-! ## Each loop's head carries its loop statement's range
+
+A later stage finds the loop records of a source loop through the source range of its head block,
+which the canonicalization pass keeps. -/
+
+/-- `while a: pass` at bytes 20 to 40, then `for i in a: if i: pass` at 41 to 60, in a function.
+The `if` ends the `for` head block under its own range, so the head block keeps the `for`'s range
+only because it was started with it. -/
+private def loops : Result :=
+  let a : StrataPython.arg SourceRange := .mk_arg none' ⟨none', "a"⟩ ⟨none', none⟩ ⟨none', none⟩
+  let args : StrataPython.arguments SourceRange :=
+    .mk_arguments none' ⟨none', #[]⟩ ⟨none', #[a]⟩ ⟨none', none⟩ ⟨none', #[]⟩ ⟨none', #[]⟩
+      ⟨none', none⟩ ⟨none', #[]⟩
+  let w := .While (rangeAt 20 40) (load "a") ⟨none', #[.Pass none']⟩ ⟨none', #[]⟩
+  let f := .For (rangeAt 41 60) (store "i") (load "a")
+    ⟨none', #[.If (rangeAt 50 59) (load "i") ⟨none', #[.Pass none']⟩ ⟨none', #[]⟩]⟩ ⟨none', #[]⟩
+    ⟨none', none⟩
+  translate "m" #[.FunctionDef (rangeAt 0 60) ⟨none', "f"⟩ args ⟨none', #[w, f]⟩ ⟨none', #[]⟩
+    ⟨none', none⟩ ⟨none', none⟩ ⟨none', #[]⟩]
+
+/-- The range of the head block of each loop that `fn`'s `py.loops` attribute records. -/
+private def headRanges (fn : Func Py.env Info) : List SourceRange :=
+  ((PyCanonical.records? fn.info).getD []).filterMap fun r =>
+    (fn.blocks.find? (·.label == r.head)).map (·.info.range)
+
+#guard loops.ok
+#guard ((loops.module.raw.funcs.find? (nameText ·.name == "m.f")).map headRanges) ==
+  some [rangeAt 20 40, rangeAt 41 60]
+-- The canonicalization pass keeps them.
+#guard (match PyCanonical.runModule loops.module with
+  | .ok cm => (cm.module.raw.funcs.find? (nameText ·.name == "m.f")).map headRanges
+  | .error _ => none) == some [rangeAt 20 40, rangeAt 41 60]
+
 -- A rejected complex literal is a diagnostic.
 #guard withComplex.diagnostics.map (·.message) = #["complex literal is not supported"]
 
@@ -153,6 +188,8 @@ private def binding : Result := translate "m" #[bindingDef]
 /-- info: module m {
   func @|m.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -203,6 +240,8 @@ private def binding : Result := translate "m" #[bindingDef]
       %set.5 : base.Unit = base.refSet[py.Value](%rest.cell.0, %rest.1)
       %kw.1 : py.Value = py.tupleGet(%bound.0, 6)
       %set.6 : base.Unit = base.refSet[py.Value](%kw.cell.0, %kw.1)
+      jump ^start.0()
+    start.0():
       %a.3 : py.Value = base.refGet[py.Value](%a.cell.0)
       %a.4 : py.Value = py.requireDefined(%a.3, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%a.4)

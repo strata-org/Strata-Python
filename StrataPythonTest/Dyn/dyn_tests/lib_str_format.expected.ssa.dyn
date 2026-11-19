@@ -1,6 +1,8 @@
 module lib_str_format {
   func @|lib_str_format.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_str_format")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_str_format", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -300,6 +302,8 @@ module lib_str_format {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__format__", binding = "def"}, {name = "__repr__", binding = "def"}, {name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -340,6 +344,8 @@ module lib_str_format {
     #[py.bindings = [{name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -382,6 +388,8 @@ module lib_str_format {
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
       %args.2 : py.Value = py.tupleGet(%bound.0, 1)
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_str_format", "print") ^catch.0()
       %repr.0 : py.Value = py.loadGlobal("lib_str_format", "repr") ^catch.0()
       %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
@@ -454,6 +462,8 @@ module lib_str_format {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "P.__init__", 0, 2, false, false, "self", "v") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %v.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %v.4 : py.Value = py.requireDefined(%v.2, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %v.5 : base.Unit = py.setAttr(%self.4, "v", %v.4) ^propagate.0()
@@ -476,6 +486,8 @@ module lib_str_format {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "P.__format__", 0, 2, false, false, "self", "spec") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %spec.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_str_format", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("format")
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -513,6 +525,8 @@ module lib_str_format {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "P.__repr__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("P(")
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %v.0 : py.Value = py.attr(%self.4, "v") ^propagate.0()
@@ -538,6 +552,8 @@ module lib_str_format {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "P.__getitem__", 0, 2, false, false, "self", "k") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_str_format", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("getitem")
       %repr.0 : py.Value = py.loadGlobal("lib_str_format", "repr") ^propagate.0()
@@ -571,6 +587,8 @@ module lib_str_format {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.__getitem__", 0, 2, false, false, "self", "k") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_str_format", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("map")
       %repr.0 : py.Value = py.loadGlobal("lib_str_format", "repr") ^propagate.0()

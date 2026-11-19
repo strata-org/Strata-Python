@@ -1,6 +1,8 @@
 module p10_conditional_local {
   func @|p10_conditional_local.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p10_conditional_local")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p10_conditional_local", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -28,6 +30,8 @@ module p10_conditional_local {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "c") ^propagate.0()
       %c.9 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%c.cell.0, %c.9)
+      jump ^start.0()
+    start.0():
       %c.10 : py.Value = base.refGet[py.Value](%c.cell.0)
       %c.11 : py.Value = py.requireDefined(%c.10, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%c.11) ^propagate.0()
@@ -48,6 +52,8 @@ module p10_conditional_local {
       ret(%exc.1)
   }
   func @p10_conditional_local.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %xs.0 : py.Value = py.undef("xs")
       %xs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%xs.0)
@@ -60,6 +66,8 @@ module p10_conditional_local {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%xs.4) ^propagate.0()
@@ -68,20 +76,34 @@ module p10_conditional_local {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %set.1 : base.Unit = base.refSet[py.Value](%i.cell.0, %item.0)
       %i.1 : py.Value = base.refGet[py.Value](%i.cell.0)
-      %i.2 : py.Value = py.requireDefined(%i.1, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %i.2 : py.Value = py.requireDefined(%i.1, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0()
       %set.2 : base.Unit = base.refSet[py.Value](%last.cell.0, %i.2)
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %last.1 : py.Value = base.refGet[py.Value](%last.cell.0)
       %last.2 : py.Value = py.requireDefined(%last.1, "last", "UnboundLocalError", "cannot access local variable 'last' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%last.2)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
 }
 

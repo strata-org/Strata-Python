@@ -1,6 +1,8 @@
 module s167_extended_slice_write_index {
   func @|s167_extended_slice_write_index.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s167_extended_slice_write_index")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s167_extended_slice_write_index", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -129,6 +131,8 @@ module s167_extended_slice_write_index {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -160,6 +164,8 @@ module s167_extended_slice_write_index {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -194,6 +200,8 @@ module s167_extended_slice_write_index {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Two.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %list.0 : py.Value = py.mkList(%int.0)
       %xs.0 : py.Value = py.loadGlobal("s167_extended_slice_write_index", "xs") ^propagate.0()
@@ -217,6 +225,8 @@ module s167_extended_slice_write_index {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Two2.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %list.0 : py.Value = py.mkList(%int.0)
       %ys.0 : py.Value = py.loadGlobal("s167_extended_slice_write_index", "ys") ^propagate.0()

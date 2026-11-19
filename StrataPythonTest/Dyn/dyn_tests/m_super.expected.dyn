@@ -6,6 +6,8 @@
 module m_super {
   func @|m_super.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_super")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_super", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -58,6 +60,8 @@ module m_super {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "wrap", 0, 1, false, false, "cls") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
+      jump ^start.0()
+    start.0():
       %cls.3 : py.Value = base.refGet[py.Value](%cls.cell.0)
       %cls.4 : py.Value = py.requireDefined(%cls.3, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%cls.4)
@@ -71,6 +75,8 @@ module m_super {
     #[py.bindings = [{name = "here", value = "__class__"}, {name = "m", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -115,6 +121,8 @@ module m_super {
     #[py.bindings = [{name = "m", binding = "def"}, {name = "names", binding = "def"}, {name = "two", binding = "def"}, {name = "bare_del", binding = "def"}, {name = "attr_del", binding = "def"}, {name = "cls_del", binding = "def"}, {name = "store_del", binding = "def"}, {name = "rebind", binding = "def"}, {name = "f", value = {expr = "Lambda"}}, {name = "local", binding = "def"}, {name = "star", binding = "def"}, {name = "kw", binding = "def"}, {name = "x", value = {call = "super", args = [], keywords = []}}, {name = "outer", binding = "def"}, {name = "s", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -206,6 +214,8 @@ module m_super {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("super() outside a class")
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
@@ -228,6 +238,8 @@ module m_super {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %x.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.4)
@@ -250,6 +262,8 @@ module m_super {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %x.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %super.0 : py.Value = py.loadGlobal("m_super", "super") ^propagate.0()
       %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
       %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
@@ -283,6 +297,8 @@ module m_super {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.names", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %range.0 : py.Value = py.loadGlobal("m_super", "range") ^propagate.0()
       %int.0 : py.Value = py.intLit(2)
       %tuple.0 : py.Value = py.mkTuple(%int.0)
@@ -340,6 +356,8 @@ module m_super {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.two", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %super.0 : py.Value = py.loadGlobal("m_super", "super") ^propagate.0()
       %B.0 : py.Value = py.loadGlobal("m_super", "B") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -367,6 +385,8 @@ module m_super {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.bare_del", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %self.5 : py.Value = py.undef("self")
@@ -394,6 +414,8 @@ module m_super {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.attr_del", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %self.5 : py.Value = py.undef("self")
@@ -426,6 +448,8 @@ module m_super {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.cls_del", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %self.5 : py.Value = py.undef("self")
@@ -454,6 +478,8 @@ module m_super {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.store_del", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %self.5 : py.Value = py.undef("self")
@@ -498,6 +524,8 @@ module m_super {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %other.3 : py.Value = base.refGet[py.Value](%other.cell.0)
       %other.4 : py.Value = py.requireDefined(%other.3, "other", "UnboundLocalError", "cannot access local variable 'other' where it is not associated with a value") ^propagate.0()
       %set.2 : base.Unit = base.refSet[py.Value](%self.cell.0, %other.4)
@@ -569,6 +597,8 @@ module m_super {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.<lambda>", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %super.0 : py.Value = py.loadGlobal("m_super", "super") ^propagate.0()
       %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
       %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
@@ -599,6 +629,8 @@ module m_super {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.local", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %len.0 : py.Value = py.loadGlobal("m_super", "len") ^propagate.0()
       %set.1 : base.Unit = base.refSet[py.Value](%super.cell.0, %len.0)
       %super.1 : py.Value = base.refGet[py.Value](%super.cell.0)
@@ -620,6 +652,8 @@ module m_super {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.star", 0, 0, true, false) ^propagate.0()
       %args.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("super() without a positional parameter")
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
@@ -637,6 +671,8 @@ module m_super {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.kw", 0, 0, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("super() without a positional parameter")
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
@@ -656,6 +692,8 @@ module m_super {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.outer", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %__class__.0 : py.Value = py.undef("__class__")
       %__class__.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%__class__.0)
@@ -678,6 +716,8 @@ module m_super {
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.s", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("super() without a positional parameter")
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
@@ -691,6 +731,8 @@ module m_super {
     #[py.bindings = [{name = "n", binding = "def"}, {name = "y", value = "__class__"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %__class__.cell.1 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -739,6 +781,8 @@ module m_super {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.outer.<locals>.Inner.n", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
       %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__class__.1)

@@ -1,6 +1,8 @@
 module t27_module_vars {
   func @|t27_module_vars.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("t27_module_vars")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -64,11 +66,15 @@ module t27_module_vars {
       ret(%exc.1)
   }
   func @t27_module_vars.use_module_vars(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %i.0 : py.Value = py.undef("i")
       %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "use_module_vars", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("Functions see module-level vars as qualifiedRef.")
       %logger.0 : py.Value = py.loadGlobal("t27_module_vars", "logger") ^propagate.0()
       %info.0 : py.Value = py.attr(%logger.0, "info") ^propagate.0()
@@ -85,27 +91,42 @@ module t27_module_vars {
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
-      %i.2 : py.Value = py.requireDefined(%item.0, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
-      %threshold.0 : py.Value = py.loadGlobal("t27_module_vars", "threshold") ^propagate.0()
-      %gt.0 : py.Value = py.gt(%i.2, %threshold.0) ^propagate.0()
-      %cond.0 : base.Bool = py.truthy(%gt.0) ^propagate.0()
+      %i.2 : py.Value = py.requireDefined(%item.0, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0()
+      %threshold.0 : py.Value = py.loadGlobal("t27_module_vars", "threshold") ^raised.0()
+      %gt.0 : py.Value = py.gt(%i.2, %threshold.0) ^raised.0()
+      %cond.0 : base.Bool = py.truthy(%gt.0) ^raised.0()
       branch(%cond.0) ^then.0() ^else.0()
     then.0():
-      jump ^exit.0()
+      jump ^brk.0()
     else.0():
       jump ^join.0()
     join.0():
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    brk.0():
+      %comp.1 : py.Completion = py.completionBreak
+      jump ^done.0(%comp.1)
+    raised.0(%exc.1 : py.Value):
+      %comp.2 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.2)
+    done.0(%comp.3 : py.Completion):
+      py.Completion.case(%comp.3) ^exit.0() ^unreachable.0() ^propagate.0() ^exit.0() ^unreachable.1()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
     exit.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @t27_module_vars.param_shadows_module_var(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -115,6 +136,8 @@ module t27_module_vars {
       %defaults.0 : py.Value = py.mkTuple(%logger.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "param_shadows_module_var", 0, 1, false, false, "logger") ^propagate.0()
       %logger.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("Function parameter shadows module-level var of same name.")
       %logger.4 : py.Value = py.requireDefined(%logger.2, "logger", "UnboundLocalError", "cannot access local variable 'logger' where it is not associated with a value") ^propagate.0()
       %info.0 : py.Value = py.attr(%logger.4, "info") ^propagate.0()
@@ -135,6 +158,8 @@ module t27_module_vars {
       %MAX_RETRIES.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%MAX_RETRIES.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "local_shadows_module_var", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("Local assignment shadows module-level var after the assignment.")
       %int.0 : py.Value = py.intLit(10)
       %MAX_RETRIES.2 : py.Value = py.requireDefined(%int.0, "MAX_RETRIES", "UnboundLocalError", "cannot access local variable 'MAX_RETRIES' where it is not associated with a value") ^propagate.0()
@@ -150,6 +175,8 @@ module t27_module_vars {
       %new_logger.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%new_logger.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "mixed_imports_and_vars", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("Function uses both imports and module-level vars.")
       %logging.0 : py.Value = py.loadGlobal("t27_module_vars", "logging") ^propagate.0()
       %getLogger.0 : py.Value = py.attr(%logging.0, "getLogger") ^propagate.0()
@@ -180,6 +207,8 @@ module t27_module_vars {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "ifexp_assignment", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("Assignment target should not be demanded by IfExp sub-blocks.")
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%x.4) ^propagate.0()
@@ -208,6 +237,8 @@ module t27_module_vars {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "boolop_assignment", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("Assignment target should not be demanded by BoolOp sub-blocks.")
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%x.4) ^propagate.0()

@@ -1,6 +1,8 @@
 module s124_new_static_base {
   func @|s124_new_static_base.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s124_new_static_base")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -195,6 +197,8 @@ module s124_new_static_base {
     #[py.bindings = [{name = "__new__", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -227,6 +231,8 @@ module s124_new_static_base {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -255,6 +261,8 @@ module s124_new_static_base {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -284,6 +292,8 @@ module s124_new_static_base {
     #[py.bindings = [{name = "__new__", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -316,6 +326,8 @@ module s124_new_static_base {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -350,6 +362,8 @@ module s124_new_static_base {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "t", 0, 1, false, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%f.cell.0, %f.2)
+      jump ^start.0()
+    start.0():
       %f.3 : py.Value = base.refGet[py.Value](%f.cell.0)
       %f.4 : py.Value = py.requireDefined(%f.3, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
@@ -397,6 +411,8 @@ module s124_new_static_base {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %NameError.0 : py.Value = py.loadGlobal("s124_new_static_base", "NameError") ^propagate.0()
       %str.0 : py.Value = py.strLit("a")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -416,6 +432,8 @@ module s124_new_static_base {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %AttributeError.0 : py.Value = py.loadGlobal("s124_new_static_base", "AttributeError") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %str.0 : py.Value = py.strLit("name")
@@ -436,6 +454,8 @@ module s124_new_static_base {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %ImportError.0 : py.Value = py.loadGlobal("s124_new_static_base", "ImportError") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %str.0 : py.Value = py.strLit("name")
@@ -458,6 +478,8 @@ module s124_new_static_base {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %NameError.0 : py.Value = py.loadGlobal("s124_new_static_base", "NameError") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %str.0 : py.Value = py.strLit("x")
@@ -483,6 +505,8 @@ module s124_new_static_base {
       %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
       %a.1 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.1)
+      jump ^start.0()
+    start.0():
       %super.0 : py.Value = py.loadGlobal("s124_new_static_base", "super") ^propagate.0()
       %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
       %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
@@ -520,6 +544,8 @@ module s124_new_static_base {
       %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
       %a.1 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.1)
+      jump ^start.0()
+    start.0():
       %super.0 : py.Value = py.loadGlobal("s124_new_static_base", "super") ^propagate.0()
       %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
       %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()

@@ -1,6 +1,8 @@
 module s344_dict_str_table_convert {
   func @|s344_dict_str_table_convert.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s344_dict_str_table_convert")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s344_dict_str_table_convert", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -77,6 +79,8 @@ module s344_dict_str_table_convert {
     #[py.bindings = [{name = "__hash__", binding = "def"}, {name = "__eq__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -111,6 +115,8 @@ module s344_dict_str_table_convert {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__eq__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -148,6 +154,8 @@ module s344_dict_str_table_convert {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.__hash__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("q")
       %__hash__.0 : py.Value = py.attr(%str.0, "__hash__") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
@@ -171,6 +179,8 @@ module s344_dict_str_table_convert {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.__eq__", 0, 2, false, false, "self", "o") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %o.4 : py.Value = py.requireDefined(%o.2, "o", "UnboundLocalError", "cannot access local variable 'o' where it is not associated with a value") ^propagate.0()
       %str.0 : py.Value = py.strLit("q")
       %eq.0 : py.Value = py.eq(%o.4, %str.0) ^propagate.0()
@@ -192,6 +202,8 @@ module s344_dict_str_table_convert {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.__init__", 0, 2, false, false, "self", "v") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %v.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %v.4 : py.Value = py.requireDefined(%v.2, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %v.5 : base.Unit = py.setAttr(%self.4, "v", %v.4) ^propagate.0()
@@ -214,6 +226,8 @@ module s344_dict_str_table_convert {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.__eq__", 0, 2, false, false, "self", "o") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s344_dict_str_table_convert", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("eq")
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()

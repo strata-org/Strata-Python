@@ -1,6 +1,8 @@
 module s112_exception_attrs {
   func @|s112_exception_attrs.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s112_exception_attrs")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s112_exception_attrs", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -306,6 +308,8 @@ module s112_exception_attrs {
       %set.0 : base.Unit = base.refSet[py.Value](%name.cell.0, %name.2)
       %f.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %f.2)
+      jump ^start.0()
+    start.0():
       %f.3 : py.Value = base.refGet[py.Value](%f.cell.0)
       %f.4 : py.Value = py.requireDefined(%f.3, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
@@ -362,6 +366,8 @@ module s112_exception_attrs {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "ctx", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %e.0 : py.Value = py.loadGlobal("s112_exception_attrs", "e") ^propagate.0()
       %__context__.0 : base.Unit = py.setAttr(%e.0, "__context__", %int.0) ^propagate.0()
@@ -376,6 +382,8 @@ module s112_exception_attrs {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "sup", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %e.0 : py.Value = py.loadGlobal("s112_exception_attrs", "e") ^propagate.0()
       %__suppress_context__.0 : base.Unit = py.setAttr(%e.0, "__suppress_context__", %int.0) ^propagate.0()
@@ -390,6 +398,8 @@ module s112_exception_attrs {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "tb", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %e.0 : py.Value = py.loadGlobal("s112_exception_attrs", "e") ^propagate.0()
       %__traceback__.0 : base.Unit = py.setAttr(%e.0, "__traceback__", %int.0) ^propagate.0()
@@ -404,6 +414,8 @@ module s112_exception_attrs {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "dargs", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %e.0 : py.Value = py.loadGlobal("s112_exception_attrs", "e") ^propagate.0()
       %args.1 : base.Unit = py.delAttr(%e.0, "args") ^propagate.0()
       %none.0 : py.Value = py.noneLit
@@ -417,6 +429,8 @@ module s112_exception_attrs {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "cause", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %e.0 : py.Value = py.loadGlobal("s112_exception_attrs", "e") ^propagate.0()
       %__cause__.0 : base.Unit = py.setAttr(%e.0, "__cause__", %int.0) ^propagate.0()
@@ -431,6 +445,8 @@ module s112_exception_attrs {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "dctx", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %e.0 : py.Value = py.loadGlobal("s112_exception_attrs", "e") ^propagate.0()
       %__context__.0 : base.Unit = py.delAttr(%e.0, "__context__") ^propagate.0()
       %none.0 : py.Value = py.noneLit
@@ -445,6 +461,8 @@ module s112_exception_attrs {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")

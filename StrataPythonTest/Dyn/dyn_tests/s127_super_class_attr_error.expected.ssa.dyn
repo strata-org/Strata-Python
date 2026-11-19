@@ -1,6 +1,8 @@
 module s127_super_class_attr_error {
   func @|s127_super_class_attr_error.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s127_super_class_attr_error")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s127_super_class_attr_error", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -43,6 +45,8 @@ module s127_super_class_attr_error {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -71,6 +75,8 @@ module s127_super_class_attr_error {
     #[py.bindings = [{name = "__getattribute__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -109,6 +115,8 @@ module s127_super_class_attr_error {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.__getattribute__", 0, 2, false, false, "self", "n") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %n.6 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %n.8 : py.Value = py.requireDefined(%n.6, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %str.0 : py.Value = py.strLit("__class__")
       %eq.0 : py.Value = py.eq(%n.8, %str.0) ^propagate.0()

@@ -1,6 +1,8 @@
 module e11_nonlocal_param {
   func @|e11_nonlocal_param.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("e11_nonlocal_param")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e11_nonlocal_param", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -25,6 +27,8 @@ module e11_nonlocal_param {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@e11_nonlocal_param.f.g, "g", "e11_nonlocal_param", %x.cell.0)
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
@@ -40,6 +44,8 @@ module e11_nonlocal_param {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f.<locals>.g", 0, 1, false, false, "x") ^propagate.0()
       %x.1 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.1)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)

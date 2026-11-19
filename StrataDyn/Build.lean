@@ -140,6 +140,9 @@ structure Body (env : Env Unit) (α : Type) where
   label : Option Label := none
   params : Array (ValDecl env) := #[]
   instrs : Array (Instruction env α) := #[]
+  /-- The annotation the open block was started with, if one was given: it overrides the one in
+  effect when the block finishes. -/
+  info : Option α := none
   blocks : Array (Block env α) := #[]
 
 /-- Whether a transfer in `b` names `l`: a successor of an instruction of the open block, or of
@@ -394,9 +397,12 @@ def renameLabel (start : Nat) (base : String) (l : Label) : BuildM env α Unit :
           freshLabels := s.freshLabels.set i { f with base := .str .base base, given := true } }
     return s
 
-/-- Close the open block with `term`.  With no block open, it is an error. -/
+/-- Close the open block with `term`.  The block carries the annotation it was started with, if
+any, else `info`, else the one in effect.  With no block open, it is an error. -/
 def finishBlock (term : Terminator env α) (info : Option α := none) : BuildM env α Unit := do
-  let info ← resolveInfo info
+  let info ← match (← get).body.info with
+    | some i => pure i
+    | none => resolveInfo info
   let s ← get
   match s.body.label with
   | none => error "a block finished with no block open"
@@ -447,10 +453,11 @@ def freshLabel (base : String := blockBase) (given : Bool := true) : BuildM env 
     freshLabels := s.freshLabels.push { name, base := .str .base base, given } }
   return ⟨name⟩
 
-/-- Open the block called `label`, taking `params`.  It is an error to open a block while
+/-- Open the block called `label`, taking `params`.  With `info`, the block carries that
+annotation, whatever is in effect when it finishes.  It is an error to open a block while
 another is open, which loses the other block, or under a label already used in the function or
 any region of it. -/
-def startBlock (label : Label) (params : Array (ValDecl env) := #[]) :
+def startBlock (label : Label) (params : Array (ValDecl env) := #[]) (info : Option α := none) :
     BuildM env α Unit := do
   let s ← get
   if let some l := s.body.label then
@@ -461,7 +468,7 @@ def startBlock (label : Label) (params : Array (ValDecl env) := #[]) :
   modify fun s =>
     { s with
       labels := s.labels.insert label.name ()
-      body := { s.body with label := some label, params, instrs := #[] } }
+      body := { s.body with label := some label, params, instrs := #[], info } }
 
 /-- Open the block called `label`, taking one fresh value of type `t` named after `name`, and
 return that value. -/

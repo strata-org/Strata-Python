@@ -1,6 +1,10 @@
 module s328_setattr_slot_depth {
   func @|s328_setattr_slot_depth.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s328_setattr_slot_depth")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s328_setattr_slot_depth", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -54,14 +58,28 @@ module s328_setattr_slot_depth {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %_.cell.0 : base.Ref(py.Value) = py.globalCell("s328_setattr_slot_depth", "_")
       %set.8 : base.Unit = base.refSet[py.Value](%_.cell.0, %item.0)
-      %t.0 : py.Value = py.loadGlobal("s328_setattr_slot_depth", "t") ^propagate.0()
+      %t.0 : py.Value = py.loadGlobal("s328_setattr_slot_depth", "t") ^raised.0()
       %tuple.5 : py.Value = py.mkTuple(%t.0)
       %t.cell.1 : base.Ref(py.Value) = py.globalCell("s328_setattr_slot_depth", "t")
       %set.9 : base.Unit = base.refSet[py.Value](%t.cell.1, %tuple.5)
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.2 : py.Value = py.mkClosure[[]](@|s328_setattr_slot_depth.P.<body>|, "<body>", "s328_setattr_slot_depth")
@@ -84,11 +102,13 @@ module s328_setattr_slot_depth {
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @s328_setattr_slot_depth.nest(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %d.0 : py.Value = py.undef("d")
       %d.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%d.0)
@@ -101,6 +121,8 @@ module s328_setattr_slot_depth {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "nest", 0, 1, false, false, "d") ^propagate.0()
       %d.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%d.cell.0, %d.2)
+      jump ^start.0()
+    start.0():
       %tuple.0 : py.Value = py.mkTuple
       %set.1 : base.Unit = base.refSet[py.Value](%t.cell.0, %tuple.0)
       %range.0 : py.Value = py.loadGlobal("s328_setattr_slot_depth", "range") ^propagate.0()
@@ -115,27 +137,43 @@ module s328_setattr_slot_depth {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %set.2 : base.Unit = base.refSet[py.Value](%_.cell.0, %item.0)
       %t.1 : py.Value = base.refGet[py.Value](%t.cell.0)
-      %t.2 : py.Value = py.requireDefined(%t.1, "t", "UnboundLocalError", "cannot access local variable 't' where it is not associated with a value") ^propagate.0()
+      %t.2 : py.Value = py.requireDefined(%t.1, "t", "UnboundLocalError", "cannot access local variable 't' where it is not associated with a value") ^raised.0()
       %tuple.2 : py.Value = py.mkTuple(%t.2)
       %set.3 : base.Unit = base.refSet[py.Value](%t.cell.0, %tuple.2)
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %t.3 : py.Value = base.refGet[py.Value](%t.cell.0)
       %t.4 : py.Value = py.requireDefined(%t.3, "t", "UnboundLocalError", "cannot access local variable 't' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%t.4)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @|s328_setattr_slot_depth.Leaf.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
     #[py.bindings = [{name = "__repr__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -167,6 +205,8 @@ module s328_setattr_slot_depth {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__delattr__", binding = "def"}, {name = "x", binding = "def"}, {name = "x", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -236,6 +276,8 @@ module s328_setattr_slot_depth {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Leaf.__repr__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %table.0 : py.Value = py.loadGlobal("s328_setattr_slot_depth", "table") ^propagate.0()
       %k2.0 : py.Value = py.loadGlobal("s328_setattr_slot_depth", "k2") ^propagate.0()
       %item.0 : py.Value = py.getItem(%table.0, %k2.0) ^propagate.0()
@@ -271,6 +313,8 @@ module s328_setattr_slot_depth {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %n.6 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.6)
+      jump ^start.0()
+    start.0():
       %object.0 : py.Value = py.loadGlobal("s328_setattr_slot_depth", "object") ^propagate.0()
       %__setattr__.0 : py.Value = py.attr(%object.0, "__setattr__") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -302,6 +346,8 @@ module s328_setattr_slot_depth {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %name.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%name.cell.0, %name.2)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -318,6 +364,8 @@ module s328_setattr_slot_depth {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "P.x", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -341,6 +389,8 @@ module s328_setattr_slot_depth {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %v.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%v.cell.0, %v.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %n.5 : py.Value = py.attr(%self.4, "n") ^propagate.0()

@@ -1,0 +1,7 @@
+module
+  f: local (assigned)
+  g: local (assigned)
+  function f
+    ValueError: global implicit (referenced)
+    c: global implicit (referenced)
+  function g

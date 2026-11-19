@@ -1,6 +1,8 @@
 module i02_param_kinds {
   func @|i02_param_kinds.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("i02_param_kinds")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i02_param_kinds", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -148,6 +150,8 @@ module i02_param_kinds {
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %y.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%y.cell.0, %y.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i02_param_kinds", "print") ^propagate.0()
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
@@ -176,6 +180,8 @@ module i02_param_kinds {
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %more.1 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%more.cell.0, %more.1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i02_param_kinds", "print") ^propagate.0()
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
@@ -204,6 +210,8 @@ module i02_param_kinds {
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %opts.1 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%opts.cell.0, %opts.1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i02_param_kinds", "print") ^propagate.0()
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
@@ -236,6 +244,8 @@ module i02_param_kinds {
       %set.1 : base.Unit = base.refSet[py.Value](%more.cell.0, %more.1)
       %opts.1 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%opts.cell.0, %opts.1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i02_param_kinds", "print") ^propagate.0()
       %first.3 : py.Value = base.refGet[py.Value](%first.cell.0)
       %first.4 : py.Value = py.requireDefined(%first.3, "first", "UnboundLocalError", "cannot access local variable 'first' where it is not associated with a value") ^propagate.0()
@@ -267,6 +277,8 @@ module i02_param_kinds {
       %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.2)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i02_param_kinds", "print") ^propagate.0()
       %a.3 : py.Value = base.refGet[py.Value](%a.cell.0)
       %a.4 : py.Value = py.requireDefined(%a.3, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
@@ -296,6 +308,8 @@ module i02_param_kinds {
       %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.2)
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%b.cell.0, %b.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i02_param_kinds", "print") ^propagate.0()
       %a.3 : py.Value = base.refGet[py.Value](%a.cell.0)
       %a.4 : py.Value = py.requireDefined(%a.3, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
@@ -324,6 +338,8 @@ module i02_param_kinds {
       %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.2)
       %opts.1 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%opts.cell.0, %opts.1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i02_param_kinds", "print") ^propagate.0()
       %a.3 : py.Value = base.refGet[py.Value](%a.cell.0)
       %a.4 : py.Value = py.requireDefined(%a.3, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()

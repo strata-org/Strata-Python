@@ -596,7 +596,6 @@ s307_format_borrowed | yes |
 s308_printf_bytes_high_byte | yes |
 s309_printf_bytes_literal | yes |
 s310_repr_one_member_set | yes |
-p51_comp_clauses | yes |
 lib_any_all | yes |
 lib_sum | yes |
 lib_sum_residual | yes |
@@ -683,3 +682,13 @@ lib_hash_int_subclass | yes |
 lib_iter_property | yes |
 lib_set_subclass_in_set | yes |
 lib_gap_str_subclass_format | yes |
+g01_loop_in_try | yes |
+g02_while_else_continue_finally | yes |
+g03_compound_guard | yes |
+g04_return_through_with | yes |
+g05_tail_not_in_loop | yes |
+g06_function_contract | yes |
+m_loop_records | yes |
+m_loop_dropped | yes |
+m_loop_dead_after | yes |
+m_loop_in_except | yes |

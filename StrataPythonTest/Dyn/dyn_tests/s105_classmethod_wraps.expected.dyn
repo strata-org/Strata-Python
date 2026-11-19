@@ -1,6 +1,8 @@
 module s105_classmethod_wraps {
   func @|s105_classmethod_wraps.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s105_classmethod_wraps")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s105_classmethod_wraps", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -131,6 +133,8 @@ module s105_classmethod_wraps {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -163,6 +167,8 @@ module s105_classmethod_wraps {
     #[py.bindings = [{name = "m", value = {call = "S", args = [5], keywords = []}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -205,6 +211,8 @@ module s105_classmethod_wraps {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -217,6 +225,8 @@ module s105_classmethod_wraps {
     #[py.bindings = [{name = "__call__", binding = "def"}, {name = "__name__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -263,6 +273,8 @@ module s105_classmethod_wraps {
     #[py.bindings = [{name = "__call__", binding = "def"}, {name = "__doc__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -309,6 +321,8 @@ module s105_classmethod_wraps {
     #[py.bindings = [{name = "x", value = {call = "property", args = [{call = "G", args = [], keywords = []}], keywords = []}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -372,6 +386,8 @@ module s105_classmethod_wraps {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %f.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %f.2)
+      jump ^start.0()
+    start.0():
       %super.0 : py.Value = py.loadGlobal("s105_classmethod_wraps", "super") ^propagate.0()
       %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
       %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
@@ -401,6 +417,8 @@ module s105_classmethod_wraps {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.__call__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -417,6 +435,8 @@ module s105_classmethod_wraps {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.__name__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s105_classmethod_wraps", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("name read")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -443,6 +463,8 @@ module s105_classmethod_wraps {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %o.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%o.cell.0, %o.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(3)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -459,6 +481,8 @@ module s105_classmethod_wraps {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "G.__doc__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s105_classmethod_wraps", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("doc read")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -475,6 +499,8 @@ module s105_classmethod_wraps {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "S.__init__.<locals>.<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)

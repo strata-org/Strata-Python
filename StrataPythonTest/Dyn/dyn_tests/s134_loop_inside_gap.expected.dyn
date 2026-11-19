@@ -1,6 +1,8 @@
 module s134_loop_inside_gap {
   func @|s134_loop_inside_gap.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s134_loop_inside_gap")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s134_loop_inside_gap", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -51,6 +53,8 @@ module s134_loop_inside_gap {
     #[py.bindings = [{name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -89,6 +93,8 @@ module s134_loop_inside_gap {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
@@ -106,6 +112,8 @@ module s134_loop_inside_gap {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %StopIteration.0 : py.Value = py.loadGlobal("s134_loop_inside_gap", "StopIteration") ^propagate.0()
       %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
       jump ^propagate.0(%exc.0)

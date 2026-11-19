@@ -1,6 +1,8 @@
 module m_expressions {
   func @|m_expressions.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_expressions")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_expressions", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -40,6 +42,8 @@ module m_expressions {
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
       %c.13 : py.Value = py.tupleGet(%bound.0, 2)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s")
       %bytes.0 : py.Value = py.bytesLit("\x00ÿ")
       %ellipsis.0 : py.Value = py.ellipsisLit

@@ -1,6 +1,8 @@
 module s313_type_getattribute_on_instance {
   func @|s313_type_getattribute_on_instance.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s313_type_getattribute_on_instance")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s313_type_getattribute_on_instance", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -90,6 +92,8 @@ module s313_type_getattribute_on_instance {
     #[py.bindings = [{name = "__getattribute__", value = "type.__getattribute__"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")

@@ -1,6 +1,8 @@
 module s337_dict_eq_compaction {
   func @|s337_dict_eq_compaction.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s337_dict_eq_compaction")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s337_dict_eq_compaction", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -81,6 +83,8 @@ module s337_dict_eq_compaction {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__eq__", binding = "def"}, {name = "__hash__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -127,6 +131,8 @@ module s337_dict_eq_compaction {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %v.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%v.cell.0, %v.2)
+      jump ^start.0()
+    start.0():
       %v.3 : py.Value = base.refGet[py.Value](%v.cell.0)
       %v.4 : py.Value = py.requireDefined(%v.3, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -140,6 +146,8 @@ module s337_dict_eq_compaction {
       ret(%exc.1)
   }
   func @s337_dict_eq_compaction.A.__eq__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %self.0 : py.Value = py.undef("self")
       %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
@@ -155,6 +163,8 @@ module s337_dict_eq_compaction {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s337_dict_eq_compaction", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("eq")
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -174,23 +184,37 @@ module s337_dict_eq_compaction {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %set.2 : base.Unit = base.refSet[py.Value](%i.cell.0, %item.0)
       %int.1 : py.Value = py.intLit(0)
-      %a.0 : py.Value = py.loadGlobal("s337_dict_eq_compaction", "a") ^propagate.0()
+      %a.0 : py.Value = py.loadGlobal("s337_dict_eq_compaction", "a") ^raised.0()
       %int.2 : py.Value = py.intLit(100)
       %i.1 : py.Value = base.refGet[py.Value](%i.cell.0)
-      %i.2 : py.Value = py.requireDefined(%i.1, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
-      %add.0 : py.Value = py.add(%int.2, %i.2) ^propagate.0()
-      %store.0 : base.Unit = py.setItem(%a.0, %add.0, %int.1) ^propagate.0()
+      %i.2 : py.Value = py.requireDefined(%i.1, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0()
+      %add.0 : py.Value = py.add(%int.2, %i.2) ^raised.0()
+      %store.0 : base.Unit = py.setItem(%a.0, %add.0, %int.1) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %bool.0 : py.Value = py.boolLit(true)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%bool.0)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @s337_dict_eq_compaction.A.__hash__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -201,6 +225,8 @@ module s337_dict_eq_compaction {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.__hash__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)

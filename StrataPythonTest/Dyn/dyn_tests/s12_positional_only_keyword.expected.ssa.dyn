@@ -1,6 +1,8 @@
 module s12_positional_only_keyword {
   func @|s12_positional_only_keyword.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s12_positional_only_keyword")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s12_positional_only_keyword", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -31,6 +33,8 @@ module s12_positional_only_keyword {
       %defaults.0 : py.Value = py.mkTuple(%a.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "h", 1, 1, false, false, "a") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%a.4)
       ret(%ret.0)

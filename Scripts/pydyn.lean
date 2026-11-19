@@ -13,6 +13,8 @@ import StrataPython.Dyn.Cli
 
 * `dyn FILE`: the Dyn translation of a `.py` or Python Ion file, from
   `StrataPython.Dyn.Cli`.
+* `canonical FILE`: the same translation, with every function in canonical form, from
+  `StrataPython.Dyn.Cli`.
 * `read FILE`: a printed Dyn module read back and printed again, from
   `StrataPython.Dyn.Cli`.
 * `pyspec SEARCH_PATH MODULE`: the IR modules of a PySpec model module and the model modules it
@@ -26,6 +28,7 @@ import StrataPython.Dyn.Cli
 
 def commands : List Command :=
   [ StrataPython.Dyn.Cli.dynCommand,
+    StrataPython.Dyn.Cli.canonicalCommand,
     StrataPython.Dyn.Cli.readCommand,
     StrataPython.Dyn.Cli.pyspecCommand,
     StrataPython.Dyn.Cli.runCommand,

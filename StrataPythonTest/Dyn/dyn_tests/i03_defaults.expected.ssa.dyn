@@ -1,6 +1,8 @@
 module i03_defaults {
   func @|i03_defaults.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("i03_defaults")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i03_defaults", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -85,6 +87,8 @@ module i03_defaults {
       %s.1 : py.Value = py.tupleGet(%bound.0, 3)
       %f.1 : py.Value = py.tupleGet(%bound.0, 4)
       %t.1 : py.Value = py.tupleGet(%bound.0, 5)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i03_defaults", "print") ^propagate.0()
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.3 : py.Value = py.requireDefined(%b.1, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
@@ -114,6 +118,8 @@ module i03_defaults {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "kwd", 0, 1, false, false, "a", "k") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %k.1 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i03_defaults", "print") ^propagate.0()
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %k.3 : py.Value = py.requireDefined(%k.1, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()

@@ -1,6 +1,8 @@
 module s188_object_init_tp_new {
   func @|s188_object_init_tp_new.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s188_object_init_tp_new")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s188_object_init_tp_new", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -148,6 +150,8 @@ module s188_object_init_tp_new {
     #[py.bindings = [{name = "__new__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -180,6 +184,8 @@ module s188_object_init_tp_new {
     #[py.bindings = [{name = "__new__", value = "object.__new__"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -219,6 +225,8 @@ module s188_object_init_tp_new {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -253,6 +261,8 @@ module s188_object_init_tp_new {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.__new__", 0, 1, true, false, "cls") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
       %a.1 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %object.0 : py.Value = py.loadGlobal("s188_object_init_tp_new", "object") ^propagate.0()
       %__new__.0 : py.Value = py.attr(%object.0, "__new__") ^propagate.0()
       %cls.4 : py.Value = py.requireDefined(%cls.2, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()

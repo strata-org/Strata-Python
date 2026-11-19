@@ -1,0 +1,10 @@
+module top
+  e: local (assigned)
+  function e
+    g: global implicit (referenced)
+    h: global implicit (referenced)
+    i: local (assigned, referenced)
+    k: global implicit (referenced)
+    m: global implicit (referenced)
+    v: local (parameter, referenced)
+qualnames: e

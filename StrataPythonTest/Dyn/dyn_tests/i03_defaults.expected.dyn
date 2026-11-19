@@ -1,6 +1,8 @@
 module i03_defaults {
   func @|i03_defaults.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("i03_defaults")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i03_defaults", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -91,6 +93,8 @@ module i03_defaults {
       %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %f.1)
       %t.1 : py.Value = py.tupleGet(%bound.0, 5)
       %set.5 : base.Unit = base.refSet[py.Value](%t.cell.0, %t.1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i03_defaults", "print") ^propagate.0()
       %a.3 : py.Value = base.refGet[py.Value](%a.cell.0)
       %a.4 : py.Value = py.requireDefined(%a.3, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
@@ -128,6 +132,8 @@ module i03_defaults {
       %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.2)
       %k.1 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i03_defaults", "print") ^propagate.0()
       %a.3 : py.Value = base.refGet[py.Value](%a.cell.0)
       %a.4 : py.Value = py.requireDefined(%a.3, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()

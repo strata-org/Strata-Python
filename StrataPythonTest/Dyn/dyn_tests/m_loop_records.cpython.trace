@@ -1,0 +1,15 @@
+--- stdout 21
+0
+done
+1
+done
+2
+done
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+spin = <function object>
+x = 2

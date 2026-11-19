@@ -1,6 +1,10 @@
 module s215_type_new_check_order {
   func @|s215_type_new_check_order.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s215_type_new_check_order")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s215_type_new_check_order", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -83,22 +87,36 @@ module s215_type_new_check_order {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("s215_type_new_check_order", "f")
       %set.15 : base.Unit = base.refSet[py.Value](%f.cell.0, %item.0)
-      %make.0 : py.Value = py.loadGlobal("s215_type_new_check_order", "make") ^propagate.0()
-      %f.0 : py.Value = py.loadGlobal("s215_type_new_check_order", "f") ^propagate.0()
+      %make.0 : py.Value = py.loadGlobal("s215_type_new_check_order", "make") ^raised.0()
+      %f.0 : py.Value = py.loadGlobal("s215_type_new_check_order", "f") ^raised.0()
       %tuple.5 : py.Value = py.mkTuple(%f.0)
       %kwargs.4 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%make.0, %tuple.5, %kwargs.4) ^propagate.0()
+      %call.0 : py.Value = py.call(%make.0, %tuple.5, %kwargs.4) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @s215_type_new_check_order.make(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -110,6 +128,8 @@ module s215_type_new_check_order {
       %defaults.0 : py.Value = py.mkTuple(%f.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "make", 0, 1, false, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -167,6 +187,8 @@ module s215_type_new_check_order {
       %X.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%X.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "dict_twice", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|s215_type_new_check_order.dict_twice.X.<body>|, "<body>", "s215_type_new_check_order")
       %str.0 : py.Value = py.strLit("X")
@@ -186,6 +208,8 @@ module s215_type_new_check_order {
       %X.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%X.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "not_identifier", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|s215_type_new_check_order.not_identifier.X.<body>|, "<body>", "s215_type_new_check_order")
       %str.0 : py.Value = py.strLit("X")
@@ -205,6 +229,8 @@ module s215_type_new_check_order {
       %Y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%Y.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "int_subtype", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|s215_type_new_check_order.int_subtype.Y.<body>|, "<body>", "s215_type_new_check_order")
       %str.0 : py.Value = py.strLit("Y")
@@ -224,6 +250,8 @@ module s215_type_new_check_order {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -253,6 +281,8 @@ module s215_type_new_check_order {
       %J.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%J.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "int_subclass_subtype", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|s215_type_new_check_order.int_subclass_subtype.J.<body>|, "<body>", "s215_type_new_check_order")
       %str.0 : py.Value = py.strLit("J")
@@ -271,6 +301,8 @@ module s215_type_new_check_order {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -299,6 +331,8 @@ module s215_type_new_check_order {
     #[py.slots = [{value = {tuple = []}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -331,6 +365,8 @@ module s215_type_new_check_order {
       %C.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%C.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "dict_from_second_base", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|s215_type_new_check_order.dict_from_second_base.C.<body>|, "<body>", "s215_type_new_check_order")
       %str.0 : py.Value = py.strLit("C")
@@ -351,6 +387,8 @@ module s215_type_new_check_order {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -380,6 +418,8 @@ module s215_type_new_check_order {
       %C.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%C.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "item_before_mro", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|s215_type_new_check_order.item_before_mro.C.<body>|, "<body>", "s215_type_new_check_order")
       %str.0 : py.Value = py.strLit("C")
@@ -401,6 +441,8 @@ module s215_type_new_check_order {
       %D.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%D.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "layout_conflict", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|s215_type_new_check_order.layout_conflict.D.<body>|, "<body>", "s215_type_new_check_order")
       %str.0 : py.Value = py.strLit("D")
@@ -423,6 +465,8 @@ module s215_type_new_check_order {
       %X.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%X.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "qualname_slot", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|s215_type_new_check_order.qualname_slot.X.<body>|, "<body>", "s215_type_new_check_order")
       %str.0 : py.Value = py.strLit("X")
@@ -441,6 +485,8 @@ module s215_type_new_check_order {
     #[py.slots = [{value = {tuple = [{str = "__dict__"}, {str = "__dict__"}]}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -474,6 +520,8 @@ module s215_type_new_check_order {
     #[py.slots = [{value = {tuple = [{str = "1a"}, 2]}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -508,6 +556,8 @@ module s215_type_new_check_order {
     #[py.slots = [{value = {tuple = [{str = "1a"}]}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -541,6 +591,8 @@ module s215_type_new_check_order {
     #[py.slots = [{value = {tuple = [{str = "a"}]}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -574,6 +626,8 @@ module s215_type_new_check_order {
     #[py.slots = [{value = {tuple = [{str = "__dict__"}]}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -607,6 +661,8 @@ module s215_type_new_check_order {
     #[py.slots = [{value = {tuple = [1]}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -639,6 +695,8 @@ module s215_type_new_check_order {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -667,6 +725,8 @@ module s215_type_new_check_order {
     #[py.slots = [{value = {tuple = [{str = "__qualname__"}]}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")

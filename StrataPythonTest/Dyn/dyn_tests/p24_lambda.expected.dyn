@@ -1,6 +1,8 @@
 module p24_lambda {
   func @|p24_lambda.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p24_lambda")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p24_lambda", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -39,6 +41,8 @@ module p24_lambda {
       %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.2)
       %b.1 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%b.cell.0, %b.1)
+      jump ^start.0()
+    start.0():
       %a.3 : py.Value = base.refGet[py.Value](%a.cell.0)
       %a.4 : py.Value = py.requireDefined(%a.3, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.2 : py.Value = base.refGet[py.Value](%b.cell.0)
@@ -61,6 +65,8 @@ module p24_lambda {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "n") ^propagate.0()
       %n.4 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.4)
+      jump ^start.0()
+    start.0():
       %n.5 : py.Value = base.refGet[py.Value](%n.cell.0)
       %n.6 : py.Value = py.requireDefined(%n.5, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %y.default.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.6)
@@ -93,6 +99,8 @@ module p24_lambda {
       %set.2 : base.Unit = base.refSet[py.Value](%r.cell.0, %r.1)
       %kw.1 : py.Value = py.tupleGet(%bound.0, 3)
       %set.3 : base.Unit = base.refSet[py.Value](%kw.cell.0, %kw.1)
+      jump ^start.0()
+    start.0():
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %n.5 : py.Value = base.refGet[py.Value](%n.cell.0)

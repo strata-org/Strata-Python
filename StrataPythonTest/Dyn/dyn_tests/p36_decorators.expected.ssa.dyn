@@ -1,6 +1,8 @@
 module p36_decorators {
   func @|p36_decorators.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p36_decorators")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p36_decorators", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -25,6 +27,8 @@ module p36_decorators {
       %defaults.0 : py.Value = py.mkTuple(%fn.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "deco", 0, 1, false, false, "fn") ^propagate.0()
       %fn.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %fn.4 : py.Value = py.requireDefined(%fn.2, "fn", "UnboundLocalError", "cannot access local variable 'fn' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%fn.4)
       ret(%ret.0)
@@ -44,6 +48,8 @@ module p36_decorators {
       %defaults.0 : py.Value = py.mkTuple(%base.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer", 0, 1, false, false, "base") ^propagate.0()
       %base.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %deco.0 : py.Value = py.loadGlobal("p36_decorators", "deco") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@p36_decorators.outer.inner, "inner", "p36_decorators")
       %args.1 : py.Value = py.mkTuple(%clo.0)
@@ -71,6 +77,8 @@ module p36_decorators {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer.<locals>.inner", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -84,6 +92,8 @@ module p36_decorators {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")

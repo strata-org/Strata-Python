@@ -2,6 +2,8 @@
 module p22_comprehensions {
   func @|p22_comprehensions.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p22_comprehensions")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p22_comprehensions", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -133,6 +135,8 @@ module p22_comprehensions {
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %ys.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%ys.cell.0, %ys.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.0 : py.Value = py.undef("x")

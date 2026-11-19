@@ -2,6 +2,8 @@
 module p44_comp_and_genexpr {
   func @|p44_comp_and_genexpr.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p44_comp_and_genexpr")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p44_comp_and_genexpr", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -35,6 +37,8 @@ module p44_comp_and_genexpr {
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %y.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%y.cell.0, %y.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")

@@ -1,6 +1,8 @@
 module lib_gap_difference_user_hash {
   func @|lib_gap_difference_user_hash.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_gap_difference_user_hash")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_difference_user_hash", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -55,6 +57,8 @@ module lib_gap_difference_user_hash {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__hash__", binding = "def"}, {name = "__eq__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -99,6 +103,8 @@ module lib_gap_difference_user_hash {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "H.__init__", 0, 2, false, false, "self", "n") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %n.6 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %n.8 : py.Value = py.requireDefined(%n.6, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %n.9 : base.Unit = py.setAttr(%self.4, "n", %n.8) ^propagate.0()
@@ -117,6 +123,8 @@ module lib_gap_difference_user_hash {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "H.__hash__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_gap_difference_user_hash", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("hash")
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -144,6 +152,8 @@ module lib_gap_difference_user_hash {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "H.__eq__", 0, 2, false, false, "self", "o") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %isinstance.0 : py.Value = py.loadGlobal("lib_gap_difference_user_hash", "isinstance") ^propagate.0()
       %o.4 : py.Value = py.requireDefined(%o.2, "o", "UnboundLocalError", "cannot access local variable 'o' where it is not associated with a value") ^propagate.0()
       %H.0 : py.Value = py.loadGlobal("lib_gap_difference_user_hash", "H") ^propagate.0()

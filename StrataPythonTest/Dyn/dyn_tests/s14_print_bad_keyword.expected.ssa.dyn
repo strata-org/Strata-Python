@@ -1,6 +1,8 @@
 module s14_print_bad_keyword {
   func @|s14_print_bad_keyword.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s14_print_bad_keyword")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s14_print_bad_keyword", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)

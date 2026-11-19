@@ -1,6 +1,8 @@
 module p51_comp_clauses {
   func @|p51_comp_clauses.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p51_comp_clauses")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p51_comp_clauses", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -107,6 +109,8 @@ module p51_comp_clauses {
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %ys.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%ys.cell.0, %ys.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
@@ -196,6 +200,8 @@ module p51_comp_clauses {
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %ys.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%ys.cell.0, %ys.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
@@ -288,6 +294,8 @@ module p51_comp_clauses {
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %ys.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%ys.cell.0, %ys.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
@@ -381,6 +389,8 @@ module p51_comp_clauses {
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %ys.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%ys.cell.0, %ys.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
@@ -462,6 +472,8 @@ module p51_comp_clauses {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "walrus_filter", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
@@ -535,6 +547,8 @@ module p51_comp_clauses {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "walrus_key", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
@@ -595,6 +609,8 @@ module p51_comp_clauses {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "walrus_filter_only", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
@@ -665,6 +681,8 @@ module p51_comp_clauses {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "walrus_key_only", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
@@ -732,6 +750,8 @@ module p51_comp_clauses {
       %set.1 : base.Unit = base.refSet[py.Value](%d.cell.0, %d.2)
       %xs.2 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %list.0 : py.Value = py.listComp(%xs.4) ^propagate.0() {
@@ -812,6 +832,8 @@ module p51_comp_clauses {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "unhashable", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
@@ -904,6 +926,8 @@ module p51_comp_clauses {
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %d.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%d.cell.0, %d.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
@@ -1019,6 +1043,8 @@ module p51_comp_clauses {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "nested", 0, 1, false, false, "xss") ^propagate.0()
       %xss.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xss.cell.0, %xss.2)
+      jump ^start.0()
+    start.0():
       %xss.3 : py.Value = base.refGet[py.Value](%xss.cell.0)
       %xss.4 : py.Value = py.requireDefined(%xss.3, "xss", "UnboundLocalError", "cannot access local variable 'xss' where it is not associated with a value") ^propagate.0()
       %xs.1 : py.Value = py.undef("xs")
@@ -1203,6 +1229,8 @@ module p51_comp_clauses {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "in_try", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^catch.0()
       %x.1 : py.Value = py.undef("x")
@@ -1266,6 +1294,8 @@ module p51_comp_clauses {
       %set.0 : base.Unit = base.refSet[py.Value](%f.cell.0, %f.2)
       %xs.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %sum.0 : py.Value = py.loadGlobal("p51_comp_clauses", "sum") ^propagate.0()
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
@@ -1350,6 +1380,8 @@ module p51_comp_clauses {
       %set.0 : base.Unit = base.refSet[py.Value](%label.cell.0, %label.2)
       %f.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %f.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("p51_comp_clauses", "print") ^catch.0()
       %label.3 : py.Value = base.refGet[py.Value](%label.cell.0)
       %label.4 : py.Value = py.requireDefined(%label.3, "label", "UnboundLocalError", "cannot access local variable 'label' where it is not associated with a value") ^catch.0()
@@ -1409,6 +1441,8 @@ module p51_comp_clauses {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %walrus_filter.0 : py.Value = py.loadGlobal("p51_comp_clauses", "walrus_filter") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
       %int.1 : py.Value = py.intLit(1)
@@ -1427,6 +1461,8 @@ module p51_comp_clauses {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %walrus_filter.0 : py.Value = py.loadGlobal("p51_comp_clauses", "walrus_filter") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(0)
@@ -1444,6 +1480,8 @@ module p51_comp_clauses {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %walrus_filter.0 : py.Value = py.loadGlobal("p51_comp_clauses", "walrus_filter") ^propagate.0()
       %list.0 : py.Value = py.mkList
       %tuple.0 : py.Value = py.mkTuple(%list.0)
@@ -1459,6 +1497,8 @@ module p51_comp_clauses {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %walrus_key.0 : py.Value = py.loadGlobal("p51_comp_clauses", "walrus_key") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -1476,6 +1516,8 @@ module p51_comp_clauses {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %walrus_key.0 : py.Value = py.loadGlobal("p51_comp_clauses", "walrus_key") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(1)

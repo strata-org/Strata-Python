@@ -1,6 +1,8 @@
 module lib_str_encode_args {
   func @|lib_str_encode_args.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_str_encode_args")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_str_encode_args", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -53,6 +55,8 @@ module lib_str_encode_args {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "show", 0, 1, false, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%f.cell.0, %f.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_str_encode_args", "print") ^catch.0()
       %repr.0 : py.Value = py.loadGlobal("lib_str_encode_args", "repr") ^catch.0()
       %f.3 : py.Value = base.refGet[py.Value](%f.cell.0)
@@ -112,6 +116,8 @@ module lib_str_encode_args {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("x")
       %encode.0 : py.Value = py.attr(%str.0, "encode") ^propagate.0()
       %str.1 : py.Value = py.strLit("utf-8\x00")
@@ -129,6 +135,8 @@ module lib_str_encode_args {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("x")
       %encode.0 : py.Value = py.attr(%str.0, "encode") ^propagate.0()
       %int.0 : py.Value = py.intLit(5)
@@ -146,6 +154,8 @@ module lib_str_encode_args {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("x")
       %encode.0 : py.Value = py.attr(%str.0, "encode") ^propagate.0()
       %str.1 : py.Value = py.strLit("utf-8")
@@ -163,6 +173,8 @@ module lib_str_encode_args {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("x")
       %encode.0 : py.Value = py.attr(%str.0, "encode") ^propagate.0()
       %str.1 : py.Value = py.strLit("utf-8")
@@ -180,6 +192,8 @@ module lib_str_encode_args {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("x")
       %encode.0 : py.Value = py.attr(%str.0, "encode") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple

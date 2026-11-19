@@ -1,6 +1,8 @@
 module s111_exception_errors {
   func @|s111_exception_errors.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s111_exception_errors")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s111_exception_errors", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -95,6 +97,8 @@ module s111_exception_errors {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -122,6 +126,8 @@ module s111_exception_errors {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -150,6 +156,8 @@ module s111_exception_errors {
     #[py.bindings = [{name = "__enter__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -180,6 +188,8 @@ module s111_exception_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "t1", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %exc.0 : py.Value = py.toException(%int.0) ^propagate.0()
       jump ^propagate.0(%exc.0)
@@ -193,6 +203,8 @@ module s111_exception_errors {
       %B.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%B.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "t2", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|s111_exception_errors.t2.B.<body>|, "<body>", "s111_exception_errors")
       %str.0 : py.Value = py.strLit("B")
@@ -211,6 +223,8 @@ module s111_exception_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "t4", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %E.0 : py.Value = py.loadGlobal("s111_exception_errors", "E") ^catch.0()
       %exc.0 : py.Value = py.toException(%E.0) ^catch.0()
       jump ^catch.0(%exc.0)
@@ -241,6 +255,8 @@ module s111_exception_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "t5", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %exc.0 : py.Value = py.handledExc ^propagate.0()
       jump ^propagate.0(%exc.0)
     propagate.0(%exc.1 : py.Value):
@@ -251,6 +267,8 @@ module s111_exception_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "t6", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %NotExc.0 : py.Value = py.loadGlobal("s111_exception_errors", "NotExc") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -287,6 +305,8 @@ module s111_exception_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "t7", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %OnlyEnter.0 : py.Value = py.loadGlobal("s111_exception_errors", "OnlyEnter") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -329,6 +349,8 @@ module s111_exception_errors {
       %defaults.0 : py.Value = py.mkTuple(%t.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "run", 0, 1, false, false, "t") ^propagate.0()
       %t.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %t.4 : py.Value = py.requireDefined(%t.2, "t", "UnboundLocalError", "cannot access local variable 't' where it is not associated with a value") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -383,6 +405,8 @@ module s111_exception_errors {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "OnlyEnter.__enter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -396,6 +420,8 @@ module s111_exception_errors {
     #[py.bindings = [{name = "__new__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -430,6 +456,8 @@ module s111_exception_errors {
       %defaults.0 : py.Value = py.mkTuple(%cls.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "t2.<locals>.B.__new__", 0, 1, false, false, "cls") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(5)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)

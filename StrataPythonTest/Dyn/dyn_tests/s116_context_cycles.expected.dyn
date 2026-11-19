@@ -1,6 +1,10 @@
 module s116_context_cycles {
   func @|s116_context_cycles.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s116_context_cycles")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s116_context_cycles", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -387,27 +391,41 @@ module s116_context_cycles {
       %set.26 : base.Unit = base.refSet[py.Value](%i.cell.0, %int.5)
       jump ^head.0()
     head.0():
-      %i.0 : py.Value = py.loadGlobal("s116_context_cycles", "i") ^propagate.0()
+      %i.0 : py.Value = py.loadGlobal("s116_context_cycles", "i") ^raised.0()
       %int.6 : py.Value = py.intLit(4)
-      %lt.0 : py.Value = py.lt(%i.0, %int.6) ^propagate.0()
-      %cond.0 : base.Bool = py.truthy(%lt.0) ^propagate.0()
-      branch(%cond.0) ^body.0() ^exit.0()
+      %lt.0 : py.Value = py.lt(%i.0, %int.6) ^raised.0()
+      %cond.0 : base.Bool = py.truthy(%lt.0) ^raised.0()
+      branch(%cond.0) ^body.0() ^normal.0()
     body.0():
-      %es.0 : py.Value = py.loadGlobal("s116_context_cycles", "es") ^propagate.0()
-      %i.1 : py.Value = py.loadGlobal("s116_context_cycles", "i") ^propagate.0()
+      %es.0 : py.Value = py.loadGlobal("s116_context_cycles", "es") ^raised.0()
+      %i.1 : py.Value = py.loadGlobal("s116_context_cycles", "i") ^raised.0()
       %int.7 : py.Value = py.intLit(1)
-      %add.0 : py.Value = py.add(%i.1, %int.7) ^propagate.0()
-      %item.0 : py.Value = py.getItem(%es.0, %add.0) ^propagate.0()
-      %es.1 : py.Value = py.loadGlobal("s116_context_cycles", "es") ^propagate.0()
-      %i.2 : py.Value = py.loadGlobal("s116_context_cycles", "i") ^propagate.0()
-      %item.1 : py.Value = py.getItem(%es.1, %i.2) ^propagate.0()
-      %__context__.22 : base.Unit = py.setAttr(%item.1, "__context__", %item.0) ^propagate.0()
-      %i.3 : py.Value = py.loadGlobal("s116_context_cycles", "i") ^propagate.0()
+      %add.0 : py.Value = py.add(%i.1, %int.7) ^raised.0()
+      %item.0 : py.Value = py.getItem(%es.0, %add.0) ^raised.0()
+      %es.1 : py.Value = py.loadGlobal("s116_context_cycles", "es") ^raised.0()
+      %i.2 : py.Value = py.loadGlobal("s116_context_cycles", "i") ^raised.0()
+      %item.1 : py.Value = py.getItem(%es.1, %i.2) ^raised.0()
+      %__context__.22 : base.Unit = py.setAttr(%item.1, "__context__", %item.0) ^raised.0()
+      %i.3 : py.Value = py.loadGlobal("s116_context_cycles", "i") ^raised.0()
       %int.8 : py.Value = py.intLit(1)
-      %iAdd.0 : py.Value = py.iAdd(%i.3, %int.8) ^propagate.0()
+      %iAdd.0 : py.Value = py.iAdd(%i.3, %int.8) ^raised.0()
       %i.cell.1 : base.Ref(py.Value) = py.globalCell("s116_context_cycles", "i")
       %set.27 : base.Unit = base.refSet[py.Value](%i.cell.1, %iAdd.0)
       jump ^head.0()
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.28 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.28)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %es.2 : py.Value = py.loadGlobal("s116_context_cycles", "es") ^propagate.0()
       %int.9 : py.Value = py.intLit(1)
@@ -426,30 +444,30 @@ module s116_context_cycles {
       %es.4 : py.Value = py.loadGlobal("s116_context_cycles", "es") ^catch.9()
       %int.11 : py.Value = py.intLit(0)
       %item.4 : py.Value = py.getItem(%es.4, %int.11) ^catch.9()
-      %exc.28 : py.Value = py.toException(%item.4) ^catch.9()
-      jump ^catch.9(%exc.28)
-    catch.9(%exc.29 : py.Value):
-      %prev.8 : py.Value = py.pushExcInfo(%exc.29)
+      %exc.29 : py.Value = py.toException(%item.4) ^catch.9()
+      jump ^catch.9(%exc.29)
+    catch.9(%exc.30 : py.Value):
+      %prev.8 : py.Value = py.pushExcInfo(%exc.30)
       %ValueError.13 : py.Value = py.loadGlobal("s116_context_cycles", "ValueError") ^unwind.9()
-      %match.8 : base.Bool = py.excMatch(%exc.29, %ValueError.13) ^unwind.9()
+      %match.8 : base.Bool = py.excMatch(%exc.30, %ValueError.13) ^unwind.9()
       branch(%match.8) ^except.8() ^next.8()
     except.8():
       %c.40 : py.Value = py.loadGlobal("s116_context_cycles", "c") ^unwind.9()
-      %exc.30 : py.Value = py.toException(%c.40) ^unwind.9()
-      jump ^unwind.9(%exc.30)
+      %exc.31 : py.Value = py.toException(%c.40) ^unwind.9()
+      jump ^unwind.9(%exc.31)
     next.8():
-      jump ^unwind.9(%exc.29)
-    unwind.9(%exc.31 : py.Value):
+      jump ^unwind.9(%exc.30)
+    unwind.9(%exc.32 : py.Value):
       %pop.12 : base.Unit = py.popExcept(%prev.8)
-      jump ^catch.8(%exc.31)
-    catch.8(%exc.32 : py.Value):
-      %prev.9 : py.Value = py.pushExcInfo(%exc.32)
+      jump ^catch.8(%exc.32)
+    catch.8(%exc.33 : py.Value):
+      %prev.9 : py.Value = py.pushExcInfo(%exc.33)
       %TypeError.9 : py.Value = py.loadGlobal("s116_context_cycles", "TypeError") ^unwind.8()
-      %match.9 : base.Bool = py.excMatch(%exc.32, %TypeError.9) ^unwind.8()
+      %match.9 : base.Bool = py.excMatch(%exc.33, %TypeError.9) ^unwind.8()
       branch(%match.9) ^except.9() ^next.9()
     except.9():
       %t.cell.6 : base.Ref(py.Value) = py.globalCell("s116_context_cycles", "t")
-      %set.29 : base.Unit = base.refSet[py.Value](%t.cell.6, %exc.32)
+      %set.29 : base.Unit = base.refSet[py.Value](%t.cell.6, %exc.33)
       %print.4 : py.Value = py.loadGlobal("s116_context_cycles", "print") ^clear.4()
       %t.5 : py.Value = py.loadGlobal("s116_context_cycles", "t") ^clear.4()
       %__context__.24 : py.Value = py.attr(%t.5, "__context__") ^clear.4()
@@ -481,23 +499,23 @@ module s116_context_cycles {
       %t.cell.7 : base.Ref(py.Value) = py.globalCell("s116_context_cycles", "t")
       %set.30 : base.Unit = base.refSet[py.Value](%t.cell.7, %t.6)
       jump ^join.8()
-    clear.4(%exc.33 : py.Value):
+    clear.4(%exc.34 : py.Value):
       %t.7 : py.Value = py.undef("t")
       %t.cell.8 : base.Ref(py.Value) = py.globalCell("s116_context_cycles", "t")
       %set.31 : base.Unit = base.refSet[py.Value](%t.cell.8, %t.7)
-      jump ^unwind.8(%exc.33)
+      jump ^unwind.8(%exc.34)
     next.9():
-      jump ^unwind.8(%exc.32)
-    unwind.8(%exc.34 : py.Value):
+      jump ^unwind.8(%exc.33)
+    unwind.8(%exc.35 : py.Value):
       %pop.14 : base.Unit = py.popExcept(%prev.9)
-      jump ^propagate.0(%exc.34)
+      jump ^propagate.0(%exc.35)
     join.8():
       %none.3 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.3)
       ret(%ret.0)
-    propagate.0(%exc.35 : py.Value):
-      %exc.36 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.35)
-      ret(%exc.36)
+    propagate.0(%exc.36 : py.Value):
+      %exc.37 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.36)
+      ret(%exc.37)
   }
 }
 

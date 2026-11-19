@@ -1,6 +1,8 @@
 module i08_binding_errors {
   func @|i08_binding_errors.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("i08_binding_errors")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i08_binding_errors", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -191,6 +193,8 @@ module i08_binding_errors {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "h", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i08_binding_errors", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("h")
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
@@ -216,6 +220,8 @@ module i08_binding_errors {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 2, false, false, "x", "y") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %y.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i08_binding_errors", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("g")
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
@@ -242,6 +248,8 @@ module i08_binding_errors {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "d", 0, 2, false, false, "a", "b") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %b.1 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i08_binding_errors", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("d")
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
@@ -268,6 +276,8 @@ module i08_binding_errors {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "k", 0, 1, false, false, "a", "key") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %key.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i08_binding_errors", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("k")
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
@@ -294,6 +304,8 @@ module i08_binding_errors {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "po", 1, 2, false, false, "a", "b") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i08_binding_errors", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("po")
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
@@ -312,6 +324,8 @@ module i08_binding_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "z", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i08_binding_errors", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("z")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -344,6 +358,8 @@ module i08_binding_errors {
       %fn.2 : py.Value = py.tupleGet(%bound.0, 1)
       %a.1 : py.Value = py.tupleGet(%bound.0, 2)
       %kw.1 : py.Value = py.tupleGet(%bound.0, 3)
+      jump ^start.0()
+    start.0():
       %fn.4 : py.Value = py.requireDefined(%fn.2, "fn", "UnboundLocalError", "cannot access local variable 'fn' where it is not associated with a value") ^catch.0()
       %a.3 : py.Value = py.requireDefined(%a.1, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^catch.0()
       %kwargs.1 : py.Value = py.mkKwargs

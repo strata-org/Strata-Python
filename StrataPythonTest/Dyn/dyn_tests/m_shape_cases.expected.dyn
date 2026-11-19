@@ -2,6 +2,8 @@
 module m_shape_cases {
   func @|m_shape_cases.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_shape_cases")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -359,6 +361,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -595,6 +599,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "_Outer__Base", binding = "class"}, {name = "_Outer__T", value = "int"}, {name = "Inner", binding = "class"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -689,6 +695,8 @@ module m_shape_cases {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "make_base", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %object.0 : py.Value = py.loadGlobal("m_shape_cases", "object") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%object.0)
       ret(%ret.0)
@@ -701,6 +709,8 @@ module m_shape_cases {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -733,6 +743,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "deco", 0, 1, false, false, "c") ^propagate.0()
       %c.9 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%c.cell.0, %c.9)
+      jump ^start.0()
+    start.0():
       %c.10 : py.Value = base.refGet[py.Value](%c.cell.0)
       %c.11 : py.Value = py.requireDefined(%c.10, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%c.11)
@@ -748,6 +760,8 @@ module m_shape_cases {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -777,6 +791,8 @@ module m_shape_cases {
     #[py.slots = [{value = {tuple = [{str = "a"}]}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -840,6 +856,8 @@ module m_shape_cases {
     #[py.slots = [{value = ["a", "b"]}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -889,6 +907,8 @@ module m_shape_cases {
     #[py.slots = [{value = [{str = "a"}, {str = "b"}]}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -923,6 +943,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "s", value = {tuple = [{str = "d"}]}}, {name = "t", value = {tuple = [{tuple = [{str = "e"}]}, 1]}, unpacked = true}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1005,6 +1027,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1036,6 +1060,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1067,6 +1093,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1098,6 +1126,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1129,6 +1159,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1164,6 +1196,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -1181,6 +1215,8 @@ module m_shape_cases {
       %__init__.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%__init__.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[]](@m_shape_cases.g.__init__, "__init__", "m_shape_cases")
       %set.0 : base.Unit = base.refSet[py.Value](%__init__.cell.0, %clo.0)
       %__init__.1 : py.Value = base.refGet[py.Value](%__init__.cell.0)
@@ -1196,6 +1232,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "x", value = 1}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1306,6 +1344,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1338,6 +1378,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "t", value = {tuple = [{tuple = [{str = "a"}]}, 1]}, unpacked = true}, {name = "t", value = {tuple = [{tuple = [{str = "b"}]}, 1]}, unpacked = true}, {name = "t", value = {tuple = [{str = "c"}, {str = "d"}, 1]}, unpacked = true}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1399,6 +1441,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1430,6 +1474,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1461,6 +1507,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1492,6 +1540,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__init__", binding = "def"}, {name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1581,6 +1631,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1612,6 +1664,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1643,6 +1697,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1674,6 +1730,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1705,6 +1763,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1736,6 +1796,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1767,6 +1829,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1798,6 +1862,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1829,6 +1895,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1872,6 +1940,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1903,6 +1973,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1933,6 +2005,8 @@ module m_shape_cases {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1964,6 +2038,8 @@ module m_shape_cases {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1999,6 +2075,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Account.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
@@ -2016,6 +2094,8 @@ module m_shape_cases {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -2044,6 +2124,8 @@ module m_shape_cases {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -2081,6 +2163,8 @@ module m_shape_cases {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %other.3 : py.Value = base.refGet[py.Value](%other.cell.0)
       %other.4 : py.Value = py.requireDefined(%other.3, "other", "UnboundLocalError", "cannot access local variable 'other' where it is not associated with a value") ^propagate.0()
       %set.2 : base.Unit = base.refSet[py.Value](%self.cell.0, %other.4)
@@ -2104,6 +2188,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "R2.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %mod.0 : py.Value = py.importModule("os") ^propagate.0()
       %set.1 : base.Unit = base.refSet[py.Value](%self.cell.0, %mod.0)
       %int.0 : py.Value = py.intLit(1)
@@ -2133,6 +2219,8 @@ module m_shape_cases {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@m_shape_cases.R3.__init__.f, "f", "m_shape_cases", %self.cell.0, %other.cell.0)
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %f.1 : py.Value = base.refGet[py.Value](%f.cell.0)
@@ -2165,6 +2253,8 @@ module m_shape_cases {
       %set.0 : base.Unit = base.refSet[py.Value](%_R4__s.cell.0, %_R4__s.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %other.3 : py.Value = base.refGet[py.Value](%other.cell.0)
       %other.4 : py.Value = py.requireDefined(%other.3, "other", "UnboundLocalError", "cannot access local variable 'other' where it is not associated with a value") ^propagate.0()
       %set.2 : base.Unit = base.refSet[py.Value](%_R4__s.cell.0, %other.4)
@@ -2181,6 +2271,8 @@ module m_shape_cases {
   }
   func @m_shape_cases.Gen.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("generator function")
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
@@ -2195,6 +2287,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g.<locals>.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -2214,6 +2308,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Star.__init__", 0, 0, true, false) ^propagate.0()
       %args.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -2232,6 +2328,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "R5.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.R5.__init__.Helper.<body>|, "<body>", "m_shape_cases")
       %str.0 : py.Value = py.strLit("Helper")
@@ -2261,6 +2359,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "R6.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[]](@m_shape_cases.R6.__init__.f, "f", "m_shape_cases")
       %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %f.1 : py.Value = base.refGet[py.Value](%f.cell.0)
@@ -2288,6 +2388,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "R7.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -2313,6 +2415,8 @@ module m_shape_cases {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %x.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %ellipsis.0 : py.Value = py.ellipsisLit
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
@@ -2335,6 +2439,8 @@ module m_shape_cases {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %x.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %ellipsis.0 : py.Value = py.ellipsisLit
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
@@ -2357,6 +2463,8 @@ module m_shape_cases {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %x.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -2385,6 +2493,8 @@ module m_shape_cases {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@m_shape_cases.Two.__init__.f, "f", "m_shape_cases", %other.cell.0, %self.cell.0)
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %f.1 : py.Value = base.refGet[py.Value](%f.cell.0)
@@ -2419,6 +2529,8 @@ module m_shape_cases {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@m_shape_cases.Chain.__init__.f, "f", "m_shape_cases", %self.cell.0, %other.cell.0)
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %f.1 : py.Value = base.refGet[py.Value](%f.cell.0)
@@ -2453,6 +2565,8 @@ module m_shape_cases {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@|m_shape_cases.ViaClass.__init__.K.<body>|, "<body>", "m_shape_cases", %other.cell.0, %self.cell.0)
       %str.0 : py.Value = py.strLit("K")
@@ -2496,6 +2610,8 @@ module m_shape_cases {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@m_shape_cases.ViaClassBody.__init__.f, "f", "m_shape_cases", %other.cell.0, %self.cell.0)
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %f.1 : py.Value = base.refGet[py.Value](%f.cell.0)
@@ -2525,6 +2641,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "InFunc.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[]](@m_shape_cases.InFunc.__init__.f, "f", "m_shape_cases")
       %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %f.1 : py.Value = base.refGet[py.Value](%f.cell.0)
@@ -2554,6 +2672,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Deep.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.Deep.__init__.A.<body>|, "<body>", "m_shape_cases")
       %str.0 : py.Value = py.strLit("A")
@@ -2583,6 +2703,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "DeepInFunc.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[]](@m_shape_cases.DeepInFunc.__init__.f, "f", "m_shape_cases")
       %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %f.1 : py.Value = base.refGet[py.Value](%f.cell.0)
@@ -2615,6 +2737,8 @@ module m_shape_cases {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %ok.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%ok.cell.0, %ok.2)
+      jump ^start.0()
+    start.0():
       %ok.3 : py.Value = base.refGet[py.Value](%ok.cell.0)
       %ok.4 : py.Value = py.requireDefined(%ok.3, "ok", "UnboundLocalError", "cannot access local variable 'ok' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%ok.4) ^propagate.0()
@@ -2646,6 +2770,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "CM.__init__", 0, 1, false, false, "cls") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %cls.3 : py.Value = base.refGet[py.Value](%cls.cell.0)
       %cls.4 : py.Value = py.requireDefined(%cls.3, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()
@@ -2668,6 +2794,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "CompVar.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %list.0 : py.Value = py.mkList(%int.0)
       %self.3 : py.Value = py.undef("self")
@@ -2717,6 +2845,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "CompWalrus.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %list.0 : py.Value = py.mkList(%int.0)
       %_.1 : py.Value = py.undef("_")
@@ -2759,6 +2889,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -2774,6 +2906,8 @@ module m_shape_cases {
     entry.0(%self.cell.0 : base.Ref(py.Value), %other.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "R3.__init__.<locals>.f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %other.0 : py.Value = base.refGet[py.Value](%other.cell.0)
       %other.1 : py.Value = py.requireDefined(%other.0, "other", "NameError", "cannot access free variable 'other' where it is not associated with a value in enclosing scope") ^propagate.0()
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %other.1)
@@ -2789,6 +2923,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "self", value = "R1"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -2842,6 +2978,8 @@ module m_shape_cases {
       %g.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%g.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "R6.__init__.<locals>.f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %int.0)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_shape_cases.R6.__init__.f.g, "g", "m_shape_cases", %self.cell.0)
@@ -2864,6 +3002,8 @@ module m_shape_cases {
       %g.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%g.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Two.__init__.<locals>.f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@m_shape_cases.Two.__init__.f.g, "g", "m_shape_cases", %self.cell.0, %other.cell.0)
       %set.0 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.0)
       %g.1 : py.Value = base.refGet[py.Value](%g.cell.0)
@@ -2884,6 +3024,8 @@ module m_shape_cases {
       %g.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%g.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Chain.__init__.<locals>.f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@m_shape_cases.Chain.__init__.f.g, "g", "m_shape_cases", %self.cell.0, %other.cell.0)
       %set.0 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.0)
       %g.1 : py.Value = base.refGet[py.Value](%g.cell.0)
@@ -2903,6 +3045,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "m", binding = "def"}]]
 
     entry.0(%other.cell.0 : base.Ref(py.Value), %self.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -2935,6 +3079,8 @@ module m_shape_cases {
       %K.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%K.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "ViaClassBody.__init__.<locals>.f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@|m_shape_cases.ViaClassBody.__init__.f.K.<body>|, "<body>", "m_shape_cases", %self.cell.0, %other.cell.0)
       %str.0 : py.Value = py.strLit("K")
@@ -2955,6 +3101,8 @@ module m_shape_cases {
       %H.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%H.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "InFunc.__init__.<locals>.f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.InFunc.__init__.f.H.<body>|, "<body>", "m_shape_cases")
       %str.0 : py.Value = py.strLit("H")
@@ -2974,6 +3122,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "B", binding = "class"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -3011,6 +3161,8 @@ module m_shape_cases {
       %A.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%A.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "DeepInFunc.__init__.<locals>.f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.DeepInFunc.__init__.f.A.<body>|, "<body>", "m_shape_cases")
       %str.0 : py.Value = py.strLit("A")
@@ -3029,6 +3181,8 @@ module m_shape_cases {
     entry.0(%self.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "R6.__init__.<locals>.f.<locals>.g", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(2)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %int.0)
       %none.0 : py.Value = py.noneLit
@@ -3042,6 +3196,8 @@ module m_shape_cases {
     entry.0(%self.cell.0 : base.Ref(py.Value), %other.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Two.__init__.<locals>.f.<locals>.g", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %other.0 : py.Value = base.refGet[py.Value](%other.cell.0)
       %other.1 : py.Value = py.requireDefined(%other.0, "other", "NameError", "cannot access free variable 'other' where it is not associated with a value in enclosing scope") ^propagate.0()
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %other.1)
@@ -3056,6 +3212,8 @@ module m_shape_cases {
     entry.0(%self.cell.0 : base.Ref(py.Value), %other.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Chain.__init__.<locals>.f.<locals>.g", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %other.0 : py.Value = base.refGet[py.Value](%other.cell.0)
       %other.1 : py.Value = py.requireDefined(%other.0, "other", "NameError", "cannot access free variable 'other' where it is not associated with a value in enclosing scope") ^propagate.0()
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %other.1)
@@ -3075,6 +3233,8 @@ module m_shape_cases {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "ViaClass.__init__.<locals>.K.m", 0, 1, false, false, "_") ^propagate.0()
       %_.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%_.cell.0, %_.2)
+      jump ^start.0()
+    start.0():
       %other.0 : py.Value = base.refGet[py.Value](%other.cell.0)
       %other.1 : py.Value = py.requireDefined(%other.0, "other", "NameError", "cannot access free variable 'other' where it is not associated with a value in enclosing scope") ^propagate.0()
       %set.1 : base.Unit = base.refSet[py.Value](%self.cell.0, %other.1)
@@ -3089,6 +3249,8 @@ module m_shape_cases {
     #[py.fields = []]
 
     entry.0(%self.cell.0 : base.Ref(py.Value), %other.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -3128,6 +3290,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "self", value = 1}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -3159,6 +3323,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "self", value = 1}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -3190,6 +3356,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "B", binding = "class"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -3226,6 +3394,8 @@ module m_shape_cases {
     #[py.bindings = [{name = "self", value = 1}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")

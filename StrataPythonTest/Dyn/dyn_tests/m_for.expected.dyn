@@ -1,6 +1,10 @@
 module m_for {
   func @|m_for.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}, {head = "head.1", done = "done.1"}, {head = "head.2", done = "done.2"}, {head = "head.3", done = "done.3"}, {head = "head.5", done = "done.5"}, {head = "head.4", done = "done.4"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_for")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -14,15 +18,29 @@ module m_for {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "x")
       %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
-      %f.0 : py.Value = py.loadGlobal("m_for", "f") ^propagate.0()
-      %x.0 : py.Value = py.loadGlobal("m_for", "x") ^propagate.0()
+      %f.0 : py.Value = py.loadGlobal("m_for", "f") ^raised.0()
+      %x.0 : py.Value = py.loadGlobal("m_for", "x") ^raised.0()
       %tuple.0 : py.Value = py.mkTuple(%x.0)
       %kwargs.0 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%f.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %call.0 : py.Value = py.call(%f.0, %tuple.0, %kwargs.0) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %xs.1 : py.Value = py.loadGlobal("m_for", "xs") ^propagate.0()
       %iter.1 : py.Value = py.getIter(%xs.1) ^propagate.0()
@@ -31,39 +49,54 @@ module m_for {
       %item.1 : py.Value = py.next(%iter.1) ^stop.1()
       %x.cell.1 : base.Ref(py.Value) = py.globalCell("m_for", "x")
       %set.3 : base.Unit = base.refSet[py.Value](%x.cell.1, %item.1)
-      %p.0 : py.Value = py.loadGlobal("m_for", "p") ^propagate.0()
-      %x.1 : py.Value = py.loadGlobal("m_for", "x") ^propagate.0()
+      %p.0 : py.Value = py.loadGlobal("m_for", "p") ^raised.1()
+      %x.1 : py.Value = py.loadGlobal("m_for", "x") ^raised.1()
       %tuple.1 : py.Value = py.mkTuple(%x.1)
       %kwargs.1 : py.Value = py.mkKwargs
-      %call.1 : py.Value = py.call(%p.0, %tuple.1, %kwargs.1) ^propagate.0()
-      %cond.0 : base.Bool = py.truthy(%call.1) ^propagate.0()
+      %call.1 : py.Value = py.call(%p.0, %tuple.1, %kwargs.1) ^raised.1()
+      %cond.0 : base.Bool = py.truthy(%call.1) ^raised.1()
       branch(%cond.0) ^then.0() ^else.1()
     then.0():
-      jump ^exit.1()
+      jump ^brk.1()
     else.1():
       jump ^join.0()
     join.0():
-      %q.0 : py.Value = py.loadGlobal("m_for", "q") ^propagate.0()
-      %x.2 : py.Value = py.loadGlobal("m_for", "x") ^propagate.0()
+      %q.0 : py.Value = py.loadGlobal("m_for", "q") ^raised.1()
+      %x.2 : py.Value = py.loadGlobal("m_for", "x") ^raised.1()
       %tuple.2 : py.Value = py.mkTuple(%x.2)
       %kwargs.2 : py.Value = py.mkKwargs
-      %call.2 : py.Value = py.call(%q.0, %tuple.2, %kwargs.2) ^propagate.0()
-      %cond.1 : base.Bool = py.truthy(%call.2) ^propagate.0()
+      %call.2 : py.Value = py.call(%q.0, %tuple.2, %kwargs.2) ^raised.1()
+      %cond.1 : base.Bool = py.truthy(%call.2) ^raised.1()
       branch(%cond.1) ^then.1() ^else.2()
     then.1():
       jump ^head.1()
     else.2():
       jump ^join.1()
     join.1():
-      %f.1 : py.Value = py.loadGlobal("m_for", "f") ^propagate.0()
-      %x.3 : py.Value = py.loadGlobal("m_for", "x") ^propagate.0()
+      %f.1 : py.Value = py.loadGlobal("m_for", "f") ^raised.1()
+      %x.3 : py.Value = py.loadGlobal("m_for", "x") ^raised.1()
       %tuple.3 : py.Value = py.mkTuple(%x.3)
       %kwargs.3 : py.Value = py.mkKwargs
-      %call.3 : py.Value = py.call(%f.1, %tuple.3, %kwargs.3) ^propagate.0()
+      %call.3 : py.Value = py.call(%f.1, %tuple.3, %kwargs.3) ^raised.1()
       jump ^head.1()
-    stop.1(%exc.1 : py.Value):
-      %done.1 : base.Bool = py.isStopIteration(%exc.1)
-      branch(%done.1) ^else.0() ^propagate.0(%exc.1)
+    stop.1(%exc.2 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.2)
+      branch(%done.1) ^normal.1() ^raised.1(%exc.2)
+    normal.1():
+      %comp.3 : py.Completion = py.completionNormal
+      jump ^done.1(%comp.3)
+    brk.1():
+      %comp.4 : py.Completion = py.completionBreak
+      jump ^done.1(%comp.4)
+    raised.1(%exc.3 : py.Value):
+      %comp.5 : py.Completion = py.completionRaise(%exc.3)
+      jump ^done.1(%comp.5)
+    done.1(%comp.6 : py.Completion):
+      py.Completion.case(%comp.6) ^else.0() ^unreachable.3() ^propagate.0() ^exit.1() ^unreachable.4()
+    unreachable.3(%val.1 : py.Value):
+      unreachable
+    unreachable.4():
+      unreachable
     else.0():
       %g.0 : py.Value = py.loadGlobal("m_for", "g") ^propagate.0()
       %tuple.4 : py.Value = py.mkTuple
@@ -76,41 +109,69 @@ module m_for {
       jump ^head.2()
     head.2():
       %item.2 : py.Value = py.next(%iter.2) ^stop.2()
-      %unpack.0 : py.Value = py.unpackSeq(%item.2, 2) ^propagate.0()
+      %unpack.0 : py.Value = py.unpackSeq(%item.2, 2) ^raised.2()
       %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
       %a.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "a")
       %set.4 : base.Unit = base.refSet[py.Value](%a.cell.0, %elem.0)
       %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
-      %unpack.1 : py.Value = py.unpackEx(%elem.1, 1, 0) ^propagate.0()
+      %unpack.1 : py.Value = py.unpackEx(%elem.1, 1, 0) ^raised.2()
       %elem.2 : py.Value = py.tupleGet(%unpack.1, 0)
       %b.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "b")
       %set.5 : base.Unit = base.refSet[py.Value](%b.cell.0, %elem.2)
       %elem.3 : py.Value = py.tupleGet(%unpack.1, 1)
       %c.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "c")
       %set.6 : base.Unit = base.refSet[py.Value](%c.cell.0, %elem.3)
-      %f.2 : py.Value = py.loadGlobal("m_for", "f") ^propagate.0()
-      %a.0 : py.Value = py.loadGlobal("m_for", "a") ^propagate.0()
-      %b.0 : py.Value = py.loadGlobal("m_for", "b") ^propagate.0()
-      %c.1 : py.Value = py.loadGlobal("m_for", "c") ^propagate.0()
+      %f.2 : py.Value = py.loadGlobal("m_for", "f") ^raised.2()
+      %a.0 : py.Value = py.loadGlobal("m_for", "a") ^raised.2()
+      %b.0 : py.Value = py.loadGlobal("m_for", "b") ^raised.2()
+      %c.1 : py.Value = py.loadGlobal("m_for", "c") ^raised.2()
       %tuple.5 : py.Value = py.mkTuple(%a.0, %b.0, %c.1)
       %kwargs.5 : py.Value = py.mkKwargs
-      %call.5 : py.Value = py.call(%f.2, %tuple.5, %kwargs.5) ^propagate.0()
+      %call.5 : py.Value = py.call(%f.2, %tuple.5, %kwargs.5) ^raised.2()
       jump ^head.2()
-    stop.2(%exc.2 : py.Value):
-      %done.2 : base.Bool = py.isStopIteration(%exc.2)
-      branch(%done.2) ^exit.2() ^propagate.0(%exc.2)
+    stop.2(%exc.4 : py.Value):
+      %done.2 : base.Bool = py.isStopIteration(%exc.4)
+      branch(%done.2) ^normal.2() ^raised.2(%exc.4)
+    normal.2():
+      %comp.7 : py.Completion = py.completionNormal
+      jump ^done.2(%comp.7)
+    raised.2(%exc.5 : py.Value):
+      %comp.8 : py.Completion = py.completionRaise(%exc.5)
+      jump ^done.2(%comp.8)
+    done.2(%comp.9 : py.Completion):
+      py.Completion.case(%comp.9) ^exit.2() ^unreachable.5() ^propagate.0() ^unreachable.6() ^unreachable.7()
+    unreachable.5(%val.2 : py.Value):
+      unreachable
+    unreachable.6():
+      unreachable
+    unreachable.7():
+      unreachable
     exit.2():
       %xs.3 : py.Value = py.loadGlobal("m_for", "xs") ^propagate.0()
       %iter.3 : py.Value = py.getIter(%xs.3) ^propagate.0()
       jump ^head.3()
     head.3():
       %item.3 : py.Value = py.next(%iter.3) ^stop.3()
-      %o.0 : py.Value = py.loadGlobal("m_for", "o") ^propagate.0()
-      %a.1 : base.Unit = py.setAttr(%o.0, "a", %item.3) ^propagate.0()
+      %o.0 : py.Value = py.loadGlobal("m_for", "o") ^raised.3()
+      %a.1 : base.Unit = py.setAttr(%o.0, "a", %item.3) ^raised.3()
       jump ^head.3()
-    stop.3(%exc.3 : py.Value):
-      %done.3 : base.Bool = py.isStopIteration(%exc.3)
-      branch(%done.3) ^exit.3() ^propagate.0(%exc.3)
+    stop.3(%exc.6 : py.Value):
+      %done.3 : base.Bool = py.isStopIteration(%exc.6)
+      branch(%done.3) ^normal.3() ^raised.3(%exc.6)
+    normal.3():
+      %comp.10 : py.Completion = py.completionNormal
+      jump ^done.3(%comp.10)
+    raised.3(%exc.7 : py.Value):
+      %comp.11 : py.Completion = py.completionRaise(%exc.7)
+      jump ^done.3(%comp.11)
+    done.3(%comp.12 : py.Completion):
+      py.Completion.case(%comp.12) ^exit.3() ^unreachable.8() ^propagate.0() ^unreachable.9() ^unreachable.10()
+    unreachable.8(%val.3 : py.Value):
+      unreachable
+    unreachable.9():
+      unreachable
+    unreachable.10():
+      unreachable
     exit.3():
       %xs.4 : py.Value = py.loadGlobal("m_for", "xs") ^propagate.0()
       %iter.4 : py.Value = py.getIter(%xs.4) ^propagate.0()
@@ -119,24 +180,54 @@ module m_for {
       %item.4 : py.Value = py.next(%iter.4) ^stop.4()
       %x.cell.2 : base.Ref(py.Value) = py.globalCell("m_for", "x")
       %set.7 : base.Unit = base.refSet[py.Value](%x.cell.2, %item.4)
-      %ys.0 : py.Value = py.loadGlobal("m_for", "ys") ^propagate.0()
-      %iter.5 : py.Value = py.getIter(%ys.0) ^propagate.0()
+      %ys.0 : py.Value = py.loadGlobal("m_for", "ys") ^raised.4()
+      %iter.5 : py.Value = py.getIter(%ys.0) ^raised.4()
       jump ^head.5()
     head.5():
       %item.5 : py.Value = py.next(%iter.5) ^stop.5()
       %y.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "y")
       %set.8 : base.Unit = base.refSet[py.Value](%y.cell.0, %item.5)
-      jump ^exit.5()
-    stop.5(%exc.4 : py.Value):
-      %done.4 : base.Bool = py.isStopIteration(%exc.4)
-      branch(%done.4) ^else.3() ^propagate.0(%exc.4)
+      jump ^brk.5()
+    stop.5(%exc.8 : py.Value):
+      %done.4 : base.Bool = py.isStopIteration(%exc.8)
+      branch(%done.4) ^normal.5() ^raised.5(%exc.8)
+    normal.5():
+      %comp.13 : py.Completion = py.completionNormal
+      jump ^done.5(%comp.13)
+    brk.5():
+      %comp.14 : py.Completion = py.completionBreak
+      jump ^done.5(%comp.14)
+    raised.5(%exc.9 : py.Value):
+      %comp.15 : py.Completion = py.completionRaise(%exc.9)
+      jump ^done.5(%comp.15)
+    done.5(%comp.16 : py.Completion):
+      py.Completion.case(%comp.16) ^else.3() ^unreachable.11() ^raised.4() ^exit.5() ^unreachable.12()
+    unreachable.11(%val.4 : py.Value):
+      unreachable
+    unreachable.12():
+      unreachable
     else.3():
       jump ^head.4()
     exit.5():
-      jump ^exit.4()
-    stop.4(%exc.5 : py.Value):
-      %done.5 : base.Bool = py.isStopIteration(%exc.5)
-      branch(%done.5) ^exit.4() ^propagate.0(%exc.5)
+      jump ^brk.4()
+    stop.4(%exc.10 : py.Value):
+      %done.5 : base.Bool = py.isStopIteration(%exc.10)
+      branch(%done.5) ^normal.4() ^raised.4(%exc.10)
+    normal.4():
+      %comp.17 : py.Completion = py.completionNormal
+      jump ^done.4(%comp.17)
+    brk.4():
+      %comp.18 : py.Completion = py.completionBreak
+      jump ^done.4(%comp.18)
+    raised.4(%exc.11 : py.Value):
+      %comp.19 : py.Completion = py.completionRaise(%exc.11)
+      jump ^done.4(%comp.19)
+    done.4(%comp.20 : py.Completion):
+      py.Completion.case(%comp.20) ^exit.4() ^unreachable.13() ^propagate.0() ^exit.4() ^unreachable.14()
+    unreachable.13(%val.5 : py.Value):
+      unreachable
+    unreachable.14():
+      unreachable
     exit.4():
       %clo.0 : py.Value = py.mkClosure[[]](@m_for.first, "first", "m_for")
       %first.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "first")
@@ -144,11 +235,13 @@ module m_for {
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.6 : py.Value):
-      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
-      ret(%exc.7)
+    propagate.0(%exc.12 : py.Value):
+      %exc.13 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.12)
+      ret(%exc.13)
   }
   func @m_for.first(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %xs.0 : py.Value = py.undef("xs")
       %xs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%xs.0)
@@ -159,6 +252,8 @@ module m_for {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "first", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%xs.4) ^propagate.0()
@@ -167,19 +262,34 @@ module m_for {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
       %x.1 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.2 : py.Value = py.requireDefined(%x.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.2)
-      ret(%ret.0)
+      %x.2 : py.Value = py.requireDefined(%x.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^raised.0()
+      %comp.0 : py.Completion = py.completionReturn(%x.2)
+      jump ^done.0(%comp.0)
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.1 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.1)
+    raised.0(%exc.1 : py.Value):
+      %comp.2 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.2)
+    done.0(%comp.3 : py.Completion):
+      py.Completion.case(%comp.3) ^exit.0() ^ret.0() ^propagate.0() ^unreachable.0() ^unreachable.1()
+    ret.0(%val.0 : py.Value):
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%val.0)
+      ret(%ret.0)
+    unreachable.0():
+      unreachable
+    unreachable.1():
+      unreachable
     exit.0():
       %none.0 : py.Value = py.noneLit
       %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.1)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
 }
 

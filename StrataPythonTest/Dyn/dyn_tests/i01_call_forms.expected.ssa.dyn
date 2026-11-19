@@ -1,6 +1,8 @@
 module i01_call_forms {
   func @|i01_call_forms.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("i01_call_forms")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i01_call_forms", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -131,6 +133,8 @@ module i01_call_forms {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "show", 0, 0, true, true) ^propagate.0()
       %args.2 : py.Value = py.tupleGet(%bound.0, 0)
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i01_call_forms", "print") ^propagate.0()
       %len.0 : py.Value = py.loadGlobal("i01_call_forms", "len") ^propagate.0()
       %args.4 : py.Value = py.requireDefined(%args.2, "args", "UnboundLocalError", "cannot access local variable 'args' where it is not associated with a value") ^propagate.0()

@@ -1,0 +1,170 @@
+module g02_while_else_continue_finally {
+  func @|g02_while_else_continue_finally.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      jump ^start.0()
+    start.0():
+      %str.0 : py.Value = py.strLit("g02_while_else_continue_finally")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("g02_while_else_continue_finally", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("g02_while_else_continue_finally", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@g02_while_else_continue_finally.b, "b", "g02_while_else_continue_finally")
+      %b.cell.0 : base.Ref(py.Value) = py.globalCell("g02_while_else_continue_finally", "b")
+      %set.2 : base.Unit = base.refSet[py.Value](%b.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+  }
+  func @g02_while_else_continue_finally.b(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %n.1 : py.Value = py.undef("n")
+      %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.1)
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %n.4 : py.Value = py.undef("n")
+      %defaults.0 : py.Value = py.mkTuple(%n.4)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "b", 0, 1, false, false, "n") ^propagate.0()
+      %n.5 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.5)
+      jump ^start.0()
+    start.0():
+      %int.0 : py.Value = py.intLit(0)
+      %set.1 : base.Unit = base.refSet[py.Value](%i.cell.0, %int.0)
+      jump ^head.0()
+    head.0():
+      %i.1 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.2 : py.Value = py.requireDefined(%i.1, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^loopexit.0()
+      %n.6 : py.Value = base.refGet[py.Value](%n.cell.0)
+      %n.7 : py.Value = py.requireDefined(%n.6, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^loopexit.0()
+      %lt.0 : py.Value = py.lt(%i.2, %n.7) ^loopexit.0()
+      %cond.0 : base.Bool = py.truthy(%lt.0) ^loopexit.0()
+      branch(%cond.0) ^body.0() ^normal.0()
+    body.0():
+      %p.0 : py.Value = py.loadGlobal("g02_while_else_continue_finally", "p") ^catch.0()
+      %i.3 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.4 : py.Value = py.requireDefined(%i.3, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple(%i.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%p.0, %tuple.0, %kwargs.1) ^catch.0()
+      %cond.1 : base.Bool = py.truthy(%call.0) ^catch.0()
+      branch(%cond.1) ^then.0() ^else.1()
+    then.0():
+      %comp.0 : py.Completion = py.completionContinue
+      jump ^fin.0(%comp.0)
+    else.1():
+      jump ^join.2()
+    join.2():
+      %work.0 : py.Value = py.loadGlobal("g02_while_else_continue_finally", "work") ^catch.0()
+      %i.5 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.6 : py.Value = py.requireDefined(%i.5, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^catch.0()
+      %tuple.1 : py.Value = py.mkTuple(%i.6)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%work.0, %tuple.1, %kwargs.2) ^catch.0()
+      jump ^join.1()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %KeyError.0 : py.Value = py.loadGlobal("g02_while_else_continue_finally", "KeyError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %KeyError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %comp.1 : py.Completion = py.completionContinue
+      jump ^fin.0(%comp.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.1 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^finRaise.0(%exc.1)
+    join.1():
+      %comp.2 : py.Completion = py.completionNormal
+      jump ^fin.0(%comp.2)
+    finRaise.0(%exc.2 : py.Value):
+      %comp.3 : py.Completion = py.completionRaise(%exc.2)
+      jump ^fin.0(%comp.3)
+    fin.0(%pending.0 : py.Completion):
+      %prev.1 : py.Value = py.pushPending(%pending.0)
+      %q.0 : py.Value = py.loadGlobal("g02_while_else_continue_finally", "q") ^superseded.0()
+      %i.7 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.8 : py.Value = py.requireDefined(%i.7, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^superseded.0()
+      %tuple.2 : py.Value = py.mkTuple(%i.8)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%q.0, %tuple.2, %kwargs.3) ^superseded.0()
+      %cond.2 : base.Bool = py.truthy(%call.2) ^superseded.0()
+      branch(%cond.2) ^then.1() ^else.2()
+    then.1():
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      jump ^latch.0()
+    else.2():
+      jump ^join.3()
+    join.3():
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      py.Completion.case(%pending.0) ^join.0() ^ret.0() ^loopexit.0() ^unreachable.0() ^latch.0()
+    ret.0(%val.0 : py.Value):
+      %comp.4 : py.Completion = py.completionReturn(%val.0)
+      jump ^done.0(%comp.4)
+    unreachable.0():
+      unreachable
+    superseded.0(%exc.3 : py.Value):
+      %pop.4 : base.Unit = py.popExcept(%prev.1)
+      jump ^raised.0(%exc.3)
+    join.0():
+      %r.0 : py.Value = py.loadGlobal("g02_while_else_continue_finally", "r") ^loopexit.0()
+      %i.9 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.10 : py.Value = py.requireDefined(%i.9, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^loopexit.0()
+      %tuple.3 : py.Value = py.mkTuple(%i.10)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%r.0, %tuple.3, %kwargs.4) ^loopexit.0()
+      %cond.3 : base.Bool = py.truthy(%call.3) ^loopexit.0()
+      branch(%cond.3) ^then.2() ^else.3()
+    then.2():
+      jump ^brk.0()
+    else.3():
+      jump ^join.4()
+    join.4():
+      %i.11 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.12 : py.Value = py.requireDefined(%i.11, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^loopexit.0()
+      %int.1 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%i.12, %int.1) ^loopexit.0()
+      %set.2 : base.Unit = base.refSet[py.Value](%i.cell.0, %iAdd.0)
+      jump ^latch.0()
+    normal.0():
+      %comp.5 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.5)
+    brk.0():
+      %comp.6 : py.Completion = py.completionBreak
+      jump ^done.0(%comp.6)
+    raised.0(%exc.4 : py.Value):
+      %comp.7 : py.Completion = py.completionRaise(%exc.4)
+      jump ^done.0(%comp.7)
+    done.0(%comp.8 : py.Completion):
+      py.Completion.case(%comp.8) ^else.0() ^ret.1() ^propagate.0() ^exit.0() ^unreachable.1()
+    ret.1(%val.1 : py.Value):
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%val.1)
+      jump ^post.0(%ret.0)
+    unreachable.1():
+      unreachable
+    else.0():
+      %log.0 : py.Value = py.loadGlobal("g02_while_else_continue_finally", "log") ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%log.0, %tuple.4, %kwargs.5) ^propagate.0()
+      jump ^exit.0()
+    exit.0():
+      %i.13 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.14 : py.Value = py.requireDefined(%i.13, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.14)
+      jump ^post.0(%ret.1)
+    propagate.0(%exc.5 : py.Value):
+      %exc.6 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.5)
+      jump ^post.0(%exc.6)
+    post.0(%ret.2 : base.Except(py.Value, py.Value)):
+      ret(%ret.2)
+    latch.0():
+      jump ^head.0()
+    loopexit.0(%exc.7 : py.Value):
+      jump ^raised.0(%exc.7)
+  }
+}

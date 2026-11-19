@@ -1,6 +1,8 @@
 module p33_with_for_targets {
   func @|p33_with_for_targets.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p33_with_for_targets")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p33_with_for_targets", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -15,6 +17,8 @@ module p33_with_for_targets {
       ret(%ret.0)
   }
   func @p33_with_for_targets.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %path.0 : py.Value = py.undef("path")
       %path.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%path.0)
@@ -44,6 +48,8 @@ module p33_with_for_targets {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 2, false, false, "path", "pairs") ^propagate.0()
       %path.2 : py.Value = py.tupleGet(%bound.0, 0)
       %pairs.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %open.0 : py.Value = py.loadGlobal("p33_with_for_targets", "open") ^propagate.0()
       %path.4 : py.Value = py.requireDefined(%path.2, "path", "UnboundLocalError", "cannot access local variable 'path' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%path.4)
@@ -128,16 +134,30 @@ module p33_with_for_targets {
       jump ^head.0(%a.0, %b.0, %c.0)
     head.0(%a.3 : py.Value, %b.3 : py.Value, %c.81 : py.Value):
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
-      %unpack.0 : py.Value = py.unpackSeq(%item.0, 2) ^propagate.0()
+      %unpack.0 : py.Value = py.unpackSeq(%item.0, 2) ^raised.0(%a.3)
       %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
       %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
-      %unpack.1 : py.Value = py.unpackEx(%elem.1, 1, 0) ^propagate.0()
+      %unpack.1 : py.Value = py.unpackEx(%elem.1, 1, 0) ^raised.0(%elem.0)
       %elem.2 : py.Value = py.tupleGet(%unpack.1, 0)
       %elem.3 : py.Value = py.tupleGet(%unpack.1, 1)
       jump ^head.0(%elem.0, %elem.2, %elem.3)
     stop.0(%exc.4 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.4)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.4)
+      branch(%done.0) ^normal.0() ^raised.0(%a.3, %exc.4)
+    normal.0():
+      %comp.3 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.3, %a.3)
+    raised.0(%a.4 : py.Value, %exc.5 : py.Value):
+      %comp.4 : py.Completion = py.completionRaise(%exc.5)
+      jump ^done.0(%comp.4, %a.4)
+    done.0(%comp.5 : py.Completion, %a.5 : py.Value):
+      py.Completion.case(%comp.5) ^exit.0() ^unreachable.4() ^propagate.0() ^unreachable.5() ^unreachable.6()
+    unreachable.4(%val.2 : py.Value):
+      unreachable
+    unreachable.5():
+      unreachable
+    unreachable.6():
+      unreachable
     exit.0():
       %int.0 : py.Value = py.intLit(0)
       %n.18 : py.Value = py.requireDefined(%int.0, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
@@ -152,7 +172,7 @@ module p33_with_for_targets {
       %int.5 : py.Value = py.intLit(0)
       %store.0 : base.Unit = py.setItem(%obj.1, %int.5, %int.4) ^propagate.0()
       %data.2 : py.Value = py.requireDefined(%data.6, "data", "UnboundLocalError", "cannot access local variable 'data' where it is not associated with a value") ^propagate.0()
-      %a.2 : py.Value = py.requireDefined(%a.3, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %a.2 : py.Value = py.requireDefined(%a.5, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.2 : py.Value = py.requireDefined(%b.3, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %c.17 : py.Value = py.requireDefined(%c.81, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       %n.22 : py.Value = py.requireDefined(%iAdd.0, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
@@ -160,9 +180,9 @@ module p33_with_for_targets {
       %tuple.3 : py.Value = py.mkTuple(%data.2, %a.2, %b.2, %c.17, %n.22, %m.6)
       %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.3)
       ret(%ret.1)
-    propagate.0(%exc.5 : py.Value):
-      %exc.6 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.5)
-      ret(%exc.6)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
   }
 }
 

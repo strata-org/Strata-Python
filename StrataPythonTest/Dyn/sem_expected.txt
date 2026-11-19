@@ -44,6 +44,12 @@ fw07_with_in_finally | gap | import of module sys is not modelled yet
 fw08_try_in_with | gap | import of module sys is not modelled yet
 fw09_try_else_finally | gap | import of module sys is not modelled yet
 fw10_return_value_timing | agree
+g01_loop_in_try | agree
+g02_while_else_continue_finally | agree
+g03_compound_guard | agree
+g04_return_through_with | agree
+g05_tail_not_in_loop | agree
+g06_function_contract | agree
 i01_call_forms | agree
 i02_param_kinds | agree
 i03_defaults | agree
@@ -169,6 +175,10 @@ m_if | agree
 m_imports | gap | import of module os is not modelled yet
 m_lambda | gap | the translator does not support generator function
 m_local_vs_global | agree
+m_loop_dead_after | agree
+m_loop_dropped | agree
+m_loop_in_except | agree
+m_loop_records | agree
 m_module_bytes_doc | agree
 m_module_dunders | gap | the translator does not support module attribute __spec__, module attribute __package__, module attribute __loader__, module attribute __file__, module attribute __cached__, module attribute __builtins__, module attribute __annotations__, module attribute __path__
 m_operators | agree

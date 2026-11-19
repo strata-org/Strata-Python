@@ -1,6 +1,10 @@
 module lib_gap_issubclass_deep {
   func @|lib_gap_issubclass_deep.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_gap_issubclass_deep")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_issubclass_deep", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -21,14 +25,28 @@ module lib_gap_issubclass_deep {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %i.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_issubclass_deep", "i")
       %set.3 : base.Unit = base.refSet[py.Value](%i.cell.0, %item.0)
-      %t.0 : py.Value = py.loadGlobal("lib_gap_issubclass_deep", "t") ^propagate.0()
+      %t.0 : py.Value = py.loadGlobal("lib_gap_issubclass_deep", "t") ^raised.0()
       %tuple.1 : py.Value = py.mkTuple(%t.0)
       %t.cell.1 : base.Ref(py.Value) = py.globalCell("lib_gap_issubclass_deep", "t")
       %set.4 : base.Unit = base.refSet[py.Value](%t.cell.1, %tuple.1)
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %print.0 : py.Value = py.loadGlobal("lib_gap_issubclass_deep", "print") ^propagate.0()
       %issubclass.0 : py.Value = py.loadGlobal("lib_gap_issubclass_deep", "issubclass") ^propagate.0()
@@ -43,9 +61,9 @@ module lib_gap_issubclass_deep {
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
 }
 

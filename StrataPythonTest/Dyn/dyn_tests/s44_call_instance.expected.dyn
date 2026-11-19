@@ -1,6 +1,8 @@
 module s44_call_instance {
   func @|s44_call_instance.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s44_call_instance")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s44_call_instance", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -47,6 +49,8 @@ module s44_call_instance {
     #[py.bindings = [{name = "__call__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -78,6 +82,8 @@ module s44_call_instance {
     #[py.bindings = [{name = "__call__", value = {call = "K", args = [], keywords = []}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -134,6 +140,8 @@ module s44_call_instance {
       %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %y.1 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%y.cell.0, %y.1)
+      jump ^start.0()
+    start.0():
       %y.2 : py.Value = base.refGet[py.Value](%y.cell.0)
       %y.3 : py.Value = py.requireDefined(%y.2, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
       %none.1 : py.Value = py.noneLit

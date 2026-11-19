@@ -1,0 +1,10 @@
+module
+  e: local (assigned)
+  function e
+    params: v
+    v: local (parameter, referenced)
+    i: local (assigned, referenced)
+    g: global implicit (referenced)
+    h: global implicit (referenced)
+    k: global implicit (referenced)
+    m: global implicit (referenced)

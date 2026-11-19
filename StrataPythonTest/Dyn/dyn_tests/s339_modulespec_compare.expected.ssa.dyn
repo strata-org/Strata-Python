@@ -1,6 +1,10 @@
 module s339_modulespec_compare {
   func @|s339_modulespec_compare.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s339_modulespec_compare")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s339_modulespec_compare", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -43,18 +47,32 @@ module s339_modulespec_compare {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("s339_modulespec_compare", "f")
       %set.5 : base.Unit = base.refSet[py.Value](%f.cell.0, %item.0)
-      %print.1 : py.Value = py.loadGlobal("s339_modulespec_compare", "print") ^propagate.0()
-      %f.0 : py.Value = py.loadGlobal("s339_modulespec_compare", "f") ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("s339_modulespec_compare", "print") ^raised.0()
+      %f.0 : py.Value = py.loadGlobal("s339_modulespec_compare", "f") ^raised.0()
       %tuple.3 : py.Value = py.mkTuple
       %kwargs.3 : py.Value = py.mkKwargs
-      %call.2 : py.Value = py.call(%f.0, %tuple.3, %kwargs.3) ^propagate.0()
+      %call.2 : py.Value = py.call(%f.0, %tuple.3, %kwargs.3) ^raised.0()
       %tuple.4 : py.Value = py.mkTuple(%call.2)
       %kwargs.4 : py.Value = py.mkKwargs
-      %call.3 : py.Value = py.call(%print.1, %tuple.4, %kwargs.4) ^propagate.0()
+      %call.3 : py.Value = py.call(%print.1, %tuple.4, %kwargs.4) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.5 : py.Value = py.mkClosure[[]](@|s339_modulespec_compare.X.<body>|, "<body>", "s339_modulespec_compare")
@@ -78,15 +96,17 @@ module s339_modulespec_compare {
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @|s339_modulespec_compare.N.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
     #[py.bindings = [{name = "name", value = {str = "builtins"}}, {name = "loader", value = "builtins.__loader__"}, {name = "origin", value = {str = "built-in"}}, {name = "submodule_search_locations", value = unit}, {name = "cached", value = unit}, {name = "has_location", value = false}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -141,6 +161,8 @@ module s339_modulespec_compare {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %s.0 : py.Value = py.loadGlobal("s339_modulespec_compare", "s") ^propagate.0()
       %N.0 : py.Value = py.loadGlobal("s339_modulespec_compare", "N") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
@@ -157,6 +179,8 @@ module s339_modulespec_compare {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %N.0 : py.Value = py.loadGlobal("s339_modulespec_compare", "N") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -173,6 +197,8 @@ module s339_modulespec_compare {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %s.0 : py.Value = py.loadGlobal("s339_modulespec_compare", "s") ^propagate.0()
       %N.0 : py.Value = py.loadGlobal("s339_modulespec_compare", "N") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
@@ -189,6 +215,8 @@ module s339_modulespec_compare {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %N.0 : py.Value = py.loadGlobal("s339_modulespec_compare", "N") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -206,6 +234,8 @@ module s339_modulespec_compare {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")

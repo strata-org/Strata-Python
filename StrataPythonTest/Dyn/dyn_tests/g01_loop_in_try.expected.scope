@@ -1,0 +1,9 @@
+module
+  a: local (assigned)
+  function a
+    params: xs
+    xs: local (parameter, referenced)
+    setup: global implicit (referenced)
+    x: local (assigned, referenced)
+    use: global implicit (referenced)
+    ValueError: global implicit (referenced)

@@ -1,6 +1,8 @@
 module tc07_if_else {
   func @|tc07_if_else.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("tc07_if_else")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("tc07_if_else", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -22,6 +24,8 @@ module tc07_if_else {
       %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %bool.0 : py.Value = py.boolLit(true)
       %cond.0 : base.Bool = py.truthy(%bool.0) ^propagate.0()
       branch(%cond.0) ^then.0() ^else.0()

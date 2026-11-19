@@ -1,6 +1,8 @@
 module fw05_with_lookup_once {
   func @|fw05_with_lookup_once.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("fw05_with_lookup_once")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("fw05_with_lookup_once", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -56,6 +58,8 @@ module fw05_with_lookup_once {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "note", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %log.0 : py.Value = py.loadGlobal("fw05_with_lookup_once", "log") ^propagate.0()
       %append.0 : py.Value = py.attr(%log.0, "append") ^propagate.0()
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
@@ -74,6 +78,8 @@ module fw05_with_lookup_once {
     #[py.bindings = [{name = "__enter__", binding = "def"}, {name = "__exit__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -123,6 +129,8 @@ module fw05_with_lookup_once {
       %t.2 : py.Value = py.tupleGet(%bound.0, 1)
       %v.2 : py.Value = py.tupleGet(%bound.0, 2)
       %tb.2 : py.Value = py.tupleGet(%bound.0, 3)
+      jump ^start.0()
+    start.0():
       %note.0 : py.Value = py.loadGlobal("fw05_with_lookup_once", "note") ^propagate.0()
       %str.0 : py.Value = py.strLit("other exit")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -141,6 +149,8 @@ module fw05_with_lookup_once {
       %Local.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%Local.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "replaced_in_body", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|fw05_with_lookup_once.replaced_in_body.Local.<body>|, "<body>", "fw05_with_lookup_once")
       %str.0 : py.Value = py.strLit("Local")
@@ -241,6 +251,8 @@ module fw05_with_lookup_once {
       %m.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%m.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "rebound_manager", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %Ctx.0 : py.Value = py.loadGlobal("fw05_with_lookup_once", "Ctx") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -295,6 +307,8 @@ module fw05_with_lookup_once {
     #[py.bindings = [{name = "__enter__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -325,6 +339,8 @@ module fw05_with_lookup_once {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "missing_exit", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %NoExit.0 : py.Value = py.loadGlobal("fw05_with_lookup_once", "NoExit") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -381,6 +397,8 @@ module fw05_with_lookup_once {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Ctx.__enter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %note.0 : py.Value = py.loadGlobal("fw05_with_lookup_once", "note") ^propagate.0()
       %str.0 : py.Value = py.strLit("enter")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -413,6 +431,8 @@ module fw05_with_lookup_once {
       %t.2 : py.Value = py.tupleGet(%bound.0, 1)
       %v.2 : py.Value = py.tupleGet(%bound.0, 2)
       %tb.2 : py.Value = py.tupleGet(%bound.0, 3)
+      jump ^start.0()
+    start.0():
       %note.0 : py.Value = py.loadGlobal("fw05_with_lookup_once", "note") ^propagate.0()
       %str.0 : py.Value = py.strLit("exit")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -430,6 +450,8 @@ module fw05_with_lookup_once {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -461,6 +483,8 @@ module fw05_with_lookup_once {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "NoExit.__enter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %note.0 : py.Value = py.loadGlobal("fw05_with_lookup_once", "note") ^propagate.0()
       %str.0 : py.Value = py.strLit("enter")
       %tuple.0 : py.Value = py.mkTuple(%str.0)

@@ -2,6 +2,8 @@
 module e19_walrus_rebinds_outer_iteration {
   func @|e19_walrus_rebinds_outer_iteration.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("e19_walrus_rebinds_outer_iteration")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e19_walrus_rebinds_outer_iteration", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -28,6 +30,8 @@ module e19_walrus_rebinds_outer_iteration {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "rows") ^propagate.0()
       %rows.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%rows.cell.0, %rows.2)
+      jump ^start.0()
+    start.0():
       %rows.3 : py.Value = base.refGet[py.Value](%rows.cell.0)
       %rows.4 : py.Value = py.requireDefined(%rows.3, "rows", "UnboundLocalError", "cannot access local variable 'rows' where it is not associated with a value") ^propagate.0()
       %row.1 : py.Value = py.undef("row")

@@ -1,6 +1,8 @@
 module i02_param_kinds {
   func @|i02_param_kinds.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("i02_param_kinds")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i02_param_kinds", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -146,6 +148,8 @@ module i02_param_kinds {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "pos", 0, 2, false, false, "x", "y") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %y.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i02_param_kinds", "print") ^propagate.0()
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %y.4 : py.Value = py.requireDefined(%y.2, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
@@ -170,6 +174,8 @@ module i02_param_kinds {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "rest", 0, 1, true, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %more.1 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i02_param_kinds", "print") ^propagate.0()
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %more.3 : py.Value = py.requireDefined(%more.1, "more", "UnboundLocalError", "cannot access local variable 'more' where it is not associated with a value") ^propagate.0()
@@ -194,6 +200,8 @@ module i02_param_kinds {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "kw", 0, 1, false, true, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %opts.1 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i02_param_kinds", "print") ^propagate.0()
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %opts.3 : py.Value = py.requireDefined(%opts.1, "opts", "UnboundLocalError", "cannot access local variable 'opts' where it is not associated with a value") ^propagate.0()
@@ -221,6 +229,8 @@ module i02_param_kinds {
       %first.2 : py.Value = py.tupleGet(%bound.0, 0)
       %more.1 : py.Value = py.tupleGet(%bound.0, 1)
       %opts.1 : py.Value = py.tupleGet(%bound.0, 2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i02_param_kinds", "print") ^propagate.0()
       %first.4 : py.Value = py.requireDefined(%first.2, "first", "UnboundLocalError", "cannot access local variable 'first' where it is not associated with a value") ^propagate.0()
       %more.3 : py.Value = py.requireDefined(%more.1, "more", "UnboundLocalError", "cannot access local variable 'more' where it is not associated with a value") ^propagate.0()
@@ -247,6 +257,8 @@ module i02_param_kinds {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "kwonly", 0, 1, false, false, "a", "k") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i02_param_kinds", "print") ^propagate.0()
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %k.4 : py.Value = py.requireDefined(%k.2, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
@@ -272,6 +284,8 @@ module i02_param_kinds {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "posonly", 1, 2, false, false, "a", "b") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i02_param_kinds", "print") ^propagate.0()
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.4 : py.Value = py.requireDefined(%b.2, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
@@ -296,6 +310,8 @@ module i02_param_kinds {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "absorb", 1, 1, false, true, "a") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %opts.1 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i02_param_kinds", "print") ^propagate.0()
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %opts.3 : py.Value = py.requireDefined(%opts.1, "opts", "UnboundLocalError", "cannot access local variable 'opts' where it is not associated with a value") ^propagate.0()

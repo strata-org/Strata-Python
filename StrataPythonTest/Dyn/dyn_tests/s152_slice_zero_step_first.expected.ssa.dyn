@@ -1,6 +1,10 @@
 module s152_slice_zero_step_first {
   func @|s152_slice_zero_step_first.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s152_slice_zero_step_first")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s152_slice_zero_step_first", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -58,12 +62,26 @@ module s152_slice_zero_step_first {
       jump ^unwind.0(%exc.0)
     unwind.0(%exc.1 : py.Value):
       %pop.2 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.1)
+      jump ^raised.0(%exc.1)
     join.0():
       jump ^head.0()
     stop.0(%exc.2 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.2)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.2)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.2)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.3 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.3)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|s152_slice_zero_step_first.A.<body>|, "<body>", "s152_slice_zero_step_first")
@@ -88,10 +106,10 @@ module s152_slice_zero_step_first {
       %int.10 : py.Value = py.intLit(0)
       %slice.1 : py.Value = py.getSlice(%xs.0, %call.2, %none.2, %int.10) ^catch.1()
       jump ^join.1()
-    catch.1(%exc.3 : py.Value):
-      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+    catch.1(%exc.4 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.4)
       %ValueError.1 : py.Value = py.loadGlobal("s152_slice_zero_step_first", "ValueError") ^unwind.1()
-      %match.2 : base.Bool = py.excMatch(%exc.3, %ValueError.1) ^unwind.1()
+      %match.2 : base.Bool = py.excMatch(%exc.4, %ValueError.1) ^unwind.1()
       branch(%match.2) ^except.2() ^next.2()
     except.2():
       %print.2 : py.Value = py.loadGlobal("s152_slice_zero_step_first", "print") ^unwind.1()
@@ -102,10 +120,10 @@ module s152_slice_zero_step_first {
       %pop.3 : base.Unit = py.popExcept(%prev.1)
       jump ^join.1()
     next.2():
-      jump ^unwind.1(%exc.3)
-    unwind.1(%exc.4 : py.Value):
+      jump ^unwind.1(%exc.4)
+    unwind.1(%exc.5 : py.Value):
       %pop.4 : base.Unit = py.popExcept(%prev.1)
-      jump ^propagate.0(%exc.4)
+      jump ^propagate.0(%exc.5)
     join.1():
       %xs.1 : py.Value = py.loadGlobal("s152_slice_zero_step_first", "xs") ^catch.2()
       %A.2 : py.Value = py.loadGlobal("s152_slice_zero_step_first", "A") ^catch.2()
@@ -117,10 +135,10 @@ module s152_slice_zero_step_first {
       %slice.2 : py.Value = py.mkSlice(%call.4, %none.3, %int.11)
       %del.0 : base.Unit = py.delItem(%xs.1, %slice.2) ^catch.2()
       jump ^join.2()
-    catch.2(%exc.5 : py.Value):
-      %prev.2 : py.Value = py.pushExcInfo(%exc.5)
+    catch.2(%exc.6 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.6)
       %ValueError.2 : py.Value = py.loadGlobal("s152_slice_zero_step_first", "ValueError") ^unwind.2()
-      %match.3 : base.Bool = py.excMatch(%exc.5, %ValueError.2) ^unwind.2()
+      %match.3 : base.Bool = py.excMatch(%exc.6, %ValueError.2) ^unwind.2()
       branch(%match.3) ^except.3() ^next.3()
     except.3():
       %print.3 : py.Value = py.loadGlobal("s152_slice_zero_step_first", "print") ^unwind.2()
@@ -131,10 +149,10 @@ module s152_slice_zero_step_first {
       %pop.5 : base.Unit = py.popExcept(%prev.2)
       jump ^join.2()
     next.3():
-      jump ^unwind.2(%exc.5)
-    unwind.2(%exc.6 : py.Value):
+      jump ^unwind.2(%exc.6)
+    unwind.2(%exc.7 : py.Value):
       %pop.6 : base.Unit = py.popExcept(%prev.2)
-      jump ^propagate.0(%exc.6)
+      jump ^propagate.0(%exc.7)
     join.2():
       %int.12 : py.Value = py.intLit(1)
       %list.2 : py.Value = py.mkList(%int.12)
@@ -148,10 +166,10 @@ module s152_slice_zero_step_first {
       %slice.3 : py.Value = py.mkSlice(%call.6, %none.4, %int.13)
       %store.0 : base.Unit = py.setItem(%xs.2, %slice.3, %list.2) ^catch.3()
       jump ^join.3()
-    catch.3(%exc.7 : py.Value):
-      %prev.3 : py.Value = py.pushExcInfo(%exc.7)
+    catch.3(%exc.8 : py.Value):
+      %prev.3 : py.Value = py.pushExcInfo(%exc.8)
       %ValueError.3 : py.Value = py.loadGlobal("s152_slice_zero_step_first", "ValueError") ^unwind.3()
-      %match.4 : base.Bool = py.excMatch(%exc.7, %ValueError.3) ^unwind.3()
+      %match.4 : base.Bool = py.excMatch(%exc.8, %ValueError.3) ^unwind.3()
       branch(%match.4) ^except.4() ^next.4()
     except.4():
       %print.4 : py.Value = py.loadGlobal("s152_slice_zero_step_first", "print") ^unwind.3()
@@ -162,10 +180,10 @@ module s152_slice_zero_step_first {
       %pop.7 : base.Unit = py.popExcept(%prev.3)
       jump ^join.3()
     next.4():
-      jump ^unwind.3(%exc.7)
-    unwind.3(%exc.8 : py.Value):
+      jump ^unwind.3(%exc.8)
+    unwind.3(%exc.9 : py.Value):
       %pop.8 : base.Unit = py.popExcept(%prev.3)
-      jump ^propagate.0(%exc.8)
+      jump ^propagate.0(%exc.9)
     join.3():
       %print.5 : py.Value = py.loadGlobal("s152_slice_zero_step_first", "print") ^propagate.0()
       %len.0 : py.Value = py.loadGlobal("s152_slice_zero_step_first", "len") ^propagate.0()
@@ -213,15 +231,17 @@ module s152_slice_zero_step_first {
       %none.5 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.5)
       ret(%ret.0)
-    propagate.0(%exc.9 : py.Value):
-      %exc.10 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.9)
-      ret(%exc.10)
+    propagate.0(%exc.10 : py.Value):
+      %exc.11 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.10)
+      ret(%exc.11)
   }
   func @|s152_slice_zero_step_first.A.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -253,6 +273,8 @@ module s152_slice_zero_step_first {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -290,6 +312,8 @@ module s152_slice_zero_step_first {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s152_slice_zero_step_first", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("A")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -318,6 +342,8 @@ module s152_slice_zero_step_first {
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %name.2 : py.Value = py.tupleGet(%bound.0, 1)
       %v.2 : py.Value = py.tupleGet(%bound.0, 2)
+      jump ^start.0()
+    start.0():
       %name.5 : py.Value = py.requireDefined(%name.2, "name", "UnboundLocalError", "cannot access local variable 'name' where it is not associated with a value") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %name.7 : base.Unit = py.setAttr(%self.4, "name", %name.5) ^propagate.0()
@@ -339,6 +365,8 @@ module s152_slice_zero_step_first {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "P.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s152_slice_zero_step_first", "print") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %name.1 : py.Value = py.attr(%self.4, "name") ^propagate.0()

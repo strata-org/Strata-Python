@@ -1,6 +1,8 @@
 module s03_call_args {
   func @|s03_call_args.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s03_call_args")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s03_call_args", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -127,6 +129,8 @@ module s03_call_args {
       %c.14 : py.Value = py.tupleGet(%bound.0, 2)
       %rest.1 : py.Value = py.tupleGet(%bound.0, 3)
       %kw.1 : py.Value = py.tupleGet(%bound.0, 4)
+      jump ^start.0()
+    start.0():
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.3 : py.Value = py.requireDefined(%b.1, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %rest.3 : py.Value = py.requireDefined(%rest.1, "rest", "UnboundLocalError", "cannot access local variable 'rest' where it is not associated with a value") ^propagate.0()

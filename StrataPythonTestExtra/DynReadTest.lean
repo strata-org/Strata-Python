@@ -8,6 +8,9 @@ module
 meta import StrataPython.Dyn.Env
 meta import StrataDyn.DDM
 meta import StrataDyn.DDMRead
+meta import StrataDyn.Canonicalize
+meta import StrataPython.Dyn.Canonical
+meta import StrataDynTest.Unforward
 meta import StrataDyn.Env.WF
 meta import StrataPythonTest.Dyn.TestUtil
 
@@ -20,7 +23,9 @@ the diagnostic lines before its module read as comments, and checks both printed
 * folded, as the goldens are, reprinting the module gives the golden's module text, byte for
   byte;
 * in full, printing, reading and printing again gives the same text;
-* no name read has a `.` inside a segment.
+* no name read has a `.` inside a segment;
+* `PyCanonical.runModule` puts every function in Python's canonical form, and undoing the forwarding
+  blocks it added gives back the module read (`Unforward.moduleUndoesTo`).
 
 Nothing is excluded: the goldens' floats print as the shortest decimals that read back
 exactly.  No Python is needed. -/
@@ -59,7 +64,12 @@ private meta def check (path : System.FilePath) : IO (Option String) := do
     | .ok m' =>
       if let some d := firstDiff (m'.format .full) full then
         return some s!"{path}: the full form reprints differently at {d}"
-      return none
+      match StrataPython.Dyn.PyCanonical.runModule m with
+      | .error fs => return some s!"{path}: not put in canonical form: {fs.map toString}"
+      | .ok cm =>
+        unless Unforward.moduleUndoesTo m.raw cm.module.raw full do
+          return some s!"{path}: in canonical form, does not undo to the module read"
+        return none
 
 #eval show IO Unit from do
   let goldens := (← testDir.readDir).filter fun f => goldenSuffixes.any (f.fileName.endsWith ·)
@@ -67,7 +77,8 @@ private meta def check (path : System.FilePath) : IO (Option String) := do
   let mut failures := #[]
   for g in goldens do
     if let some msg ← check g.path then failures := failures.push msg
-  IO.println s!"DynReadTest: {goldens.size - failures.size}/{goldens.size} read back"
+  IO.println s!"DynReadTest: {goldens.size - failures.size}/{goldens.size} read back and \
+    put in canonical form"
   if !failures.isEmpty then
     for f in failures do IO.println f
     throw <| IO.userError s!"DynReadTest: {failures.size} failure(s)"

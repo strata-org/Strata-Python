@@ -1,6 +1,8 @@
 module p29_mangling {
   func @|p29_mangling.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p29_mangling")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p29_mangling", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -27,6 +29,8 @@ module p29_mangling {
     #[py.bindings = [{name = "_Foo__a", value = 1}, {name = "__b__", value = 2}, {name = "_Foo__m", binding = "def"}, {name = "_Foo__Inner", binding = "class"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -83,6 +87,8 @@ module p29_mangling {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %_Foo__p.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%_Foo__p.cell.0, %_Foo__p.2)
+      jump ^start.0()
+    start.0():
       %_Foo__p.3 : py.Value = base.refGet[py.Value](%_Foo__p.cell.0)
       %_Foo__p.4 : py.Value = py.requireDefined(%_Foo__p.3, "_Foo__p", "UnboundLocalError", "cannot access local variable '_Foo__p' where it is not associated with a value") ^propagate.0()
       %set.2 : base.Unit = base.refSet[py.Value](%_Foo__local.cell.0, %_Foo__p.4)
@@ -103,6 +109,8 @@ module p29_mangling {
     #[py.bindings = [{name = "_Inner__c", value = 3}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")

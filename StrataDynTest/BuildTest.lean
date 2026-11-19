@@ -5,11 +5,13 @@
 -/
 module
 public import StrataDyn.Build
+public import StrataDyn.Build.Typed
 public import StrataDyn.DDM
 public import StrataDyn.WF
 import StrataDyn.Env.WF
 -- The builder, the checker and the printer run as compiled code below.
 meta import StrataDyn.Build
+meta import StrataDyn.Build.Typed
 meta import StrataDyn.DDM
 meta import StrataDyn.WF
 meta import StrataDyn.Env.WF
@@ -190,7 +192,8 @@ private def hConsts : Built Unit :=
 /-! ## Annotations
 
 An emitter given no annotation uses the default, which starts as the function's own and
-which `withInfo` replaces for what it emits.  An explicit one wins over both. -/
+which `withInfo` replaces for what it emits.  An explicit one wins over both, and a block
+started with one keeps it. -/
 
 private def annotated : Built Nat :=
   build (.str .base "a") (Base.Except Base.String Base.Int) 0 do
@@ -208,6 +211,36 @@ private def instrInfos (fn : Func base Nat) : Array Nat :=
 #guard (annotated.toOption.map (instrInfos ·.1)) == some #[0, 7, 9, 0]
 
 #guard (annotated.toOption.map (·.1.blocks.map (·.info))) == some #[5]
+
+/-- A block started with the annotation 3 keeps it, whatever is in effect when it finishes, and
+even when it finishes with the annotation 4. -/
+private def startedWith : Built Nat :=
+  build (.str .base "a") (Base.Except Base.String Base.Int) 0 do
+    let l ← freshLabel
+    startBlock l (info := some 3)
+    let m ← freshLabel
+    finishBlock (.jump 0 ⟨m, #[]⟩) (info := some 4)
+    startBlock m
+    let a ← emitConst (.str .base "a") (.int 1)
+    let r ← emitApply (.str .base "ret") (Base.Except Base.String Base.Int) Base.Except.ok.ref #[a]
+    withInfo 5 (finishBlock (.ret 5 r))
+
+-- The next block takes the annotation in effect again.
+#guard (startedWith.toOption.map (·.1.blocks.map (·.info))) == some #[3, 5]
+
+/-- `startedWith`, with its first block opened by the typed `Emit.startBlock`. -/
+private def startedWithTyped : Built Nat :=
+  build (.str .base "a") (Base.Except Base.String Base.Int) 0 do
+    let l ← Emit.freshLabel []
+    discard <| Emit.startBlock l (info := some 3)
+    let m ← freshLabel
+    finishBlock (.jump 0 ⟨m, #[]⟩) (info := some 4)
+    startBlock m
+    let a ← emitConst (.str .base "a") (.int 1)
+    let r ← emitApply (.str .base "ret") (Base.Except Base.String Base.Int) Base.Except.ok.ref #[a]
+    withInfo 5 (finishBlock (.ret 5 r))
+
+#guard (startedWithTyped.toOption.map (·.1.blocks.map (·.info))) == some #[3, 5]
 
 /-! ## Misuse
 

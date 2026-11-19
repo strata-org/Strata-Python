@@ -1,6 +1,8 @@
 module p28_global_nested {
   func @|p28_global_nested.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p28_global_nested")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p28_global_nested", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -24,6 +26,8 @@ module p28_global_nested {
       %g.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%g.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       %clo.0 : py.Value = py.mkClosure[[]](@p28_global_nested.outer.mid, "mid", "p28_global_nested")
@@ -43,6 +47,8 @@ module p28_global_nested {
       %inner.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%inner.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer.<locals>.mid", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[]](@p28_global_nested.outer.mid.inner, "inner", "p28_global_nested")
       %inner.2 : py.Value = py.requireDefined(%clo.0, "inner", "UnboundLocalError", "cannot access local variable 'inner' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%inner.2)
@@ -55,6 +61,8 @@ module p28_global_nested {
     entry.0(%x.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer.<locals>.g", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p28_global_nested.helper, "helper", "p28_global_nested", %x.cell.0)
       %helper.cell.0 : base.Ref(py.Value) = py.globalCell("p28_global_nested", "helper")
       %set.0 : base.Unit = base.refSet[py.Value](%helper.cell.0, %clo.0)
@@ -69,6 +77,8 @@ module p28_global_nested {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer.<locals>.mid.<locals>.inner", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %x.0 : py.Value = py.loadGlobal("p28_global_nested", "x") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.0)
       ret(%ret.0)
@@ -80,6 +90,8 @@ module p28_global_nested {
     entry.0(%x.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "helper", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.1 : py.Value = py.requireDefined(%x.0, "x", "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.1)

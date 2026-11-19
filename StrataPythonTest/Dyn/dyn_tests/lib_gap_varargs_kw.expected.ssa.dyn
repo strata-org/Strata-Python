@@ -1,6 +1,8 @@
 module lib_gap_varargs_kw {
   func @|lib_gap_varargs_kw.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_gap_varargs_kw")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_varargs_kw", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)

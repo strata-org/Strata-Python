@@ -1,6 +1,8 @@
 module p16_closures {
   func @|p16_closures.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p16_closures")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p16_closures", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -28,6 +30,8 @@ module p16_closures {
       %r.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%r.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "reader", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p16_closures.reader.r, "r", "p16_closures", %x.cell.0)
@@ -50,6 +54,8 @@ module p16_closures {
       %inc.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%inc.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "counter", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %set.0 : base.Unit = base.refSet[py.Value](%n.cell.0, %int.0)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p16_closures.counter.inc, "inc", "p16_closures", %n.cell.0)
@@ -73,6 +79,8 @@ module p16_closures {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer", 0, 1, false, false, "p") ^propagate.0()
       %p.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%p.cell.0, %p.2)
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p16_closures.outer.middle, "middle", "p16_closures", %p.cell.0)
       %set.1 : base.Unit = base.refSet[py.Value](%middle.cell.0, %clo.0)
       %middle.1 : py.Value = base.refGet[py.Value](%middle.cell.0)
@@ -87,6 +95,8 @@ module p16_closures {
     entry.0(%x.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "reader.<locals>.r", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.1 : py.Value = py.requireDefined(%x.0, "x", "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.1)
@@ -99,6 +109,8 @@ module p16_closures {
     entry.0(%n.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "counter.<locals>.inc", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %n.0 : py.Value = base.refGet[py.Value](%n.cell.0)
       %n.1 : py.Value = py.requireDefined(%n.0, "n", "NameError", "cannot access free variable 'n' where it is not associated with a value in enclosing scope") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
@@ -118,6 +130,8 @@ module p16_closures {
       %inner.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%inner.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer.<locals>.middle", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p16_closures.outer.middle.inner, "inner", "p16_closures", %p.cell.0)
       %set.0 : base.Unit = base.refSet[py.Value](%inner.cell.0, %clo.0)
       %inner.1 : py.Value = base.refGet[py.Value](%inner.cell.0)
@@ -132,6 +146,8 @@ module p16_closures {
     entry.0(%p.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer.<locals>.middle.<locals>.inner", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p.0 : py.Value = base.refGet[py.Value](%p.cell.0)
       %p.1 : py.Value = py.requireDefined(%p.0, "p", "NameError", "cannot access free variable 'p' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%p.1)

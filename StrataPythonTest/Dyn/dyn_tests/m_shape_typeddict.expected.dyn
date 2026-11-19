@@ -1,6 +1,8 @@
 module m_shape_typeddict {
   func @|m_shape_typeddict.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_shape_typeddict")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_typeddict", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -69,6 +71,8 @@ module m_shape_typeddict {
     #[py.fields = [{name = "title", type = "str"}, {name = "year", type = {union = ["int", unit]}}, {name = "tags", type = {name = "typing.List", args = ["str"]}}, {name = "rating", type = {name = "Literal", args = [1, -2, {str = "three"}, unit]}}, {name = "sequel", type = {str = "Movie"}}, {name = "pick", type = {name = "Callable", args = [["int"], "str"]}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -262,6 +266,8 @@ module m_shape_typeddict {
     #[py.fields = [{name = "title", type = {name = "Required", args = ["str"]}}, {name = "notes", type = "str"}, {name = "owner", type = {name = "ReadOnly", args = [{name = "NotRequired", args = ["str"]}]}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -391,6 +397,8 @@ module m_shape_typeddict {
     #[py.fields = [{name = "prequel", type = "Movie"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")

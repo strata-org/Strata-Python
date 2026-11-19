@@ -1,6 +1,10 @@
 module lib_unicode_errors {
   func @|lib_unicode_errors.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}, {head = "head.1", done = "done.1"}, {head = "head.2", done = "done.2"}, {head = "head.3", done = "done.3"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_unicode_errors")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -88,12 +92,26 @@ module lib_unicode_errors {
       jump ^unwind.0(%exc.0)
     unwind.0(%exc.2 : py.Value):
       %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.2)
+      jump ^raised.0(%exc.2)
     join.0():
       jump ^head.0()
     stop.0(%exc.3 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.3)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.3)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.3)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.4 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.4)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %str.15 : py.Value = py.strLit("a")
       %int.13 : py.Value = py.intLit(1)
@@ -137,14 +155,14 @@ module lib_unicode_errors {
       %kwargs.5 : py.Value = py.mkKwargs
       %call.5 : py.Value = py.call(%print.1, %tuple.13, %kwargs.5) ^catch.1()
       jump ^join.1()
-    catch.1(%exc.4 : py.Value):
-      %prev.1 : py.Value = py.pushExcInfo(%exc.4)
+    catch.1(%exc.5 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.5)
       %Exception.1 : py.Value = py.loadGlobal("lib_unicode_errors", "Exception") ^unwind.1()
-      %match.1 : base.Bool = py.excMatch(%exc.4, %Exception.1) ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.5, %Exception.1) ^unwind.1()
       branch(%match.1) ^except.1() ^next.1()
     except.1():
       %e.cell.4 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
-      %set.8 : base.Unit = base.refSet[py.Value](%e.cell.4, %exc.4)
+      %set.8 : base.Unit = base.refSet[py.Value](%e.cell.4, %exc.5)
       %print.2 : py.Value = py.loadGlobal("lib_unicode_errors", "print") ^clear.1()
       %type.1 : py.Value = py.loadGlobal("lib_unicode_errors", "type") ^clear.1()
       %e.5 : py.Value = py.loadGlobal("lib_unicode_errors", "e") ^clear.1()
@@ -161,21 +179,35 @@ module lib_unicode_errors {
       %e.cell.5 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.9 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.7)
       jump ^join.1()
-    clear.1(%exc.5 : py.Value):
+    clear.1(%exc.6 : py.Value):
       %e.8 : py.Value = py.undef("e")
       %e.cell.6 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.10 : base.Unit = base.refSet[py.Value](%e.cell.6, %e.8)
-      jump ^unwind.1(%exc.5)
+      jump ^unwind.1(%exc.6)
     next.1():
-      jump ^unwind.1(%exc.4)
-    unwind.1(%exc.6 : py.Value):
+      jump ^unwind.1(%exc.5)
+    unwind.1(%exc.7 : py.Value):
       %pop.3 : base.Unit = py.popExcept(%prev.1)
-      jump ^propagate.0(%exc.6)
+      jump ^raised.1(%exc.7)
     join.1():
       jump ^head.1()
-    stop.1(%exc.7 : py.Value):
-      %done.1 : base.Bool = py.isStopIteration(%exc.7)
-      branch(%done.1) ^exit.1() ^propagate.0(%exc.7)
+    stop.1(%exc.8 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.8)
+      branch(%done.1) ^normal.1() ^raised.1(%exc.8)
+    normal.1():
+      %comp.3 : py.Completion = py.completionNormal
+      jump ^done.1(%comp.3)
+    raised.1(%exc.9 : py.Value):
+      %comp.4 : py.Completion = py.completionRaise(%exc.9)
+      jump ^done.1(%comp.4)
+    done.1(%comp.5 : py.Completion):
+      py.Completion.case(%comp.5) ^exit.1() ^unreachable.3() ^propagate.0() ^unreachable.4() ^unreachable.5()
+    unreachable.3(%val.1 : py.Value):
+      unreachable
+    unreachable.4():
+      unreachable
+    unreachable.5():
+      unreachable
     exit.1():
       %UnicodeEncodeError.1 : py.Value = py.loadGlobal("lib_unicode_errors", "UnicodeEncodeError") ^catch.2()
       %str.23 : py.Value = py.strLit("a")
@@ -189,14 +221,14 @@ module lib_unicode_errors {
       %kwargs.8 : py.Value = py.mkKwargs(%str.26, %int.22)
       %call.8 : py.Value = py.call(%UnicodeEncodeError.1, %tuple.16, %kwargs.8) ^catch.2()
       jump ^join.2()
-    catch.2(%exc.8 : py.Value):
-      %prev.2 : py.Value = py.pushExcInfo(%exc.8)
+    catch.2(%exc.10 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.10)
       %Exception.2 : py.Value = py.loadGlobal("lib_unicode_errors", "Exception") ^unwind.2()
-      %match.2 : base.Bool = py.excMatch(%exc.8, %Exception.2) ^unwind.2()
+      %match.2 : base.Bool = py.excMatch(%exc.10, %Exception.2) ^unwind.2()
       branch(%match.2) ^except.2() ^next.2()
     except.2():
       %e.cell.7 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
-      %set.11 : base.Unit = base.refSet[py.Value](%e.cell.7, %exc.8)
+      %set.11 : base.Unit = base.refSet[py.Value](%e.cell.7, %exc.10)
       %print.3 : py.Value = py.loadGlobal("lib_unicode_errors", "print") ^clear.2()
       %type.2 : py.Value = py.loadGlobal("lib_unicode_errors", "type") ^clear.2()
       %e.9 : py.Value = py.loadGlobal("lib_unicode_errors", "e") ^clear.2()
@@ -213,16 +245,16 @@ module lib_unicode_errors {
       %e.cell.8 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.12 : base.Unit = base.refSet[py.Value](%e.cell.8, %e.11)
       jump ^join.2()
-    clear.2(%exc.9 : py.Value):
+    clear.2(%exc.11 : py.Value):
       %e.12 : py.Value = py.undef("e")
       %e.cell.9 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.13 : base.Unit = base.refSet[py.Value](%e.cell.9, %e.12)
-      jump ^unwind.2(%exc.9)
+      jump ^unwind.2(%exc.11)
     next.2():
-      jump ^unwind.2(%exc.8)
-    unwind.2(%exc.10 : py.Value):
+      jump ^unwind.2(%exc.10)
+    unwind.2(%exc.12 : py.Value):
       %pop.5 : base.Unit = py.popExcept(%prev.2)
-      jump ^propagate.0(%exc.10)
+      jump ^propagate.0(%exc.12)
     join.2():
       %UnicodeEncodeError.2 : py.Value = py.loadGlobal("lib_unicode_errors", "UnicodeEncodeError") ^propagate.0()
       %str.27 : py.Value = py.strLit("ascii")
@@ -314,14 +346,14 @@ module lib_unicode_errors {
       %kwargs.23 : py.Value = py.mkKwargs
       %call.23 : py.Value = py.call(%encode.0, %tuple.31, %kwargs.23) ^catch.3()
       jump ^join.3()
-    catch.3(%exc.11 : py.Value):
-      %prev.3 : py.Value = py.pushExcInfo(%exc.11)
+    catch.3(%exc.13 : py.Value):
+      %prev.3 : py.Value = py.pushExcInfo(%exc.13)
       %UnicodeEncodeError.4 : py.Value = py.loadGlobal("lib_unicode_errors", "UnicodeEncodeError") ^unwind.3()
-      %match.3 : base.Bool = py.excMatch(%exc.11, %UnicodeEncodeError.4) ^unwind.3()
+      %match.3 : base.Bool = py.excMatch(%exc.13, %UnicodeEncodeError.4) ^unwind.3()
       branch(%match.3) ^except.3() ^next.3()
     except.3():
       %e.cell.14 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
-      %set.18 : base.Unit = base.refSet[py.Value](%e.cell.14, %exc.11)
+      %set.18 : base.Unit = base.refSet[py.Value](%e.cell.14, %exc.13)
       %print.8 : py.Value = py.loadGlobal("lib_unicode_errors", "print") ^clear.3()
       %str.43 : py.Value = py.loadGlobal("lib_unicode_errors", "str") ^clear.3()
       %e.18 : py.Value = py.loadGlobal("lib_unicode_errors", "e") ^clear.3()
@@ -338,16 +370,16 @@ module lib_unicode_errors {
       %e.cell.15 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.19 : base.Unit = base.refSet[py.Value](%e.cell.15, %e.20)
       jump ^join.3()
-    clear.3(%exc.12 : py.Value):
+    clear.3(%exc.14 : py.Value):
       %e.21 : py.Value = py.undef("e")
       %e.cell.16 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.20 : base.Unit = base.refSet[py.Value](%e.cell.16, %e.21)
-      jump ^unwind.3(%exc.12)
+      jump ^unwind.3(%exc.14)
     next.3():
-      jump ^unwind.3(%exc.11)
-    unwind.3(%exc.13 : py.Value):
+      jump ^unwind.3(%exc.13)
+    unwind.3(%exc.15 : py.Value):
       %pop.7 : base.Unit = py.popExcept(%prev.3)
-      jump ^propagate.0(%exc.13)
+      jump ^propagate.0(%exc.15)
     join.3():
       %str.44 : py.Value = py.loadGlobal("lib_unicode_errors", "str") ^catch.4()
       %bytes.3 : py.Value = py.bytesLit("ÿ")
@@ -356,14 +388,14 @@ module lib_unicode_errors {
       %kwargs.26 : py.Value = py.mkKwargs
       %call.26 : py.Value = py.call(%str.44, %tuple.34, %kwargs.26) ^catch.4()
       jump ^join.4()
-    catch.4(%exc.14 : py.Value):
-      %prev.4 : py.Value = py.pushExcInfo(%exc.14)
+    catch.4(%exc.16 : py.Value):
+      %prev.4 : py.Value = py.pushExcInfo(%exc.16)
       %UnicodeDecodeError.3 : py.Value = py.loadGlobal("lib_unicode_errors", "UnicodeDecodeError") ^unwind.4()
-      %match.4 : base.Bool = py.excMatch(%exc.14, %UnicodeDecodeError.3) ^unwind.4()
+      %match.4 : base.Bool = py.excMatch(%exc.16, %UnicodeDecodeError.3) ^unwind.4()
       branch(%match.4) ^except.4() ^next.4()
     except.4():
       %e.cell.17 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
-      %set.21 : base.Unit = base.refSet[py.Value](%e.cell.17, %exc.14)
+      %set.21 : base.Unit = base.refSet[py.Value](%e.cell.17, %exc.16)
       %print.9 : py.Value = py.loadGlobal("lib_unicode_errors", "print") ^clear.4()
       %str.46 : py.Value = py.loadGlobal("lib_unicode_errors", "str") ^clear.4()
       %e.22 : py.Value = py.loadGlobal("lib_unicode_errors", "e") ^clear.4()
@@ -380,16 +412,16 @@ module lib_unicode_errors {
       %e.cell.18 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.22 : base.Unit = base.refSet[py.Value](%e.cell.18, %e.24)
       jump ^join.4()
-    clear.4(%exc.15 : py.Value):
+    clear.4(%exc.17 : py.Value):
       %e.25 : py.Value = py.undef("e")
       %e.cell.19 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.23 : base.Unit = base.refSet[py.Value](%e.cell.19, %e.25)
-      jump ^unwind.4(%exc.15)
+      jump ^unwind.4(%exc.17)
     next.4():
-      jump ^unwind.4(%exc.14)
-    unwind.4(%exc.16 : py.Value):
+      jump ^unwind.4(%exc.16)
+    unwind.4(%exc.18 : py.Value):
       %pop.9 : base.Unit = py.popExcept(%prev.4)
-      jump ^propagate.0(%exc.16)
+      jump ^propagate.0(%exc.18)
     join.4():
       %str.47 : py.Value = py.loadGlobal("lib_unicode_errors", "str") ^catch.5()
       %bytes.4 : py.Value = py.bytesLit("aÿb")
@@ -398,14 +430,14 @@ module lib_unicode_errors {
       %kwargs.29 : py.Value = py.mkKwargs
       %call.29 : py.Value = py.call(%str.47, %tuple.37, %kwargs.29) ^catch.5()
       jump ^join.5()
-    catch.5(%exc.17 : py.Value):
-      %prev.5 : py.Value = py.pushExcInfo(%exc.17)
+    catch.5(%exc.19 : py.Value):
+      %prev.5 : py.Value = py.pushExcInfo(%exc.19)
       %UnicodeError.0 : py.Value = py.loadGlobal("lib_unicode_errors", "UnicodeError") ^unwind.5()
-      %match.5 : base.Bool = py.excMatch(%exc.17, %UnicodeError.0) ^unwind.5()
+      %match.5 : base.Bool = py.excMatch(%exc.19, %UnicodeError.0) ^unwind.5()
       branch(%match.5) ^except.5() ^next.5()
     except.5():
       %e.cell.20 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
-      %set.24 : base.Unit = base.refSet[py.Value](%e.cell.20, %exc.17)
+      %set.24 : base.Unit = base.refSet[py.Value](%e.cell.20, %exc.19)
       %print.10 : py.Value = py.loadGlobal("lib_unicode_errors", "print") ^clear.5()
       %type.3 : py.Value = py.loadGlobal("lib_unicode_errors", "type") ^clear.5()
       %e.26 : py.Value = py.loadGlobal("lib_unicode_errors", "e") ^clear.5()
@@ -426,16 +458,16 @@ module lib_unicode_errors {
       %e.cell.21 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.25 : base.Unit = base.refSet[py.Value](%e.cell.21, %e.28)
       jump ^join.5()
-    clear.5(%exc.18 : py.Value):
+    clear.5(%exc.20 : py.Value):
       %e.29 : py.Value = py.undef("e")
       %e.cell.22 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.26 : base.Unit = base.refSet[py.Value](%e.cell.22, %e.29)
-      jump ^unwind.5(%exc.18)
+      jump ^unwind.5(%exc.20)
     next.5():
-      jump ^unwind.5(%exc.17)
-    unwind.5(%exc.19 : py.Value):
+      jump ^unwind.5(%exc.19)
+    unwind.5(%exc.21 : py.Value):
       %pop.11 : base.Unit = py.popExcept(%prev.5)
-      jump ^propagate.0(%exc.19)
+      jump ^propagate.0(%exc.21)
     join.5():
       %bytes.5 : py.Value = py.loadGlobal("lib_unicode_errors", "bytes") ^catch.6()
       %str.50 : py.Value = py.strLit("é")
@@ -444,14 +476,14 @@ module lib_unicode_errors {
       %kwargs.33 : py.Value = py.mkKwargs
       %call.33 : py.Value = py.call(%bytes.5, %tuple.41, %kwargs.33) ^catch.6()
       jump ^join.6()
-    catch.6(%exc.20 : py.Value):
-      %prev.6 : py.Value = py.pushExcInfo(%exc.20)
+    catch.6(%exc.22 : py.Value):
+      %prev.6 : py.Value = py.pushExcInfo(%exc.22)
       %UnicodeError.1 : py.Value = py.loadGlobal("lib_unicode_errors", "UnicodeError") ^unwind.6()
-      %match.6 : base.Bool = py.excMatch(%exc.20, %UnicodeError.1) ^unwind.6()
+      %match.6 : base.Bool = py.excMatch(%exc.22, %UnicodeError.1) ^unwind.6()
       branch(%match.6) ^except.6() ^next.6()
     except.6():
       %e.cell.23 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
-      %set.27 : base.Unit = base.refSet[py.Value](%e.cell.23, %exc.20)
+      %set.27 : base.Unit = base.refSet[py.Value](%e.cell.23, %exc.22)
       %print.11 : py.Value = py.loadGlobal("lib_unicode_errors", "print") ^clear.6()
       %type.4 : py.Value = py.loadGlobal("lib_unicode_errors", "type") ^clear.6()
       %e.30 : py.Value = py.loadGlobal("lib_unicode_errors", "e") ^clear.6()
@@ -472,16 +504,16 @@ module lib_unicode_errors {
       %e.cell.24 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.28 : base.Unit = base.refSet[py.Value](%e.cell.24, %e.32)
       jump ^join.6()
-    clear.6(%exc.21 : py.Value):
+    clear.6(%exc.23 : py.Value):
       %e.33 : py.Value = py.undef("e")
       %e.cell.25 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.29 : base.Unit = base.refSet[py.Value](%e.cell.25, %e.33)
-      jump ^unwind.6(%exc.21)
+      jump ^unwind.6(%exc.23)
     next.6():
-      jump ^unwind.6(%exc.20)
-    unwind.6(%exc.22 : py.Value):
+      jump ^unwind.6(%exc.22)
+    unwind.6(%exc.24 : py.Value):
       %pop.13 : base.Unit = py.popExcept(%prev.6)
-      jump ^propagate.0(%exc.22)
+      jump ^propagate.0(%exc.24)
     join.6():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|lib_unicode_errors.U.<body>|, "<body>", "lib_unicode_errors")
@@ -540,14 +572,14 @@ module lib_unicode_errors {
       %args.5 : py.Value = py.argsTuple(%UnicodeDecodeError.4, %a.2) ^catch.7()
       %call.40 : py.Value = py.call(%UnicodeDecodeError.4, %args.5, %kwargs.41) ^catch.7()
       jump ^join.7()
-    catch.7(%exc.23 : py.Value):
-      %prev.7 : py.Value = py.pushExcInfo(%exc.23)
+    catch.7(%exc.25 : py.Value):
+      %prev.7 : py.Value = py.pushExcInfo(%exc.25)
       %TypeError.0 : py.Value = py.loadGlobal("lib_unicode_errors", "TypeError") ^unwind.7()
-      %match.7 : base.Bool = py.excMatch(%exc.23, %TypeError.0) ^unwind.7()
+      %match.7 : base.Bool = py.excMatch(%exc.25, %TypeError.0) ^unwind.7()
       branch(%match.7) ^except.7() ^next.7()
     except.7():
       %e.cell.26 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
-      %set.32 : base.Unit = base.refSet[py.Value](%e.cell.26, %exc.23)
+      %set.32 : base.Unit = base.refSet[py.Value](%e.cell.26, %exc.25)
       %print.13 : py.Value = py.loadGlobal("lib_unicode_errors", "print") ^clear.7()
       %e.34 : py.Value = py.loadGlobal("lib_unicode_errors", "e") ^clear.7()
       %tuple.52 : py.Value = py.mkTuple(%e.34)
@@ -558,21 +590,35 @@ module lib_unicode_errors {
       %e.cell.27 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.33 : base.Unit = base.refSet[py.Value](%e.cell.27, %e.35)
       jump ^join.7()
-    clear.7(%exc.24 : py.Value):
+    clear.7(%exc.26 : py.Value):
       %e.36 : py.Value = py.undef("e")
       %e.cell.28 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.34 : base.Unit = base.refSet[py.Value](%e.cell.28, %e.36)
-      jump ^unwind.7(%exc.24)
+      jump ^unwind.7(%exc.26)
     next.7():
-      jump ^unwind.7(%exc.23)
-    unwind.7(%exc.25 : py.Value):
+      jump ^unwind.7(%exc.25)
+    unwind.7(%exc.27 : py.Value):
       %pop.15 : base.Unit = py.popExcept(%prev.7)
-      jump ^propagate.0(%exc.25)
+      jump ^raised.2(%exc.27)
     join.7():
       jump ^head.2()
-    stop.2(%exc.26 : py.Value):
-      %done.2 : base.Bool = py.isStopIteration(%exc.26)
-      branch(%done.2) ^exit.2() ^propagate.0(%exc.26)
+    stop.2(%exc.28 : py.Value):
+      %done.2 : base.Bool = py.isStopIteration(%exc.28)
+      branch(%done.2) ^normal.2() ^raised.2(%exc.28)
+    normal.2():
+      %comp.6 : py.Completion = py.completionNormal
+      jump ^done.2(%comp.6)
+    raised.2(%exc.29 : py.Value):
+      %comp.7 : py.Completion = py.completionRaise(%exc.29)
+      jump ^done.2(%comp.7)
+    done.2(%comp.8 : py.Completion):
+      py.Completion.case(%comp.8) ^exit.2() ^unreachable.6() ^propagate.0() ^unreachable.7() ^unreachable.8()
+    unreachable.6(%val.2 : py.Value):
+      unreachable
+    unreachable.7():
+      unreachable
+    unreachable.8():
+      unreachable
     exit.2():
       %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.1 : py.Value = py.mkClosure[[]](@|lib_unicode_errors.SE.<body>|, "<body>", "lib_unicode_errors")
@@ -594,14 +640,14 @@ module lib_unicode_errors {
       %kwargs.45 : py.Value = py.mkKwargs
       %call.43 : py.Value = py.call(%encode.1, %tuple.55, %kwargs.45) ^catch.8()
       jump ^join.8()
-    catch.8(%exc.27 : py.Value):
-      %prev.8 : py.Value = py.pushExcInfo(%exc.27)
+    catch.8(%exc.30 : py.Value):
+      %prev.8 : py.Value = py.pushExcInfo(%exc.30)
       %UnicodeEncodeError.6 : py.Value = py.loadGlobal("lib_unicode_errors", "UnicodeEncodeError") ^unwind.8()
-      %match.8 : base.Bool = py.excMatch(%exc.27, %UnicodeEncodeError.6) ^unwind.8()
+      %match.8 : base.Bool = py.excMatch(%exc.30, %UnicodeEncodeError.6) ^unwind.8()
       branch(%match.8) ^except.8() ^next.8()
     except.8():
       %e.cell.29 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
-      %set.36 : base.Unit = base.refSet[py.Value](%e.cell.29, %exc.27)
+      %set.36 : base.Unit = base.refSet[py.Value](%e.cell.29, %exc.30)
       %print.14 : py.Value = py.loadGlobal("lib_unicode_errors", "print") ^clear.8()
       %e.37 : py.Value = py.loadGlobal("lib_unicode_errors", "e") ^clear.8()
       %args.6 : py.Value = py.attr(%e.37, "args") ^clear.8()
@@ -613,16 +659,16 @@ module lib_unicode_errors {
       %e.cell.30 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.37 : base.Unit = base.refSet[py.Value](%e.cell.30, %e.38)
       jump ^join.8()
-    clear.8(%exc.28 : py.Value):
+    clear.8(%exc.31 : py.Value):
       %e.39 : py.Value = py.undef("e")
       %e.cell.31 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.38 : base.Unit = base.refSet[py.Value](%e.cell.31, %e.39)
-      jump ^unwind.8(%exc.28)
+      jump ^unwind.8(%exc.31)
     next.8():
-      jump ^unwind.8(%exc.27)
-    unwind.8(%exc.29 : py.Value):
+      jump ^unwind.8(%exc.30)
+    unwind.8(%exc.32 : py.Value):
       %pop.17 : base.Unit = py.popExcept(%prev.8)
-      jump ^propagate.0(%exc.29)
+      jump ^propagate.0(%exc.32)
     join.8():
       %bytes.6 : py.Value = py.loadGlobal("lib_unicode_errors", "bytes") ^catch.9()
       %SE.2 : py.Value = py.loadGlobal("lib_unicode_errors", "SE") ^catch.9()
@@ -635,14 +681,14 @@ module lib_unicode_errors {
       %kwargs.48 : py.Value = py.mkKwargs
       %call.46 : py.Value = py.call(%bytes.6, %tuple.58, %kwargs.48) ^catch.9()
       jump ^join.9()
-    catch.9(%exc.30 : py.Value):
-      %prev.9 : py.Value = py.pushExcInfo(%exc.30)
+    catch.9(%exc.33 : py.Value):
+      %prev.9 : py.Value = py.pushExcInfo(%exc.33)
       %UnicodeEncodeError.7 : py.Value = py.loadGlobal("lib_unicode_errors", "UnicodeEncodeError") ^unwind.9()
-      %match.9 : base.Bool = py.excMatch(%exc.30, %UnicodeEncodeError.7) ^unwind.9()
+      %match.9 : base.Bool = py.excMatch(%exc.33, %UnicodeEncodeError.7) ^unwind.9()
       branch(%match.9) ^except.9() ^next.9()
     except.9():
       %e.cell.32 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
-      %set.39 : base.Unit = base.refSet[py.Value](%e.cell.32, %exc.30)
+      %set.39 : base.Unit = base.refSet[py.Value](%e.cell.32, %exc.33)
       %print.15 : py.Value = py.loadGlobal("lib_unicode_errors", "print") ^clear.9()
       %e.40 : py.Value = py.loadGlobal("lib_unicode_errors", "e") ^clear.9()
       %args.7 : py.Value = py.attr(%e.40, "args") ^clear.9()
@@ -654,16 +700,16 @@ module lib_unicode_errors {
       %e.cell.33 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.40 : base.Unit = base.refSet[py.Value](%e.cell.33, %e.41)
       jump ^join.9()
-    clear.9(%exc.31 : py.Value):
+    clear.9(%exc.34 : py.Value):
       %e.42 : py.Value = py.undef("e")
       %e.cell.34 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.41 : base.Unit = base.refSet[py.Value](%e.cell.34, %e.42)
-      jump ^unwind.9(%exc.31)
+      jump ^unwind.9(%exc.34)
     next.9():
-      jump ^unwind.9(%exc.30)
-    unwind.9(%exc.32 : py.Value):
+      jump ^unwind.9(%exc.33)
+    unwind.9(%exc.35 : py.Value):
       %pop.19 : base.Unit = py.popExcept(%prev.9)
-      jump ^propagate.0(%exc.32)
+      jump ^propagate.0(%exc.35)
     join.9():
       %print.16 : py.Value = py.loadGlobal("lib_unicode_errors", "print") ^propagate.0()
       %str.70 : py.Value = py.strLit("é")
@@ -718,14 +764,14 @@ module lib_unicode_errors {
       %args.8 : py.Value = py.argsTuple(%encode.6, %a.3) ^catch.10()
       %call.53 : py.Value = py.call(%encode.6, %args.8, %kwargs.55) ^catch.10()
       jump ^join.10()
-    catch.10(%exc.33 : py.Value):
-      %prev.10 : py.Value = py.pushExcInfo(%exc.33)
+    catch.10(%exc.36 : py.Value):
+      %prev.10 : py.Value = py.pushExcInfo(%exc.36)
       %Exception.3 : py.Value = py.loadGlobal("lib_unicode_errors", "Exception") ^unwind.10()
-      %match.10 : base.Bool = py.excMatch(%exc.33, %Exception.3) ^unwind.10()
+      %match.10 : base.Bool = py.excMatch(%exc.36, %Exception.3) ^unwind.10()
       branch(%match.10) ^except.10() ^next.10()
     except.10():
       %e.cell.35 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
-      %set.43 : base.Unit = base.refSet[py.Value](%e.cell.35, %exc.33)
+      %set.43 : base.Unit = base.refSet[py.Value](%e.cell.35, %exc.36)
       %print.17 : py.Value = py.loadGlobal("lib_unicode_errors", "print") ^clear.10()
       %type.5 : py.Value = py.loadGlobal("lib_unicode_errors", "type") ^clear.10()
       %e.43 : py.Value = py.loadGlobal("lib_unicode_errors", "e") ^clear.10()
@@ -742,34 +788,50 @@ module lib_unicode_errors {
       %e.cell.36 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.44 : base.Unit = base.refSet[py.Value](%e.cell.36, %e.45)
       jump ^join.10()
-    clear.10(%exc.34 : py.Value):
+    clear.10(%exc.37 : py.Value):
       %e.46 : py.Value = py.undef("e")
       %e.cell.37 : base.Ref(py.Value) = py.globalCell("lib_unicode_errors", "e")
       %set.45 : base.Unit = base.refSet[py.Value](%e.cell.37, %e.46)
-      jump ^unwind.10(%exc.34)
+      jump ^unwind.10(%exc.37)
     next.10():
-      jump ^unwind.10(%exc.33)
-    unwind.10(%exc.35 : py.Value):
+      jump ^unwind.10(%exc.36)
+    unwind.10(%exc.38 : py.Value):
       %pop.21 : base.Unit = py.popExcept(%prev.10)
-      jump ^propagate.0(%exc.35)
+      jump ^raised.3(%exc.38)
     join.10():
       jump ^head.3()
-    stop.3(%exc.36 : py.Value):
-      %done.3 : base.Bool = py.isStopIteration(%exc.36)
-      branch(%done.3) ^exit.3() ^propagate.0(%exc.36)
+    stop.3(%exc.39 : py.Value):
+      %done.3 : base.Bool = py.isStopIteration(%exc.39)
+      branch(%done.3) ^normal.3() ^raised.3(%exc.39)
+    normal.3():
+      %comp.9 : py.Completion = py.completionNormal
+      jump ^done.3(%comp.9)
+    raised.3(%exc.40 : py.Value):
+      %comp.10 : py.Completion = py.completionRaise(%exc.40)
+      jump ^done.3(%comp.10)
+    done.3(%comp.11 : py.Completion):
+      py.Completion.case(%comp.11) ^exit.3() ^unreachable.9() ^propagate.0() ^unreachable.10() ^unreachable.11()
+    unreachable.9(%val.3 : py.Value):
+      unreachable
+    unreachable.10():
+      unreachable
+    unreachable.11():
+      unreachable
     exit.3():
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.37 : py.Value):
-      %exc.38 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.37)
-      ret(%exc.38)
+    propagate.0(%exc.41 : py.Value):
+      %exc.42 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.41)
+      ret(%exc.42)
   }
   func @|lib_unicode_errors.U.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.bases = ["UnicodeEncodeError"]]
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -799,6 +861,8 @@ module lib_unicode_errors {
     #[py.bindings = [{name = "__repr__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -833,6 +897,8 @@ module lib_unicode_errors {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "SE.__repr__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("SE!")
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
       ret(%ret.0)

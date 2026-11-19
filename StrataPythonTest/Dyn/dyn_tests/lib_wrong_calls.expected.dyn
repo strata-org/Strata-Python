@@ -1,6 +1,8 @@
 module lib_wrong_calls {
   func @|lib_wrong_calls.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_wrong_calls")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_wrong_calls", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -269,6 +271,8 @@ module lib_wrong_calls {
     #[py.bindings = [{name = "__len__", binding = "def"}, {name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -317,6 +321,8 @@ module lib_wrong_calls {
       %set.1 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %kwargs.2)
+      jump ^start.0()
+    start.0():
       %f.3 : py.Value = base.refGet[py.Value](%f.cell.0)
       %f.4 : py.Value = py.requireDefined(%f.3, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
       %args.3 : py.Value = base.refGet[py.Value](%args.cell.0)
@@ -374,6 +380,8 @@ module lib_wrong_calls {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "S.__len__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -395,6 +403,8 @@ module lib_wrong_calls {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %i.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%i.cell.0, %i.2)
+      jump ^start.0()
+    start.0():
       %i.3 : py.Value = base.refGet[py.Value](%i.cell.0)
       %i.4 : py.Value = py.requireDefined(%i.3, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.4)

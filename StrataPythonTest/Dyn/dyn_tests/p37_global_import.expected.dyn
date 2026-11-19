@@ -1,6 +1,8 @@
 module p37_global_import {
   func @|p37_global_import.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p37_global_import")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p37_global_import", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -18,6 +20,8 @@ module p37_global_import {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %mod.0 : py.Value = py.importModule("json") ^propagate.0()
       %json.cell.0 : base.Ref(py.Value) = py.globalCell("p37_global_import", "json")
       %set.0 : base.Unit = base.refSet[py.Value](%json.cell.0, %mod.0)

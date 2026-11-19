@@ -1,6 +1,8 @@
 module t23_kwargs_boto3 {
   func @|t23_kwargs_boto3.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("t23_kwargs_boto3")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t23_kwargs_boto3", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -79,6 +81,8 @@ module t23_kwargs_boto3 {
       %bucket.2 : py.Value = py.tupleGet(%bound.0, 1)
       %key.2 : py.Value = py.tupleGet(%bound.0, 2)
       %data.2 : py.Value = py.tupleGet(%bound.0, 3)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("Direct keyword args - the common boto3 pattern.")
       %client.4 : py.Value = py.requireDefined(%client.2, "client", "UnboundLocalError", "cannot access local variable 'client' where it is not associated with a value") ^propagate.0()
       %put_item.0 : py.Value = py.attr(%client.4, "put_item") ^propagate.0()
@@ -110,6 +114,8 @@ module t23_kwargs_boto3 {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "put_item_from_dict", 0, 2, false, false, "client", "params") ^propagate.0()
       %client.2 : py.Value = py.tupleGet(%bound.0, 0)
       %params.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("Unpacking a dict as kwargs.")
       %client.4 : py.Value = py.requireDefined(%client.2, "client", "UnboundLocalError", "cannot access local variable 'client' where it is not associated with a value") ^propagate.0()
       %put_item.0 : py.Value = py.attr(%client.4, "put_item") ^propagate.0()
@@ -143,6 +149,8 @@ module t23_kwargs_boto3 {
       %client.2 : py.Value = py.tupleGet(%bound.0, 0)
       %bucket.2 : py.Value = py.tupleGet(%bound.0, 1)
       %key.2 : py.Value = py.tupleGet(%bound.0, 2)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("Build kwargs dict incrementally then unpack.")
       %str.1 : py.Value = py.strLit("Bucket")
       %bucket.4 : py.Value = py.requireDefined(%bucket.2, "bucket", "UnboundLocalError", "cannot access local variable 'bucket' where it is not associated with a value") ^propagate.0()

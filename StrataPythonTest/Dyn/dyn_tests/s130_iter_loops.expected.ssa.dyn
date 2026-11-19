@@ -1,6 +1,8 @@
 module s130_iter_loops {
   func @|s130_iter_loops.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s130_iter_loops")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s130_iter_loops", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -369,6 +371,8 @@ module s130_iter_loops {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}, {name = "__length_hint__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -409,6 +413,8 @@ module s130_iter_loops {
     #[py.bindings = [{name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -443,6 +449,8 @@ module s130_iter_loops {
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "show", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s130_iter_loops", "print") ^propagate.0()
       %len.0 : py.Value = py.loadGlobal("s130_iter_loops", "len") ^propagate.0()
       %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
@@ -469,6 +477,8 @@ module s130_iter_loops {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, true, false) ^propagate.0()
       %args.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %args.4 : py.Value = py.requireDefined(%args.2, "args", "UnboundLocalError", "cannot access local variable 'args' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%args.4)
       ret(%ret.0)
@@ -488,6 +498,8 @@ module s130_iter_loops {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__init__", 0, 2, false, false, "self", "n") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %n.6 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %i.0 : base.Unit = py.setAttr(%self.4, "i", %int.0) ^propagate.0()
@@ -509,6 +521,8 @@ module s130_iter_loops {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s130_iter_loops", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("iter")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -529,6 +543,8 @@ module s130_iter_loops {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %i.0 : py.Value = py.attr(%self.4, "i") ^propagate.0()
       %self.6 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -571,6 +587,8 @@ module s130_iter_loops {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__length_hint__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s130_iter_loops", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("hint")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -595,6 +613,8 @@ module s130_iter_loops {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "G.__getitem__", 0, 2, false, false, "self", "i") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %i.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %i.4 : py.Value = py.requireDefined(%i.2, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(3)
       %gtE.0 : py.Value = py.gtE(%i.4, %int.0) ^propagate.0()

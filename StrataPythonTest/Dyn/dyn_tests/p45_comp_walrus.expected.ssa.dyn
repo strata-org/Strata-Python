@@ -1,6 +1,8 @@
 module p45_comp_walrus {
   func @|p45_comp_walrus.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p45_comp_walrus")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p45_comp_walrus", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -93,6 +95,8 @@ module p45_comp_walrus {
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
@@ -141,6 +145,8 @@ module p45_comp_walrus {
       %defaults.0 : py.Value = py.mkTuple(%rows.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 1, false, false, "rows") ^propagate.0()
       %rows.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %rows.4 : py.Value = py.requireDefined(%rows.2, "rows", "UnboundLocalError", "cannot access local variable 'rows' where it is not associated with a value") ^propagate.0()
       %row.1 : py.Value = py.undef("row")
       %row.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%row.1)
@@ -231,6 +237,8 @@ module p45_comp_walrus {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "h", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %set.1 : base.Unit = base.refSet[py.Value](%total.cell.0, %int.0)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@p45_comp_walrus.h.add, "add", "p45_comp_walrus", %total.cell.0, %xs.cell.0)
@@ -247,6 +255,8 @@ module p45_comp_walrus {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "h.<locals>.add", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %xs.0 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.1 : py.Value = py.requireDefined(%xs.0, "xs", "NameError", "cannot access free variable 'xs' where it is not associated with a value in enclosing scope") ^propagate.0()
       %x.1 : py.Value = py.undef("x")

@@ -1,0 +1,9 @@
+module top
+  total: local (assigned)
+  function total
+    ValueError: global implicit (referenced)
+    i: local (assigned, referenced)
+    n: local (parameter, referenced)
+    range: global implicit (referenced)
+    s: local (assigned, referenced)
+qualnames: total

@@ -362,7 +362,7 @@ emission state of the Python builder. `Ctx` is fixed while one function is trans
 
 | State | Field | Exists? | Set by |
 |---|---|---|---|
-| enclosing handler: the block every raising operation names as `err` | `Frame.handler : PyTarget [Py.Value]` | yes | `buildFuncTypedWith` (`propagate.0`), `withHandler` and `withHandlerTo` (`try`, `with`, `for`) |
+| enclosing handler: the block every raising operation names as `err` | `Frame.handler : PyTarget [Py.Value]` | yes | `buildFuncTypedWith` (`propagate.0`), `withHandler` and `withHandlerTo` (`try`, `with`, `while`, `for`) |
 | the function's exit, which `return` and a propagated failure leave by | `Frame.exit : PyTarget [Py.failing]` | yes | `buildFuncTypedWith` |
 | locals: name ↦ cell | `Frame.locals` | yes | `declareLocal` |
 | scope: the `PyScope.Table`, the current `ScopeId` and its `Scope` (with the `__qualname__`), giving each name's kind (`local`, `cell`, `free`, `globalExplicit`, `globalImplicit`). Imports are `Table.imports`, a separate list of fully qualified targets | `Ctx.table`, `Ctx.scope`, `Ctx.cur` | yes | `PyScope.analyze` (§5.1), `transFunc` |
@@ -372,6 +372,7 @@ emission state of the Python builder. `Ctx` is fixed while one function is trans
 | exits stack (below) | `TState.exits : Array Exit` | yes | `withExit`: loops, `except` clause and `finally` bodies, `try`/`finally`, `with` |
 | the labels some emitted transfer names, for starting join blocks | `TState.targeted` | yes | `jump`, `branch` |
 | the `__init__`s of the class body being emitted, for its declared fields | `TState.inits` | yes | closure |
+| the loops of the function, for its `py.loops` attribute, and the `done` blocks some `return` jumps to | `TState.loops`, `TState.returnsTo` | yes | `loopDone`, `exitWalk` |
 | exception an `except` body handles, for bare `raise` | `Ctx.handled : Option ValId` | yes | `except` bodies; a `finally` body resets it |
 | namespace, inside a class body | `Ctx.classNs : Option ValId` | yes | class body functions |
 | default annotation | `Build.State.info` | yes | `withRange` |
@@ -384,7 +385,7 @@ must pass through, innermost last:
 
 ```
 inductive Exit
-  | loop    (brk cont : Label)    -- break → brk, continue → cont
+  | loop    (brk cont done : Label)  -- break → brk, continue → cont, return → done
   | handler (prev : ValId) …      -- an except clause or finally body: leave the handler
   | cleanup (fin : Label)         -- try/finally or with: fin takes a py.Completion
 ```
@@ -394,7 +395,7 @@ emitted by walking the stack from the innermost entry outward:
 
 | Entry | `break` | `continue` | `return v` |
 |---|---|---|---|
-| `loop brk cont` | `jump ^brk()`, stop | `jump ^cont()`, stop | skip |
+| `loop brk cont done` | `jump ^brk()`, stop | `jump ^cont()`, stop | `py.completionReturn v`, `jump ^done(%c)`, stop |
 | `cleanup fin` | `%c = py.completionBreak`, `jump ^fin(%c)`, stop | `py.completionContinue`, likewise | `py.completionReturn v`, likewise |
 | `handler prev` | leave the handler (§7.2), keep walking | same | same |
 | stack empty | | | `emitReturn v` |
@@ -552,7 +553,12 @@ enclosing scope. Free variables are bound late: a read sees the latest write to 
 
 A call passes one positional tuple and one keyword dict. Binding them to the source
 signature is the callee's job, done by a branch-free *prologue* at the top of the entry block.
-`PyTranslate.prologue` emits it. In a class, a private parameter's name is mangled everywhere,
+The entry block then ends in `jump ^start.0()`, a block that nothing else enters, where every
+source parameter is bound (F1, `docs/Dyn.md`, "Canonical form"). Later stages can rely on it: a
+precondition over the source parameters can be assumed at the start of `start.0`, where every
+parameter's cell holds its bound value. A module body, a class body and the stub of a rejected
+function jump to `start.0` at once.
+`PyTranslate.prologue` emits the prologue. In a class, a private parameter's name is mangled everywhere,
 its keyword included, as in CPython: `def m(self, __x)` in class `C` takes the keyword `_C__x`.
 
 A function's prologue builds its defaults with `py.mkTuple`, applies `py.bindArgs` to its `args` and
@@ -587,9 +593,10 @@ cell.
 
 ### 5.5 `return`
 
-Evaluate the value (`None` if absent), then perform the exit walk (§4). If no `cleanup` entry
-is on the stack, the walk ends in `emitReturn v`, which emits `base.ok` and then `ret`, the
-jump to the function's exit.
+Evaluate the value (`None` if absent), then perform the exit walk (§4). Inside a loop, the walk
+ends at the loop's `done`, which carries on from outside the loop (§6.4). If no `loop` or
+`cleanup` entry is on the stack, the walk ends in `emitReturn v`, which emits `base.ok` and then
+`ret`, the jump to the function's exit.
 
 ## 6. Statements and expressions
 
@@ -718,17 +725,36 @@ Then emit `py.call f args kwargs`. A method call `o.m(x)` is `py.attr`, then
 
 ### 6.4 Loops
 
+Every way out of a loop meets at one block, `done(k : py.Completion)`, whose completion says why
+the loop ended: P4 of the canonical form (`docs/Dyn.md`, "Canonical form"). A contract's exit
+clauses are asserted there, one per completion.
+
 **`while c: B else: E`:**
 
 ```
     jump ^head.0()
   head.0():
-    …                                    -- %4 = c
-    %5 : base.Bool = py.truthy(%4) ^propagate.0()
-    branch(%5) ^body.0() ^else.0()        -- ^exit.0() without an else
-  body.0():                              -- exits += loop(exit.0, head.0)
-    …
+    …                                    -- %4 = c, raising to ^raised.0()
+    %5 : base.Bool = py.truthy(%4) ^raised.0()
+    branch(%5) ^body.0() ^normal.0()
+  body.0():                              -- exits += loop(brk.0, head.0, done.0)
+    …                                    -- B, raising to ^raised.0()
     jump ^head.0()
+  normal.0():
+    %comp.0 : py.Completion = py.completionNormal
+    jump ^done.0(%comp.0)
+  brk.0():                               -- started only if targeted
+    %comp.1 : py.Completion = py.completionBreak
+    jump ^done.0(%comp.1)
+  raised.0(%exc.0 : py.Value):
+    %comp.2 : py.Completion = py.completionRaise(%exc.0)
+    jump ^done.0(%comp.2)
+  done.0(%comp.3 : py.Completion):
+    py.Completion.case(%comp.3) ^else.0() ^ret.0() ^propagate.0() ^exit.0() ^unreachable.0()
+  ret.0(%val.0 : py.Value):              -- the exit walk for `return v`, from outside the loop
+    …
+  unreachable.0():                       -- a `continue` jumps to the head, never to done
+    unreachable
   else.0():                              -- E
     jump ^exit.0()
   exit.0():                              -- started only if targeted
@@ -742,26 +768,50 @@ Then emit `py.call f args kwargs`. A method call `o.m(x)` is `py.attr`, then
   head.0():
     %10 : py.Value = py.next(%9) ^stop.0()                -- its own successor
     %11 : base.Unit = base.refSet[py.Value](%3, %10)       -- x = …
-    …                                                    -- B, raising to ^propagate.0()
+    …                                                    -- B, raising to ^raised.0()
     jump ^head.0()
   stop.0(%12 : py.Value):
     %13 : base.Bool = py.isStopIteration(%12)
-    branch(%13) ^else.0() ^propagate.0(%12)               -- anything else propagates
-  else.0():
-    jump ^exit.0()
-  exit.0():
+    branch(%13) ^normal.0() ^raised.0(%12)               -- anything else is raised
+  …                                                      -- normal, brk, raised, done, as above
 ```
 
+- The guard, the target's assignment and the body raise to the loop's own `raised` block, so
+  the loop's exceptions leave it through `done`. A `try` in the body sends the exceptions of
+  its own body to its handlers first, and only what they raise again reaches `raised`.
+- `done` dispatches the completion: a normal end goes to `else` (or `exit`), a `break` to
+  `exit`, and a `continue` never gets there. A `return` and an exception carry on from outside
+  the loop, as they would have at the loop statement: the `return` arm performs the exit walk
+  for `return v` from the loop's position, and the `raise` arm goes to the handler in effect at
+  the loop statement. In a module or class body, the `return` arm is `unreachable`.
 - `py.next`'s `err` successor is `stop`, not `Frame.handler`. The translator emits that one
-  instruction under `withHandler stop`. Every operation in the body uses the enclosing
-  handler. The loop's exhaustion edge and the body's exception edges are therefore different
-  successors on different instructions, and neither can shadow the other.
-- `stop` forwards anything that is not `StopIteration` to the handler in effect at the
-  `for` statement.
-- The target is assigned inside the loop, as §6.1 describes. A raising assignment uses the
-  body's handler.
-- `B` runs with `loop(exit, head)` pushed onto the exits stack. `break` skips `else`, and
+  instruction under `withHandler stop`. The loop's exhaustion edge and the body's exception
+  edges are therefore different successors on different instructions, and neither can shadow
+  the other.
+- `B` runs with `loop(brk, head, done)` pushed onto the exits stack. `break` skips `else`, and
   `continue` goes to `head`.
+- The canonicalization pass adds a preheader and a latch where the loop lacks them
+  (`docs/Dyn.md`), so a `continue` and the end of the body reach the head through the latch.
+- The break arm of `done` is `unreachable` when nothing targets `brk`, and its `return` arm
+  when no exit walk of a `return` reaches `done`. A `finally` body in the loop has a return arm
+  that walks to `done`, so `done` keeps its `return` arm then, even when the loop has no
+  `return`. So the code after a loop is not lowered when no `break` leaves the loop and its
+  `else` clause returns.
+
+Each function records its loops in the attribute `py.loops`, one record per loop with its head
+and its `done`: `#[py.loops = [{head = "head.0", done = "done.0"}]]`. A loop whose blocks the
+builder drops, such as one in an `except` clause of a `try` whose body cannot raise, has no
+record. `PyCanonical.runModule` reports an attribute that does not read as loop records, and
+the check verifies each record. The check cannot see a missing record of a loop that the CFG does
+not see as one, such as `while c: return x`, so a stage that places a contract on a loop must
+fail when the loop has no record.
+
+Each loop's head block carries the source range of its loop statement, and the canonicalization
+pass keeps each head's label and annotation. So, in the module the translator returns, a later
+stage finds the record of a source loop through the range of its head block. A module read back
+from text carries, in each head block, its position in the Dyn text instead, so a later stage
+can no longer find a Python loop through it. `PyTranslateTest` pins the ranges, before
+and after the pass.
 
 Loops are plain blocks. There is no transfer to the entry block, because `head` is always a
 fresh block.
@@ -770,8 +820,9 @@ fresh block.
 
 These perform the exit walk (§4). Inside a `try` with a `finally` (or a `with`) inside the
 loop, the walk reaches the `cleanup` entry first, so control goes to `fin(completionBreak)`
-and the `finally` body runs before the loop exits. The scope pass reports one outside a loop
-(§5.1); a loop does not count inside a nested `def` or `class`, or in its own `else`.
+and the `finally` body runs before the loop exits; the dispatch after the `finally` body then
+jumps to the loop's `brk` or its head. The scope pass reports one outside a loop (§5.1); a loop
+does not count inside a nested `def` or `class`, or in its own `else`.
 
 ### 6.6 Closures
 
@@ -1107,11 +1158,11 @@ statement:
 | normal | `jump ^join()` |
 | return `v` | the exit walk for `return v` from `S` |
 | raise `e` | `jump ^H(e)` |
-| break / continue | the exit walk from `S`. With no enclosing loop, its block is `unreachable` |
+| break / continue | the exit walk from `S`. With no enclosing loop, or when no `break` (or `continue`) of the protected code reaches the `finally` or `with` exit block, its block is `unreachable` |
 
 When a successor's action is a single transfer, the successor targets that block directly,
-for example `propagate.0` for raise or `exit.0` for break. Otherwise it gets a fresh block.
-`PyBuild.dispatchArms` takes each successor as either: `Arm.to l`, or `Arm.block base emit`
+for example `propagate.0` for raise or `brk.0` for a break of the enclosing loop. Otherwise it gets a fresh block.
+`PyBuild.dispatchArms` takes each successor as either: `Arm.to k`, a target, or `Arm.block base emit`
 for a fresh block. `PyBuild.tryFinally` emits the whole lowering: the `try` body under
 `protect fin`, which makes `finRaise`, then `fin`, then the dispatch, then `superseded`. A
 `finally` body that always exits abruptly has no dispatch.
@@ -1137,7 +1188,9 @@ Example: c1 (§10). The prologue is elided, and `cleanup` is read as a global.
 
 ```
   entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
-    …
+    …                                                        -- binds the arguments
+    jump ^start.0()
+  start.0():
     %int.1 : py.Value = py.intLit(1)
     %comp.0 : py.Completion = py.completionReturn(%int.1)    -- return 1 → exit walk
     jump ^fin.0(%comp.0)
@@ -1291,8 +1344,8 @@ counts `cleanup()` calls. The repros are `c1`–`c7` and `t30_loop_try_nested` i
 | Case | Python | Wrong lowering | Fixed by |
 |---|---|---|---|
 | c1 | `try: return 1` / `finally: cleanup()` | the return skipped `cleanup()` | §5.5 and §4: `return` walks to `fin(completionReturn 1)`. The return successor returns |
-| c2 | `try:` / `for x in xs: return x` / `finally: cleanup()` | same, from inside the loop | the walk skips the `loop` entry and reaches the `cleanup` entry |
-| c3 | `for x in xs:` / `try: break` / `finally: cleanup()` / `return 0` | `break` jumped straight past `cleanup()` | §6.5: `fin(completionBreak)`. The break successor targets `exit` |
+| c2 | `try:` / `for x in xs: return x` / `finally: cleanup()` | same, from inside the loop | the walk stops at the loop's `done`, whose `return` arm walks on and reaches the `cleanup` entry |
+| c3 | `for x in xs:` / `try: break` / `finally: cleanup()` / `return 0` | `break` jumped straight past `cleanup()` | §6.5: `fin(completionBreak)`. The break successor targets the loop's `brk`, which goes through `done` to `exit` |
 | c4 | as c3, with `continue` | `continue` skipped `cleanup()`, exhaustion re-entered the loop, and `return 0` was dead | §6.5: the continue successor targets `head`. §6.4: exhaustion is `next`'s own `^stop` |
 | c5 | `for x in xs:` / `try: cleanup()` / `finally: note()` / `return 0` | the `finally` captured `next()`'s `StopIteration`, and the loop exit was dead | §6.4: `py.next ^stop` is emitted outside the `try`'s handler |
 | c6 | `for x in xs: boom()` / `return 0` | `boom()`'s `ValueError` ended the loop normally | §6.4: body operations raise to `Frame.handler`, never to `stop`, and `stop` re-raises anything that is not `StopIteration` |

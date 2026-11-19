@@ -2,6 +2,8 @@
 module e03_nonlocal_module {
   func @|e03_nonlocal_module.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("e03_nonlocal_module")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e03_nonlocal_module", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)

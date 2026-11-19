@@ -1,6 +1,8 @@
 module i01_call_forms {
   func @|i01_call_forms.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("i01_call_forms")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i01_call_forms", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -133,6 +135,8 @@ module i01_call_forms {
       %set.0 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %kwargs.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("i01_call_forms", "print") ^propagate.0()
       %len.0 : py.Value = py.loadGlobal("i01_call_forms", "len") ^propagate.0()
       %args.3 : py.Value = base.refGet[py.Value](%args.cell.0)

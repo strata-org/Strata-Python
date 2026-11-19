@@ -1,6 +1,10 @@
 module s213_item_index_key_errors {
   func @|s213_item_index_key_errors.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s213_item_index_key_errors")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s213_item_index_key_errors", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -85,27 +89,41 @@ module s213_item_index_key_errors {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %r.cell.0 : base.Ref(py.Value) = py.globalCell("s213_item_index_key_errors", "r")
       %set.14 : base.Unit = base.refSet[py.Value](%r.cell.0, %item.0)
-      %print.0 : py.Value = py.loadGlobal("s213_item_index_key_errors", "print") ^propagate.0()
-      %r.0 : py.Value = py.loadGlobal("s213_item_index_key_errors", "r") ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("s213_item_index_key_errors", "print") ^raised.0()
+      %r.0 : py.Value = py.loadGlobal("s213_item_index_key_errors", "r") ^raised.0()
       %int.0 : py.Value = py.intLit(0)
-      %item.1 : py.Value = py.getItem(%r.0, %int.0) ^propagate.0()
-      %r.1 : py.Value = py.loadGlobal("s213_item_index_key_errors", "r") ^propagate.0()
+      %item.1 : py.Value = py.getItem(%r.0, %int.0) ^raised.0()
+      %r.1 : py.Value = py.loadGlobal("s213_item_index_key_errors", "r") ^raised.0()
       %int.1 : py.Value = py.intLit(1)
-      %item.2 : py.Value = py.getItem(%r.1, %int.1) ^propagate.0()
+      %item.2 : py.Value = py.getItem(%r.1, %int.1) ^raised.0()
       %tuple.8 : py.Value = py.mkTuple(%item.1, %item.2)
       %kwargs.7 : py.Value = py.mkKwargs
-      %call.4 : py.Value = py.call(%print.0, %tuple.8, %kwargs.7) ^propagate.0()
+      %call.4 : py.Value = py.call(%print.0, %tuple.8, %kwargs.7) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @s213_item_index_key_errors.err(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -118,6 +136,8 @@ module s213_item_index_key_errors {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "err", 0, 1, false, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%f.cell.0, %f.2)
+      jump ^start.0()
+    start.0():
       %f.3 : py.Value = base.refGet[py.Value](%f.cell.0)
       %f.4 : py.Value = py.requireDefined(%f.3, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
@@ -168,6 +188,8 @@ module s213_item_index_key_errors {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -199,6 +221,8 @@ module s213_item_index_key_errors {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -229,6 +253,8 @@ module s213_item_index_key_errors {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -256,6 +282,8 @@ module s213_item_index_key_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "s1", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %A.0 : py.Value = py.loadGlobal("s213_item_index_key_errors", "A") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
@@ -277,6 +305,8 @@ module s213_item_index_key_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "s2", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %A.0 : py.Value = py.loadGlobal("s213_item_index_key_errors", "A") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -297,6 +327,8 @@ module s213_item_index_key_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "s3", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %A.0 : py.Value = py.loadGlobal("s213_item_index_key_errors", "A") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
@@ -318,6 +350,8 @@ module s213_item_index_key_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "s4", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %A.0 : py.Value = py.loadGlobal("s213_item_index_key_errors", "A") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -343,6 +377,8 @@ module s213_item_index_key_errors {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Big.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(2)
       %int.1 : py.Value = py.intLit(100)
       %pow.0 : py.Value = py.pow(%int.0, %int.1) ^propagate.0()
@@ -361,6 +397,8 @@ module s213_item_index_key_errors {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Boom.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %KeyError.0 : py.Value = py.loadGlobal("s213_item_index_key_errors", "KeyError") ^propagate.0()
       %str.0 : py.Value = py.strLit("boom")
       %tuple.0 : py.Value = py.mkTuple(%str.0)

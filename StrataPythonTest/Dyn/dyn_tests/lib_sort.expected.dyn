@@ -1,6 +1,10 @@
 module lib_sort {
   func @|lib_sort.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_sort")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_sort", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -466,16 +470,30 @@ module lib_sort {
       %item.0 : py.Value = py.next(%iter.1) ^stop.0()
       %r.cell.0 : base.Ref(py.Value) = py.globalCell("lib_sort", "r")
       %set.12 : base.Unit = base.refSet[py.Value](%r.cell.0, %item.0)
-      %print.14 : py.Value = py.loadGlobal("lib_sort", "print") ^propagate.0()
-      %r.0 : py.Value = py.loadGlobal("lib_sort", "r") ^propagate.0()
-      %xs.0 : py.Value = py.attr(%r.0, "xs") ^propagate.0()
+      %print.14 : py.Value = py.loadGlobal("lib_sort", "print") ^raised.0()
+      %r.0 : py.Value = py.loadGlobal("lib_sort", "r") ^raised.0()
+      %xs.0 : py.Value = py.attr(%r.0, "xs") ^raised.0()
       %tuple.71 : py.Value = py.mkTuple(%xs.0)
       %kwargs.63 : py.Value = py.mkKwargs
-      %call.60 : py.Value = py.call(%print.14, %tuple.71, %kwargs.63) ^propagate.0()
+      %call.60 : py.Value = py.call(%print.14, %tuple.71, %kwargs.63) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %__class__.0 : py.Value = py.undef("__class__")
@@ -709,15 +727,17 @@ module lib_sort {
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @|lib_sort.A.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__lt__", binding = "def"}, {name = "__gt__", binding = "def"}, {name = "__repr__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -758,6 +778,8 @@ module lib_sort {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__lt__", binding = "def"}, {name = "__eq__", binding = "def"}, {name = "__repr__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -812,6 +834,8 @@ module lib_sort {
       %set.1 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %kwargs.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_sort", "print") ^catch.0()
       %repr.0 : py.Value = py.loadGlobal("lib_sort", "repr") ^catch.0()
       %f.3 : py.Value = base.refGet[py.Value](%f.cell.0)
@@ -887,6 +911,8 @@ module lib_sort {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %neg.0 : py.Value = py.uSub(%x.4) ^propagate.0()
@@ -905,6 +931,8 @@ module lib_sort {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "key", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_sort", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("key")
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
@@ -930,6 +958,8 @@ module lib_sort {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
@@ -949,6 +979,8 @@ module lib_sort {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "grow", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %m.1 : py.Value = py.loadGlobal("lib_sort", "m") ^propagate.0()
       %append.0 : py.Value = py.attr(%m.1, "append") ^propagate.0()
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
@@ -973,6 +1005,8 @@ module lib_sort {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "peek", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_sort", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("len during sort")
       %len.0 : py.Value = py.loadGlobal("lib_sort", "len") ^propagate.0()
@@ -1000,6 +1034,8 @@ module lib_sort {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "t") ^propagate.0()
       %t.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%t.cell.0, %t.2)
+      jump ^start.0()
+    start.0():
       %t.3 : py.Value = base.refGet[py.Value](%t.cell.0)
       %t.4 : py.Value = py.requireDefined(%t.3, "t", "UnboundLocalError", "cannot access local variable 't' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
@@ -1015,6 +1051,8 @@ module lib_sort {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1050,6 +1088,8 @@ module lib_sort {
     #[py.bindings = [{name = "__new__", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1082,6 +1122,8 @@ module lib_sort {
     #[py.bindings = [{name = "__call__", value = {call = "staticmethod", args = ["list"], keywords = []}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1133,6 +1175,8 @@ module lib_sort {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1171,6 +1215,8 @@ module lib_sort {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "churn", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %k1.0 : py.Value = py.loadGlobal("lib_sort", "k1") ^propagate.0()
       %append.0 : py.Value = py.attr(%k1.0, "append") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
@@ -1199,6 +1245,8 @@ module lib_sort {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "quiet", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %k2.0 : py.Value = py.loadGlobal("lib_sort", "k2") ^propagate.0()
       %extend.0 : py.Value = py.attr(%k2.0, "extend") ^propagate.0()
       %iter.0 : py.Value = py.loadGlobal("lib_sort", "iter") ^propagate.0()
@@ -1227,6 +1275,8 @@ module lib_sort {
     #[py.bindings = [{name = "count", value = 0}, {name = "__init__", binding = "def"}, {name = "__lt__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1260,6 +1310,8 @@ module lib_sort {
       ret(%exc.1)
   }
   func @lib_sort.late_sort(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}, {head = "head.1", done = "done.1"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %stop.0 : py.Value = py.undef("stop")
       %stop.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%stop.0)
@@ -1281,6 +1333,8 @@ module lib_sort {
       %set.0 : base.Unit = base.refSet[py.Value](%stop.cell.0, %stop.2)
       %reverse.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%reverse.cell.0, %reverse.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %Late.0 : py.Value = py.loadGlobal("lib_sort", "Late") ^propagate.0()
       %count.0 : base.Unit = py.setAttr(%Late.0, "count", %int.0) ^propagate.0()
@@ -1301,25 +1355,39 @@ module lib_sort {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %set.3 : base.Unit = base.refSet[py.Value](%i.cell.0, %item.0)
       %items.1 : py.Value = base.refGet[py.Value](%items.cell.0)
-      %items.2 : py.Value = py.requireDefined(%items.1, "items", "UnboundLocalError", "cannot access local variable 'items' where it is not associated with a value") ^propagate.0()
-      %append.0 : py.Value = py.attr(%items.2, "append") ^propagate.0()
-      %Late.2 : py.Value = py.loadGlobal("lib_sort", "Late") ^propagate.0()
+      %items.2 : py.Value = py.requireDefined(%items.1, "items", "UnboundLocalError", "cannot access local variable 'items' where it is not associated with a value") ^raised.0()
+      %append.0 : py.Value = py.attr(%items.2, "append") ^raised.0()
+      %Late.2 : py.Value = py.loadGlobal("lib_sort", "Late") ^raised.0()
       %i.1 : py.Value = base.refGet[py.Value](%i.cell.0)
-      %i.2 : py.Value = py.requireDefined(%i.1, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %i.2 : py.Value = py.requireDefined(%i.1, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^raised.0()
       %int.2 : py.Value = py.intLit(7919)
-      %mult.0 : py.Value = py.mult(%i.2, %int.2) ^propagate.0()
+      %mult.0 : py.Value = py.mult(%i.2, %int.2) ^raised.0()
       %int.3 : py.Value = py.intLit(300)
-      %mod.0 : py.Value = py.mod(%mult.0, %int.3) ^propagate.0()
+      %mod.0 : py.Value = py.mod(%mult.0, %int.3) ^raised.0()
       %tuple.1 : py.Value = py.mkTuple(%mod.0)
       %kwargs.2 : py.Value = py.mkKwargs
-      %call.1 : py.Value = py.call(%Late.2, %tuple.1, %kwargs.2) ^propagate.0()
+      %call.1 : py.Value = py.call(%Late.2, %tuple.1, %kwargs.2) ^raised.0()
       %tuple.2 : py.Value = py.mkTuple(%call.1)
       %kwargs.3 : py.Value = py.mkKwargs
-      %call.2 : py.Value = py.call(%append.0, %tuple.2, %kwargs.3) ^propagate.0()
+      %call.2 : py.Value = py.call(%append.0, %tuple.2, %kwargs.3) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %items.3 : py.Value = base.refGet[py.Value](%items.cell.0)
       %items.4 : py.Value = py.requireDefined(%items.3, "items", "UnboundLocalError", "cannot access local variable 'items' where it is not associated with a value") ^catch.0()
@@ -1331,19 +1399,19 @@ module lib_sort {
       %kwargs.4 : py.Value = py.mkKwargs(%str.0, %reverse.4)
       %call.3 : py.Value = py.call(%sort.0, %tuple.3, %kwargs.4) ^catch.0()
       jump ^join.0()
-    catch.0(%exc.1 : py.Value):
-      %prev.0 : py.Value = py.pushExcInfo(%exc.1)
+    catch.0(%exc.2 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.2)
       %ValueError.0 : py.Value = py.loadGlobal("lib_sort", "ValueError") ^unwind.0()
-      %match.0 : base.Bool = py.excMatch(%exc.1, %ValueError.0) ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.2, %ValueError.0) ^unwind.0()
       branch(%match.0) ^except.0() ^next.0()
     except.0():
       %pop.0 : base.Unit = py.popExcept(%prev.0)
       jump ^join.0()
     next.0():
-      jump ^unwind.0(%exc.1)
-    unwind.0(%exc.2 : py.Value):
+      jump ^unwind.0(%exc.2)
+    unwind.0(%exc.3 : py.Value):
       %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.2)
+      jump ^propagate.0(%exc.3)
     join.0():
       %list.1 : py.Value = py.mkList
       %set.4 : base.Unit = base.refSet[py.Value](%vs.cell.0, %list.1)
@@ -1355,18 +1423,32 @@ module lib_sort {
       %item.1 : py.Value = py.next(%iter.1) ^stop.1()
       %set.5 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.1)
       %vs.1 : py.Value = base.refGet[py.Value](%vs.cell.0)
-      %vs.2 : py.Value = py.requireDefined(%vs.1, "vs", "UnboundLocalError", "cannot access local variable 'vs' where it is not associated with a value") ^propagate.0()
-      %append.1 : py.Value = py.attr(%vs.2, "append") ^propagate.0()
+      %vs.2 : py.Value = py.requireDefined(%vs.1, "vs", "UnboundLocalError", "cannot access local variable 'vs' where it is not associated with a value") ^raised.1()
+      %append.1 : py.Value = py.attr(%vs.2, "append") ^raised.1()
       %x.1 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.2 : py.Value = py.requireDefined(%x.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
-      %v.0 : py.Value = py.attr(%x.2, "v") ^propagate.0()
+      %x.2 : py.Value = py.requireDefined(%x.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^raised.1()
+      %v.0 : py.Value = py.attr(%x.2, "v") ^raised.1()
       %tuple.4 : py.Value = py.mkTuple(%v.0)
       %kwargs.5 : py.Value = py.mkKwargs
-      %call.4 : py.Value = py.call(%append.1, %tuple.4, %kwargs.5) ^propagate.0()
+      %call.4 : py.Value = py.call(%append.1, %tuple.4, %kwargs.5) ^raised.1()
       jump ^head.1()
-    stop.1(%exc.3 : py.Value):
-      %done.1 : base.Bool = py.isStopIteration(%exc.3)
-      branch(%done.1) ^exit.1() ^propagate.0(%exc.3)
+    stop.1(%exc.4 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.4)
+      branch(%done.1) ^normal.1() ^raised.1(%exc.4)
+    normal.1():
+      %comp.3 : py.Completion = py.completionNormal
+      jump ^done.1(%comp.3)
+    raised.1(%exc.5 : py.Value):
+      %comp.4 : py.Completion = py.completionRaise(%exc.5)
+      jump ^done.1(%comp.4)
+    done.1(%comp.5 : py.Completion):
+      py.Completion.case(%comp.5) ^exit.1() ^unreachable.3() ^propagate.0() ^unreachable.4() ^unreachable.5()
+    unreachable.3(%val.1 : py.Value):
+      unreachable
+    unreachable.4():
+      unreachable
+    unreachable.5():
+      unreachable
     exit.1():
       %print.0 : py.Value = py.loadGlobal("lib_sort", "print") ^propagate.0()
       %stop.6 : py.Value = base.refGet[py.Value](%stop.cell.0)
@@ -1381,9 +1463,9 @@ module lib_sort {
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
-    propagate.0(%exc.4 : py.Value):
-      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
-      ret(%exc.5)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
   }
   func @lib_sort.A.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -1399,6 +1481,8 @@ module lib_sort {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %v.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%v.cell.0, %v.2)
+      jump ^start.0()
+    start.0():
       %v.3 : py.Value = base.refGet[py.Value](%v.cell.0)
       %v.4 : py.Value = py.requireDefined(%v.3, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -1425,6 +1509,8 @@ module lib_sort {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_sort", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("lt")
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -1457,6 +1543,8 @@ module lib_sort {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_sort", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("gt")
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -1490,6 +1578,8 @@ module lib_sort {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.__repr__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("A(")
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -1518,6 +1608,8 @@ module lib_sort {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %v.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%v.cell.0, %v.2)
+      jump ^start.0()
+    start.0():
       %v.3 : py.Value = base.refGet[py.Value](%v.cell.0)
       %v.4 : py.Value = py.requireDefined(%v.3, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -1544,6 +1636,8 @@ module lib_sort {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_sort", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("blt")
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -1582,6 +1676,8 @@ module lib_sort {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_sort", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("beq")
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -1615,6 +1711,8 @@ module lib_sort {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.__repr__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("B(")
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -1643,6 +1741,8 @@ module lib_sort {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %xs.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -1664,6 +1764,8 @@ module lib_sort {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Rows.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %iter.0 : py.Value = py.loadGlobal("lib_sort", "iter") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -1690,6 +1792,8 @@ module lib_sort {
       %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
       %args.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_sort", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("new")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1729,6 +1833,8 @@ module lib_sort {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %xs.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -1750,6 +1856,8 @@ module lib_sort {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Flip.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %staticmethod.0 : py.Value = py.loadGlobal("lib_sort", "staticmethod") ^propagate.0()
       %tuple.0 : py.Value = py.loadGlobal("lib_sort", "tuple") ^propagate.0()
       %tuple.1 : py.Value = py.mkTuple(%tuple.0)
@@ -1784,6 +1892,8 @@ module lib_sort {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %v.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%v.cell.0, %v.2)
+      jump ^start.0()
+    start.0():
       %v.3 : py.Value = base.refGet[py.Value](%v.cell.0)
       %v.4 : py.Value = py.requireDefined(%v.3, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -1810,6 +1920,8 @@ module lib_sort {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
+      jump ^start.0()
+    start.0():
       %Late.0 : py.Value = py.loadGlobal("lib_sort", "Late") ^propagate.0()
       %count.0 : py.Value = py.attr(%Late.0, "count") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)

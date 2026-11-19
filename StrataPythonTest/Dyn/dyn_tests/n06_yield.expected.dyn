@@ -2,6 +2,8 @@
 module n06_yield {
   func @|n06_yield.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("n06_yield")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("n06_yield", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -33,6 +35,8 @@ module n06_yield {
   }
   func @n06_yield.count_up(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("generator function")
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
@@ -47,6 +51,8 @@ module n06_yield {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "normal_func", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(2)

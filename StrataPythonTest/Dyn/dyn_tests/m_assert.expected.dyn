@@ -1,6 +1,10 @@
 module m_assert {
   func @|m_assert.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_assert")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -82,22 +86,36 @@ module m_assert {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "x")
       %set.3 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
-      %x.0 : py.Value = py.loadGlobal("m_assert", "x") ^propagate.0()
-      %cond.7 : base.Bool = py.truthy(%x.0) ^propagate.0()
+      %x.0 : py.Value = py.loadGlobal("m_assert", "x") ^raised.0()
+      %cond.7 : base.Bool = py.truthy(%x.0) ^raised.0()
       branch(%cond.7) ^ok.5() ^fail.5()
     fail.5():
       %AssertionError.5 : py.Value = py.assertionError
-      %x.1 : py.Value = py.loadGlobal("m_assert", "x") ^propagate.0()
+      %x.1 : py.Value = py.loadGlobal("m_assert", "x") ^raised.0()
       %args.3 : py.Value = py.mkTuple(%x.1)
       %kwargs.4 : py.Value = py.mkKwargs
-      %call.4 : py.Value = py.call(%AssertionError.5, %args.3, %kwargs.4) ^propagate.0()
-      %exc.5 : py.Value = py.toException(%call.4) ^propagate.0()
-      jump ^propagate.0(%exc.5)
+      %call.4 : py.Value = py.call(%AssertionError.5, %args.3, %kwargs.4) ^raised.0()
+      %exc.5 : py.Value = py.toException(%call.4) ^raised.0()
+      jump ^raised.0(%exc.5)
     ok.5():
       jump ^head.0()
     stop.0(%exc.6 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.6)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.6)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.6)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.7 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.7)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %clo.0 : py.Value = py.mkClosure[[]](@m_assert.f, "f", "m_assert")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "f")
@@ -105,9 +123,9 @@ module m_assert {
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.7 : py.Value):
-      %exc.8 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.7)
-      ret(%exc.8)
+    propagate.0(%exc.8 : py.Value):
+      %exc.9 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.8)
+      ret(%exc.9)
   }
   func @m_assert.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -118,6 +136,8 @@ module m_assert {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%x.4) ^propagate.0()

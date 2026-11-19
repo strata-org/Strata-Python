@@ -1,6 +1,8 @@
 module s97_getattr_static {
   func @|s97_getattr_static.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s97_getattr_static")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s97_getattr_static", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -36,6 +38,8 @@ module s97_getattr_static {
     #[py.bindings = [{name = "__getattr__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -82,6 +86,8 @@ module s97_getattr_static {
       %defaults.0 : py.Value = py.mkTuple(%name.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "C.__getattr__", 0, 1, false, false, "name") ^propagate.0()
       %name.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %name.5 : py.Value = py.requireDefined(%name.2, "name", "UnboundLocalError", "cannot access local variable 'name' where it is not associated with a value") ^propagate.0()
       %str.0 : py.Value = py.strLit("abc")
       %eq.0 : py.Value = py.eq(%name.5, %str.0) ^propagate.0()

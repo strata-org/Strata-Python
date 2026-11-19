@@ -1,6 +1,8 @@
 module p21_closure_three_levels {
   func @|p21_closure_three_levels.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p21_closure_three_levels")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p21_closure_three_levels", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -22,6 +24,8 @@ module p21_closure_three_levels {
       %g.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%g.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %int.0)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p21_closure_three_levels.f.g, "g", "p21_closure_three_levels", %a.cell.0)
@@ -40,6 +44,8 @@ module p21_closure_three_levels {
       %h.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%h.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f.<locals>.g", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(2)
       %set.0 : base.Unit = base.refSet[py.Value](%b.cell.0, %int.0)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@p21_closure_three_levels.f.g.h, "h", "p21_closure_three_levels", %a.cell.0, %b.cell.0)
@@ -56,6 +62,8 @@ module p21_closure_three_levels {
       %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f.<locals>.g.<locals>.h", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@p21_closure_three_levels.f.g.h.k, "k", "p21_closure_three_levels", %a.cell.0, %b.cell.0)
       %k.2 : py.Value = py.requireDefined(%clo.0, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%k.2)
@@ -68,6 +76,8 @@ module p21_closure_three_levels {
     entry.0(%a.cell.0 : base.Ref(py.Value), %b.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f.<locals>.g.<locals>.h.<locals>.k", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %a.0 : py.Value = base.refGet[py.Value](%a.cell.0)
       %a.1 : py.Value = py.requireDefined(%a.0, "a", "NameError", "cannot access free variable 'a' where it is not associated with a value in enclosing scope") ^propagate.0()
       %b.0 : py.Value = base.refGet[py.Value](%b.cell.0)

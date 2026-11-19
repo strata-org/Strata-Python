@@ -1,6 +1,8 @@
 module s128_class_doc_descriptor {
   func @|s128_class_doc_descriptor.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s128_class_doc_descriptor")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s128_class_doc_descriptor", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -93,6 +95,8 @@ module s128_class_doc_descriptor {
     #[py.bindings = [{name = "__get__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -124,6 +128,8 @@ module s128_class_doc_descriptor {
     #[py.bindings = [{name = "__doc__", value = {call = "DocDescr", args = [], keywords = []}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -166,6 +172,8 @@ module s128_class_doc_descriptor {
     #[py.bindings = [{name = "__doc__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -221,6 +229,8 @@ module s128_class_doc_descriptor {
     #[py.bindings = [{name = "__doc__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -278,6 +288,8 @@ module s128_class_doc_descriptor {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -323,6 +335,8 @@ module s128_class_doc_descriptor {
       %set.1 : base.Unit = base.refSet[py.Value](%obj.cell.0, %obj.2)
       %owner.2 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%owner.cell.0, %owner.2)
+      jump ^start.0()
+    start.0():
       %obj.3 : py.Value = base.refGet[py.Value](%obj.cell.0)
       %obj.4 : py.Value = py.requireDefined(%obj.3, "obj", "UnboundLocalError", "cannot access local variable 'obj' where it is not associated with a value") ^propagate.0()
       %none.0 : py.Value = py.noneLit
@@ -360,6 +374,8 @@ module s128_class_doc_descriptor {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.__doc__", 0, 1, false, false, "cls") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("A doc for ")
       %cls.3 : py.Value = base.refGet[py.Value](%cls.cell.0)
       %cls.4 : py.Value = py.requireDefined(%cls.3, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()
@@ -380,6 +396,8 @@ module s128_class_doc_descriptor {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.__doc__", 0, 1, false, false, "cls") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("Second")
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
       ret(%ret.0)

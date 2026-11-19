@@ -1,6 +1,8 @@
 module s363_seq_slot_subclass_alias {
   func @|s363_seq_slot_subclass_alias.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s363_seq_slot_subclass_alias")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s363_seq_slot_subclass_alias", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -42,6 +44,8 @@ module s363_seq_slot_subclass_alias {
     #[py.bindings = [{name = "__radd__", value = "list.__add__"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")

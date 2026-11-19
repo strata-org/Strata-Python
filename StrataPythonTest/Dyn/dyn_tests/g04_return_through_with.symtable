@@ -1,0 +1,11 @@
+module top
+  d: local (assigned)
+  function d
+    bad: global implicit (referenced)
+    lock: global implicit (referenced)
+    r: local (assigned, referenced)
+    rows: local (parameter, referenced)
+    skip: global implicit (referenced)
+    tidy: global implicit (referenced)
+    x: local (assigned, referenced)
+qualnames: d

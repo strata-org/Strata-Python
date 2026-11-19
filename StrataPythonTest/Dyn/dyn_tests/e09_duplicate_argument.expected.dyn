@@ -2,6 +2,8 @@
 module e09_duplicate_argument {
   func @|e09_duplicate_argument.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("e09_duplicate_argument")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e09_duplicate_argument", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -32,6 +34,8 @@ module e09_duplicate_argument {
       %set.1 : base.Unit = base.refSet[py.Value](%b.cell.0, %b.2)
       %a.4 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.4)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)

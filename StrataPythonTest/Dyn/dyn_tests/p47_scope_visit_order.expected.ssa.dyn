@@ -1,6 +1,8 @@
 module p47_scope_visit_order {
   func @|p47_scope_visit_order.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p47_scope_visit_order")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p47_scope_visit_order", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -45,6 +47,8 @@ module p47_scope_visit_order {
       %defaults.0 : py.Value = py.mkTuple(%cmd.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "patterns", 0, 1, false, false, "cmd") ^propagate.0()
       %cmd.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -56,6 +60,8 @@ module p47_scope_visit_order {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "keys", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %KEY_ONLY.0 : py.Value = py.loadGlobal("p47_scope_visit_order", "KEY_ONLY") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %dict.0 : py.Value = py.mkDict(%KEY_ONLY.0, %int.0) ^propagate.0()
@@ -73,6 +79,8 @@ module p47_scope_visit_order {
       %defaults.0 : py.Value = py.mkTuple(%a.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "a") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%a.4)
       ret(%ret.0)
@@ -88,6 +96,8 @@ module p47_scope_visit_order {
       %defaults.0 : py.Value = py.mkTuple(%b.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "b") ^propagate.0()
       %b.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %b.4 : py.Value = py.requireDefined(%b.2, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%b.4)
       ret(%ret.0)
@@ -103,6 +113,8 @@ module p47_scope_visit_order {
       %defaults.0 : py.Value = py.mkTuple(%c.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "c") ^propagate.0()
       %c.9 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %c.11 : py.Value = py.requireDefined(%c.9, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%c.11)
       ret(%ret.0)
@@ -118,6 +130,8 @@ module p47_scope_visit_order {
       %defaults.0 : py.Value = py.mkTuple(%d.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "d") ^propagate.0()
       %d.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %d.4 : py.Value = py.requireDefined(%d.2, "d", "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%d.4)
       ret(%ret.0)
@@ -143,6 +157,8 @@ module p47_scope_visit_order {
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
       %v.1 : py.Value = py.tupleGet(%bound.0, 2)
       %kw.1 : py.Value = py.tupleGet(%bound.0, 3)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)

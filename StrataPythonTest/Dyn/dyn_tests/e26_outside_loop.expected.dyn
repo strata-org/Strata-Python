@@ -4,7 +4,11 @@
 -- syntax error: 'continue' not properly in loop at 13:4-13:12
 module e26_outside_loop {
   func @|e26_outside_loop.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}, {head = "head.1", done = "done.1"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("e26_outside_loop")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e26_outside_loop", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -21,42 +25,72 @@ module e26_outside_loop {
       %clo.0 : py.Value = py.mkClosure[[]](@e26_outside_loop.g, "g", "e26_outside_loop")
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("e26_outside_loop", "g")
       %set.3 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.0)
-      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^raised.0()
       %clo.1 : py.Value = py.mkClosure[[]](@|e26_outside_loop.C.<body>|, "<body>", "e26_outside_loop")
       %str.1 : py.Value = py.strLit("C")
       %tuple.0 : py.Value = py.mkTuple(%clo.1, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs
-      %C.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %C.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^raised.0()
       %C.cell.0 : base.Ref(py.Value) = py.globalCell("e26_outside_loop", "C")
       %set.4 : base.Unit = base.refSet[py.Value](%C.cell.0, %C.0)
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^else.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^else.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     else.0():
       jump ^exit.0()
     exit.0():
       jump ^head.1()
     head.1():
-      %x.0 : py.Value = py.loadGlobal("e26_outside_loop", "x") ^propagate.0()
-      %cond.0 : base.Bool = py.truthy(%x.0) ^propagate.0()
-      branch(%cond.0) ^body.0() ^else.1()
+      %x.0 : py.Value = py.loadGlobal("e26_outside_loop", "x") ^raised.1()
+      %cond.0 : base.Bool = py.truthy(%x.0) ^raised.1()
+      branch(%cond.0) ^body.0() ^normal.1()
     body.0():
       jump ^head.1()
+    normal.1():
+      %comp.3 : py.Completion = py.completionNormal
+      jump ^done.1(%comp.3)
+    raised.1(%exc.2 : py.Value):
+      %comp.4 : py.Completion = py.completionRaise(%exc.2)
+      jump ^done.1(%comp.4)
+    done.1(%comp.5 : py.Completion):
+      py.Completion.case(%comp.5) ^else.1() ^unreachable.3() ^propagate.0() ^unreachable.4() ^unreachable.5()
+    unreachable.3(%val.1 : py.Value):
+      unreachable
+    unreachable.4():
+      unreachable
+    unreachable.5():
+      unreachable
     else.1():
       jump ^exit.1()
     exit.1():
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
   }
   func @e26_outside_loop.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -68,6 +102,8 @@ module e26_outside_loop {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")

@@ -1,0 +1,10 @@
+module top
+  c: local (assigned)
+  function c
+    handle: global implicit (referenced)
+    it: local (parameter, referenced)
+    n: local (assigned, referenced)
+    next: global implicit (referenced)
+    ok: global implicit (referenced)
+    x: local (assigned, referenced)
+qualnames: c

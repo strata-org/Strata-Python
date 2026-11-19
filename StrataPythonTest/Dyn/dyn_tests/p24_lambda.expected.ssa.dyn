@@ -1,6 +1,8 @@
 module p24_lambda {
   func @|p24_lambda.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p24_lambda")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p24_lambda", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -37,6 +39,8 @@ module p24_lambda {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 2, false, false, "a", "b") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %b.1 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.3 : py.Value = py.requireDefined(%b.1, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %add.0 : py.Value = py.add(%a.4, %b.3) ^propagate.0()
@@ -57,6 +61,8 @@ module p24_lambda {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "n") ^propagate.0()
       %n.4 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.4)
+      jump ^start.0()
+    start.0():
       %n.5 : py.Value = base.refGet[py.Value](%n.cell.0)
       %n.6 : py.Value = py.requireDefined(%n.5, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %y.default.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.6)
@@ -85,6 +91,8 @@ module p24_lambda {
       %y.1 : py.Value = py.tupleGet(%bound.0, 1)
       %r.1 : py.Value = py.tupleGet(%bound.0, 2)
       %kw.1 : py.Value = py.tupleGet(%bound.0, 3)
+      jump ^start.0()
+    start.0():
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %n.5 : py.Value = base.refGet[py.Value](%n.cell.0)
       %n.6 : py.Value = py.requireDefined(%n.5, "n", "NameError", "cannot access free variable 'n' where it is not associated with a value in enclosing scope") ^propagate.0()

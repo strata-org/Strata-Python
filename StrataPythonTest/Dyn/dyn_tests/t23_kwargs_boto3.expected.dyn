@@ -1,6 +1,8 @@
 module t23_kwargs_boto3 {
   func @|t23_kwargs_boto3.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("t23_kwargs_boto3")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t23_kwargs_boto3", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -83,6 +85,8 @@ module t23_kwargs_boto3 {
       %set.2 : base.Unit = base.refSet[py.Value](%key.cell.0, %key.2)
       %data.2 : py.Value = py.tupleGet(%bound.0, 3)
       %set.3 : base.Unit = base.refSet[py.Value](%data.cell.0, %data.2)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("Direct keyword args - the common boto3 pattern.")
       %client.3 : py.Value = base.refGet[py.Value](%client.cell.0)
       %client.4 : py.Value = py.requireDefined(%client.3, "client", "UnboundLocalError", "cannot access local variable 'client' where it is not associated with a value") ^propagate.0()
@@ -120,6 +124,8 @@ module t23_kwargs_boto3 {
       %set.0 : base.Unit = base.refSet[py.Value](%client.cell.0, %client.2)
       %params.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%params.cell.0, %params.2)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("Unpacking a dict as kwargs.")
       %client.3 : py.Value = base.refGet[py.Value](%client.cell.0)
       %client.4 : py.Value = py.requireDefined(%client.3, "client", "UnboundLocalError", "cannot access local variable 'client' where it is not associated with a value") ^propagate.0()
@@ -158,6 +164,8 @@ module t23_kwargs_boto3 {
       %set.1 : base.Unit = base.refSet[py.Value](%bucket.cell.0, %bucket.2)
       %key.2 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%key.cell.0, %key.2)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("Build kwargs dict incrementally then unpack.")
       %str.1 : py.Value = py.strLit("Bucket")
       %bucket.3 : py.Value = base.refGet[py.Value](%bucket.cell.0)

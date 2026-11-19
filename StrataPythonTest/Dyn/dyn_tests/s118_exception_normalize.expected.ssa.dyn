@@ -1,6 +1,8 @@
 module s118_exception_normalize {
   func @|s118_exception_normalize.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s118_exception_normalize")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s118_exception_normalize", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -66,6 +68,8 @@ module s118_exception_normalize {
     #[py.bindings = [{name = "__new__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -103,6 +107,8 @@ module s118_exception_normalize {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.__new__", 0, 1, true, false, "cls") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
       %a.1 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %a.3 : py.Value = py.requireDefined(%a.1, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%a.3) ^propagate.0()
       branch(%cond.0) ^then.0() ^else.0()

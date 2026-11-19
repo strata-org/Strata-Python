@@ -1,6 +1,8 @@
 module p26_params {
   func @|p26_params.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p26_params")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p26_params", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -64,6 +66,8 @@ module p26_params {
       %set.5 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 6)
       %set.6 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %kwargs.2)
+      jump ^start.0()
+    start.0():
       %a.3 : py.Value = base.refGet[py.Value](%a.cell.0)
       %a.4 : py.Value = py.requireDefined(%a.3, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.2 : py.Value = base.refGet[py.Value](%b.cell.0)
@@ -94,6 +98,8 @@ module p26_params {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "h", 0, 0, false, false, "k") ^propagate.0()
       %k.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.2)
+      jump ^start.0()
+    start.0():
       %k.3 : py.Value = base.refGet[py.Value](%k.cell.0)
       %k.4 : py.Value = py.requireDefined(%k.3, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%k.4)

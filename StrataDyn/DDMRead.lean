@@ -95,13 +95,7 @@ open DDM
 /-! ## Names, literals and types -/
 
 /-- The name a printed identifier denotes: dotted segments, all-digit ones numeric. -/
-def nameOf (s : String) : Name :=
-  if s == "_" then .base
-  else
-    (s.splitOn ".").foldl (init := .base) fun pre seg =>
-      match if seg.all Char.isDigit then seg.toNat? else none with
-      | some i => .num pre i
-      | none => .str pre seg
+def nameOf (s : String) : Name := ToDDM.nameOfText s
 
 /-- An identifier's text, for a message. -/
 def identText (n : MName SourceRange) : String :=

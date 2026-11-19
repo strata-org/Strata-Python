@@ -1,6 +1,8 @@
 module p11_shadow_under_control {
   func @|p11_shadow_under_control.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p11_shadow_under_control")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p11_shadow_under_control", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -21,6 +23,8 @@ module p11_shadow_under_control {
       ret(%ret.0)
   }
   func @p11_shadow_under_control.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %xs.0 : py.Value = py.undef("xs")
       %xs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%xs.0)
@@ -33,6 +37,8 @@ module p11_shadow_under_control {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%xs.4) ^propagate.0()
@@ -49,23 +55,37 @@ module p11_shadow_under_control {
       jump ^head.0()
     head.0():
       %xs.5 : py.Value = base.refGet[py.Value](%xs.cell.0)
-      %xs.6 : py.Value = py.requireDefined(%xs.5, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
-      %cond.1 : base.Bool = py.truthy(%xs.6) ^propagate.0()
-      branch(%cond.1) ^body.0() ^exit.0()
+      %xs.6 : py.Value = py.requireDefined(%xs.5, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^raised.0()
+      %cond.1 : base.Bool = py.truthy(%xs.6) ^raised.0()
+      branch(%cond.1) ^body.0() ^normal.0()
     body.0():
       %total.1 : py.Value = base.refGet[py.Value](%total.cell.0)
-      %total.2 : py.Value = py.requireDefined(%total.1, "total", "UnboundLocalError", "cannot access local variable 'total' where it is not associated with a value") ^propagate.0()
+      %total.2 : py.Value = py.requireDefined(%total.1, "total", "UnboundLocalError", "cannot access local variable 'total' where it is not associated with a value") ^raised.0()
       %int.2 : py.Value = py.intLit(1)
-      %iAdd.0 : py.Value = py.iAdd(%total.2, %int.2) ^propagate.0()
+      %iAdd.0 : py.Value = py.iAdd(%total.2, %int.2) ^raised.0()
       %set.3 : base.Unit = base.refSet[py.Value](%total.cell.0, %iAdd.0)
       %xs.7 : py.Value = base.refGet[py.Value](%xs.cell.0)
-      %xs.8 : py.Value = py.requireDefined(%xs.7, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.8 : py.Value = py.requireDefined(%xs.7, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^raised.0()
       %int.3 : py.Value = py.intLit(1)
       %none.0 : py.Value = py.noneLit
       %none.1 : py.Value = py.noneLit
-      %slice.0 : py.Value = py.getSlice(%xs.8, %int.3, %none.0, %none.1) ^propagate.0()
+      %slice.0 : py.Value = py.getSlice(%xs.8, %int.3, %none.0, %none.1) ^raised.0()
       %set.4 : base.Unit = base.refSet[py.Value](%xs.cell.0, %slice.0)
       jump ^head.0()
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.0 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.0)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %total.3 : py.Value = base.refGet[py.Value](%total.cell.0)
       %total.4 : py.Value = py.requireDefined(%total.3, "total", "UnboundLocalError", "cannot access local variable 'total' where it is not associated with a value") ^propagate.0()
@@ -74,11 +94,13 @@ module p11_shadow_under_control {
       %tuple.0 : py.Value = py.mkTuple(%total.4, %len.2)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
   }
   func @p11_shadow_under_control.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %xs.0 : py.Value = py.undef("xs")
       %xs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%xs.0)
@@ -89,6 +111,8 @@ module p11_shadow_under_control {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%xs.4) ^propagate.0()
@@ -99,15 +123,29 @@ module p11_shadow_under_control {
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %total.1 : py.Value = base.refGet[py.Value](%total.cell.0)
       %total.2 : py.Value = py.requireDefined(%total.1, "total", "UnboundLocalError", "cannot access local variable 'total' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%total.2)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
 }
 

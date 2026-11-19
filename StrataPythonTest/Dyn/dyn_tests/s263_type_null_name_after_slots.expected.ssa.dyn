@@ -1,6 +1,8 @@
 module s263_type_null_name_after_slots {
   func @|s263_type_null_name_after_slots.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s263_type_null_name_after_slots")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s263_type_null_name_after_slots", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)

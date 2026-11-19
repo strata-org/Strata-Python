@@ -1,0 +1,9 @@
+module
+  total: local (assigned)
+  function total
+    params: n
+    n: local (parameter, referenced)
+    ValueError: global implicit (referenced)
+    s: local (assigned, referenced)
+    i: local (assigned, referenced)
+    range: global implicit (referenced)

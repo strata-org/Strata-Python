@@ -1,6 +1,8 @@
 module s314_new_init_same_keyword {
   func @|s314_new_init_same_keyword.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s314_new_init_same_keyword")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s314_new_init_same_keyword", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -41,6 +43,8 @@ module s314_new_init_same_keyword {
     #[py.bindings = [{name = "__new__", binding = "def"}, {name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -82,6 +86,8 @@ module s314_new_init_same_keyword {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "D.__new__", 0, 2, false, false, "cls", "a") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
       %a.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %object.0 : py.Value = py.loadGlobal("s314_new_init_same_keyword", "object") ^propagate.0()
       %__new__.0 : py.Value = py.attr(%object.0, "__new__") ^propagate.0()
       %cls.4 : py.Value = py.requireDefined(%cls.2, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()
@@ -106,6 +112,8 @@ module s314_new_init_same_keyword {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "D.__init__", 0, 2, false, false, "self", "a") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %a.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %a.5 : base.Unit = py.setAttr(%self.4, "a", %a.4) ^propagate.0()

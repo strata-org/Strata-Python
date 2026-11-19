@@ -1,6 +1,8 @@
 module s103_property_subclass {
   func @|s103_property_subclass.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s103_property_subclass")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s103_property_subclass", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -101,6 +103,8 @@ module s103_property_subclass {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -133,6 +137,8 @@ module s103_property_subclass {
     #[py.bindings = [{name = "a", value = {call = "P", args = [5], keywords = []}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -176,6 +182,8 @@ module s103_property_subclass {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -204,6 +212,8 @@ module s103_property_subclass {
     #[py.bindings = [{name = "v", binding = "def"}, {name = "v", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -272,6 +282,8 @@ module s103_property_subclass {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %x.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %super.0 : py.Value = py.loadGlobal("s103_property_subclass", "super") ^propagate.0()
       %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
       %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
@@ -303,6 +315,8 @@ module s103_property_subclass {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "D.v", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(3)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -324,6 +338,8 @@ module s103_property_subclass {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %x.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s103_property_subclass", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("set")
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
@@ -347,6 +363,8 @@ module s103_property_subclass {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "P.__init__.<locals>.<lambda>", 0, 1, false, false, "s") ^propagate.0()
       %s.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%s.cell.0, %s.2)
+      jump ^start.0()
+    start.0():
       %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.1 : py.Value = py.requireDefined(%x.0, "x", "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.1)

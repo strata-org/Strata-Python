@@ -1,6 +1,8 @@
 module s62_setattr_other_descr {
   func @|s62_setattr_other_descr.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s62_setattr_other_descr")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s62_setattr_other_descr", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -41,6 +43,8 @@ module s62_setattr_other_descr {
     #[py.bindings = [{name = "__setattr__", value = "dict.__setitem__"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")

@@ -1,6 +1,8 @@
 module s126_super_metaclass {
   func @|s126_super_metaclass.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s126_super_metaclass")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s126_super_metaclass", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -86,6 +88,8 @@ module s126_super_metaclass {
     #[py.bindings = [{name = "__call__", binding = "def"}, {name = "m", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -122,6 +126,8 @@ module s126_super_metaclass {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -152,6 +158,8 @@ module s126_super_metaclass {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -188,6 +196,8 @@ module s126_super_metaclass {
       %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
       %a.1 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s126_super_metaclass", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("meta call")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -222,6 +232,8 @@ module s126_super_metaclass {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.m", 0, 1, false, false, "cls") ^propagate.0()
       %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
+      jump ^start.0()
+    start.0():
       %super.0 : py.Value = py.loadGlobal("s126_super_metaclass", "super") ^propagate.0()
       %cls.3 : py.Value = base.refGet[py.Value](%cls.cell.0)
       %cls.4 : py.Value = py.requireDefined(%cls.3, "cls", "RuntimeError", "super(): arg[0] deleted") ^propagate.0()
@@ -253,6 +265,8 @@ module s126_super_metaclass {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %x.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)

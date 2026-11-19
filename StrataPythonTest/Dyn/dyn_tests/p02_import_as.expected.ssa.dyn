@@ -1,6 +1,8 @@
 module p02_import_as {
   func @|p02_import_as.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p02_import_as")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p02_import_as", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -31,6 +33,8 @@ module p02_import_as {
       %defaults.0 : py.Value = py.mkTuple(%p.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "p") ^propagate.0()
       %p.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %osp.0 : py.Value = py.loadGlobal("p02_import_as", "osp") ^propagate.0()
       %basename.0 : py.Value = py.attr(%osp.0, "basename") ^propagate.0()
       %p.4 : py.Value = py.requireDefined(%p.2, "p", "UnboundLocalError", "cannot access local variable 'p' where it is not associated with a value") ^propagate.0()

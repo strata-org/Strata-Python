@@ -10,6 +10,7 @@ public import StrataPython.Dyn.Scope
 public import StrataDyn.WF
 public import StrataDyn.Attr
 public import StrataPython.Dyn.Shape
+import StrataDyn.LoopRecordAttr
 public import Lean.Data.Position
 import StrataPython.Dyn.Termination
 import Strata.Util.ListUtilsProps
@@ -119,8 +120,9 @@ end -- public section
 
 /-- A construct that `break`, `continue` and `return` leave through, innermost last. -/
 inductive Exit where
-  /-- A loop: `break` jumps to `brk`, `continue` to `cont`. -/
-  | loop (brk cont : BlockRef Py.env [])
+  /-- A loop: `break` jumps to `brk`, `continue` to `cont`, and `return v` jumps to `done`
+  with its completion. -/
+  | loop (brk cont : BlockRef Py.env []) (done : BlockRef Py.env [Py.Completion])
   /-- The body of an `except` clause or a `finally`, left through `leaveHandler`: `prev` is
   the exception handled before, `name` the name the clause binds and where, and `outer` the
   handler around the `try`. -/
@@ -173,7 +175,8 @@ structure Ctx where
   handled : Option ValId := none
 
 /-- What translation accumulates.  The first three fields are module-wide; `exits`,
-`targeted` and `inits` belong to the function being emitted. -/
+`targeted`, `inits`, `loops`, `returnsTo` and `loopExitsTo` belong to the function being
+emitted. -/
 structure TState where
   diagnostics : Array Diagnostic := #[]
   pending : Array FuncJob := #[]
@@ -185,6 +188,14 @@ structure TState where
   whether it keeps its first parameter, so that its `self.x: T` declare fields of the
   instance. -/
   inits : Array (SourceRange × Name × Bool) := #[]
+  /-- The loops of the function being emitted: each one's head and `done` (§6.4). -/
+  loops : Array (Label × Label) := #[]
+  /-- The `done` blocks that some `return` jumps to: a loop's `done` needs a return arm only
+  then. -/
+  returnsTo : Std.HashSet Label := {}
+  /-- The pairs `(fin, brk)` such that some `break` (`brk = true`) or `continue` jumps to the
+  `finally` or `with` exit block `fin`: the dispatch at `fin` needs that arm only then. -/
+  loopExitsTo : Std.HashSet (Label × Bool) := {}
 
 /-- Translating one Python function. -/
 abbrev TransM := ReaderT Ctx (StateT TState (PyM Info))
@@ -1920,38 +1931,98 @@ def exitWalk (brk : Bool) (ret : Option ValId) (range : SourceRange) : TransM Un
     return ← internalError (if brk then "'break' outside loop" else "'continue' outside loop") range
   for e in exits.reverse do
     match e, ret with
-    | .loop b c, none => return ← jump (if brk then b else c).goto
-    | .loop .., some _ => pure ()
+    | .loop b c _, none => return ← jump (if brk then b else c).goto
+    | .loop _ _ d, some v =>
+      modify fun st => { st with returnsTo := st.returnsTo.insert d.label }
+      return ← jump (d.goto.bind (← build (compReturn v)))
     | .handler prev name outer, _ => leaveHandler prev name outer
     | .cleanup fin, _ =>
+      if ret.isNone then
+        modify fun st => { st with loopExitsTo := st.loopExitsTo.insert (fin.label, brk) }
       let c ← build <| match ret with
         | some v => compReturn v
         | none => if brk then compBreak else compContinue
       return ← jump (fin.goto.bind c)
   if let some v := ret then build (emitReturn v)
 
-/-- The arms of the dispatch after a `finally` body or a `with`'s `__exit__`, which do from
-outside the statement at `sr` what the completion would have done: `join` is the code after
-it, and `outer` the handler around it. -/
-def exitArms (join : BlockRef Py.env []) (outer : PyTarget [Py.Value]) (sr : SourceRange) :
-    TransM (Arms TransM) := do
+/-- The `return` arm of a dispatch at `sr`: the exit walk for `return v` from the exits stack
+in effect, or `unreachable` in a module or class body, where no `return` is. -/
+def returnArm (sr : SourceRange) : TransM (Arm TransM [Py.Value] (PyVal Py.Value)) := do
+  if (← curScope).kind matches .module | .classBody then return .unreachable
+  return .block "ret" fun v => exitWalk false (some v.id) sr
+
+/-- The arms of the dispatch at `fin`, after a `finally` body or a `with`'s `__exit__`, which do
+from outside the statement at `sr` what the completion would have done: `join` is the code after
+it, and `outer` the handler around it.  The `break` arm is `unreachable` unless some `break` of
+the protected code jumps to `fin`, and the `continue` arm unless some `continue` does, so that a
+dispatch after code that cannot leave by either does not come back to the loop. -/
+def exitArms (fin : Label) (join : BlockRef Py.env []) (outer : PyTarget [Py.Value])
+    (sr : SourceRange) : TransM (Arms TransM) := do
   let exits := (← get).exits
+  let sent := (← get).loopExitsTo
   -- `break` or `continue` jumps straight to the loop when it is the innermost entry.
   let loopArm (brk : Bool) : TransM (Arm TransM [] Unit) := do
-    if !exits.any (· matches .loop ..) then return .unreachable
+    if !sent.contains (fin, brk) || !exits.any (· matches .loop ..) then return .unreachable
     match exits.back? with
-    | some (.loop b c) =>
+    | some (.loop b c _) =>
       let k := (if brk then b else c).goto
       recordTarget k
       return .to k
     | _ => return .block (if brk then "brk" else "cont") fun _ => exitWalk brk none sr
   return {
     normal := .to join.goto
-    «return» := if (← curScope).kind matches .module | .classBody then .unreachable
-      else .block "ret" fun v => exitWalk false (some v.id) sr
+    «return» := ← returnArm sr
     raise := .to outer
     «break» := ← loopArm true
     «continue» := ← loopArm false }
+
+/-- The blocks every loop leaves through (§6.4): `normal` when its guard fails or its
+iterator is exhausted, `brk` for a `break`, `raised` for an exception, and `done`, where they
+meet with their completion. -/
+structure LoopLabels where
+  normal : BlockRef Py.env []
+  brk : BlockRef Py.env []
+  raised : BlockRef Py.env [Py.Value]
+  done : BlockRef Py.env [Py.Completion]
+
+/-- Fresh labels for a loop's exits. -/
+def loopLabels : TransM LoopLabels :=
+  return { normal := ← build (freshLabel [] "normal"), brk := ← build (freshLabel [] "brk"),
+           raised := ← build (freshLabel [Py.Value] "raised"),
+           done := ← build (freshLabel [Py.Completion] "done") }
+
+/-- Emit the blocks through which the loop at `sr`, whose head is `head`, ends (§6.4), and
+record the loop for the function's `py.loops` attribute.  Each of `normal` and `brk` that some
+transfer targets builds its completion and jumps to `done`, and so does `raised`.  `done` then
+dispatches the completion.  A normal end goes to `finished`, the `else` clause or `exit`.  A
+`break` goes to `exit`.  A `continue` never reaches `done`, because it jumps to the head.  A
+`return` and an exception carry on from outside the loop, with the exits stack and the handler
+`outer` that were in effect at the loop statement.  The break arm is `unreachable` when nothing
+targets `brk`, and the return arm when no `return` jumps to `done`. -/
+def loopDone (sr : SourceRange) (head : BlockRef Py.env []) (ex : LoopLabels)
+    (finished exit : BlockRef Py.env []) (outer : PyTarget [Py.Value]) : TransM Unit := do
+  if ← targeted ex.normal then
+    build (startBlock ex.normal)
+    jump (ex.done.goto.bind (← build compNormal))
+  if ← targeted ex.brk then
+    build (startBlock ex.brk)
+    jump (ex.done.goto.bind (← build compBreak))
+  -- Raising operations name `raised` without recording it, so it is started in any case; the
+  -- builder drops it, and `done` if nothing else reaches it, when nothing raises.
+  let e ← build (startBlockWith ex.raised (.str .base "exc"))
+  jump (ex.done.goto.bind (← build (compRaise e)))
+  modify fun st => { st with loops := st.loops.push (head.label, ex.done.label) }
+  let k ← build (startBlockWith ex.done (.str .base "comp"))
+  let broke ← targeted ex.brk
+  recordTarget finished.goto
+  if broke then recordTarget exit.goto
+  let ret ← if (← get).returnsTo.contains ex.done.label then returnArm sr else pure .unreachable
+  dispatchArms k {
+    normal := .to finished.goto
+    «return» := ret
+    raise := .to outer
+    «break» := if broke then .to exit.goto else .unreachable
+    «continue» := .unreachable }
 
 mutual
 
@@ -1996,7 +2067,7 @@ def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
     let rhs ← transExpr v
     writeLhs l (← inPlaceOp op cur rhs) sr
   | .If _ test body orelse => ifStmt test body.val orelse.val
-  | .While _ test body orelse => whileStmt test body.val orelse.val
+  | .While sr test body orelse => whileStmt sr test body.val orelse.val
   | .For sr target iter body orelse _ => forStmt sr target iter body.val orelse.val
   | .Break sr => exitWalk true none sr
   | .Continue sr => exitWalk false none sr
@@ -2057,23 +2128,29 @@ def ifStmt (test : expr SourceRange) (body orelse : Array (stmt SourceRange)) :
   if ← targeted join then build (startBlock join)
 termination_by sizeOf test + sizeOf body + sizeOf orelse + 1
 
-/-- `while test: body else: orelse` (§6.4). -/
-def whileStmt (test : expr SourceRange) (body orelse : Array (stmt SourceRange)) :
-    TransM Unit := do
+/-- `while test: body else: orelse` at `sr` (§6.4).  The guard and the body raise to the loop's
+own `raised` block, and every way out of the loop meets at `done`.  The head block carries `sr`,
+through which a later stage finds the loop's record. -/
+def whileStmt (sr : SourceRange) (test : expr SourceRange)
+    (body orelse : Array (stmt SourceRange)) : TransM Unit := do
+  let outer ← build handler
   let head ← build (freshLabel [] "head")
   let bodyL ← build (freshLabel [] "body")
   let elseL? ← if orelse.isEmpty then pure none else some <$> build (freshLabel [] "else")
   let exit ← build (freshLabel [] "exit")
+  let ex ← loopLabels
   jump head.goto
-  build (startBlock head)
-  transCond test bodyL.goto (elseL?.getD exit).goto
+  build (startBlock head (info := some { range := sr }))
+  withHandler ex.raised (transCond test bodyL.goto ex.normal.goto)
   build (startBlock bodyL)
-  withExit (.loop exit head) (transStmts body)
+  withHandler ex.raised (withExit (.loop ex.brk head ex.done) (transStmts body))
   if ← isOpen then jump head.goto
+  loopDone sr head ex (elseL?.getD exit) exit outer
   if let some l := elseL? then
-    build (startBlock l)
-    transStmts orelse
-    if ← isOpen then jump exit.goto
+    if ← targeted l then
+      build (startBlock l)
+      transStmts orelse
+      if ← isOpen then jump exit.goto
   if ← targeted exit then build (startBlock exit)
 termination_by sizeOf test + sizeOf body + sizeOf orelse + 1
 
@@ -2166,7 +2243,7 @@ def tryFinallyStmt (sr : SourceRange) (body : Array (stmt SourceRange))
       if handlers.isEmpty then transStmts body else tryStmt body handlers orelse)
     (fun prev => withReader ({ · with handled := none })
       (withExit (.handler prev none outer) (transStmts final)))
-    (exitArms join outer sr)
+    (fun fin => exitArms fin.label join outer sr)
   if finished then build (startBlock join)
 termination_by sizeOf body + sizeOf handlers + sizeOf orelse + sizeOf final + 2
 
@@ -2216,7 +2293,7 @@ def withStmt (sr : SourceRange) (items : List (withitem SourceRange))
       let t ← build (emitTotal (.str .base "args") Py.mkTuple.ref #[n, n, n])
       let kw ← build (emitTotal (.str .base "kwargs") Py.mkKwargs.ref #[])
       discard <| build (emitFailing (.str .base "exited") Py.call.ref #[exit, t, kw])
-      dispatchArms pending (← exitArms join outer sr)
+      dispatchArms pending (← exitArms fin.label join outer sr)
     build (startBlock join)
 termination_by sizeOf items + sizeOf body + 1
 
@@ -2242,32 +2319,38 @@ def clause (exc prev : ValId) (outer : PyTarget [Py.Value]) (join : BlockRef Py.
 termination_by sizeOf body + 1
 
 /-- `for target in iter: body else: orelse` at `sr` (§6.4).  Only `next` raises to `stop`,
-which ends the loop on `StopIteration` and passes any other exception to the enclosing
-handler. -/
+which ends the loop on `StopIteration` and sends any other exception to the loop's `raised`
+block, as the target's assignment and the body do.  Every way out of the loop meets at
+`done`.  The head block carries `sr`. -/
 def forStmt (sr : SourceRange) (target iter : expr SourceRange)
     (body orelse : Array (stmt SourceRange)) : TransM Unit := do
   match assigner sr target with
   | .error t => badTarget t
   | .ok assign =>
     let it ← build (emitFailing (.str .base "iter") Py.getIter.ref #[← iterOperand iter])
+    let outer ← build handler
     let head ← build (freshLabel [] "head")
     let stop ← build (freshLabel [Py.Value] "stop")
     let elseL? ← if orelse.isEmpty then pure none else some <$> build (freshLabel [] "else")
     let exit ← build (freshLabel [] "exit")
+    let ex ← loopLabels
     jump head.goto
-    build (startBlock head)
-    assign (← build (withHandler stop (emitFailing (.str .base "item") Py.next.ref #[it])))
-    withExit (.loop exit head) (transStmts body)
+    build (startBlock head (info := some { range := sr }))
+    withHandler ex.raised do
+      assign (← build (withHandler stop (emitFailing (.str .base "item") Py.next.ref #[it])))
+      withExit (.loop ex.brk head ex.done) (transStmts body)
     if ← isOpen then jump head.goto
     let e ← build (startBlockWith stop (.str .base "exc"))
-    let done ← build (emitTest (.str .base "done") Py.isStopIteration.ref #[e.id])
-    let finished := (elseL?.getD exit).goto
-    recordTarget finished
-    build (PyBuild.branch done finished ((← build handler).bind e))
+    let stopped ← build (emitTest (.str .base "done") Py.isStopIteration.ref #[e.id])
+    recordTarget ex.normal.goto
+    recordTarget ex.raised.goto
+    build (PyBuild.branch stopped ex.normal.goto (ex.raised.goto.bind e))
+    loopDone sr head ex (elseL?.getD exit) exit outer
     if let some l := elseL? then
-      build (startBlock l)
-      transStmts orelse
-      if ← isOpen then jump exit.goto
+      if ← targeted l then
+        build (startBlock l)
+        transStmts orelse
+        if ← isOpen then jump exit.goto
     if ← targeted exit then build (startBlock exit)
 termination_by sizeOf target + sizeOf iter + sizeOf body + sizeOf orelse + 1
 
@@ -2287,8 +2370,24 @@ def runBody (ctx : Ctx) (st : TState) (range : SourceRange) (act : TransM Unit) 
   let body : TransM Unit := withRange range do
     act
     if ← isOpen then build emitReturnNone
-  let ((), st') ← (body.run ctx).run { st with exits := #[], targeted := {} }
+  let ((), st') ← (body.run ctx).run
+    { st with exits := #[], targeted := {}, loops := #[], returnsTo := {}, loopExitsTo := {} }
   return st'
+
+/-- End the entry block with a jump to a fresh block `start`, which nothing else enters: where a
+function's precondition holds, after its arguments are bound (F1, §6.4). -/
+def startBody : TransM Unit := do
+  let l ← build (freshLabel [] "start")
+  jump l.goto
+  build (startBlock l)
+
+/-- The `py.loops` attribute of `fn`: the head and `done` of each loop recorded in `st` whose head
+is a block of `fn`.  A loop whose head the builder dropped, such as one in an `except` clause of
+a `try` whose body cannot raise, is not in `fn`, so it has no record. -/
+def loopsAttr (fn : Func Py.env Info) (st : TState) : Array Attr :=
+  let labels : Std.HashSet Label := .ofList fn.labels
+  LoopRecord.toAttrs (Shape.key "loops") <| st.loops.toList.filterMap fun (h, d) =>
+    if labels.contains h then some { head := h, done := some d } else none
 
 /-- Build the function `name`, taking `params`, with `body`: the checked function and the
 translator's state.  If the build fails, the function is its stub, and the state gains an
@@ -2329,6 +2428,7 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) :
     runBody ctx st job.range do
       match job.stub with
       | some what =>
+        startBody
         build (emitReturn (← standIn what))
       | none =>
         let sc ← curScope
@@ -2338,6 +2438,7 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) :
           | internalError "a function without its args and kwargs parameters" job.range
         match job.args with
         | none =>
+          startBody
           let ns ← build (emitFailing (.str .base "ns") Py.getItem.ref #[args, ← build (intLit 0)])
           let annotated := findAnn job.body
           withReader ({ · with classNs := some ns, classAnnotations := annotated }) do
@@ -2363,13 +2464,15 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) :
             if sym.scope == .«local» || sym.scope == .cell then
               discard <| build (declareLocal sym.name)
           prologue (params a) defaultCells args kwargs
+          startBody
           transStmts job.body
   let attrs := match job.classParts with
     | some c =>
       Shape.classAttrs ctx.table c.outerPrivate job.scope c.bases c.keywords c.decorators job.body
         st.inits
     | none => #[]
-  (Func.setInfo fn { fn.val.info with attrs }, { st with inits := #[] })
+  (Func.setInfo fn { fn.val.info with attrs := attrs ++ loopsAttr fn.val st },
+    { st with inits := #[] })
 
 /-- A set of scope ids below `n` has at most `n` elements. -/
 private theorem size_le_of_lt {done : Std.HashSet ScopeId} {n : Nat}
@@ -2465,6 +2568,7 @@ def translate (moduleName : String) (stmts : Array (stmt SourceRange)) : Result 
   let st : TState := { funcNames := ({} : Std.HashSet Name).insert bodyName }
   let (body, st) := builtFunc bodyName #[] range fun _ =>
     runBody ctx st range do
+      startBody
       writeName "__name__" (← build (strLit moduleName)) .none
       if findAnn stmts then setupAnnotations
       match docstring? stmts, stmts[0]? with
@@ -2475,6 +2579,8 @@ def translate (moduleName : String) (stmts : Array (stmt SourceRange)) : Result 
       | _, _ =>
         writeName "__doc__" (← build noneLit) .none
         transStmts stmts
+  let body :=
+    Func.setInfo body { body.val.info with attrs := body.val.info.attrs ++ loopsAttr body.val st }
   let (funcs, st) := emitQueued ctx {} (by simp) st 0 #[body]
   let (module, ds) := assemble mname funcs range
   -- The scope pass's internal errors are bugs, reported like the translator's.

@@ -390,6 +390,16 @@ public def nameText : Name → String
   | .str pre s => s!"{nameText pre}.{s}"
   | .num pre i => s!"{nameText pre}.{i}"
 
+/-- The name whose text is `s`, as the reader reads an identifier: its `.`-separated segments,
+a segment of digits only being a number.  `_` alone is the root. -/
+public def nameOfText (s : String) : Name :=
+  if s == "_" then .base
+  else
+    (s.splitOn ".").foldl (init := .base) fun pre seg =>
+      match if seg.all Char.isDigit then seg.toNat? else none with
+      | some i => .num pre i
+      | none => .str pre seg
+
 /-- A name, as one identifier. -/
 def name (n : Name) : MName SourceRange := .name .none ⟨.none, nameText n⟩
 

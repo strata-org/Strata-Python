@@ -2,6 +2,8 @@
 module m_set_constants_rejected {
   func @|m_set_constants_rejected.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_set_constants_rejected")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_set_constants_rejected", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)

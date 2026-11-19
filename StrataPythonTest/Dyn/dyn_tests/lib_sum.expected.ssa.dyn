@@ -1,6 +1,10 @@
 module lib_sum {
   func @|lib_sum.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}, {head = "head.1", done = "done.1"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_sum")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_sum", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -445,12 +449,26 @@ module lib_sum {
       jump ^unwind.0(%exc.0)
     unwind.0(%exc.2 : py.Value):
       %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.2)
+      jump ^raised.0(%exc.2)
     join.0():
       jump ^head.0()
     stop.0(%exc.3 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.3)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.3)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.3)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.4 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.4)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %tuple.60 : py.Value = py.mkTuple
       %dict.1 : py.Value = py.mkDict ^propagate.0()
@@ -478,7 +496,7 @@ module lib_sum {
       jump ^head.1()
     head.1():
       %item.5 : py.Value = py.next(%iter.1) ^stop.1()
-      %unpack.1 : py.Value = py.unpackSeq(%item.5, 2) ^propagate.0()
+      %unpack.1 : py.Value = py.unpackSeq(%item.5, 2) ^raised.1()
       %elem.2 : py.Value = py.tupleGet(%unpack.1, 0)
       %args.cell.0 : base.Ref(py.Value) = py.globalCell("lib_sum", "args")
       %set.17 : base.Unit = base.refSet[py.Value](%args.cell.0, %elem.2)
@@ -493,14 +511,14 @@ module lib_sum {
       %args.2 : py.Value = py.argsTuple(%sum.30, %args.1) ^catch.1()
       %call.50 : py.Value = py.call(%sum.30, %args.2, %merge.0) ^catch.1()
       jump ^join.1()
-    catch.1(%exc.4 : py.Value):
-      %prev.1 : py.Value = py.pushExcInfo(%exc.4)
+    catch.1(%exc.5 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.5)
       %TypeError.1 : py.Value = py.loadGlobal("lib_sum", "TypeError") ^unwind.1()
-      %match.1 : base.Bool = py.excMatch(%exc.4, %TypeError.1) ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.5, %TypeError.1) ^unwind.1()
       branch(%match.1) ^except.1() ^next.1()
     except.1():
       %e.cell.3 : base.Ref(py.Value) = py.globalCell("lib_sum", "e")
-      %set.19 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.4)
+      %set.19 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.5)
       %print.14 : py.Value = py.loadGlobal("lib_sum", "print") ^clear.1()
       %e.3 : py.Value = py.loadGlobal("lib_sum", "e") ^clear.1()
       %args.3 : py.Value = py.attr(%e.3, "args") ^clear.1()
@@ -514,21 +532,35 @@ module lib_sum {
       %e.cell.4 : base.Ref(py.Value) = py.globalCell("lib_sum", "e")
       %set.20 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.4)
       jump ^join.1()
-    clear.1(%exc.5 : py.Value):
+    clear.1(%exc.6 : py.Value):
       %e.5 : py.Value = py.undef("e")
       %e.cell.5 : base.Ref(py.Value) = py.globalCell("lib_sum", "e")
       %set.21 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
-      jump ^unwind.1(%exc.5)
+      jump ^unwind.1(%exc.6)
     next.1():
-      jump ^unwind.1(%exc.4)
-    unwind.1(%exc.6 : py.Value):
+      jump ^unwind.1(%exc.5)
+    unwind.1(%exc.7 : py.Value):
       %pop.3 : base.Unit = py.popExcept(%prev.1)
-      jump ^propagate.0(%exc.6)
+      jump ^raised.1(%exc.7)
     join.1():
       jump ^head.1()
-    stop.1(%exc.7 : py.Value):
-      %done.1 : base.Bool = py.isStopIteration(%exc.7)
-      branch(%done.1) ^exit.1() ^propagate.0(%exc.7)
+    stop.1(%exc.8 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.8)
+      branch(%done.1) ^normal.1() ^raised.1(%exc.8)
+    normal.1():
+      %comp.3 : py.Completion = py.completionNormal
+      jump ^done.1(%comp.3)
+    raised.1(%exc.9 : py.Value):
+      %comp.4 : py.Completion = py.completionRaise(%exc.9)
+      jump ^done.1(%comp.4)
+    done.1(%comp.5 : py.Completion):
+      py.Completion.case(%comp.5) ^exit.1() ^unreachable.3() ^propagate.0() ^unreachable.4() ^unreachable.5()
+    unreachable.3(%val.1 : py.Value):
+      unreachable
+    unreachable.4():
+      unreachable
+    unreachable.5():
+      unreachable
     exit.1():
       %sum.31 : py.Value = py.loadGlobal("lib_sum", "sum") ^catch.2()
       %int.60 : py.Value = py.intLit(1)
@@ -538,14 +570,14 @@ module lib_sum {
       %kwargs.58 : py.Value = py.mkKwargs
       %call.52 : py.Value = py.call(%sum.31, %tuple.69, %kwargs.58) ^catch.2()
       jump ^join.2()
-    catch.2(%exc.8 : py.Value):
-      %prev.2 : py.Value = py.pushExcInfo(%exc.8)
+    catch.2(%exc.10 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.10)
       %TypeError.2 : py.Value = py.loadGlobal("lib_sum", "TypeError") ^unwind.2()
-      %match.2 : base.Bool = py.excMatch(%exc.8, %TypeError.2) ^unwind.2()
+      %match.2 : base.Bool = py.excMatch(%exc.10, %TypeError.2) ^unwind.2()
       branch(%match.2) ^except.2() ^next.2()
     except.2():
       %e.cell.6 : base.Ref(py.Value) = py.globalCell("lib_sum", "e")
-      %set.22 : base.Unit = base.refSet[py.Value](%e.cell.6, %exc.8)
+      %set.22 : base.Unit = base.refSet[py.Value](%e.cell.6, %exc.10)
       %print.15 : py.Value = py.loadGlobal("lib_sum", "print") ^clear.2()
       %e.6 : py.Value = py.loadGlobal("lib_sum", "e") ^clear.2()
       %args.4 : py.Value = py.attr(%e.6, "args") ^clear.2()
@@ -559,16 +591,16 @@ module lib_sum {
       %e.cell.7 : base.Ref(py.Value) = py.globalCell("lib_sum", "e")
       %set.23 : base.Unit = base.refSet[py.Value](%e.cell.7, %e.7)
       jump ^join.2()
-    clear.2(%exc.9 : py.Value):
+    clear.2(%exc.11 : py.Value):
       %e.8 : py.Value = py.undef("e")
       %e.cell.8 : base.Ref(py.Value) = py.globalCell("lib_sum", "e")
       %set.24 : base.Unit = base.refSet[py.Value](%e.cell.8, %e.8)
-      jump ^unwind.2(%exc.9)
+      jump ^unwind.2(%exc.11)
     next.2():
-      jump ^unwind.2(%exc.8)
-    unwind.2(%exc.10 : py.Value):
+      jump ^unwind.2(%exc.10)
+    unwind.2(%exc.12 : py.Value):
       %pop.5 : base.Unit = py.popExcept(%prev.2)
-      jump ^propagate.0(%exc.10)
+      jump ^propagate.0(%exc.12)
     join.2():
       %sum.32 : py.Value = py.loadGlobal("lib_sum", "sum") ^catch.3()
       %str.13 : py.Value = py.strLit("a")
@@ -578,14 +610,14 @@ module lib_sum {
       %kwargs.60 : py.Value = py.mkKwargs
       %call.54 : py.Value = py.call(%sum.32, %tuple.71, %kwargs.60) ^catch.3()
       jump ^join.3()
-    catch.3(%exc.11 : py.Value):
-      %prev.3 : py.Value = py.pushExcInfo(%exc.11)
+    catch.3(%exc.13 : py.Value):
+      %prev.3 : py.Value = py.pushExcInfo(%exc.13)
       %TypeError.3 : py.Value = py.loadGlobal("lib_sum", "TypeError") ^unwind.3()
-      %match.3 : base.Bool = py.excMatch(%exc.11, %TypeError.3) ^unwind.3()
+      %match.3 : base.Bool = py.excMatch(%exc.13, %TypeError.3) ^unwind.3()
       branch(%match.3) ^except.3() ^next.3()
     except.3():
       %e.cell.9 : base.Ref(py.Value) = py.globalCell("lib_sum", "e")
-      %set.25 : base.Unit = base.refSet[py.Value](%e.cell.9, %exc.11)
+      %set.25 : base.Unit = base.refSet[py.Value](%e.cell.9, %exc.13)
       %print.16 : py.Value = py.loadGlobal("lib_sum", "print") ^clear.3()
       %e.9 : py.Value = py.loadGlobal("lib_sum", "e") ^clear.3()
       %args.5 : py.Value = py.attr(%e.9, "args") ^clear.3()
@@ -599,16 +631,16 @@ module lib_sum {
       %e.cell.10 : base.Ref(py.Value) = py.globalCell("lib_sum", "e")
       %set.26 : base.Unit = base.refSet[py.Value](%e.cell.10, %e.10)
       jump ^join.3()
-    clear.3(%exc.12 : py.Value):
+    clear.3(%exc.14 : py.Value):
       %e.11 : py.Value = py.undef("e")
       %e.cell.11 : base.Ref(py.Value) = py.globalCell("lib_sum", "e")
       %set.27 : base.Unit = base.refSet[py.Value](%e.cell.11, %e.11)
-      jump ^unwind.3(%exc.12)
+      jump ^unwind.3(%exc.14)
     next.3():
-      jump ^unwind.3(%exc.11)
-    unwind.3(%exc.13 : py.Value):
+      jump ^unwind.3(%exc.13)
+    unwind.3(%exc.15 : py.Value):
       %pop.7 : base.Unit = py.popExcept(%prev.3)
-      jump ^propagate.0(%exc.13)
+      jump ^propagate.0(%exc.15)
     join.3():
       %print.17 : py.Value = py.loadGlobal("lib_sum", "print") ^propagate.0()
       %sum.33 : py.Value = py.loadGlobal("lib_sum", "sum") ^propagate.0()
@@ -669,14 +701,14 @@ module lib_sum {
       %kwargs.72 : py.Value = py.mkKwargs
       %call.66 : py.Value = py.call(%sum.37, %tuple.83, %kwargs.72) ^catch.4()
       jump ^join.4()
-    catch.4(%exc.14 : py.Value):
-      %prev.4 : py.Value = py.pushExcInfo(%exc.14)
+    catch.4(%exc.16 : py.Value):
+      %prev.4 : py.Value = py.pushExcInfo(%exc.16)
       %TypeError.4 : py.Value = py.loadGlobal("lib_sum", "TypeError") ^unwind.4()
-      %match.4 : base.Bool = py.excMatch(%exc.14, %TypeError.4) ^unwind.4()
+      %match.4 : base.Bool = py.excMatch(%exc.16, %TypeError.4) ^unwind.4()
       branch(%match.4) ^except.4() ^next.4()
     except.4():
       %e.cell.12 : base.Ref(py.Value) = py.globalCell("lib_sum", "e")
-      %set.28 : base.Unit = base.refSet[py.Value](%e.cell.12, %exc.14)
+      %set.28 : base.Unit = base.refSet[py.Value](%e.cell.12, %exc.16)
       %print.18 : py.Value = py.loadGlobal("lib_sum", "print") ^clear.4()
       %e.12 : py.Value = py.loadGlobal("lib_sum", "e") ^clear.4()
       %args.6 : py.Value = py.attr(%e.12, "args") ^clear.4()
@@ -690,29 +722,31 @@ module lib_sum {
       %e.cell.13 : base.Ref(py.Value) = py.globalCell("lib_sum", "e")
       %set.29 : base.Unit = base.refSet[py.Value](%e.cell.13, %e.13)
       jump ^join.4()
-    clear.4(%exc.15 : py.Value):
+    clear.4(%exc.17 : py.Value):
       %e.14 : py.Value = py.undef("e")
       %e.cell.14 : base.Ref(py.Value) = py.globalCell("lib_sum", "e")
       %set.30 : base.Unit = base.refSet[py.Value](%e.cell.14, %e.14)
-      jump ^unwind.4(%exc.15)
+      jump ^unwind.4(%exc.17)
     next.4():
-      jump ^unwind.4(%exc.14)
-    unwind.4(%exc.16 : py.Value):
+      jump ^unwind.4(%exc.16)
+    unwind.4(%exc.18 : py.Value):
       %pop.9 : base.Unit = py.popExcept(%prev.4)
-      jump ^propagate.0(%exc.16)
+      jump ^propagate.0(%exc.18)
     join.4():
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.17 : py.Value):
-      %exc.18 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.17)
-      ret(%exc.18)
+    propagate.0(%exc.19 : py.Value):
+      %exc.20 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.19)
+      ret(%exc.20)
   }
   func @|lib_sum.I.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.bases = ["int"]]
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -741,6 +775,8 @@ module lib_sum {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -769,6 +805,8 @@ module lib_sum {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -797,6 +835,8 @@ module lib_sum {
     #[py.bindings = [{name = "__add__", binding = "def"}, {name = "__radd__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -831,6 +871,8 @@ module lib_sum {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -875,6 +917,8 @@ module lib_sum {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Acc.__add__", 0, 2, false, false, "self", "other") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_sum", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("add")
       %other.4 : py.Value = py.requireDefined(%other.2, "other", "UnboundLocalError", "cannot access local variable 'other' where it is not associated with a value") ^propagate.0()
@@ -900,6 +944,8 @@ module lib_sum {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Acc.__radd__", 0, 2, false, false, "self", "other") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_sum", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("radd")
       %other.4 : py.Value = py.requireDefined(%other.2, "other", "UnboundLocalError", "cannot access local variable 'other' where it is not associated with a value") ^propagate.0()
@@ -925,6 +971,8 @@ module lib_sum {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Countdown.__init__", 0, 2, false, false, "self", "n") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %n.6 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %n.8 : py.Value = py.requireDefined(%n.6, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %n.9 : base.Unit = py.setAttr(%self.4, "n", %n.8) ^propagate.0()
@@ -943,6 +991,8 @@ module lib_sum {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Countdown.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
       ret(%ret.0)
@@ -958,6 +1008,8 @@ module lib_sum {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Countdown.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %n.2 : py.Value = py.attr(%self.4, "n") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)

@@ -1,6 +1,8 @@
 module s170_unbound_call_checks {
   func @|s170_unbound_call_checks.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s170_unbound_call_checks")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s170_unbound_call_checks", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)

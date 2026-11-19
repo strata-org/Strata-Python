@@ -1,6 +1,10 @@
 module t05_for {
   func @|t05_for.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}, {head = "head.1", done = "done.1"}, {head = "head.2", done = "done.2"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("t05_for")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t05_for", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -37,15 +41,29 @@ module t05_for {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("t05_for", "x")
       %set.5 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
-      %total.0 : py.Value = py.loadGlobal("t05_for", "total") ^propagate.0()
-      %x.0 : py.Value = py.loadGlobal("t05_for", "x") ^propagate.0()
-      %iAdd.0 : py.Value = py.iAdd(%total.0, %x.0) ^propagate.0()
+      %total.0 : py.Value = py.loadGlobal("t05_for", "total") ^raised.0()
+      %x.0 : py.Value = py.loadGlobal("t05_for", "x") ^raised.0()
+      %iAdd.0 : py.Value = py.iAdd(%total.0, %x.0) ^raised.0()
       %total.cell.1 : base.Ref(py.Value) = py.globalCell("t05_for", "total")
       %set.6 : base.Unit = base.refSet[py.Value](%total.cell.1, %iAdd.0)
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %items.1 : py.Value = py.loadGlobal("t05_for", "items") ^propagate.0()
       %iter.1 : py.Value = py.getIter(%items.1) ^propagate.0()
@@ -54,20 +72,35 @@ module t05_for {
       %item.1 : py.Value = py.next(%iter.1) ^stop.1()
       %x.cell.1 : base.Ref(py.Value) = py.globalCell("t05_for", "x")
       %set.7 : base.Unit = base.refSet[py.Value](%x.cell.1, %item.1)
-      %x.1 : py.Value = py.loadGlobal("t05_for", "x") ^propagate.0()
+      %x.1 : py.Value = py.loadGlobal("t05_for", "x") ^raised.1()
       %int.5 : py.Value = py.intLit(2)
-      %eq.0 : py.Value = py.eq(%x.1, %int.5) ^propagate.0()
-      %cond.0 : base.Bool = py.truthy(%eq.0) ^propagate.0()
+      %eq.0 : py.Value = py.eq(%x.1, %int.5) ^raised.1()
+      %cond.0 : base.Bool = py.truthy(%eq.0) ^raised.1()
       branch(%cond.0) ^then.0() ^else.0()
     then.0():
-      jump ^exit.1()
+      jump ^brk.1()
     else.0():
       jump ^join.0()
     join.0():
       jump ^head.1()
-    stop.1(%exc.1 : py.Value):
-      %done.1 : base.Bool = py.isStopIteration(%exc.1)
-      branch(%done.1) ^exit.1() ^propagate.0(%exc.1)
+    stop.1(%exc.2 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.2)
+      branch(%done.1) ^normal.1() ^raised.1(%exc.2)
+    normal.1():
+      %comp.3 : py.Completion = py.completionNormal
+      jump ^done.1(%comp.3)
+    brk.1():
+      %comp.4 : py.Completion = py.completionBreak
+      jump ^done.1(%comp.4)
+    raised.1(%exc.3 : py.Value):
+      %comp.5 : py.Completion = py.completionRaise(%exc.3)
+      jump ^done.1(%comp.5)
+    done.1(%comp.6 : py.Completion):
+      py.Completion.case(%comp.6) ^exit.1() ^unreachable.3() ^propagate.0() ^exit.1() ^unreachable.4()
+    unreachable.3(%val.1 : py.Value):
+      unreachable
+    unreachable.4():
+      unreachable
     exit.1():
       %int.6 : py.Value = py.intLit(0)
       %even_sum.cell.0 : base.Ref(py.Value) = py.globalCell("t05_for", "even_sum")
@@ -83,34 +116,48 @@ module t05_for {
       %item.2 : py.Value = py.next(%iter.2) ^stop.2()
       %x.cell.2 : base.Ref(py.Value) = py.globalCell("t05_for", "x")
       %set.9 : base.Unit = base.refSet[py.Value](%x.cell.2, %item.2)
-      %x.2 : py.Value = py.loadGlobal("t05_for", "x") ^propagate.0()
+      %x.2 : py.Value = py.loadGlobal("t05_for", "x") ^raised.2()
       %int.8 : py.Value = py.intLit(2)
-      %mod.0 : py.Value = py.mod(%x.2, %int.8) ^propagate.0()
+      %mod.0 : py.Value = py.mod(%x.2, %int.8) ^raised.2()
       %int.9 : py.Value = py.intLit(0)
-      %notEq.0 : py.Value = py.notEq(%mod.0, %int.9) ^propagate.0()
-      %cond.1 : base.Bool = py.truthy(%notEq.0) ^propagate.0()
+      %notEq.0 : py.Value = py.notEq(%mod.0, %int.9) ^raised.2()
+      %cond.1 : base.Bool = py.truthy(%notEq.0) ^raised.2()
       branch(%cond.1) ^then.1() ^else.1()
     then.1():
       jump ^head.2()
     else.1():
       jump ^join.1()
     join.1():
-      %even_sum.0 : py.Value = py.loadGlobal("t05_for", "even_sum") ^propagate.0()
-      %x.3 : py.Value = py.loadGlobal("t05_for", "x") ^propagate.0()
-      %iAdd.1 : py.Value = py.iAdd(%even_sum.0, %x.3) ^propagate.0()
+      %even_sum.0 : py.Value = py.loadGlobal("t05_for", "even_sum") ^raised.2()
+      %x.3 : py.Value = py.loadGlobal("t05_for", "x") ^raised.2()
+      %iAdd.1 : py.Value = py.iAdd(%even_sum.0, %x.3) ^raised.2()
       %even_sum.cell.1 : base.Ref(py.Value) = py.globalCell("t05_for", "even_sum")
       %set.10 : base.Unit = base.refSet[py.Value](%even_sum.cell.1, %iAdd.1)
       jump ^head.2()
-    stop.2(%exc.2 : py.Value):
-      %done.2 : base.Bool = py.isStopIteration(%exc.2)
-      branch(%done.2) ^exit.2() ^propagate.0(%exc.2)
+    stop.2(%exc.4 : py.Value):
+      %done.2 : base.Bool = py.isStopIteration(%exc.4)
+      branch(%done.2) ^normal.2() ^raised.2(%exc.4)
+    normal.2():
+      %comp.7 : py.Completion = py.completionNormal
+      jump ^done.2(%comp.7)
+    raised.2(%exc.5 : py.Value):
+      %comp.8 : py.Completion = py.completionRaise(%exc.5)
+      jump ^done.2(%comp.8)
+    done.2(%comp.9 : py.Completion):
+      py.Completion.case(%comp.9) ^exit.2() ^unreachable.5() ^propagate.0() ^unreachable.6() ^unreachable.7()
+    unreachable.5(%val.2 : py.Value):
+      unreachable
+    unreachable.6():
+      unreachable
+    unreachable.7():
+      unreachable
     exit.2():
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.3 : py.Value):
-      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
-      ret(%exc.4)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
   }
 }
 

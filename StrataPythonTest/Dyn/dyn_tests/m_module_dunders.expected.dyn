@@ -12,6 +12,8 @@
 module m_module_dunders {
   func @|m_module_dunders.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_module_dunders")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_module_dunders", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -61,6 +63,8 @@ module m_module_dunders {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %__name__.0 : py.Value = py.loadGlobal("m_module_dunders", "__name__") ^propagate.0()
       %__doc__.0 : py.Value = py.loadGlobal("m_module_dunders", "__doc__") ^propagate.0()
       %str.0 : py.Value = py.strLit("module attribute __spec__")
@@ -85,6 +89,8 @@ module m_module_dunders {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 1, false, false, "__file__") ^propagate.0()
       %__file__.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%__file__.cell.0, %__file__.2)
+      jump ^start.0()
+    start.0():
       %__file__.3 : py.Value = base.refGet[py.Value](%__file__.cell.0)
       %__file__.4 : py.Value = py.requireDefined(%__file__.3, "__file__", "UnboundLocalError", "cannot access local variable '__file__' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__file__.4)
@@ -98,6 +104,8 @@ module m_module_dunders {
     #[py.bindings = [{name = "f", value = "__file__"}, {name = "__builtins__", value = {expr = "Dict"}}, {name = "__cached__", value = 0}, {name = "__cached__", binding = "del"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")

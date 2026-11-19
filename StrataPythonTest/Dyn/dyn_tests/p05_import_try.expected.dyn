@@ -1,6 +1,8 @@
 module p05_import_try {
   func @|p05_import_try.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p05_import_try")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p05_import_try", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -61,6 +63,8 @@ module p05_import_try {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %json.0 : py.Value = py.loadGlobal("p05_import_try", "json") ^propagate.0()
       %dumps.0 : py.Value = py.attr(%json.0, "dumps") ^propagate.0()
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)

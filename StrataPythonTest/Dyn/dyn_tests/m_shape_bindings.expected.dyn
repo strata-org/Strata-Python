@@ -2,6 +2,8 @@
 module m_shape_bindings {
   func @|m_shape_bindings.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_shape_bindings")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -110,6 +112,8 @@ module m_shape_bindings {
     #[py.bindings = [{name = "PENDING", value = 1}, {name = "RUNNING", value = -2}, {name = "DONE", value = {tuple = [3, {str = "done"}]}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -151,6 +155,8 @@ module m_shape_bindings {
     #[py.bindings = [{name = "_fields_", value = [{tuple = [{str = "status"}, "ctypes.c_int"]}, {tuple = [{str = "buffer"}, {op = "*", args = ["ctypes.c_char", 10]}]}]}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -209,6 +215,8 @@ module m_shape_bindings {
     #[py.bindings = [{name = "model_config", value = {call = "ConfigDict", args = [], keywords = [{name = "frozen", value = true}]}}, {name = "total", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -286,8 +294,11 @@ module m_shape_bindings {
     #[py.fields = []]
     #[py.slots = [{value = {tuple = [{str = "x"}]}}]]
     #[py.bindings = [{name = "a", value = 1}, {name = "b", value = 1}, {name = "c", value = {tuple = [1, {tuple = [2, 3]}]}, unpacked = true}, {name = "d", value = {tuple = [1, {tuple = [2, 3]}]}, unpacked = true}, {name = "e", value = {tuple = [1, {tuple = [2, 3]}]}, unpacked = true}, {name = "a", value = 1, augmented = true}, {name = "s", value = {tuple = [{str = "x"}]}}, {name = "f", value = 2}, {name = "os", binding = "import"}, {name = "separator", binding = "import"}, {name = "i", binding = "for", conditional = true}, {name = "j", value = "i", conditional = true}, {name = "fh", binding = "with"}, {name = "k", value = 1, conditional = true}, {name = "err", binding = "except", conditional = true}, {name = "err", binding = "del", conditional = true}, {name = "k", binding = "del"}, {name = "n", binding = ":="}, {name = "m", value = {op = "+", args = [{expr = "NamedExpr"}, 1]}}, {name = "w", value = 5, conditional = true}, {name = "_Kinds__p", value = 6}, {name = "q", value = {op = "-", args = [{op = "+", args = [{op = "-", args = ["a"]}, {op = "~", args = ["b"]}]}, {op = "*", args = [{op = "not", args = ["c"]}, {op = "**", args = ["d", 2]}]}]}}, {name = "Inner", binding = "class"}]]
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -393,22 +404,36 @@ module m_shape_bindings {
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %str.21 : py.Value = py.strLit("i")
-      %store.14 : base.Unit = py.setItem(%ns.0, %str.21, %item.0) ^propagate.0()
+      %store.14 : base.Unit = py.setItem(%ns.0, %str.21, %item.0) ^raised.0()
       %str.22 : py.Value = py.strLit("i")
       %i.4 : py.Value = py.undef("i")
-      %i.5 : py.Value = py.getOptionalItem(%ns.0, %str.22, %i.4) ^propagate.0()
+      %i.5 : py.Value = py.getOptionalItem(%ns.0, %str.22, %i.4) ^raised.0()
       %found.5 : base.Bool = py.isDefined(%i.5)
       branch(%found.5) ^join.4(%i.5) ^absent.4()
     absent.4():
-      %i.6 : py.Value = py.loadGlobal("m_shape_bindings", "i") ^propagate.0()
+      %i.6 : py.Value = py.loadGlobal("m_shape_bindings", "i") ^raised.0()
       jump ^join.4(%i.6)
     join.4(%i.7 : py.Value):
       %str.23 : py.Value = py.strLit("j")
-      %store.15 : base.Unit = py.setItem(%ns.0, %str.23, %i.7) ^propagate.0()
+      %store.15 : base.Unit = py.setItem(%ns.0, %str.23, %i.7) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %str.24 : py.Value = py.strLit("open")
       %open.0 : py.Value = py.undef("open")
@@ -430,38 +455,38 @@ module m_shape_bindings {
       %entered.0 : py.Value = py.call(%enter.0, %args.1, %kwargs.3) ^propagate.0()
       %str.26 : py.Value = py.strLit("fh")
       %store.16 : base.Unit = py.setItem(%ns.0, %str.26, %entered.0) ^wexc.0()
-      %comp.0 : py.Completion = py.completionNormal
-      jump ^fin.0(%comp.0)
-    wexc.0(%exc.1 : py.Value):
-      %prev.0 : py.Value = py.pushExcInfo(%exc.1)
-      %exited.0 : py.Value = py.exitWithExc(%exit.0, %exc.1) ^unwind.0()
+      %comp.3 : py.Completion = py.completionNormal
+      jump ^fin.0(%comp.3)
+    wexc.0(%exc.2 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.2)
+      %exited.0 : py.Value = py.exitWithExc(%exit.0, %exc.2) ^unwind.0()
       %cond.0 : base.Bool = py.truthy(%exited.0) ^unwind.0()
-      branch(%cond.0) ^suppress.0() ^unwind.0(%exc.1)
+      branch(%cond.0) ^suppress.0() ^unwind.0(%exc.2)
     suppress.0():
       %pop.0 : base.Unit = py.popExcept(%prev.0)
       jump ^join.6()
-    unwind.0(%exc.2 : py.Value):
+    unwind.0(%exc.3 : py.Value):
       %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.2)
+      jump ^propagate.0(%exc.3)
     fin.0(%pending.0 : py.Completion):
       %none.0 : py.Value = py.noneLit
       %args.2 : py.Value = py.mkTuple(%none.0, %none.0, %none.0)
       %kwargs.4 : py.Value = py.mkKwargs
       %exited.1 : py.Value = py.call(%exit.0, %args.2, %kwargs.4) ^propagate.0()
-      py.Completion.case(%pending.0) ^join.6() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
-    unreachable.0(%val.0 : py.Value):
+      py.Completion.case(%pending.0) ^join.6() ^unreachable.3() ^propagate.0() ^unreachable.4() ^unreachable.5()
+    unreachable.3(%val.1 : py.Value):
       unreachable
-    unreachable.1():
+    unreachable.4():
       unreachable
-    unreachable.2():
+    unreachable.5():
       unreachable
     join.6():
       %int.12 : py.Value = py.intLit(1)
       %str.27 : py.Value = py.strLit("k")
       %store.17 : base.Unit = py.setItem(%ns.0, %str.27, %int.12) ^catch.0()
       jump ^join.7()
-    catch.0(%exc.3 : py.Value):
-      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+    catch.0(%exc.4 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.4)
       %str.28 : py.Value = py.strLit("ValueError")
       %ValueError.0 : py.Value = py.undef("ValueError")
       %ValueError.1 : py.Value = py.getOptionalItem(%ns.0, %str.28, %ValueError.0) ^unwind.1()
@@ -471,11 +496,11 @@ module m_shape_bindings {
       %ValueError.2 : py.Value = py.loadGlobal("m_shape_bindings", "ValueError") ^unwind.1()
       jump ^join.8(%ValueError.2)
     join.8(%ValueError.3 : py.Value):
-      %match.0 : base.Bool = py.excMatch(%exc.3, %ValueError.3) ^unwind.1()
+      %match.0 : base.Bool = py.excMatch(%exc.4, %ValueError.3) ^unwind.1()
       branch(%match.0) ^except.0() ^next.0()
     except.0():
       %str.29 : py.Value = py.strLit("err")
-      %store.18 : base.Unit = py.setItem(%ns.0, %str.29, %exc.3) ^unwind.1()
+      %store.18 : base.Unit = py.setItem(%ns.0, %str.29, %exc.4) ^unwind.1()
       %pop.2 : base.Unit = py.popExcept(%prev.1)
       %none.1 : py.Value = py.noneLit
       %str.30 : py.Value = py.strLit("err")
@@ -483,22 +508,22 @@ module m_shape_bindings {
       %str.31 : py.Value = py.strLit("err")
       %del.0 : base.Unit = py.delItem(%ns.0, %str.31) ^undefined.0()
       jump ^deleted.0()
-    undefined.0(%exc.4 : py.Value):
+    undefined.0(%exc.5 : py.Value):
       %err.0 : py.Value = py.undef("err")
       %err.1 : py.Value = py.requireDefined(%err.0, "err", "NameError", "name 'err' is not defined") ^propagate.0()
       unreachable
     deleted.0():
       jump ^join.7()
     next.0():
-      jump ^unwind.1(%exc.3)
-    unwind.1(%exc.7 : py.Value):
+      jump ^unwind.1(%exc.4)
+    unwind.1(%exc.8 : py.Value):
       %pop.3 : base.Unit = py.popExcept(%prev.1)
-      jump ^propagate.0(%exc.7)
+      jump ^propagate.0(%exc.8)
     join.7():
       %str.34 : py.Value = py.strLit("k")
       %del.2 : base.Unit = py.delItem(%ns.0, %str.34) ^undefined.2()
       jump ^deleted.2()
-    undefined.2(%exc.8 : py.Value):
+    undefined.2(%exc.9 : py.Value):
       %k.0 : py.Value = py.undef("k")
       %k.1 : py.Value = py.requireDefined(%k.0, "k", "NameError", "name 'k' is not defined") ^propagate.0()
       unreachable
@@ -589,9 +614,9 @@ module m_shape_bindings {
       %none.3 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.3)
       ret(%ret.0)
-    propagate.0(%exc.9 : py.Value):
-      %exc.10 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.9)
-      ret(%exc.10)
+    propagate.0(%exc.10 : py.Value):
+      %exc.11 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.10)
+      ret(%exc.11)
   }
   func @m_shape_bindings.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -605,6 +630,8 @@ module m_shape_bindings {
       %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.1)
       %k.1 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.1)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -615,8 +642,11 @@ module m_shape_bindings {
   func @|m_shape_bindings.Walrus.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
     #[py.bindings = [{name = "a", binding = ":="}, {name = "b", binding = ":="}, {name = "c", binding = ":="}, {name = "dd", binding = ":="}, {name = "d", value = {expr = "Dict"}}, {name = "p1", binding = ":="}, {name = "k1", binding = ":="}, {name = "x", value = {call = "f", args = [{expr = "Starred"}], keywords = [{name = "k", value = {expr = "NamedExpr"}}]}}, {name = "q", binding = ":="}, {name = "p", binding = ":=", conditional = true}, {name = "r", binding = ":=", conditional = true}, {name = "y", value = {expr = "IfExp"}}, {name = "lo", binding = ":="}, {name = "hi", binding = ":="}, {name = "st", binding = ":="}, {name = "s", value = {name = [1, 2], args = [{expr = "Slice"}]}}, {name = "fv", binding = ":="}, {name = "spec", binding = ":="}, {name = "fs", value = {expr = "JoinedStr"}}, {name = "ld", binding = ":="}, {name = "lk", binding = ":="}, {name = "lam", value = {expr = "Lambda"}}, {name = "c1", binding = ":="}, {name = "c2", binding = ":="}, {name = "c3", binding = ":=", conditional = true}, {name = "cmp", value = {expr = "Compare"}}, {name = "t1", binding = ":="}, {name = "t2", binding = ":="}, {name = "t", value = {tuple = [{expr = "NamedExpr"}, {expr = "Starred"}]}}, {name = "s1", binding = ":="}, {name = "st2", value = {expr = "Set"}}, {name = "o", binding = ":="}, {name = "at", value = {expr = "Attribute"}}, {name = "sv", binding = ":="}, {name = "si", binding = ":="}, {name = "sub", value = {name = {expr = "NamedExpr"}, args = [{expr = "NamedExpr"}]}}, {name = "u", binding = ":="}, {name = "un", value = {op = "-", args = [{expr = "NamedExpr"}]}}, {name = "as1", binding = ":="}, {name = "as2", binding = ":=", conditional = true}, {name = "dl", binding = ":="}, {name = "sc1", binding = ":=", conditional = true}, {name = "sc2", binding = ":=", conditional = true}, {name = "sc", value = {expr = "BoolOp"}}, {name = "dec", binding = ":="}, {name = "dv", binding = ":="}, {name = "ra", binding = ":="}, {name = "m", binding = "def"}, {name = "base", binding = ":="}, {name = "mt", binding = ":="}, {name = "Inner", binding = "class"}, {name = "wv", binding = ":="}, {name = "it", binding = ":="}, {name = "fv2", binding = "for", conditional = true}]]
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -956,24 +986,41 @@ module m_shape_bindings {
     head.0():
       %item.1 : py.Value = py.next(%iter.0) ^stop.0()
       %str.72 : py.Value = py.strLit("fv2")
-      %store.56 : base.Unit = py.setItem(%ns.0, %str.72, %item.1) ^propagate.0()
+      %store.56 : base.Unit = py.setItem(%ns.0, %str.72, %item.1) ^raised.0()
       jump ^head.0()
     stop.0(%exc.3 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.3)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.3)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.3)
+    normal.0():
+      %comp.1 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.1)
+    raised.0(%exc.4 : py.Value):
+      %comp.2 : py.Completion = py.completionRaise(%exc.4)
+      jump ^done.0(%comp.2)
+    done.0(%comp.3 : py.Completion):
+      py.Completion.case(%comp.3) ^exit.0() ^unreachable.3() ^propagate.0() ^unreachable.4() ^unreachable.5()
+    unreachable.3(%val.1 : py.Value):
+      unreachable
+    unreachable.4():
+      unreachable
+    unreachable.5():
+      unreachable
     exit.0():
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.4 : py.Value):
-      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
-      ret(%exc.5)
+    propagate.0(%exc.5 : py.Value):
+      %exc.6 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.5)
+      ret(%exc.6)
   }
   func @|m_shape_bindings.Handlers.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
     #[py.bindings = [{name = "E", binding = ":=", conditional = true}, {name = "err", binding = "except", conditional = true}, {name = "err", value = 5, conditional = true}, {name = "err", binding = "del", conditional = true}, {name = "k", binding = "for", conditional = true}]]
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1060,24 +1107,40 @@ module m_shape_bindings {
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %str.13 : py.Value = py.strLit("k")
-      %store.7 : base.Unit = py.setItem(%ns.0, %str.13, %item.0) ^propagate.0()
+      %store.7 : base.Unit = py.setItem(%ns.0, %str.13, %item.0) ^raised.0()
       jump ^head.0()
     stop.0(%exc.6 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.6)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.6)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.6)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.7 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.7)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %none.2 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.2)
       ret(%ret.0)
-    propagate.0(%exc.7 : py.Value):
-      %exc.8 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.7)
-      ret(%exc.8)
+    propagate.0(%exc.8 : py.Value):
+      %exc.9 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.8)
+      ret(%exc.9)
   }
   func @|m_shape_bindings.Flags.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
     #[py.bindings = [{name = "R", value = 1}, {name = "W", value = 2}, {name = "RW", value = {union = ["R", "W"]}}, {name = "RWX", value = {union = ["R", {union = ["W", 4]}]}}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1159,6 +1222,8 @@ module m_shape_bindings {
       %Uses.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%Uses.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %set.0 : base.Unit = base.refSet[py.Value](%v.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
@@ -1180,6 +1245,8 @@ module m_shape_bindings {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1212,6 +1279,8 @@ module m_shape_bindings {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Product.total", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -1224,6 +1293,8 @@ module m_shape_bindings {
     #[py.bindings = [{name = "z", value = 7}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1266,6 +1337,8 @@ module m_shape_bindings {
       %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.1)
       %b.1 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%b.cell.0, %b.1)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(3)
       %set.2 : base.Unit = base.refSet[py.Value](%lb.cell.0, %int.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
@@ -1283,6 +1356,8 @@ module m_shape_bindings {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Walrus.<lambda>", 0, 1, false, false, "g") ^propagate.0()
       %g.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%g.cell.0, %g.2)
+      jump ^start.0()
+    start.0():
       %g.3 : py.Value = base.refGet[py.Value](%g.cell.0)
       %g.4 : py.Value = py.requireDefined(%g.3, "g", "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%g.4)
@@ -1305,6 +1380,8 @@ module m_shape_bindings {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %v.1 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%v.cell.0, %v.1)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -1318,6 +1395,8 @@ module m_shape_bindings {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1346,6 +1425,8 @@ module m_shape_bindings {
     #[py.bindings = [{name = "u", value = 2}]]
 
     entry.0(%v.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")

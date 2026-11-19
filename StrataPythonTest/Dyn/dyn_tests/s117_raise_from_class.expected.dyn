@@ -1,6 +1,8 @@
 module s117_raise_from_class {
   func @|s117_raise_from_class.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s117_raise_from_class")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s117_raise_from_class", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -94,6 +96,8 @@ module s117_raise_from_class {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -129,6 +133,8 @@ module s117_raise_from_class {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "C.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s117_raise_from_class", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("C sees")
       %e.0 : py.Value = py.loadGlobal("s117_raise_from_class", "e") ^propagate.0()

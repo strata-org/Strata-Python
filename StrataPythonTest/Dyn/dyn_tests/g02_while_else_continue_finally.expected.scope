@@ -1,0 +1,12 @@
+module
+  b: local (assigned)
+  function b
+    params: n
+    n: local (parameter, referenced)
+    i: local (assigned, referenced)
+    p: global implicit (referenced)
+    work: global implicit (referenced)
+    KeyError: global implicit (referenced)
+    q: global implicit (referenced)
+    r: global implicit (referenced)
+    log: global implicit (referenced)

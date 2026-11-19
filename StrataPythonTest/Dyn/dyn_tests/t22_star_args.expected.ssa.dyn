@@ -1,6 +1,8 @@
 module t22_star_args {
   func @|t22_star_args.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("t22_star_args")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t22_star_args", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -79,6 +81,8 @@ module t22_star_args {
       ret(%exc.1)
   }
   func @t22_star_args.log_all(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %prefix.0 : py.Value = py.undef("prefix")
       %prefix.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%prefix.0)
@@ -91,30 +95,48 @@ module t22_star_args {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "log_all", 0, 1, true, false, "prefix") ^propagate.0()
       %prefix.2 : py.Value = py.tupleGet(%bound.0, 0)
       %args.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %args.4 : py.Value = py.requireDefined(%args.2, "args", "UnboundLocalError", "cannot access local variable 'args' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%args.4) ^propagate.0()
       jump ^head.0()
     head.0():
       %item.1 : py.Value = py.next(%iter.0) ^stop.0()
-      %print.0 : py.Value = py.loadGlobal("t22_star_args", "print") ^propagate.0()
-      %prefix.4 : py.Value = py.requireDefined(%prefix.2, "prefix", "UnboundLocalError", "cannot access local variable 'prefix' where it is not associated with a value") ^propagate.0()
-      %item.3 : py.Value = py.requireDefined(%item.1, "item", "UnboundLocalError", "cannot access local variable 'item' where it is not associated with a value") ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("t22_star_args", "print") ^raised.0()
+      %prefix.4 : py.Value = py.requireDefined(%prefix.2, "prefix", "UnboundLocalError", "cannot access local variable 'prefix' where it is not associated with a value") ^raised.0()
+      %item.3 : py.Value = py.requireDefined(%item.1, "item", "UnboundLocalError", "cannot access local variable 'item' where it is not associated with a value") ^raised.0()
       %tuple.0 : py.Value = py.mkTuple(%prefix.4, %item.3)
       %kwargs.1 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @t22_star_args.create_config(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %kwargs.1 : py.Value = py.undef("kwargs")
       %kwargs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%kwargs.1)
@@ -125,29 +147,45 @@ module t22_star_args {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "create_config", 0, 0, false, true) ^propagate.0()
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %dict.0 : py.Value = py.mkDict ^propagate.0()
       %kwargs.4 : py.Value = py.requireDefined(%kwargs.2, "kwargs", "UnboundLocalError", "cannot access local variable 'kwargs' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%kwargs.4) ^propagate.0()
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
-      %kwargs.6 : py.Value = py.requireDefined(%kwargs.2, "kwargs", "UnboundLocalError", "cannot access local variable 'kwargs' where it is not associated with a value") ^propagate.0()
-      %key.2 : py.Value = py.requireDefined(%item.0, "key", "UnboundLocalError", "cannot access local variable 'key' where it is not associated with a value") ^propagate.0()
-      %item.1 : py.Value = py.getItem(%kwargs.6, %key.2) ^propagate.0()
-      %config.2 : py.Value = py.requireDefined(%dict.0, "config", "UnboundLocalError", "cannot access local variable 'config' where it is not associated with a value") ^propagate.0()
-      %key.4 : py.Value = py.requireDefined(%item.0, "key", "UnboundLocalError", "cannot access local variable 'key' where it is not associated with a value") ^propagate.0()
-      %store.0 : base.Unit = py.setItem(%config.2, %key.4, %item.1) ^propagate.0()
+      %kwargs.6 : py.Value = py.requireDefined(%kwargs.2, "kwargs", "UnboundLocalError", "cannot access local variable 'kwargs' where it is not associated with a value") ^raised.0()
+      %key.2 : py.Value = py.requireDefined(%item.0, "key", "UnboundLocalError", "cannot access local variable 'key' where it is not associated with a value") ^raised.0()
+      %item.1 : py.Value = py.getItem(%kwargs.6, %key.2) ^raised.0()
+      %config.2 : py.Value = py.requireDefined(%dict.0, "config", "UnboundLocalError", "cannot access local variable 'config' where it is not associated with a value") ^raised.0()
+      %key.4 : py.Value = py.requireDefined(%item.0, "key", "UnboundLocalError", "cannot access local variable 'key' where it is not associated with a value") ^raised.0()
+      %store.0 : base.Unit = py.setItem(%config.2, %key.4, %item.1) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %config.4 : py.Value = py.requireDefined(%dict.0, "config", "UnboundLocalError", "cannot access local variable 'config' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%config.4)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @t22_star_args.flexible(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -163,6 +201,8 @@ module t22_star_args {
       %first.2 : py.Value = py.tupleGet(%bound.0, 0)
       %args.2 : py.Value = py.tupleGet(%bound.0, 1)
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 2)
+      jump ^start.0()
+    start.0():
       %first.4 : py.Value = py.requireDefined(%first.2, "first", "UnboundLocalError", "cannot access local variable 'first' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%first.4)
       ret(%ret.0)

@@ -1,6 +1,8 @@
 module s255_unicode_error_member_write {
   func @|s255_unicode_error_member_write.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s255_unicode_error_member_write")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s255_unicode_error_member_write", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)

@@ -1,6 +1,10 @@
 module lib_sizes {
   func @|lib_sizes.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}, {head = "head.1", done = "done.1"}, {head = "head.2", done = "done.2"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_sizes")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_sizes", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -21,20 +25,34 @@ module lib_sizes {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %i.cell.0 : base.Ref(py.Value) = py.globalCell("lib_sizes", "i")
       %set.3 : base.Unit = base.refSet[py.Value](%i.cell.0, %item.0)
-      %l.0 : py.Value = py.loadGlobal("lib_sizes", "l") ^propagate.0()
-      %append.0 : py.Value = py.attr(%l.0, "append") ^propagate.0()
+      %l.0 : py.Value = py.loadGlobal("lib_sizes", "l") ^raised.0()
+      %append.0 : py.Value = py.attr(%l.0, "append") ^raised.0()
       %int.1 : py.Value = py.intLit(5000)
-      %i.0 : py.Value = py.loadGlobal("lib_sizes", "i") ^propagate.0()
-      %sub.0 : py.Value = py.sub(%int.1, %i.0) ^propagate.0()
-      %i.1 : py.Value = py.loadGlobal("lib_sizes", "i") ^propagate.0()
+      %i.0 : py.Value = py.loadGlobal("lib_sizes", "i") ^raised.0()
+      %sub.0 : py.Value = py.sub(%int.1, %i.0) ^raised.0()
+      %i.1 : py.Value = py.loadGlobal("lib_sizes", "i") ^raised.0()
       %tuple.1 : py.Value = py.mkTuple(%sub.0, %i.1)
       %tuple.2 : py.Value = py.mkTuple(%tuple.1)
       %kwargs.1 : py.Value = py.mkKwargs
-      %call.1 : py.Value = py.call(%append.0, %tuple.2, %kwargs.1) ^propagate.0()
+      %call.1 : py.Value = py.call(%append.0, %tuple.2, %kwargs.1) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %l.1 : py.Value = py.loadGlobal("lib_sizes", "l") ^propagate.0()
       %sort.0 : py.Value = py.attr(%l.1, "sort") ^propagate.0()
@@ -66,22 +84,36 @@ module lib_sizes {
       %item.3 : py.Value = py.next(%iter.1) ^stop.1()
       %i.cell.1 : base.Ref(py.Value) = py.globalCell("lib_sizes", "i")
       %set.5 : base.Unit = base.refSet[py.Value](%i.cell.1, %item.3)
-      %f.0 : py.Value = py.loadGlobal("lib_sizes", "f") ^propagate.0()
-      %append.1 : py.Value = py.attr(%f.0, "append") ^propagate.0()
-      %float.0 : py.Value = py.loadGlobal("lib_sizes", "float") ^propagate.0()
-      %i.2 : py.Value = py.loadGlobal("lib_sizes", "i") ^propagate.0()
+      %f.0 : py.Value = py.loadGlobal("lib_sizes", "f") ^raised.1()
+      %append.1 : py.Value = py.attr(%f.0, "append") ^raised.1()
+      %float.0 : py.Value = py.loadGlobal("lib_sizes", "float") ^raised.1()
+      %i.2 : py.Value = py.loadGlobal("lib_sizes", "i") ^raised.1()
       %int.5 : py.Value = py.intLit(7)
-      %mod.0 : py.Value = py.mod(%i.2, %int.5) ^propagate.0()
+      %mod.0 : py.Value = py.mod(%i.2, %int.5) ^raised.1()
       %tuple.6 : py.Value = py.mkTuple(%mod.0)
       %kwargs.5 : py.Value = py.mkKwargs
-      %call.5 : py.Value = py.call(%float.0, %tuple.6, %kwargs.5) ^propagate.0()
+      %call.5 : py.Value = py.call(%float.0, %tuple.6, %kwargs.5) ^raised.1()
       %tuple.7 : py.Value = py.mkTuple(%call.5)
       %kwargs.6 : py.Value = py.mkKwargs
-      %call.6 : py.Value = py.call(%append.1, %tuple.7, %kwargs.6) ^propagate.0()
+      %call.6 : py.Value = py.call(%append.1, %tuple.7, %kwargs.6) ^raised.1()
       jump ^head.1()
-    stop.1(%exc.1 : py.Value):
-      %done.1 : base.Bool = py.isStopIteration(%exc.1)
-      branch(%done.1) ^exit.1() ^propagate.0(%exc.1)
+    stop.1(%exc.2 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.2)
+      branch(%done.1) ^normal.1() ^raised.1(%exc.2)
+    normal.1():
+      %comp.3 : py.Completion = py.completionNormal
+      jump ^done.1(%comp.3)
+    raised.1(%exc.3 : py.Value):
+      %comp.4 : py.Completion = py.completionRaise(%exc.3)
+      jump ^done.1(%comp.4)
+    done.1(%comp.5 : py.Completion):
+      py.Completion.case(%comp.5) ^exit.1() ^unreachable.3() ^propagate.0() ^unreachable.4() ^unreachable.5()
+    unreachable.3(%val.1 : py.Value):
+      unreachable
+    unreachable.4():
+      unreachable
+    unreachable.5():
+      unreachable
     exit.1():
       %f.1 : py.Value = py.loadGlobal("lib_sizes", "f") ^propagate.0()
       %append.2 : py.Value = py.attr(%f.1, "append") ^propagate.0()
@@ -243,22 +275,36 @@ module lib_sizes {
       %item.7 : py.Value = py.next(%iter.2) ^stop.2()
       %i.cell.2 : base.Ref(py.Value) = py.globalCell("lib_sizes", "i")
       %set.8 : base.Unit = base.refSet[py.Value](%i.cell.2, %item.7)
-      %m.43 : py.Value = py.loadGlobal("lib_sizes", "m") ^propagate.0()
-      %append.3 : py.Value = py.attr(%m.43, "append") ^propagate.0()
-      %i.3 : py.Value = py.loadGlobal("lib_sizes", "i") ^propagate.0()
+      %m.43 : py.Value = py.loadGlobal("lib_sizes", "m") ^raised.2()
+      %append.3 : py.Value = py.attr(%m.43, "append") ^raised.2()
+      %i.3 : py.Value = py.loadGlobal("lib_sizes", "i") ^raised.2()
       %int.28 : py.Value = py.intLit(7919)
-      %mult.6 : py.Value = py.mult(%i.3, %int.28) ^propagate.0()
+      %mult.6 : py.Value = py.mult(%i.3, %int.28) ^raised.2()
       %int.29 : py.Value = py.intLit(101)
-      %mod.1 : py.Value = py.mod(%mult.6, %int.29) ^propagate.0()
-      %i.4 : py.Value = py.loadGlobal("lib_sizes", "i") ^propagate.0()
+      %mod.1 : py.Value = py.mod(%mult.6, %int.29) ^raised.2()
+      %i.4 : py.Value = py.loadGlobal("lib_sizes", "i") ^raised.2()
       %tuple.34 : py.Value = py.mkTuple(%mod.1, %i.4)
       %tuple.35 : py.Value = py.mkTuple(%tuple.34)
       %kwargs.30 : py.Value = py.mkKwargs
-      %call.30 : py.Value = py.call(%append.3, %tuple.35, %kwargs.30) ^propagate.0()
+      %call.30 : py.Value = py.call(%append.3, %tuple.35, %kwargs.30) ^raised.2()
       jump ^head.2()
-    stop.2(%exc.2 : py.Value):
-      %done.2 : base.Bool = py.isStopIteration(%exc.2)
-      branch(%done.2) ^exit.2() ^propagate.0(%exc.2)
+    stop.2(%exc.4 : py.Value):
+      %done.2 : base.Bool = py.isStopIteration(%exc.4)
+      branch(%done.2) ^normal.2() ^raised.2(%exc.4)
+    normal.2():
+      %comp.6 : py.Completion = py.completionNormal
+      jump ^done.2(%comp.6)
+    raised.2(%exc.5 : py.Value):
+      %comp.7 : py.Completion = py.completionRaise(%exc.5)
+      jump ^done.2(%comp.7)
+    done.2(%comp.8 : py.Completion):
+      py.Completion.case(%comp.8) ^exit.2() ^unreachable.6() ^propagate.0() ^unreachable.7() ^unreachable.8()
+    unreachable.6(%val.2 : py.Value):
+      unreachable
+    unreachable.7():
+      unreachable
+    unreachable.8():
+      unreachable
     exit.2():
       %m.47 : py.Value = py.loadGlobal("lib_sizes", "m") ^propagate.0()
       %sort.2 : py.Value = py.attr(%m.47, "sort") ^propagate.0()
@@ -279,9 +325,9 @@ module lib_sizes {
       %none.3 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.3)
       ret(%ret.0)
-    propagate.0(%exc.3 : py.Value):
-      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
-      ret(%exc.4)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
   }
 }
 

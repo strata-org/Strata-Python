@@ -89,7 +89,8 @@ The scope pass and the translator share their tests. To add one, put `NAME.py` i
 The translator test fails on any `.py` that is not listed, the scope test on any `.py`
 without both scope files, and the ref-to-reg test on any translator golden without its
 `.expected.ssa.dyn` golden.
-`lake exe pydyn dyn FILE.py` prints the diagnostics and the module for one file.
+`lake exe pydyn dyn FILE.py` prints the diagnostics and the module for one file, and
+`lake exe pydyn canonical FILE.py` prints it with every function in canonical form.
 
 A PySpec model translates to IR modules (`docs/PythonToDyn.md` §12.13). To add a test, put the
 model under a search path such as `StrataPythonTestExtra/Specs/`, add the line `SEARCH_PATH |
@@ -98,7 +99,16 @@ and write its goldens by running `StrataPythonTestExtra/PySpecDynTest.lean` with
 `PYSPEC_DYN_UPDATE=1`. `lake exe pydyn pyspec SEARCH_PATH MODULE` prints one set.
 
 `StrataPythonTestExtra/DynReadTest.lean` reads every golden back with `Module.read`, so a
-printer change that breaks reading fails there; `lake exe pydyn read FILE` reads one.
+printer change that breaks reading fails there. It also puts every golden in canonical form, so
+a translator change that the canonicalization pass cannot handle fails there too.
+`StrataPythonTestExtra/DynCanonicalTest.lean` compares the canonical form of the example
+programs `g01` to `g06`, each of which exercises some properties of the canonical form, with their
+goldens `NAME.expected.canonical`; `CANON_UPDATE=1` rewrites them.
+`StrataPythonTestExtra/DynTailTest.lean` translates five functions whose loop has a tail (code in
+the loop's body that cannot come back to its head: an inner loop, a `try`/`finally` or a `with`,
+then a `return`) and checks, by source lines, that in the canonical form each loop holds its loop
+statement and the code that comes back to the head, and none of the tail.
+`lake exe pydyn read FILE` reads one golden.
 A new program in `StrataPythonTest/Dyn/dyn_tests/` or in `StrataPythonTest/tests/` also needs
 its CPython trace and its verdict for the Python semantics' differential test: run
 `StrataPythonTestExtra/SemDiffTest.lean` with `SEM_UPDATE=1`.

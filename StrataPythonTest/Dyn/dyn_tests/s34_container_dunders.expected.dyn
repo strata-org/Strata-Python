@@ -1,6 +1,8 @@
 module s34_container_dunders {
   func @|s34_container_dunders.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s34_container_dunders")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s34_container_dunders", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)

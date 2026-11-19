@@ -1,6 +1,10 @@
 module s216_del_next_for {
   func @|s216_del_next_for.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s216_del_next_for")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s216_del_next_for", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -28,17 +32,31 @@ module s216_del_next_for {
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^catch.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^catch.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       jump ^join.0()
-    catch.0(%exc.1 : py.Value):
-      %prev.0 : py.Value = py.pushExcInfo(%exc.1)
+    catch.0(%exc.2 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.2)
       %TypeError.0 : py.Value = py.loadGlobal("s216_del_next_for", "TypeError") ^unwind.0()
-      %match.0 : base.Bool = py.excMatch(%exc.1, %TypeError.0) ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.2, %TypeError.0) ^unwind.0()
       branch(%match.0) ^except.0() ^next.0()
     except.0():
       %e.cell.0 : base.Ref(py.Value) = py.globalCell("s216_del_next_for", "e")
-      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.1)
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.2)
       %e.0 : py.Value = py.loadGlobal("s216_del_next_for", "e") ^clear.0()
       %args.0 : py.Value = py.attr(%e.0, "args") ^clear.0()
       %int.0 : py.Value = py.intLit(0)
@@ -50,29 +68,31 @@ module s216_del_next_for {
       %e.cell.1 : base.Ref(py.Value) = py.globalCell("s216_del_next_for", "e")
       %set.6 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
       jump ^join.0()
-    clear.0(%exc.2 : py.Value):
+    clear.0(%exc.3 : py.Value):
       %e.2 : py.Value = py.undef("e")
       %e.cell.2 : base.Ref(py.Value) = py.globalCell("s216_del_next_for", "e")
       %set.7 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
-      jump ^unwind.0(%exc.2)
+      jump ^unwind.0(%exc.3)
     next.0():
-      jump ^unwind.0(%exc.1)
-    unwind.0(%exc.3 : py.Value):
+      jump ^unwind.0(%exc.2)
+    unwind.0(%exc.4 : py.Value):
       %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.3)
+      jump ^propagate.0(%exc.4)
     join.0():
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.4 : py.Value):
-      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
-      ret(%exc.5)
+    propagate.0(%exc.5 : py.Value):
+      %exc.6 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.5)
+      ret(%exc.6)
   }
   func @|s216_del_next_for.It.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
     #[py.bindings = [{name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -110,6 +130,8 @@ module s216_del_next_for {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
       ret(%ret.0)
@@ -125,6 +147,8 @@ module s216_del_next_for {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %It.0 : py.Value = py.loadGlobal("s216_del_next_for", "It") ^propagate.0()
       %__next__.0 : base.Unit = py.delAttr(%It.0, "__next__") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)

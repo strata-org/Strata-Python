@@ -1,6 +1,8 @@
 module m_with {
   func @|m_with.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_with")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_with", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -108,6 +110,8 @@ module m_with {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "note", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.4)
       ret(%ret.0)
@@ -120,6 +124,8 @@ module m_with {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__enter__", binding = "def"}, {name = "__exit__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -160,6 +166,8 @@ module m_with {
       %defaults.0 : py.Value = py.mkTuple(%f.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "suppressed", 0, 1, false, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %Ctx.0 : py.Value = py.loadGlobal("m_with", "Ctx") ^propagate.0()
       %bool.0 : py.Value = py.boolLit(true)
       %tuple.0 : py.Value = py.mkTuple(%bool.0)
@@ -218,6 +226,8 @@ module m_with {
       %defaults.0 : py.Value = py.mkTuple(%f.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "reraised", 0, 1, false, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %Ctx.0 : py.Value = py.loadGlobal("m_with", "Ctx") ^propagate.0()
       %bool.0 : py.Value = py.boolLit(false)
       %tuple.0 : py.Value = py.mkTuple(%bool.0)
@@ -267,6 +277,8 @@ module m_with {
       ret(%exc.3)
   }
   func @m_with.loop(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %xs.0 : py.Value = py.undef("xs")
       %xs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%xs.0)
@@ -276,21 +288,23 @@ module m_with {
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "loop", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%xs.4) ^propagate.0()
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
-      %Ctx.0 : py.Value = py.loadGlobal("m_with", "Ctx") ^propagate.0()
+      %Ctx.0 : py.Value = py.loadGlobal("m_with", "Ctx") ^raised.0()
       %bool.0 : py.Value = py.boolLit(false)
       %tuple.0 : py.Value = py.mkTuple(%bool.0)
       %kwargs.1 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%Ctx.0, %tuple.0, %kwargs.1) ^propagate.0()
-      %enter.0 : py.Value = py.enterMethod(%call.0) ^propagate.0()
-      %exit.0 : py.Value = py.exitMethod(%call.0) ^propagate.0()
+      %call.0 : py.Value = py.call(%Ctx.0, %tuple.0, %kwargs.1) ^raised.0()
+      %enter.0 : py.Value = py.enterMethod(%call.0) ^raised.0()
+      %exit.0 : py.Value = py.exitMethod(%call.0) ^raised.0()
       %args.1 : py.Value = py.mkTuple
       %kwargs.2 : py.Value = py.mkKwargs
-      %entered.0 : py.Value = py.call(%enter.0, %args.1, %kwargs.2) ^propagate.0()
+      %entered.0 : py.Value = py.call(%enter.0, %args.1, %kwargs.2) ^raised.0()
       %x.2 : py.Value = py.requireDefined(%item.0, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^wexc.0()
       %cond.0 : base.Bool = py.truthy(%x.2) ^wexc.0()
       branch(%cond.0) ^then.0() ^else.0()
@@ -312,28 +326,44 @@ module m_with {
       jump ^join.0()
     unwind.0(%exc.1 : py.Value):
       %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.1)
+      jump ^raised.0(%exc.1)
     fin.0(%pending.0 : py.Completion):
       %none.0 : py.Value = py.noneLit
       %args.2 : py.Value = py.mkTuple(%none.0, %none.0, %none.0)
       %kwargs.3 : py.Value = py.mkKwargs
-      %exited.1 : py.Value = py.call(%exit.0, %args.2, %kwargs.3) ^propagate.0()
-      py.Completion.case(%pending.0) ^join.0() ^ret.0() ^propagate.0() ^exit.0() ^head.0()
+      %exited.1 : py.Value = py.call(%exit.0, %args.2, %kwargs.3) ^raised.0()
+      py.Completion.case(%pending.0) ^join.0() ^ret.0() ^raised.0() ^brk.0() ^head.0()
     ret.0(%val.0 : py.Value):
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%val.0)
-      ret(%ret.0)
+      %comp.2 : py.Completion = py.completionReturn(%val.0)
+      jump ^done.0(%comp.2)
     join.0():
       jump ^head.0()
     stop.0(%exc.2 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.2)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.2)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.2)
+    normal.0():
+      %comp.3 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.3)
+    brk.0():
+      %comp.4 : py.Completion = py.completionBreak
+      jump ^done.0(%comp.4)
+    raised.0(%exc.3 : py.Value):
+      %comp.5 : py.Completion = py.completionRaise(%exc.3)
+      jump ^done.0(%comp.5)
+    done.0(%comp.6 : py.Completion):
+      py.Completion.case(%comp.6) ^exit.0() ^ret.1() ^propagate.0() ^exit.0() ^unreachable.0()
+    ret.1(%val.1 : py.Value):
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%val.1)
+      ret(%ret.0)
+    unreachable.0():
+      unreachable
     exit.0():
       %int.0 : py.Value = py.intLit(0)
       %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.1)
-    propagate.0(%exc.3 : py.Value):
-      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
-      ret(%exc.4)
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
   }
   func @m_with.two(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -351,6 +381,8 @@ module m_with {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "two", 0, 2, false, false, "a", "b") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %enter.0 : py.Value = py.enterMethod(%a.4) ^propagate.0()
       %exit.0 : py.Value = py.exitMethod(%a.4) ^propagate.0()
@@ -439,6 +471,8 @@ module m_with {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "target_fails", 0, 2, false, false, "m", "d") ^propagate.0()
       %m.2 : py.Value = py.tupleGet(%bound.0, 0)
       %d.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %m.4 : py.Value = py.requireDefined(%m.2, "m", "UnboundLocalError", "cannot access local variable 'm' where it is not associated with a value") ^propagate.0()
       %enter.0 : py.Value = py.enterMethod(%m.4) ^propagate.0()
       %exit.0 : py.Value = py.exitMethod(%m.4) ^propagate.0()
@@ -490,6 +524,8 @@ module m_with {
       %v.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%v.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "shadowed", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %Ctx.0 : py.Value = py.loadGlobal("m_with", "Ctx") ^propagate.0()
       %bool.0 : py.Value = py.boolLit(false)
       %tuple.0 : py.Value = py.mkTuple(%bool.0)
@@ -547,6 +583,8 @@ module m_with {
       %defaults.0 : py.Value = py.mkTuple(%m.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "always_raises", 0, 1, false, false, "m") ^propagate.0()
       %m.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %m.4 : py.Value = py.requireDefined(%m.2, "m", "UnboundLocalError", "cannot access local variable 'm' where it is not associated with a value") ^propagate.0()
       %enter.0 : py.Value = py.enterMethod(%m.4) ^propagate.0()
       %exit.0 : py.Value = py.exitMethod(%m.4) ^propagate.0()
@@ -580,6 +618,8 @@ module m_with {
     #[py.bindings = [{name = "c", binding = "with"}, {name = "v", value = {call = "note", args = ["c"], keywords = []}, conditional = true}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -684,6 +724,8 @@ module m_with {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Ctx.__init__", 0, 2, false, false, "self", "suppress") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %suppress.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %suppress.4 : py.Value = py.requireDefined(%suppress.2, "suppress", "UnboundLocalError", "cannot access local variable 'suppress' where it is not associated with a value") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %suppress.5 : base.Unit = py.setAttr(%self.4, "suppress", %suppress.4) ^propagate.0()
@@ -702,6 +744,8 @@ module m_with {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Ctx.__enter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
       ret(%ret.0)
@@ -729,6 +773,8 @@ module m_with {
       %t.2 : py.Value = py.tupleGet(%bound.0, 1)
       %v.2 : py.Value = py.tupleGet(%bound.0, 2)
       %tb.2 : py.Value = py.tupleGet(%bound.0, 3)
+      jump ^start.0()
+    start.0():
       %note.0 : py.Value = py.loadGlobal("m_with", "note") ^propagate.0()
       %sys.0 : py.Value = py.loadGlobal("m_with", "sys") ^propagate.0()
       %exc_info.0 : py.Value = py.attr(%sys.0, "exc_info") ^propagate.0()

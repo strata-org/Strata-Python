@@ -1,6 +1,8 @@
 module t20_raise {
   func @|t20_raise.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("t20_raise")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t20_raise", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -40,6 +42,8 @@ module t20_raise {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "fail_hard", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %ValueError.0 : py.Value = py.loadGlobal("t20_raise", "ValueError") ^propagate.0()
       %str.0 : py.Value = py.strLit("bad input")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -55,6 +59,8 @@ module t20_raise {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "reraise_example", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %fail_hard.0 : py.Value = py.loadGlobal("t20_raise", "fail_hard") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -88,6 +94,8 @@ module t20_raise {
       %defaults.0 : py.Value = py.mkTuple(%msg.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "raise_with_msg", 0, 1, false, false, "msg") ^propagate.0()
       %msg.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %RuntimeError.0 : py.Value = py.loadGlobal("t20_raise", "RuntimeError") ^propagate.0()
       %msg.5 : py.Value = py.requireDefined(%msg.2, "msg", "UnboundLocalError", "cannot access local variable 'msg' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%msg.5)
@@ -105,6 +113,8 @@ module t20_raise {
       %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "reraise_named", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %fail_hard.0 : py.Value = py.loadGlobal("t20_raise", "fail_hard") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -142,6 +152,8 @@ module t20_raise {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "reraise_bare", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %fail_hard.0 : py.Value = py.loadGlobal("t20_raise", "fail_hard") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -169,6 +181,8 @@ module t20_raise {
       %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "reraise_after_work", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %fail_hard.0 : py.Value = py.loadGlobal("t20_raise", "fail_hard") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs

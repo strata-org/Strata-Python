@@ -1,0 +1,9 @@
+module top
+  a: local (assigned)
+  function a
+    ValueError: global implicit (referenced)
+    setup: global implicit (referenced)
+    use: global implicit (referenced)
+    x: local (assigned, referenced)
+    xs: local (parameter, referenced)
+qualnames: a

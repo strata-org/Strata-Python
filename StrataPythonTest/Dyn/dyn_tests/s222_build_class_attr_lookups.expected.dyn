@@ -1,6 +1,8 @@
 module s222_build_class_attr_lookups {
   func @|s222_build_class_attr_lookups.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s222_build_class_attr_lookups")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -182,6 +184,8 @@ module s222_build_class_attr_lookups {
     #[py.bindings = [{name = "__getattr__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -213,6 +217,8 @@ module s222_build_class_attr_lookups {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -240,6 +246,8 @@ module s222_build_class_attr_lookups {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -267,6 +275,8 @@ module s222_build_class_attr_lookups {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -299,6 +309,8 @@ module s222_build_class_attr_lookups {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "bases") ^propagate.0()
       %bases.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%bases.cell.0, %bases.2)
+      jump ^start.0()
+    start.0():
       %Real.0 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "Real") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%Real.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
@@ -312,6 +324,8 @@ module s222_build_class_attr_lookups {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -341,6 +355,8 @@ module s222_build_class_attr_lookups {
     #[py.bindings = [{name = "__prepare__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -372,6 +388,8 @@ module s222_build_class_attr_lookups {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -400,6 +418,8 @@ module s222_build_class_attr_lookups {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -437,6 +457,8 @@ module s222_build_class_attr_lookups {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %n.6 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.6)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("getattr")
       %n.8 : py.Value = base.refGet[py.Value](%n.cell.0)
@@ -464,6 +486,8 @@ module s222_build_class_attr_lookups {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "MM.__prepare__", 0, 0, true, false) ^propagate.0()
       %args.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("MM prepare")
       %len.0 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "len") ^propagate.0()

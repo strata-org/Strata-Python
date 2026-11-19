@@ -1,6 +1,8 @@
 module lib_dict_methods {
   func @|lib_dict_methods.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_dict_methods")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_dict_methods", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -508,6 +510,8 @@ module lib_dict_methods {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__hash__", binding = "def"}, {name = "__eq__", binding = "def"}, {name = "__repr__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -559,6 +563,8 @@ module lib_dict_methods {
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
       %a.1 : py.Value = py.tupleGet(%bound.0, 1)
       %k.1 : py.Value = py.tupleGet(%bound.0, 2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_dict_methods", "print") ^catch.0()
       %repr.0 : py.Value = py.loadGlobal("lib_dict_methods", "repr") ^catch.0()
       %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
@@ -621,6 +627,8 @@ module lib_dict_methods {
     #[py.bindings = [{name = "__setitem__", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -653,6 +661,8 @@ module lib_dict_methods {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -691,6 +701,8 @@ module lib_dict_methods {
     #[py.bindings = [{name = "sorted_keys", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "keys", binding = "def"}, {name = "__getitem__", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -739,6 +751,8 @@ module lib_dict_methods {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.__init__", 0, 2, false, false, "self", "v") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %v.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %v.4 : py.Value = py.requireDefined(%v.2, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %v.5 : base.Unit = py.setAttr(%self.4, "v", %v.4) ^propagate.0()
@@ -757,6 +771,8 @@ module lib_dict_methods {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.__hash__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_dict_methods", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("hash")
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -788,6 +804,8 @@ module lib_dict_methods {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.__eq__", 0, 2, false, false, "self", "o") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_dict_methods", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("eq")
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -825,6 +843,8 @@ module lib_dict_methods {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.__repr__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("K(")
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %v.0 : py.Value = py.attr(%self.4, "v") ^propagate.0()
@@ -854,6 +874,8 @@ module lib_dict_methods {
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
       %v.2 : py.Value = py.tupleGet(%bound.0, 2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_dict_methods", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("setitem")
       %k.4 : py.Value = py.requireDefined(%k.2, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
@@ -888,6 +910,8 @@ module lib_dict_methods {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(3)
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %n.2 : base.Unit = py.setAttr(%self.4, "n", %int.0) ^propagate.0()
@@ -906,6 +930,8 @@ module lib_dict_methods {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
       ret(%ret.0)
@@ -921,6 +947,8 @@ module lib_dict_methods {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %n.2 : py.Value = py.attr(%self.4, "n") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
@@ -948,6 +976,8 @@ module lib_dict_methods {
       ret(%exc.2)
   }
   func @lib_dict_methods.SortedDict.sorted_keys(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %self.0 : py.Value = py.undef("self")
       %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
@@ -959,6 +989,8 @@ module lib_dict_methods {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "SortedDict.sorted_keys", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %list.0 : py.Value = py.mkList
       %dict.0 : py.Value = py.loadGlobal("lib_dict_methods", "dict") ^propagate.0()
       %__iter__.0 : py.Value = py.attr(%dict.0, "__iter__") ^propagate.0()
@@ -970,16 +1002,30 @@ module lib_dict_methods {
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
-      %out.2 : py.Value = py.requireDefined(%list.0, "out", "UnboundLocalError", "cannot access local variable 'out' where it is not associated with a value") ^propagate.0()
-      %append.0 : py.Value = py.attr(%out.2, "append") ^propagate.0()
-      %k.2 : py.Value = py.requireDefined(%item.0, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
+      %out.2 : py.Value = py.requireDefined(%list.0, "out", "UnboundLocalError", "cannot access local variable 'out' where it is not associated with a value") ^raised.0()
+      %append.0 : py.Value = py.attr(%out.2, "append") ^raised.0()
+      %k.2 : py.Value = py.requireDefined(%item.0, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^raised.0()
       %tuple.1 : py.Value = py.mkTuple(%k.2)
       %kwargs.2 : py.Value = py.mkKwargs
-      %call.1 : py.Value = py.call(%append.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %call.1 : py.Value = py.call(%append.0, %tuple.1, %kwargs.2) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %out.4 : py.Value = py.requireDefined(%list.0, "out", "UnboundLocalError", "cannot access local variable 'out' where it is not associated with a value") ^propagate.0()
       %sort.0 : py.Value = py.attr(%out.4, "sort") ^propagate.0()
@@ -989,9 +1035,9 @@ module lib_dict_methods {
       %out.6 : py.Value = py.requireDefined(%list.0, "out", "UnboundLocalError", "cannot access local variable 'out' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%out.6)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @lib_dict_methods.SortedDict.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -1001,6 +1047,8 @@ module lib_dict_methods {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "SortedDict.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %iter.0 : py.Value = py.loadGlobal("lib_dict_methods", "iter") ^propagate.0()
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %sorted_keys.0 : py.Value = py.attr(%self.4, "sorted_keys") ^propagate.0()
@@ -1024,6 +1072,8 @@ module lib_dict_methods {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "SortedDict.keys", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_dict_methods", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("keys")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1052,6 +1102,8 @@ module lib_dict_methods {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "SortedDict.__getitem__", 0, 2, false, false, "self", "k") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_dict_methods", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("getitem")
       %k.4 : py.Value = py.requireDefined(%k.2, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()

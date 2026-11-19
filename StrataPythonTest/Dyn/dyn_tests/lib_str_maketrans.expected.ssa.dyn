@@ -1,6 +1,8 @@
 module lib_str_maketrans {
   func @|lib_str_maketrans.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_str_maketrans")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_str_maketrans", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -147,6 +149,8 @@ module lib_str_maketrans {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "show", 0, 1, true, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
       %args.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_str_maketrans", "print") ^catch.0()
       %repr.0 : py.Value = py.loadGlobal("lib_str_maketrans", "repr") ^catch.0()
       %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()

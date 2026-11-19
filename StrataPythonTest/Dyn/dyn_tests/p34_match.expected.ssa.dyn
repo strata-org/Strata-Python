@@ -1,6 +1,8 @@
 module p34_match {
   func @|p34_match.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p34_match")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p34_match", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -34,6 +36,8 @@ module p34_match {
       %defaults.0 : py.Value = py.mkTuple(%cmd.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "cmd") ^propagate.0()
       %cmd.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)

@@ -3,6 +3,8 @@
 module m_lambda {
   func @|m_lambda.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m_lambda")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_lambda", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -42,6 +44,8 @@ module m_lambda {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "adder", 0, 1, false, false, "n") ^propagate.0()
       %n.4 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.4)
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|m_lambda.adder.<lambda>|, "<lambda>", "m_lambda", %n.cell.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%clo.0)
       ret(%ret.0)
@@ -76,6 +80,8 @@ module m_lambda {
       %set.3 : base.Unit = base.refSet[py.Value](%r.cell.0, %r.1)
       %kw.1 : py.Value = py.tupleGet(%bound.0, 4)
       %set.4 : base.Unit = base.refSet[py.Value](%kw.cell.0, %kw.1)
+      jump ^start.0()
+    start.0():
       %a.3 : py.Value = base.refGet[py.Value](%a.cell.0)
       %a.4 : py.Value = py.requireDefined(%a.3, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.3 : py.Value = base.refGet[py.Value](%b.cell.0)
@@ -97,6 +103,8 @@ module m_lambda {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %clo.0 : py.Value = py.mkClosure[[]](@|m_lambda.<lambda>.<lambda>|, "<lambda>", "m_lambda")
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%clo.0)
       ret(%ret.0)
@@ -106,6 +114,8 @@ module m_lambda {
   }
   func @|m_lambda.<lambda>.2|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("generator function")
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
@@ -120,6 +130,8 @@ module m_lambda {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "d") ^propagate.0()
       %d.1 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%d.cell.0, %d.1)
+      jump ^start.0()
+    start.0():
       %d.2 : py.Value = base.refGet[py.Value](%d.cell.0)
       %d.3 : py.Value = py.requireDefined(%d.2, "d", "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%d.3)
@@ -130,6 +142,8 @@ module m_lambda {
   }
   func @m_lambda.yields(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("generator function")
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
@@ -144,6 +158,8 @@ module m_lambda {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "adder.<locals>.<lambda>", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      jump ^start.0()
+    start.0():
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %n.2 : py.Value = base.refGet[py.Value](%n.cell.0)
@@ -164,6 +180,8 @@ module m_lambda {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>.<locals>.<lambda>", 0, 1, false, false, "z") ^propagate.0()
       %z.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%z.cell.0, %z.2)
+      jump ^start.0()
+    start.0():
       %z.3 : py.Value = base.refGet[py.Value](%z.cell.0)
       %z.4 : py.Value = py.requireDefined(%z.3, "z", "UnboundLocalError", "cannot access local variable 'z' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%z.4)

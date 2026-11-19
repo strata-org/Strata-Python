@@ -1,6 +1,10 @@
 module lib_collections {
   func @|lib_collections.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.1", done = "done.1"}, {head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_collections")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_collections", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -89,130 +93,158 @@ module lib_collections {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("lib_collections", "f")
       %set.12 : base.Unit = base.refSet[py.Value](%f.cell.0, %item.0)
-      %print.0 : py.Value = py.loadGlobal("lib_collections", "print") ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("lib_collections", "print") ^raised.0()
       %str.9 : py.Value = py.strLit("--")
-      %f.0 : py.Value = py.loadGlobal("lib_collections", "f") ^propagate.0()
-      %__name__.0 : py.Value = py.attr(%f.0, "__name__") ^propagate.0()
+      %f.0 : py.Value = py.loadGlobal("lib_collections", "f") ^raised.0()
+      %__name__.0 : py.Value = py.attr(%f.0, "__name__") ^raised.0()
       %tuple.11 : py.Value = py.mkTuple(%str.9, %__name__.0)
       %kwargs.8 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%print.0, %tuple.11, %kwargs.8) ^propagate.0()
-      %print.1 : py.Value = py.loadGlobal("lib_collections", "print") ^propagate.0()
-      %len.0 : py.Value = py.loadGlobal("lib_collections", "len") ^propagate.0()
-      %f.1 : py.Value = py.loadGlobal("lib_collections", "f") ^propagate.0()
-      %X.1 : py.Value = py.loadGlobal("lib_collections", "X") ^propagate.0()
+      %call.0 : py.Value = py.call(%print.0, %tuple.11, %kwargs.8) ^raised.0()
+      %print.1 : py.Value = py.loadGlobal("lib_collections", "print") ^raised.0()
+      %len.0 : py.Value = py.loadGlobal("lib_collections", "len") ^raised.0()
+      %f.1 : py.Value = py.loadGlobal("lib_collections", "f") ^raised.0()
+      %X.1 : py.Value = py.loadGlobal("lib_collections", "X") ^raised.0()
       %int.0 : py.Value = py.intLit(2)
       %tuple.12 : py.Value = py.mkTuple(%int.0)
       %kwargs.9 : py.Value = py.mkKwargs
-      %call.1 : py.Value = py.call(%X.1, %tuple.12, %kwargs.9) ^propagate.0()
+      %call.1 : py.Value = py.call(%X.1, %tuple.12, %kwargs.9) ^raised.0()
       %tuple.13 : py.Value = py.mkTuple(%call.1)
       %kwargs.10 : py.Value = py.mkKwargs
-      %call.2 : py.Value = py.call(%f.1, %tuple.13, %kwargs.10) ^propagate.0()
+      %call.2 : py.Value = py.call(%f.1, %tuple.13, %kwargs.10) ^raised.0()
       %tuple.14 : py.Value = py.mkTuple(%call.2)
       %kwargs.11 : py.Value = py.mkKwargs
-      %call.3 : py.Value = py.call(%len.0, %tuple.14, %kwargs.11) ^propagate.0()
-      %len.1 : py.Value = py.loadGlobal("lib_collections", "len") ^propagate.0()
-      %f.2 : py.Value = py.loadGlobal("lib_collections", "f") ^propagate.0()
-      %H.1 : py.Value = py.loadGlobal("lib_collections", "H") ^propagate.0()
+      %call.3 : py.Value = py.call(%len.0, %tuple.14, %kwargs.11) ^raised.0()
+      %len.1 : py.Value = py.loadGlobal("lib_collections", "len") ^raised.0()
+      %f.2 : py.Value = py.loadGlobal("lib_collections", "f") ^raised.0()
+      %H.1 : py.Value = py.loadGlobal("lib_collections", "H") ^raised.0()
       %tuple.15 : py.Value = py.mkTuple
       %kwargs.12 : py.Value = py.mkKwargs
-      %call.4 : py.Value = py.call(%H.1, %tuple.15, %kwargs.12) ^propagate.0()
+      %call.4 : py.Value = py.call(%H.1, %tuple.15, %kwargs.12) ^raised.0()
       %tuple.16 : py.Value = py.mkTuple(%call.4)
       %kwargs.13 : py.Value = py.mkKwargs
-      %call.5 : py.Value = py.call(%f.2, %tuple.16, %kwargs.13) ^propagate.0()
+      %call.5 : py.Value = py.call(%f.2, %tuple.16, %kwargs.13) ^raised.0()
       %tuple.17 : py.Value = py.mkTuple(%call.5)
       %kwargs.14 : py.Value = py.mkKwargs
-      %call.6 : py.Value = py.call(%len.1, %tuple.17, %kwargs.14) ^propagate.0()
-      %len.2 : py.Value = py.loadGlobal("lib_collections", "len") ^propagate.0()
-      %f.3 : py.Value = py.loadGlobal("lib_collections", "f") ^propagate.0()
-      %Down.1 : py.Value = py.loadGlobal("lib_collections", "Down") ^propagate.0()
+      %call.6 : py.Value = py.call(%len.1, %tuple.17, %kwargs.14) ^raised.0()
+      %len.2 : py.Value = py.loadGlobal("lib_collections", "len") ^raised.0()
+      %f.3 : py.Value = py.loadGlobal("lib_collections", "f") ^raised.0()
+      %Down.1 : py.Value = py.loadGlobal("lib_collections", "Down") ^raised.0()
       %int.1 : py.Value = py.intLit(4)
       %tuple.18 : py.Value = py.mkTuple(%int.1)
       %kwargs.15 : py.Value = py.mkKwargs
-      %call.7 : py.Value = py.call(%Down.1, %tuple.18, %kwargs.15) ^propagate.0()
+      %call.7 : py.Value = py.call(%Down.1, %tuple.18, %kwargs.15) ^raised.0()
       %tuple.19 : py.Value = py.mkTuple(%call.7)
       %kwargs.16 : py.Value = py.mkKwargs
-      %call.8 : py.Value = py.call(%f.3, %tuple.19, %kwargs.16) ^propagate.0()
+      %call.8 : py.Value = py.call(%f.3, %tuple.19, %kwargs.16) ^raised.0()
       %tuple.20 : py.Value = py.mkTuple(%call.8)
       %kwargs.17 : py.Value = py.mkKwargs
-      %call.9 : py.Value = py.call(%len.2, %tuple.20, %kwargs.17) ^propagate.0()
-      %len.3 : py.Value = py.loadGlobal("lib_collections", "len") ^propagate.0()
-      %f.4 : py.Value = py.loadGlobal("lib_collections", "f") ^propagate.0()
+      %call.9 : py.Value = py.call(%len.2, %tuple.20, %kwargs.17) ^raised.0()
+      %len.3 : py.Value = py.loadGlobal("lib_collections", "len") ^raised.0()
+      %f.4 : py.Value = py.loadGlobal("lib_collections", "f") ^raised.0()
       %tuple.21 : py.Value = py.mkTuple
       %kwargs.18 : py.Value = py.mkKwargs
-      %call.10 : py.Value = py.call(%f.4, %tuple.21, %kwargs.18) ^propagate.0()
+      %call.10 : py.Value = py.call(%f.4, %tuple.21, %kwargs.18) ^raised.0()
       %tuple.22 : py.Value = py.mkTuple(%call.10)
       %kwargs.19 : py.Value = py.mkKwargs
-      %call.11 : py.Value = py.call(%len.3, %tuple.22, %kwargs.19) ^propagate.0()
-      %len.4 : py.Value = py.loadGlobal("lib_collections", "len") ^propagate.0()
-      %f.5 : py.Value = py.loadGlobal("lib_collections", "f") ^propagate.0()
+      %call.11 : py.Value = py.call(%len.3, %tuple.22, %kwargs.19) ^raised.0()
+      %len.4 : py.Value = py.loadGlobal("lib_collections", "len") ^raised.0()
+      %f.5 : py.Value = py.loadGlobal("lib_collections", "f") ^raised.0()
       %str.10 : py.Value = py.strLit("abc")
       %tuple.23 : py.Value = py.mkTuple(%str.10)
       %kwargs.20 : py.Value = py.mkKwargs
-      %call.12 : py.Value = py.call(%f.5, %tuple.23, %kwargs.20) ^propagate.0()
+      %call.12 : py.Value = py.call(%f.5, %tuple.23, %kwargs.20) ^raised.0()
       %tuple.24 : py.Value = py.mkTuple(%call.12)
       %kwargs.21 : py.Value = py.mkKwargs
-      %call.13 : py.Value = py.call(%len.4, %tuple.24, %kwargs.21) ^propagate.0()
-      %len.5 : py.Value = py.loadGlobal("lib_collections", "len") ^propagate.0()
-      %f.6 : py.Value = py.loadGlobal("lib_collections", "f") ^propagate.0()
-      %range.0 : py.Value = py.loadGlobal("lib_collections", "range") ^propagate.0()
+      %call.13 : py.Value = py.call(%len.4, %tuple.24, %kwargs.21) ^raised.0()
+      %len.5 : py.Value = py.loadGlobal("lib_collections", "len") ^raised.0()
+      %f.6 : py.Value = py.loadGlobal("lib_collections", "f") ^raised.0()
+      %range.0 : py.Value = py.loadGlobal("lib_collections", "range") ^raised.0()
       %int.2 : py.Value = py.intLit(3)
       %tuple.25 : py.Value = py.mkTuple(%int.2)
       %kwargs.22 : py.Value = py.mkKwargs
-      %call.14 : py.Value = py.call(%range.0, %tuple.25, %kwargs.22) ^propagate.0()
+      %call.14 : py.Value = py.call(%range.0, %tuple.25, %kwargs.22) ^raised.0()
       %tuple.26 : py.Value = py.mkTuple(%call.14)
       %kwargs.23 : py.Value = py.mkKwargs
-      %call.15 : py.Value = py.call(%f.6, %tuple.26, %kwargs.23) ^propagate.0()
+      %call.15 : py.Value = py.call(%f.6, %tuple.26, %kwargs.23) ^raised.0()
       %tuple.27 : py.Value = py.mkTuple(%call.15)
       %kwargs.24 : py.Value = py.mkKwargs
-      %call.16 : py.Value = py.call(%len.5, %tuple.27, %kwargs.24) ^propagate.0()
+      %call.16 : py.Value = py.call(%len.5, %tuple.27, %kwargs.24) ^raised.0()
       %tuple.28 : py.Value = py.mkTuple(%call.3, %call.6, %call.9, %call.11, %call.13, %call.16)
       %kwargs.25 : py.Value = py.mkKwargs
-      %call.17 : py.Value = py.call(%print.1, %tuple.28, %kwargs.25) ^propagate.0()
+      %call.17 : py.Value = py.call(%print.1, %tuple.28, %kwargs.25) ^raised.0()
       %int.3 : py.Value = py.intLit(1)
       %int.4 : py.Value = py.intLit(2)
       %tuple.29 : py.Value = py.mkTuple(%int.3, %int.4)
-      %dict.1 : py.Value = py.mkDict ^propagate.0()
+      %dict.1 : py.Value = py.mkDict ^raised.0()
       %tuple.30 : py.Value = py.mkTuple(%tuple.29, %dict.1)
       %tuple.31 : py.Value = py.mkTuple
       %str.11 : py.Value = py.strLit("x")
       %int.5 : py.Value = py.intLit(1)
-      %dict.2 : py.Value = py.mkDict(%str.11, %int.5) ^propagate.0()
+      %dict.2 : py.Value = py.mkDict(%str.11, %int.5) ^raised.0()
       %tuple.32 : py.Value = py.mkTuple(%tuple.31, %dict.2)
       %int.6 : py.Value = py.intLit(5)
       %tuple.33 : py.Value = py.mkTuple(%int.6)
-      %dict.3 : py.Value = py.mkDict ^propagate.0()
+      %dict.3 : py.Value = py.mkDict ^raised.0()
       %tuple.34 : py.Value = py.mkTuple(%tuple.33, %dict.3)
       %list.2 : py.Value = py.mkList(%tuple.30, %tuple.32, %tuple.34)
-      %iter.1 : py.Value = py.getIter(%list.2) ^propagate.0()
+      %iter.1 : py.Value = py.getIter(%list.2) ^raised.0()
       jump ^head.1()
     head.1():
       %item.1 : py.Value = py.next(%iter.1) ^stop.1()
-      %unpack.0 : py.Value = py.unpackSeq(%item.1, 2) ^propagate.0()
+      %unpack.0 : py.Value = py.unpackSeq(%item.1, 2) ^raised.1()
       %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
       %args.cell.0 : base.Ref(py.Value) = py.globalCell("lib_collections", "args")
       %set.13 : base.Unit = base.refSet[py.Value](%args.cell.0, %elem.0)
       %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
       %kwargs.cell.0 : base.Ref(py.Value) = py.globalCell("lib_collections", "kwargs")
       %set.14 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %elem.1)
-      %errors.0 : py.Value = py.loadGlobal("lib_collections", "errors") ^propagate.0()
-      %f.7 : py.Value = py.loadGlobal("lib_collections", "f") ^propagate.0()
+      %errors.0 : py.Value = py.loadGlobal("lib_collections", "errors") ^raised.1()
+      %f.7 : py.Value = py.loadGlobal("lib_collections", "f") ^raised.1()
       %list.3 : py.Value = py.mkList(%f.7)
-      %args.0 : py.Value = py.loadGlobal("lib_collections", "args") ^propagate.0()
-      %extend.0 : base.Unit = py.listExtend(%list.3, %args.0) ^propagate.0()
+      %args.0 : py.Value = py.loadGlobal("lib_collections", "args") ^raised.1()
+      %extend.0 : base.Unit = py.listExtend(%list.3, %args.0) ^raised.1()
       %tuple.35 : py.Value = py.listToTuple(%list.3)
       %kwargs.26 : py.Value = py.mkKwargs
-      %kwargs.27 : py.Value = py.loadGlobal("lib_collections", "kwargs") ^propagate.0()
-      %merge.0 : py.Value = py.dictMerge(%errors.0, %kwargs.26, %kwargs.27) ^propagate.0()
-      %call.18 : py.Value = py.call(%errors.0, %tuple.35, %merge.0) ^propagate.0()
+      %kwargs.27 : py.Value = py.loadGlobal("lib_collections", "kwargs") ^raised.1()
+      %merge.0 : py.Value = py.dictMerge(%errors.0, %kwargs.26, %kwargs.27) ^raised.1()
+      %call.18 : py.Value = py.call(%errors.0, %tuple.35, %merge.0) ^raised.1()
       jump ^head.1()
     stop.1(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.1() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.1() ^raised.1(%exc.0)
+    normal.1():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.1(%comp.0)
+    raised.1(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.1(%comp.1)
+    done.1(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.1() ^unreachable.0() ^raised.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.1():
       jump ^head.0()
-    stop.0(%exc.1 : py.Value):
-      %done.1 : base.Bool = py.isStopIteration(%exc.1)
-      branch(%done.1) ^exit.0() ^propagate.0(%exc.1)
+    stop.0(%exc.2 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.2)
+      branch(%done.1) ^normal.0() ^raised.0(%exc.2)
+    normal.0():
+      %comp.3 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.3)
+    raised.0(%exc.3 : py.Value):
+      %comp.4 : py.Completion = py.completionRaise(%exc.3)
+      jump ^done.0(%comp.4)
+    done.0(%comp.5 : py.Completion):
+      py.Completion.case(%comp.5) ^exit.0() ^unreachable.3() ^propagate.0() ^unreachable.4() ^unreachable.5()
+    unreachable.3(%val.1 : py.Value):
+      unreachable
+    unreachable.4():
+      unreachable
+    unreachable.5():
+      unreachable
     exit.0():
       %list.4 : py.Value = py.loadGlobal("lib_collections", "list") ^propagate.0()
       %Down.2 : py.Value = py.loadGlobal("lib_collections", "Down") ^propagate.0()
@@ -858,15 +890,17 @@ module lib_collections {
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.2 : py.Value):
-      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
-      ret(%exc.3)
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
   }
   func @|lib_collections.X.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__len__", binding = "def"}, {name = "__length_hint__", binding = "def"}, {name = "__iter__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -907,6 +941,8 @@ module lib_collections {
     #[py.bindings = [{name = "__length_hint__", binding = "def"}, {name = "__iter__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -941,6 +977,8 @@ module lib_collections {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -978,6 +1016,8 @@ module lib_collections {
     #[py.bindings = [{name = "keys", binding = "def"}, {name = "__getitem__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1012,6 +1052,8 @@ module lib_collections {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1040,6 +1082,8 @@ module lib_collections {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1068,6 +1112,8 @@ module lib_collections {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1096,6 +1142,8 @@ module lib_collections {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1138,6 +1186,8 @@ module lib_collections {
       %set.1 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %kwargs.2)
+      jump ^start.0()
+    start.0():
       %f.3 : py.Value = base.refGet[py.Value](%f.cell.0)
       %f.4 : py.Value = py.requireDefined(%f.3, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
       %args.3 : py.Value = base.refGet[py.Value](%args.cell.0)
@@ -1200,6 +1250,8 @@ module lib_collections {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1234,6 +1286,8 @@ module lib_collections {
     #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1272,6 +1326,8 @@ module lib_collections {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1304,6 +1360,8 @@ module lib_collections {
     #[py.bindings = [{name = "__next__", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1336,6 +1394,8 @@ module lib_collections {
     #[py.bindings = [{name = "__len__", binding = "def"}, {name = "__iter__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1370,6 +1430,8 @@ module lib_collections {
     #[py.bindings = [{name = "__length_hint__", binding = "def"}, {name = "__iter__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1413,6 +1475,8 @@ module lib_collections {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %n.6 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.6)
+      jump ^start.0()
+    start.0():
       %n.7 : py.Value = base.refGet[py.Value](%n.cell.0)
       %n.8 : py.Value = py.requireDefined(%n.7, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -1434,6 +1498,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "X.__len__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_collections", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("len")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1457,6 +1523,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "X.__length_hint__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_collections", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("hint")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1480,6 +1548,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "X.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_collections", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("iter")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1511,6 +1581,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "H.__length_hint__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_collections", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("hint")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1532,6 +1604,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "H.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_collections", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("iter")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1564,6 +1638,8 @@ module lib_collections {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %n.6 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.6)
+      jump ^start.0()
+    start.0():
       %n.7 : py.Value = base.refGet[py.Value](%n.cell.0)
       %n.8 : py.Value = py.requireDefined(%n.7, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -1585,6 +1661,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Down.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
@@ -1602,6 +1680,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Down.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %n.2 : py.Value = py.attr(%self.4, "n") ^propagate.0()
@@ -1640,6 +1720,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Mp.keys", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_collections", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("keys")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -1668,6 +1750,8 @@ module lib_collections {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %k.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_collections", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("get")
       %k.3 : py.Value = base.refGet[py.Value](%k.cell.0)
@@ -1704,6 +1788,8 @@ module lib_collections {
       %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.2)
       %v.2 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%v.cell.0, %v.2)
+      jump ^start.0()
+    start.0():
       %k.3 : py.Value = base.refGet[py.Value](%k.cell.0)
       %k.4 : py.Value = py.requireDefined(%k.3, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
       %v.3 : py.Value = base.refGet[py.Value](%v.cell.0)
@@ -1728,6 +1814,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Pair.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %iter.0 : py.Value = py.loadGlobal("lib_collections", "iter") ^propagate.0()
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
@@ -1760,6 +1848,8 @@ module lib_collections {
       %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.2)
       %v.2 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%v.cell.0, %v.2)
+      jump ^start.0()
+    start.0():
       %k.3 : py.Value = base.refGet[py.Value](%k.cell.0)
       %k.4 : py.Value = py.requireDefined(%k.3, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
       %v.3 : py.Value = base.refGet[py.Value](%v.cell.0)
@@ -1795,6 +1885,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "SlowPair.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
@@ -1812,6 +1904,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "SlowPair.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %i.0 : py.Value = py.attr(%self.4, "i") ^propagate.0()
@@ -1871,6 +1965,8 @@ module lib_collections {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %it.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%it.cell.0, %it.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_collections", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("init")
       %len.0 : py.Value = py.loadGlobal("lib_collections", "len") ^propagate.0()
@@ -1900,6 +1996,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "LoudDown.__next__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %super.0 : py.Value = py.loadGlobal("lib_collections", "super") ^propagate.0()
       %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
       %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
@@ -1937,6 +2035,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "NegLen.__len__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %neg.0 : py.Value = py.uSub(%int.0) ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%neg.0)
@@ -1954,6 +2054,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "NegLen.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %iter.0 : py.Value = py.loadGlobal("lib_collections", "iter") ^propagate.0()
       %list.0 : py.Value = py.mkList
       %tuple.0 : py.Value = py.mkTuple(%list.0)
@@ -1974,6 +2076,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "BadHint.__length_hint__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("x")
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
       ret(%ret.0)
@@ -1990,6 +2094,8 @@ module lib_collections {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "BadHint.__iter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %iter.0 : py.Value = py.loadGlobal("lib_collections", "iter") ^propagate.0()
       %list.0 : py.Value = py.mkList
       %tuple.0 : py.Value = py.mkTuple(%list.0)

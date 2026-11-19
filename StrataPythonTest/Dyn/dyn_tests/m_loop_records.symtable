@@ -1,0 +1,7 @@
+module top
+  print: global implicit (referenced)
+  range: global implicit (referenced)
+  spin: local (assigned)
+  x: local (assigned, referenced)
+  function spin
+qualnames: spin

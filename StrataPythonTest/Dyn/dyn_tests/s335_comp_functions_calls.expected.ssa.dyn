@@ -1,6 +1,8 @@
 module s335_comp_functions_calls {
   func @|s335_comp_functions_calls.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s335_comp_functions_calls")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s335_comp_functions_calls", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -237,6 +239,8 @@ module s335_comp_functions_calls {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "show", 0, 2, false, false, "label", "f") ^propagate.0()
       %label.2 : py.Value = py.tupleGet(%bound.0, 0)
       %f.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "print") ^catch.0()
       %label.4 : py.Value = py.requireDefined(%label.2, "label", "UnboundLocalError", "cannot access local variable 'label' where it is not associated with a value") ^catch.0()
       %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
@@ -297,6 +301,8 @@ module s335_comp_functions_calls {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p43_free", 0, 1, false, false, "rows") ^propagate.0()
       %rows.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%rows.cell.0, %rows.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(3)
       %set.1 : base.Unit = base.refSet[py.Value](%scale.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
@@ -324,6 +330,8 @@ module s335_comp_functions_calls {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p43_class_name", 0, 1, false, false, "rows") ^propagate.0()
       %rows.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%rows.cell.0, %rows.2)
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|s335_comp_functions_calls.p43_class_name.C.<body>|, "<body>", "s335_comp_functions_calls", %rows.cell.0)
       %str.0 : py.Value = py.strLit("C")
@@ -351,6 +359,8 @@ module s335_comp_functions_calls {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p43_lambdas", 0, 1, false, false, "rows") ^propagate.0()
       %rows.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%rows.cell.0, %rows.2)
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|s335_comp_functions_calls.p43_lambdas.C.<body>|, "<body>", "s335_comp_functions_calls", %rows.cell.0)
       %str.0 : py.Value = py.strLit("C")
@@ -399,6 +409,8 @@ module s335_comp_functions_calls {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p43_class_cell", 0, 1, false, false, "rows") ^propagate.0()
       %rows.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%rows.cell.0, %rows.2)
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|s335_comp_functions_calls.p43_class_cell.C.<body>|, "<body>", "s335_comp_functions_calls", %rows.cell.0)
       %str.0 : py.Value = py.strLit("C")
@@ -424,6 +436,8 @@ module s335_comp_functions_calls {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p43_super", 0, 1, false, false, "rows") ^propagate.0()
       %rows.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%rows.cell.0, %rows.2)
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %__class__.0 : py.Value = py.undef("__class__")
       %__class__.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%__class__.0)
@@ -485,6 +499,8 @@ module s335_comp_functions_calls {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "m_f", 0, 2, false, false, "pairs", "ys") ^propagate.0()
       %pairs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %ys.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %pairs.4 : py.Value = py.requireDefined(%pairs.2, "pairs", "UnboundLocalError", "cannot access local variable 'pairs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
@@ -700,6 +716,8 @@ module s335_comp_functions_calls {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "m_outer", 0, 1, false, false, "n") ^propagate.0()
       %n.5 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.5)
+      jump ^start.0()
+    start.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|s335_comp_functions_calls.m_outer.C.<body>|, "<body>", "s335_comp_functions_calls", %n.cell.0)
       %str.0 : py.Value = py.strLit("C")
@@ -721,6 +739,8 @@ module s335_comp_functions_calls {
       %D.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%D.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "m_shadowed", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(1)
       %set.0 : base.Unit = base.refSet[py.Value](%n.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
@@ -748,6 +768,8 @@ module s335_comp_functions_calls {
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p40_f", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
@@ -791,6 +813,8 @@ module s335_comp_functions_calls {
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p40_g", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %y.1 : py.Value = py.undef("y")
       %y.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%y.1)
@@ -838,6 +862,8 @@ module s335_comp_functions_calls {
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p45_f", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
@@ -886,6 +912,8 @@ module s335_comp_functions_calls {
       %defaults.0 : py.Value = py.mkTuple(%rows.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p45_g", 0, 1, false, false, "rows") ^propagate.0()
       %rows.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %rows.4 : py.Value = py.requireDefined(%rows.2, "rows", "UnboundLocalError", "cannot access local variable 'rows' where it is not associated with a value") ^propagate.0()
       %row.1 : py.Value = py.undef("row")
       %row.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%row.1)
@@ -976,6 +1004,8 @@ module s335_comp_functions_calls {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p45_h", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %set.1 : base.Unit = base.refSet[py.Value](%total.cell.0, %int.0)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@s335_comp_functions_calls.p45_h.add, "add", "s335_comp_functions_calls", %total.cell.0, %xs.cell.0)
@@ -998,6 +1028,8 @@ module s335_comp_functions_calls {
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p46_f", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
@@ -1060,6 +1092,8 @@ module s335_comp_functions_calls {
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p46_g", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
@@ -1130,6 +1164,8 @@ module s335_comp_functions_calls {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p46_h", 0, 2, false, false, "xs", "ys") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %ys.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
@@ -1203,6 +1239,8 @@ module s335_comp_functions_calls {
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p46_k", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
@@ -1260,6 +1298,8 @@ module s335_comp_functions_calls {
     #[py.bindings = [{name = "m", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1292,6 +1332,8 @@ module s335_comp_functions_calls {
     #[py.bindings = [{name = "m", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1337,6 +1379,8 @@ module s335_comp_functions_calls {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p50_f", 0, 2, false, false, "k", "a") ^propagate.0()
       %k.2 : py.Value = py.tupleGet(%bound.0, 0)
       %a.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.1 : py.Value = py.undef("b")
       %b.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%b.1)
@@ -1420,6 +1464,8 @@ module s335_comp_functions_calls {
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p48_m", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
@@ -1461,6 +1507,8 @@ module s335_comp_functions_calls {
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
@@ -1496,6 +1544,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p43_free.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p43_free") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -1513,6 +1563,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p43_class_name.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p43_class_name") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %list.0 : py.Value = py.mkList(%int.0)
@@ -1529,6 +1581,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p43_lambdas.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p43_lambdas") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -1546,6 +1600,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p43_class_cell.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p43_class_cell") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %list.0 : py.Value = py.mkList(%int.0)
@@ -1562,6 +1618,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p43_super.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p43_super") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -1579,6 +1637,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %m_f.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "m_f") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -1603,6 +1663,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %m_outer.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "m_outer") ^propagate.0()
       %int.0 : py.Value = py.intLit(5)
       %tuple.0 : py.Value = py.mkTuple(%int.0)
@@ -1619,6 +1681,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %m_shadowed.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "m_shadowed") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -1634,6 +1698,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p40_f.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p40_f") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -1651,6 +1717,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p40_g.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p40_g") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -1668,6 +1736,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p45_f.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p45_f") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -1685,6 +1755,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p45_g.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p45_g") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(0)
@@ -1705,6 +1777,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p45_h.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p45_h") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -1726,6 +1800,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p46_f.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p46_f") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -1743,6 +1819,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p46_g.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p46_g") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -1760,6 +1838,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p46_h.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p46_h") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -1779,6 +1859,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p46_k.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p46_k") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -1796,6 +1878,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %B.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "B") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -1820,6 +1904,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p50_f.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p50_f") ^propagate.0()
       %int.0 : py.Value = py.intLit(7)
       %int.1 : py.Value = py.intLit(0)
@@ -1845,6 +1931,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %p48_m.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "p48_m") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -1864,6 +1952,8 @@ module s335_comp_functions_calls {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %k48.0 : py.Value = py.loadGlobal("s335_comp_functions_calls", "k48") ^propagate.0()
       %int.0 : py.Value = py.intLit(3)
       %int.1 : py.Value = py.intLit(4)
@@ -1882,6 +1972,8 @@ module s335_comp_functions_calls {
     #[py.bindings = [{name = "a", value = {expr = "ListComp"}}]]
 
     entry.0(%rows.cell.0 : base.Ref(py.Value), %scale.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -1945,6 +2037,8 @@ module s335_comp_functions_calls {
     #[py.bindings = [{name = "k", value = 1}, {name = "a", value = {expr = "ListComp"}}]]
 
     entry.0(%rows.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -2010,6 +2104,8 @@ module s335_comp_functions_calls {
     #[py.bindings = [{name = "fs", value = {expr = "ListComp"}}]]
 
     entry.0(%rows.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -2068,6 +2164,8 @@ module s335_comp_functions_calls {
     #[py.bindings = [{name = "own", value = {expr = "ListComp"}}]]
 
     entry.0(%rows.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -2128,6 +2226,8 @@ module s335_comp_functions_calls {
     #[py.bindings = [{name = "m", binding = "def"}]]
 
     entry.0(%rows.cell.0 : base.Ref(py.Value), %__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -2159,6 +2259,8 @@ module s335_comp_functions_calls {
     entry.0(%y.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "m_f.<locals>.<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %y.0 : py.Value = base.refGet[py.Value](%y.cell.0)
       %y.1 : py.Value = py.requireDefined(%y.0, "y", "NameError", "cannot access free variable 'y' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%y.1)
@@ -2172,6 +2274,8 @@ module s335_comp_functions_calls {
     #[py.bindings = [{name = "xs", value = {expr = "ListComp"}}]]
 
     entry.0(%n.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -2238,6 +2342,8 @@ module s335_comp_functions_calls {
     #[py.bindings = [{name = "n", value = 2}, {name = "xs", value = {expr = "ListComp"}}]]
 
     entry.0(%n.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -2306,6 +2412,8 @@ module s335_comp_functions_calls {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p45_h.<locals>.add", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %xs.0 : py.Value = base.refGet[py.Value](%xs.cell.0)
       %xs.1 : py.Value = py.requireDefined(%xs.0, "xs", "NameError", "cannot access free variable 'xs' where it is not associated with a value in enclosing scope") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
@@ -2342,6 +2450,8 @@ module s335_comp_functions_calls {
     entry.0(%x.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p46_f.<locals>.<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.1 : py.Value = py.requireDefined(%x.0, "x", "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.1)
@@ -2354,6 +2464,8 @@ module s335_comp_functions_calls {
     entry.0(%x.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p46_g.<locals>.<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.1 : py.Value = py.requireDefined(%x.0, "x", "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.1)
@@ -2366,6 +2478,8 @@ module s335_comp_functions_calls {
     entry.0(%x.cell.0 : base.Ref(py.Value), %y.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p46_h.<locals>.<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.1 : py.Value = py.requireDefined(%x.0, "x", "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
       %y.0 : py.Value = base.refGet[py.Value](%y.cell.0)
@@ -2385,6 +2499,8 @@ module s335_comp_functions_calls {
       %defaults.0 : py.Value = py.mkTuple(%y.default.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p46_k.<locals>.<lambda>", 0, 1, false, false, "y") ^propagate.0()
       %y.1 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %y.3 : py.Value = py.requireDefined(%y.1, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%y.3)
       ret(%ret.0)
@@ -2404,6 +2520,8 @@ module s335_comp_functions_calls {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.m", 0, 2, false, false, "self", "i") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %i.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %i.4 : py.Value = py.requireDefined(%i.2, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.4)
       ret(%ret.0)
@@ -2427,6 +2545,8 @@ module s335_comp_functions_calls {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.m", 0, 2, false, false, "self", "rows") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %rows.2 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %rows.4 : py.Value = py.requireDefined(%rows.2, "rows", "UnboundLocalError", "cannot access local variable 'rows' where it is not associated with a value") ^propagate.0()
       %r.1 : py.Value = py.undef("r")
       %r.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%r.1)
@@ -2491,6 +2611,8 @@ module s335_comp_functions_calls {
     entry.0(%r.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p43_lambdas.<locals>.C.<lambda>", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %r.0 : py.Value = base.refGet[py.Value](%r.cell.0)
       %r.1 : py.Value = py.requireDefined(%r.0, "r", "NameError", "cannot access free variable 'r' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%r.1)
@@ -2509,6 +2631,8 @@ module s335_comp_functions_calls {
       %defaults.0 : py.Value = py.mkTuple(%self.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "p43_super.<locals>.C.m", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      jump ^start.0()
+    start.0():
       %rows.0 : py.Value = base.refGet[py.Value](%rows.cell.0)
       %rows.1 : py.Value = py.requireDefined(%rows.0, "rows", "NameError", "cannot access free variable 'rows' where it is not associated with a value in enclosing scope") ^propagate.0()
       %_.1 : py.Value = py.undef("_")

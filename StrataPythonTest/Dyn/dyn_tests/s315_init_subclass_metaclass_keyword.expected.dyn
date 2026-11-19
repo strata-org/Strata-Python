@@ -1,6 +1,8 @@
 module s315_init_subclass_metaclass_keyword {
   func @|s315_init_subclass_metaclass_keyword.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s315_init_subclass_metaclass_keyword")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s315_init_subclass_metaclass_keyword", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -49,6 +51,8 @@ module s315_init_subclass_metaclass_keyword {
     #[py.bindings = [{name = "__init_subclass__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -81,6 +85,8 @@ module s315_init_subclass_metaclass_keyword {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -113,6 +119,8 @@ module s315_init_subclass_metaclass_keyword {
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -150,6 +158,8 @@ module s315_init_subclass_metaclass_keyword {
       %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
       %flag.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%flag.cell.0, %flag.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s315_init_subclass_metaclass_keyword", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("isc")
       %flag.3 : py.Value = base.refGet[py.Value](%flag.cell.0)
@@ -193,6 +203,8 @@ module s315_init_subclass_metaclass_keyword {
       %set.3 : base.Unit = base.refSet[py.Value](%ns.cell.0, %ns.2)
       %flag.1 : py.Value = py.tupleGet(%bound.0, 4)
       %set.4 : base.Unit = base.refSet[py.Value](%flag.cell.0, %flag.1)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("s315_init_subclass_metaclass_keyword", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("init")
       %flag.2 : py.Value = base.refGet[py.Value](%flag.cell.0)

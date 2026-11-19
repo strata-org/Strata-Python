@@ -1,6 +1,8 @@
 module s113_oserror_fields {
   func @|s113_oserror_fields.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s113_oserror_fields")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -356,6 +358,8 @@ module s113_oserror_fields {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -388,6 +392,8 @@ module s113_oserror_fields {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -421,6 +427,8 @@ module s113_oserror_fields {
     #[py.bindings = [{name = "__init__", binding = "def"}]]
 
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -472,6 +480,8 @@ module s113_oserror_fields {
       %set.2 : base.Unit = base.refSet[py.Value](%b.cell.0, %b.2)
       %c.15 : py.Value = py.tupleGet(%bound.0, 3)
       %set.3 : base.Unit = base.refSet[py.Value](%c.cell.0, %c.15)
+      jump ^start.0()
+    start.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -496,6 +506,8 @@ module s113_oserror_fields {
       %set.1 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.1)
       %k.1 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.1)
+      jump ^start.0()
+    start.0():
       %super.0 : py.Value = py.loadGlobal("s113_oserror_fields", "super") ^propagate.0()
       %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
       %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
@@ -531,6 +543,8 @@ module s113_oserror_fields {
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %path.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%path.cell.0, %path.2)
+      jump ^start.0()
+    start.0():
       %super.0 : py.Value = py.loadGlobal("s113_oserror_fields", "super") ^propagate.0()
       %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
       %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()

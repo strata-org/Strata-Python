@@ -1,6 +1,10 @@
 module lib_str_methods {
   func @|lib_str_methods.<module>|() -> base.Except(py.Value, py.Value) {
+    #[py.loops = [{head = "head.0", done = "done.0"}]]
+
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("lib_str_methods")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_str_methods", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -55,54 +59,68 @@ module lib_str_methods {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %name.cell.0 : base.Ref(py.Value) = py.globalCell("lib_str_methods", "name")
       %set.6 : base.Unit = base.refSet[py.Value](%name.cell.0, %item.0)
-      %print.0 : py.Value = py.loadGlobal("lib_str_methods", "print") ^propagate.0()
-      %name.3 : py.Value = py.loadGlobal("lib_str_methods", "name") ^propagate.0()
-      %repr.0 : py.Value = py.loadGlobal("lib_str_methods", "repr") ^propagate.0()
-      %getattr.0 : py.Value = py.loadGlobal("lib_str_methods", "getattr") ^propagate.0()
-      %s.0 : py.Value = py.loadGlobal("lib_str_methods", "s") ^propagate.0()
-      %name.4 : py.Value = py.loadGlobal("lib_str_methods", "name") ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("lib_str_methods", "print") ^raised.0()
+      %name.3 : py.Value = py.loadGlobal("lib_str_methods", "name") ^raised.0()
+      %repr.0 : py.Value = py.loadGlobal("lib_str_methods", "repr") ^raised.0()
+      %getattr.0 : py.Value = py.loadGlobal("lib_str_methods", "getattr") ^raised.0()
+      %s.0 : py.Value = py.loadGlobal("lib_str_methods", "s") ^raised.0()
+      %name.4 : py.Value = py.loadGlobal("lib_str_methods", "name") ^raised.0()
       %tuple.2 : py.Value = py.mkTuple(%s.0, %name.4)
       %kwargs.2 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%getattr.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %call.0 : py.Value = py.call(%getattr.0, %tuple.2, %kwargs.2) ^raised.0()
       %tuple.3 : py.Value = py.mkTuple
       %kwargs.3 : py.Value = py.mkKwargs
-      %call.1 : py.Value = py.call(%call.0, %tuple.3, %kwargs.3) ^propagate.0()
+      %call.1 : py.Value = py.call(%call.0, %tuple.3, %kwargs.3) ^raised.0()
       %tuple.4 : py.Value = py.mkTuple(%call.1)
       %kwargs.4 : py.Value = py.mkKwargs
-      %call.2 : py.Value = py.call(%repr.0, %tuple.4, %kwargs.4) ^propagate.0()
-      %repr.1 : py.Value = py.loadGlobal("lib_str_methods", "repr") ^propagate.0()
-      %getattr.1 : py.Value = py.loadGlobal("lib_str_methods", "getattr") ^propagate.0()
+      %call.2 : py.Value = py.call(%repr.0, %tuple.4, %kwargs.4) ^raised.0()
+      %repr.1 : py.Value = py.loadGlobal("lib_str_methods", "repr") ^raised.0()
+      %getattr.1 : py.Value = py.loadGlobal("lib_str_methods", "getattr") ^raised.0()
       %str.23 : py.Value = py.strLit("ΑΣ")
-      %name.5 : py.Value = py.loadGlobal("lib_str_methods", "name") ^propagate.0()
+      %name.5 : py.Value = py.loadGlobal("lib_str_methods", "name") ^raised.0()
       %tuple.5 : py.Value = py.mkTuple(%str.23, %name.5)
       %kwargs.5 : py.Value = py.mkKwargs
-      %call.3 : py.Value = py.call(%getattr.1, %tuple.5, %kwargs.5) ^propagate.0()
+      %call.3 : py.Value = py.call(%getattr.1, %tuple.5, %kwargs.5) ^raised.0()
       %tuple.6 : py.Value = py.mkTuple
       %kwargs.6 : py.Value = py.mkKwargs
-      %call.4 : py.Value = py.call(%call.3, %tuple.6, %kwargs.6) ^propagate.0()
+      %call.4 : py.Value = py.call(%call.3, %tuple.6, %kwargs.6) ^raised.0()
       %tuple.7 : py.Value = py.mkTuple(%call.4)
       %kwargs.7 : py.Value = py.mkKwargs
-      %call.5 : py.Value = py.call(%repr.1, %tuple.7, %kwargs.7) ^propagate.0()
-      %repr.2 : py.Value = py.loadGlobal("lib_str_methods", "repr") ^propagate.0()
-      %getattr.2 : py.Value = py.loadGlobal("lib_str_methods", "getattr") ^propagate.0()
+      %call.5 : py.Value = py.call(%repr.1, %tuple.7, %kwargs.7) ^raised.0()
+      %repr.2 : py.Value = py.loadGlobal("lib_str_methods", "repr") ^raised.0()
+      %getattr.2 : py.Value = py.loadGlobal("lib_str_methods", "getattr") ^raised.0()
       %str.24 : py.Value = py.strLit("")
-      %name.6 : py.Value = py.loadGlobal("lib_str_methods", "name") ^propagate.0()
+      %name.6 : py.Value = py.loadGlobal("lib_str_methods", "name") ^raised.0()
       %tuple.8 : py.Value = py.mkTuple(%str.24, %name.6)
       %kwargs.8 : py.Value = py.mkKwargs
-      %call.6 : py.Value = py.call(%getattr.2, %tuple.8, %kwargs.8) ^propagate.0()
+      %call.6 : py.Value = py.call(%getattr.2, %tuple.8, %kwargs.8) ^raised.0()
       %tuple.9 : py.Value = py.mkTuple
       %kwargs.9 : py.Value = py.mkKwargs
-      %call.7 : py.Value = py.call(%call.6, %tuple.9, %kwargs.9) ^propagate.0()
+      %call.7 : py.Value = py.call(%call.6, %tuple.9, %kwargs.9) ^raised.0()
       %tuple.10 : py.Value = py.mkTuple(%call.7)
       %kwargs.10 : py.Value = py.mkKwargs
-      %call.8 : py.Value = py.call(%repr.2, %tuple.10, %kwargs.10) ^propagate.0()
+      %call.8 : py.Value = py.call(%repr.2, %tuple.10, %kwargs.10) ^raised.0()
       %tuple.11 : py.Value = py.mkTuple(%name.3, %call.2, %call.5, %call.8)
       %kwargs.11 : py.Value = py.mkKwargs
-      %call.9 : py.Value = py.call(%print.0, %tuple.11, %kwargs.11) ^propagate.0()
+      %call.9 : py.Value = py.call(%print.0, %tuple.11, %kwargs.11) ^raised.0()
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
-      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+      branch(%done.0) ^normal.0() ^raised.0(%exc.0)
+    normal.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^done.0(%comp.0)
+    raised.0(%exc.1 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.1)
+      jump ^done.0(%comp.1)
+    done.0(%comp.2 : py.Completion):
+      py.Completion.case(%comp.2) ^exit.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
     exit.0():
       %show.0 : py.Value = py.loadGlobal("lib_str_methods", "show") ^propagate.0()
       %s.1 : py.Value = py.loadGlobal("lib_str_methods", "s") ^propagate.0()
@@ -779,15 +797,17 @@ module lib_str_methods {
       %none.10 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.10)
       ret(%ret.0)
-    propagate.0(%exc.1 : py.Value):
-      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
-      ret(%exc.2)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @|lib_str_methods.S.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.bases = ["str"]]
     #[py.fields = []]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -816,6 +836,8 @@ module lib_str_methods {
     #[py.bindings = [{name = "__index__", binding = "def"}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -861,6 +883,8 @@ module lib_str_methods {
       %set.1 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 2)
       %set.2 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %kwargs.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_str_methods", "print") ^catch.0()
       %repr.0 : py.Value = py.loadGlobal("lib_str_methods", "repr") ^catch.0()
       %f.3 : py.Value = base.refGet[py.Value](%f.cell.0)
@@ -936,6 +960,8 @@ module lib_str_methods {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "I.__index__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      jump ^start.0()
+    start.0():
       %print.0 : py.Value = py.loadGlobal("lib_str_methods", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("index")
       %tuple.0 : py.Value = py.mkTuple(%str.0)

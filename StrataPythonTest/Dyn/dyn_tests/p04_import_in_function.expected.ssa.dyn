@@ -1,6 +1,8 @@
 module p04_import_in_function {
   func @|p04_import_in_function.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("p04_import_in_function")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p04_import_in_function", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -25,6 +27,8 @@ module p04_import_in_function {
       %s.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%s.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %mod.0 : py.Value = py.importModule("math") ^propagate.0()
       %sep.0 : py.Value = py.importFrom("os", "sep") ^propagate.0()
       %math.2 : py.Value = py.requireDefined(%mod.0, "math", "UnboundLocalError", "cannot access local variable 'math' where it is not associated with a value") ^propagate.0()
@@ -45,6 +49,8 @@ module p04_import_in_function {
       %h.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%h.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %mod.0 : py.Value = py.importModule("json") ^propagate.0()
       %set.0 : base.Unit = base.refSet[py.Value](%json.cell.0, %mod.0)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p04_import_in_function.g.h, "h", "p04_import_in_function", %json.cell.0)
@@ -59,6 +65,8 @@ module p04_import_in_function {
     entry.0(%json.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g.<locals>.h", 0, 0, false, false) ^propagate.0()
+      jump ^start.0()
+    start.0():
       %json.0 : py.Value = base.refGet[py.Value](%json.cell.0)
       %json.1 : py.Value = py.requireDefined(%json.0, "json", "NameError", "cannot access free variable 'json' where it is not associated with a value in enclosing scope") ^propagate.0()
       %dumps.0 : py.Value = py.attr(%json.1, "dumps") ^propagate.0()

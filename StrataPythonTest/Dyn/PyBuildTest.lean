@@ -196,9 +196,9 @@ private def k : Built :=
     discard <| tryFinally
       (fun fin => do jump (fin.goto.bind (← compReturn (← getAttr x "foo"))))
       (fun _ => discard <| getAttr x "cleanup")
-      (pure { normal := .block "normal" fun _ => emitReturnNone
-              «return» := .block "ret" fun v => emitReturn v.id
-              raise := .block "raise" emitPropagate })
+      (fun _ => pure { normal := .block "normal" fun _ => emitReturnNone
+                       «return» := .block "ret" fun v => emitReturn v.id
+                       raise := .block "raise" emitPropagate })
 
 #guard k.isOk
 
@@ -222,7 +222,7 @@ private def kReturns : Built :=
       (fun prev => do
         discard <| emitEffect (.str .base "pop") Py.popExcept.ref #[prev]
         emitReturnNone)
-      (pure { normal := .unreachable, «return» := .unreachable, raise := .unreachable })
+      (fun _ => pure { normal := .unreachable, «return» := .unreachable, raise := .unreachable })
 
 #guard kReturns.isOk
 
@@ -238,9 +238,9 @@ private def kBound : Built :=
     let hc := h.goto.bind (value c)
     withHandlerTo hc do
       discard <| tryFinally (fun _ => pure ()) (fun _ => discard <| getAttr x "cleanup")
-        (pure { normal := .block "normal" fun _ => emitReturnNone
-                «return» := .unreachable
-                raise := .block "raise" fun e => jump (hc.bind e) })
+        (fun _ => pure { normal := .block "normal" fun _ => emitReturnNone
+                         «return» := .unreachable
+                         raise := .block "raise" fun e => jump (hc.bind e) })
     let .cons _ (.cons pe .nil) ← Emit.startBlock h (.str .base "exc")
     emitReturn pe.id
 

@@ -1,6 +1,8 @@
 module s299_printf_str {
   func @|s299_printf_str.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("s299_printf_str")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s299_printf_str", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -264,6 +266,8 @@ module s299_printf_str {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "t", 0, 2, false, false, "fmt", "args") ^propagate.0()
       %fmt.2 : py.Value = py.tupleGet(%bound.0, 0)
       %args.3 : py.Value = py.tupleGet(%bound.0, 1)
+      jump ^start.0()
+    start.0():
       %fmt.4 : py.Value = py.requireDefined(%fmt.2, "fmt", "UnboundLocalError", "cannot access local variable 'fmt' where it is not associated with a value") ^catch.0()
       %args.5 : py.Value = py.requireDefined(%args.3, "args", "UnboundLocalError", "cannot access local variable 'args' where it is not associated with a value") ^catch.0()
       %mod.0 : py.Value = py.mod(%fmt.4, %args.5) ^catch.0()
