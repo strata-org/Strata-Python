@@ -10,6 +10,7 @@ public import StrataDyn.WF
 import all StrataDyn.Canonical
 import all StrataDyn.Loops
 import all StrataDyn.LoopsProps
+import all StrataDyn.LoopsFast
 import all StrataDyn.DomComplete
 import all StrataDyn.DomDecide
 import all StrataDyn.DomProps
@@ -30,6 +31,16 @@ every well-formed function's do.
   against a depth-first order, establishes `Body.Reducible` and `Func.Reducible` when it holds;
 * `Body.Reducible.no_forward_cycle`: then no cycle of blocks avoids the back edges;
 * `Func.of_loopsCheck`: `Canonicalize.run`'s check establishes the form and one entry per loop;
+* `Body.dom_of_atLoop`: a loop's head dominates every point of its loop;
+* `Body.Preheader.root_ne`: a head with a preheader is not the body's root;
+* `Body.Preheader.transfer_head`, `Body.Preheader.transfer_head_latch`,
+  `Body.Preheader.transfer_head_of_not_isHead`: every transfer to a loop's head leaves from the end
+  of its preheader or is a back edge, so from the end of its latch, and from the end of its
+  preheader when no back edge enters it;
+* `Body.Preheader.atLoop_of_path`, `Body.Preheader.atLoop_of_path_head`: every path from outside a
+  loop into it passes the end of its preheader;
+* `Body.leaves_iff`: a point leaves the body exactly when a successor of its instruction or
+  terminator names `Label.exit`;
 * `Body.mem_loopRoles`, `Body.loopRoles_complete`, `Func.loopRoles_spec`: in a body whose loops
   have preheaders and latches, and so in a canonical function, `Body.loopRoles` names each loop's
   head, preheader and latch.
@@ -349,6 +360,170 @@ theorem oneExitB_iff (hn : (bs.map (·.label)).Nodup) : oneExitB bs = true ↔ O
         have hend : endOf post ∈ exitPoints bs := hpost.exits u (mem_exitPoints.mp hu) ▸ hu
         exact ⟨endOf post, hend, fun w hw => hpost.exits w (mem_exitPoints.mp hw),
           (endsAtB_iff hn).mpr ⟨post, hpost.mem, rfl, hpost.endsIn⟩⟩
+
+/-! ## Paths through the preheader and the latch
+
+A stage that checks a loop's invariant asserts its base case at the end of the preheader and its
+step case at the end of the latch, and assumes it at the head's start.  That is sound because a
+run reaches the head's start only by a transfer (`Preheader.root_ne`), and every transfer to the
+head leaves from one of those two points (`Preheader.transfer_head_latch`).  The writes it havocs
+at the preheader are those of the loop's blocks, because a path that comes back to the head
+without passing the end of the preheader stays in the loop (`Preheader.atLoop_of_path_head`). -/
+
+/-- A path that avoids `d` and ends in a block other than the one it starts in passes the start
+of that block. -/
+private theorem PathAvoid.toStart {d x y : Point} (hp : PathAvoid bs d x y) (hl : x.label ≠ y.label) :
+    PathAvoid bs d x ⟨y.label, 0⟩ := by
+  induction hp with
+  | refl => exact absurd rfl hl
+  | step hp he hw ih =>
+    cases he with
+    | fall => exact ih hl
+    | jump hj => exact .step hp (.jump hj) hw
+
+/-- The start of `h` dominates every point of the loop of `h`.  A path from the root that avoids
+`h`'s start and reaches a block of the loop would go on, inside the loop, to the source of a back
+edge to `h`, which `h`'s start dominates. -/
+public theorem dom_of_atLoop {h : Label} {w : Point} (hw : AtLoop bs h w) : Dom bs ⟨h, 0⟩ w := by
+  obtain ⟨b, hbl, u, ⟨v, -, -, hdu⟩, -, hin⟩ := hw
+  intro hr
+  rw [reachAvoid_iff_pathAvoid] at hr
+  have hroot : root bs = ⟨(root bs).label, 0⟩ := rfl
+  rcases hin with hbh | hpath
+  · -- `w` is in the head's block, which a path enters only through its start.
+    by_cases hrl : (root bs).label = h
+    · exact hr.start_ne (hroot.trans (by rw [hrl]))
+    · exact hr.label_ne hrl (hbl.symm.trans hbh)
+  · apply hdu
+    rw [reachAvoid_iff_pathAvoid]
+    by_cases hrl : (root bs).label = b.label
+    · rw [hroot, hrl]
+      exact hpath
+    · exact (hbl ▸ hr.toStart (hbl ▸ hrl)).trans hpath
+
+/-- (P1) A head with a preheader is not the body's root, so a run reaches the head's start only
+by a transfer.  The preheader's end transfers to the head's start, and a path to it passes the
+root, so the root would dominate it: that transfer would be a back edge, and the preheader would
+be in the loop. -/
+public theorem Preheader.root_ne {h : Label} {pre : Block env α} (hp : Preheader bs h pre) :
+    root bs ≠ ⟨h, 0⟩ := by
+  intro hr
+  have hdom : Dom bs ⟨h, 0⟩ (endOf pre) := by
+    intro ra
+    have key : ∀ y, ReachAvoid bs ⟨h, 0⟩ y → root bs ≠ ⟨h, 0⟩ := by
+      intro y hy
+      induction hy with
+      | root hne => exact hne
+      | step _ _ _ ih => exact ih
+    exact key _ ra hr
+  obtain ⟨v, hj, hvl⟩ := hp.enters
+  apply hp.outside
+  refine ⟨endOf pre, ⟨v, hj, hvl, hdom⟩, hp.mem, ?_⟩
+  by_cases hph : pre.label = h
+  · exact .inl hph
+  · exact .inr (PathAvoid.fall hp.mem (d := ⟨h, 0⟩) hph (Nat.le_refl _))
+
+/-- (P1) If `pre` is the preheader of `h`, every transfer to `h` leaves from the end of `pre`, or
+is a back edge. -/
+public theorem Preheader.transfer_head {h : Label} {pre : Block env α} (hp : Preheader bs h pre)
+    {u : Point} (ht : Transfer bs u h) : u = endOf pre ∨ IsBackEdge bs u h := by
+  by_cases hu : AtLoop bs h u
+  · obtain ⟨v, hj, hvl⟩ := ht
+    exact .inr ⟨v, hj, hvl, dom_of_atLoop hu⟩
+  · exact .inl (hp.entries u ht hu)
+
+/-- (P1, P2) If the loop of `h` has the preheader `pre` and the latch `l`, every transfer to `h`
+leaves from the end of `pre` or from the end of `l`. -/
+public theorem Preheader.transfer_head_latch {h : Label} {pre l : Block env α}
+    (hp : Preheader bs h pre) (hl : Latch bs h l) {u : Point} (ht : Transfer bs u h) :
+    u = endOf pre ∨ u = endOf l :=
+  (hp.transfer_head ht).imp_right (hl.back u)
+
+/-- (P1) If no back edge enters `h`, every transfer to `h` leaves from the end of its
+preheader. -/
+public theorem Preheader.transfer_head_of_not_isHead {h : Label} {pre : Block env α}
+    (hp : Preheader bs h pre) (hh : ¬ IsHead bs h) {u : Point} (ht : Transfer bs u h) :
+    u = endOf pre :=
+  (hp.transfer_head ht).resolve_right fun hb => hh ⟨u, hb⟩
+
+/-- (P1) If `pre` is the preheader of `h`, a path that ends at a point of the loop of `h` without
+passing the end of `pre` starts in the loop.  So every point of a path from `h`'s start back to
+it that does not pass the end of `pre` is in the loop. -/
+public theorem Preheader.atLoop_of_path {h : Label} {pre : Block env α} (hp : Preheader bs h pre)
+    {x y : Point} (hxy : PathAvoid bs (endOf pre) x y) (hy : AtLoop bs h y) :
+    AtLoop bs h x := by
+  induction hxy with
+  | refl => exact hy
+  | @step u w hxu he hw ih =>
+    apply ih
+    cases he with
+    | fall hb hk => exact hy
+    | @jump _ v hj =>
+      obtain ⟨c, hcl, u', hbe, -, hin⟩ := hy
+      have hcl : c.label = v.label := hcl
+      by_cases hvh : v.label = h
+      · exact Classical.byContradiction fun hu =>
+          hxu.end_ne (hp.entries u ⟨v, hj, hvh⟩ hu)
+      · obtain ⟨bu, hbu, hbul, hk⟩ :
+            ∃ bu ∈ bs, bu.label = u.label ∧ u.count ≤ bu.instrs.size := by
+          cases hj with
+          | instr hb hi => exact ⟨_, hb, rfl, Nat.le_of_lt (Array.getElem?_eq_some_iff.mp hi).1⟩
+          | term hb => exact ⟨_, hb, rfl, Nat.le_refl _⟩
+        refine ⟨bu, hbul, u', hbe, hbu, ?_⟩
+        by_cases hbh : bu.label = h
+        · exact .inl hbh
+        · rcases hin with hch | hpath
+          · exact absurd (hcl.symm.trans hch) hvh
+          · -- The start of `u`'s block reaches `u'` through `v` without passing `h`'s start.
+            have hu : u = ⟨bu.label, u.count⟩ := by rw [hbul]
+            have hfall : PathAvoid bs ⟨h, 0⟩ ⟨bu.label, 0⟩ u :=
+              hu ▸ PathAvoid.fall hbu (d := ⟨h, 0⟩) hbh hk
+            have hstep : PathAvoid bs ⟨h, 0⟩ ⟨bu.label, 0⟩ ⟨v.label, 0⟩ :=
+              .step hfall (.jump hj) fun he => hvh (congrArg Point.label he)
+            rw [hcl] at hpath
+            exact .inr (hstep.trans hpath)
+
+/-- The loop of `h` holds the block `h` when a back edge enters it. -/
+private theorem atLoop_head {h : Label} (hh : IsHead bs h) : AtLoop bs h ⟨h, 0⟩ := by
+  obtain ⟨u, v, hj, hvl, hd⟩ := hh
+  exact ⟨v, hvl, u, ⟨v, hj, hvl, hd⟩, hj.mem, .inl hvl⟩
+
+/-- (P1) If `pre` is the preheader of the loop of `h`, every point from which a path reaches
+`h`'s start without passing the end of `pre` is in the loop: the writes between two visits of
+`h` that do not pass the end of `pre` are those of the loop's blocks. -/
+public theorem Preheader.atLoop_of_path_head {h : Label} {pre : Block env α} (hp : Preheader bs h pre)
+    (hh : IsHead bs h) {x : Point} (hx : PathAvoid bs (endOf pre) x ⟨h, 0⟩) : AtLoop bs h x :=
+  hp.atLoop_of_path hx (atLoop_head hh)
+
+/-! ## Leaving the body
+
+`Leaves` is how P3, P4 and F2 tell where a run of the body ends normally: a point whose
+instruction or terminator has a successor that names `Label.exit`.  A `ret` is a `jump` to
+`Label.exit`, and an instruction's successor may also name it, such as a failure that leaves the
+body at once.  In a region's body, `Label.exit` leaves the region, not the function.  The machine
+leaves a body only along such a successor.  A step that leaves the top frame takes an exit site
+among the sites of the instruction or terminator it runs (`Exec.step_ret`), and linking makes an
+exit site of a successor exactly when it names `Label.exit` (`Exec.linkSite_target_exit`).  That
+linking makes the sites of an instruction or terminator from its successors, in order
+(`mapM linkSite`, `StrataDyn/Exec/Link.lean`), is read from the code, not proved: `link_wf` is
+still to be proved. -/
+
+/-- A point leaves the body exactly when its instruction, or its terminator if it is the block's
+end, has a successor that names `Label.exit`. -/
+public theorem leaves_iff {u : Point} :
+    Leaves bs u ↔ ∃ b ∈ bs, b.label = u.label ∧
+      ((∃ i, b.instrs[u.count]? = some i ∧ ∃ s ∈ i.succs, s.label = Label.exit) ∨
+        (u.count = b.instrs.size ∧ ∃ s ∈ b.term.succs, s.label = Label.exit)) := by
+  unfold Leaves targets
+  refine exists_congr fun b => and_congr_right fun _ => and_congr_right fun _ => ?_
+  rw [List.mem_append]
+  apply or_congr
+  · cases hi : b.instrs[u.count]? with
+    | none => simp
+    | some i => simp [eq_comm]
+  · by_cases hk : u.count = b.instrs.size
+    · simp [hk, eq_comm]
+    · simp [hk]
 
 /-! ## One entry per loop -/
 

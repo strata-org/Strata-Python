@@ -137,6 +137,20 @@ private def brkReturns : Func E Unit :=
 -- A path from an exit returns before `done` (`noReturn`).
 #guard !check shape [rec "head" "done"] brkReturns
 
+/-- `whileBrk`, whose `break` block runs an instruction whose failure leaves the body, as a raise
+does that a handler sends to the function's exit, before it goes on to `done`. -/
+private def brkRaises : Func E Unit :=
+  fn [blk "entry" #[] (jump "pre"), blk "pre" #[] (jump "head"),
+      blk "head" #[] (branch "body" "normal"), blk "body" #[] (branch "latch" "brk"),
+      blk "latch" #[] (jump "head"),
+      blk "normal" #[] (jump "done"), blk "brk" #[addExit 9] (jump "done"),
+      blkK "done" 7 Demo.Completion #[] (caseT 7 ["after", "unr", "unr", "after", "unr"]),
+      blk "unr" #[] unreachableT, blk "after" #[] ret]
+
+-- A path from an exit leaves the body through an instruction's failure before `done`
+-- (`noReturn`): an instruction's successor to the exit leaves the body as `ret` does.
+#guard !check shape [rec "head" "done"] brkRaises
+
 /-- `whileBrk`, whose `break` block spins forever, never reaching `done` and never returning. -/
 private def brkSpins : Func E Unit :=
   fn [blk "entry" #[] (jump "pre"), blk "pre" #[] (jump "head"),
@@ -148,6 +162,21 @@ private def brkSpins : Func E Unit :=
 
 -- An exit that never reaches `done` (`reaches`).
 #guard !check shape [rec "head" "done", recNoDone "spin"] brkSpins
+
+/-- `whileBrk`, whose `break` block goes on to `done`, or to `spin`, through `spre`: a loop of
+its own that never ends. -/
+private def brkMaySpin : Func E Unit :=
+  fn [blk "entry" #[] (jump "pre"), blk "pre" #[] (jump "head"),
+      blk "head" #[] (branch "body" "normal"), blk "body" #[] (branch "latch" "brk"),
+      blk "latch" #[] (jump "head"),
+      blk "normal" #[] (jump "done"), blk "brk" #[] (branch "done" "spre"),
+      blk "spre" #[] (jump "spin"), blk "spin" #[] (jump "spin"),
+      blkK "done" 7 Demo.Completion #[] (caseT 7 ["after", "unr", "unr", "after", "unr"]),
+      blk "unr" #[] unreachableT, blk "after" #[] ret]
+
+-- A path out of the loop may run forever instead of reaching `done`: some path from each block
+-- that the loop leaves for reaches `done`, and none leaves the body before it.
+#guard check shape [rec "head" "done", recNoDone "spin"] brkMaySpin
 
 /-- An outer loop at `ohead` that never ends, and an inner loop whose `break` block `ib` goes on
 to the outer latch, so it continues the outer loop without passing the inner `done`. -/
@@ -475,5 +504,9 @@ private def preamble (twice : Bool) : Func E Unit :=
 #guard (fn [blk "entry" #[] unreachableT]).checkPreamble
 -- An entry block that runs an instruction, whose failure goes to `h`, before `unreachable`.
 #guard !(fn [blk "entry" #[add 1 "h"] unreachableT, blk "h" #[] ret]).checkPreamble
+-- F1 says nothing about the entry block's own instructions: here a run whose instruction fails
+-- goes to `h` and returns, without reaching `body`, the block where the precondition is assumed,
+-- as a translated Python function does whose argument binding fails.
+#guard (fn [blk "entry" #[add 1 "h"] (jump "body"), blk "body" #[] ret, blk "h" #[] ret]).checkPreamble
 
 end Strata.Dyn.LoopExitsTest

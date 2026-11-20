@@ -559,6 +559,18 @@ passes. A function is in canonical form when each class of obligation has one su
   ends;
 - (F2) the function returns from one block, for its postcondition.
 
+So a stage may assume the invariant at the head's start once it has asserted it at the end of the
+preheader and of the latch: a run reaches the head's start only by a transfer, and every transfer
+to the head leaves from one of the two (`Body.Preheader.root_ne` and
+`Body.Preheader.transfer_head_latch`, in `StrataDyn/CanonicalProps.lean`). The writes it havocs at
+the preheader are those of the loop's blocks, the regions their instructions run and the code they
+call included: a path that comes back to the head without passing the end of the preheader stays
+in the loop (`Body.Preheader.atLoop_of_path_head`). For a recorded loop that no back edge enters,
+every transfer to the head leaves from the end of its preheader
+(`Body.Preheader.transfer_head_of_not_isHead`), so the base case alone suffices. The assertion goes
+right before the block's plain `jump`, and checks the invariant with the head's parameters replaced
+by the jump's arguments.
+
 A loop is found in the control-flow graph, as the natural loops of the back edges to its head:
 a block is in it when control can go from the block around the loop again. Code that cannot,
 such as the code after a `break`, is not. The preheader, the latch and the return block end in
@@ -596,13 +608,36 @@ A front end whose loops end with a *completion*, a value that says how a constru
 (normal, `break`, `continue`, `return`, `raise`), asks `run` to check three more properties,
 which it states in a `CanonicalSpec` (`StrataDyn/LoopExits.lean`):
 
-- each loop has one block `done(k)` where every way out of the loop meets, with the
-  completion `k` as its first parameter, so that what holds when the loop ends with `k` can be
-  asserted there (P4);
+- each loop has one block `done(k)`, with the completion `k` as its first parameter (P4). No
+  path out of the loop leaves the body (returns or raises), or comes back to the head of a loop
+  around it, without passing `done`, and some path from each block that the loop leaves for,
+  except an empty block that ends in `base.unreachable`, reaches `done`. A path may instead run
+  forever or fault, and reaching `base.unreachable` is a fault. Code before the loop may also
+  enter `done`. So a stage may assert at `done` what holds when the loop ends with `k`; it may
+  assume there only what it has just asserted;
 - `done` absorbs its own loop's `break` and `continue`, and sends every other completion out
   of the loop (P7);
-- the entry block ends in a plain `jump` to a block that nothing else enters, so that the
-  precondition can be assumed at the start of that block (F1).
+- the entry block ends in a plain `jump` to a block that nothing else enters, the start block,
+  so that the precondition can be assumed at the start of that block (F1).
+
+The entry block's own instructions run before the start block, and F1 says nothing about them. So
+a stage that assumes the precondition at the start block must cover them in two ways. Runs whose
+entry-block instruction transfers elsewhere, such as an argument binding that fails, never reach
+the start block. The stage either proves at each call site that the entry block reaches its jump,
+or accounts for those runs at the call site (what they return, what they write, and where they
+fault), or verifies those runs in the callee itself, against its frame and its exceptional result,
+without assuming the precondition. On runs that reach the start
+block, the stage checks the entry block's code itself: its writes count against the function's
+frame, and the state it leaves is the one the precondition is assumed of, so the stage must relate
+it to the state at the call, where the caller asserted the precondition.
+
+Two conditions keep P4 meaningful. A fault is a failure, not an assumption: a lowering encodes
+`base.unreachable` as a failed assertion, never as an assumption. And no pass adds an assumption
+between a loop's exit and its `done`. The check of P4 sees every way a run of a body ends
+normally: a step of the machine leaves a body only along an exit site of the instruction or
+terminator it runs (`Exec.step_ret`), and linking makes an exit site of a successor exactly when
+it names the body's exit (`Exec.linkSite_target_exit`). That linking makes an instruction's sites
+from its successors, in order, is read from the code, not proved yet.
 
 The front end names its completion datatype and the constructor of each role in a `CompletionShape`,
 which the check reads against the datatype's declaration, and states each loop's head and `done` in

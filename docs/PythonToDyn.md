@@ -558,6 +558,37 @@ source parameter is bound (F1, `docs/Dyn.md`, "Canonical form"). Later stages ca
 precondition over the source parameters can be assumed at the start of `start.0`, where every
 parameter's cell holds its bound value. A module body, a class body and the stub of a rejected
 function jump to `start.0` at once.
+
+The prologue only binds the arguments. The entry block makes a new cell for every local, parameters
+included, and the prologue writes the bound value into each parameter's cell and into no other
+cell. `StrataPythonTestExtra/DynReadTest.lean` checks this on every translator golden except those
+of four programs that the translator rejects with a scope error (`e02_global_param`,
+`e09_duplicate_argument`, `e11_nonlocal_param` and `e28_symtable_error_first`). It checks that
+`py.bindArgs` takes the entry block's last two parameters, the positional tuple and the keyword
+dict, and matches the function's signature in its scope golden, and that each write gives a
+parameter's new cell the slot of the result that binds that parameter, once. It doesn't check which
+default each parameter gets. When the translator replaces a function by a stub without a binding,
+such as a generator lambda, another function with the same qualified name may be checked against
+the stub's signature instead of its own, so a wrong binding of it can pass. A stage that relies on
+this property must check it again, in one pass over the entry block. `py.bindArgs` names only the
+named parameters, so for `*args` and `**kw` the stage also needs the function's signature. Binding
+runs no user code: `py.bindArgs` stops with a gap at a keyword that is not an exact `str`, whose
+`__eq__` could run code. The `*args` tuple and the `**kw` dict that it gives are new objects, so
+the callee's writes to them don't reach the caller. Two obligations follow for a stage that assumes
+the precondition at the start of `start.0` (F1 in `docs/Dyn.md`):
+
+- The precondition is about the bound values, defaults included. A default is evaluated once, at
+  the `def`, but the object it names may change between calls. For
+  `def h(xs=[]): xs.append(1); return len(xs)`, the first `h()` returns 1 and the second returns 2.
+  So a call site computes the binding as `py.bindArgs` does, reading each default's cell in the
+  current state, and asserts the precondition on that result.
+- A call whose binding fails raises `TypeError` and never reaches `start.0`. So a call site either
+  proves that the binding succeeds (the number of arguments and the keyword names), or keeps the
+  `TypeError` among the call's possible results. For example, take `def f(x: int) -> int`, whose
+  contract says that it returns 1 and raises nothing, and `def g(xs): return f(*xs)`. A verifier
+  must not conclude that `g` never raises: CPython raises `TypeError` for `g([])` and
+  `g([1, 2])`.
+
 `PyTranslate.prologue` emits the prologue. In a class, a private parameter's name is mangled everywhere,
 its keyword included, as in CPython: `def m(self, __x)` in class `C` takes the keyword `_C__x`.
 

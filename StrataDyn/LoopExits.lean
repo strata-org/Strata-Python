@@ -20,15 +20,38 @@ The rest of the canonical form, for a front end whose loops end with a *completi
 datatype that says how a construct finished, such as `Normal`, `Break`, `Continue`, `Return v` or
 `Raise e`.  For each loop:
 
-* (P4) one block `done(k)`, whose first parameter is the completion, where every way out of the
-  loop meets.  What holds when the loop ends by `k` is asserted there;
+* (P4) one block `done(k)`, whose first parameter is the completion.  No path out of the loop
+  leaves the body (returns or raises), or comes back to the head of a loop around it, without
+  passing `done`, and some path from each block that the loop leaves for, except an empty block
+  that ends in `base.unreachable`, reaches `done`.  A path may instead run forever or fault, and
+  reaching `base.unreachable` is a fault.  Code before the loop may also enter `done`.  So a stage
+  may assert at `done` what holds when the loop ends by `k`; it may assume there only what it has
+  just asserted;
 * (P7) `done` absorbs its own loop's `Break` and `Continue`, and forwards every other completion
   out of the loop.
 
 And for the function:
 
-* (F1) the entry block ends in a plain jump to a block that nothing else enters, or in
-  `base.unreachable`.  The precondition is assumed at the start of that block.
+* (F1) the entry block ends in a plain jump to a block that nothing else enters, the *start
+  block*, or in `base.unreachable`.  The precondition is assumed at the start of the start block.
+
+The entry block's own instructions run before the start block, and F1 says nothing about them.
+So a stage that assumes the precondition at the start block must cover them in two ways.  Runs
+whose entry-block instruction transfers elsewhere, such as an argument binding that fails, never
+reach the start block.  The stage either proves at each call site that the entry block reaches its
+jump, or accounts for those runs at the call site (what they return, what they write, and where
+they fault), or verifies those runs in the callee itself, against its frame and its exceptional
+result, without assuming the precondition.  On runs that reach the
+start block, the stage checks the entry block's code itself: its writes count against the
+function's frame, and the state it leaves is the one the precondition is assumed of, so the stage
+must relate it to the state at the call, where the caller asserted the precondition.
+
+Two conditions keep P4 meaningful for the stages after the pass.  A fault is a failure, not an
+assumption: `reaches` exempts an empty block that ends in `base.unreachable` only because control
+that gets there fails, so a lowering encodes `base.unreachable` as a failed assertion, never as an
+assumption.  And no pass adds an assumption, which drops the runs that break it, between a loop's
+exit and its `done`.  `Body.Leaves`, which `noReturn` uses, sees every normal end of a body's run
+("Leaving the body" in `StrataDyn/CanonicalProps.lean`).
 
 The front end supplies two things.  A `CompletionShape` names its completion datatype and the
 role of each constructor; the check reads the constructors' order from the environment.  A
@@ -172,10 +195,11 @@ and it transfers nowhere. -/
 @[expose] def PastExit (h d : Label) (u : Point) : Prop :=
   ∃ x, ExitOf bs h x ∧ PathAvoid bs ⟨d, 0⟩ ⟨x, 0⟩ u
 
-/-- (P4) `d` is where every way out of the loop that starts at `h` meets: it takes the completion
-first; it is outside the loop; no point of the loop leaves the body; every block the loop leaves
-for reaches it, unless control never gets there; no path from those blocks returns from the
-function before it; and none comes back to the head of a loop around this one before it. -/
+/-- (P4) `d` is the `done` of the loop that starts at `h`: it takes the completion first; it is
+outside the loop; no point of the loop leaves the body; some path from every block the loop leaves
+for reaches it, unless control never gets there; no path from those blocks leaves the body
+(returns or raises) before it; and none comes back to the head of a loop around this one before
+it.  A path from those blocks may instead run forever. -/
 structure Done (s : CompletionShape env) (h d : Label) : Prop where
   block : ∃ b ∈ bs, b.label = d ∧ (b.params[0]?.map (·.type)) = some s.ty
   outside : ¬ InLoopScope bs h ⟨d, 0⟩
@@ -1042,8 +1066,9 @@ definition only in code compiled after it. -/
     simp only [hl]
 
 /-- (F1) The function's entry block ends in a plain jump to a block that nothing else enters, or it
-is empty and ends in `base.unreachable`, so that no code of the function ever runs.  So the block
-after it starts where every run of the body does. -/
+is empty and ends in `base.unreachable`, so that no code of the function ever runs.  The entry
+block's own instructions run before that block: a run whose entry-block instruction transfers
+elsewhere, such as an argument binding that fails, never reaches it. -/
 @[expose] def Func.Preamble (fn : Func env α) : Prop :=
   ∀ e, fn.blocks[0]? = some e → (e.instrs = #[] ∧ e.term.name = bn "unreachable") ∨
     ∃ b ∈ fn.blocks.toList, Body.EndsIn e b.label ∧ e.term.succs.size = 1 ∧

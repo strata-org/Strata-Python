@@ -30,6 +30,15 @@ And for the function:
 
 * (F2) one block from whose end every return leaves.  The postcondition is asserted there.
 
+A stage that asserts the invariant at the end of the preheader and of the latch may assume it at
+the head's start: a run reaches the head's start only by a transfer (`Body.Preheader.root_ne`),
+and every transfer to the head leaves from one of the two (`Body.Preheader.transfer_head_latch`).
+And the writes it havocs at the preheader are those of the loop's blocks, the regions their
+instructions run and the code they call included: a path that comes back to the head without
+passing the end of the preheader stays in the loop (`Body.Preheader.atLoop_of_path_head`).  For a
+recorded loop that no back edge enters, every transfer to the head leaves from the end of its
+preheader (`Body.Preheader.transfer_head_of_not_isHead`), so the base case alone suffices.
+
 The loop of a head `h` is the union of the natural loops of its back edges
 (`StrataDyn/Loops.lean`), as in LLVM.  Its code that cannot repeat the loop, such as the code
 after a `break`, is not in it.  The loop properties hold in every body of the function, its own

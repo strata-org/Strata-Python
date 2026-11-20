@@ -86,6 +86,22 @@ private meta def canonical (name : String) : IO (Except String String) := do
         (ToDDM.nameText r.head.name, ToDDM.nameText r.preheader.name, ToDDM.nameText r.latch.name)
     unless roles == [("head.0", "start.0", "then.0"), ("head.1", "join.0", "body.1")] do
       failures := failures.push s!"{path}: loop roles {roles}"
+  -- In g06, `total`'s entry block binds the arguments with `py.bindArgs`, whose failure goes to
+  -- `propagate.0` and on to `post.0`: a run whose binding fails reaches the end of `post.0`
+  -- without passing `start.0`, where the precondition is assumed (F1).
+  let path := testDir / "g06_function_contract.expected.canonical"
+  match ← Module.read Py.env (← IO.FS.readFile path) path.toString with
+  | .error e => failures := failures.push s!"{path}: does not read back:\n{e}"
+  | .ok m =>
+    let l (s : String) : Label := ⟨.num (.str .base s) 0⟩
+    match m.raw.funcs.toList.find? (ToDDM.nameText ·.name == "g06_function_contract.total") with
+    | none => failures := failures.push s!"{path}: no function total"
+    | some f =>
+      let bs := f.blocks.toList
+      let postEnd : Option Point := (Body.blockAt? bs (l "post")).map Body.endOf
+      unless postEnd.any (Body.reachAvoidB bs ⟨l "start", 0⟩ ·) do
+        failures := failures.push s!"{path}: no run of total reaches the end of post.0 without \
+          passing start.0"
   IO.println s!"DynCanonicalTest: {programs.length - failures.size}/{programs.length} \
     in canonical form as their goldens"
   if !failures.isEmpty then
