@@ -52,6 +52,7 @@ guarantees the function is well formed.
 * `freshLabel`, `startBlock`, `startBlock₁`, `param`, `int`, `bool`, `str`, `float`, `unit`,
   `code`, `jump`, `branch`, `ret`, `withFailureBlock`, `loopInvariant`: the builder's operations
   at typed values.
+* `startBody`: the start block of a function's body (F1).
 * `Build.named` and `let%`: a value or a block named after the Lean binder it is bound to.
 * `Build.withInfo`: run an action with a default annotation, for what it emits without one.
 
@@ -326,6 +327,14 @@ def param (stem : Name) (t : TypeExpr env) : m (ValDecl env × Val env t) :=
 /-- Close the open block with a jump to `k`, which `Build.checkedTarget` checks. -/
 def jump [base ≼ env] (k : Target env []) (info : Option α := none) : m Unit :=
   liftBuild do Raw.jump (← checkedTarget k) info
+
+/-- Close the open block, a function's entry block, with a plain jump to a fresh block `start.n`,
+and open that block: the start block of F1 (`StrataDyn/LoopExits.lean`), where the function's
+precondition is assumed.  Nothing else enters it, since its label is not returned. -/
+def startBody [base ≼ env] : m Unit := do
+  let l ← freshLabel [] (some "start")
+  jump l.goto
+  discard <| startBlock l
 
 /-- Close the open block with a branch on `cond` to `t` or `f`, which `Build.checkedTarget`
 checks. -/

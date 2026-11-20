@@ -8,6 +8,7 @@ meta import StrataPython.Dyn.PySpec.Load
 meta import StrataDyn.DDM
 meta import StrataDyn.DDMRead
 meta import StrataPython.Dyn.Env
+meta import StrataPython.Dyn.Canonical
 meta import StrataDyn.Env.WF
 meta import StrataPythonTest.Util.Python
 meta import StrataPythonTest.Dyn.TestUtil
@@ -24,8 +25,9 @@ StrataPythonTestExtra/Specs/dispatch_test | servicelib.Counter | ensures
 
 The columns are PySpec's search path, the model module, and `ok` or the rule IDs of the set's
 rejections, sorted and joined by commas. A translated set's modules must each equal
-`StrataPythonTest/Dyn/pyspec_models/<module>.expected.dyn`, and read back in `Py.env`,
-which checks them, to the same text. A rejected set's rejections, with their messages, must
+`StrataPythonTest/Dyn/pyspec_models/<module>.expected.dyn`, read back in `Py.env`,
+which checks them, to the same text, and be accepted by `PyCanonical.runModule`, as the
+translator's modules are. A rejected set's rejections, with their messages, must
 equal `<module>.expected.rejections` there. Set `PYSPEC_DYN_UPDATE=1` to rewrite the goldens.
 The test needs Python, as `withPython` finds it.
 -/
@@ -87,6 +89,8 @@ private meta def runEntry (pythonCmd : String) (update : Bool) (e : Entry) : IO 
       | .error d => fails := fails.push s!"{name}: does not read back: {d}"
       | .ok back =>
         if back.format != text then fails := fails.push s!"{name}: reads back differently"
+        if let .error fs := StrataPython.Dyn.PyCanonical.runModule back then
+          fails := fails.push s!"{name}: not put in Python's canonical form: {fs.map toString}"
       if update then IO.FS.writeFile golden text
       else if !(← golden.pathExists) then
         fails := fails.push s!"{name}: no golden {golden}; run with PYSPEC_DYN_UPDATE=1"

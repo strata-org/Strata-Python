@@ -12,6 +12,8 @@ import StrataDyn.DSL
 meta import StrataDyn.Build.Typed
 meta import StrataDyn.DDM
 meta import StrataDyn.Env.WF
+import StrataDyn.LoopExits
+meta import StrataDyn.LoopExits
 meta import Lean.Elab.Command
 meta import Lean.DocString
 
@@ -277,6 +279,27 @@ private def fl (value : Option Bool) : Built :=
 #guard_msgs in
 #eval IO.println (showMod (Emit.func (n "nf") [] Base.Bool () fun _ exit =>
   Emit.withFailureBlock [Te.Value] (some false) fun _ => do ret exit (← bool (n "t") true) : Built))
+
+/-- `startBody`: the entry block ends in a plain jump to `start.0`, which nothing else enters, so
+the function holds F1. -/
+private def started : Built :=
+  Emit.func (n "s") [] Base.Int () fun _ exit => do
+    startBody
+    ret exit (← int (n "k") 0)
+
+/-- info: module m {
+  func @s() -> base.Int {
+    entry.0():
+      jump ^start.0()
+    start.0():
+      ret(0)
+  }
+} -/
+#guard_msgs in
+#eval IO.println (showMod started)
+#guard match started with
+  | .ok (f, _) => f.val.checkPreamble
+  | .error _ => false
 
 /-- Regions: an `if` whose branches leave by their exit with the result, and a `forEach` whose
 body leaves with `ok ()`, and a `guard`, which ends the block. -/

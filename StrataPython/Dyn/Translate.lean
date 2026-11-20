@@ -2371,11 +2371,8 @@ def runBody (ctx : Ctx) (st : TState) (range : SourceRange) (act : TransM Unit) 
   return st'
 
 /-- End the entry block with a jump to a fresh block `start`, which nothing else enters: where a
-function's precondition holds, after its arguments are bound (F1, §6.4). -/
-def startBody : TransM Unit := do
-  let l ← build (freshLabel [] "start")
-  jump l.goto
-  build (startBlock l)
+function's precondition holds, after its arguments are bound (F1, §5.4). -/
+def startBody : TransM Unit := build Emit.startBody
 
 /-- The `py.loops` attribute of `fn`: the head and `done` of each loop recorded in `st` whose head
 is a block of `fn`.  A loop whose head the builder dropped, such as one in an `except` clause of

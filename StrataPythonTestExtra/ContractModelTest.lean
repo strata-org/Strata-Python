@@ -6,6 +6,7 @@
 module
 
 meta import StrataPython.Dyn.Env
+meta import StrataPython.Dyn.Canonical
 meta import StrataDyn.DDM
 meta import StrataDyn.DDMRead
 meta import StrataDyn.Env.WF
@@ -22,6 +23,7 @@ test.  For each file:
 
 * the file reads in `Py.env`, which checks it, and the module prints back as the file without
   its comment lines;
+* `PyCanonical.runModule` accepts the module, as it accepts the translator's and PySpec's;
 * one change to the file is rejected by the reader or the checker, with its rule's message.
 
 Three more checks follow:
@@ -65,7 +67,8 @@ private meta def readModel (file text : String) : IO (Module Py.env Info) := do
   | .error e => throw <| IO.userError (toString e)
 
 /-- Read the model `file` in `Py.env`.  Print its diagnostics, or the first line where the module
-prints differently from the file without its comment lines. -/
+prints differently from the file without its comment lines, and why `PyCanonical.runModule`
+rejects it, if it does. -/
 private meta def check (file : String) : IO Unit := do
   let text ← IO.FS.readFile (modelDir / file)
   match ← Module.read Py.env text file with
@@ -74,6 +77,8 @@ private meta def check (file : String) : IO Unit := do
     let expected := uncommented text
     unless toString m == expected do
       IO.println s!"{file} prints differently, at {(firstDiff (toString m) expected).getD "its end"}"
+    if let .error fs := PyCanonical.runModule m then
+      for f in fs do IO.println s!"{file}: not in Python's canonical form: {f}"
 
 /-- `text` with one change: the first `old` after `anchor`, which occurs once, becomes `new`.
 Throws if `anchor` does not occur exactly once or no `old` follows it, so that a change is never

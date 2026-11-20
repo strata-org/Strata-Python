@@ -557,7 +557,8 @@ The entry block then ends in `jump ^start.0()`, a block that nothing else enters
 source parameter is bound (F1, `docs/Dyn.md`, "Canonical form"). Later stages can rely on it: a
 precondition over the source parameters can be assumed at the start of `start.0`, where every
 parameter's cell holds its bound value. A module body, a class body and the stub of a rejected
-function jump to `start.0` at once.
+function jump to `start.0` at once. So do a PySpec model's module body, class bodies and
+class invariants' predicates (§12).
 
 The prologue only binds the arguments. The entry block makes a new cell for every local, parameters
 included, and the prologue writes the bound value into each parameter's cell and into no other
@@ -2023,6 +2024,8 @@ func @|m.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.V
 }
 func @|m.C.<invariant>.0|(%self.0 : py.Value) -> base.Bool {
   entry.0(%self.0 : py.Value):
+    jump ^start.0()
+  start.0():
     %count.0 : py.Value = py.attr(%self.0, "count") ^fail.0()
     %int.0 : py.Value = py.intLit(0)
     %ge.0 : py.Value = py.gtE(%count.0, %int.0) ^fail.0()
@@ -2391,8 +2394,8 @@ each of seven PySpec fixtures, and four written for the test.
 `StrataPythonTestExtra/ContractModelTest.lean` reads each one against `Py.env`, which checks it,
 and compares the printed module with the file without its comment lines. It also checks that one
 change to each file is rejected with its rule's message, and that every predicate entry of
-`py.invariants` has its predicate's parameters, and that ref-to-reg accepts every model and
-changes none. With CPython 3.12, it checks that the names that
+`py.invariants` has its predicate's parameters, that `PyCanonical.runModule` accepts every model,
+and that ref-to-reg accepts every model and changes none. With CPython 3.12, it checks that the names that
 a model class defines leave `C.extra` and `super().extra` raising `AttributeError`, `len(C())`
 and `iter(C())` raising `TypeError`, and `bool(C())` true (§12.11).
 Each file's first comment names its fixture, or says that the file was written for the test.
@@ -2494,8 +2497,9 @@ as that module's class, where CPython raises `AttributeError`. `SpecsTest` pins 
 
 `StrataPythonTestExtra/PySpecDynTest.lean` translates each set that
 `StrataPythonTest/Dyn/pyspec_models.txt` lists, and compares each module with its golden in
-`StrataPythonTest/Dyn/pyspec_models/`. For a rejected set, it compares the rule IDs with the
-list, and the rejections with their messages with a golden there.
+`StrataPythonTest/Dyn/pyspec_models/`, and checks that `PyCanonical.runModule` accepts it, as it
+accepts the translator's modules. For a rejected set, it compares the rule IDs with the list, and
+the rejections with their messages with a golden there.
 
 ## 13. Semantics
 

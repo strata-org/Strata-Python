@@ -328,6 +328,7 @@ def translateInvariant (t : Table) (c : ModelClass) (i : Nat) (inv : ClassInvari
   let r := Build.build fname Base.Bool { range := inv.loc } do
     let ps ← params.mapM fun (n, ty) => Build.freshVal n ty
     let _ ← Build.Raw.startFreshBlock ps "entry"
+    Emit.startBody
     let self := (ps.map (·.id))[0]!
     let ectx : EmitCtx :=
       { args := self, kwargs := self, requires := false
@@ -534,6 +535,7 @@ def translateClass (t : Table) (globals : Array String) (c : ModelClass) : ModM 
   let facts := classFacts t c initName invariants
   let r := buildFuncTyped bodyName #[(nm "args", Py.Value), (nm "kwargs", Py.Value)]
     { range := d.loc, attrs := facts } fun ps => do
+    Emit.startBody
     let zero ← intLit 0
     let ns ← emitFailing (nm "ns") Py.getItem.ref #[ps[0]!, zero]
     let store (n : String) (v : ValId) : PyM Info Unit := do
@@ -628,6 +630,7 @@ the classes, the functions and the module `__getattr__`, in the order of the sou
 def moduleBody (t : Table) (m : ModelInput) : Except String {fn : Func Py.env Info // fn.WF} :=
   let module := toString m.module
   (buildFuncTyped (qualified module ["<module>"]) #[] {} fun _ => do
+    Emit.startBody
     let _ ← writeGlobal module "__name__" (← strLit module)
     for sig in m.sigs do
       match sig with

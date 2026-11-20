@@ -29,6 +29,8 @@ module m {
   }
   func @|m.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("m")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
@@ -56,6 +58,8 @@ module m {
     #[py.invariants = [{fn = @|m.Counter.<invariant>.0|, ghosts = [ghost @|m.<ghost>.limit|]}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
       %str.0 : py.Value = py.strLit("__name__")
@@ -87,6 +91,8 @@ module m {
   }
   func @|m.Counter.<invariant>.0|(%self.0 : py.Value, %limit.0 : py.Value) -> base.Bool {
     entry.0(%self.0 : py.Value, %limit.0 : py.Value):
+      jump ^start.0()
+    start.0():
       %count.0 : py.Value = py.attr(%self.0, "count") ^fail.0()
       %le.0 : py.Value = py.ltE(%count.0, %limit.0) ^fail.0()
       %ok.0 : base.Bool = py.truthy(%le.0) ^fail.0()

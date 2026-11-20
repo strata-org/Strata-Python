@@ -1,6 +1,8 @@
 module bare_import_alias {
   func @|bare_import_alias.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
+      jump ^start.0()
+    start.0():
       %str.0 : py.Value = py.strLit("bare_import_alias")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("bare_import_alias", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
