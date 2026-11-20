@@ -21,40 +21,53 @@ set_option autoImplicit false
 /-!
 # Checking large inputs in linear time
 
-Each test checks an input of some size `n` and one of size `2n`, and fails if the larger one takes
-3 times as long as the smaller one, or longer.  A check in linear time takes about twice as long on
-the larger input, and a check in quadratic time about 4 times as long, once the quadratic part of
-its time dominates.  The sizes are chosen so that it would dominate.  So the tests do not depend on
-how fast the machine is.  The answers are pinned too, a large one by a count.
+Each test checks an input of some size `n` and one of size `2n`, and, when timed, fails if the
+larger one takes 3 times as long as the smaller one, or longer.  A check in linear time takes about
+twice as long on the larger input, and a check in quadratic time about 4 times as long, once the
+quadratic part of its time dominates.  The sizes are chosen so that it would dominate.  So the
+timed tests do not depend on how fast the machine is, only on its load staying steady.  The
+answers are pinned too, a large one by a count.
+
+A loaded shared builder slows some runs far more than the shortest of three times hides, so timing
+there is not reliable enough for a build.  So the tests are timed only with `DYN_SCALE_TIME=1`;
+without it, each test checks both inputs once, so the answers stay pinned, and times nothing.  Lake
+does not elaborate a module again when only the environment changes, so run the timed tests as
+`DYN_SCALE_TIME=1 lake lean StrataDynTest/ScaleTest.lean`.
 
 Lean decides a quantifier over an array's members in time quadratic in its size, so the checker
 quantifies over lists.  The reader adds the type of each folded constant to its array in place,
 and it collects the instructions and the blocks it reads, and its diagnostics, in lists.  The
 checks of contract regions look the targets of failure successors up in a map built once per
 region (`Region.failuresToB`), and compiled code checks that a region has no cycle by Kahn's
-algorithm (`Body.acyclicFast`, through `@[csimp]`).  These tests fail if the check of a
+algorithm (`Body.acyclicFast`, through `@[csimp]`).  Timed, these tests fail if the check of a
 function's blocks, of a module's functions, ghosts and references, or of a contract's regions
 becomes quadratic, or if the reader copies an array for each folded constant, instruction, block
-or diagnostic.  The tests of the last section fail if the dominance check takes quadratic time
-when many blocks jump to one block: in a chain of blocks, in a contract clause and in a loop.
+or diagnostic.  Timed, the tests of the last section fail if the dominance check takes quadratic
+time when many blocks jump to one block: in a chain of blocks, in a contract clause and in a loop.
 
 Heartbeats count small allocations.  The quadratic versions do their extra work without them, by
-copying arrays and calling closures, so a heartbeat limit cannot see it.  Each test measures time
-instead.
+copying arrays and calling closures, so a heartbeat limit cannot see it.  So the timed tests
+measure time instead.
 -/
 
 namespace Strata.Dyn.ScaleTest
 
 /-- Fail unless `check` gives `true` on both inputs that `inputs m` gives, one of size `m` and one
-of size `2 * m`, and fail if checking the larger one takes 3 times as long as checking the smaller
-one, or longer.  It compares the shortest of three times of each input, so one run that a busy
-machine slows down does not change the result.  It times the smaller input three times first.  It
-then times the larger one up to three times, and stops as soon as the shortest time so far is less
-than 3 times the smaller one's.  Run `k` builds the inputs with `m = n + k`.  A computation that
-uses no variable is a closed term, and compiled code computes it only once.  The run number makes
-each run build and check its inputs again. -/
+of size `2 * m`.  Without `DYN_SCALE_TIME=1`, check the inputs for `m = n` once each and time
+nothing.  With it, also fail if checking the larger one takes 3 times as long as checking the
+smaller one, or longer.  It compares the shortest of three times of each input, so one run that a
+busy machine slows down does not change the result.  It times the smaller input three times first.
+It then times the larger one up to three times, and stops as soon as the shortest time so far is
+less than 3 times the smaller one's.  Run `k` builds the inputs with `m = n + k`.  A computation
+that uses no variable is a closed term, and compiled code computes it only once.  The run number
+makes each run build and check its inputs again. -/
 private def scalesLinearly {α : Type} (what : String) (n : Nat) (inputs : Nat → α × α)
     (check : α → Bool) : IO Unit := do
+  let wrong := IO.userError s!"{what}: the check gives false"
+  unless (← IO.getEnv "DYN_SCALE_TIME") == some "1" do
+    let (s, l) := inputs n
+    unless check s && check l do throw wrong
+    return
   let mut small : Nat := 0
   let mut larges : Array α := #[]
   for k in [0:3] do
@@ -62,7 +75,7 @@ private def scalesLinearly {α : Type} (what : String) (n : Nat) (inputs : Nat �
     let t0 ← IO.monoNanosNow
     let ok ← IO.lazyPure fun _ => check s
     let t1 ← IO.monoNanosNow
-    unless ok do throw <| IO.userError s!"{what}: the check gives false"
+    unless ok do throw wrong
     small := if k = 0 then t1 - t0 else min small (t1 - t0)
     larges := larges.push l
   let mut large : Option Nat := none
@@ -70,7 +83,7 @@ private def scalesLinearly {α : Type} (what : String) (n : Nat) (inputs : Nat �
     let t0 ← IO.monoNanosNow
     let ok ← IO.lazyPure fun _ => check l
     let t1 ← IO.monoNanosNow
-    unless ok do throw <| IO.userError s!"{what}: the check gives false"
+    unless ok do throw wrong
     let t := (large.map (min (t1 - t0))).getD (t1 - t0)
     if t < 3 * small then return
     large := some t

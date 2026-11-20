@@ -111,6 +111,10 @@ statement and the code that comes back to the head, and none of the tail.
 `StrataPythonTestExtra/DynCanonicalScaleTest.lean` checks that the work of putting a function with
 many loops in canonical form, counted in heartbeats, grows with the size of the function, not with
 the number of loops times that size; `CANON_SCALE_TIME=1` also times it.
+`StrataDynTest/ScaleTest.lean` checks the checker and the reader on large inputs; only with
+`DYN_SCALE_TIME=1` does it also time them, to check that they take linear time. Lake does not
+elaborate a module again when only the environment changes, so run it as
+`DYN_SCALE_TIME=1 lake lean StrataDynTest/ScaleTest.lean`.
 `lake exe pydyn read FILE` reads one golden.
 A new program in `StrataPythonTest/Dyn/dyn_tests/` or in `StrataPythonTest/tests/` also needs
 its CPython trace and its verdict for the Python semantics' differential test: run
