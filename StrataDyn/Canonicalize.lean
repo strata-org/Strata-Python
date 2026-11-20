@@ -522,19 +522,33 @@ end
   let (r, st) := Region.mapBodies simplifyBody st ⟨bs.toArray⟩
   { fn with blocks := r.blocks, names := st.names }
 
-/-- A preheader for each block of `hs` that no back edge enters and that lacks one: a forwarding
-block that takes every transfer to it.  The body's entry block gets none: nothing may enter it,
-so the check reports that it has no preheader.  A body whose labels are not distinct, which a
-well-formed function does not have, is left as it is, and the result is not well formed. -/
-@[expose] def recordPreheaders [base ≼ env] (hs : List Label) (st : Fresh)
+/-- The heads of the front end's loop records, each once, by their position in the records'
+order. -/
+structure HeadOrder where
+  pos : Std.HashMap Label Nat
+
+/-- The heads `hs`, each once, by the position of its first record. -/
+@[expose] def HeadOrder.of (hs : List Label) : HeadOrder :=
+  ⟨(hs.foldl (init := ((∅ : Std.HashMap Label Nat), 0)) fun (m, n) h =>
+    if m.contains h then (m, n) else (m.insert h n, n + 1)).1⟩
+
+/-- A preheader for each block of the body whose label is a head of `ho` and that no back edge
+enters and that lacks one: a forwarding block that takes every transfer to it, made in the order
+of `ho`.  It looks only at the body's own blocks, so the work of all the bodies of a function grows
+with their size, not with their number times the number of heads.  That holds when the labels
+have counters, as every label that the builder and the pass make does.  The body's index finds a
+label by its counter, so a lookup of a label without one scans all such labels.  The body's entry
+block gets none: nothing may enter it, so the check reports that it has no preheader.  A body whose labels are not distinct, which a well-formed function does not have, is
+left as it is, and the result is not well formed. -/
+@[expose] def recordPreheaders [base ≼ env] (ho : HeadOrder) (st : Fresh)
     (bs : List (Block env α)) : List (Block env α) × Fresh :=
+  let mine := ((bs.filterMap fun b => (ho.pos.get? b.label).map (·, b.label)).mergeSort
+    fun a b => a.1 ≤ b.1).map (·.2)
+  if mine.isEmpty then (bs, st) else
   match loopIndex? bs with
   | none => (bs, st)
   | some ix =>
-    -- One preheader per head: a second record of the same head finds it.
-    let hs := (hs.foldl (init := (#[], (∅ : Std.HashSet Label))) fun (acc, seen) h =>
-      if seen.contains h then (acc, seen) else (acc.push h, seen.insert h)).1.toList
-    let (r, added, st) := hs.foldl (init := (({} : Redirects), (#[] : Array (Block env α)), st))
+    let (r, added, st) := mine.foldl (init := (({} : Redirects), (#[] : Array (Block env α)), st))
       fun (r, added, st) h =>
         -- The body's first block is its entry, which no transfer may enter.
         if ix.isHead h || bs.head?.any (·.label == h) then (r, added, st)
@@ -550,12 +564,13 @@ well-formed function does not have, is left as it is, and the result is not well
     (redirectAll bs r ++ added.toList, st)
 
 /-- `canonicalize`, then a preheader for every head of `hs` that the CFG does not see as a loop's:
-the heads of the front end's loop records. -/
+the heads of the front end's loop records, put in order once for the whole function. -/
 @[expose] def canonicalizeWith [base ≼ env] (hs : List Label) (fn : Func env α) : Func env α :=
   let g := canonicalize fn
   if hs.isEmpty then g
   else
-    let (r, st) := Region.mapBodies (recordPreheaders hs) (Fresh.ofFunc g.labels g.names) ⟨g.blocks⟩
+    let ho := HeadOrder.of hs
+    let (r, st) := Region.mapBodies (recordPreheaders ho) (Fresh.ofFunc g.labels g.names) ⟨g.blocks⟩
     { g with blocks := r.blocks, names := st.names }
 
 /-- Why `spec.check` fails, for a message: the first record or rule that does not hold. -/

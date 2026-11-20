@@ -8,10 +8,12 @@ module
 /-! # The canonical form of a function with many loops, in work that grows with its size
 
 Counts the work of the canonical form's computation in heartbeats, as `pydyn canonical --time`
-reports them, on three shapes:
+reports them, on four shapes:
 a function of sequential `for` loops, each with a `break` and a `return`; a function of
-sequential outer loops, each holding an inner loop with a `break` and a `return`; and a function
-of sequential loops that never jump back to their head, each a `for` loop whose body returns.
+sequential outer loops, each holding an inner loop with a `break` and a `return`; a function
+of sequential loops that never jump back to their head, each a `for` loop whose body returns; and
+a function of sequential `for` loops, each followed by a list comprehension, whose regions the
+pass visits as bodies of their own.
 A heartbeat is one constructor cell that the computation allocates, so the count is the same on
 every run of the same file.  For each shape, four times the loops must take less than six times
 the heartbeats: the pass gives about four here, growth in n log n at most five, and quadratic
@@ -50,6 +52,11 @@ edge enters its head. -/
 private meta def noBack (n : Nat) : String :=
   "def f(xs, x):\n" ++ String.join ((List.range n).map fun _ =>
     "    for v in xs:\n        return v\n") ++ "    return 0\n"
+
+/-- A function of `n` sequential `for` loops, each followed by a list comprehension. -/
+private meta def withComps (n : Nat) : String :=
+  "def f(xs):\n" ++ String.join ((List.range n).map fun i =>
+    s!"    for v{i} in xs:\n        pass\n    a{i} = [x for x in xs]\n") ++ "    return 0\n"
 
 /-- The longest that one run of `pydyn canonical` may take, in seconds. -/
 private meta def limit : Nat := 600
@@ -95,7 +102,8 @@ private meta def timePairs (ps pl : System.FilePath) : IO (Except String (Array 
   IO.FS.createDirAll dir
   let timed := (← IO.getEnv "CANON_SCALE_TIME") == some "1"
   let mut failures := #[]
-  for (shape, gen, n) in [("flat", flat, 400), ("nested", nested, 200), ("noback", noBack, 400)] do
+  for (shape, gen, n) in [("flat", flat, 400), ("nested", nested, 200), ("noback", noBack, 400),
+      ("comps", withComps, 800)] do
     let ps := dir / s!"{shape}{n}.py"
     let pl := dir / s!"{shape}{4 * n}.py"
     IO.FS.writeFile ps (gen n)

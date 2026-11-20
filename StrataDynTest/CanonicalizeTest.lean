@@ -1213,7 +1213,7 @@ private def dupFresh : Canonicalize.Fresh :=
 -- No round of fixes, although the loop of `c.0` has no latch.
 #guard (Canonicalize.fixRound dupFresh dupBody).isNone
 -- No preheader for a recorded head.
-#guard ((Canonicalize.recordPreheaders [dupLbl "d"] dupFresh dupBody).1.map (·.label)) ==
+#guard ((Canonicalize.recordPreheaders (.of [dupLbl "d"]) dupFresh dupBody).1.map (·.label)) ==
   dupBody.map (·.label)
 
 -- Without the second `b.0`, the pass does add those blocks: `post`, a latch, and the preheaders
@@ -1224,5 +1224,18 @@ private def distinctFn : Func base Unit :=
 
 #guard ((Canonicalize.canonicalizeWith [dupLbl "d"] distinctFn).blocks.toList.drop 4).map
     (ToDDM.nameText ·.label.name) == ["post.0", "latch.0", "pre.0", "pre.1"]
+
+/-- The blocks that `canonicalizeWith hs` adds to `distinctFn`, each with the labels it jumps to,
+`_` for the body's exit. -/
+private def addedBy (hs : List Label) : List (String × List String) :=
+  ((Canonicalize.canonicalizeWith hs distinctFn).blocks.toList.drop 4).map fun b =>
+    (ToDDM.nameText b.label.name, b.term.succs.toList.map (ToDDM.nameText ·.label.name))
+
+-- The recorded heads `d.0` and `b.0` get their preheaders in the order of their records, not of
+-- their blocks.
+#guard addedBy [dupLbl "d", dupLbl "b"] == [("post.0", ["_"]), ("latch.0", ["c.0"]),
+  ("pre.0", ["c.0"]), ("pre.1", ["d.0"]), ("pre.2", ["b.0"])]
+#guard addedBy [dupLbl "b", dupLbl "d"] == [("post.0", ["_"]), ("latch.0", ["c.0"]),
+  ("pre.0", ["c.0"]), ("pre.1", ["b.0"]), ("pre.2", ["d.0"])]
 
 end Strata.Dyn.CanonicalizeTest
