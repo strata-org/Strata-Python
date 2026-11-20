@@ -581,7 +581,8 @@ the heads of the front end's loop records. -/
         if !(recs.map (·.head)).Nodup then some "two records name the same loop"
         else if !(recs.filterMap (·.done)).Nodup then some "two records name the same done block"
         else recs.findSome? fun r =>
-          if !g.labels.contains r.head then some s!"the record's loop {name r.head} is no block"
+          if !g.bodyLabels.contains r.head then
+            some s!"the record's loop {name r.head} is no block of the function's bodies"
           else if !bs.any (·.label == r.head) then none
           else if !Body.preheaderB bs (lo r.head) r.head then
             some s!"the loop at {name r.head} has no preheader"

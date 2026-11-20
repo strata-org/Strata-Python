@@ -56,9 +56,10 @@ exit and its `done`.  `Body.Leaves`, which `noReturn` uses, sees every normal en
 The front end supplies two things.  A `CompletionShape` names its completion datatype and the
 role of each constructor; the check reads the constructors' order from the environment.  A
 `LoopRecord` per loop names its head and its `done`.  Every loop has a record; a loop that control
-never leaves has no `done`.  The records are untrusted: the check verifies each one.  They are
-needed because an enclosing loop's `done` also meets every exit of an inner loop, so the CFG alone
-cannot tell which `done` belongs to which loop.
+never leaves has no `done`.  The records are untrusted: the check verifies each one, in the body
+that holds its head (`Func.LoopExits.recordHolds`).  They are needed because an enclosing loop's
+`done` also meets every exit of an inner loop, so the CFG alone cannot tell which `done` belongs
+to which loop.
 
 A record's head need not head a loop of the CFG: a loop whose body always leaves, such as
 `while c: return x`, has no back edge.  Then its *scope* is its head alone.  P1 asks for a
@@ -808,13 +809,15 @@ public section
 
 variable {env : Env Unit} {α : Type}
 
-/-- P4 and P7 hold in every body of the function for the records `recs`, which name blocks
-of the function, each head and each `done` once, and the shape is well formed. -/
+/-- P4 and P7 hold in every body of the function for the records `recs`, which name blocks of
+the function's bodies, each head and each `done` once, and the shape is well formed.  A record
+whose head is a block of a contract clause is rejected: no body that the check visits holds it,
+so no check would apply to it. -/
 @[expose] def Func.LoopExits (s : CompletionShape env) (recs : List LoopRecord)
     (fn : Func env α) : Prop :=
   ∃ ro, s.roles? = some ro ∧ Body.Every (Body.LoopExits · s ro recs) fn.blocks.toList ∧
     (recs.map (·.head)).Nodup ∧ (recs.filterMap (·.done)).Nodup ∧
-    ∀ r ∈ recs, r.head ∈ fn.labels
+    ∀ r ∈ recs, r.head ∈ fn.bodyLabels
 
 /-- Whether the function holds `Func.LoopExits`, for a function whose bodies have distinct
 labels. -/
@@ -825,7 +828,7 @@ labels. -/
   | some ro =>
     Body.everyB (Body.loopExitsB · s ro recs) fn.blocks.toList &&
       (recs.map (·.head)).Nodup && (recs.filterMap (·.done)).Nodup &&
-      recs.all fun r => fn.labels.contains r.head
+      recs.all fun r => fn.bodyLabels.contains r.head
 
 /-- `Func.checkLoopExits`, with the records by head computed once for every body, and the
 duplicates and the labels found through label sets. -/
@@ -835,7 +838,7 @@ duplicates and the labels found through label sets. -/
   | none => false
   | some ro =>
     let rm := LabelMap.groupBy (·.head) id recs
-    let ls := LabelMap.setOf fn.labels
+    let ls := LabelMap.setOf fn.bodyLabels
     Body.everyB (Body.loopExitsByB · rm s ro recs) fn.blocks.toList &&
       (LabelMap.ofDistinct? (recs.map (·.head))).isSome &&
       (LabelMap.ofDistinct? (recs.filterMap (·.done))).isSome &&
@@ -858,7 +861,7 @@ definition only in code compiled after it. -/
     have hd : ∀ ls : List Label, decide ls.Nodup = (LabelMap.ofDistinct? ls).isSome :=
       fun ls => Bool.eq_iff_iff.mpr (by rw [decide_eq_true_iff, LabelMap.ofDistinct?_isSome_iff])
     have hl : ∀ r : LoopRecord,
-        fn.labels.contains r.head = ((LabelMap.setOf fn.labels).find? r.head).isSome :=
+        fn.bodyLabels.contains r.head = ((LabelMap.setOf fn.bodyLabels).find? r.head).isSome :=
       fun r => Bool.eq_iff_iff.mpr (by rw [List.contains_iff_mem, LabelMap.find?_setOf])
     rw [hb, hd, hd]
     simp only [hl]

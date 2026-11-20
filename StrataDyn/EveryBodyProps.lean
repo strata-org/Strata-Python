@@ -7,6 +7,7 @@ module
 public import StrataDyn.EveryBody
 import all StrataDyn.EveryBody
 public import StrataDyn.DomComplete
+public import StrataDyn.WF
 
 set_option autoImplicit false
 
@@ -19,7 +20,10 @@ set_option autoImplicit false
 * `Body.everyB_iff_of`: the same, if `p` decides `P` only on bodies where some `Q` holds, and `Q`
   holds of every body;
 * `Body.distinct_iff_every`: `Body.Distinct`, which `Body.Scopable.distinct` gives for a
-  well-formed function, is `Every` of distinct labels.
+  well-formed function, is `Every` of distinct labels;
+* `Body.every_not_label_iff`, `Body.Every.exists_label`: the blocks that `Block.withNestedList`
+  lists are those of the bodies that `Every` visits, so each label of `Func.bodyLabels` labels a
+  block of one of those bodies.
 -/
 
 namespace Strata.Dyn
@@ -138,5 +142,93 @@ public theorem distinct_iff_every (bs : List (Block env α)) :
     | mk hr _ ih => exact .mk hr ih
 
 end Body
+
+/-! ## The bodies' blocks
+
+The blocks that `Block.withNestedList` lists are those of the bodies that `Body.Every` visits. -/
+
+section
+
+variable {env : Env Unit} {α : Type}
+
+mutual
+
+/-- `q` holds of every block nested in the instruction exactly when, in each body nested in its
+regions, `q` holds of every block. -/
+private theorem Instruction.nestedBlocks_all (q : Block env α → Bool) :
+    ∀ i : Instruction env α, i.nestedBlocks.all q = i.everyB (·.all q)
+  | .const .. => rfl
+  | .apply _ _ _ _ _ _ ⟨regions⟩ => Region.blocksList_all q regions
+
+/-- `q` holds of every block nested in the instructions exactly when, in each body nested in
+them, `q` holds of every block. -/
+private theorem Instruction.nestedBlocksList_all (q : Block env α → Bool) :
+    ∀ is : List (Instruction env α),
+      (Instruction.nestedBlocksList is).all q = Instruction.everyListB (·.all q) is
+  | [] => rfl
+  | i :: is => by
+    rw [Instruction.nestedBlocksList, Instruction.everyListB, List.all_append,
+      Instruction.nestedBlocks_all q i, Instruction.nestedBlocksList_all q is]
+
+/-- `q` holds of every block nested in the terminator exactly when, in each body nested in its
+regions, `q` holds of every block. -/
+private theorem Terminator.nestedBlocks_all (q : Block env α → Bool) :
+    ∀ t : Terminator env α, t.nestedBlocks.all q = t.everyB (·.all q)
+  | .apply _ _ _ _ _ ⟨regions⟩ => Region.blocksList_all q regions
+
+/-- `q` holds of the blocks and of every block nested in them exactly when it holds of the
+blocks, and, in each body nested in them, of every block. -/
+private theorem Block.withNestedList_all (q : Block env α → Bool) :
+    ∀ bs : List (Block env α),
+      (Block.withNestedList bs).all q = (bs.all q && Block.everyListB (·.all q) bs)
+  | [] => rfl
+  | ⟨l, ps, ⟨instrs⟩, t, info⟩ :: bs => by
+    rw [Block.withNestedList, Block.everyListB, List.all_cons, List.all_append, List.all_append,
+      Instruction.nestedBlocksList_all q instrs, Terminator.nestedBlocks_all q t,
+      Block.withNestedList_all q bs, List.all_cons]
+    cases q ⟨l, ps, ⟨instrs⟩, t, info⟩ <;> cases List.all bs q <;>
+      cases Instruction.everyListB (·.all q) instrs <;> cases t.everyB (·.all q) <;> rfl
+
+/-- `q` holds of every block of the regions exactly when, in each body of the regions and each
+body nested in them, `q` holds of every block. -/
+private theorem Region.blocksList_all (q : Block env α → Bool) :
+    ∀ rs : List (Region env α), (Region.blocksList rs).all q = Region.everyListB (·.all q) rs
+  | [] => rfl
+  | ⟨⟨blocks⟩⟩ :: rs => by
+    rw [Region.blocksList, Region.everyListB, Region.everyB, List.all_append,
+      Block.withNestedList_all q blocks, Region.blocksList_all q rs]
+
+end
+
+namespace Body
+
+/-- No block of the body, nor of any body nested in it, is labelled `l` exactly when no block of
+`Block.withNestedList` is. -/
+public theorem every_not_label_iff (bs : List (Block env α)) (l : Label) :
+    Every (fun bs => ∀ b ∈ bs, b.label ≠ l) bs ↔ l ∉ (Block.withNestedList bs).map (·.label) := by
+  rw [← everyB_iff (p := fun bs => bs.all (·.label != l)) (fun bs => by simp) bs]
+  unfold everyB
+  rw [Region.everyB, ← Block.withNestedList_all]
+  simp
+
+/-- If `P` holds of every body, and some body nested in `bs` has a block labelled `l`, then some
+body of which `P` holds has a block labelled `l`. -/
+public theorem Every.exists_label {P : List (Block env α) → Prop} {bs : List (Block env α)} {l : Label}
+    (hP : Every P bs) (hl : ¬ Every (fun bs => ∀ b ∈ bs, b.label ≠ l) bs) :
+    ∃ bs', P bs' ∧ ∃ b ∈ bs', b.label = l := by
+  induction hP with
+  | @mk bs hPb _ ih =>
+    by_cases hb : ∃ b ∈ bs, b.label = l
+    · exact ⟨bs, hPb, hb⟩
+    · have hno : ∀ b ∈ bs, b.label ≠ l := fun b hb' he => hb ⟨b, hb', he⟩
+      obtain ⟨y, r, hr, hnot⟩ : ∃ y r, RegionAt bs y r ∧
+          ¬ Every (fun bs => ∀ b ∈ bs, b.label ≠ l) r.blocks.toList :=
+        Classical.byContradiction fun h => hl (.mk hno fun y r hr =>
+          Classical.byContradiction fun hn => h ⟨y, r, hr, hn⟩)
+      exact ih y r hr hnot
+
+end Body
+
+end
 
 end Strata.Dyn

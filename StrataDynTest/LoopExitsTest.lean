@@ -115,6 +115,16 @@ private def whileBrk (brkTo : String) : Func E Unit :=
 -- A record whose head is no block.
 #guard !check shape [rec "head" "done", rec "nowhere" "done"] (whileBrk "done")
 
+/-- `whileBrk "done"`, with a `requires` clause whose region's block is `rq`. -/
+private def withClause : Func E Unit :=
+  { whileBrk "done" with contract := { requires := #[{ region := ⟨#[blk "rq" #[] ret]⟩ }] } }
+
+#guard check shape [rec "head" "done"] withClause
+-- A record whose head is the block of a contract clause, which is in none of the bodies that the
+-- check visits: it is rejected, as a record whose head is no block is.
+#guard !check shape [rec "head" "done", rec "rq" "nowhere"] withClause
+#guard !check shape [rec "head" "done", rec "nowhere" "nowhere"] withClause
+
 /-! ## Each clause of P4 alone
 
 Each twin below breaks one clause only. -/
@@ -472,14 +482,20 @@ private def preamble (twice : Bool) : Func E Unit :=
 -- as a translated Python function does whose argument binding fails.
 #guard (fn [blk "entry" #[add 1 "h"] (jump "body"), blk "body" #[] ret, blk "h" #[] ret]).checkPreamble
 
-/-! ## The swap to the fast check rests on the standard axioms
+/-! ## The swaps to the fast checks rest on the standard axioms
 
-Compiled code runs `Body.loopExitsFastB` in place of `Body.loopExitsB` through the `@[csimp]` lemma
-`Body.loopExitsB_eq_fast`, which Lean accepts even when it is an axiom or is proved with `sorry`.
-So the lemma must be a theorem that rests on Lean's standard axioms only. -/
+Compiled code runs `Body.loopExitsFastB` in place of `Body.loopExitsB`, and
+`Func.checkLoopExitsFast` in place of `Func.checkLoopExits`, through `@[csimp]` lemmas, which Lean
+accepts even when they are axioms or are proved with `sorry`.  So each lemma must be a theorem
+that rests on Lean's standard axioms only. -/
 
 /-- info: 'Strata.Dyn.Body.loopExitsB_eq_fast' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms Body.loopExitsB_eq_fast
+
+-- The same for the function's check, `Func.checkLoopExits_eq_fast`.
+/-- info: 'Strata.Dyn.Func.checkLoopExits_eq_fast' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Func.checkLoopExits_eq_fast
 
 end Strata.Dyn.LoopExitsTest

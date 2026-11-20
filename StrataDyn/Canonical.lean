@@ -42,8 +42,9 @@ preheader (`Body.Preheader.transfer_head_of_not_isHead`), so the base case alone
 The loop of a head `h` is the union of the natural loops of its back edges
 (`StrataDyn/Loops.lean`), as in LLVM.  Its code that cannot repeat the loop, such as the code
 after a `break`, is not in it.  The loop properties hold in every body of the function, its own
-and each region's (`Body.Every`); F2 holds in its own body.  The form does not ask for the loops
-to be reducible: a cycle with no back edge has no head, so no loop property mentions it.
+and each region's, but not its contract's clauses (`Body.Every`); F2 holds in its own body.  The
+form does not ask for the loops to be reducible: a cycle with no back edge has no head, so no
+loop property mentions it.
 `Body.Reducible` asks it separately: every cycle passes through a back edge, so every cycle lies
 in the loop of some head.  Neither says anything about an operation that runs a region again and
 again: such a loop has no back edge.

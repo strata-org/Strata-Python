@@ -926,9 +926,17 @@ private def noBackEdge : String := "module m {
 #eval canonText (withDone) (specOf [recOf "head" "done", recOf "body" "done"])
 
 -- A record whose loop is no block.
-/-- info: m.w: the record's loop nowhere.0 is no block -/
+/-- info: m.w: the record's loop nowhere.0 is no block of the function's bodies -/
 #guard_msgs in
 #eval canonText (withDone) (specOf [recOf "head" "done", recOf "nowhere" "after"])
+
+-- A record whose head is the block of a contract clause, which is a label of the function but no
+-- block of its bodies.
+/-- info: m.w: the record's loop rq.0 is no block of the function's bodies -/
+#guard_msgs in
+#eval canonText ((withDone).replace "-> demo.Value {\n    entry.0"
+    "-> demo.Value\n    requires {\n      rq.0():\n        ret(true)\n    }\n  {\n    entry.0")
+  (specOf [recOf "head" "done", recOf "rq" "nowhere"])
 
 -- A record whose `done` is entered from the loop, but whose arms do not absorb the loop's
 -- `continue`: its `continue` arm is not unreachable.

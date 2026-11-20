@@ -27,7 +27,8 @@ well-formed function's do.
 
 * `Func.checkLoopExits_iff`: `Func.checkLoopExits` decides `Func.LoopExits`;
 * `Func.checkPreamble_iff`: `Func.checkPreamble` decides `Func.Preamble`, for every function;
-* `CanonicalSpec.holds_of_check`: the check of a `CanonicalSpec` proves the properties that it asks for.
+* `CanonicalSpec.holds_of_check`: the check of a `CanonicalSpec` proves the properties that it asks for;
+* `Func.LoopExits.recordHolds`: every record holds in the body that holds its head.
 -/
 
 namespace Strata.Dyn
@@ -434,9 +435,26 @@ theorem loopExitsB_iff (hn : (bs.map (·.label)).Nodup) {s : CompletionShape env
 
 end Body
 
-/-! ## The function -/
+/-! ## Every record is checked -/
 
 variable {env : Env Unit} {α : Type}
+
+/-- In a function that holds `Func.LoopExits`, each record holds in a body of the function that
+holds its head.  That body has every property `Q` that all of the function's bodies have, such as
+distinct labels, so a caller can tie it to what it knows of the function's bodies. -/
+public theorem Func.LoopExits.recordHolds {fn : Func env α} {s : CompletionShape env}
+    {recs : List LoopRecord} {Q : List (Block env α) → Prop} (hq : Body.Every Q fn.blocks.toList)
+    (h : fn.LoopExits s recs) {r : LoopRecord} (hr : r ∈ recs) :
+    ∃ (ro : Roles) (bs : List (Block env α)), s.roles? = some ro ∧ Q bs ∧
+      (∃ b ∈ bs, b.label = r.head) ∧ Body.RecordHolds bs s ro r := by
+  obtain ⟨ro, hro, hev, -, -, hl⟩ := h
+  obtain ⟨bs, ⟨hQ, hbs⟩, hb⟩ := Body.Every.exists_label
+    (Body.Every.imp (B := fun bs => Q bs ∧ Body.LoopExits bs s ro recs) (fun _ a b => ⟨a, b⟩)
+      hq hev)
+    fun he => (Body.every_not_label_iff _ _).mp he (hl r hr)
+  exact ⟨ro, bs, hro, hQ, hb, hbs.each r hr hb⟩
+
+/-! ## The function -/
 
 /-- For a function whose bodies have distinct labels, `checkLoopExits` holds exactly when the
 shape is well formed, every body states P4 and P7 truly for the records, and the records name

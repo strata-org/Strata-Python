@@ -550,9 +550,21 @@ id is defined twice. -/
 @[expose] def Func.ctx? {env : Env Unit} {α : Type} (fn : Func env α) : Option (Ctx env) :=
   fn.defs.foldlM (init := (∅ : Ctx env)) Ctx.define?
 
-/-- The label of every block of the function, regions included. -/
+/-- The label of every block of the function: its bodies' and its contract's.
+`Func.bodyLabels` leaves out the contract's. -/
 @[expose] def Func.labels {env : Env Unit} {α : Type} (fn : Func env α) : List Label :=
   fn.allBlocks.map (·.label)
+
+/-- The blocks of the bodies that `Body.Every` visits: the function's own and every region's, at
+any depth, but not its contract's. -/
+@[expose] def Func.bodyBlocks {env : Env Unit} {α : Type} (fn : Func env α) :
+    List (Block env α) :=
+  Block.withNestedList fn.blocks.toList
+
+/-- The labels of the blocks of the function's bodies (`Func.bodyBlocks`): `Func.labels` without
+the labels of the contract's blocks. -/
+@[expose] def Func.bodyLabels {env : Env Unit} {α : Type} (fn : Func env α) : List Label :=
+  fn.bodyBlocks.map (·.label)
 
 /-- The blocks a transfer at the function's top level may name, and its exit, taking
 `retType`. -/
