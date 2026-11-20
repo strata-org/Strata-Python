@@ -55,10 +55,10 @@ exit and its `done`.  `Body.Leaves`, which `noReturn` uses, sees every normal en
 
 The front end supplies two things.  A `CompletionShape` names its completion datatype and the
 role of each constructor; the check reads the constructors' order from the environment.  A
-`LoopRecord` per loop names its head and its `done`, and the label a labelled `break` carries, if
-the language has them.  Every loop has a record; a loop that control never leaves has no `done`.  The records are
-untrusted: the check verifies each one.  They are needed because an enclosing loop's `done` also
-meets every exit of an inner loop, so the CFG alone cannot tell which `done` belongs to which loop.
+`LoopRecord` per loop names its head and its `done`.  Every loop has a record; a loop that control
+never leaves has no `done`.  The records are untrusted: the check verifies each one.  They are
+needed because an enclosing loop's `done` also meets every exit of an inner loop, so the CFG alone
+cannot tell which `done` belongs to which loop.
 
 A record's head need not head a loop of the CFG: a loop whose body always leaves, such as
 `while c: return x`, has no back edge.  Then its *scope* is its head alone.  P1 asks for a
@@ -76,9 +76,10 @@ What the form cannot see, which is the lowering's semantics:
 * whether a shape gives the right roles to two constructors that carry no field, such as
   `normal` and `continue`: a front end pins its shape with a test.
 
-A labelled exit that leaves through a `finally` between two loops is not expressible: another
-loop's label must go straight to the `done`, the head or the latch of a loop around this one, or
-to the dedicated exit that the pass puts in front of that `done`.
+Labelled `break` and `continue`, which need a label in their completion, are not part of the
+form: a shape's `break` and `continue` carry no field, so the check rejects every function whose
+completion type gives `break` or `continue` a label.  A front end with labels, such as one for
+JavaScript, needs the form extended first.
 
 ## Main definitions
 
@@ -90,9 +91,9 @@ to the dedicated exit that the pass puts in front of that `done`.
   `StrataDyn/LoopExitsProps.lean` proves to decide them;
 * `CanonicalSpec`: what a front end asks of `Canonicalize.run`, and its check.
 
-`Body.loopExitsFastB` and `Func.checkLoopExitsFast` read each record's loop, the transfers into
-and out of it, and the records of the loops around it from the body's index (`Body.Index`,
-`StrataDyn/BodyIndex.lean`) and a map of the records by head, computed once.
+`Body.loopExitsFastB` and `Func.checkLoopExitsFast` read each record's loop, and the transfers
+into and out of it, from the body's index (`Body.Index`, `StrataDyn/BodyIndex.lean`), and each
+block's records from a map of the records by head, both computed once.
 `Body.loopExitsB_eq_fast` and `Func.checkLoopExits_eq_fast`, proved here so that the code below
 and `Canonicalize.run` use them, make them run in place of `Body.loopExitsB` and
 `Func.checkLoopExits`.
@@ -107,10 +108,7 @@ variable {env : Env Unit} {α : Type}
 /-- How a front end represents the way a construct finished: the datatype `data` of type `ty`,
 and the constructors of each role, by name: the normal end, `break`, `continue`, and those
 forwarded out of every loop, such as `return` and `raise`.  `data`'s case instruction branches on
-it, with one successor per constructor, in the constructors' order.  With `labelTest`, `break` and
-`continue` carry the label of their loop as their only field, an `base.Int`, and `labelTest` names
-a terminal operation on two operands, a label and a constant, whose first successor is taken when
-they are equal and the second when not. -/
+it, with one successor per constructor, in the constructors' order. -/
 structure CompletionShape (env : Env Unit) where
   ty : TypeExpr env
   data : Name
@@ -118,7 +116,6 @@ structure CompletionShape (env : Env Unit) where
   brk : Name
   cont : Name
   forwarded : List Name
-  labelTest : Option Name := none
 
 /-- The constructor index of each role of a completion shape, as `CompletionShape.roles?` reads
 them from the environment. -/
@@ -137,10 +134,9 @@ deriving DecidableEq
 
 /-- The index of each role, read from the environment's declaration of `s.data`, if the shape is
 well formed: each constructor of `s.data` has exactly one role, and the normal end, `break` and
-`continue` carry no field, or one with `labelTest`.  So a shape cannot give a role to a constructor
-that carries the wrong fields, nor leave a constructor without one.  It does not check whether two
-constructors that carry the same fields have their roles swapped, nor the label test's
-signature. -/
+`continue` carry no field.  So a shape cannot give a role to a constructor that carries the wrong
+fields, nor leave a constructor without one.  It does not check whether two constructors that
+carry no field have their roles swapped. -/
 @[expose] def CompletionShape.roles? (s : CompletionShape env) : Option Roles := do
   let (g, i) ← env.dataOf? s.data
   let m ← g.member? i
@@ -148,24 +144,16 @@ signature. -/
   let idx (n : Name) : Option Nat := names.idxOf? n
   let ro : Roles := { normal := ← idx s.normal, brk := ← idx s.brk, cont := ← idx s.cont,
                       forwarded := ← s.forwarded.mapM idx }
-  let fields := if s.labelTest.isSome then 1 else 0
   let arity (k : Nat) : Nat := (m.ctors[k]?.map (·.args.size)).getD 0
   if ro.all.Nodup && ro.all.length = names.length && arity ro.normal = 0 &&
-      arity ro.brk = fields && arity ro.cont = fields then some ro else none
+      arity ro.brk = 0 && arity ro.cont = 0 then some ro else none
 
-/-- What a front end states about one of its loops: the block it starts at, the block `done` its
-exits meet at, and the label its `break` and `continue` carry, if the language has labels.  A loop
-that control never leaves has no `done`. -/
+/-- What a front end states about one of its loops: the block it starts at, and the block `done`
+its exits meet at.  A loop that control never leaves has no `done`. -/
 structure LoopRecord where
   head : Label
   done : Option Label
-  label : Option Int := none
 deriving DecidableEq
-
-/-- The value an instruction defines and the integer it holds, if it is an integer constant. -/
-@[expose] def Instruction.intConst? : Instruction env α → Option (ValId × Int)
-  | .const _ d (.int n) => some (d.id, n)
-  | _ => none
 
 namespace Body
 
@@ -214,75 +202,32 @@ outside the loop, is not `d`, and no path from the loop's exits reaches it befor
 @[expose] def ArmOut (h d t : Label) : Prop :=
   Unreachable bs t ∨ (¬ InLoopScope bs h ⟨t, 0⟩ ∧ t ≠ d ∧ ¬ PastExit bs h d ⟨t, 0⟩)
 
-/-- The block `t` tests the label its first parameter carries against `n` with `lt`, and its
-two successors satisfy `own` (equal) and `other` (different). -/
-@[expose] def LabelArm (lt : Name) (n : Int) (own other : Label → Prop) (t : Label) : Prop :=
-  ∃ b ∈ bs, b.label = t ∧ b.term.name = lt ∧
-    ∃ p v s₁ s₂, b.params[0]? = some p ∧ b.term.args = #[p.id, v] ∧
-      (∃ i ∈ b.instrs, i.intConst? = some (v, n)) ∧ b.term.succs = #[s₁, s₂] ∧
-      own s₁.label ∧ other s₂.label
+/-- What the arm for constructor `i` of `d`, the `done` of the loop of `h`, must do: the
+`continue` arm is unreachable, since a `continue` of the loop goes to its latch; every other arm
+leaves the loop for good. -/
+@[expose] def ArmOk (ro : Roles) (h d : Label) (i : Nat) (t : Label) : Prop :=
+  if i = ro.cont then Unreachable bs t else ArmOut bs h d t
 
-/-- The record `r'` of `recs` is of a loop around the loop of `r`. -/
-@[expose] def Encloses (r r' : LoopRecord) : Prop :=
-  r'.head ≠ r.head ∧ InLoopScope bs r'.head ⟨r.head, 0⟩
-
-/-- The block `t` is unreachable, or it is the `done` of a loop around the loop of `r`, or an
-empty block that ends in a plain jump to that `done`: where a `break` with another loop's label
-goes.  The empty block is the dedicated exit that the pass puts in front of the outer `done`, so
-that no code runs on the way. -/
-@[expose] def ToOuterDone (recs : List LoopRecord) (r : LoopRecord) (t : Label) : Prop :=
-  Unreachable bs t ∨ ∃ r' ∈ recs, Encloses bs r r' ∧ ∃ d, r'.done = some d ∧
-    (t = d ∨ ∃ b ∈ bs, b.label = t ∧ b.instrs = #[] ∧ EndsIn b d)
-
-/-- The block `t` is unreachable, or the `done`, the head or the latch of a loop around the loop
-of `r`: where a `continue` with another loop's label goes.  `continue outer` goes to the head of
-the outer loop, and once the pass has given that loop its latch, to the latch: an empty block of
-the loop that ends in a plain jump to its head, so that no code of the loop runs on the way. -/
-@[expose] def ToOuterLoop (recs : List LoopRecord) (r : LoopRecord) (t : Label) : Prop :=
-  ToOuterDone bs recs r t ∨ ∃ r' ∈ recs, Encloses bs r r' ∧
-    (t = r'.head ∨ ∃ b ∈ bs, b.label = t ∧ b.instrs = #[] ∧ EndsIn b r'.head ∧
-      InLoopScope bs r'.head ⟨t, 0⟩)
-
-/-- What the arm for constructor `i` of `d`, the `done` of record `r`, must do: the `continue`
-arm is unreachable, since a `continue` of the loop goes to its latch; every other arm leaves the
-loop for good.  With labels, the `break` and `continue` arms test the label, and send any other
-loop's label to a loop around this one.  The `continue` arm may also be unreachable, for a front
-end with no labelled `continue` to test. -/
-@[expose] def ArmOk (s : CompletionShape env) (ro : Roles) (recs : List LoopRecord)
-    (r : LoopRecord) (d : Label) (i : Nat) (t : Label) : Prop :=
-  match s.labelTest, r.label with
-  | none, none =>
-    if i = ro.cont then Unreachable bs t else ArmOut bs r.head d t
-  | some lt, some n =>
-    if i = ro.cont then
-      Unreachable bs t ∨ LabelArm bs lt n (Unreachable bs) (ToOuterLoop bs recs r) t
-    else if i = ro.brk then
-      LabelArm bs lt n (ArmOut bs r.head d) (ToOuterDone bs recs r) t
-    else ArmOut bs r.head d t
-  | _, _ => False
-
-/-- (P7) `d`, the `done` of record `r`, cases on its completion with the shape's case instruction,
-one arm per constructor, and each arm does what `ArmOk` asks. -/
-@[expose] def Absorbs (s : CompletionShape env) (ro : Roles) (recs : List LoopRecord)
-    (r : LoopRecord) (d : Label) : Prop :=
+/-- (P7) `d`, the `done` of the loop of `h`, cases on its completion with the shape's case
+instruction, one arm per constructor, and each arm does what `ArmOk` asks. -/
+@[expose] def Absorbs (s : CompletionShape env) (ro : Roles) (h d : Label) : Prop :=
   ∃ b ∈ bs, b.label = d ∧ b.term.name = s.caseName ∧
     (∃ p, b.params[0]? = some p ∧ b.term.args[0]? = some p.id) ∧
     b.term.succs.size = ro.all.length ∧
     ∀ (i : Nat) (sv : Target.Raw), b.term.succs[i]? = some sv →
-      ArmOk bs s ro recs r d i sv.label
+      ArmOk bs ro h d i sv.label
 
 /-- What a record whose head is a block of the body states: its head has a preheader (P1, which
 for a loop of the CFG is part of `LoopsSimplified`); if no back edge enters its head, the head
 dominates its `done` and every block it leaves for, so that every way into the loop's code
 passes through the head; with a `done`, P4 and P7 hold; without one, control never leaves the
 loop: every block it leaves for is unreachable, and no point of it leaves the body. -/
-@[expose] def RecordHolds (s : CompletionShape env) (ro : Roles) (recs : List LoopRecord)
-    (r : LoopRecord) : Prop :=
+@[expose] def RecordHolds (s : CompletionShape env) (ro : Roles) (r : LoopRecord) : Prop :=
   (∃ pre, Preheader bs r.head pre) ∧
     (¬ IsHead bs r.head → (∀ d, r.done = some d → Dom bs ⟨r.head, 0⟩ ⟨d, 0⟩) ∧
       ∀ x, ExitOf bs r.head x → Dom bs ⟨r.head, 0⟩ ⟨x, 0⟩) ∧
     match r.done with
-    | some d => Done bs s r.head d ∧ Absorbs bs s ro recs r d
+    | some d => Done bs s r.head d ∧ Absorbs bs s ro r.head d
     | none => (∀ x, ExitOf bs r.head x → Unreachable bs x) ∧
         ∀ u, InLoopScope bs r.head u → ¬ Leaves bs u
 
@@ -290,7 +235,7 @@ loop: every block it leaves for is unreachable, and no point of it leaves the bo
 body holds. -/
 structure LoopExits (s : CompletionShape env) (ro : Roles) (recs : List LoopRecord) : Prop where
   recorded : ∀ h, IsHead bs h → ∃ r ∈ recs, r.head = h
-  each : ∀ r ∈ recs, (∃ b ∈ bs, b.label = r.head) → RecordHolds bs s ro recs r
+  each : ∀ r ∈ recs, (∃ b ∈ bs, b.label = r.head) → RecordHolds bs s ro r
 
 /-! ## Their decisions
 
@@ -373,58 +318,11 @@ good. -/
 @[expose] def armOutB (S : List Label) (Rs : List (Label × LabelMap Unit)) (d t : Label) : Bool :=
   unreachableB bs t || (!S.contains t && t != d && !inRegionsB bs d Rs ⟨t, 0⟩)
 
-/-- Whether the block `b` tests its first parameter's label against `n` with `lt`, with
-successors that satisfy `own` and `other`. -/
-@[expose] def _root_.Strata.Dyn.Block.labelArmB (lt : Name) (n : Int) (own other : Label → Bool)
-    (b : Block env α) : Bool :=
-  b.term.name == lt &&
-    match b.params[0]?, b.term.args.toList, b.term.succs.toList with
-    | some p, [x, v], [s₁, s₂] =>
-      x == p.id && b.instrs.any (fun i => i.intConst? == some (v, n)) &&
-        own s₁.label && other s₂.label
-    | _, _, _ => false
-
-/-- Whether the block `t` tests its first parameter's label against `n` with `lt`, with
-successors that satisfy `own` and `other`. -/
-@[expose] def labelArmB (lt : Name) (n : Int) (own other : Label → Bool) (t : Label) : Bool :=
-  (blockAt? bs t).any (Block.labelArmB lt n own other)
-
-/-- Whether the record `r'` is of a loop around the loop of `r`, given `lo`. -/
-@[expose] def enclosesB (lo : Label → List Label) (r r' : LoopRecord) : Bool :=
-  r'.head != r.head && (scopeIn lo r'.head).contains r.head
-
-/-- Whether the block `t` is empty and ends in a plain jump to `h`. -/
-@[expose] def jumpsToB (t h : Label) : Bool :=
-  (blockAt? bs t).any fun b => b.instrs.isEmpty && endsAtB bs (endOf b) h
-
-/-- Whether `t` is unreachable, or the `done` of a loop around the loop of `r`, or an empty block
-that ends in a plain jump to it. -/
-@[expose] def toOuterDoneB (lo : Label → List Label) (recs : List LoopRecord) (r : LoopRecord)
-    (t : Label) : Bool :=
-  unreachableB bs t || recs.any fun r' => enclosesB lo r r' &&
-    r'.done.any fun d => t == d || jumpsToB bs t d
-
-/-- Whether `t` is unreachable, or the `done`, the head or the latch of a loop around the loop of
-`r`. -/
-@[expose] def toOuterLoopB (lo : Label → List Label) (recs : List LoopRecord) (r : LoopRecord)
-    (t : Label) : Bool :=
-  toOuterDoneB bs lo recs r t || recs.any fun r' => enclosesB lo r r' &&
-    (r'.head == t || (jumpsToB bs t r'.head && (scopeIn lo r'.head).contains t))
-
 /-- Whether the arm for constructor `i` of `d` to `t` does what `ArmOk` asks, given the scope
-`S` of `r`'s loop and the regions `Rs` of its exits. -/
-@[expose] def armOkB (lo : Label → List Label) (S : List Label)
-    (Rs : List (Label × LabelMap Unit)) (s : CompletionShape env)
-    (ro : Roles) (recs : List LoopRecord) (r : LoopRecord) (d : Label) (i : Nat) (t : Label) :
-    Bool :=
-  match s.labelTest, r.label with
-  | none, none => if i = ro.cont then unreachableB bs t else armOutB bs S Rs d t
-  | some lt, some n =>
-    if i = ro.cont then
-      unreachableB bs t || labelArmB bs lt n (unreachableB bs) (toOuterLoopB bs lo recs r) t
-    else if i = ro.brk then labelArmB bs lt n (armOutB bs S Rs d) (toOuterDoneB bs lo recs r) t
-    else armOutB bs S Rs d t
-  | _, _ => false
+`S` of the loop and the regions `Rs` of its exits. -/
+@[expose] def armOkB (S : List Label) (Rs : List (Label × LabelMap Unit)) (ro : Roles) (d : Label)
+    (i : Nat) (t : Label) : Bool :=
+  if i = ro.cont then unreachableB bs t else armOutB bs S Rs d t
 
 /-- Whether the block `b` dispatches on its first parameter with the case of `s`, with `n`
 successors, the `i`th of which satisfies `arm i`. -/
@@ -435,13 +333,11 @@ successors, the `i`th of which satisfies `arm i`. -/
     b.term.succs.size == n &&
     (List.range b.term.succs.size).all fun i => (b.term.succs[i]?).all fun sv => arm i sv.label
 
-/-- Whether `d` absorbs its own loop's `break` and `continue` and forwards the rest (P7), given
-`Rs`, the regions of the blocks the loop leaves for. -/
+/-- Whether `d` absorbs the `break` and `continue` of the loop of `h` and forwards the rest (P7),
+given `Rs`, the regions of the blocks the loop leaves for. -/
 @[expose] def absorbsB (lo : Label → List Label) (s : CompletionShape env) (ro : Roles)
-    (recs : List LoopRecord) (r : LoopRecord) (d : Label) (Rs : List (Label × LabelMap Unit)) :
-    Bool :=
-  let S := scopeIn lo r.head
-  (blockAt? bs d).any (Block.absorbsB s ro.all.length (armOkB bs lo S Rs s ro recs r d))
+    (h d : Label) (Rs : List (Label × LabelMap Unit)) : Bool :=
+  (blockAt? bs d).any (Block.absorbsB s ro.all.length (armOkB bs (scopeIn lo h) Rs ro d))
 
 /-- Whether the head of record `r` is a loop head, or dominates its `done` and every block its
 scope leaves for, given the body's transfers, its heads, their loops and its dominator tree. -/
@@ -456,13 +352,12 @@ their loops, `info`, the body's dominator tree for `domWith`, and `sm`, its succ
 searches once from each block the loop leaves for. -/
 @[expose] def recordHoldsB (tr : List (Point × Label)) (ep : List Point) (hs : List Label)
     (lo : Label → List Label) (info : Option (LabelMap (Block env α) × Tree × AncMap × Nat))
-    (sm : LabelMap (List Label)) (s : CompletionShape env) (ro : Roles) (recs : List LoopRecord)
-    (r : LoopRecord) : Bool :=
+    (sm : LabelMap (List Label)) (s : CompletionShape env) (ro : Roles) (r : LoopRecord) : Bool :=
   preheaderB bs (lo r.head) r.head && headDominatesB bs tr hs lo info r &&
     match r.done with
     | some d =>
       let Rs := regionsOf bs sm d (exitsIn tr (scopeIn lo r.head))
-      doneB bs tr ep hs lo s r.head d Rs && absorbsB bs lo s ro recs r d Rs
+      doneB bs tr ep hs lo s r.head d Rs && absorbsB bs lo s ro r.head d Rs
     | none => (exitsIn tr (scopeIn lo r.head)).all (unreachableB bs) &&
         ep.all fun u => !(scopeIn lo r.head).contains u.label
 
@@ -474,7 +369,7 @@ body holds, given what the body's check computes once. -/
     Bool :=
   hs.all (fun h => recs.any (·.head == h)) &&
     recs.all fun r => !bs.any (·.label == r.head) ||
-      recordHoldsB bs tr ep hs lo info sm s ro recs r
+      recordHoldsB bs tr ep hs lo info sm s ro r
 
 /-- The loop of a head, looked up in a table of heads and their loops; no loop for any other
 label. -/
@@ -496,8 +391,8 @@ tree and the successor map are computed once. -/
 its block, each loop's labels as a set and as a list, and the heads whose loops hold it.  The
 check below reads them from it, and finds the records of a head through `rm`, the records by
 head.  So the check of a record reads only the blocks of its scope, the transfers into and out of
-them, the records of the loops around it, and the regions of its exits, where `loopExitsB` scans
-the body's transfers, its heads and the records for each record. -/
+them, and the regions of its exits, where `loopExitsB` scans the body's transfers, its heads and
+the records for each record. -/
 
 namespace Index
 
@@ -556,50 +451,20 @@ number of blocks. -/
 @[expose] def armOutB (h : Label) (Rs : List (Label × LabelMap Unit)) (d t : Label) : Bool :=
   ix.unreachableB t || (!ix.inScope h t && t != d && !ix.inRegionsB d Rs ⟨t, 0⟩)
 
-/-- `labelArmB`, with the index's blocks by label. -/
-@[expose] def labelArmB (lt : Name) (n : Int) (own other : Label → Bool) (t : Label) : Bool :=
-  (ix.blocks.find? t).any (Block.labelArmB lt n own other)
+/-- `armOkB` of the scope of `h`, with the index. -/
+@[expose] def armOkB (Rs : List (Label × LabelMap Unit)) (ro : Roles) (h d : Label) (i : Nat)
+    (t : Label) : Bool :=
+  if i = ro.cont then ix.unreachableB t else ix.armOutB h Rs d t
 
-/-- `jumpsToB`, with the index's blocks by label. -/
-@[expose] def jumpsToB (t h : Label) : Bool :=
-  (ix.blocks.find? t).any fun b => b.instrs.isEmpty && ix.endsAtB (endOf b) h
-
-/-- `toOuterDoneB`, with the index and `rm`, the records by head: the records of the loops
-around the one of `r` are those of the heads whose loops hold `r`'s head. -/
-@[expose] def toOuterDoneB (rm : LabelMap (List LoopRecord)) (r : LoopRecord) (t : Label) :
-    Bool :=
-  ix.unreachableB t || (LabelMap.listAt ix.around r.head).any fun h' => h' != r.head &&
-    (LabelMap.listAt rm h').any fun r' => r'.done.any fun d => t == d || ix.jumpsToB t d
-
-/-- `toOuterLoopB`, with the index and `rm`, the records by head. -/
-@[expose] def toOuterLoopB (rm : LabelMap (List LoopRecord)) (r : LoopRecord) (t : Label) :
-    Bool :=
-  ix.toOuterDoneB rm r t || (LabelMap.listAt ix.around r.head).any fun h' => h' != r.head &&
-    (LabelMap.listAt rm h').any fun r' =>
-      r'.head == t || (ix.jumpsToB t r'.head && ix.inScope r'.head t)
-
-/-- `armOkB`, with the index and `rm`, the records by head. -/
-@[expose] def armOkB (rm : LabelMap (List LoopRecord)) (Rs : List (Label × LabelMap Unit))
-    (s : CompletionShape env) (ro : Roles) (r : LoopRecord) (d : Label) (i : Nat) (t : Label) :
-    Bool :=
-  match s.labelTest, r.label with
-  | none, none => if i = ro.cont then ix.unreachableB t else ix.armOutB r.head Rs d t
-  | some lt, some n =>
-    if i = ro.cont then
-      ix.unreachableB t || ix.labelArmB lt n ix.unreachableB (ix.toOuterLoopB rm r) t
-    else if i = ro.brk then ix.labelArmB lt n (ix.armOutB r.head Rs d) (ix.toOuterDoneB rm r) t
-    else ix.armOutB r.head Rs d t
-  | _, _ => false
-
-/-- `absorbsB`, with the index and `rm`, the records by head. -/
-@[expose] def absorbsB (rm : LabelMap (List LoopRecord)) (s : CompletionShape env) (ro : Roles)
-    (r : LoopRecord) (d : Label) (Rs : List (Label × LabelMap Unit)) : Bool :=
-  (ix.blocks.find? d).any (Block.absorbsB s ro.all.length (ix.armOkB rm Rs s ro r d))
+/-- `absorbsB`, with the index. -/
+@[expose] def absorbsB (s : CompletionShape env) (ro : Roles) (h d : Label)
+    (Rs : List (Label × LabelMap Unit)) : Bool :=
+  (ix.blocks.find? d).any (Block.absorbsB s ro.all.length (ix.armOkB Rs ro h d))
 
 /-- `recordHoldsB` of the body's transfers, heads, loops, dominance and successor map, with the
-index and `rm`, the records by head.  It computes once the blocks that the scope leaves for. -/
+index.  It computes once the blocks that the scope leaves for. -/
 @[expose] def recordHoldsB (ep : List Point) (s : CompletionShape env) (ro : Roles)
-    (rm : LabelMap (List LoopRecord)) (r : LoopRecord) : Bool :=
+    (r : LoopRecord) : Bool :=
   let X := ix.exitsOf (ix.scopeList r.head) (ix.inScope r.head)
   ix.preheaderB r.head &&
     (ix.isHead r.head || (r.done.all fun d => domWith bs ix.info ⟨d, 0⟩ r.head) &&
@@ -607,7 +472,7 @@ index and `rm`, the records by head.  It computes once the blocks that the scope
     match r.done with
     | some d =>
       let Rs := ix.regionsOf d X
-      ix.doneB ep s r.head d Rs && ix.absorbsB rm s ro r d Rs
+      ix.doneB ep s r.head d Rs && ix.absorbsB s ro r.head d Rs
     | none => X.all ix.unreachableB && ep.all fun u => !ix.inScope r.head u.label
 
 /-- `loopExitsWith` of the body's transfers, heads, loops, dominance and successor map, with the
@@ -615,7 +480,7 @@ index and `rm`, the records by head: it checks the records of each block's label
 @[expose] def loopExitsB (ep : List Point) (s : CompletionShape env) (ro : Roles)
     (rm : LabelMap (List LoopRecord)) : Bool :=
   ix.heads.all (fun h => !(LabelMap.listAt rm h).isEmpty) &&
-    bs.all fun b => (LabelMap.listAt rm b.label).all (ix.recordHoldsB bs ep s ro rm)
+    bs.all fun b => (LabelMap.listAt rm b.label).all (ix.recordHoldsB bs ep s ro)
 
 end Index
 
@@ -834,97 +699,30 @@ private theorem Index.armOutB_eq (hs : ix.Spec bs ep) {Rs Rs' : List (Label × L
   rw [Index.armOutB, Body.armOutB, Index.unreachableB_eq hs, Index.inScope_eq hs,
     Index.inRegionsB_eq hs hR]
 
-/-- The index's `labelArmB` is `labelArmB`. -/
-private theorem Index.labelArmB_eq (hs : ix.Spec bs ep) (lt : Name) (n : Int)
-    (own other : Label → Bool) (t : Label) :
-    ix.labelArmB lt n own other t = Body.labelArmB bs lt n own other t := by
-  rw [Index.labelArmB, Body.labelArmB, blockAt?, hs.blocks]
-
-/-- The index's `jumpsToB` is `jumpsToB`. -/
-private theorem Index.jumpsToB_eq (hs : ix.Spec bs ep) (t h : Label) :
-    ix.jumpsToB t h = Body.jumpsToB bs t h := by
-  unfold Index.jumpsToB Body.jumpsToB
-  simp only [Index.endsAtB_eq hs, blockAt?, hs.blocks]
-
-/-- The records of the loops around the one of `r` that satisfy `P`, found through the heads
-whose loops hold `r`'s head and `rm`, the records of `recs` by head, are those of `recs` that
-`enclosesB` picks. -/
-private theorem Index.any_around (hs : ix.Spec bs ep) {rm : LabelMap (List LoopRecord)}
-    {recs : List LoopRecord} (hrm : ∀ h r, r ∈ LabelMap.listAt rm h ↔ r ∈ recs ∧ r.head = h)
-    (r : LoopRecord) (P : LoopRecord → Bool) :
-    ((LabelMap.listAt ix.around r.head).any fun h' => h' != r.head &&
-      (LabelMap.listAt rm h').any P) = recs.any fun r' => enclosesB (loopOf bs) r r' && P r' := by
-  apply Bool.eq_iff_iff.mpr
-  simp only [List.any_eq_true, Bool.and_eq_true, bne_iff_ne, ne_eq, hrm, hs.around, enclosesB,
-    List.contains_iff_mem]
-  constructor
-  · rintro ⟨h', ⟨u, hu, hx⟩, hne, r', ⟨hr', rfl⟩, hP⟩
-    exact ⟨r', hr', ⟨hne, mem_scopeIn.mpr (.inl (mem_loopOf.mpr ⟨u, hu, hx⟩))⟩, hP⟩
-  · rintro ⟨r', hr', ⟨hne, hsc⟩, hP⟩
-    rcases mem_scopeIn.mp hsc with hL | ⟨-, heq⟩
-    · obtain ⟨u, hu, hx⟩ := mem_loopOf.mp hL
-      exact ⟨r'.head, ⟨u, hu, hx⟩, hne, r', ⟨hr', rfl⟩, hP⟩
-    · exact absurd heq.symm hne
-
-/-- The index's `toOuterDoneB` is `toOuterDoneB` of the body's loops and the records `recs`,
-whose records by head are `rm`. -/
-private theorem Index.toOuterDoneB_eq (hs : ix.Spec bs ep) {rm : LabelMap (List LoopRecord)}
-    {recs : List LoopRecord} (hrm : ∀ h r, r ∈ LabelMap.listAt rm h ↔ r ∈ recs ∧ r.head = h)
-    (r : LoopRecord) (t : Label) :
-    ix.toOuterDoneB rm r t = Body.toOuterDoneB bs (loopOf bs) recs r t := by
-  unfold Index.toOuterDoneB Body.toOuterDoneB
-  simp only [Index.jumpsToB_eq hs]
-  rw [Index.unreachableB_eq hs, Index.any_around hs hrm]
-
-/-- The index's `toOuterLoopB` is `toOuterLoopB` of the body's loops and the records `recs`,
-whose records by head are `rm`. -/
-private theorem Index.toOuterLoopB_eq (hs : ix.Spec bs ep) {rm : LabelMap (List LoopRecord)}
-    {recs : List LoopRecord} (hrm : ∀ h r, r ∈ LabelMap.listAt rm h ↔ r ∈ recs ∧ r.head = h)
-    (r : LoopRecord) (t : Label) :
-    ix.toOuterLoopB rm r t = Body.toOuterLoopB bs (loopOf bs) recs r t := by
-  unfold Index.toOuterLoopB Body.toOuterLoopB
-  simp only [Index.jumpsToB_eq hs, Index.inScope_eq hs]
-  rw [Index.toOuterDoneB_eq hs hrm, Index.any_around hs hrm]
-
-/-- The index's `armOkB` is `armOkB` of the body's loops and the records `recs`, whose records by
-head are `rm`, of a list of regions with the same elements. -/
+/-- The index's `armOkB` for the loop of `h` is `armOkB` of the scope of `h`, given a list of
+regions with the same elements. -/
 private theorem Index.armOkB_eq (hs : ix.Spec bs ep) {Rs Rs' : List (Label × LabelMap Unit)}
-    (hR : ∀ p, p ∈ Rs ↔ p ∈ Rs') {rm : LabelMap (List LoopRecord)} {recs : List LoopRecord}
-    (hrm : ∀ h r, r ∈ LabelMap.listAt rm h ↔ r ∈ recs ∧ r.head = h) (s : CompletionShape env)
-    (ro : Roles) (r : LoopRecord) (d : Label) (i : Nat) (t : Label) :
-    ix.armOkB rm Rs' s ro r d i t =
-      Body.armOkB bs (loopOf bs) (scopeIn (loopOf bs) r.head) Rs s ro recs r d i t := by
-  have e₁ : ix.unreachableB = Body.unreachableB bs := funext (Index.unreachableB_eq hs)
-  have e₂ : ix.toOuterLoopB rm r = Body.toOuterLoopB bs (loopOf bs) recs r :=
-    funext (Index.toOuterLoopB_eq hs hrm r)
-  have e₃ : ix.toOuterDoneB rm r = Body.toOuterDoneB bs (loopOf bs) recs r :=
-    funext (Index.toOuterDoneB_eq hs hrm r)
-  have e₄ : ix.armOutB r.head Rs' d = Body.armOutB bs (scopeIn (loopOf bs) r.head) Rs d :=
-    funext (Index.armOutB_eq hs hR r.head d)
+    (hR : ∀ p, p ∈ Rs ↔ p ∈ Rs') (ro : Roles) (h d : Label) (i : Nat) (t : Label) :
+    ix.armOkB Rs' ro h d i t = Body.armOkB bs (scopeIn (loopOf bs) h) Rs ro d i t := by
   unfold Index.armOkB Body.armOkB
-  rw [e₁, e₂, e₃, e₄]
-  simp only [Index.labelArmB_eq hs]
+  rw [Index.unreachableB_eq hs, Index.armOutB_eq hs hR]
 
-/-- The index's `absorbsB` is `absorbsB` of the body's loops and the records `recs`, whose
-records by head are `rm`, of a list of regions with the same elements. -/
+/-- The index's `absorbsB` is `absorbsB` of the body's loops, of a list of regions with the same
+elements. -/
 private theorem Index.absorbsB_eq (hs : ix.Spec bs ep) {Rs Rs' : List (Label × LabelMap Unit)}
-    (hR : ∀ p, p ∈ Rs ↔ p ∈ Rs') {rm : LabelMap (List LoopRecord)} {recs : List LoopRecord}
-    (hrm : ∀ h r, r ∈ LabelMap.listAt rm h ↔ r ∈ recs ∧ r.head = h) (s : CompletionShape env)
-    (ro : Roles) (r : LoopRecord) (d : Label) :
-    ix.absorbsB rm s ro r d Rs' = Body.absorbsB bs (loopOf bs) s ro recs r d Rs := by
+    (hR : ∀ p, p ∈ Rs ↔ p ∈ Rs') (s : CompletionShape env) (ro : Roles) (h d : Label) :
+    ix.absorbsB s ro h d Rs' = Body.absorbsB bs (loopOf bs) s ro h d Rs := by
   unfold Index.absorbsB Body.absorbsB
   rw [blockAt?, ← hs.blocks]
   congr 2
   funext i t
-  exact Index.armOkB_eq hs hR hrm s ro r d i t
+  exact Index.armOkB_eq hs hR ro h d i t
 
-/-- The index's `recordHoldsB` is `recordHoldsB` of the body's transfers, heads and loops, and of
-the records `recs`, whose records by head are `rm`. -/
-private theorem Index.recordHoldsB_eq (hs : ix.Spec bs ep) {rm : LabelMap (List LoopRecord)}
-    {recs : List LoopRecord} (hrm : ∀ h r, r ∈ LabelMap.listAt rm h ↔ r ∈ recs ∧ r.head = h)
-    (s : CompletionShape env) (ro : Roles) (r : LoopRecord) :
-    ix.recordHoldsB bs ep s ro rm r = Body.recordHoldsB bs (transfers bs) ep (Body.heads bs)
-      (loopOf bs) (domInfo bs) (succMap bs) s ro recs r := by
+/-- The index's `recordHoldsB` is `recordHoldsB` of the body's transfers, heads and loops. -/
+private theorem Index.recordHoldsB_eq (hs : ix.Spec bs ep) (s : CompletionShape env) (ro : Roles)
+    (r : LoopRecord) :
+    ix.recordHoldsB bs ep s ro r = Body.recordHoldsB bs (transfers bs) ep (Body.heads bs)
+      (loopOf bs) (domInfo bs) (succMap bs) s ro r := by
   have hX : ∀ l, l ∈ exitsIn (transfers bs) (scopeIn (loopOf bs) r.head) ↔
       l ∈ ix.exitsOf (ix.scopeList r.head) (ix.inScope r.head) :=
     fun l => (Index.mem_exitsOf_scope hs).symm
@@ -945,7 +743,7 @@ private theorem Index.recordHoldsB_eq (hs : ix.Spec bs ep) {rm : LabelMap (List 
   | some d =>
     dsimp only
     rw [Index.doneB_eq hs (Index.mem_regionsOf hs hX),
-      Index.absorbsB_eq hs (Index.mem_regionsOf hs hX) hrm]
+      Index.absorbsB_eq hs (Index.mem_regionsOf hs hX)]
   | none =>
     dsimp only
     rw [all_eq_of_mem_iff (fun l => (hX l).symm) (Index.unreachableB_eq hs)]
@@ -966,7 +764,7 @@ private theorem Index.loopExitsB_eq (hs : ix.Spec bs ep) {rm : LabelMap (List Lo
       beq_iff_eq]
   · apply Bool.eq_iff_iff.mpr
     simp only [List.all_eq_true, hrm, Bool.or_eq_true, Bool.not_eq_true', List.any_eq_false,
-      beq_iff_eq, Index.recordHoldsB_eq hs hrm]
+      beq_iff_eq, Index.recordHoldsB_eq hs]
     constructor
     · intro hall r hr
       by_cases hb : ∃ b ∈ bs, b.label = r.head

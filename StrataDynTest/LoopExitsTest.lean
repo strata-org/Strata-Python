@@ -30,19 +30,16 @@ private def shape : CompletionShape E :=
     brk := Demo.Completion.broke.name, cont := Demo.Completion.continued.name,
     forwarded := [Demo.Completion.returned.name, Demo.Completion.raised.name] }
 
-/-- `demo.LCompletion`, whose `break` and `continue` carry a label, tested with
-`demo.labelIs`. -/
+/-- `demo.LCompletion`, whose `break` and `continue` carry a label. -/
 private def lshape : CompletionShape E :=
   { ty := Demo.LCompletion, data := Demo.LCompletion.name,
     normal := Demo.LCompletion.lnormal.name, brk := Demo.LCompletion.lbroke.name,
     cont := Demo.LCompletion.lcontinued.name,
-    forwarded := [Demo.LCompletion.lreturned.name, Demo.LCompletion.lraised.name],
-    labelTest := some Demo.labelIs.name }
+    forwarded := [Demo.LCompletion.lreturned.name, Demo.LCompletion.lraised.name] }
 
 /-! ## The shape, checked against the datatype -/
 
 #guard shape.roles? == some { normal := 0, brk := 3, cont := 4, forwarded := [1, 2] }
-#guard lshape.roles? == some { normal := 0, brk := 3, cont := 4, forwarded := [1, 2] }
 -- `raised` as `continue` and `continued` as forwarded: `raised` carries a field, which
 -- `continue` must not, so the swap is caught.
 private def swapped : CompletionShape E :=
@@ -56,8 +53,6 @@ private def swapped : CompletionShape E :=
 #guard ({ shape with brk := Demo.Completion.normal.name }).roles? == none
 -- A role that names no constructor of the datatype.
 #guard ({ shape with brk := Demo.Box.empty.name }).roles? == none
--- A labelled shape over a datatype whose `break` carries no label.
-#guard ({ shape with labelTest := some Demo.labelIs.name }).roles? == none
 
 /-- Block `s` that takes the completion `%k`, numbered `k`, of type `t`. -/
 private def blkK (s : String) (k : Nat) (t : TypeExpr E) (is : Array (Instruction E Unit))
@@ -87,8 +82,7 @@ private def labelBlk (s : String) (l v : Nat) (n : Int) (yes no : String) : Bloc
     info := () }
 
 /-- A record of the loop at `h`, whose exits meet at `d`. -/
-private def rec (h d : String) (label : Option Int := none) : LoopRecord :=
-  { head := lbl h, done := some (lbl d), label }
+private def rec (h d : String) : LoopRecord := { head := lbl h, done := some (lbl d) }
 
 /-- A record of the loop at `h`, which control never leaves. -/
 private def recNoDone (h : String) : LoopRecord := { head := lbl h, done := none }
@@ -367,12 +361,12 @@ private def noBackEdge (direct : Bool) : Func E Unit :=
   (fn ((noBackEdge false).blocks.toList.map fun b =>
     if b.label == lbl "entry" then { b with term := branch "pre" "done" } else b))
 
-/-! ## Labelled `break` -/
+/-! ## Labelled `break` and `continue` are not part of the form -/
 
-/-- The loops of `nested`, with labels 1 (outer) and 2 (inner).  The inner `done`'s `break` and
-`continue` arms test the label: the inner loop's own label goes on to `iafter` (or nowhere, for
-`continue`), and any other goes to `otherTo`. -/
-private def labelled (otherTo : String) (contOther : String := otherTo) : Func E Unit :=
+/-- The loops of `nested`, with labels 1 (outer) and 2 (inner), as a front end with labels would
+build them: the inner `done`'s `break` and `continue` arms test the label, and send the outer
+loop's label to the outer `done`. -/
+private def labelled : Func E Unit :=
   fn [blk "entry" #[] (jump "opre"), blk "opre" #[] (jump "ohead"),
       blk "ohead" #[] (branch "obody" "onormal"), blk "obody" #[] (jump "ipre"),
       blk "ipre" #[] (jump "ihead"), blk "ihead" #[] (branch "ibody" "inormal"),
@@ -380,7 +374,7 @@ private def labelled (otherTo : String) (contOther : String := otherTo) : Func E
       blk "inormal" #[] (jump "idone"), blk "ibrk" #[] (jump "idone"),
       blkK "idone" 7 Demo.LCompletion #[]
         (lcaseT 7 ["iafter", "unr", "unr", "ibl", "icl"]),
-      labelBlk "ibl" 9 10 2 "iafter" otherTo, labelBlk "icl" 11 12 2 "unr" contOther,
+      labelBlk "ibl" 9 10 2 "iafter" "odone", labelBlk "icl" 11 12 2 "unr" "odone",
       blk "iafter" #[] (jump "olatch"), blk "olatch" #[] (jump "ohead"),
       blk "onormal" #[] (jump "odone"),
       blkK "odone" 8 Demo.LCompletion #[]
@@ -388,41 +382,10 @@ private def labelled (otherTo : String) (contOther : String := otherTo) : Func E
       labelBlk "obl" 13 14 1 "after" "unr", labelBlk "ocl" 15 16 1 "unr" "unr",
       blk "unr" #[] unreachableT, blk "after" #[] ret]
 
-#guard check lshape [rec "ohead" "odone" (some 1), rec "ihead" "idone" (some 2)] (labelled "odone")
--- `continue outer` from the inner loop goes straight to the outer loop's head.
-#guard check lshape [rec "ohead" "odone" (some 1), rec "ihead" "idone" (some 2)]
-  (labelled "odone" "ohead")
--- `break outer` must leave the outer loop through its `done`, not continue it at its head.
-#guard !check lshape [rec "ohead" "odone" (some 1), rec "ihead" "idone" (some 2)]
-  (labelled "ohead" "odone")
--- Another loop's label is absorbed at the inner loop's `after`.
-#guard !check lshape [rec "ohead" "odone" (some 1), rec "ihead" "idone" (some 2)]
-  (labelled "iafter")
--- `break outer` may go through an empty block that jumps to the outer `done`, such as the
--- dedicated exit that the pass puts in front of it, but not through a block that runs code.
-#guard check lshape [rec "ohead" "odone" (some 1), rec "ihead" "idone" (some 2)]
-  (fn ((labelled "fwd" "ohead").blocks.toList ++ [blk "fwd" #[] (jump "odone")]))
-#guard !check lshape [rec "ohead" "odone" (some 1), rec "ihead" "idone" (some 2)]
-  (fn ((labelled "fwd" "ohead").blocks.toList ++ [blk "fwd" #[add 1 "unr"] (jump "odone")]))
-/-- `labelled`, with no labelled `continue`: the inner `done`'s `continue` arm goes to `contTo`. -/
-private def noLabelledContinue (contTo : String) : Func E Unit :=
-  fn ((labelled "odone" "unr").blocks.toList.filterMap fun b =>
-    if b.label == lbl "idone" then
-      some { b with term := lcaseT 7 ["iafter", "unr", "unr", "ibl", contTo] }
-    else if b.label == lbl "icl" && contTo != "icl" then none
-    else some b)
--- The `continue` arm may then be unreachable.
-#guard check lshape [rec "ohead" "odone" (some 1), rec "ihead" "idone" (some 2)]
-  (noLabelledContinue "unr")
--- A limit: a label test whose two successors are unreachable is an exit of the outer loop that
--- does not reach the outer `done`, so the check rejects it.
-#guard !check lshape [rec "ohead" "odone" (some 1), rec "ihead" "idone" (some 2)]
-  (noLabelledContinue "icl")
--- A labelled shape with records that carry no label.
-#guard !check lshape [rec "ohead" "odone", rec "ihead" "idone"] (labelled "odone")
--- A record whose label is not the one the arms test.
-#guard !check lshape [rec "ohead" "odone" (some 1), rec "ihead" "idone" (some 3)]
-  (labelled "odone")
+-- A shape's `break` and `continue` carry no field, so a completion datatype whose `break` and
+-- `continue` carry a label has no shape, and the check rejects its functions.
+#guard lshape.roles? == none
+#guard !check lshape [rec "ohead" "odone", rec "ihead" "idone"] labelled
 
 /-! ## A loop inside a region -/
 
@@ -508,5 +471,15 @@ private def preamble (twice : Bool) : Func E Unit :=
 -- goes to `h` and returns, without reaching `body`, the block where the precondition is assumed,
 -- as a translated Python function does whose argument binding fails.
 #guard (fn [blk "entry" #[add 1 "h"] (jump "body"), blk "body" #[] ret, blk "h" #[] ret]).checkPreamble
+
+/-! ## The swap to the fast check rests on the standard axioms
+
+Compiled code runs `Body.loopExitsFastB` in place of `Body.loopExitsB` through the `@[csimp]` lemma
+`Body.loopExitsB_eq_fast`, which Lean accepts even when it is an axiom or is proved with `sorry`.
+So the lemma must be a theorem that rests on Lean's standard axioms only. -/
+
+/-- info: 'Strata.Dyn.Body.loopExitsB_eq_fast' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Body.loopExitsB_eq_fast
 
 end Strata.Dyn.LoopExitsTest

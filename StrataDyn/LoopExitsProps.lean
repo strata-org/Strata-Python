@@ -308,126 +308,24 @@ theorem armOutB_iff (hn : (bs.map (·.label)).Nodup) {h d t : Label} :
     pastExitB_iff hn]
   exact or_congr Iff.rfl ⟨fun ⟨⟨a, b⟩, c⟩ => ⟨a, b, c⟩, fun ⟨a, b, c⟩ => ⟨⟨a, b⟩, c⟩⟩
 
-/-- In a body with distinct labels, `enclosesB` decides `Encloses`. -/
-theorem enclosesB_iff (hn : (bs.map (·.label)).Nodup) {r r' : LoopRecord} :
-    enclosesB (loopOf bs) r r' = true ↔ Encloses bs r r' := by
-  unfold enclosesB Encloses
-  simp only [Bool.and_eq_true, bne_iff_ne, ne_eq, List.contains_iff_mem,
-    ← inLoopScope_iff hn (u := ⟨r.head, 0⟩)]
-
-/-- In a body with distinct labels, `jumpsToB` decides whether the block `t` is empty and ends in
-a plain jump to `h`. -/
-theorem jumpsToB_iff (hn : (bs.map (·.label)).Nodup) {t h : Label} :
-    jumpsToB bs t h = true ↔ ∃ b ∈ bs, b.label = t ∧ b.instrs = #[] ∧ EndsIn b h := by
-  unfold jumpsToB
-  cases hf : blockAt? bs t with
-  | none =>
-    simp only [Option.any_none, Bool.false_eq_true, false_iff, not_exists, not_and]
-    intro b hb hbl _
-    rw [(blockAt?_eq_some hn).mpr ⟨hb, hbl⟩] at hf
-    exact absurd hf (by simp)
-  | some b =>
-    obtain ⟨hb, hbl⟩ := (blockAt?_eq_some hn).mp hf
-    rw [Option.any_some, Bool.and_eq_true, Array.isEmpty_iff, endsAtB_iff hn]
-    constructor
-    · rintro ⟨hi, c, hc, hcb, he⟩
-      have hcl : c.label = b.label := congrArg Point.label hcb.symm
-      rw [eq_of_label_eq hn hc hb hcl] at he
-      exact ⟨b, hb, hbl, hi, he⟩
-    · rintro ⟨c, hc, hcl, hi, he⟩
-      rw [eq_of_label_eq hn hc hb (hcl.trans hbl.symm)] at he hi
-      exact ⟨hi, b, hb, rfl, he⟩
-
-/-- In a body with distinct labels, `toOuterDoneB` decides `ToOuterDone`. -/
-theorem toOuterDoneB_iff (hn : (bs.map (·.label)).Nodup) {recs : List LoopRecord}
-    {r : LoopRecord} {t : Label} :
-    toOuterDoneB bs (loopOf bs) recs r t = true ↔ ToOuterDone bs recs r t := by
-  unfold toOuterDoneB ToOuterDone
-  simp only [Bool.or_eq_true, List.any_eq_true, Bool.and_eq_true, beq_iff_eq,
-    unreachableB_iff hn, enclosesB_iff hn, Option.any_eq_true, jumpsToB_iff hn]
-
-/-- In a body with distinct labels, `toOuterLoopB` decides `ToOuterLoop`. -/
-theorem toOuterLoopB_iff (hn : (bs.map (·.label)).Nodup) {recs : List LoopRecord}
-    {r : LoopRecord} {t : Label} :
-    toOuterLoopB bs (loopOf bs) recs r t = true ↔ ToOuterLoop bs recs r t := by
-  unfold toOuterLoopB ToOuterLoop
-  simp only [Bool.or_eq_true, List.any_eq_true, Bool.and_eq_true, beq_iff_eq,
-    toOuterDoneB_iff hn, enclosesB_iff hn, jumpsToB_iff hn, List.contains_iff_mem,
-    ← inLoopScope_iff hn (u := ⟨t, 0⟩)]
-  refine or_congr Iff.rfl (exists_congr fun r' => and_congr Iff.rfl (and_congr Iff.rfl ?_))
-  refine or_congr ⟨fun h => h.symm, fun h => h.symm⟩ ?_
-  exact ⟨fun ⟨⟨b, hb, hbl, hi, he⟩, hin⟩ => ⟨b, hb, hbl, hi, he, hin⟩,
-    fun ⟨b, hb, hbl, hi, he, hin⟩ => ⟨⟨b, hb, hbl, hi, he⟩, hin⟩⟩
-
-/-- In a body with distinct labels, `labelArmB` decides `LabelArm`, given checks that decide
-`own` and `other`. -/
-theorem labelArmB_iff (hn : (bs.map (·.label)).Nodup) {lt : Name} {n : Int}
-    {own other : Label → Prop} {ownB otherB : Label → Bool}
-    (hown : ∀ l, ownB l = true ↔ own l) (hother : ∀ l, otherB l = true ↔ other l) {t : Label} :
-    labelArmB bs lt n ownB otherB t = true ↔ LabelArm bs lt n own other t := by
-  unfold labelArmB Block.labelArmB LabelArm
-  cases hf : blockAt? bs t with
-  | none =>
-    simp only [Option.any_none, Bool.false_eq_true, false_iff, not_exists, not_and]
-    intro b hb hbl
-    rw [(blockAt?_eq_some hn).mpr ⟨hb, hbl⟩] at hf
-    exact absurd hf (by simp)
-  | some b =>
-    obtain ⟨hb, hbl⟩ := (blockAt?_eq_some hn).mp hf
-    rw [Option.any_some]
-    constructor
-    · intro hc
-      simp only [Bool.and_eq_true, beq_iff_eq] at hc
-      obtain ⟨hname, hrest⟩ := hc
-      refine ⟨b, hb, hbl, hname, ?_⟩
-      split at hrest
-      · rename_i p x v s₁ s₂ hp ha hs
-        simp only [Bool.and_eq_true, beq_iff_eq, ← Array.any_toList, List.any_eq_true,
-          Array.mem_toList_iff] at hrest
-        obtain ⟨⟨⟨hx, i, hi, hiv⟩, ho⟩, hot⟩ := hrest
-        refine ⟨p, v, s₁, s₂, hp, ?_, ⟨i, hi, hiv⟩, ?_, (hown _).mp ho, (hother _).mp hot⟩
-        · rw [← Array.toList_inj, ha, hx]
-        · rw [← Array.toList_inj, hs]
-      · exact absurd hrest (by simp)
-    · rintro ⟨c, hc, hcl, hname, p, v, s₁, s₂, hp, ha, ⟨i, hi, hiv⟩, hs, ho, hot⟩
-      have hcb := eq_of_label_eq hn hc hb (hcl.trans hbl.symm)
-      subst hcb
-      simp only [Bool.and_eq_true, beq_iff_eq, hname, true_and]
-      rw [hp, ha, hs]
-      simp only [Bool.and_eq_true, beq_iff_eq, ← Array.any_toList, List.any_eq_true,
-        Array.mem_toList_iff]
-      exact ⟨⟨⟨by simp, i, hi, hiv⟩, (hown _).mpr ho⟩, (hother _).mpr hot⟩
-
 /-- In a body with distinct labels, `armOkB` decides `ArmOk`. -/
-theorem armOkB_iff (hn : (bs.map (·.label)).Nodup) {s : CompletionShape env} {ro : Roles}
-    {recs : List LoopRecord} {r : LoopRecord} {d : Label} {i : Nat} {t : Label} :
-    armOkB bs (loopOf bs) (scopeIn (loopOf bs) r.head)
-        (regionsOf bs (succMap bs) d (exitsIn (transfers bs) (scopeIn (loopOf bs) r.head))) s ro
-        recs r d i t =
+theorem armOkB_iff (hn : (bs.map (·.label)).Nodup) {ro : Roles} {h d : Label} {i : Nat}
+    {t : Label} :
+    armOkB bs (scopeIn (loopOf bs) h)
+        (regionsOf bs (succMap bs) d (exitsIn (transfers bs) (scopeIn (loopOf bs) h))) ro d i t =
         true ↔
-      ArmOk bs s ro recs r d i t := by
+      ArmOk bs ro h d i t := by
   unfold armOkB ArmOk
-  have hu := fun l => unreachableB_iff hn (bs := bs) (l := l)
-  have ho := fun l => armOutB_iff hn (bs := bs) (h := r.head) (d := d) (t := l)
-  have hd := fun l => toOuterDoneB_iff hn (bs := bs) (recs := recs) (r := r) (t := l)
-  have hl := fun l => toOuterLoopB_iff hn (bs := bs) (recs := recs) (r := r) (t := l)
   split
-  · split
-    · exact hu t
-    · exact ho t
-  · split
-    · rw [Bool.or_eq_true, hu t, labelArmB_iff hn hu hl]
-    · split
-      · exact labelArmB_iff hn ho hd
-      · exact ho t
-  · simp
+  · exact unreachableB_iff hn
+  · exact armOutB_iff hn
 
 /-- In a body with distinct labels, `absorbsB` decides `Absorbs`. -/
 theorem absorbsB_iff (hn : (bs.map (·.label)).Nodup) {s : CompletionShape env} {ro : Roles}
-    {recs : List LoopRecord} {r : LoopRecord} {d : Label} :
-    absorbsB bs (loopOf bs) s ro recs r d
-        (regionsOf bs (succMap bs) d (exitsIn (transfers bs) (scopeIn (loopOf bs) r.head))) =
-      true ↔ Absorbs bs s ro recs r d := by
+    {h d : Label} :
+    absorbsB bs (loopOf bs) s ro h d
+        (regionsOf bs (succMap bs) d (exitsIn (transfers bs) (scopeIn (loopOf bs) h))) =
+      true ↔ Absorbs bs s ro h d := by
   unfold absorbsB Block.absorbsB Absorbs
   cases hf : blockAt? bs d with
   | none =>
@@ -440,13 +338,12 @@ theorem absorbsB_iff (hn : (bs.map (·.label)).Nodup) {s : CompletionShape env} 
     rw [Option.any_some]
     have harms : ((List.range b.term.succs.size).all fun i =>
           (b.term.succs[i]?).all fun sv =>
-            armOkB bs (loopOf bs) (scopeIn (loopOf bs) r.head)
-              (regionsOf bs (succMap bs) d (exitsIn (transfers bs) (scopeIn (loopOf bs) r.head)))
-              s ro recs r d
-              i sv.label) =
+            armOkB bs (scopeIn (loopOf bs) h)
+              (regionsOf bs (succMap bs) d (exitsIn (transfers bs) (scopeIn (loopOf bs) h)))
+              ro d i sv.label) =
           true ↔
         ∀ (i : Nat) (sv : Target.Raw), b.term.succs[i]? = some sv →
-          ArmOk bs s ro recs r d i sv.label := by
+          ArmOk bs ro h d i sv.label := by
       simp only [List.all_eq_true, List.mem_range]
       constructor
       · intro hall i sv hi
@@ -480,10 +377,10 @@ theorem exitsIn_all_unreachable_iff (hn : (bs.map (·.label)).Nodup) {h : Label}
 
 /-- In a body with distinct labels, `recordHoldsB` decides `RecordHolds`. -/
 theorem recordHoldsB_iff (hbs : bs ≠ []) (hn : (bs.map (·.label)).Nodup)
-    {s : CompletionShape env} {ro : Roles} {recs : List LoopRecord} {r : LoopRecord} :
+    {s : CompletionShape env} {ro : Roles} {r : LoopRecord} :
     recordHoldsB bs (transfers bs) (exitPoints bs) (heads bs) (loopOf bs) (domInfo bs)
-        (succMap bs) s ro recs r = true ↔
-      RecordHolds bs s ro recs r := by
+        (succMap bs) s ro r = true ↔
+      RecordHolds bs s ro r := by
   unfold recordHoldsB headDominatesB RecordHolds
   rw [Bool.and_eq_true, Bool.and_eq_true, preheaderB_iff hn, and_assoc]
   refine and_congr Iff.rfl (and_congr ?_ ?_)

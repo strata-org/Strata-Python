@@ -1019,27 +1019,27 @@ private def noBackEdge : String := "module m {
 }
 " (specOf [])
 
-/-! ## A labelled `continue` of an outer loop
+/-! ## A labelled `continue` is not part of the form
 
-`outer: while c { while c { if c { continue outer } } }`, with labels 1 (outer) and 2 (inner).
-The inner `done` sends label 1 on to the outer head; the pass gives the outer loop a latch, which
-then takes that transfer. -/
+`outer: while c { while c { if c { continue outer } } }`, with labels 1 (outer) and 2 (inner), as a
+front end with labels would lower it: the inner `done` tests the label and sends label 1 on to the
+outer head.  A shape's `break` and `continue` carry no field, so `demo.LCompletion`, whose `break`
+and `continue` carry a label, has no shape, and `run` rejects the function. -/
 
 /-- `demo.LCompletion`, whose `break` and `continue` carry a label. -/
 private def demoLShape : CompletionShape Demo.env :=
   { ty := Demo.LCompletion, data := Demo.LCompletion.name,
     normal := Demo.LCompletion.lnormal.name, brk := Demo.LCompletion.lbroke.name,
     cont := Demo.LCompletion.lcontinued.name,
-    forwarded := [Demo.LCompletion.lreturned.name, Demo.LCompletion.lraised.name],
-    labelTest := some Demo.labelIs.name }
+    forwarded := [Demo.LCompletion.lreturned.name, Demo.LCompletion.lraised.name] }
 
-/-- The records of the two loops, with labels 1 (outer) and 2 (inner). -/
+/-- The records of the two loops. -/
 private def labelSpec : CanonicalSpec Demo.env Info :=
   { shape := some demoLShape, preamble := true,
     records := fun _ => [{ head := ⟨.num (.str .base "ohead") 0⟩,
-                           done := some ⟨.num (.str .base "odone") 0⟩, label := some 1 },
+                           done := some ⟨.num (.str .base "odone") 0⟩ },
                          { head := ⟨.num (.str .base "ihead") 0⟩,
-                           done := some ⟨.num (.str .base "idone") 0⟩, label := some 2 }] }
+                           done := some ⟨.num (.str .base "idone") 0⟩ }] }
 
 private def continueOuter : String := "module m {
   func @m.l(%c.0 : base.Bool, %x.0 : demo.Value) -> demo.Value {
@@ -1102,167 +1102,11 @@ private def continueOuter : String := "module m {
 }
 "
 
-/-- info: module m {
-  func @m.l(%c.0 : base.Bool, %x.0 : demo.Value) -> demo.Value {
-    entry.0(%c.0 : base.Bool, %x.0 : demo.Value):
-      jump ^body.0()
-    body.0():
-      jump ^ohead.0()
-    ohead.0():
-      branch(%c.0) ^obody.0() ^onormal.0()
-    obody.0():
-      jump ^ihead.0()
-    ihead.0():
-      branch(%c.0) ^ibody.0() ^inormal.0()
-    ibody.0():
-      branch(%c.0) ^icont.0() ^latch.0()
-    icont.0():
-      %k.0 : demo.LCompletion = demo.lcontinued(1)
-      jump ^idone.0(%k.0)
-    inormal.0():
-      %k.1 : demo.LCompletion = demo.lnormal
-      jump ^idone.0(%k.1)
-    idone.0(%k.2 : demo.LCompletion):
-      demo.LCompletion.case(%k.2) ^iafter.0() ^u1.0() ^u2.0() ^ibl.0() ^icl.0()
-    ibl.0(%lb.0 : base.Int):
-      demo.labelIs(%lb.0, 2) ^iafter.0() ^u3.0()
-    icl.0(%lc.0 : base.Int):
-      demo.labelIs(%lc.0, 2) ^u4.0() ^latch.1()
-    iafter.0():
-      jump ^latch.1()
-    onormal.0():
-      %k.3 : demo.LCompletion = demo.lnormal
-      jump ^odone.0(%k.3)
-    odone.0(%k.4 : demo.LCompletion):
-      demo.LCompletion.case(%k.4) ^after.0() ^ret.0() ^u5.0() ^obl.0() ^ocl.0()
-    obl.0(%lb.1 : base.Int):
-      demo.labelIs(%lb.1, 1) ^after.0() ^u6.0()
-    ocl.0(%lc.1 : base.Int):
-      demo.labelIs(%lc.1, 1) ^u7.0() ^u8.0()
-    ret.0(%v.0 : demo.Value):
-      jump ^post.0(%v.0)
-    u1.0(%e.0 : demo.Value):
-      unreachable
-    u2.0(%e.1 : demo.Value):
-      unreachable
-    u3.0():
-      unreachable
-    u4.0():
-      unreachable
-    u5.0(%e.2 : demo.Value):
-      unreachable
-    u6.0():
-      unreachable
-    u7.0():
-      unreachable
-    u8.0():
-      unreachable
-    after.0():
-      jump ^post.0(%x.0)
-    post.0(%ret.0 : demo.Value):
-      ret(%ret.0)
-    latch.0():
-      jump ^ihead.0()
-    latch.1():
-      jump ^ohead.0()
-  }
-}
--/
+/-- info: m.l: the completion shape does not match its datatype's constructors -/
 #guard_msgs in
 #eval canonText continueOuter labelSpec
 
--- A wrong lowering: `continue outer` sent to `iafter`, the code after the inner loop, which is
--- the outer loop's latch but runs an instruction first.  The latch a `continue outer` may reach
--- is an empty one.
-/-- info: m.l: idone.0 does not absorb the break and continue of the loop at ihead.0 -/
-#guard_msgs in
-#eval canonText ((continueOuter.replace "demo.labelIs(%lc.0, 2) ^u4.0() ^ohead.0()"
-      "demo.labelIs(%lc.0, 2) ^u4.0() ^iafter.0()").replace
-    "    iafter.0():\n      jump ^ohead.0()"
-    "    iafter.0():\n      %s.0 : demo.Value = demo.add(%x.0, %x.0) ^u9.0()\n      jump ^ohead.0()\n    u9.0(%e.3 : demo.Value):\n      unreachable")
-  labelSpec
-
-/-! ## A labelled `break` of an outer loop
-
-`outer: while c { while c { if c { break outer } } }`.  The inner `done` sends label 1 on to the
-outer `done`; the pass puts a dedicated exit in front of it, which then takes that transfer. -/
-
-private def breakOuter : String :=
-  ((continueOuter.replace "%k.0 : demo.LCompletion = demo.lcontinued(1)"
-      "%k.0 : demo.LCompletion = demo.lbroke(1)").replace
-    "      demo.labelIs(%lb.0, 2) ^iafter.0() ^u3.0()"
-    "      %kb.0 : demo.LCompletion = demo.lbroke(%lb.0)\n      demo.labelIs(%lb.0, 2) ^iafter.0() ^odone.0(%kb.0)").replace
-    "    u3.0():\n      unreachable\n" "" |>.replace "icont" "ibrk"
-
-/-- info: module m {
-  func @m.l(%c.0 : base.Bool, %x.0 : demo.Value) -> demo.Value {
-    entry.0(%c.0 : base.Bool, %x.0 : demo.Value):
-      jump ^body.0()
-    body.0():
-      jump ^ohead.0()
-    ohead.0():
-      branch(%c.0) ^obody.0() ^onormal.0()
-    obody.0():
-      jump ^ihead.0()
-    ihead.0():
-      branch(%c.0) ^ibody.0() ^inormal.0()
-    ibody.0():
-      branch(%c.0) ^ibrk.0() ^latch.0()
-    ibrk.0():
-      %k.0 : demo.LCompletion = demo.lbroke(1)
-      jump ^idone.0(%k.0)
-    inormal.0():
-      %k.1 : demo.LCompletion = demo.lnormal
-      jump ^idone.0(%k.1)
-    idone.0(%k.2 : demo.LCompletion):
-      demo.LCompletion.case(%k.2) ^iafter.0() ^u1.0() ^u2.0() ^ibl.0() ^icl.0()
-    ibl.0(%lb.0 : base.Int):
-      %kb.0 : demo.LCompletion = demo.lbroke(%lb.0)
-      demo.labelIs(%lb.0, 2) ^iafter.0() ^loopexit.0(%kb.0)
-    icl.0(%lc.0 : base.Int):
-      demo.labelIs(%lc.0, 2) ^u4.0() ^latch.1()
-    iafter.0():
-      jump ^latch.1()
-    onormal.0():
-      %k.3 : demo.LCompletion = demo.lnormal
-      jump ^odone.0(%k.3)
-    odone.0(%k.4 : demo.LCompletion):
-      demo.LCompletion.case(%k.4) ^after.0() ^ret.0() ^u5.0() ^obl.0() ^ocl.0()
-    obl.0(%lb.1 : base.Int):
-      demo.labelIs(%lb.1, 1) ^after.0() ^u6.0()
-    ocl.0(%lc.1 : base.Int):
-      demo.labelIs(%lc.1, 1) ^u7.0() ^u8.0()
-    ret.0(%v.0 : demo.Value):
-      jump ^post.0(%v.0)
-    u1.0(%e.0 : demo.Value):
-      unreachable
-    u2.0(%e.1 : demo.Value):
-      unreachable
-    u4.0():
-      unreachable
-    u5.0(%e.2 : demo.Value):
-      unreachable
-    u6.0():
-      unreachable
-    u7.0():
-      unreachable
-    u8.0():
-      unreachable
-    after.0():
-      jump ^post.0(%x.0)
-    post.0(%ret.0 : demo.Value):
-      ret(%ret.0)
-    latch.0():
-      jump ^ihead.0()
-    latch.1():
-      jump ^ohead.0()
-    loopexit.0(%k.5 : demo.LCompletion):
-      jump ^odone.0(%k.5)
-  }
-}
--/
-#guard_msgs in
-#eval canonText breakOuter labelSpec
+/-! ## Records the check rejects, and ghosts the pass keeps -/
 
 -- A record whose head is `normal`, a block of the loop that the path into the body does not
 -- pass.  The pass gives `normal` a preheader, but `normal` does not dominate the loop's exits.

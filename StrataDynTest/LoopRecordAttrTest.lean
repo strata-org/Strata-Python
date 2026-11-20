@@ -34,7 +34,7 @@ private def lbl (s : String) (k : Nat) : Label := ⟨.num (.str .base s) k⟩
 
 private def recs : List LoopRecord :=
   [{ head := lbl "head" 0, done := some (lbl "done" 0) },
-   { head := lbl "head" 1, done := none, label := some 3 }]
+   { head := lbl "head" 1, done := none }]
 
 -- Each record reads back as itself, and so does the attribute that states them.
 #guard recs.all fun r => LoopRecord.ofAttrValue? r.toAttrValue == some r
@@ -46,8 +46,9 @@ private def recs : List LoopRecord :=
 -- An entry that is not a record: the attribute does not read.
 #guard LoopRecord.ofAttrs? (.str .base "loops")
   #[(.str .base "loops", .list #[.const (.int 1)])] == none
--- A label field that is not an integer.
+-- A record with a field other than `head` and `done`, such as the label of a labelled `break`:
+-- the record does not read.
 #guard LoopRecord.ofAttrValue? (.record #[(.str .base "head", .const (.str "head.0")),
-  (.str .base "label", .const (.str "x"))]) == none
+  (.str .base "label", .const (.int 2))]) == none
 
 end Strata.Dyn.LoopRecordAttrTest

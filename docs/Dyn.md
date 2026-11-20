@@ -644,7 +644,9 @@ which the check reads against the datatype's declaration, and states each loop's
 a `LoopRecord`, which `run` reads from the function's annotation. The records are needed because an
 enclosing loop's `done` also meets every exit of an inner loop, so the control-flow graph alone does
 not say which `done` is whose. The check verifies every record, so a wrong record is rejected, not
-trusted, within the limits that `StrataDyn/LoopExits.lean` lists. Every loop has a record. A loop
+trusted, within the limits that `StrataDyn/LoopExits.lean` lists. A shape's `break` and `continue`
+carry no field, so labelled exits, as in JavaScript, need the form extended first. Every loop has
+a record. A loop
 with no exit has a record without a `done`, and the check verifies that it has no exit. A front end
 should give each `unreachable` target its own block. When code outside the loop also enters such a
 block, the pass puts a forwarding block in front of it, and the check then rejects the loop, since

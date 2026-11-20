@@ -595,7 +595,7 @@ the heads of the front end's loop records. -/
               let Rs := Body.regionsOf bs sm d (Body.exitsIn tr (Body.scopeIn lo r.head))
               if !Body.doneB bs tr ep hs lo s r.head d Rs then
                 some s!"the exits of the loop at {name r.head} do not all meet at {name d}"
-              else if !Body.absorbsB bs lo s ro recs r d Rs then
+              else if !Body.absorbsB bs lo s ro r.head d Rs then
                 some s!"{name d} does not absorb the break and continue of the loop at \
                   {name r.head}"
               else none
