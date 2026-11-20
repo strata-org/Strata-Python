@@ -3074,8 +3074,10 @@ private partial def scanDispatchFields (ctx : TranslationContext)
 /-- Synthesize a default `__init__` declaration and procedure for a class that lacks one.
     Returns a `PythonFunctionDecl` (for call-site arity checking) and a `Procedure` (for verification).
     The procedure is derived from the decl so that both stay in sync when the calling convention changes.
-    TODO: The synthesized procedure has an `.Opaque` body, so the verifier cannot reason about
-    default field values. Wire default field values through as postconditions to enable full verification. -/
+    Python's default `__init__` does nothing, so the procedure's implementation is the empty block:
+    it is the exact behaviour, not a model of external code. The procedure is `.Opaque` with no
+    postconditions, so callers do not see default field values; wiring them through as postconditions
+    would enable full verification of reads of those fields. -/
 def mkDefaultInitDecl (className : String) : PythonFunctionDecl × Procedure :=
   let initDeclName := className ++ "@__init__"
   -- Build the decl as the single source of truth
@@ -3101,7 +3103,7 @@ def mkDefaultInitDecl (className : String) : PythonFunctionDecl × Procedure :=
     outputs := [{name := "LaurelResult", type := AnyTy}]
     preconditions := [{ condition := mkStmtExprMd (StmtExpr.LiteralBool true) }]
     decreases := none
-    body := .Opaque [] .none wildcardModifies
+    body := .Opaque [] (some (mkStmtExprMd (StmtExpr.Block [] none [] none))) wildcardModifies
   }
   (decl, proc)
 
