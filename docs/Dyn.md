@@ -529,7 +529,10 @@ A consumer that uses invariants follows these rules:
 
 * At a loop's head, it checks the invariants on every edge into the head, and may assume them at
   the head only if it checks them on each of those edges. In canonical form, those edges leave the
-  end of the preheader (the base case) and the end of the latch (the step case). At the head, the
+  end of the preheader (the base case) and the end of the latch (the step case). A loop that a
+  front end records but no back edge enters, such as `while c: return x`, has no latch, and its only
+  edge into the head leaves the end of its preheader. **Canonical form**, below, gives the theorems
+  for both. At the head, the
   instruction's place is where the invariants are assumed, never where they are checked: a check
   at the start of the head, after the havoc and the assumption, checks nothing.
 * In a block that is not a loop's head, the invariants are an assertion at each entry, and may be
@@ -669,9 +672,12 @@ unchanged with the same proofs, or says why the function is not canonical. A sta
 that should keep the form uses it, so that a break is reported, not repaired. `check` takes the
 same `CanonicalSpec` as `run`, `run` is the pass followed by `check`, and
 `Canonicalize.checkModule` runs `check` on every function of a module.
-`Body.loopRoles` names each loop's head, preheader and latch. In every body of a canonical
-function, every loop has its entry and the names are right (`Func.loopRoles_spec`), so a stage
-that places obligations reads each of these blocks by its role.
+`Body.loopRoles`, given a test of the heads of the function's loop records, names each loop's
+head, its preheader and, when a back edge enters its head, its latch. A recorded loop that no back edge
+enters, such as `while c: return x`, has an entry without a latch. In every body of a canonical
+function, every loop of the control-flow graph and every record that the loop exits check accepts
+has its entry, and the names are right (`Func.loopRoles_spec`, `Func.LoopExits.loopRoles_record`), so a
+stage that places obligations reads each of these blocks by its role.
 
 **Annotations.** Every part of a program carries an annotation of a type the front end chooses,
 such as a source position, so that results can be reported against the original source.

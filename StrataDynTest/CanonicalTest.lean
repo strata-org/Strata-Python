@@ -250,4 +250,60 @@ private def twoEntries : List (Block E Unit) :=
 -- The check depends on the order it is given: the canonical loop in reverse order fails.
 #guard !Body.reducibleWithB whileLoop (lbls ["exit", "latch", "body", "head", "pre", "entry"])
 
+/-! ## Each loop's roles, in work that grows with the body
+
+`Body.loopRoles` of `n` sequential loops, counted in heartbeats, on two bodies: canonical loops,
+and loops that always return, which only their records make loops.  Four times the loops must
+take less than six times the heartbeats, where a scan of the body's transfers per loop takes about
+eight at these sizes.  The labels carry counters, as every label that the builder and the
+pass make does, and the records' heads are a label set built once. -/
+
+/-- The label `s.i`. -/
+private def lc (s : String) (i : Nat) : Label := ⟨.num (.str .base s) i⟩
+
+/-- Block `s.i`, empty, ending in `t`. -/
+private def blkC (s : String) (i : Nat) (t : Terminator E Unit) : Block E Unit :=
+  { label := lc s i, params := #[], instrs := #[], term := t, info := () }
+
+/-- `n` sequential loops: `pre.i` jumps to `head.i`, which branches to `body.i` or to `exit.i`,
+which goes on to `pre.(i+1)`; `pre.n` returns.  With `back`, `body.i` is the latch, a jump back
+to `head.i`; without, it returns, so no back edge enters `head.i`. -/
+private def loops (back : Bool) (n : Nat) : List (Block E Unit) :=
+  blk "entry" #[] (.jump () ⟨lc "pre" 0, #[]⟩) ::
+    ((List.range n).flatMap fun i =>
+      [blkC "pre" i (.jump () ⟨lc "head" i, #[]⟩),
+       blkC "head" i (.branch () ⟨0⟩ ⟨lc "body" i, #[]⟩ ⟨lc "exit" i, #[]⟩),
+       blkC "body" i (if back then .jump () ⟨lc "head" i, #[]⟩ else ret),
+       blkC "exit" i (.jump () ⟨lc "pre" (i + 1), #[]⟩)]) ++ [blkC "pre" n ret]
+
+/-- The heartbeats of `Body.loopRoles` on `loops back n`, with the heads `head.i` as the
+records' heads, after checking that it names every loop. -/
+private def rolesHeartbeats (back : Bool) (n : Nat) : IO Nat := do
+  let bs ← IO.lazyPure fun _ => loops back n
+  let rs ← IO.lazyPure fun _ => LabelMap.setOf ((List.range n).map (lc "head"))
+  unless bs.length == 4 * n + 2 && (rs.find? (lc "head" 0)).isSome do
+    throw <| IO.userError "the body was not built"
+  let h₀ ← IO.getNumHeartbeats
+  let roles ← IO.lazyPure fun _ => Body.loopRoles bs fun l => (rs.find? l).isSome
+  let h₁ ← IO.getNumHeartbeats
+  unless roles.length == n do throw <| IO.userError s!"loopRoles names {roles.length} of {n} loops"
+  return h₁ - h₀
+
+#guard canon (loops true 3)
+
+#eval show IO Unit from do
+  for back in [true, false] do
+    let a ← rolesHeartbeats back 400
+    let b ← rolesHeartbeats back 1600
+    unless b < 6 * max a 1 do
+      throw <| IO.userError s!"loopRoles: 1600 loops took {b} heartbeats, at least six times the \
+        {a} of 400 (back edges: {back})"
+
+-- Compiled code runs `Body.loopRolesFastB` in place of `Body.loopRoles` through the `@[csimp]`
+-- lemma `Body.loopRoles_eq_fast`, which Lean accepts even when it is an axiom or is proved with
+-- `sorry`.  So the lemma must be a theorem that rests on Lean's standard axioms only.
+/-- info: 'Strata.Dyn.Body.loopRoles_eq_fast' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Body.loopRoles_eq_fast
+
 end Strata.Dyn.CanonicalTest

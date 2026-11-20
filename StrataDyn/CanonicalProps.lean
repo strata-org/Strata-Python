@@ -41,9 +41,10 @@ every well-formed function's do.
   loop into it passes the end of its preheader;
 * `Body.leaves_iff`: a point leaves the body exactly when a successor of its instruction or
   terminator names `Label.exit`;
-* `Body.mem_loopRoles`, `Body.loopRoles_complete`, `Func.loopRoles_spec`: in a body whose loops
-  have preheaders and latches, and so in a canonical function, `Body.loopRoles` names each loop's
-  head, preheader and latch.
+* `Body.mem_loopRoles`, `Body.loopRoles_complete`, `Body.loopRoles_complete_record`,
+  `Func.loopRoles_spec`: in a body whose loops have preheaders and latches, and so in a canonical
+  function, `Body.loopRoles` names each loop's head, preheader and latch, and each recorded loop
+  that no back edge enters, with its preheader.
 
 ## Main definitions
 
@@ -277,53 +278,67 @@ theorem loopsSimplifiedB_iff (hn : (bs.map (·.label)).Nodup) :
     obtain ⟨hp, hl, he⟩ := hall h hh'
     exact ⟨⟨(preheaderB_iff hn).mpr hp, (latchB_iff hn hh').mpr hl⟩, (exitsB_iff hn).mpr he⟩
 
-/-- `theOne? E` is `u` exactly when `u` is in `E` and every point of `E` is `u`. -/
-public theorem theOne?_eq_some {E : List Point} {u : Point} :
-    theOne? E = some u ↔ u ∈ E ∧ ∀ w ∈ E, w = u := by
-  unfold theOne?
-  cases E with
-  | nil => simp
-  | cons v vs =>
-    simp only [List.mem_cons, forall_eq_or_imp]
-    split
-    · rename_i hall
-      simp only [List.all_eq_true, beq_iff_eq] at hall
-      constructor
-      · rintro ⟨⟩
-        exact ⟨.inl rfl, rfl, hall⟩
-      · rintro ⟨-, rfl, -⟩
-        rfl
-    · rename_i hall
-      simp only [List.all_eq_true, beq_iff_eq] at hall
-      simp only [reduceCtorEq, false_iff, not_and]
-      rintro - rfl hrest
-      exact hall hrest
+/-- In a body with distinct labels, a point that `entriesFrom` lists, and that is the only one,
+ends a block that is the preheader of `h` if it ends in a plain jump to `h`. -/
+private theorem preheader_of_theOne (hn : (bs.map (·.label)).Nodup) {h : Label} {u : Point}
+    (hu : theOne? (entriesFrom bs (loopOf bs h) h) = some u) (he : endsAtB bs u h = true) :
+    ∃ pre, pre.label = u.label ∧ Preheader bs h pre := by
+  obtain ⟨hmem, hall⟩ := theOne?_eq_some.mp hu
+  obtain ⟨b, hb, rfl, hends⟩ := (endsAtB_iff hn).mp he
+  obtain ⟨htr, hout⟩ := (mem_entriesFrom hn).mp hmem
+  exact ⟨b, rfl, hb, fun hin => hout ((atLoop_endOf_iff hn hb).mpr hin), hends, htr,
+    fun w hw hwo => hall w ((mem_entriesFrom hn).mpr ⟨hw, hwo⟩)⟩
 
-/-- In a body with distinct labels whose loops have preheaders and latches, each entry of
-`loopRoles` names the head of a loop, its preheader and its latch. -/
-public theorem mem_loopRoles (hn : (bs.map (·.label)).Nodup) (hs : LoopsSimplified bs) {r : LoopRoles}
-    (hr : r ∈ loopRoles bs) :
-    IsHead bs r.head ∧ (∃ pre, pre.label = r.preheader ∧ Preheader bs r.head pre) ∧
-      ∃ latch, latch.label = r.latch ∧ Latch bs r.head latch := by
-  obtain ⟨h, hh, hm⟩ := List.mem_filterMap.mp hr
+/-- In a body with distinct labels, each entry of `loopRoles` with a latch names the head of a
+loop of the CFG, its preheader and its latch, and each entry without one names a head that
+`isRec` tells and no back edge enters, and its preheader.  The body need not be canonical. -/
+public theorem mem_loopRoles (hn : (bs.map (·.label)).Nodup) {isRec : Label → Bool}
+    {r : LoopRoles} (hr : r ∈ loopRoles bs isRec) :
+    (∃ pre, pre.label = r.preheader ∧ Preheader bs r.head pre) ∧
+      match r.latch with
+      | some l => IsHead bs r.head ∧ ∃ latch, latch.label = l ∧ Latch bs r.head latch
+      | none => ¬ IsHead bs r.head ∧ isRec r.head = true := by
+  obtain ⟨b, -, hm⟩ := List.mem_filterMap.mp hr
+  unfold rolesAt at hm
   split at hm
-  · rename_i u v hu hv
-    cases hm
-    have hhead := (mem_heads_iff hn).mp hh
-    obtain ⟨⟨pre, hpre⟩, ⟨latch, hlat⟩, -⟩ := hs h hhead
-    obtain ⟨-, hu⟩ := theOne?_eq_some.mp hu
-    obtain ⟨-, hv⟩ := theOne?_eq_some.mp hv
-    have hpu : endOf pre = u := hu _ ((mem_entriesFrom hn).mpr ⟨hpre.enters, fun hat =>
-      hpre.outside ((atLoop_endOf_iff hn hpre.mem).mp hat)⟩)
-    obtain ⟨w, hw⟩ := hhead
-    have hlv : endOf latch = v := hv _ (hlat.back w hw ▸ (mem_backFrom hn).mpr hw)
-    exact ⟨⟨w, hw⟩, ⟨pre, by rw [← hpu]; rfl, hpre⟩, ⟨latch, by rw [← hlv]; rfl, hlat⟩⟩
-  · cases hm
+  · rename_i hh
+    have hhead := (mem_heads_iff hn).mp (List.contains_iff_mem.mp hh)
+    split at hm
+    · rename_i u v hu hv
+      split at hm
+      · rename_i he
+        cases hm
+        rw [Bool.and_eq_true] at he
+        obtain ⟨c, hc, rfl, hends⟩ := (endsAtB_iff hn).mp he.2
+        obtain ⟨-, hall⟩ := theOne?_eq_some.mp hv
+        exact ⟨preheader_of_theOne hn hu he.1, hhead, c, rfl,
+          ⟨hc, hends, fun w hw => hall w ((mem_backFrom hn).mpr hw)⟩⟩
+      · cases hm
+    · cases hm
+  · rename_i hnh
+    split at hm
+    · rename_i hrh
+      split at hm
+      · rename_i u hu
+        split at hm
+        · rename_i he
+          cases hm
+          refine ⟨preheader_of_theOne hn hu he, fun hh => hnh ?_, hrh⟩
+          exact List.contains_iff_mem.mpr ((mem_heads_iff hn).mpr hh)
+        · cases hm
+      · cases hm
+    · cases hm
 
-/-- In a body with distinct labels whose loops have preheaders and latches, every loop has an
-entry in `loopRoles`. -/
-public theorem loopRoles_complete (hn : (bs.map (·.label)).Nodup) (hs : LoopsSimplified bs) {h : Label}
-    (hh : IsHead bs h) : ∃ r ∈ loopRoles bs, r.head = h := by
+/-- `rolesAt` of a block's label is the entry of `loopRoles` for that block. -/
+private theorem mem_loopRoles_of_rolesAt {isRec : Label → Bool} {b : Block env α} (hb : b ∈ bs)
+    {r : LoopRoles} (hr : rolesAt bs isRec b.label = some r) : r ∈ loopRoles bs isRec :=
+  List.mem_filterMap.mpr ⟨b, hb, hr⟩
+
+/-- In a body with distinct labels whose loops have preheaders and latches, every loop of the CFG
+has an entry in `loopRoles`, with a latch. -/
+public theorem loopRoles_complete (hn : (bs.map (·.label)).Nodup) (hs : LoopsSimplified bs)
+    (isRec : Label → Bool) {h : Label} (hh : IsHead bs h) :
+    ∃ r ∈ loopRoles bs isRec, r.head = h ∧ r.latch.isSome := by
   obtain ⟨⟨pre, hpre⟩, ⟨latch, hlat⟩, -⟩ := hs h hh
   have hp : theOne? (entriesFrom bs (loopOf bs h) h) = some (endOf pre) := by
     refine theOne?_eq_some.mpr ⟨(mem_entriesFrom hn).mpr ⟨hpre.enters, fun hat =>
@@ -334,9 +349,37 @@ public theorem loopRoles_complete (hn : (bs.map (·.label)).Nodup) (hs : LoopsSi
     obtain ⟨u, hu⟩ := hh
     exact theOne?_eq_some.mpr ⟨hlat.back u hu ▸ (mem_backFrom hn).mpr hu,
       fun w hw => hlat.back w ((mem_backFrom hn).mp hw)⟩
-  refine ⟨⟨h, (endOf pre).label, (endOf latch).label⟩, List.mem_filterMap.mpr
-    ⟨h, (mem_heads_iff hn).mpr hh, ?_⟩, rfl⟩
-  simp only [hp, hl]
+  have he : (endsAtB bs (endOf pre) h && endsAtB bs (endOf latch) h) = true := by
+    rw [Bool.and_eq_true]
+    exact ⟨(endsAtB_iff hn).mpr ⟨pre, hpre.mem, rfl, hpre.endsIn⟩,
+      (endsAtB_iff hn).mpr ⟨latch, hlat.mem, rfl, hlat.endsIn⟩⟩
+  have hc : (heads bs).contains h = true := List.contains_iff_mem.mpr ((mem_heads_iff hn).mpr hh)
+  obtain ⟨u, v, hj, hvl, -⟩ := hh
+  have hr : rolesAt bs isRec v.label = some ⟨h, (endOf pre).label, some (endOf latch).label⟩ := by
+    unfold rolesAt
+    simp only [hvl, hc, ↓reduceIte, hp, hl, he]
+  exact ⟨_, mem_loopRoles_of_rolesAt hj.mem hr, rfl, rfl⟩
+
+/-- In a body with distinct labels, every head that `isRec` tells, that no back edge enters and
+that has a preheader, as the head of every record that the loop exits check accepts does, has an
+entry in `loopRoles`, without a latch. -/
+public theorem loopRoles_complete_record (hn : (bs.map (·.label)).Nodup) {isRec : Label → Bool}
+    {h : Label} (hrh : isRec h = true) (hnh : ¬ IsHead bs h) {pre : Block env α}
+    (hpre : Preheader bs h pre) : ∃ r ∈ loopRoles bs isRec, r.head = h ∧ r.latch = none := by
+  have hp : theOne? (entriesFrom bs (loopOf bs h) h) = some (endOf pre) := by
+    refine theOne?_eq_some.mpr ⟨(mem_entriesFrom hn).mpr ⟨hpre.enters, fun hat =>
+      hpre.outside ((atLoop_endOf_iff hn hpre.mem).mp hat)⟩, fun w hw => ?_⟩
+    obtain ⟨htr, hout⟩ := (mem_entriesFrom hn).mp hw
+    exact hpre.entries w htr hout
+  have he : endsAtB bs (endOf pre) h = true :=
+    (endsAtB_iff hn).mpr ⟨pre, hpre.mem, rfl, hpre.endsIn⟩
+  have hc : (heads bs).contains h = false :=
+    Bool.eq_false_iff.mpr fun hc => hnh ((mem_heads_iff hn).mp (List.contains_iff_mem.mp hc))
+  obtain ⟨v, hj, hvl⟩ := hpre.enters
+  have hr : rolesAt bs isRec v.label = some ⟨h, (endOf pre).label, none⟩ := by
+    unfold rolesAt
+    simp only [hvl, hc, hrh, Bool.false_eq_true, ↓reduceIte, hp, he]
+  exact ⟨_, mem_loopRoles_of_rolesAt hj.mem hr, rfl, rfl⟩
 
 /-- In a body with distinct labels, `oneExitB` decides `OneExit`. -/
 theorem oneExitB_iff (hn : (bs.map (·.label)).Nodup) : oneExitB bs = true ↔ OneExit bs := by
@@ -622,17 +665,21 @@ public theorem Func.reducible_of_everyB {fn : Func env α} (hd : Body.Distinct f
   exact Body.Every.imp (fun _ hn hr => Body.reducible_of_reducibleB hn hr) hd' he
 
 /-- In a canonical function whose bodies have distinct labels, in its own body and in every
-region's body, each entry of `loopRoles` names the head of a loop, its preheader and its latch,
-and every loop has an entry. -/
+region's body, each entry of `loopRoles` names a loop's head and its preheader, and either its
+latch, if a back edge enters its head, or nothing, if no back edge does and `isRec` tells the
+head, as a recorded loop's; and every loop of the CFG has an entry with its latch. -/
 public theorem Func.loopRoles_spec {fn : Func env α} (hd : Body.Distinct fn.blocks.toList)
-    (hc : fn.CanonicalCFG) :
+    (hc : fn.CanonicalCFG) (isRec : Label → Bool) :
     Body.Every (fun bs =>
-      (∀ r ∈ Body.loopRoles bs, Body.IsHead bs r.head ∧
+      (∀ r ∈ Body.loopRoles bs isRec,
         (∃ pre, pre.label = r.preheader ∧ Body.Preheader bs r.head pre) ∧
-        ∃ latch, latch.label = r.latch ∧ Body.Latch bs r.head latch) ∧
-      ∀ h, Body.IsHead bs h → ∃ r ∈ Body.loopRoles bs, r.head = h) fn.blocks.toList :=
-  Body.Every.imp (fun _ hn hs => ⟨fun _ hr => Body.mem_loopRoles hn hs hr,
-    fun _ hh => Body.loopRoles_complete hn hs hh⟩) ((Body.distinct_iff_every _).mp hd) hc.1
+        match r.latch with
+        | some l => Body.IsHead bs r.head ∧ ∃ latch, latch.label = l ∧ Body.Latch bs r.head latch
+        | none => ¬ Body.IsHead bs r.head ∧ isRec r.head = true) ∧
+      ∀ h, Body.IsHead bs h → ∃ r ∈ Body.loopRoles bs isRec, r.head = h ∧ r.latch.isSome)
+      fn.blocks.toList :=
+  Body.Every.imp (fun _ hn hs => ⟨fun _ hr => Body.mem_loopRoles hn hr,
+    fun _ hh => Body.loopRoles_complete hn hs isRec hh⟩) ((Body.distinct_iff_every _).mp hd) hc.1
 
 /-- If `Canonicalize.run`'s per-body check holds of every body of a function whose bodies have
 distinct labels, and its own body leaves through at most one block, the function is canonical

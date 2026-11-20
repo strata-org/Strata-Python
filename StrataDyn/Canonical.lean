@@ -65,14 +65,16 @@ bodies have distinct labels, as `Func.WF` asks; `StrataDyn/CanonicalProps.lean` 
   against a depth-first order;
 * `Body.FwdStep`: a transfer between blocks that is not a back edge;
 * `Body.loopsCheckB`: the per-body check that `Canonicalize.run` makes, of both;
-* `Body.loopRoles`: each loop's head, preheader and latch, by name.
+* `Body.loopRoles`: each loop's head, preheader and latch, by name, the loops that a front end
+  records but no back edge enters included.
 
 `Body.loopsSimplifiedFastB` and `Body.loopsCheckFastB` read each loop's blocks and the transfers
 into and out of them from the body's index (`Body.Index`, `StrataDyn/BodyIndex.lean`), computed
 once, so that a check of a loop costs what its blocks and their transfers cost, not what the
 whole body costs.  `Body.loopsSimplifiedB_eq_fast` and `Body.loopsCheckB_eq_fast`, proved here so
 that the code below and `Canonicalize.run` use them, make them run in place of
-`Body.loopsSimplifiedB` and `Body.loopsCheckB`.
+`Body.loopsSimplifiedB` and `Body.loopsCheckB`.  `Body.loopRoles_eq_fast` does the same for
+`Body.loopRoles`, so the lemmas about `theOne?` that it needs are here too.
 -/
 
 namespace Strata.Dyn
@@ -85,12 +87,13 @@ variable {env : Env Unit} {α : Type}
 @[expose] def Terminator.name : Terminator env α → Name
   | .apply _ r .. => r.name
 
-/-- A loop's blocks by their role in the canonical form: its head, its preheader and its
-latch. -/
+/-- A loop's blocks by their role in the canonical form: its head, its preheader and, if a back
+edge enters its head, its latch.  A recorded loop that no back edge enters, such as
+`while c: return x`, has no latch. -/
 structure LoopRoles where
   head : Label
   preheader : Label
-  latch : Label
+  latch : Option Label
 deriving DecidableEq
 
 namespace Body
@@ -549,38 +552,182 @@ variable (bs : List (Block env α))
   | [] => none
   | u :: us => if us.all (· == u) then some u else none
 
-/-- Each loop of the body, with its preheader and its latch, in the order of `heads`: the block of
-the one point outside the loop that transfers to the head, and the block of the one point that a
-back edge to it leaves from.  A loop without such single points is left out.  In a body whose
-loops have a preheader and a latch, every loop has its entry, and each entry names them
-(`Body.mem_loopRoles`, `Body.loopRoles_complete`), so a stage that places obligations reads each
-block by its role. -/
-@[expose] def loopRoles : List LoopRoles :=
-  (heads bs).filterMap fun h =>
+/-- The roles of the loop at the block labelled `h`, given `isRec`, which tells the heads that a
+front end records.  If `h` heads a loop of the CFG, its preheader is the block of the one point
+outside the loop that transfers to `h`, and its latch the block of the one point that a back edge
+to `h` leaves from.  If no back edge enters `h` and `isRec h` holds, its preheader is the block of
+the one point that transfers to `h`, and it has no latch.  Each block it names must end in a plain
+jump to `h`; otherwise there are none. -/
+@[expose] def rolesAt (isRec : Label → Bool) (h : Label) : Option LoopRoles :=
+  if (heads bs).contains h then
     match theOne? (entriesFrom bs (loopOf bs h) h), theOne? (backFrom bs h) with
-    | some pre, some latch => some ⟨h, pre.label, latch.label⟩
+    | some pre, some latch =>
+      if endsAtB bs pre h && endsAtB bs latch h then some ⟨h, pre.label, some latch.label⟩
+      else none
     | _, _ => none
+  else if isRec h then
+    match theOne? (entriesFrom bs (loopOf bs h) h) with
+    | some pre => if endsAtB bs pre h then some ⟨h, pre.label, none⟩ else none
+    | none => none
+  else none
 
-/-- `loopRoles`, given the body's back edges `be` and transfers `tr`, with every loop computed
-once from them. -/
-@[expose] def loopRolesWith (be tr : List (Point × Label)) : List LoopRoles :=
-  (tableOf be (loopsOf bs be)).filterMap fun (h, L) =>
-    match theOne? ((tr.filter fun (u, l) => l == h && !L.contains u.label).map (·.1)),
-        theOne? ((be.filter (·.2 == h)).map (·.1)) with
-    | some pre, some latch => some ⟨h, pre.label, latch.label⟩
+/-- Each loop of the body, in the order of its heads' blocks, with its preheader and its latch
+(`rolesAt`): every loop of the CFG, and every loop at a head that `isRec` tells, the heads that a
+front end records, that no back edge enters.  A loop whose blocks do not have these roles is left
+out.  Each entry names the right blocks (`Body.mem_loopRoles`), and in a body whose loops have a
+preheader and a latch every loop of the CFG has its entry (`Body.loopRoles_complete`), and so has
+every recorded head that has a preheader, as the head of every record that the loop exits check
+accepts does (`Body.loopRoles_complete_record`).  So a stage that places obligations reads each
+block by its role.  `isRec` should cost one lookup, such as a label set built once per
+function. -/
+@[expose] def loopRoles (isRec : Label → Bool) : List LoopRoles :=
+  bs.filterMap fun b => rolesAt bs isRec b.label
+
+namespace Index
+
+variable (ix : Index env α)
+
+/-- `rolesAt`, with the index. -/
+@[expose] def rolesAt (isRec : Label → Bool) (h : Label) : Option LoopRoles :=
+  if ix.isHead h then
+    match theOne? ((LabelMap.listAt ix.into h).filter fun u => !ix.inLoop h u.label),
+        theOne? (LabelMap.listAt ix.backInto h) with
+    | some pre, some latch =>
+      if ix.endsAtB pre h && ix.endsAtB latch h then some ⟨h, pre.label, some latch.label⟩
+      else none
     | _, _ => none
+  else if isRec h then
+    match theOne? (LabelMap.listAt ix.into h) with
+    | some pre => if ix.endsAtB pre h then some ⟨h, pre.label, none⟩ else none
+    | none => none
+  else none
 
-/-- `loopRoles`, with the back edges, the transfers and every loop computed once for the body. -/
-@[expose] def loopRolesFastB : List LoopRoles :=
-  loopRolesWith bs (backEdges bs) (transfers bs)
+end Index
+
+/-- `loopRoles`, read from the body's index, so that each block costs what the transfers into it
+cost; as defined when two blocks share a label. -/
+@[expose] def loopRolesFastB (isRec : Label → Bool) : List LoopRoles :=
+  match tree? bs with
+  | some tm =>
+    let ix := Index.of bs tm (domInfo bs) (exitPoints bs)
+    bs.filterMap fun b => ix.rolesAt isRec b.label
+  | none => loopRoles bs isRec
+
+end Body
+
+end
+
+namespace Body
+
+variable {env : Env Unit} {α : Type} {bs : List (Block env α)} {ep : List Point}
+  {ix : Index env α}
+
+/-- `theOne? E` is `u` exactly when `u` is in `E` and every point of `E` is `u`. -/
+public theorem theOne?_eq_some {E : List Point} {u : Point} :
+    theOne? E = some u ↔ u ∈ E ∧ ∀ w ∈ E, w = u := by
+  unfold theOne?
+  cases E with
+  | nil => simp
+  | cons v vs =>
+    simp only [List.mem_cons, forall_eq_or_imp]
+    split
+    · rename_i hall
+      simp only [List.all_eq_true, beq_iff_eq] at hall
+      constructor
+      · rintro ⟨⟩
+        exact ⟨.inl rfl, rfl, hall⟩
+      · rintro ⟨-, rfl, -⟩
+        rfl
+    · rename_i hall
+      simp only [List.all_eq_true, beq_iff_eq] at hall
+      simp only [reduceCtorEq, false_iff, not_and]
+      rintro - rfl hrest
+      exact hall hrest
+
+/-- `theOne?` gives the same answer on two lists with the same points. -/
+private theorem theOne?_congr {E E' : List Point} (hE : ∀ u, u ∈ E ↔ u ∈ E') :
+    theOne? E = theOne? E' := by
+  cases h : theOne? E' with
+  | none =>
+    cases h' : theOne? E with
+    | none => rfl
+    | some u =>
+      obtain ⟨hu, hall⟩ := theOne?_eq_some.mp h'
+      exact absurd (theOne?_eq_some.mpr ⟨(hE u).mp hu, fun w hw => hall w ((hE w).mpr hw)⟩)
+        (by rw [h]; simp)
+  | some u =>
+    obtain ⟨hu, hall⟩ := theOne?_eq_some.mp h
+    exact theOne?_eq_some.mpr ⟨(hE u).mpr hu, fun w hw => hall w ((hE w).mp hw)⟩
+
+/-- The index's `rolesAt` is `rolesAt`. -/
+private theorem Index.rolesAt_eq (hs : ix.Spec bs ep) (isRec : Label → Bool) (h : Label) :
+    ix.rolesAt isRec h = Body.rolesAt bs isRec h := by
+  have hhead : ix.isHead h = (Body.heads bs).contains h := by
+    apply Bool.eq_iff_iff.mpr
+    rw [hs.isHead, List.contains_iff_mem, mem_heads]
+  have hentries : theOne? ((LabelMap.listAt ix.into h).filter fun u => !ix.inLoop h u.label) =
+      theOne? (entriesFrom bs (loopOf bs h) h) := by
+    apply theOne?_congr
+    intro u
+    simp only [entriesFrom, List.mem_filter, List.mem_map, hs.into, Index.inLoop_eq hs,
+      Bool.and_eq_true, beq_iff_eq]
+    constructor
+    · rintro ⟨ht, hL⟩
+      exact ⟨(u, h), ⟨ht, rfl, hL⟩, rfl⟩
+    · rintro ⟨⟨u', l⟩, ⟨ht, rfl, hL⟩, rfl⟩
+      exact ⟨ht, hL⟩
+  have hback : theOne? (LabelMap.listAt ix.backInto h) = theOne? (backFrom bs h) := by
+    apply theOne?_congr
+    intro u
+    simp only [backFrom, List.mem_map, List.mem_filter, hs.backInto, beq_iff_eq]
+    constructor
+    · exact fun he => ⟨(u, h), ⟨he, rfl⟩, rfl⟩
+    · rintro ⟨⟨u', l⟩, ⟨he, rfl⟩, rfl⟩
+      exact he
+  unfold Index.rolesAt Body.rolesAt
+  rw [hhead, hentries, hback]
+  split
+  · simp only [Index.endsAtB_eq hs]
+  · rename_i hnh
+    have hall : theOne? (LabelMap.listAt ix.into h) = theOne? (entriesFrom bs (loopOf bs h) h) := by
+      rw [← hentries]
+      congr 1
+      symm
+      apply List.filter_eq_self.mpr
+      intro u _
+      have hno : ix.inLoop h u.label = false := by
+        cases hl : ix.inLoop h u.label with
+        | false => rfl
+        | true =>
+          obtain ⟨w, hw, -⟩ := (hs.inLoop h u.label).mp hl
+          exact absurd (List.contains_iff_mem.mpr ((mem_heads bs).mpr ⟨w, hw⟩)) hnh
+      simp [hno]
+    rw [hall]
+    split <;> simp only [Index.endsAtB_eq hs]
 
 /-- The fast version gives the same list as `loopRoles` on every body, so that it runs in its
 place. -/
-@[csimp] theorem loopRoles_eq_fast : @loopRoles = @loopRolesFastB := by
-  funext env α bs
-  unfold loopRoles loopRolesFastB loopRolesWith
-  simp only [tableOf_loopsOf, List.filterMap_map]
-  rfl
+@[csimp] public theorem loopRoles_eq_fast : @loopRoles = @loopRolesFastB := by
+  funext env α bs isRec
+  unfold loopRolesFastB
+  split
+  next tm ht =>
+    have hs := Index.spec_of ht (exitPoints bs)
+    unfold loopRoles
+    congr 1
+    funext b
+    exact (Index.rolesAt_eq hs isRec b.label).symm
+  next => rfl
+
+end Body
+
+public section
+
+variable {env : Env Unit} {α : Type}
+
+namespace Body
+
+variable (bs : List (Block env α))
 
 /-! ## One entry per loop -/
 

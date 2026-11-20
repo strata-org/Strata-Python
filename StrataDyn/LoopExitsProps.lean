@@ -28,7 +28,9 @@ well-formed function's do.
 * `Func.checkLoopExits_iff`: `Func.checkLoopExits` decides `Func.LoopExits`;
 * `Func.checkPreamble_iff`: `Func.checkPreamble` decides `Func.Preamble`, for every function;
 * `CanonicalSpec.holds_of_check`: the check of a `CanonicalSpec` proves the properties that it asks for;
-* `Func.LoopExits.recordHolds`: every record holds in the body that holds its head.
+* `Func.LoopExits.recordHolds`: every record holds in the body that holds its head;
+* `Func.LoopExits.loopRoles_record`: in a canonical function, every record has its entry in
+  `Body.loopRoles` of the body that holds its head.
 -/
 
 namespace Strata.Dyn
@@ -453,6 +455,28 @@ public theorem Func.LoopExits.recordHolds {fn : Func env α} {s : CompletionShap
       hq hev)
     fun he => (Body.every_not_label_iff _ _).mp he (hl r hr)
   exact ⟨ro, bs, hro, hQ, hb, hbs.each r hr hb⟩
+
+/-- In a canonical function, whose bodies have distinct labels, that holds `Func.LoopExits` for
+the records `recs`, every record has its entry in `loopRoles` of each body that holds its head,
+given an `isRec` that tells every record's head: with a latch if a back edge enters its head, and
+without one if not. -/
+public theorem Func.LoopExits.loopRoles_record {fn : Func env α} {s : CompletionShape env}
+    {recs : List LoopRecord} (hd : Body.Distinct fn.blocks.toList) (hc : fn.CanonicalCFG)
+    (h : fn.LoopExits s recs) {isRec : Label → Bool} (hrec : ∀ r ∈ recs, isRec r.head = true) :
+    Body.Every (fun bs => ∀ r ∈ recs, (∃ b ∈ bs, b.label = r.head) →
+      ∃ x ∈ Body.loopRoles bs isRec, x.head = r.head ∧
+        (x.latch.isSome ↔ Body.IsHead bs r.head)) fn.blocks.toList := by
+  obtain ⟨ro, -, hev, -, -, -⟩ := h
+  have hall := Body.Every.imp
+    (B := fun bs => (bs.map (·.label)).Nodup ∧ Body.LoopsSimplified bs)
+    (fun _ hn hls => ⟨hn, hls⟩) ((Body.distinct_iff_every _).mp hd) hc.1
+  refine Body.Every.imp (fun bs ⟨hn, hls⟩ hle r hr hb => ?_) hall hev
+  obtain ⟨⟨pre, hpre⟩, -, -⟩ := hle.each r hr hb
+  by_cases hh : Body.IsHead bs r.head
+  · obtain ⟨x, hx, hxh, hl⟩ := Body.loopRoles_complete hn hls isRec hh
+    exact ⟨x, hx, hxh, iff_of_true hl hh⟩
+  · obtain ⟨x, hx, hxh, hl⟩ := Body.loopRoles_complete_record hn (hrec r hr) hh hpre
+    exact ⟨x, hx, hxh, iff_of_false (by simp [hl]) hh⟩
 
 /-! ## The function -/
 

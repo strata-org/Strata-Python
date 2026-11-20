@@ -34,8 +34,8 @@ promotes a cell that an invariant reads: the invariant then reads the head's new
 Each test before the last section reads a function, puts it in canonical form with
 `Canonicalize.runModule`, runs `refToReg` on the result, and prints the module after each pass.
 It then checks that the result of ref-to-reg is still canonical, and prints, for each loop that
-`Body.loopRoles` names, its head, its preheader, its latch and how many invariants lead its head,
-and each block that holds an invariant but heads no loop.
+`Body.loopRoles` names, its head, its preheader, its latch if it has one, and how many invariants
+lead its head, and each block that holds an invariant but heads no loop.
 
 The loops: one whose counter lives in a cell; one with a `continue` and a `break`; one left by a
 failure and by a `return`; a `for`-shaped one; nested ones; a head that no back edge reaches; one
@@ -45,8 +45,9 @@ of a parameter cell.  Then two that canonicalization rejects: a loop with two en
 that leaves its region.  Then a latch that canonicalization adds and ref-to-reg extends with a
 cell's content.  Then two blocks that hold an invariant but head no loop: a join block, which
 ref-to-reg extends with a cell's content, and a region's entry block, whose invariant ref-to-reg
-rewrites to read the cell's content.  Then a loop of a front end whose loops end with a completion,
-under its `CanonicalSpec`.  Last, two tests run the same passes and print only whether case
+rewrites to read the cell's content.  Then two loops of a front end whose loops end with a
+completion, under its `CanonicalSpec`: one with a `break`, and one that no back edge reaches, whose
+record names its head.  Last, two tests run the same passes and print only whether case
 lowering (`CasesInput`) and demotion (`Demotable`) take the result.  Both take only bodies whose
 instructions have no regions, so neither takes a function with an invariant. -/
 
@@ -88,16 +89,20 @@ private def bodies (f : Func env Info) : List (List (Block env Info)) :=
   f.blocks.toList :: (Region.allList (f.blocks.toList.flatMap fun b =>
     b.instrs.toList.flatMap (·.regions.toList) ++ b.term.regions.toList)).map (·.blocks.toList)
 
-/-- Each loop of each body of `m`'s functions, as `Body.loopRoles` names it, with the number of
-invariants that lead its head; then each block that holds an invariant but heads no loop, which
-a consumer that handles invariants only at loop heads rejects. -/
-private def roles (m : Module env Info) : List String :=
+/-- Each loop of each body of `m`'s functions, as `Body.loopRoles` names it, given the heads of
+`spec`'s records when `spec` has a shape, the only case in which the check verifies them, with the
+number of invariants that lead its head; then each block that holds an invariant but heads no loop,
+which a consumer that handles invariants only at loop heads rejects. -/
+private def roles (spec : CanonicalSpec env Info) (m : Module env Info) : List String :=
   m.raw.funcs.toList.flatMap fun f => (bodies f).flatMap fun bs =>
-    let rs := Body.loopRoles bs
+    let rh := if spec.shape.isSome then (spec.records f.info).map (·.head) else []
+    let rs := Body.loopRoles bs rh.contains
     (rs.map fun r =>
+      let latch := match r.latch with
+        | some l => s!"latch {ToDDM.nameText l.name}"
+        | none => "no latch"
       s!"{ToDDM.nameText f.name}: head {ToDDM.nameText r.head.name} with \
-        {leading bs r.head} invariants, preheader {ToDDM.nameText r.preheader.name}, \
-        latch {ToDDM.nameText r.latch.name}") ++
+        {leading bs r.head} invariants, preheader {ToDDM.nameText r.preheader.name}, {latch}") ++
     (bs.filter fun b => leading bs b.label > 0 && !rs.any (·.head == b.label)).map fun b =>
       s!"{ToDDM.nameText f.name}: {ToDDM.nameText b.label.name} holds an invariant and heads no loop"
 
@@ -120,7 +125,7 @@ private def passes (env : Env Unit) [base ≼ env] (text : String)
         IO.print (toString m₁)
         match Canonicalize.checkModule m₁ spec with
         | .error fs => for f in fs do IO.println (toString f)
-        | .ok cm₁ => for r in roles cm₁.module do IO.println r
+        | .ok cm₁ => for r in roles spec cm₁.module do IO.println r
 
 /-- A loop whose counter lives in a cell, with an invariant that reads the cell. -/
 private def counter := "module m {
@@ -505,8 +510,8 @@ module m {
       jump ^inner.0(%j.2)
   }
 }
-m.f: head inner.0 with 1 invariants, preheader pre.0, latch step.0
-m.f: head outer.0 with 1 invariants, preheader entry.0, latch next.0 -/
+m.f: head outer.0 with 1 invariants, preheader entry.0, latch next.0
+m.f: head inner.0 with 1 invariants, preheader pre.0, latch step.0 -/
 #guard_msgs in
 #eval passes E "module m {
   func @m.f(%n.0 : base.Int) -> base.Int {
@@ -540,8 +545,8 @@ m.f: head outer.0 with 1 invariants, preheader entry.0, latch next.0 -/
 }
 "
 
--- A head that no back edge reaches (`while c: return x`): `Body.loopRoles` names no loop, and
--- the invariant stays where it is.
+-- A head that no back edge reaches (`while c: return x`): no record names it, so
+-- `Body.loopRoles` names no loop, and the invariant stays where it is.
 /-- info: -- canonical
 module m {
   func @m.f(%n.0 : base.Int) -> base.Int {
@@ -1355,6 +1360,114 @@ m.w: head head.0 with 1 invariants, preheader body.0, latch latch.0 -/
     unr.0(%e.0 : demo.Value):
       unreachable
     unr.1():
+      unreachable
+    after.0():
+      ret(%x.0)
+  }
+}
+" specOf
+
+-- `while c: return x`, whose record names its head: `Body.loopRoles` names its loop, with no
+-- latch, and its invariant stays at the head.
+/-- info: -- canonical
+module m {
+  func @m.r(%c.0 : base.Bool, %x.0 : demo.Value) -> demo.Value {
+    entry.0(%c.0 : base.Bool, %x.0 : demo.Value):
+      jump ^body.0()
+    body.0():
+      jump ^head.0()
+    head.0():
+      %inv.0 : base.Unit = base.loopInvariant {
+        inv.0():
+          ret(%c.0)
+      }
+      branch(%c.0) ^loop.0() ^normal.0()
+    loop.0():
+      %k.0 : demo.Completion = demo.returned(%x.0)
+      jump ^done.0(%k.0)
+    normal.0():
+      %k.1 : demo.Completion = demo.normal
+      jump ^done.0(%k.1)
+    done.0(%k.2 : demo.Completion):
+      demo.Completion.case(%k.2) ^after.0() ^ret.0() ^unr.0() ^unr.1() ^unr.2()
+    ret.0(%v.0 : demo.Value):
+      jump ^post.0(%v.0)
+    unr.0(%e.0 : demo.Value):
+      unreachable
+    unr.1():
+      unreachable
+    unr.2():
+      unreachable
+    after.0():
+      jump ^post.0(%x.0)
+    post.0(%ret.0 : demo.Value):
+      ret(%ret.0)
+  }
+}
+-- ref-to-reg
+module m {
+  func @m.r(%c.0 : base.Bool, %x.0 : demo.Value) -> demo.Value {
+    entry.0(%c.0 : base.Bool, %x.0 : demo.Value):
+      jump ^body.0()
+    body.0():
+      jump ^head.0()
+    head.0():
+      %inv.0 : base.Unit = base.loopInvariant {
+        inv.0():
+          ret(%c.0)
+      }
+      branch(%c.0) ^loop.0() ^normal.0()
+    loop.0():
+      %k.0 : demo.Completion = demo.returned(%x.0)
+      jump ^done.0(%k.0)
+    normal.0():
+      %k.1 : demo.Completion = demo.normal
+      jump ^done.0(%k.1)
+    done.0(%k.2 : demo.Completion):
+      demo.Completion.case(%k.2) ^after.0() ^ret.0() ^unr.0() ^unr.1() ^unr.2()
+    ret.0(%v.0 : demo.Value):
+      jump ^post.0(%v.0)
+    unr.0(%e.0 : demo.Value):
+      unreachable
+    unr.1():
+      unreachable
+    unr.2():
+      unreachable
+    after.0():
+      jump ^post.0(%x.0)
+    post.0(%ret.0 : demo.Value):
+      ret(%ret.0)
+  }
+}
+m.r: head head.0 with 1 invariants, preheader body.0, no latch -/
+#guard_msgs in
+#eval passes DSLTest.Demo.env "module m {
+  func @m.r(%c.0 : base.Bool, %x.0 : demo.Value) -> demo.Value {
+    entry.0(%c.0 : base.Bool, %x.0 : demo.Value):
+      jump ^body.0()
+    body.0():
+      jump ^head.0()
+    head.0():
+      %inv.0 : base.Unit = base.loopInvariant {
+        inv.0():
+          ret(%c.0)
+      }
+      branch(%c.0) ^loop.0() ^normal.0()
+    loop.0():
+      %k.0 : demo.Completion = demo.returned(%x.0)
+      jump ^done.0(%k.0)
+    normal.0():
+      %k.1 : demo.Completion = demo.normal
+      jump ^done.0(%k.1)
+    done.0(%k.2 : demo.Completion):
+      demo.Completion.case(%k.2) ^after.0() ^ret.0() ^unr.0() ^unr.1() ^unr.2()
+    ret.0(%v.0 : demo.Value):
+      ret(%v.0)
+    unr.0(%e.0 : demo.Value):
+      unreachable
+    unr.1():
+      unreachable
+    unr.2():
       unreachable
     after.0():
       ret(%x.0)

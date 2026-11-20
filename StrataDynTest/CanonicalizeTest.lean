@@ -69,7 +69,7 @@ private def checkText (text : String) (spec : CanonicalSpec Demo.env Info := {})
 
 /-- Read `text` in `Demo.env`, put it in canonical form with `Canonicalize.runModule`, check the
 result again with `Canonicalize.checkModule`, both with `spec`, and print each loop of each function's own body as
-its head, its preheader and its latch (`Body.loopRoles`). -/
+its head, its preheader and its latch (`Body.loopRoles`, with the heads of `spec`'s records). -/
 private def rolesText (text : String) (spec : CanonicalSpec Demo.env Info := {}) : IO Unit := do
   match ← Module.read Demo.env text "t.dyn" with
   | .error e => IO.println e
@@ -81,9 +81,13 @@ private def rolesText (text : String) (spec : CanonicalSpec Demo.env Info := {})
       | .error fs => for f in fs do IO.println (toString f)
       | .ok cm' =>
         for f in cm'.module.raw.funcs do
-          for r in Body.loopRoles f.blocks.toList do
+          let rh := if spec.shape.isSome then (spec.records f.info).map (·.head) else []
+          for r in Body.loopRoles f.blocks.toList rh.contains do
+            let latch := match r.latch with
+              | some l => s!"latch {ToDDM.nameText l.name}"
+              | none => "no latch"
             IO.println s!"{ToDDM.nameText f.name}: head {ToDDM.nameText r.head.name}, \
-              preheader {ToDDM.nameText r.preheader.name}, latch {ToDDM.nameText r.latch.name}"
+              preheader {ToDDM.nameText r.preheader.name}, {latch}"
 
 /-! ## A loop with every problem
 
@@ -914,6 +918,12 @@ private def noBackEdge : String := "module m {
 -/
 #guard_msgs in
 #eval canonText noBackEdge (specOf [recOf "head" "done"])
+
+-- The recorded loop, which no back edge enters, has its roles: the preheader the pass gave it,
+-- and no latch.
+/-- info: m.n: head head.0, preheader pre.0, no latch -/
+#guard_msgs in
+#eval rolesText noBackEdge (specOf [recOf "head" "done"])
 
 -- Two records of the same loop.
 /-- info: m.w: two records name the same loop -/

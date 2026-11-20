@@ -82,10 +82,29 @@ private meta def canonical (name : String) : IO (Except String String) := do
   | .error e => failures := failures.push s!"{path}: does not read back:\n{e}"
   | .ok m =>
     let roles := m.raw.funcs.toList.flatMap fun f =>
-      (Body.loopRoles f.blocks.toList).map fun r =>
-        (ToDDM.nameText r.head.name, ToDDM.nameText r.preheader.name, ToDDM.nameText r.latch.name)
-    unless roles == [("head.0", "start.0", "then.0"), ("head.1", "join.0", "body.1")] do
+      (Body.loopRoles f.blocks.toList
+          (((PyCanonical.records? f.info).getD []).map (·.head)).contains).map
+        fun r => (ToDDM.nameText r.head.name, ToDDM.nameText r.preheader.name,
+          r.latch.map (ToDDM.nameText ·.name))
+    unless roles == [("head.0", "start.0", some "then.0"), ("head.1", "join.0", some "body.1")] do
       failures := failures.push s!"{path}: loop roles {roles}"
+  -- In m_for, `first`'s loop always returns, so no back edge enters its head, but its record
+  -- gives it its roles: its preheader, the start block, and no latch.
+  let path := testDir / "m_for.expected.dyn"
+  match ← Module.read Py.env (← IO.FS.readFile path) path.toString with
+  | .error e => failures := failures.push s!"{path}: does not read back:\n{e}"
+  | .ok m =>
+    match PyCanonical.runModule m with
+    | .error fs => failures := failures.push s!"{path}: not put in canonical form: {fs.map toString}"
+    | .ok cm =>
+      let roles := cm.canonical.module.raw.funcs.toList.flatMap fun f =>
+        if ToDDM.nameText f.name != "m_for.first" then [] else
+        (Body.loopRoles f.blocks.toList
+            (((PyCanonical.records? f.info).getD []).map (·.head)).contains).map
+          fun r => (ToDDM.nameText r.head.name, ToDDM.nameText r.preheader.name,
+            r.latch.map (ToDDM.nameText ·.name))
+      unless roles == [("head.0", "start.0", none)] do
+        failures := failures.push s!"{path}: loop roles of first {roles}"
   -- In g06, `total`'s entry block binds the arguments with `py.bindArgs`, whose failure goes to
   -- `propagate.0` and on to `post.0`: a run whose binding fails reaches the end of `post.0`
   -- without passing `start.0`, where the precondition is assumed (F1).

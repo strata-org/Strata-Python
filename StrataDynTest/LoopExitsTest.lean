@@ -364,8 +364,15 @@ private def noBackEdge (direct : Bool) : Func E Unit :=
 -- its head does not dominate its loop's exits.  (`CanonicalizeTest` runs this through the pass,
 -- which gives `normal` a preheader, so that only this clause fails.)
 #guard !check shape [rec "normal" "done"] (noBackEdge false)
--- Its head has no preheader, so the invariant's base case has no block.
+-- `loopRoles` names its head and its preheader, given the record's head, and gives it no latch;
+-- without the record, no back edge makes it a loop.
+#guard Body.loopRoles (noBackEdge false).blocks.toList (· == lbl "head") ==
+  [{ head := lbl "head", preheader := lbl "pre", latch := none }]
+#guard Body.loopRoles (noBackEdge false).blocks.toList (fun _ => false) == []
+-- Its head has no preheader, so the invariant's base case has no block, and `loopRoles` gives it
+-- no entry.
 #guard !check shape [rec "head" "done"] (noBackEdge true)
+#guard Body.loopRoles (noBackEdge true).blocks.toList (· == lbl "head") == []
 -- Its head dominates the loop's exits, but code before the loop also enters `done`.
 #guard !check shape [rec "head" "done"]
   (fn ((noBackEdge false).blocks.toList.map fun b =>
