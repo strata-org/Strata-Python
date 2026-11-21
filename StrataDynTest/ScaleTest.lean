@@ -21,18 +21,21 @@ set_option autoImplicit false
 /-!
 # Checking large inputs in linear time
 
-Each test checks an input of some size `n` and one of size `2n`, and, when timed, fails if the
-larger one takes 3 times as long as the smaller one, or longer.  A check in linear time takes about
-twice as long on the larger input, and a check in quadratic time about 4 times as long, once the
+Each test checks an input of some size `n` and one of size `4n`, and, when timed, fails if the
+larger one takes 8 times as long as the smaller one, or longer.  A check in linear time takes about
+4 times as long on the larger input, and a check in quadratic time about 16 times as long, once the
 quadratic part of its time dominates.  The sizes are chosen so that it would dominate.  So the
-timed tests do not depend on how fast the machine is, only on its load staying steady.  The
-answers are pinned too, a large one by a count.
+timed tests do not depend on how fast the machine is.  They time each check by the CPU time of its
+thread, which does not count the time the thread waits for a CPU on a busy machine.  The bound 8 is
+twice the linear ratio and half the quadratic one.  The answers are pinned too, a large one by a
+count.
 
-A loaded shared builder slows some runs far more than the shortest of three times hides, so timing
-there is not reliable enough for a build.  So the tests are timed only with `DYN_SCALE_TIME=1`;
-without it, each test checks both inputs once, so the answers stay pinned, and times nothing.  Lake
-does not elaborate a module again when only the environment changes, so run the timed tests as
-`DYN_SCALE_TIME=1 lake lean StrataDynTest/ScaleTest.lean`.
+The CPU time still counts the slowdown from sharing a core's caches and the memory with other jobs,
+and load that starts or stops between the small runs and the large ones changes the ratio, so
+timing on a loaded shared builder is not reliable enough for a build.  So the tests are timed only
+with `DYN_SCALE_TIME=1`; without it, each test checks both inputs once, so the answers stay pinned,
+and times nothing.  Lake does not elaborate a module again when only the environment changes, so
+run the timed tests as `DYN_SCALE_TIME=1 lake lean StrataDynTest/ScaleTest.lean`.
 
 Lean decides a quantifier over an array's members in time quadratic in its size, so the checker
 quantifies over lists.  The reader adds the type of each folded constant to its array in place,
@@ -52,15 +55,52 @@ measure time instead.
 
 namespace Strata.Dyn.ScaleTest
 
+/-- The time in nanoseconds that the current thread has run on a CPU, which Linux gives as the
+first field of the file `stat`, `/proc/thread-self/schedstat`, if the file is there and that field
+is positive: it stays 0 when the kernel does not account it. -/
+private def threadCpuNanos? (stat : System.FilePath := "/proc/thread-self/schedstat") :
+    IO (Option Nat) := do
+  try
+    let s ← IO.FS.readFile stat
+    return (s.splitOn " ").head?.bind String.toNat? |>.filter (· > 0)
+  catch _ => return none
+
+/-- The clock that times the checks: the CPU time of the current thread (`threadCpuNanos?`), or the
+monotonic clock where that is not available.  On a busy machine the thread waits for a CPU, and the
+monotonic clock counts that wait while the CPU time does not, so the CPU time of a check grows with
+its input alone.  It counts the current thread only, so a timed check must do all its work on that
+thread: the checks timed below are pure functions that start no task.  The bound of
+`scalesLinearly` is set for these CPU times.  Where they are not available, as on macOS, the times
+are wall-clock times, which a busy machine can still distort.  The clock is chosen once, so the two
+ends of a timing come from the same one. -/
+private def clock : IO (IO Nat) := do
+  if (← threadCpuNanos?).isSome then
+    return do return (← threadCpuNanos?).getD 0
+  else
+    return IO.monoNanosNow
+
+-- Without the file, or with a first field of 0, `threadCpuNanos?` gives no CPU time, so `clock`
+-- uses the monotonic clock.
+#guard_msgs in
+#eval do
+  let dir ← IO.FS.createTempDir
+  let zero := dir / "schedstat"
+  IO.FS.writeFile zero "0 0 0\n"
+  let missing ← threadCpuNanos? (dir / "missing")
+  let unaccounted ← threadCpuNanos? zero
+  IO.FS.removeDirAll dir
+  unless missing.isNone && unaccounted.isNone do
+    throw <| IO.userError "a CPU time without the kernel's accounting"
+
 /-- Fail unless `check` gives `true` on both inputs that `inputs m` gives, one of size `m` and one
-of size `2 * m`.  Without `DYN_SCALE_TIME=1`, check the inputs for `m = n` once each and time
-nothing.  With it, also fail if checking the larger one takes 3 times as long as checking the
-smaller one, or longer.  It compares the shortest of three times of each input, so one run that a
-busy machine slows down does not change the result.  It times the smaller input three times first.
-It then times the larger one up to three times, and stops as soon as the shortest time so far is
-less than 3 times the smaller one's.  Run `k` builds the inputs with `m = n + k`.  A computation
-that uses no variable is a closed term, and compiled code computes it only once.  The run number
-makes each run build and check its inputs again. -/
+of size `4 * m`.  Without `DYN_SCALE_TIME=1`, check the inputs for `m = n` once each and time
+nothing.  With it, also fail if checking the larger one takes 8 times as long as checking the
+smaller one, or longer.  `clock` gives the times.  It compares the shortest of three times of each
+input, so one run that the machine slows down does not change the result.  It times the smaller
+input three times first.  It then times the larger one up to three times, and stops as soon as the
+shortest time so far is less than 8 times the smaller one's.  Run `k` builds the inputs with
+`m = n + k`.  A computation that uses no variable is a closed term, and compiled code computes it
+only once.  The run number makes each run build and check its inputs again. -/
 private def scalesLinearly {α : Type} (what : String) (n : Nat) (inputs : Nat → α × α)
     (check : α → Bool) : IO Unit := do
   let wrong := IO.userError s!"{what}: the check gives false"
@@ -68,30 +108,31 @@ private def scalesLinearly {α : Type} (what : String) (n : Nat) (inputs : Nat �
     let (s, l) := inputs n
     unless check s && check l do throw wrong
     return
+  let now ← clock
   let mut small : Nat := 0
   let mut larges : Array α := #[]
   for k in [0:3] do
     let (s, l) ← IO.lazyPure fun _ => inputs (n + k)
-    let t0 ← IO.monoNanosNow
+    let t0 ← now
     let ok ← IO.lazyPure fun _ => check s
-    let t1 ← IO.monoNanosNow
+    let t1 ← now
     unless ok do throw wrong
     small := if k = 0 then t1 - t0 else min small (t1 - t0)
     larges := larges.push l
   let mut large : Option Nat := none
   for l in larges do
-    let t0 ← IO.monoNanosNow
+    let t0 ← now
     let ok ← IO.lazyPure fun _ => check l
-    let t1 ← IO.monoNanosNow
+    let t1 ← now
     unless ok do throw wrong
     let t := (large.map (min (t1 - t0))).getD (t1 - t0)
-    if t < 3 * small then return
+    if t < 8 * small then return
     large := some t
   throw <| IO.userError s!"{what}: the larger input took \
     {(large.getD 0).toFloat / small.toFloat} times as long as the smaller one"
 
-/-- The inputs of sizes `m` and `2 * m` that `f` builds. -/
-private def twice {α : Type} (f : Nat → α) (m : Nat) : α × α := (f m, f (2 * m))
+/-- The inputs of sizes `m` and `4 * m` that `f` builds. -/
+private def fourfold {α : Type} (f : Nat → α) (m : Nat) : α × α := (f m, f (4 * m))
 
 private def nm (s : String) : Name := .str .base s
 
@@ -104,7 +145,7 @@ private def blocksFn (n : Nat) : Func base Unit :=
 
 -- The blocks of a function.
 #guard_msgs in
-#eval scalesLinearly "the blocks of a function" 15000 (twice blocksFn) fun fn => decide fn.BodyWF
+#eval scalesLinearly "the blocks of a function" 15000 (fourfold blocksFn) fun fn => decide fn.BodyWF
 
 /-- The stubs `@f.0` to `@f.(n-1)`, each checked. -/
 private def stubs (n : Nat) : Array {f : Func base Unit // f.WF} :=
@@ -112,7 +153,7 @@ private def stubs (n : Nat) : Array {f : Func base Unit // f.WF} :=
 
 -- A module of checked functions.
 #guard_msgs in
-#eval scalesLinearly "a module of checked functions" 15000 (twice stubs) fun fs =>
+#eval scalesLinearly "a module of checked functions" 15000 (fourfold stubs) fun fs =>
   (Module.ofChecked (nm "m") fs ()).toOption.any (·.raw.funcs.size == fs.size)
 
 /-- The externs `@f.0` to `@f.(n-1)`, without parameters or contracts. -/
@@ -126,7 +167,7 @@ private def externModule (n : Nat) : Nat × Module.Raw base Unit :=
 
 -- A module checked whole.
 #guard_msgs in
-#eval scalesLinearly "a module of externs" 12000 (twice externModule) fun (n, m) =>
+#eval scalesLinearly "a module of externs" 12000 (fourfold externModule) fun (n, m) =>
   m.funcs.size == n && m.check.toOption.any (·.raw.funcs.size == n)
 
 /-- `@g.0`, which starts at `0`, then the ghosts `@g.1` to `@g.(n-1)`, each of which starts at the
@@ -149,7 +190,7 @@ private def ghostFan (n : Nat) : Array {g : Ghost base Unit // g.WF} :=
 -- A module of checked ghosts, each initializer naming a ghost before it, so that the order of
 -- the initializers is checked.
 #guard_msgs in
-#eval scalesLinearly "a module of checked ghosts" 20000 (twice fun n => (n, ghostFan n))
+#eval scalesLinearly "a module of checked ghosts" 20000 (fourfold fun n => (n, ghostFan n))
   fun (n, gs) => gs.size == n &&
     (Module.ofChecked (nm "m") #[] () (ghosts := gs)).toOption.any (·.raw.ghosts.size == n)
 
@@ -164,7 +205,7 @@ private def ghostModule (n : Nat) : Nat × Module.Raw base Unit :=
 
 -- A module of ghosts checked whole.
 #guard_msgs in
-#eval scalesLinearly "a module of ghosts" 15000 (twice ghostModule) fun (n, m) =>
+#eval scalesLinearly "a module of ghosts" 15000 (fourfold ghostModule) fun (n, m) =>
   m.check.toOption.any (·.raw.ghosts.size == n)
 
 /-- Define `n` folded constants with `Read.defineConst`, and check that the last one has the id
@@ -181,7 +222,7 @@ private def defineConsts (n : Nat) : Bool :=
 
 -- Folded constants.
 #guard_msgs in
-#eval scalesLinearly "folded constants" 100000 (twice id) defineConsts
+#eval scalesLinearly "folded constants" 100000 (fourfold id) defineConsts
 
 /-- A name, as the printed form writes it. -/
 private def mname (s : String) : DDM.MName StrataDDM.SourceRange := .name .none ⟨.none, s⟩
@@ -239,18 +280,18 @@ private def exitScope : Read.Scope base := ({} : Read.Scope base).insert .base #
 -- little time to measure reliably, so the test times the walk and the completion together.  A
 -- quadratic completion would still take most of that time.
 #guard_msgs in
-#eval scalesLinearly "reading the instructions of a block" 24000 (twice constInsns) fun is =>
+#eval scalesLinearly "reading the instructions of a block" 24000 (fourfold constInsns) fun is =>
   match walked (Read.insnList { funcs := NameTable.empty } exitScope is.toList) with
   | .ok (l, ids) => (Read.Late.list l ids).toOption.map (·.size) == some is.size
   | .error _ => false
 
-/-- A walk of size `2 * m`, and its first `m` completions with the same ids, each with its size.
+/-- A walk of size `4 * m`, and its first `m` completions with the same ids, each with its size.
 One walk gives both inputs, since walking takes much longer than completing. -/
-private def halves {β : Type} (m : Nat)
+private def quarter {β : Type} (m : Nat)
     (w : Except String (List (Read.Late β) × (Name → Option ValId))) :
     (Nat × Except String (List (Read.Late β) × (Name → Option ValId))) ×
       (Nat × Except String (List (Read.Late β) × (Name → Option ValId))) :=
-  ((m, w.map fun (l, ids) => (l.take m, ids)), (2 * m, w))
+  ((m, w.map fun (l, ids) => (l.take m, ids)), (4 * m, w))
 
 /-- The blocks `b.0` to `b.(n-1)`, each ending in `unreachable`, as the parser gives them. -/
 private def unreachableBlocks (n : Nat) : List (DDM.MBlock SR) :=
@@ -269,7 +310,7 @@ private def walkedBlocks (n : Nat) :
 -- Completing the blocks of a body, after the walk.
 #guard_msgs in
 #eval scalesLinearly "completing the blocks of a body" 32000
-  (fun m => halves m (walkedBlocks (2 * m))) fun
+  (fun m => quarter m (walkedBlocks (4 * m))) fun
   | (n, .ok (l, ids)) => (Read.Late.list l ids).toOption.map (·.size) == some n
   | (_, .error _) => false
 
@@ -283,7 +324,7 @@ private def failingModule (n : Nat) : DDM.Command SR :=
 
 -- The diagnostics of a module.
 #guard_msgs in
-#eval scalesLinearly "the diagnostics of a module" 50000 (twice fun n => (n, failingModule n))
+#eval scalesLinearly "the diagnostics of a module" 50000 (fourfold fun n => (n, failingModule n))
   fun (n, c) =>
     match Module.ofDDM (env := base) c with
     | .ok _ => false
@@ -396,7 +437,7 @@ private def chainFn (n : Nat) : Func Ops.env Unit :=
 
 -- The checks of a contract's regions, `Func.ContractRegionsWF`.
 #guard_msgs in
-#eval scalesLinearly "the checks of contract regions" 1000 (twice chainFn) fun fn =>
+#eval scalesLinearly "the checks of contract regions" 1000 (fourfold chainFn) fun fn =>
   decide fn.ContractRegionsWF
 
 /-! ## Dominance where many blocks jump to one block -/
@@ -539,17 +580,17 @@ module m.f {
 -- edge to `fail.0`, whose immediate dominator is the start of `b.0`.
 #guard_msgs in
 #eval scalesLinearly "a function body whose blocks all jump to one block" 1000
-  (twice bodyChainFn) fun fn => decide fn.WF
+  (fourfold bodyChainFn) fun fn => decide fn.WF
 
 #guard_msgs in
 #eval scalesLinearly "a contract clause whose blocks all jump to one block" 1000
-  (twice clauseChainFn) fun fn => decide fn.WF
+  (fourfold clauseChainFn) fun fn => decide fn.WF
 
 -- In the loop, the immediate dominator of `fail.0` is the start of `head.0`.  The search's order
 -- lists `stop.0` after the body, so `stop.0` comes before the body among the points that jump to
 -- `fail.0`.
 #guard_msgs in
 #eval scalesLinearly "a loop whose blocks all jump to one block" 1000
-  (twice loopFn) fun fn => decide fn.WF
+  (fourfold loopFn) fun fn => decide fn.WF
 
 end Strata.Dyn.ScaleTest
