@@ -89,6 +89,24 @@ open StrataPython.V2TestUtil
       throw <| IO.userError
         s!"Expected exactly the user assert VC without --pyspec, got {results.size}"
 
+-- The V2 harness verifies the procedures the CLI chooses: `helper` is opaque and reachable from
+-- the root `check_helper`, so its body is verified on its own, and its assertion is reported.
+#test "opaque_callee_body_checked" => withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    let results ← runAndVerify pythonCmd tmpDir "test_opaque_callee_body.py"
+    -- The only assertion of the program is the one in `helper`'s body. It is inconclusive: the
+    -- modelless call is an unresolved hole, so nothing proves or refutes it.
+    match results with
+    | #[vc] =>
+      unless (vc.obligation.metadata.getPropertySummary.getD vc.obligation.label).contains "assert" do
+        throw <| IO.userError "The surviving VC is not the assertion in the opaque callee's body"
+      unless vc.isUnknown do
+        throw <| IO.userError
+          s!"Expected the opaque callee's assertion to stay inconclusive: {vc.formatOutcome}"
+    | _ =>
+      throw <| IO.userError
+        s!"Expected exactly the assertion in the opaque callee's body, got {results.size} VCs"
+
 -- A dispatch-factory result binding the modeled class cannot be lowered by V2 while `Any` is not gradual.
 #test "method_dispatch_binds_storage" => withPython fun pythonCmd => do
   IO.FS.withTempDir fun tmpDir => do

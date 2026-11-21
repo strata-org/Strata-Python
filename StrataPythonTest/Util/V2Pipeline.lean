@@ -90,18 +90,14 @@ public def expectNoCore (pythonCmd : System.FilePath) (tmpDir : System.FilePath)
     throw <| IO.userError s!"{scriptName}: expected V2 to produce no Core, but it did"
   | .error msg => throw <| IO.userError s!"{scriptName}: V2 pipeline failed: {msg}"
 
+/-- Verify `coreProgram` in bug-finding mode from the procedures the CLI chooses
+    (`chooseBugFindingRoots` in roots mode), the user procedures being those located in
+    `userSources`. -/
 public def verifyCore (coreProgram : Core.Program) (userSources : List String := [])
     : IO (Except String (Array Core.VCResult)) := do
-  let (_, userProcNames) := splitProcNames coreProgram userSources
-  let cg := coreProgram.toProcedureCG
-  let userSet := Std.HashSet.ofList userProcNames
-  let entryPoints := (cg.computeRoots (preferredRoots := userProcNames)).filter userSet.contains
-  let entrySet := Std.HashSet.ofList entryPoints
-  let inlinePhases : List Core.PipelinePhase :=
-    [_root_.Core.procedureInliningPipelinePhase
-      { doInline := fun caller callee a =>
-          (match caller with | some c => entrySet.contains c | none => false)
-          && _root_.Core.doInlineNonRecursive callee a }]
+  let (entryPoints, inlinePhase) :=
+    StrataPython.Pipeline.chooseBugFindingRoots coreProgram userSources .roots
+  let inlinePhases : List Core.PipelinePhase := [inlinePhase]
   let options : Core.VerifyOptions :=
     { Core.VerifyOptions.default with
       stopOnFirstError := false, verbose := .quiet, solver := "z3",

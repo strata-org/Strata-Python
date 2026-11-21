@@ -626,9 +626,9 @@ def pyInterpretCommand : _root_.Command where
       -- first entry's post-state into the next.
       let runs : List Core.Env := match Core.Program.entryProcedures core with
         | [] => match Core.Program.Procedure.find? core ⟨"__main__", ()⟩ with
-          | some mainProc => [Core.Program.runEntry E mainProc fuel]
-          | none => [Core.Statement.Command.runCall [] "__main__" [] fuel E]
-        | entries => entries.map (fun p => Core.Program.runEntry E p fuel)
+          | some mainProc => [Core.Program.runEntry .execute E mainProc fuel]
+          | none => [Core.Statement.Command.runCall .execute [] "__main__" [] fuel E]
+        | entries => entries.map (fun p => Core.Program.runEntry .execute E p fuel)
       match runs.findSome? (·.error) with
       | none =>
         IO.println "Execution completed successfully."

@@ -1,4 +1,4 @@
 (set-info :file "tests/test_class_field_init.py")
-(set-info :start 655)
-(set-info :stop 660)
+(set-info :start 562)
+(set-info :stop 567)
 (set-info :error-message "expected 'Any', got 'string'")

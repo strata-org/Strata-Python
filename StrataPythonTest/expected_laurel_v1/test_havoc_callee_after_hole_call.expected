@@ -1,3 +1,4 @@
+test_havoc_callee_after_hole_call.py(68, 4): ❓ unknown - kwargs should be havocked
 test_havoc_callee_after_hole_call.py(7, 0): ✔️ always true if reached - global 'xs' is bound
 test_havoc_callee_after_hole_call.py(8, 7): ✔️ always true if reached - global 'xs' is bound
 test_havoc_callee_after_hole_call.py(8, 0): ❓ unknown - expected unknown because xs should be havocked
@@ -36,6 +37,5 @@ test_havoc_callee_after_hole_call.py(59, 0): ❓ unknown - module-global root in
 test_havoc_callee_after_hole_call.py(62, 0): ✔️ always true if reached - global 'global_conditional' is bound
 test_havoc_callee_after_hole_call.py(63, 7): ✔️ always true if reached - global 'global_conditional' is bound
 test_havoc_callee_after_hole_call.py(63, 0): ❓ unknown - module-global root in conditional should be havocked
-test_havoc_callee_after_hole_call.py(71, 0): ❓ unknown - kwargs should be havocked
 DETAIL: 27 passed, 0 failed, 12 inconclusive
 RESULT: Inconclusive

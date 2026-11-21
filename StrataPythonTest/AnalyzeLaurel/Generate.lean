@@ -127,30 +127,20 @@ meta def testVerifyOptions : Core.VerifyOptions :=
 
 /-- Verify an already-generated Laurel program. -/
 private meta def verifyLaurel
-    (laurel : Strata.Laurel.LaurelProgram) (useRoots : Bool := false)
+    (laurel : Strata.Laurel.LaurelProgram) (userSourcePaths : List String)
+    (useRoots : Bool := false)
     (verifyOptions : Core.VerifyOptions := testVerifyOptions)
     : IO (Except String (Array Core.VCResult)) := do
   let (coreProgramOption, _) ← translateCombinedLaurel laurel
   let coreProgram ← match coreProgramOption with
     | none => return .error "Laurel to Core translation failed"
     | some core => pure core
-  let entryPoints ←
-    if useRoots then
-      let (_preludeNames, userProcNames) := splitProcNames coreProgram
-      let cg := coreProgram.toProcedureCG
-      let userSet := Std.HashSet.ofList userProcNames
-      pure ((cg.computeRoots (preferredRoots := userProcNames)).filter userSet.contains)
-    else
-      pure ["__main__"]
-  let entrySet := Std.HashSet.ofList entryPoints
-  let inlinePhases : List Core.PipelinePhase :=
-    [_root_.Core.procedureInliningPipelinePhase
-      { doInline := fun caller callee a =>
-          (match caller with | some c => entrySet.contains c | none => false)
-          && _root_.Core.doInlineNonRecursive callee a }]
+  -- The same roots as the CLI.
+  let (entryPoints, inlinePhase) := StrataPython.Pipeline.chooseBugFindingRoots coreProgram
+    userSourcePaths (if useRoots then .roots else .main)
   let options : Core.VerifyOptions :=
     { verifyOptions with proceduresToVerify := some entryPoints }
-  match StrataPython.Pipeline.buildVerificationPipeline options inlinePhases with
+  match StrataPython.Pipeline.buildVerificationPipeline options [inlinePhase] with
   | .error e =>
     -- The default phase order always validates; an error here is a test bug.
     return .error s!"Cannot assemble the verification pipeline for this test: {e}"
@@ -164,7 +154,8 @@ private meta def verifyLaurel
 
 /-- Run pyAnalyzeLaurel with inlining and verification.
     When `useRoots` is true, entry points are determined via the call graph
-    (the CLI `--entry-point roots` default); otherwise only `__main__` is used. -/
+    (the CLI `--entry-point roots` default); otherwise `__main__` is used. Every opaque user
+    procedure with a body is an entry point too. -/
 meta def runAnalyzeAndVerify
     (pythonCmd : System.FilePath)
     (tmpDir : System.FilePath) (scriptName : String)
@@ -183,7 +174,9 @@ meta def runAnalyzeAndVerify
       let msgs ← pctx.getMessages
       let detail := match msgs.back? with | some m => m.message.message | none => "Pipeline aborted"
       return .error detail
-  verifyLaurel laurel useRoots verifyOptions
+  -- The user's procedures are located in the script or in its compiled form, as the CLI's
+  -- `userSourcePath` is one or the other.
+  verifyLaurel laurel [testIon.toString, (testDir / scriptName).toString] useRoots verifyOptions
 
 /-- Expected outcome for a test case. -/
 inductive Expected where
@@ -748,13 +741,14 @@ every obligation holds: true
           (warningOutput := .none) (pythonCmd := toString pythonCmd) |>.toBaseIO with
       | .ok () => pure ()
       | .error msg => throw <| IO.userError s!"pySpecsDir failed: {msg}"
-    let testIon ← compileTestScript pythonCmd (testDir / "test_overload_requires.py") tmpDir
+    let script := testDir / "test_overload_requires.py"
+    let testIon ← compileTestScript pythonCmd script tmpDir
     match ← (pythonAndSpecToLaurel testIon.toString
         (dispatchModules := #["overload_requires"])
         (specDir := tmpDir)).run (← quietCtx) |>.toBaseIO with
     | .error () => throw <| IO.userError "Python-to-Laurel translation failed"
     | .ok laurel =>
-      match ← verifyLaurel laurel (useRoots := true) with
+      match ← verifyLaurel laurel [testIon.toString, script.toString] (useRoots := true) with
       | .error msg => throw <| IO.userError s!"Verification failed: {msg}"
       | .ok vcs => printVCs vcs
 

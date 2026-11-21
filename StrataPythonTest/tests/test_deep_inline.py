@@ -13,7 +13,7 @@ def triple_apply(x: int) -> int:
 
 def main():
     r: int = triple_apply(3)
-    # triple_apply(3) = inc(double_inc(3)) = inc(inc(3) * 2) = inc(4 * 2) = inc(8) = 9
+    # User functions are opaque: main knows triple_apply only through its contract (its result is an int). This test pins that contract-only behaviour: both assertions are inconclusive.
     assert r == 9, "triple_apply(3) should be 9"
     assert r == 10, "triple_apply(3) should not be 10"
 

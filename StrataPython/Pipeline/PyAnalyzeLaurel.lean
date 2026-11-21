@@ -57,6 +57,15 @@ public structure PyAnalyzeConfig where
       `pythonAndSpecToLaurel`. -/
   useV2 : Bool := false
 
+/-- The procedures of `coreProgram` that bug-finding verification checks, and the phase that
+    inlines callees into them: the user procedures, those located in `userSourcePaths`, and every
+    opaque user procedure with a body. A user run trusts the contracts of the prelude's opaque
+    procedures; their bodies are verified once, in CI. -/
+public def chooseBugFindingRoots (coreProgram : Core.Program) (userSourcePaths : List String)
+    (entryPoint : Core.EntryPoint) : List String × Core.PipelinePhase :=
+  let (_, userProcNames) := StrataPython.splitProcNames coreProgram userSourcePaths
+  Core.chooseEntryProceduresAndBuildInlinePhases coreProgram userProcNames entryPoint
+
 private def runPipeline (config : PyAnalyzeConfig)
     : PipelineM (PyAnalyzeOutcome × Statistics) := do
   let uri := config.sourcePath.getD config.filePath
@@ -143,8 +152,7 @@ private def runPipeline (config : PyAnalyzeConfig)
     let (_, userProcNames) := StrataPython.splitProcNames coreProgram [userSourcePath]
     let (proceduresToVerify, inlinePhases) :=
       if config.isBugFinding then
-        let ⟨p, i⟩ := Core.chooseEntryProceduresAndBuildInlinePhases
-          coreProgram userProcNames config.entryPoint
+        let (p, i) := chooseBugFindingRoots coreProgram [userSourcePath] config.entryPoint
         (p, [i])
       else (userProcNames, [])
     let verifyOptions :=
