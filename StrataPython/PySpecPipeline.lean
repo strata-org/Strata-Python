@@ -564,6 +564,7 @@ private def pythonRealizeCoercion : Laurel.Coercion → Laurel.StmtExprMd → La
   -- Numeric widening int -> real/float64: insert the runtime `int_to_real` call. Both
   -- `real` and `float64` share the real domain in this pipeline (pyTypeKey folds float->real).
   | .widen _, e => pyCoerceCall "int_to_real" e
+  | .implicitCast _ _, e => e
 
 /-- Python TRUTHINESS realizer for the `toBool` caller hook. Maps an operand's `HighType` (by
     `pyTypeKey`) to a bool-typed term, mapping each operand type to its truthiness witness:
