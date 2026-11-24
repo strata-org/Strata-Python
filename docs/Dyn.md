@@ -611,15 +611,17 @@ A front end whose loops end with a *completion*, a value that says how a constru
 (normal, `break`, `continue`, `return`, `raise`), asks `run` to check three more properties,
 which it states in a `CanonicalSpec` (`StrataDyn/LoopExits.lean`):
 
-- each loop has one block `done(k)`, with the completion `k` as its first parameter (P4). No
-  path out of the loop leaves the body (returns or raises), or comes back to the head of a loop
-  around it, without passing `done`, and some path from each block that the loop leaves for,
-  except an empty block that ends in `base.unreachable`, reaches `done`. A path may instead run
-  forever or fault, and reaching `base.unreachable` is a fault. Code before the loop may also
-  enter `done`. So a stage may assert at `done` what holds when the loop ends with `k`; it may
-  assume there only what it has just asserted;
-- `done` absorbs its own loop's `break` and `continue`, and sends every other completion out
-  of the loop (P7);
+- each loop has one block `done(k)`, which takes the completion `k` as its first parameter and is
+  no loop's head: no back edge enters it, and no record names it as its head (P4). No path out of
+  the loop leaves the body (returns or raises), or comes back to the head of a loop around it,
+  without passing `done`, and some path from each block that the loop leaves for, except an empty
+  block that ends in `base.unreachable`, reaches `done`. A path may instead run forever or fault,
+  and reaching `base.unreachable` is a fault. Code before the loop may also enter `done`. So a
+  stage may assert at `done` what holds when the loop ends with `k`; it may assume there only what
+  it has just asserted;
+- `done` holds no instructions, not even a `base.loopInvariant`, so every completion leaves it
+  through the arm of its case for that completion; it absorbs its own loop's `break` and `continue`, and sends every other
+  completion out of the loop (P7);
 - the entry block ends in a plain `jump` to a block that nothing else enters, the start block,
   so that the precondition can be assumed at the start of that block (F1).
 
@@ -659,7 +661,8 @@ the loop that also dominates the loop's code. A loop that the control-flow graph
 as `while c: return x`, still gets a preheader from `run`. The pass never builds `done`: only the
 front end knows why a loop was left. `run`'s result then also carries the proofs of P4, P7 and F1.
 The check cannot see whether a completion carries the right reason, such as a `break` built as a
-normal end.
+normal end, or where an arm of `done` sends a completion once it has left the loop: a `return` arm
+that goes round a loop around this one is accepted, as Python's `finally: continue` needs.
 
 The form is built by a separate pass, after the front end, for three reasons. The pass and its
 proofs serve every front end, and need no language's semantics: it only adds blocks that

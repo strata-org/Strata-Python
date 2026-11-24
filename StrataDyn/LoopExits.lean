@@ -20,15 +20,17 @@ The rest of the canonical form, for a front end whose loops end with a *completi
 datatype that says how a construct finished, such as `Normal`, `Break`, `Continue`, `Return v` or
 `Raise e`.  For each loop:
 
-* (P4) one block `done(k)`, whose first parameter is the completion.  No path out of the loop
-  leaves the body (returns or raises), or comes back to the head of a loop around it, without
-  passing `done`, and some path from each block that the loop leaves for, except an empty block
-  that ends in `base.unreachable`, reaches `done`.  A path may instead run forever or fault, and
-  reaching `base.unreachable` is a fault.  Code before the loop may also enter `done`.  So a stage
-  may assert at `done` what holds when the loop ends by `k`; it may assume there only what it has
-  just asserted;
-* (P7) `done` absorbs its own loop's `Break` and `Continue`, and forwards every other completion
-  out of the loop.
+* (P4) one block `done(k)`, which takes the completion as its first parameter and is no loop's
+  head: no back edge enters it, and no record names it as its head.  No path out of the loop leaves
+  the body (returns or raises), or comes back to the head of a loop around it, without passing
+  `done`, and some path from each block that the loop leaves for, except an empty block that ends
+  in `base.unreachable`, reaches `done`.  A path may instead run forever or fault, and reaching
+  `base.unreachable` is a fault.  Code before the loop may also enter `done`.  So a stage may
+  assert at `done` what holds when the loop ends by `k`; it may assume there only what it has just
+  asserted;
+* (P7) `done` holds no instructions, not even a `base.loopInvariant`, so every completion leaves it
+  through the arm of its case for that completion.  It absorbs its own loop's `Break` and `Continue`, and forwards every other
+  completion out of the loop.
 
 And for the function:
 
@@ -75,7 +77,9 @@ What the form cannot see, which is the lowering's semantics:
 * whether a record of a loop with no back edge names the block where the loop statement starts,
   or a block before it that also dominates the loop's code;
 * whether a shape gives the right roles to two constructors that carry no field, such as
-  `normal` and `continue`: a front end pins its shape with a test.
+  `normal` and `continue`: a front end pins its shape with a test;
+* where an arm of `done` sends a completion once it has left the loop: a `return` arm that goes
+  round a loop around this one is accepted, as Python's `finally: continue` needs.
 
 Labelled `break` and `continue`, which need a label in their completion, are not part of the
 form: a shape's `break` and `continue` carry no field, so the check rejects every function whose
@@ -188,7 +192,9 @@ and it transfers nowhere. -/
 outside the loop; no point of the loop leaves the body; some path from every block the loop leaves
 for reaches it, unless control never gets there; no path from those blocks leaves the body
 (returns or raises) before it; and none comes back to the head of a loop around this one before
-it.  A path from those blocks may instead run forever. -/
+it.  A path from those blocks may instead run forever.  That `d` is no loop's head is a property
+of the records (`Func.LoopExits.done_not_head`): every loop has a record, and no record's head is
+a `done`. -/
 structure Done (s : CompletionShape env) (h d : Label) : Prop where
   block : ∃ b ∈ bs, b.label = d ∧ (b.params[0]?.map (·.type)) = some s.ty
   outside : ¬ InLoopScope bs h ⟨d, 0⟩
@@ -209,10 +215,11 @@ leaves the loop for good. -/
 @[expose] def ArmOk (ro : Roles) (h d : Label) (i : Nat) (t : Label) : Prop :=
   if i = ro.cont then Unreachable bs t else ArmOut bs h d t
 
-/-- (P7) `d`, the `done` of the loop of `h`, cases on its completion with the shape's case
-instruction, one arm per constructor, and each arm does what `ArmOk` asks. -/
+/-- (P7) `d`, the `done` of the loop of `h`, holds no instructions: its terminator, the shape's
+case instruction, cases on its completion, one arm per constructor, and each arm does what `ArmOk`
+asks. -/
 @[expose] def Absorbs (s : CompletionShape env) (ro : Roles) (h d : Label) : Prop :=
-  ∃ b ∈ bs, b.label = d ∧ b.term.name = s.caseName ∧
+  ∃ b ∈ bs, b.label = d ∧ b.instrs = #[] ∧ b.term.name = s.caseName ∧
     (∃ p, b.params[0]? = some p ∧ b.term.args[0]? = some p.id) ∧
     b.term.succs.size = ro.all.length ∧
     ∀ (i : Nat) (sv : Target.Raw), b.term.succs[i]? = some sv →
@@ -325,11 +332,11 @@ good. -/
     (i : Nat) (t : Label) : Bool :=
   if i = ro.cont then unreachableB bs t else armOutB bs S Rs d t
 
-/-- Whether the block `b` dispatches on its first parameter with the case of `s`, with `n`
-successors, the `i`th of which satisfies `arm i`. -/
+/-- Whether the block `b` holds no instructions and dispatches on its first parameter with the
+case of `s`, with `n` successors, the `i`th of which satisfies `arm i`. -/
 @[expose] def _root_.Strata.Dyn.Block.absorbsB (s : CompletionShape env) (n : Nat)
     (arm : Nat → Label → Bool) (b : Block env α) : Bool :=
-  b.term.name == s.caseName &&
+  b.instrs.isEmpty && b.term.name == s.caseName &&
     (b.params[0]?).any (fun p => b.term.args[0]? == some p.id) &&
     b.term.succs.size == n &&
     (List.range b.term.succs.size).all fun i => (b.term.succs[i]?).all fun sv => arm i sv.label
@@ -810,14 +817,13 @@ public section
 variable {env : Env Unit} {α : Type}
 
 /-- P4 and P7 hold in every body of the function for the records `recs`, which name blocks of
-the function's bodies, each head and each `done` once, and the shape is well formed.  A record
-whose head is a block of a contract clause is rejected: no body that the check visits holds it,
-so no check would apply to it. -/
+the function's bodies, name each head and each `done` once, and never name a `done` as a head; and
+the shape is well formed.  A record whose head is a block of a contract clause is rejected: no body
+that the check visits holds it, so no check would apply to it. -/
 @[expose] def Func.LoopExits (s : CompletionShape env) (recs : List LoopRecord)
     (fn : Func env α) : Prop :=
   ∃ ro, s.roles? = some ro ∧ Body.Every (Body.LoopExits · s ro recs) fn.blocks.toList ∧
-    (recs.map (·.head)).Nodup ∧ (recs.filterMap (·.done)).Nodup ∧
-    ∀ r ∈ recs, r.head ∈ fn.bodyLabels
+    (recs.map (·.head) ++ recs.filterMap (·.done)).Nodup ∧ ∀ r ∈ recs, r.head ∈ fn.bodyLabels
 
 /-- Whether the function holds `Func.LoopExits`, for a function whose bodies have distinct
 labels. -/
@@ -827,7 +833,7 @@ labels. -/
   | none => false
   | some ro =>
     Body.everyB (Body.loopExitsB · s ro recs) fn.blocks.toList &&
-      (recs.map (·.head)).Nodup && (recs.filterMap (·.done)).Nodup &&
+      (recs.map (·.head) ++ recs.filterMap (·.done)).Nodup &&
       recs.all fun r => fn.bodyLabels.contains r.head
 
 /-- `Func.checkLoopExits`, with the records by head computed once for every body, and the
@@ -840,8 +846,7 @@ duplicates and the labels found through label sets. -/
     let rm := LabelMap.groupBy (·.head) id recs
     let ls := LabelMap.setOf fn.bodyLabels
     Body.everyB (Body.loopExitsByB · rm s ro recs) fn.blocks.toList &&
-      (LabelMap.ofDistinct? (recs.map (·.head))).isSome &&
-      (LabelMap.ofDistinct? (recs.filterMap (·.done))).isSome &&
+      (LabelMap.ofDistinct? (recs.map (·.head) ++ recs.filterMap (·.done))).isSome &&
       recs.all fun r => (ls.find? r.head).isSome
 
 /-- The fast check gives the same answer as `Func.checkLoopExits` on every function.  It is
@@ -863,7 +868,7 @@ definition only in code compiled after it. -/
     have hl : ∀ r : LoopRecord,
         fn.bodyLabels.contains r.head = ((LabelMap.setOf fn.bodyLabels).find? r.head).isSome :=
       fun r => Bool.eq_iff_iff.mpr (by rw [List.contains_iff_mem, LabelMap.find?_setOf])
-    rw [hb, hd, hd]
+    rw [hb, hd]
     simp only [hl]
 
 /-- (F1) The function's entry block ends in a plain jump to a block that nothing else enters, or it

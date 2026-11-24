@@ -29,6 +29,7 @@ well-formed function's do.
 * `Func.checkPreamble_iff`: `Func.checkPreamble` decides `Func.Preamble`, for every function;
 * `CanonicalSpec.holds_of_check`: the check of a `CanonicalSpec` proves the properties that it asks for;
 * `Func.LoopExits.recordHolds`: every record holds in the body that holds its head;
+* `Func.LoopExits.done_not_head`: no record's `done` is a loop's head;
 * `Func.LoopExits.loopRoles_record`: in a canonical function, every record has its entry in
   `Body.loopRoles` of the body that holds its head.
 -/
@@ -358,14 +359,14 @@ theorem absorbsB_iff (hn : (bs.map (·.label)).Nodup) {s : CompletionShape env} 
         cases hi : b.term.succs[i]? with
         | none => rfl
         | some sv => exact (armOkB_iff hn).mpr (hall i sv hi)
-    simp only [Bool.and_eq_true, beq_iff_eq, harms, Option.any_eq_true]
+    simp only [Bool.and_eq_true, beq_iff_eq, harms, Option.any_eq_true, Array.isEmpty_iff]
     constructor
-    · rintro ⟨⟨⟨hname, hargs⟩, hsize⟩, hall⟩
-      exact ⟨b, hb, hbl, hname, hargs, hsize, hall⟩
-    · rintro ⟨c, hc, hcl, hname, hargs, hsize, hall⟩
+    · rintro ⟨⟨⟨⟨hempty, hname⟩, hargs⟩, hsize⟩, hall⟩
+      exact ⟨b, hb, hbl, hempty, hname, hargs, hsize, hall⟩
+    · rintro ⟨c, hc, hcl, hempty, hname, hargs, hsize, hall⟩
       have hcb := eq_of_label_eq hn hc hb (hcl.trans hbl.symm)
       subst hcb
-      exact ⟨⟨⟨hname, hargs⟩, hsize⟩, hall⟩
+      exact ⟨⟨⟨⟨hempty, hname⟩, hargs⟩, hsize⟩, hall⟩
 
 /-! ## A body -/
 
@@ -449,7 +450,7 @@ public theorem Func.LoopExits.recordHolds {fn : Func env α} {s : CompletionShap
     (h : fn.LoopExits s recs) {r : LoopRecord} (hr : r ∈ recs) :
     ∃ (ro : Roles) (bs : List (Block env α)), s.roles? = some ro ∧ Q bs ∧
       (∃ b ∈ bs, b.label = r.head) ∧ Body.RecordHolds bs s ro r := by
-  obtain ⟨ro, hro, hev, -, -, hl⟩ := h
+  obtain ⟨ro, hro, hev, -, hl⟩ := h
   obtain ⟨bs, ⟨hQ, hbs⟩, hb⟩ := Body.Every.exists_label
     (Body.Every.imp (B := fun bs => Q bs ∧ Body.LoopExits bs s ro recs) (fun _ a b => ⟨a, b⟩)
       hq hev)
@@ -466,7 +467,7 @@ public theorem Func.LoopExits.loopRoles_record {fn : Func env α} {s : Completio
     Body.Every (fun bs => ∀ r ∈ recs, (∃ b ∈ bs, b.label = r.head) →
       ∃ x ∈ Body.loopRoles bs isRec, x.head = r.head ∧
         (x.latch.isSome ↔ Body.IsHead bs r.head)) fn.blocks.toList := by
-  obtain ⟨ro, -, hev, -, -, -⟩ := h
+  obtain ⟨ro, -, hev, -, -⟩ := h
   have hall := Body.Every.imp
     (B := fun bs => (bs.map (·.label)).Nodup ∧ Body.LoopsSimplified bs)
     (fun _ hn hls => ⟨hn, hls⟩) ((Body.distinct_iff_every _).mp hd) hc.1
@@ -478,11 +479,24 @@ public theorem Func.LoopExits.loopRoles_record {fn : Func env α} {s : Completio
   · obtain ⟨x, hx, hxh, hl⟩ := Body.loopRoles_complete_record hn (hrec r hr) hh hpre
     exact ⟨x, hx, hxh, iff_of_false (by simp [hl]) hh⟩
 
+/-- In a function that holds `Func.LoopExits`, no record's `done` is the head of a loop in any of
+the function's bodies: every loop of a body has a record, and no record names a `done` as its
+head. -/
+public theorem Func.LoopExits.done_not_head {fn : Func env α} {s : CompletionShape env}
+    {recs : List LoopRecord} (h : fn.LoopExits s recs) :
+    Body.Every (fun bs => ∀ r ∈ recs, ∀ d, r.done = some d → ¬ Body.IsHead bs d)
+      fn.blocks.toList := by
+  obtain ⟨ro, -, hev, hnd, -⟩ := h
+  refine Body.Every.imp (fun bs hle _ r hr d hd hh => ?_) hev hev
+  obtain ⟨r', hr', hrh⟩ := hle.recorded d hh
+  exact (List.nodup_append.mp hnd).2.2 r'.head (List.mem_map_of_mem hr')
+    d (List.mem_filterMap.mpr ⟨r, hr, hd⟩) hrh
+
 /-! ## The function -/
 
 /-- For a function whose bodies have distinct labels, `checkLoopExits` holds exactly when the
 shape is well formed, every body states P4 and P7 truly for the records, and the records name
-each head and each `done` once, at blocks of the function. -/
+each head and each `done` once, no `done` as a head, at blocks of the function. -/
 public theorem Func.checkLoopExits_iff (fn : Func env α) (hd : Body.Distinct fn.blocks.toList)
     {s : CompletionShape env} {recs : List LoopRecord} :
     fn.checkLoopExits s recs = true ↔ fn.LoopExits s recs := by
@@ -494,7 +508,7 @@ public theorem Func.checkLoopExits_iff (fn : Func env α) (hd : Body.Distinct fn
       List.all_eq_true, List.contains_iff_mem]
     rw [Body.everyB_iff_of (Q := fun bs => (bs.map (·.label)).Nodup)
       (fun _ hn => Body.loopExitsB_iff hn) ((Body.distinct_iff_every _).mp hd)]
-    exact ⟨fun ⟨⟨⟨a, b⟩, c⟩, d⟩ => ⟨a, b, c, d⟩, fun ⟨a, b, c, d⟩ => ⟨⟨⟨a, b⟩, c⟩, d⟩⟩
+    exact ⟨fun ⟨⟨a, b⟩, c⟩ => ⟨a, b, c⟩, fun ⟨a, b, c⟩ => ⟨⟨a, b⟩, c⟩⟩
 
 /-- `checkPreamble` holds exactly when the function's entry block ends in a plain jump to a block
 that nothing else enters, or in `base.unreachable`. -/

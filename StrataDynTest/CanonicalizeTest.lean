@@ -955,6 +955,125 @@ private def noBackEdge : String := "module m {
 #eval canonText ((withDone).replace "^after.0() ^unr.1()" "^unr.1() ^after.0()")
   (specOf [recOf "head" "done"])
 
+-- A record whose `done` runs an instruction before its case.
+/-- info: m.w: done.0 runs instructions before it cases on the completion -/
+#guard_msgs in
+#eval canonText ((withDone).replace "    done.0(%k.2 : demo.Completion):\n"
+    "    done.0(%k.2 : demo.Completion):\n      %z.0 : base.Int = const 0\n")
+  (specOf [recOf "head" "done"])
+
+/-- `while c: if c: break`, whose exits meet at `done` through `j`, and whose `done` sends a
+`returned` to `r`, which goes back to `done`: `done` heads a loop of its own. -/
+private def doneHeadsLoop : String := "module m {
+  func @m.w(%c.0 : base.Bool, %x.0 : demo.Value) -> demo.Value {
+    entry.0(%c.0 : base.Bool, %x.0 : demo.Value):
+      jump ^pre.0()
+    pre.0():
+      jump ^head.0()
+    head.0():
+      branch(%c.0) ^body.0() ^normal.0()
+    body.0():
+      branch(%c.0) ^latch.0() ^brk.0()
+    latch.0():
+      jump ^head.0()
+    normal.0():
+      %k.0 : demo.Completion = demo.returned(%x.0)
+      jump ^j.0(%k.0)
+    brk.0():
+      %k.1 : demo.Completion = demo.broke
+      jump ^j.0(%k.1)
+    j.0(%k.2 : demo.Completion):
+      jump ^done.0(%k.2)
+    done.0(%k.3 : demo.Completion):
+      demo.Completion.case(%k.3) ^after.0() ^r.0() ^dunr.0() ^after.0() ^dunr.1()
+    r.0(%v.0 : demo.Value):
+      %k.4 : demo.Completion = demo.normal
+      jump ^done.0(%k.4)
+    dunr.0(%e.0 : demo.Value):
+      unreachable
+    dunr.1():
+      unreachable
+    after.0():
+      %k.5 : demo.Completion = demo.normal
+      jump ^d2.0(%k.5)
+    d2.0(%k.6 : demo.Completion):
+      demo.Completion.case(%k.6) ^fin.0() ^ret.0() ^ret.1() ^fin.0() ^unr.0()
+    ret.0(%v.1 : demo.Value):
+      ret(%v.1)
+    ret.1(%e.1 : demo.Value):
+      ret(%e.1)
+    unr.0():
+      unreachable
+    fin.0():
+      ret(%x.0)
+  }
+}
+"
+
+-- A record whose `done` heads a loop of its own.
+/-- info: m.w: a record names the head of a recorded loop as its done block -/
+#guard_msgs in
+#eval canonText doneHeadsLoop (specOf [recOf "head" "done", recOf "done" "d2"])
+
+-- A record whose `done` is the head of a loop that no back edge enters, but that another record
+-- names: `doneHeadsLoop` with `r.0` sending its completion on to `d2` instead of back to `done`.
+/-- info: m.w: a record names the head of a recorded loop as its done block -/
+#guard_msgs in
+#eval canonText ((doneHeadsLoop).replace "      %k.4 : demo.Completion = demo.normal\n      jump ^done.0(%k.4)"
+    "      %k.4 : demo.Completion = demo.normal\n      jump ^d2.0(%k.4)")
+  (specOf [recOf "head" "done", recOf "done" "d2"])
+
+/-- `while True: while c: pass`, whose inner loop names the outer loop's head `ohead` as its
+`done`: the inner loop's exit reaches it only through the outer latch. -/
+private def doneIsOuterHead : String := "module m {
+  func @m.w(%c.0 : base.Bool, %x.0 : demo.Value) -> demo.Value {
+    entry.0(%c.0 : base.Bool, %x.0 : demo.Value):
+      jump ^opre.0()
+    opre.0():
+      %k.0 : demo.Completion = demo.normal
+      jump ^ohead.0(%k.0)
+    ohead.0(%k.1 : demo.Completion):
+      demo.Completion.case(%k.1) ^obody.0() ^oret.0() ^oraise.0() ^obody.0() ^ounr.0()
+    obody.0():
+      jump ^ipre.0()
+    ipre.0():
+      jump ^ihead.0()
+    ihead.0():
+      branch(%c.0) ^ilatch.0() ^inormal.0()
+    ilatch.0():
+      jump ^ihead.0()
+    inormal.0():
+      %k.2 : demo.Completion = demo.returned(%x.0)
+      jump ^olatch.0(%k.2)
+    olatch.0(%k.3 : demo.Completion):
+      jump ^ohead.0(%k.3)
+    oret.0(%v.0 : demo.Value):
+      %k.4 : demo.Completion = demo.returned(%v.0)
+      jump ^odone.0(%k.4)
+    oraise.0(%e.0 : demo.Value):
+      %k.5 : demo.Completion = demo.raised(%e.0)
+      jump ^odone.0(%k.5)
+    ounr.0():
+      unreachable
+    odone.0(%k.6 : demo.Completion):
+      demo.Completion.case(%k.6) ^after.0() ^ret.0() ^ret.1() ^after.0() ^unr.0()
+    ret.0(%v.1 : demo.Value):
+      ret(%v.1)
+    ret.1(%e.1 : demo.Value):
+      ret(%e.1)
+    unr.0():
+      unreachable
+    after.0():
+      ret(%x.0)
+  }
+}
+"
+
+-- A record whose `done` is the head of the loop around its loop.
+/-- info: m.w: a record names the head of a recorded loop as its done block -/
+#guard_msgs in
+#eval canonText doneIsOuterHead (specOf [recOf "ohead" "odone", recOf "ihead" "ohead"])
+
 -- A record of the entry block: nothing may enter it, so it has no preheader.
 /-- info: m.w: the loop at entry.0 has no preheader -/
 #guard_msgs in

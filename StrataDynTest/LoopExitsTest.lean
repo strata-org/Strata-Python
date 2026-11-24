@@ -211,6 +211,65 @@ private def doneTakesValue : Func E Unit :=
 -- `done`'s first parameter is not the completion.
 #guard !check shape [rec "head" "done"] doneTakesValue
 
+/-- `while True: while c: pass`, whose inner loop names the outer loop's head `ohead` as its
+`done`: the inner loop's exit goes to the outer latch, so its completion goes round the outer loop
+before `done` cases on it. -/
+private def doneIsOuterHead : Func E Unit :=
+  fn [blk "entry" #[] (jump "opre"), blk "opre" #[] (jump "ohead"),
+      blkK "ohead" 7 Demo.Completion #[] (caseT 7 ["obody", "oexit", "oexit", "obody", "ounr"]),
+      blk "ounr" #[] unreachableT, blk "obody" #[] (jump "ipre"),
+      blk "ipre" #[] (jump "ihead"), blk "ihead" #[] (branch "ibody" "inormal"),
+      blk "ibody" #[] (jump "ilatch"), blk "ilatch" #[] (jump "ihead"),
+      blk "inormal" #[] (jump "olatch"), blk "olatch" #[] (jump "ohead"),
+      blk "oexit" #[] (jump "odone"),
+      blkK "odone" 8 Demo.Completion #[] (caseT 8 ["post", "post", "post", "post", "unr"]),
+      blk "unr" #[] unreachableT, blk "post" #[] ret]
+
+-- `done` is a loop's head, which has a record: here the head of the loop around this one.  Each
+-- body holds both records, so the rule on the records alone rejects the function.
+#guard !check shape [rec "ohead" "odone", rec "ihead" "ohead"] doneIsOuterHead
+#guard (shape.roles?).any fun ro =>
+  Body.loopExitsB doneIsOuterHead.blocks.toList shape ro [rec "ohead" "odone", rec "ihead" "ohead"]
+#guard doneIsOuterHead.checkCanonicalCFG
+
+/-- `whileBrk`, whose exits meet at `done` through `j`, and whose `done` sends a `returned` to
+`r`, which goes back to `done`: `done` heads a loop of its own, whose exits meet at `d2`. -/
+private def doneHeadsLoop : Func E Unit :=
+  fn [blk "entry" #[] (jump "pre"), blk "pre" #[] (jump "head"),
+      blk "head" #[] (branch "body" "normal"), blk "body" #[] (branch "latch" "brk"),
+      blk "latch" #[] (jump "head"),
+      blk "normal" #[] (jump "j"), blk "brk" #[] (jump "j"), blk "j" #[] (jump "done"),
+      blkK "done" 7 Demo.Completion #[] (caseT 7 ["after", "r", "r", "after", "dunr"]),
+      blk "r" #[] (jump "done"), blk "dunr" #[] unreachableT, blk "after" #[] (jump "d2"),
+      blkK "d2" 8 Demo.Completion #[] (caseT 8 ["post", "post", "post", "post", "unr"]),
+      blk "unr" #[] unreachableT, blk "post" #[] ret]
+
+-- `done` is the head of its own loop, which has a record; the rule on the records rejects it.
+#guard !check shape [rec "head" "done", rec "done" "d2"] doneHeadsLoop
+#guard (shape.roles?).any fun ro =>
+  Body.loopExitsB doneHeadsLoop.blocks.toList shape ro [rec "head" "done", rec "done" "d2"]
+#guard doneHeadsLoop.checkCanonicalCFG
+
+/-- `whileBrk`, whose exits meet at `done` through `j`, where a loop that no back edge enters
+starts, whose exits meet at `d2`. -/
+private def doneIsRecordedHead : Func E Unit :=
+  fn [blk "entry" #[] (jump "pre"), blk "pre" #[] (jump "head"),
+      blk "head" #[] (branch "body" "normal"), blk "body" #[] (branch "latch" "brk"),
+      blk "latch" #[] (jump "head"),
+      blk "normal" #[] (jump "j"), blk "brk" #[] (jump "j"), blk "j" #[] (jump "done"),
+      blkK "done" 7 Demo.Completion #[] (caseT 7 ["after", "retb", "retb", "after", "dunr"]),
+      blk "after" #[] (jump "d2"), blk "retb" #[] (jump "d2"), blk "dunr" #[] unreachableT,
+      blkK "d2" 8 Demo.Completion #[] (caseT 8 ["post", "post", "post", "post", "unr"]),
+      blk "unr" #[] unreachableT, blk "post" #[] ret]
+
+-- The first record alone is accepted.  With both, the check rejects the function, because `done`
+-- is the head of the second record; the rule on the records rejects it.
+#guard check shape [rec "head" "done"] doneIsRecordedHead
+#guard !check shape [rec "head" "done", rec "done" "d2"] doneIsRecordedHead
+#guard (shape.roles?).any fun ro =>
+  Body.loopExitsB doneIsRecordedHead.blocks.toList shape ro [rec "head" "done", rec "done" "d2"]
+#guard doneIsRecordedHead.checkCanonicalCFG
+
 /-! ## Each clause of P7 alone -/
 
 /-- `whileBrk`, whose `break` block goes to `done` or to `mid`, which also goes to `done`; `done`'s
@@ -228,13 +287,14 @@ private def armVia (normalTo : String) : Func E Unit :=
 -- An arm to a block that an exit also reaches before `done`: the loop's code past its exits.
 #guard !check shape [rec "head" "done"] (armVia "mid")
 
-/-- `whileBrk`, whose `done` ends in `term`. -/
-private def doneEndsIn (term : Terminator E Unit) : Func E Unit :=
+/-- `whileBrk`, whose `done` runs `is` and ends in `term`. -/
+private def doneEndsIn (term : Terminator E Unit) (is : Array (Instruction E Unit) := #[]) :
+    Func E Unit :=
   fn [blk "entry" #[] (jump "pre"), blk "pre" #[] (jump "head"),
       blk "head" #[] (branch "body" "normal"), blk "body" #[] (branch "latch" "brk"),
       blk "latch" #[] (jump "head"),
       blk "normal" #[] (jump "done"), blk "brk" #[] (jump "done"),
-      blkK "done" 7 Demo.Completion #[] term,
+      blkK "done" 7 Demo.Completion is term,
       blk "unr" #[] unreachableT, blk "after" #[] ret]
 
 #guard check shape [rec "head" "done"] (doneEndsIn (caseT 7 ["after", "unr", "unr", "after", "unr"]))
@@ -243,6 +303,13 @@ private def doneEndsIn (term : Terminator E Unit) : Func E Unit :=
   (doneEndsIn (lcaseT 7 ["after", "unr", "unr", "after", "unr"]))
 -- A case on another value than `done`'s parameter.
 #guard !check shape [rec "head" "done"] (doneEndsIn (caseT 8 ["after", "unr", "unr", "after", "unr"]))
+-- An instruction whose failure leaves the body runs before the case, so a completion can leave
+-- `done` without its arm: `done` holds no instructions.
+#guard !check shape [rec "head" "done"]
+  (doneEndsIn (caseT 7 ["after", "unr", "unr", "after", "unr"]) #[addExit 9])
+-- An instruction that cannot fail is rejected too.
+#guard !check shape [rec "head" "done"]
+  (doneEndsIn (caseT 7 ["after", "unr", "unr", "after", "unr"]) #[intC 9 1])
 
 /-- `while c: pass` inside `while True:`: the inner loop at `ihead` leaves to `done`, but the
 outer loop at `head` never ends, so its record names no `done`. -/

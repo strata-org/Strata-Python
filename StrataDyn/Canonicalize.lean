@@ -595,6 +595,8 @@ the heads of the front end's loop records, put in order once for the whole funct
       | none =>
         if !(recs.map (·.head)).Nodup then some "two records name the same loop"
         else if !(recs.filterMap (·.done)).Nodup then some "two records name the same done block"
+        else if !(recs.map (·.head) ++ recs.filterMap (·.done)).Nodup then
+          some "a record names the head of a recorded loop as its done block"
         else recs.findSome? fun r =>
           if !g.bodyLabels.contains r.head then
             some s!"the record's loop {name r.head} is no block of the function's bodies"
@@ -609,7 +611,9 @@ the heads of the front end's loop records, put in order once for the whole funct
               else some s!"control leaves the loop at {name r.head}, but its record names no done"
             | some d =>
               let Rs := Body.regionsOf bs sm d (Body.exitsIn tr (Body.scopeIn lo r.head))
-              if !Body.doneB bs tr ep hs lo s r.head d Rs then
+              if (bs.find? (·.label == d)).any (!·.instrs.isEmpty) then
+                some s!"{name d} runs instructions before it cases on the completion"
+              else if !Body.doneB bs tr ep hs lo s r.head d Rs then
                 some s!"the exits of the loop at {name r.head} do not all meet at {name d}"
               else if !Body.absorbsB bs lo s ro r.head d Rs then
                 some s!"{name d} does not absorb the break and continue of the loop at \
