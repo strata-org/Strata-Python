@@ -1,6 +1,6 @@
 name = "StrataPython"
 version = "0.1.0"
-defaultTargets = ["StrataPython"]
+defaultTargets = ["StrataMantle", "StrataPython", "Pylate", "pylate", "pylateTests", "pyInterpret", "pymantle"]
 testDriver = "StrataPythonFrontEndTestMain"
 
 [leanOptions]
@@ -16,8 +16,35 @@ name = "PythonDialectIon"
 path = "Python/strata-python/dialects/Python.dialect.st.ion"
 
 [[lean_lib]]
+name = "StrataMantle"
+globs = ["StrataMantle.+"]
+
+[[lean_lib]]
+name = "StrataMantleTest"
+globs = ["StrataMantleTest.+"]
+
+[[lean_lib]]
 name = "StrataPython"
 extraDepTargets = ["PythonDialectIon"]
+
+# Pylate reads the Strata Python AST, so it needs the dialect (`Python_map`,
+# `Python.name`, `Command.ofAst`) from `StrataPython`, and the dialect Ion file
+# that `StrataPython` embeds -- hence the same `extraDepTargets` as that lib.
+[[lean_lib]]
+name = "Pylate"
+extraDepTargets = ["PythonDialectIon"]
+
+# Pylate's own Lean suites. They are a separate executable rather than the
+# package `testDriver`, because a package has exactly one and the host already
+# uses it for `StrataPythonFrontEndTestMain`.
+[[lean_lib]]
+name = "PylateTests"
+globs = ["Pylate.Tests.+"]
+
+[[lean_exe]]
+name = "pylateTests"
+root = "Pylate.Tests.Main"
+needs = ["Pylate", "StrataPython"]
 
 [[lean_lib]]
 name = "StrataPythonTest"
@@ -29,7 +56,12 @@ globs = ["StrataPythonTestExtra.+"]
 
 [[lean_exe]]
 name = "StrataPythonFrontEndTestMain"
-needs = ["StrataPython", "StrataPythonTest"]
+needs = ["StrataPython", "StrataPythonTest", "StrataMantleTest", "pylateTests"]
+
+[[lean_exe]]
+name = "pylate"
+root = "Scripts.pylate"
+needs = ["Pylate", "StrataPython"]
 
 [[lean_exe]]
 name = "pyAnalyzeLaurel"
@@ -79,4 +111,9 @@ needs = ["StrataPython"]
 [[lean_exe]]
 name = "strata"
 root = "StrataMain"
+needs = ["StrataPython"]
+
+[[lean_exe]]
+name = "pymantle"
+root = "Scripts.pymantle"
 needs = ["StrataPython"]
